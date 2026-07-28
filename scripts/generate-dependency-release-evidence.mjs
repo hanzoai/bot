@@ -145,7 +145,7 @@ export function createDependencyEvidenceManifest({
     releaseRef,
     releaseSha,
     npmDistTag,
-    packageName: "openclaw",
+    packageName: "bot",
     packageVersion,
     workflowRunId,
     workflowRunAttempt,
@@ -365,7 +365,7 @@ async function generateDependencyReleaseEvidence({
     await appendFile(
       githubStepSummary,
       renderDependencyEvidenceStepSummary({
-        evidenceArtifactName: `openclaw-release-dependency-evidence-${releaseRef}`,
+        evidenceArtifactName: `bot-release-dependency-evidence-${releaseRef}`,
         baseRef: dependencyChangeBaseRef,
         counts,
       }),

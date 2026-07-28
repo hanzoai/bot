@@ -1,5 +1,5 @@
 import CoreLocation
-import OpenClawKit
+import BotKit
 import SwiftUI
 import UIKit
 import UserNotifications
@@ -7,9 +7,9 @@ import UserNotifications
 extension SettingsProTab {
     func detailStatusCard(
         icon: String,
-        title: OpenClawTextValue,
-        detail: OpenClawTextValue,
-        value: OpenClawTextValue,
+        title: BotTextValue,
+        detail: BotTextValue,
+        value: BotTextValue,
         color: Color,
         actionTitle: LocalizedStringKey? = nil,
         actionSystemImage: String = "arrow.right",
@@ -20,25 +20,25 @@ extension SettingsProTab {
                 SettingsIcon(systemName: icon, color: color)
                 VStack(alignment: .leading, spacing: 2) {
                     title.text
-                        .font(OpenClawType.headline)
+                        .font(BotType.headline)
                     detail.text
-                        .font(OpenClawType.caption)
+                        .font(BotType.caption)
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 8)
                 value.text
-                    .font(OpenClawType.subheadMedium)
+                    .font(BotType.subheadMedium)
                     .foregroundStyle(color)
             }
             if let action, let actionTitle {
                 Button(action: action) {
                     Label(actionTitle, systemImage: actionSystemImage)
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(OpenClawBrand.accent)
+                .tint(BotBrand.accent)
             }
         }
     }
@@ -62,7 +62,7 @@ extension SettingsProTab {
                 title: "Discovery",
                 detail: .verbatim(self.gatewayController.discoveryStatusText),
                 value: .verbatim(self.gatewayController.gateways.count.formatted()),
-                color: self.gatewayController.gateways.isEmpty ? .secondary : OpenClawBrand.accent)
+                color: self.gatewayController.gateways.isEmpty ? .secondary : BotBrand.accent)
             self.diagnosticCheckRow(
                 icon: "waveform",
                 title: "Talk Config",
@@ -82,7 +82,7 @@ extension SettingsProTab {
                 value: .verbatim(self.appModel.screenRecordActive
                     ? String(localized: "live")
                     : String(localized: "idle")),
-                color: self.appModel.screenRecordActive ? OpenClawBrand.ok : .secondary)
+                color: self.appModel.screenRecordActive ? BotBrand.ok : .secondary)
             self.diagnosticCheckRow(
                 icon: "mic",
                 title: "Voice Wake",
@@ -90,30 +90,30 @@ extension SettingsProTab {
                 value: .verbatim(self.voiceWakeEnabled
                     ? String(localized: "on")
                     : String(localized: "off")),
-                color: self.voiceWakeEnabled ? OpenClawBrand.ok : .secondary)
+                color: self.voiceWakeEnabled ? BotBrand.ok : .secondary)
         }
     }
 
     func diagnosticCheckRow(
         icon: String,
-        title: OpenClawTextValue,
-        detail: OpenClawTextValue,
-        value: OpenClawTextValue,
+        title: BotTextValue,
+        detail: BotTextValue,
+        value: BotTextValue,
         color: Color) -> some View
     {
         HStack(spacing: 12) {
             SettingsIcon(systemName: icon, color: color)
             VStack(alignment: .leading, spacing: 2) {
                 title.text
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
                 detail.text
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
             value.text
-                .font(OpenClawType.subhead)
+                .font(BotType.subhead)
                 .foregroundStyle(.secondary)
         }
     }
@@ -239,8 +239,8 @@ extension SettingsProTab {
             targetStableID: stableID)
     }
 
-    func refreshLocationPermissionSummary(desiredMode modeOverride: OpenClawLocationMode? = nil) {
-        let mode = modeOverride ?? OpenClawLocationMode(rawValue: self.locationModeRaw) ?? .off
+    func refreshLocationPermissionSummary(desiredMode modeOverride: BotLocationMode? = nil) {
+        let mode = modeOverride ?? BotLocationMode(rawValue: self.locationModeRaw) ?? .off
         let authorization = self.appModel.locationAuthorizationSnapshot
         self.locationPermissionRefreshID &+= 1
         let refreshID = self.locationPermissionRefreshID
@@ -254,7 +254,7 @@ extension SettingsProTab {
             let locationServicesEnabled = await Self.locationServicesEnabled()
             guard refreshID == self.locationPermissionRefreshID else { return }
             let latestAuthorization = self.appModel.locationAuthorizationSnapshot
-            let latestMode = modeOverride ?? OpenClawLocationMode(rawValue: self.locationModeRaw) ?? .off
+            let latestMode = modeOverride ?? BotLocationMode(rawValue: self.locationModeRaw) ?? .off
             self.locationPermissionSummary = LocationPermissionSummary(
                 desiredMode: latestMode,
                 locationServicesEnabled: locationServicesEnabled,
@@ -602,7 +602,7 @@ extension SettingsProTab {
     func handleLocationModeChange(_ newValue: String) {
         guard !self.isChangingLocationMode else { return }
         guard newValue != self.previousLocationModeRaw else { return }
-        guard let mode = OpenClawLocationMode(rawValue: newValue) else { return }
+        guard let mode = BotLocationMode(rawValue: newValue) else { return }
         let previous = self.previousLocationModeRaw
         Task {
             await self.applyLocationMode(mode, rawValue: newValue, previous: previous)
@@ -611,7 +611,7 @@ extension SettingsProTab {
 
     @MainActor
     func applyLocationMode(
-        _ mode: OpenClawLocationMode,
+        _ mode: BotLocationMode,
         rawValue: String,
         previous: String) async
     {
@@ -641,17 +641,17 @@ extension SettingsProTab {
             self.locationModeRaw = previous
             self.previousLocationModeRaw = previous
             self.refreshLocationPermissionSummary(
-                desiredMode: OpenClawLocationMode(rawValue: previous) ?? .off)
+                desiredMode: BotLocationMode(rawValue: previous) ?? .off)
             let presentation = self.locationSettingsPresentation(selectedMode: mode)
             self.locationStatusText = presentation.statusText
         }
     }
 
-    var selectedLocationMode: OpenClawLocationMode {
-        OpenClawLocationMode(rawValue: self.locationModeRaw) ?? .off
+    var selectedLocationMode: BotLocationMode {
+        BotLocationMode(rawValue: self.locationModeRaw) ?? .off
     }
 
-    var displayedLocationMode: OpenClawLocationMode {
+    var displayedLocationMode: BotLocationMode {
         self.pendingLocationMode ?? self.selectedLocationMode
     }
 
@@ -659,7 +659,7 @@ extension SettingsProTab {
         self.locationSettingsPresentation(selectedMode: self.displayedLocationMode)
     }
 
-    func locationSettingsPresentation(selectedMode: OpenClawLocationMode) -> LocationSettingsPresentation {
+    func locationSettingsPresentation(selectedMode: BotLocationMode) -> LocationSettingsPresentation {
         var summary = self.locationPermissionSummary
         summary.desiredMode = selectedMode
         return LocationSettingsPresentation(selectedMode: selectedMode, summary: summary)
@@ -670,7 +670,7 @@ extension SettingsProTab {
         self.performLocationSettingsAction(self.locationSettingsPresentation.toggleAction())
     }
 
-    func selectLocationAccessLevel(_ mode: OpenClawLocationMode) {
+    func selectLocationAccessLevel(_ mode: BotLocationMode) {
         guard mode != .off else { return }
         guard !self.isChangingLocationMode else { return }
         let presentation = self.locationSettingsPresentation(selectedMode: mode)
@@ -688,7 +688,7 @@ extension SettingsProTab {
         }
     }
 
-    func setLocationMode(_ mode: OpenClawLocationMode) {
+    func setLocationMode(_ mode: BotLocationMode) {
         let rawValue = mode.rawValue
         let previous = self.previousLocationModeRaw
         if self.locationModeRaw != rawValue {
@@ -760,7 +760,7 @@ extension SettingsProTab {
     }
 
     private func prepareNotificationEnrollment() -> Bool {
-        if PushBuildConfig.current.usesOpenClawHostedRelay,
+        if PushBuildConfig.current.usesBotHostedRelay,
            !PushEnrollmentConsent.disclosureAccepted
         {
             self.showNotificationRelayDisclosure = true
@@ -814,7 +814,7 @@ extension SettingsProTab {
     @MainActor
     func registerForRemoteNotificationsIfEnrollmentReady() {
         guard self.notificationServingEnabled else { return }
-        guard !PushBuildConfig.current.usesOpenClawHostedRelay
+        guard !PushBuildConfig.current.usesBotHostedRelay
             || PushEnrollmentConsent.disclosureAccepted
         else { return }
         guard self.notificationStatus.allowsNotifications else { return }
@@ -933,7 +933,7 @@ extension SettingsProTab {
     func title(for route: SettingsRoute) -> String {
         switch route {
         case .gateway: String(localized: "Gateway")
-        case .systemAgent: String(localized: "OpenClaw")
+        case .systemAgent: String(localized: "Bot")
         case .appleWatch: String(localized: "Apple Watch")
         case .approvals: String(localized: "Approvals")
         case .permissions: String(localized: "Permissions")
@@ -956,9 +956,9 @@ extension SettingsProTab {
         do {
             let result = try await self.appModel.sendDirectWatchSetup()
             self.watchDirectSetupStatusText = result.deliveredImmediately
-                ? String(localized: "Setup sent. Open OpenClaw on the watch to connect.")
+                ? String(localized: "Setup sent. Open Bot on the watch to connect.")
                 : String(
-                    localized: "Setup queued for the watch. Open OpenClaw before the code expires.")
+                    localized: "Setup queued for the watch. Open Bot before the code expires.")
         } catch {
             self.watchDirectSetupStatusText = error.localizedDescription
         }
@@ -1055,7 +1055,7 @@ extension SettingsProTab {
         let lower = raw.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if lower.contains("pairing required") {
             return String(
-                localized: "Pairing required. Run /pair approve in your OpenClaw chat, then connect again.")
+                localized: "Pairing required. Run /pair approve in your Bot chat, then connect again.")
         }
         if lower.contains("device nonce required") || lower.contains("device nonce mismatch") {
             return String(localized: "Secure handshake failed. Check Tailscale, then connect again.")
@@ -1203,8 +1203,8 @@ extension SettingsProTab {
     }
 
     var gatewayStatusColor: Color {
-        if self.appModel.isAppleReviewDemoModeEnabled { return OpenClawBrand.accent }
-        return self.gatewayConnected ? OpenClawBrand.ok : .secondary
+        if self.appModel.isAppleReviewDemoModeEnabled { return BotBrand.accent }
+        return self.gatewayConnected ? BotBrand.ok : .secondary
     }
 
     var gatewayDiagnosticConnected: Bool {
@@ -1221,7 +1221,7 @@ extension SettingsProTab {
         }
         if self.notificationsNeedAttention {
             return String(
-                localized: "Foreground approvals still appear while OpenClaw is connected.")
+                localized: "Foreground approvals still appear while Bot is connected.")
         }
         return self.gatewayConnected
             ? String(localized: "Gateway requests will appear here.")
@@ -1242,7 +1242,7 @@ extension SettingsProTab {
 
     var gatewayTalkConfigColor: Color {
         if self.appModel.isAppleReviewDemoModeEnabled { return .secondary }
-        return self.appModel.talkMode.gatewayTalkConfigLoaded ? OpenClawBrand.ok : .secondary
+        return self.appModel.talkMode.gatewayTalkConfigLoaded ? BotBrand.ok : .secondary
     }
 
     var gatewayAddress: String {
@@ -1250,7 +1250,7 @@ extension SettingsProTab {
     }
 
     var gatewayServer: String {
-        self.appModel.gatewayServerName ?? "OpenClaw Gateway"
+        self.appModel.gatewayServerName ?? "Bot Gateway"
     }
 
     var pendingApproval: NodeAppModel.ExecApprovalPrompt? {
@@ -1276,8 +1276,8 @@ extension SettingsProTab {
 
     var approvalItems: [SettingsApprovalItem] {
         guard let pendingApproval else { return [] }
-        let pendingTitle = pendingApproval.commandPreview.map(OpenClawTextValue.verbatim)
-            ?? OpenClawTextValue.localized("Review gateway action")
+        let pendingTitle = pendingApproval.commandPreview.map(BotTextValue.verbatim)
+            ?? BotTextValue.localized("Review gateway action")
         let agentDetail = String(
             format: String(localized: "Agent: %@"),
             self.appModel.activeAgentName)
@@ -1290,7 +1290,7 @@ extension SettingsProTab {
                 priority: self.appModel.pendingExecApprovalPromptResolving
                     ? .localized("Resolving")
                     : .localized("High"),
-                color: OpenClawBrand.danger),
+                color: BotBrand.danger),
             SettingsApprovalItem(
                 id: "pending-context",
                 icon: "doc.text.fill",
@@ -1301,7 +1301,7 @@ extension SettingsProTab {
                 priority: pendingApproval.allowsAllowAlways
                     ? .localized("Medium")
                     : .localized("Review"),
-                color: OpenClawBrand.warn),
+                color: BotBrand.warn),
         ]
     }
 
@@ -1328,7 +1328,7 @@ extension SettingsProTab {
 
     var diagnosticsRunColor: Color {
         guard let diagnosticsIssueCount else { return .secondary }
-        return diagnosticsIssueCount == 0 ? OpenClawBrand.ok : OpenClawBrand.warn
+        return diagnosticsIssueCount == 0 ? BotBrand.ok : BotBrand.warn
     }
 
     var locationPermissionDetailText: String? {
@@ -1357,7 +1357,7 @@ extension SettingsProTab {
     }
 
     var notificationDisclosureAccepted: Bool {
-        !PushBuildConfig.current.usesOpenClawHostedRelay
+        !PushBuildConfig.current.usesBotHostedRelay
             || PushEnrollmentConsent.disclosureAccepted
     }
 
@@ -1393,21 +1393,21 @@ extension SettingsProTab {
     }
 
     var notificationRelayDetail: String {
-        if PushBuildConfig.current.usesOpenClawHostedRelay {
+        if PushBuildConfig.current.usesBotHostedRelay {
             let host = PushBuildConfig.current.relayBaseURL.flatMap {
                 URLComponents(url: $0, resolvingAgainstBaseURL: false)?.host
-            } ?? "ios-push-relay.openclaw.ai"
+            } ?? "ios-push-relay.bot.ai"
             return String(
                 format: String(
-                    localized: "This build uses OpenClaw's hosted push relay at %@ for notification delivery data."),
+                    localized: "This build uses Bot's hosted push relay at %@ for notification delivery data."),
                 host)
         }
         return String(
-            localized: "This build is not configured to use OpenClaw's hosted push relay.")
+            localized: "This build is not configured to use Bot's hosted push relay.")
     }
 
     var notificationRelayDisclosureMessage: String {
         String(
-            localized: "Enabling this sends delivery data through OpenClaw's hosted push relay.")
+            localized: "Enabling this sends delivery data through Bot's hosted push relay.")
     }
 }

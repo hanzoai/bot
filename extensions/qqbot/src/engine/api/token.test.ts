@@ -5,8 +5,8 @@ import { TokenManager } from "./token.js";
 
 const fetchWithSsrFGuardMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>();
+vi.mock("bot/plugin-sdk/ssrf-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/ssrf-runtime")>();
   return {
     ...actual,
     fetchWithSsrFGuard: fetchWithSsrFGuardMock,
@@ -184,8 +184,8 @@ describe("QQBot token manager", () => {
   it("times out one stalled token fetch for every singleflight waiter and allows retry", async () => {
     vi.useFakeTimers();
     const { fetchWithSsrFGuard } = await vi.importActual<
-      typeof import("openclaw/plugin-sdk/ssrf-runtime")
-    >("openclaw/plugin-sdk/ssrf-runtime");
+      typeof import("bot/plugin-sdk/ssrf-runtime")
+    >("bot/plugin-sdk/ssrf-runtime");
     fetchWithSsrFGuardMock.mockImplementation(fetchWithSsrFGuard);
 
     let fetchSignal: AbortSignal | undefined;

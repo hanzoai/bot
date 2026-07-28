@@ -8,7 +8,7 @@ function plan(
   ownerAction: "install" | "reuse" = "install",
 ): ClawAddPlan {
   return {
-    schemaVersion: "openclaw.clawAddPlan.v1",
+    schemaVersion: "bot.clawAddPlan.v1",
     manifestSchemaVersion: 1,
     stability: "experimental",
     dryRun: true,
@@ -80,7 +80,7 @@ function pluginPackageRef(
   overrides: Partial<PersistedClawPackageRef> = {},
 ): PersistedClawPackageRef {
   return {
-    schemaVersion: "openclaw.clawPackageRef.v1",
+    schemaVersion: "bot.clawPackageRef.v1",
     agentId: "incident-2",
     clawName: "incident-claw",
     kind: "plugin",

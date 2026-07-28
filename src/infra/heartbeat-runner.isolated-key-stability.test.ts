@@ -1,7 +1,7 @@
 // Covers heartbeat system-event isolation by stable session keys.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import * as replyModule from "../auto-reply/reply.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { resolveMainSessionKey } from "../config/sessions.js";
 import { runHeartbeatOnce } from "./heartbeat-runner.js";
 import {
@@ -51,7 +51,7 @@ describe("runHeartbeatOnce – isolated session key stability (#59493)", () => {
   async function runIsolatedHeartbeat(params: {
     tmpDir: string;
     storePath: string;
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     sessionKey: string;
   }) {
     await seedSessionStore(params.storePath, params.sessionKey, {
@@ -76,7 +76,7 @@ describe("runHeartbeatOnce – isolated session key stability (#59493)", () => {
     return replyCall(replySpy);
   }
 
-  function makeIsolatedHeartbeatConfig(tmpDir: string, storePath: string): OpenClawConfig {
+  function makeIsolatedHeartbeatConfig(tmpDir: string, storePath: string): BotConfig {
     return {
       agents: {
         defaults: {
@@ -97,7 +97,7 @@ describe("runHeartbeatOnce – isolated session key stability (#59493)", () => {
     tmpDir: string,
     storePath: string,
     heartbeatSession: string,
-  ): OpenClawConfig {
+  ): BotConfig {
     return {
       agents: {
         defaults: {
@@ -371,7 +371,7 @@ describe("runHeartbeatOnce – isolated session key stability (#59493)", () => {
 
   it("treats leftover tasks text as ordinary scratch instead of runtime scheduling state", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,

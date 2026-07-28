@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { redactTranscriptMessage } from "../agents/transcript-redact.js";
 import {
   appendTranscriptMessage,
@@ -33,7 +33,7 @@ import type {
   SessionTranscriptDeliveryMirror,
   SessionTranscriptUpdateMode,
 } from "../config/sessions/transcript.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { extractAssistantVisibleText } from "../shared/chat-message-content.js";
 import type { AgentMessage } from "./agent-core.js";
@@ -145,7 +145,7 @@ export type SessionTranscriptStrictMessageAppendResult<TMessage> =
   | { kind: "rejected"; reason: "session-rebound" };
 
 export type SessionTranscriptAssistantMirrorAppendParams = SessionTranscriptReadParams & {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   deliveryMirror?: SessionTranscriptDeliveryMirror;
   idempotencyKey?: string;
   mediaUrls?: string[];
@@ -352,7 +352,7 @@ export async function appendAssistantMirrorMessageByIdentity(
 
 /**
  * Appends an already-canonical transcript message by scoped transcript target.
- * Media-bearing user turns use ordered `message.__openclaw.media` facts; this
+ * Media-bearing user turns use ordered `message.__bot.media` facts; this
  * low-level API does not infer deprecated top-level Media* projections.
  */
 export async function appendSessionTranscriptMessageByIdentity<TMessage>(
@@ -492,7 +492,7 @@ function createAssistantMirrorMessage(params: {
     role: "assistant",
     content: [{ type: "text", text: params.text }],
     api: "openai-responses",
-    provider: "openclaw",
+    provider: "bot",
     model: "delivery-mirror",
     usage: {
       input: 0,
@@ -505,14 +505,14 @@ function createAssistantMirrorMessage(params: {
     stopReason: "stop",
     timestamp: Date.now(),
     ...(params.idempotencyKey ? { idempotencyKey: params.idempotencyKey } : {}),
-    ...(params.deliveryMirror ? { openclawDeliveryMirror: params.deliveryMirror } : {}),
+    ...(params.deliveryMirror ? { botDeliveryMirror: params.deliveryMirror } : {}),
   };
 }
 
 function findLatestEquivalentAssistantMessageId(
   events: readonly SessionTranscriptEvent[],
   message: SessionTranscriptAssistantMessage,
-  config: OpenClawConfig | undefined,
+  config: BotConfig | undefined,
 ): string | undefined {
   const expectedText = extractAssistantMirrorComparableText(message, config);
   if (!expectedText) {
@@ -542,7 +542,7 @@ function findLatestEquivalentAssistantMessageId(
 
 function extractAssistantMirrorComparableText(
   message: SessionTranscriptAssistantMessage,
-  config: OpenClawConfig | undefined,
+  config: BotConfig | undefined,
 ): string | undefined {
   const redacted = redactTranscriptMessage(
     message as Parameters<typeof redactTranscriptMessage>[0],
@@ -552,7 +552,7 @@ function extractAssistantMirrorComparableText(
 }
 
 function isDeliveryMirrorAssistantMessage(message: SessionTranscriptAssistantMessage): boolean {
-  return message.provider === "openclaw" && message.model === "delivery-mirror";
+  return message.provider === "bot" && message.model === "delivery-mirror";
 }
 
 function readNonEmptyString(value: unknown): string | undefined {

@@ -2,7 +2,7 @@
  * Tests pending-node gateway method responses and state filtering.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { nodePendingHandlers } from "./nodes-pending.js";
 

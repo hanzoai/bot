@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { render } from "lit";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getLobsterdex, getLobsterdexEntries } from "./lobster-dex.ts";
@@ -53,7 +53,7 @@ type LobsterPetElement = HTMLElement & {
 };
 
 function createPet(seed: number, mode: LobsterPetMode = "idle"): LobsterPetElement {
-  const element = document.createElement("openclaw-lobster-pet") as LobsterPetElement;
+  const element = document.createElement("bot-lobster-pet") as LobsterPetElement;
   element.seed = seed;
   element.mode = mode;
   document.body.append(element);
@@ -494,7 +494,7 @@ describe("lobster pet element", () => {
     vi.setSystemTime(new Date("2026-07-09T12:00:00"));
     vi.stubGlobal("localStorage", window.localStorage);
     localStorage.setItem(
-      "openclaw.control.lobsterpet.familiarity.v1",
+      "bot.control.lobsterpet.familiarity.v1",
       JSON.stringify({ visits: 30, shoos: 0 }),
     );
     const element = createPet(42);
@@ -518,7 +518,7 @@ describe("lobster pet element", () => {
       ?.dispatchEvent(new Event("contextmenu", { cancelable: true }));
     await element.updateComplete;
     const raw = JSON.parse(
-      localStorage.getItem("openclaw.control.lobsterpet.familiarity.v1") ?? "{}",
+      localStorage.getItem("bot.control.lobsterpet.familiarity.v1") ?? "{}",
     );
     expect(raw.shoos).toBe(1);
   });
@@ -659,14 +659,14 @@ describe("lobster pet element", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-07-09T12:00:00"));
     vi.stubGlobal("localStorage", window.localStorage);
-    localStorage.setItem("openclaw.control.lobsterpet.gatewayVersion.v1", "2026.6.1");
+    localStorage.setItem("bot.control.lobsterpet.gatewayVersion.v1", "2026.6.1");
     const element = createPet(42);
     element.gatewayVersion = "2026.7.1";
     await arrive(element);
 
     expect(element.querySelector(".lob-bindle")).not.toBeNull();
     expect(element.querySelector(".lobster-pet")?.getAttribute("title")).toContain("just moved in");
-    expect(localStorage.getItem("openclaw.control.lobsterpet.gatewayVersion.v1")).toBe("2026.7.1");
+    expect(localStorage.getItem("bot.control.lobsterpet.gatewayVersion.v1")).toBe("2026.7.1");
   });
 
   it("travels light on first sighting and on same-version reloads", async () => {
@@ -678,7 +678,7 @@ describe("lobster pet element", () => {
     first.gatewayVersion = "2026.7.1";
     await arrive(first);
     expect(first.querySelector(".lob-bindle")).toBeNull();
-    expect(localStorage.getItem("openclaw.control.lobsterpet.gatewayVersion.v1")).toBe("2026.7.1");
+    expect(localStorage.getItem("bot.control.lobsterpet.gatewayVersion.v1")).toBe("2026.7.1");
     first.remove();
 
     // Same version on the next load: still no bindle.
@@ -728,7 +728,7 @@ describe("lobster pet element", () => {
     vi.stubGlobal("localStorage", window.localStorage);
     const look = createLobsterPetLook(42, new Date("2026-07-09T12:00:00"));
     localStorage.setItem(
-      "openclaw.control.lobsterdex.v1",
+      "bot.control.lobsterdex.v1",
       JSON.stringify({
         [look.palette.id]: {
           firstSeenAt: new Date("2025-07-09T12:00:00").getTime(),
@@ -849,7 +849,7 @@ describe("lobster plans", () => {
     // An empty dex has no friends to bring back, whatever the roll says.
     expect(identityOf(191).oldFriend).toBe(false);
     localStorage.setItem(
-      "openclaw.control.lobsterdex.v1",
+      "bot.control.lobsterdex.v1",
       JSON.stringify({
         gold: { firstSeenAt: 1, name: "Goldenrod" },
         teal: { firstSeenAt: 2, name: "Minty" },
@@ -905,7 +905,7 @@ describe("rare lobster loads", () => {
     vi.setSystemTime(new Date("2026-07-09T12:00:00"));
     vi.stubGlobal("localStorage", window.localStorage);
     localStorage.setItem(
-      "openclaw.control.lobsterdex.v1",
+      "bot.control.lobsterdex.v1",
       JSON.stringify({
         gold: { firstSeenAt: 1, name: "Goldenrod" },
         teal: { firstSeenAt: 2, name: "Minty" },
@@ -1009,7 +1009,7 @@ describe("rare lobster loads", () => {
     vi.setSystemTime(new Date("2026-07-09T12:00:00"));
     vi.stubGlobal("localStorage", window.localStorage);
     localStorage.setItem(
-      "openclaw.control.lobsterdex.v1",
+      "bot.control.lobsterdex.v1",
       JSON.stringify(
         Object.fromEntries(
           LOBSTER_PET_PALETTES.map((palette) => [palette.id, { firstSeenAt: 1, name: "First" }]),

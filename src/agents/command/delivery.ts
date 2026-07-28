@@ -1,7 +1,7 @@
 /**
  * Normalizes and delivers agent command results to outbound channels.
  */
-import { hasNonEmptyString } from "@openclaw/normalization-core/string-coerce";
+import { hasNonEmptyString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   resolveAgentWorkspaceDir,
   resolveDefaultAgentId,
@@ -27,7 +27,7 @@ import { getChannelPlugin, normalizeChannelId } from "../../channels/plugins/ind
 import { createReplyPrefixContext } from "../../channels/reply-prefix.js";
 import { createOutboundSendDeps, type CliDeps } from "../../cli/outbound-send-deps.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { formatErrorMessage, toErrorObject } from "../../infra/errors.js";
 import {
   resolveAgentDeliveryPlanWithSessionRoute,
@@ -123,7 +123,7 @@ type FreshSessionDeliveryRefreshParams =
     };
 
 type DeliverAgentCommandResultParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   deps: CliDeps;
   runtime: RuntimeEnv;
   opts: AgentCommandOpts;
@@ -295,7 +295,7 @@ function noVisiblePayloadStatus(): AgentCommandDeliveryStatus {
 }
 
 async function normalizeReplyMediaPathsForDelivery(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   payloads: ReplyPayload[];
   sessionKey?: string;
   outboundSession: OutboundSessionContext | undefined;
@@ -371,7 +371,7 @@ async function normalizeSentMediaUrlsForDelivery(params: {
 const UNRESOLVED_RESPONSE_PREFIX_VAR_PATTERN = /\{[a-zA-Z][a-zA-Z0-9.]*\}/;
 
 async function filterAlreadyDeliveredReplyPayloads(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   payloads: ReplyPayload[];
   result: RunResult;
   deliveryChannel: string;
@@ -456,7 +456,7 @@ async function filterAlreadyDeliveredReplyPayloads(params: {
 
 /** Normalizes reply payloads and media paths before delivery. */
 function normalizeAgentCommandReplyPayloads(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   opts: AgentCommandOpts;
   outboundSession: OutboundSessionContext | undefined;
   payloads: RunResult["payloads"];

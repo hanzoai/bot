@@ -1,5 +1,5 @@
 // TTS runtime types define plugin-facing text-to-speech synthesis hooks and results.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type {
   ResolvedTtsPersona,
   TtsAutoMode,
@@ -76,7 +76,7 @@ export type ResolveTtsAutoModeParams = {
 
 /** Inputs for explicit provider/model/voice overrides parsed from user or tool directives. */
 export type ResolveExplicitTtsOverridesParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prefsPath?: string;
   provider?: string;
   modelId?: string;
@@ -89,7 +89,7 @@ export type ResolveExplicitTtsOverridesParams = {
 /** Standard text-to-speech request for file or stream synthesis. */
 export type TtsRequestParams = {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prefsPath?: string;
   channel?: string;
   overrides?: TtsDirectiveOverrides;
@@ -101,14 +101,14 @@ export type TtsRequestParams = {
 
 /** Inputs for surface-specific config merge and directive pre-resolution. */
 export type PrepareTtsRequestParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   override?: TtsConfig;
   text: string;
 };
 
 /** Effective synthesis inputs returned before choosing file, stream, or telephony output. */
 export type PreparedTtsRequest = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   directives: TtsDirectiveParseResult;
 };
 
@@ -118,7 +118,7 @@ export type PrepareTtsRequest = (params: PrepareTtsRequestParams) => Promise<Pre
 /** Telephony-specific synthesis request where output format is constrained by the caller. */
 export type TtsTelephonyRequestParams = {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prefsPath?: string;
   overrides?: TtsDirectiveOverrides;
 };
@@ -126,7 +126,7 @@ export type TtsTelephonyRequestParams = {
 /** Inputs for listing voices from a speech provider with optional resolved config. */
 export type ListSpeechVoicesParams = {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   config?: ResolvedTtsConfig;
   apiKey?: string;
   baseUrl?: string;
@@ -135,7 +135,7 @@ export type ListSpeechVoicesParams = {
 /** Inputs for attaching synthesized speech to an outbound reply payload when enabled. */
 export type MaybeApplyTtsToPayloadParams = {
   payload: ReplyPayload;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel?: string;
   kind?: "tool" | "block" | "final";
   inboundAudio?: boolean;
@@ -161,7 +161,7 @@ export type TtsTestFacade = {
   getResolvedSpeechProviderConfig: (
     config: ResolvedTtsConfig,
     providerId: string,
-    cfg?: OpenClawConfig,
+    cfg?: BotConfig,
   ) => SpeechProviderConfig;
   formatTtsProviderError: (provider: TtsProvider, err: unknown) => string;
   sanitizeTtsErrorForLog: (err: unknown) => string;
@@ -257,12 +257,12 @@ export type TtsRuntimeFacade = {
   /** @deprecated Use `testApi`. */
   _test: TtsTestFacade;
   testApi: TtsTestFacade;
-  buildTtsSystemPromptHint: (cfg: OpenClawConfig, agentId?: string) => string | undefined;
+  buildTtsSystemPromptHint: (cfg: BotConfig, agentId?: string) => string | undefined;
   getLastTtsAttempt: () => TtsStatusEntry | undefined;
   getResolvedSpeechProviderConfig: (
     config: ResolvedTtsConfig,
     providerId: string,
-    cfg?: OpenClawConfig,
+    cfg?: BotConfig,
   ) => SpeechProviderConfig;
   getTtsMaxLength: (prefsPath: string) => number;
   getTtsPersona: (config: ResolvedTtsConfig, prefsPath: string) => ResolvedTtsPersona | undefined;
@@ -272,7 +272,7 @@ export type TtsRuntimeFacade = {
   isTtsProviderConfigured: (
     config: ResolvedTtsConfig,
     provider: TtsProvider,
-    cfg?: OpenClawConfig,
+    cfg?: BotConfig,
   ) => boolean;
   listSpeechVoices: ListSpeechVoices;
   listTtsPersonas: (config: ResolvedTtsConfig) => ResolvedTtsPersona[];
@@ -280,11 +280,11 @@ export type TtsRuntimeFacade = {
   resolveExplicitTtsOverrides: (params: ResolveExplicitTtsOverridesParams) => TtsDirectiveOverrides;
   resolveTtsAutoMode: (params: ResolveTtsAutoModeParams) => TtsAutoMode;
   resolveTtsConfig: (
-    cfg: OpenClawConfig,
+    cfg: BotConfig,
     contextOrAgentId?: string | TtsConfigResolutionContext,
   ) => ResolvedTtsConfig;
   resolveTtsPrefsPath: (config: ResolvedTtsConfig) => string;
-  resolveTtsProviderOrder: (primary: TtsProvider, cfg?: OpenClawConfig) => TtsProvider[];
+  resolveTtsProviderOrder: (primary: TtsProvider, cfg?: BotConfig) => TtsProvider[];
   setLastTtsAttempt: (entry: TtsStatusEntry | undefined) => void;
   setSummarizationEnabled: (prefsPath: string, enabled: boolean) => void;
   setTtsAutoMode: (prefsPath: string, mode: TtsAutoMode) => void;

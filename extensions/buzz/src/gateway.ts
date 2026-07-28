@@ -1,7 +1,7 @@
-import { waitUntilAbort } from "openclaw/plugin-sdk/channel-outbound";
-import { attachChannelToResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { computeBackoff, sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+import { waitUntilAbort } from "bot/plugin-sdk/channel-outbound";
+import { attachChannelToResult } from "bot/plugin-sdk/channel-send-result";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { computeBackoff, sleepWithAbort } from "bot/plugin-sdk/runtime-env";
 import type { ChannelGatewayContext } from "../runtime-api.js";
 import { sendBuzzTextOneShot, startBuzzBus, type BuzzBus } from "./buzz-bus.js";
 import { handleBuzzInbound } from "./inbound.js";
@@ -24,7 +24,7 @@ const RECONNECT_STABLE_MS = 60_000;
 const RECONNECT_LOOKBACK_SECONDS = 24 * 60 * 60;
 
 function resolveBuzzProfileName(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   account: ResolvedBuzzAccount;
   channelIds: string[];
 }): string {
@@ -45,12 +45,12 @@ function resolveBuzzProfileName(params: {
     ),
   );
   if (agentIds.size !== 1) {
-    return "OpenClaw";
+    return "Bot";
   }
   const agentId = agentIds.values().next().value;
   return agentId
-    ? runtime.agent.resolveAgentIdentity(params.cfg, agentId)?.name?.trim() || "OpenClaw"
-    : "OpenClaw";
+    ? runtime.agent.resolveAgentIdentity(params.cfg, agentId)?.name?.trim() || "Bot"
+    : "Bot";
 }
 
 export async function startBuzzGatewayAccount(ctx: ChannelGatewayContext<ResolvedBuzzAccount>) {
@@ -199,7 +199,7 @@ export const buzzOutboundAdapter = {
     threadId,
     replyToId,
   }: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     to: string;
     text: string;
     accountId?: string | null;

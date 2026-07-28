@@ -3,7 +3,7 @@
  *
  * Renders sanitized runtime-owned subagent state into system prompt additions.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { sanitizeForPromptLiteral } from "./sanitize-for-prompt.js";
 import { listControlledSubagentRuns } from "./subagent-control.js";
 import { buildSubagentList } from "./subagent-list.js";
@@ -17,7 +17,7 @@ function quotePromptData(value: string): string {
 
 /** Builds the runtime-owned active subagent section appended to the system prompt. */
 export function buildActiveSubagentSystemPromptAddition(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   controllerSessionKey?: string;
   hasSessionsYield?: boolean;
   recentMinutes?: number;

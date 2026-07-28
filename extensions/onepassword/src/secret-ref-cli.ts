@@ -1,13 +1,13 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/plugin-entry";
+import type { BotConfig } from "bot/plugin-sdk/plugin-entry";
 import {
   DEFAULT_SECRET_FILE_MAX_BYTES,
   tryReadSecretFileSync,
-} from "openclaw/plugin-sdk/secret-file-runtime";
-import { pluginSecretRefSetup } from "openclaw/plugin-sdk/secret-ref-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "bot/plugin-sdk/secret-file-runtime";
+import { pluginSecretRefSetup } from "bot/plugin-sdk/secret-ref-runtime";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
 import {
   resolveTrustedOnePasswordCli,
   resolveTrustedOnePasswordDirectoryPath,
@@ -49,7 +49,7 @@ type SecretsApplyPlan = ReturnType<typeof pluginSecretRefSetup.buildPlan>;
 
 type RegisterOnePasswordSecretRefCommandsParams = {
   command: CommandLike;
-  config: OpenClawConfig;
+  config: BotConfig;
   tokenFile: string;
   env?: NodeJS.ProcessEnv;
 };
@@ -146,8 +146,8 @@ function renderApplyCommands(
   const render = (shell: CommandShell, extraIndent = "") => {
     const quotedPlanPath = quoteCliArg(planPath, shell);
     return [
-      `${extraIndent}openclaw secrets apply --from ${quotedPlanPath} --dry-run --allow-exec`,
-      `${extraIndent}openclaw secrets apply --from ${quotedPlanPath} --allow-exec`,
+      `${extraIndent}bot secrets apply --from ${quotedPlanPath} --dry-run --allow-exec`,
+      `${extraIndent}bot secrets apply --from ${quotedPlanPath} --allow-exec`,
     ];
   };
   if (platform !== "win32") {
@@ -178,7 +178,7 @@ function normalizeOnePasswordSecretId(label: string, value: string): string {
   }
 }
 
-function readProviderStatus(config: OpenClawConfig, providerAlias: string): ProviderStatus {
+function readProviderStatus(config: BotConfig, providerAlias: string): ProviderStatus {
   const provider = config.secrets?.providers?.[providerAlias];
   if (!isRecord(provider)) {
     return { configured: false };
@@ -212,7 +212,7 @@ function isOnePasswordIntegrationProvider(value: unknown): boolean {
   );
 }
 
-function resolveStatusProviderAlias(config: OpenClawConfig, requestedAlias?: string): string {
+function resolveStatusProviderAlias(config: BotConfig, requestedAlias?: string): string {
   const explicitAlias = normalizeOptionalString(requestedAlias);
   if (explicitAlias) {
     assertValidProviderAlias(explicitAlias);
@@ -318,7 +318,7 @@ function parseConfigTargetMappings(values: string[] | undefined): ConfigTargetSe
     const separator = value.indexOf("=");
     if (separator <= 0 || separator === value.length - 1) {
       throw new Error(
-        `Invalid --target value "${value}". Use <openclaw-config-path>=<1password-secret-id>.`,
+        `Invalid --target value "${value}". Use <bot-config-path>=<1password-secret-id>.`,
       );
     }
     const target = parseTargetSpecifier(value.slice(0, separator).trim());
@@ -495,7 +495,7 @@ async function writePlanFile(
 ): Promise<string> {
   const requestedPlanPath =
     normalizeOptionalString(requestedPath) ??
-    path.join(resolvePreferredOpenClawTmpDir(), `openclaw-1password-secrets-${randomUUID()}.json`);
+    path.join(resolvePreferredBotTmpDir(), `bot-1password-secrets-${randomUUID()}.json`);
   const content = `${JSON.stringify(plan, null, 2)}\n`;
   const requestedPlanPathAbsolute = path.resolve(requestedPlanPath);
   const planDirectory = await (
@@ -533,13 +533,13 @@ async function runSetup(options: SetupOptions): Promise<void> {
   writeLine(`Targets: ${plan.targets.length}`);
   writeLine("");
   writeLine("Next steps:");
-  writeLine("  openclaw plugins enable onepassword");
-  writeLine("  openclaw onepassword secretref status");
+  writeLine("  bot plugins enable onepassword");
+  writeLine("  bot onepassword secretref status");
   for (const command of renderApplyCommands(planPath)) {
     writeLine(`  ${command}`);
   }
-  writeLine("  openclaw secrets audit --check --allow-exec");
-  writeLine("  openclaw secrets reload");
+  writeLine("  bot secrets audit --check --allow-exec");
+  writeLine("  bot secrets reload");
 }
 
 export function registerOnePasswordSecretRefCommands(

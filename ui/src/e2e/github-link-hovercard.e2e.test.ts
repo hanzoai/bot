@@ -11,7 +11,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let server: ControlUiE2eServer;
@@ -82,8 +82,8 @@ describeControlUiE2e("GitHub link hover cards", () => {
                 login: "steipete",
                 mergedAt: "2026-07-04T09:53:52Z",
                 number: 99816,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "bot",
+                repo: "bot",
                 state: "closed",
                 title: "fix(agents): derive conversation scope from trusted group facts",
                 updatedAt: "2026-07-04T09:53:55Z",
@@ -99,8 +99,8 @@ describeControlUiE2e("GitHub link hover cards", () => {
                 kind: "issue",
                 login: "octocat",
                 number: 99815,
-                owner: "openclaw",
-                repo: "openclaw",
+                owner: "bot",
+                repo: "bot",
                 state: "open",
                 title: "Keep hover previews compact",
                 updatedAt: new Date().toISOString(),
@@ -119,10 +119,10 @@ describeControlUiE2e("GitHub link hover cards", () => {
             {
               type: "text",
               text: [
-                "Review [#99816](https://github.com/openclaw/openclaw/pull/99816),",
-                "then [#99815](https://github.com/openclaw/openclaw/issues/99815).",
-                "A [missing item](https://github.com/openclaw/openclaw/issues/999999) stays usable.",
-                "The [repository](https://github.com/openclaw/openclaw) has no item preview.",
+                "Review [#99816](https://github.com/hanzoai/bot/pull/99816),",
+                "then [#99815](https://github.com/hanzoai/bot/issues/99815).",
+                "A [missing item](https://github.com/hanzoai/bot/issues/999999) stays usable.",
+                "The [repository](https://github.com/hanzoai/bot) has no item preview.",
               ].join(" "),
             },
           ],
@@ -137,7 +137,7 @@ describeControlUiE2e("GitHub link hover cards", () => {
     await pullLink.hover();
     const card = page.locator(".github-link-hovercard");
     await expectText(card, "Merged");
-    await expectText(card, "openclaw/openclaw #99816");
+    await expectText(card, "hanzoai/bot #99816");
     await expectText(card, "+101");
     await expectText(card, "−12");
     await expectText(card, "3 files");
@@ -174,7 +174,7 @@ describeControlUiE2e("GitHub link hover cards", () => {
     await expectText(card, "GitHub preview unavailable");
     expect((await gateway.getRequests("controlUi.githubPreview")).length).toBe(3);
     expect(await missingLink.getAttribute("href")).toBe(
-      "https://github.com/openclaw/openclaw/issues/999999",
+      "https://github.com/hanzoai/bot/issues/999999",
     );
     await page.mouse.move(1, 1);
 
@@ -197,6 +197,6 @@ describeControlUiE2e("GitHub link hover cards", () => {
     await pullLink.click();
     const popup = await popupPromise;
     await popup.waitForLoadState("domcontentloaded");
-    expect(popup.url()).toBe("https://github.com/openclaw/openclaw/pull/99816");
+    expect(popup.url()).toBe("https://github.com/hanzoai/bot/pull/99816");
   });
 });

@@ -1,5 +1,5 @@
 import type { SessionTranscriptUpdate } from "../../sessions/transcript-events.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import type { BotConfig } from "../types.bot.js";
 import type {
   DeletedAgentSessionEntryPurgeParams,
   DeleteSessionEntryLifecycleResult,
@@ -101,7 +101,7 @@ export type {
 } from "./session-accessor.types.js";
 
 export type TranscriptMessageAppendOptions<TMessage> = {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   cwd?: string;
   idempotencyLookup?: "scan" | "scan-assistant" | "caller-checked";
   message: TMessage;

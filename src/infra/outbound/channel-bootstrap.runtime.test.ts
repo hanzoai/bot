@@ -1,7 +1,7 @@
 // Covers lazy outbound channel bootstrap, retry guards, auto-enable config, and
 // send-capable active registry short-circuiting.
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { createEmptyPluginRegistry } from "../../plugins/registry-empty.js";
 import {
   pinActivePluginChannelRegistry,
@@ -24,13 +24,13 @@ const discordConfig = {
   channels: {
     discord: {},
   },
-} satisfies OpenClawConfig;
+} satisfies BotConfig;
 
 const updatedDiscordConfig = {
   channels: {
     discord: { enabled: true },
   },
-} satisfies OpenClawConfig;
+} satisfies BotConfig;
 
 function pinDiscordSetupShell(): void {
   const registry = createEmptyPluginRegistry();

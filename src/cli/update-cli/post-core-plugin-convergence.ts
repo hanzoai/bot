@@ -2,12 +2,12 @@
 import path from "node:path";
 import { repairMissingConfiguredPluginInstalls } from "../../commands/doctor/shared/missing-configured-plugin-install.js";
 import { UPDATE_POST_CORE_CONVERGENCE_ENV } from "../../commands/doctor/shared/update-phase.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import type { ClawHubRiskAcknowledgementRequest } from "../../infra/clawhub-install-trust.js";
 import { resolveDefaultPluginNpmDir } from "../../plugins/install-paths.js";
 import { listManagedPluginNpmRoots } from "../../plugins/npm-project-roots.js";
-import { relinkOpenClawPeerDependenciesInManagedNpmRoot } from "../../plugins/plugin-peer-link.js";
+import { relinkBotPeerDependenciesInManagedNpmRoot } from "../../plugins/plugin-peer-link.js";
 import { pruneStaleLocalBundledPluginInstallRecords } from "../../plugins/stale-local-bundled-plugin-install-records.js";
 import { resolveUserPath } from "../../utils.js";
 import { VERSION } from "../../version.js";
@@ -43,9 +43,9 @@ type PostCoreConvergenceResult = {
   installRecords: Record<string, PluginInstallRecord>;
 };
 
-const REPAIR_GUIDANCE = "Run `openclaw update repair` to retry plugin repair.";
+const REPAIR_GUIDANCE = "Run `bot update repair` to retry plugin repair.";
 const inspectGuidance = (pluginId: string) =>
-  `Run \`openclaw plugins inspect ${pluginId} --runtime --json\` for details.`;
+  `Run \`bot plugins inspect ${pluginId} --runtime --json\` for details.`;
 
 function smokeFailureGuidance(failure: PluginPayloadSmokeFailure): string[] {
   if (failure.reason !== "unreadable-package-json") {
@@ -55,12 +55,12 @@ function smokeFailureGuidance(failure: PluginPayloadSmokeFailure): string[] {
     ? path.join(failure.installPath, "package.json")
     : "the plugin package.json";
   return [
-    `Fix file access for ${packageJsonPath} so it is readable by the user running OpenClaw. For EACCES or EPERM, correct its ownership or permissions; otherwise resolve the reported filesystem I/O error, then retry.`,
+    `Fix file access for ${packageJsonPath} so it is readable by the user running Bot. For EACCES or EPERM, correct its ownership or permissions; otherwise resolve the reported filesystem I/O error, then retry.`,
     inspectGuidance(failure.pluginId),
   ];
 }
 
-async function repairManagedNpmOpenClawPeerLinks(params: { env: NodeJS.ProcessEnv }): Promise<{
+async function repairManagedNpmBotPeerLinks(params: { env: NodeJS.ProcessEnv }): Promise<{
   changes: string[];
   warnings: PostCoreConvergenceWarning[];
   packageReadFailures: Array<{ error: unknown; packageDir: string }>;
@@ -70,7 +70,7 @@ async function repairManagedNpmOpenClawPeerLinks(params: { env: NodeJS.ProcessEn
     const npmRoots = await listManagedPluginNpmRoots(resolveDefaultPluginNpmDir(params.env));
     const results = await Promise.all(
       npmRoots.map((npmRoot) =>
-        relinkOpenClawPeerDependenciesInManagedNpmRoot({
+        relinkBotPeerDependenciesInManagedNpmRoot({
           npmRoot,
           logger: {},
           onPackageReadError: (error, packageDir) => {
@@ -83,13 +83,13 @@ async function repairManagedNpmOpenClawPeerLinks(params: { env: NodeJS.ProcessEn
     return {
       changes:
         repaired > 0
-          ? [`Repaired OpenClaw host peer link(s) for ${repaired} managed npm plugin package(s).`]
+          ? [`Repaired Bot host peer link(s) for ${repaired} managed npm plugin package(s).`]
           : [],
       warnings: [],
       packageReadFailures,
     };
   } catch (err) {
-    const message = `Failed to repair managed npm OpenClaw host peer links: ${err instanceof Error ? err.message : String(err)}`;
+    const message = `Failed to repair managed npm Bot host peer links: ${err instanceof Error ? err.message : String(err)}`;
     return {
       changes: [],
       warnings: [
@@ -105,7 +105,7 @@ async function repairManagedNpmOpenClawPeerLinks(params: { env: NodeJS.ProcessEn
 }
 
 function formatPeerLinkPackageReadWarning(failure: { error: unknown }): PostCoreConvergenceWarning {
-  const message = `Failed to repair managed npm OpenClaw host peer links: ${failure.error instanceof Error ? failure.error.message : String(failure.error)}`;
+  const message = `Failed to repair managed npm Bot host peer links: ${failure.error instanceof Error ? failure.error.message : String(failure.error)}`;
   return {
     reason: message,
     message,
@@ -118,13 +118,13 @@ function formatPeerLinkPackageReadWarning(failure: { error: unknown }): PostCore
  * are swapped and the in-update doctor pass has already returned, but BEFORE
  * the gateway is restarted. Missing-plugin repair failures stay nonblocking:
  * an external package fetch may be transient, and failing the core update
- * would strand the user. Explicit `openclaw update` callers keep reporting
+ * would strand the user. Explicit `bot update` callers keep reporting
  * payload smoke failures as errors. Gateway startup consumes the same typed
  * failures by quarantining each known plugin owner before any module import,
  * then boots with that plugin marked configured-unavailable.
  */
 export async function runPostCorePluginConvergence(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   /**
    * Optional in-memory install records from earlier post-core steps (e.g.
@@ -140,7 +140,7 @@ export async function runPostCorePluginConvergence(params: {
 }): Promise<PostCoreConvergenceResult> {
   const env: NodeJS.ProcessEnv = {
     ...params.env,
-    OPENCLAW_COMPATIBILITY_HOST_VERSION: VERSION,
+    BOT_COMPATIBILITY_HOST_VERSION: VERSION,
     [UPDATE_POST_CORE_CONVERGENCE_ENV]: "1",
   };
   const prunedBaseline = params.baselineInstallRecords
@@ -163,7 +163,7 @@ export async function runPostCorePluginConvergence(params: {
     message,
     guidance: [REPAIR_GUIDANCE],
   }));
-  const peerLinkRepair = await repairManagedNpmOpenClawPeerLinks({ env });
+  const peerLinkRepair = await repairManagedNpmBotPeerLinks({ env });
   warnings.push(...peerLinkRepair.warnings);
   const notices: PostCoreConvergenceWarning[] = (repair.notices ?? []).map((message) => ({
     reason: message,

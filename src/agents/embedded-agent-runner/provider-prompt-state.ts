@@ -1,7 +1,7 @@
 import { Buffer } from "node:buffer";
 import crypto from "node:crypto";
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
+import type { Model } from "bot/plugin-sdk/llm";
 import { resolveGlobalSingleton } from "../../shared/global-singleton.js";
 import { stableStringify } from "../stable-stringify.js";
 
@@ -16,7 +16,7 @@ export type ProviderPromptState = {
   lastRejected?: ProviderPromptSnapshot;
 };
 
-const PROVIDER_PROMPT_STATES_KEY = Symbol.for("openclaw.providerPromptStates");
+const PROVIDER_PROMPT_STATES_KEY = Symbol.for("bot.providerPromptStates");
 const providerPromptStates = resolveGlobalSingleton(
   PROVIDER_PROMPT_STATES_KEY,
   () => new Map<string, ProviderPromptState>(),

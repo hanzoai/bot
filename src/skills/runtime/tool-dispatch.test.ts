@@ -5,9 +5,9 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { replaceSessionEntry } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
-type CreateOpenClawToolsArg = {
+type CreateBotToolsArg = {
   beforeToolCallHookContext?: {
     skillCommand?: { skillFile?: string };
   };
@@ -25,7 +25,7 @@ const hoisted = vi.hoisted(() => {
     };
   }
   return {
-    createOpenClawToolsMock: vi.fn((_args: CreateOpenClawToolsArg) => [
+    createBotToolsMock: vi.fn((_args: CreateBotToolsArg) => [
       makeTool("read"),
       makeTool("cron"),
       makeTool("exec"),
@@ -33,8 +33,8 @@ const hoisted = vi.hoisted(() => {
   };
 });
 
-vi.mock("../../agents/openclaw-tools.runtime.js", () => ({
-  createOpenClawTools: (args: CreateOpenClawToolsArg) => hoisted.createOpenClawToolsMock(args),
+vi.mock("../../agents/bot-tools.runtime.js", () => ({
+  createBotTools: (args: CreateBotToolsArg) => hoisted.createBotToolsMock(args),
 }));
 
 import { resolveSkillDispatchTools } from "./tool-dispatch.js";
@@ -49,15 +49,15 @@ describe("resolveSkillDispatchTools", () => {
       },
       cfg: {
         tools: { allow: ["read", "cron"] },
-      } as OpenClawConfig,
+      } as BotConfig,
       agentId: "main",
       sessionKey: "agent:main:telegram:group:restricted-room",
-      workspaceDir: "/tmp/openclaw-skill-tool-dispatch-test",
+      workspaceDir: "/tmp/bot-skill-tool-dispatch-test",
       provider: "openai",
       model: "gpt-5.5",
     });
 
-    const args = hoisted.createOpenClawToolsMock.mock.calls[0]?.[0];
+    const args = hoisted.createBotToolsMock.mock.calls[0]?.[0];
     expect(tools.map((tool) => tool.name)).toEqual(["read", "cron"]);
     expect(args?.cronCreatorToolAllowlist).toEqual([{ name: "read" }, { name: "cron" }]);
     expect(args?.nativeChannelId).toBe("native-room-1");
@@ -66,15 +66,15 @@ describe("resolveSkillDispatchTools", () => {
   it("passes unrestricted skill-dispatch tool surfaces to cron jobs", () => {
     const tools = resolveSkillDispatchTools({
       message: { surface: "telegram", senderId: "user-1" },
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       agentId: "main",
       sessionKey: "agent:main:telegram:direct:user-1",
-      workspaceDir: "/tmp/openclaw-skill-tool-dispatch-test",
+      workspaceDir: "/tmp/bot-skill-tool-dispatch-test",
       provider: "openai",
       model: "gpt-5.5",
     });
 
-    const args = hoisted.createOpenClawToolsMock.mock.calls.at(-1)?.[0];
+    const args = hoisted.createBotToolsMock.mock.calls.at(-1)?.[0];
     expect(tools.map((tool) => tool.name)).toEqual(["read", "cron", "exec"]);
     expect(args?.cronCreatorToolAllowlist).toEqual([
       { name: "read" },
@@ -86,10 +86,10 @@ describe("resolveSkillDispatchTools", () => {
   it("carries command skill file identity into tool diagnostics", () => {
     resolveSkillDispatchTools({
       message: { surface: "telegram", senderId: "user-1" },
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       agentId: "main",
       sessionKey: "agent:main:telegram:direct:user-1",
-      workspaceDir: "/tmp/openclaw-skill-tool-dispatch-test",
+      workspaceDir: "/tmp/bot-skill-tool-dispatch-test",
       provider: "openai",
       model: "gpt-5.5",
       skillCommand: {
@@ -101,14 +101,14 @@ describe("resolveSkillDispatchTools", () => {
       },
     });
 
-    const args = hoisted.createOpenClawToolsMock.mock.calls.at(-1)?.[0];
+    const args = hoisted.createBotToolsMock.mock.calls.at(-1)?.[0];
     expect(args?.beforeToolCallHookContext?.skillCommand?.skillFile).toBe(
       "/workspace/skills/daily-brief/SKILL.md",
     );
   });
 
   it("uses persisted delegated policy instead of a sender wildcard", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-skill-delegated-policy-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-skill-delegated-policy-"));
     const storePath = path.join(tempDir, "sessions.json");
     const sessionKey = "agent:main:subagent:skill-child";
     await replaceSessionEntry({ storePath, sessionKey }, {
@@ -132,10 +132,10 @@ describe("resolveSkillDispatchTools", () => {
               "id:alice": {},
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         agentId: "main",
         sessionKey,
-        workspaceDir: "/tmp/openclaw-skill-tool-dispatch-test",
+        workspaceDir: "/tmp/bot-skill-tool-dispatch-test",
         provider: "openai",
         model: "gpt-5.5",
       });

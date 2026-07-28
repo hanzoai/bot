@@ -1,10 +1,10 @@
-import type { ChannelBotLoopProtectionFacts } from "openclaw/plugin-sdk/channel-inbound";
-import { resolveChannelProgressDraftConfig } from "openclaw/plugin-sdk/channel-outbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { mergePairLoopGuardConfig } from "openclaw/plugin-sdk/pair-loop-guard-runtime";
-import { resolveSendableOutboundReplyParts } from "openclaw/plugin-sdk/reply-payload";
-import type { ReplyDispatchKind, ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import type { ChannelBotLoopProtectionFacts } from "bot/plugin-sdk/channel-inbound";
+import { resolveChannelProgressDraftConfig } from "bot/plugin-sdk/channel-outbound";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { mergePairLoopGuardConfig } from "bot/plugin-sdk/pair-loop-guard-runtime";
+import { resolveSendableOutboundReplyParts } from "bot/plugin-sdk/reply-payload";
+import type { ReplyDispatchKind, ReplyPayload } from "bot/plugin-sdk/reply-runtime";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import { resolveSlackReplyRenderPlan } from "../../reply-blocks.js";
 import type { SlackMessageEvent } from "../../types.js";
 import { readSlackReplyBlocks, resolveSlackThreadTs } from "../replies.js";

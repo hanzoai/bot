@@ -1,6 +1,6 @@
-import type { Api, Model } from "@openclaw/llm-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import type { Api, Model } from "@hanzo/bot-llm-core";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import type { ResponseCreateParamsStreaming } from "openai/resources/responses/responses.js";
 import { resolveModelPayloadDebugMode } from "./model-transport-debug.js";
 import { RESPONSE_FAILED_NO_DETAILS_MESSAGE } from "./openai-responses-contracts.js";

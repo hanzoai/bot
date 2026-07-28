@@ -44,7 +44,7 @@ export function buildRemoteProtectedSkillMounts(params: {
       localRoot: path.join(materializedSkillsWorkspaceDir, "skills"),
       containerRoot: path.posix.join(
         params.workspaceContainerRoot,
-        ".openclaw",
+        ".bot",
         "sandbox-skills",
         "skills",
       ),
@@ -73,7 +73,7 @@ export function buildRemoteProtectedSkillMounts(params: {
         localRoot: path.join(materializedSkillsWorkspaceDir, "skills"),
         containerRoot: path.posix.join(
           params.agentContainerRoot,
-          ".openclaw",
+          ".bot",
           "sandbox-skills",
           "skills",
         ),

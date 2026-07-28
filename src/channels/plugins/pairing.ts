@@ -3,7 +3,7 @@
  *
  * Lists pairing-capable channels and dispatches approval notifications through adapters.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import type { ChannelId } from "./channel-id.types.js";
 import type { ChannelPairingAdapter } from "./pairing.types.js";
@@ -32,7 +32,7 @@ function requirePairingAdapter(channelId: ChannelId): ChannelPairingAdapter {
 export async function notifyPairingApproved(params: {
   channelId: ChannelId;
   id: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string;
   runtime?: RuntimeEnv;
   /** Extension channels can pass their adapter directly to bypass registry lookup. */

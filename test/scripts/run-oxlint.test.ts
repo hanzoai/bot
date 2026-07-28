@@ -132,7 +132,7 @@ describe("run-oxlint", () => {
       "node scripts/prepare-extension-package-boundary-artifacts.mjs",
     );
     expect(shardedLintRunner).toContain("prepare-extension-package-boundary-artifacts.mjs");
-    expect(shardedLintRunner).toContain('OPENCLAW_OXLINT_SKIP_PREPARE: "1"');
+    expect(shardedLintRunner).toContain('BOT_OXLINT_SKIP_PREPARE: "1"');
   });
 
   it("prepares the worktree toolchain before the complete lint pre-step", () => {
@@ -153,9 +153,9 @@ describe("run-oxlint", () => {
 
   it("holds one parent heavy-check lock for sharded lint runs", () => {
     const shardedLintRunner = readFileSync("scripts/run-oxlint-shards.mjs", "utf8");
-    const skipLockIndex = shardedLintRunner.indexOf('env.OPENCLAW_OXLINT_SKIP_LOCK === "1"');
+    const skipLockIndex = shardedLintRunner.indexOf('env.BOT_OXLINT_SKIP_LOCK === "1"');
     const lockIndex = shardedLintRunner.indexOf("acquireLocalHeavyCheckLockSync({");
-    const childSkipIndex = shardedLintRunner.indexOf('OPENCLAW_OXLINT_SKIP_LOCK: "1"');
+    const childSkipIndex = shardedLintRunner.indexOf('BOT_OXLINT_SKIP_LOCK: "1"');
 
     expect(shardedLintRunner).toContain("resolveLocalHeavyCheckEnv");
     expect(shardedLintRunner).toContain("shouldAcquireLocalHeavyCheckLockForOxlint");
@@ -187,7 +187,7 @@ describe("run-oxlint", () => {
     ).toBe(true);
     expect(
       shouldRunOxlintShardsSerial({
-        env: { CI: "true", OPENCLAW_LOCAL_CHECK_MODE: "throttled" },
+        env: { CI: "true", BOT_LOCAL_CHECK_MODE: "throttled" },
         platform: "linux",
         hostResources: constrainedHost,
       }),
@@ -226,7 +226,7 @@ describe("run-oxlint", () => {
     ).toBe(false);
     expect(
       shouldRunOxlintShardsSerial({
-        env: { OPENCLAW_LOCAL_CHECK_MODE: "full" },
+        env: { BOT_LOCAL_CHECK_MODE: "full" },
         platform: "linux",
         hostResources: constrainedHost,
       }),
@@ -238,14 +238,14 @@ describe("run-oxlint", () => {
 
     expect(
       shouldRunOxlintShardsSerial({
-        env: { OPENCLAW_OXLINT_SHARDS_SERIAL: "1", CI: "true" },
+        env: { BOT_OXLINT_SHARDS_SERIAL: "1", CI: "true" },
         platform: "linux",
         hostResources: roomyHost,
       }),
     ).toBe(true);
     expect(
       shouldRunOxlintShardsSerial({
-        env: { OPENCLAW_OXLINT_SHARDS_SERIAL: "0" },
+        env: { BOT_OXLINT_SHARDS_SERIAL: "0" },
         platform: "linux",
         hostResources: roomyHost,
       }),
@@ -284,8 +284,8 @@ describe("run-oxlint", () => {
     expect(
       resolveOxlintShardConcurrency({
         env: {
-          OPENCLAW_CHECK_CHANGED_REMOTE_CHILD: "1",
-          OPENCLAW_LOCAL_CHECK_MODE: "throttled",
+          BOT_CHECK_CHANGED_REMOTE_CHILD: "1",
+          BOT_LOCAL_CHECK_MODE: "throttled",
         },
         platform: "linux",
         hostResources: roomyHost,
@@ -299,7 +299,7 @@ describe("run-oxlint", () => {
 
     expect(
       resolveOxlintShardConcurrency({
-        env: { CI: "true", OPENCLAW_OXLINT_SHARD_CONCURRENCY: "2" },
+        env: { CI: "true", BOT_OXLINT_SHARD_CONCURRENCY: "2" },
         platform: "linux",
         hostResources: roomyHost,
         splitCore: true,
@@ -308,39 +308,39 @@ describe("run-oxlint", () => {
 
     expect(() =>
       resolveOxlintShardConcurrency({
-        env: { CI: "true", OPENCLAW_OXLINT_SHARD_CONCURRENCY: "2x" },
+        env: { CI: "true", BOT_OXLINT_SHARD_CONCURRENCY: "2x" },
         platform: "linux",
         hostResources: roomyHost,
         splitCore: true,
       }),
-    ).toThrow("OPENCLAW_OXLINT_SHARD_CONCURRENCY must be a positive integer; got: 2x");
+    ).toThrow("BOT_OXLINT_SHARD_CONCURRENCY must be a positive integer; got: 2x");
   });
 
   it("uses a bounded oxlint shard heartbeat by default", () => {
     expect(resolveShardHeartbeatMs({})).toBe(30_000);
-    expect(resolveShardHeartbeatMs({ OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "0" })).toBe(0);
-    expect(resolveShardHeartbeatMs({ OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "5000" })).toBe(5000);
-    expect(() => resolveShardHeartbeatMs({ OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "5000ms" })).toThrow(
-      "OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS must be a non-negative integer; got: 5000ms",
+    expect(resolveShardHeartbeatMs({ BOT_OXLINT_SHARD_HEARTBEAT_MS: "0" })).toBe(0);
+    expect(resolveShardHeartbeatMs({ BOT_OXLINT_SHARD_HEARTBEAT_MS: "5000" })).toBe(5000);
+    expect(() => resolveShardHeartbeatMs({ BOT_OXLINT_SHARD_HEARTBEAT_MS: "5000ms" })).toThrow(
+      "BOT_OXLINT_SHARD_HEARTBEAT_MS must be a non-negative integer; got: 5000ms",
     );
   });
 
   it("uses a bounded oxlint shard timeout by default", () => {
     expect(resolveShardTimeoutMs({})).toBe(900_000);
-    expect(resolveShardTimeoutMs({ OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "0" })).toBe(0);
-    expect(resolveShardTimeoutMs({ OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "5000" })).toBe(5000);
-    expect(() => resolveShardTimeoutMs({ OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "1e3" })).toThrow(
-      "OPENCLAW_OXLINT_SHARD_TIMEOUT_MS must be a non-negative integer; got: 1e3",
+    expect(resolveShardTimeoutMs({ BOT_OXLINT_SHARD_TIMEOUT_MS: "0" })).toBe(0);
+    expect(resolveShardTimeoutMs({ BOT_OXLINT_SHARD_TIMEOUT_MS: "5000" })).toBe(5000);
+    expect(() => resolveShardTimeoutMs({ BOT_OXLINT_SHARD_TIMEOUT_MS: "1e3" })).toThrow(
+      "BOT_OXLINT_SHARD_TIMEOUT_MS must be a non-negative integer; got: 1e3",
     );
     expect(resolveShardKillGraceMs({})).toBe(5_000);
-    expect(resolveShardKillGraceMs({ OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: "0" })).toBe(0);
-    expect(() => resolveShardKillGraceMs({ OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: "-1" })).toThrow(
-      "OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS must be a non-negative integer; got: -1",
+    expect(resolveShardKillGraceMs({ BOT_OXLINT_SHARD_KILL_GRACE_MS: "0" })).toBe(0);
+    expect(() => resolveShardKillGraceMs({ BOT_OXLINT_SHARD_KILL_GRACE_MS: "-1" })).toThrow(
+      "BOT_OXLINT_SHARD_KILL_GRACE_MS must be a non-negative integer; got: -1",
     );
   });
 
   it("fails a stuck oxlint shard instead of waiting forever", async () => {
-    const tempDir = mkdtempSync(join(tmpdir(), "openclaw-oxlint-shard-"));
+    const tempDir = mkdtempSync(join(tmpdir(), "bot-oxlint-shard-"));
     const runner = join(tempDir, "hang-runner.mjs");
     try {
       writeFileSync(runner, "setInterval(() => {}, 1000);\n", "utf8");
@@ -348,9 +348,9 @@ describe("run-oxlint", () => {
       const status = await runShard({
         env: {
           ...process.env,
-          OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "0",
-          OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "25",
-          OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: "25",
+          BOT_OXLINT_SHARD_HEARTBEAT_MS: "0",
+          BOT_OXLINT_SHARD_TIMEOUT_MS: "25",
+          BOT_OXLINT_SHARD_KILL_GRACE_MS: "25",
         },
         extraArgs: [],
         runner,
@@ -366,7 +366,7 @@ describe("run-oxlint", () => {
   it.runIf(process.platform !== "win32")(
     "kills timed-out shard process groups when the leader exits first",
     async () => {
-      const tempDir = createTempDir("openclaw-oxlint-timeout-group-");
+      const tempDir = createTempDir("bot-oxlint-timeout-group-");
       const runner = join(tempDir, "timeout-runner.mjs");
       const childPidPath = join(tempDir, "child.pid");
       let childPid = 0;
@@ -390,9 +390,9 @@ describe("run-oxlint", () => {
           env: {
             ...process.env,
             CHILD_PID_PATH: childPidPath,
-            OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: "0",
-            OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: "25",
-            OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: "250",
+            BOT_OXLINT_SHARD_HEARTBEAT_MS: "0",
+            BOT_OXLINT_SHARD_KILL_GRACE_MS: "25",
+            BOT_OXLINT_SHARD_TIMEOUT_MS: "250",
           },
           extraArgs: [],
           runner,
@@ -417,7 +417,7 @@ describe("run-oxlint", () => {
   it.runIf(process.platform !== "win32")(
     "forwards parent termination to detached oxlint shard processes",
     () => {
-      const tempDir = mkdtempSync(join(tmpdir(), "openclaw-oxlint-signal-"));
+      const tempDir = mkdtempSync(join(tmpdir(), "bot-oxlint-signal-"));
       const runner = join(tempDir, "signal-runner.mjs");
       const harness = join(tempDir, "signal-harness.mjs");
       const readyFile = join(tempDir, "ready");
@@ -446,8 +446,8 @@ describe("run-oxlint", () => {
             "const promise = runShard({",
             "  env: {",
             "    ...process.env,",
-            "    OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: '0',",
-            "    OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: '0',",
+            "    BOT_OXLINT_SHARD_HEARTBEAT_MS: '0',",
+            "    BOT_OXLINT_SHARD_TIMEOUT_MS: '0',",
             "  },",
             "  extraArgs: [],",
             "  runner: process.env.RUNNER_FILE,",
@@ -492,7 +492,7 @@ describe("run-oxlint", () => {
   it.runIf(process.platform !== "win32")(
     "force kills detached shard processes that ignore parent termination",
     () => {
-      const tempDir = mkdtempSync(join(tmpdir(), "openclaw-oxlint-signal-"));
+      const tempDir = mkdtempSync(join(tmpdir(), "bot-oxlint-signal-"));
       const runner = join(tempDir, "signal-runner.mjs");
       const harness = join(tempDir, "signal-harness.mjs");
       const readyFile = join(tempDir, "ready");
@@ -520,9 +520,9 @@ describe("run-oxlint", () => {
             "const promise = runShard({",
             "  env: {",
             "    ...process.env,",
-            "    OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: '0',",
-            "    OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: '0',",
-            "    OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: '250',",
+            "    BOT_OXLINT_SHARD_HEARTBEAT_MS: '0',",
+            "    BOT_OXLINT_SHARD_TIMEOUT_MS: '0',",
+            "    BOT_OXLINT_SHARD_KILL_GRACE_MS: '250',",
             "  },",
             "  extraArgs: [],",
             "  runner: process.env.RUNNER_FILE,",
@@ -567,7 +567,7 @@ describe("run-oxlint", () => {
   it.runIf(process.platform !== "win32")(
     "kills parent-terminated shard process groups when the leader exits first",
     () => {
-      const tempDir = createTempDir("openclaw-oxlint-parent-group-");
+      const tempDir = createTempDir("bot-oxlint-parent-group-");
       const runner = join(tempDir, "signal-runner.mjs");
       const harness = join(tempDir, "signal-harness.mjs");
       const childPidPath = join(tempDir, "child.pid");
@@ -607,9 +607,9 @@ describe("run-oxlint", () => {
             "const promise = runShard({",
             "  env: {",
             "    ...process.env,",
-            "    OPENCLAW_OXLINT_SHARD_HEARTBEAT_MS: '0',",
-            "    OPENCLAW_OXLINT_SHARD_KILL_GRACE_MS: '25',",
-            "    OPENCLAW_OXLINT_SHARD_TIMEOUT_MS: '0',",
+            "    BOT_OXLINT_SHARD_HEARTBEAT_MS: '0',",
+            "    BOT_OXLINT_SHARD_KILL_GRACE_MS: '25',",
+            "    BOT_OXLINT_SHARD_TIMEOUT_MS: '0',",
             "  },",
             "  extraArgs: [],",
             "  runner: process.env.RUNNER_FILE,",
@@ -654,7 +654,7 @@ describe("run-oxlint", () => {
     const shards = createOxlintShards({
       cwd: "/repo",
       env: {
-        OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "2",
+        BOT_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "2",
       },
       platform: "win32",
       readDir: () =>
@@ -782,14 +782,14 @@ describe("run-oxlint", () => {
   it("rejects invalid Windows oxlint extension chunk size overrides", () => {
     expect(resolveWindowsExtensionChunkSize({})).toBe(8);
     expect(() =>
-      resolveWindowsExtensionChunkSize({ OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "0" }),
-    ).toThrow("OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE must be a positive integer; got: 0");
+      resolveWindowsExtensionChunkSize({ BOT_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "0" }),
+    ).toThrow("BOT_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE must be a positive integer; got: 0");
     expect(() =>
       resolveWindowsExtensionChunkSize({
-        OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "8 chunks",
+        BOT_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE: "8 chunks",
       }),
     ).toThrow(
-      "OPENCLAW_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE must be a positive integer; got: 8 chunks",
+      "BOT_OXLINT_WINDOWS_EXTENSION_CHUNK_SIZE must be a positive integer; got: 8 chunks",
     );
   });
 

@@ -6,7 +6,7 @@ import type { Command } from "commander";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { ACT_MAX_VIEWPORT_DIMENSION } from "../browser/act-policy.js";
 import { runCommandWithRuntime } from "../core-api.js";
 import { runBrowserResizeWithOutput } from "./browser-cli-resize.js";

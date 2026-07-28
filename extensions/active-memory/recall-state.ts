@@ -1,11 +1,11 @@
 import crypto from "node:crypto";
-import { closeActiveMemorySearchManager } from "openclaw/plugin-sdk/memory-host-search";
+import { closeActiveMemorySearchManager } from "bot/plugin-sdk/memory-host-search";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/number-runtime";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-entry";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { resolveActiveMemoryCleanupConfig } from "./config.js";
 import {
   CACHE_SWEEP_INTERVAL_MS,
@@ -52,7 +52,7 @@ function resetCircuitBreaker(key: string): void {
 }
 
 function scheduleMemorySearchCleanupAfterTimeout(
-  api: OpenClawPluginApi,
+  api: BotPluginApi,
   logPrefix: string,
   agentId: string,
 ): void {

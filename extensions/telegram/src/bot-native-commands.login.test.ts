@@ -1,5 +1,5 @@
 // Tests Telegram native Codex login command behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTelegramGroupCommandContext } from "./bot-native-commands.fixture-test-support.js";
 import {
@@ -17,7 +17,7 @@ let registerTelegramNativeCommands: typeof import("./bot-native-commands.js").re
 type LoginFlowMock = ReturnType<typeof vi.fn>;
 
 function registerLoginCommand(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   loginFlow: LoginFlowMock;
   allowFrom?: string[];
 }) {
@@ -96,7 +96,7 @@ describe("registerTelegramNativeCommands /login", () => {
           ownerAllowFrom: ["200"],
         },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as BotConfig,
       loginFlow,
     });
 
@@ -135,7 +135,7 @@ describe("registerTelegramNativeCommands /login", () => {
           ownerAllowFrom: ["200"],
         },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as BotConfig,
       loginFlow,
       allowFrom: ["200"],
     });
@@ -164,7 +164,7 @@ describe("registerTelegramNativeCommands /login", () => {
           allowFrom: { telegram: ["200"] },
           ownerAllowFrom: ["999"],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       loginFlow,
     });
 
@@ -172,7 +172,7 @@ describe("registerTelegramNativeCommands /login", () => {
 
     expect(loginFlow).not.toHaveBeenCalled();
     expect(sendMessage.mock.calls.map((call) => String(call[1]))).toContain(
-      "Only a configured OpenClaw owner can start Codex login from Telegram.",
+      "Only a configured Bot owner can start Codex login from Telegram.",
     );
   });
 
@@ -206,7 +206,7 @@ describe("registerTelegramNativeCommands /login", () => {
           ownerAllowFrom: ["200"],
         },
         agents: { list: [{ id: "main", default: true }] },
-      } as OpenClawConfig,
+      } as BotConfig,
       loginFlow,
     });
 

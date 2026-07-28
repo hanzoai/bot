@@ -28,7 +28,7 @@ describe("main session recovery store", () => {
   let storePath: string;
 
   beforeEach(() => {
-    dir = tempDirs.make("openclaw-main-recovery-store-");
+    dir = tempDirs.make("bot-main-recovery-store-");
     lifecycleGeneration = getAgentEventLifecycleGeneration();
     storePath = path.join(dir, "sessions.json");
   });

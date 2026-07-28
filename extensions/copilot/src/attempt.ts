@@ -1,4 +1,4 @@
-import type { AgentHarnessAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentHarnessAttemptParams } from "bot/plugin-sdk/agent-harness-runtime";
 import { finalizeCopilotAttempt } from "./attempt-cleanup.js";
 import {
   createPromptError,

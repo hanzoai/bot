@@ -2,19 +2,19 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { withTempDir } from "../../test-helpers/temp-dir.js";
 import { deleteTestEnvValue, setTestEnvValue } from "../../test-utils/env.js";
 import type { MsgContext } from "../templating.js";
 import { resolveCurrentTurnImages } from "./current-turn-images.js";
 
-const originalStateDirEnv = process.env.OPENCLAW_STATE_DIR;
+const originalStateDirEnv = process.env.BOT_STATE_DIR;
 
 function restoreProcessState() {
   if (originalStateDirEnv === undefined) {
-    deleteTestEnvValue("OPENCLAW_STATE_DIR");
+    deleteTestEnvValue("BOT_STATE_DIR");
   } else {
-    setTestEnvValue("OPENCLAW_STATE_DIR", originalStateDirEnv);
+    setTestEnvValue("BOT_STATE_DIR", originalStateDirEnv);
   }
 }
 
@@ -25,7 +25,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("hydrates Telegram-style state-relative media into native prompt images", async () => {
-    await withTempDir({ prefix: "openclaw-current-turn-images-" }, async (base) => {
+    await withTempDir({ prefix: "bot-current-turn-images-" }, async (base) => {
       const stateDir = path.join(base, "state");
       const cwd = path.join(base, "cwd");
       const relativePath = "media/inbound/telegram.jpg";
@@ -34,7 +34,7 @@ describe("resolveCurrentTurnImages", () => {
       await fs.mkdir(path.dirname(attachmentPath), { recursive: true });
       await fs.mkdir(cwd, { recursive: true });
       await fs.writeFile(attachmentPath, imageBytes);
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+      setTestEnvValue("BOT_STATE_DIR", stateDir);
       vi.spyOn(process, "cwd").mockReturnValue(cwd);
 
       const result = await resolveCurrentTurnImages({
@@ -42,7 +42,7 @@ describe("resolveCurrentTurnImages", () => {
           Body: "caption",
           media: [{ path: relativePath, contentType: "image/jpeg" }],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
       });
 
       expect(result).toStrictEqual({
@@ -59,7 +59,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("does not duplicate a prepared host-staged image during runner hydration", async () => {
-    await withTempDir({ prefix: "openclaw-current-turn-staged-image-" }, async (base) => {
+    await withTempDir({ prefix: "bot-current-turn-staged-image-" }, async (base) => {
       const stagingRoot = path.join(base, "media", "inbound", "staged");
       const imagePath = path.join(stagingRoot, "photo.png");
       const imageBytes = Buffer.from("host-staged-image");
@@ -75,11 +75,11 @@ describe("resolveCurrentTurnImages", () => {
           ...sharedContext,
           media: [{ path: imagePath, contentType: "image/png", workspaceDir: stagingRoot }],
         },
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
       });
       const runner = await resolveCurrentTurnImages({
         ctx: sharedContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         images: prepared.images,
         imageOrder: prepared.imageOrder,
       });
@@ -91,7 +91,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("does not let a staging root expose sibling workspace images", async () => {
-    await withTempDir({ prefix: "openclaw-current-turn-staged-image-" }, async (base) => {
+    await withTempDir({ prefix: "bot-current-turn-staged-image-" }, async (base) => {
       const stagingRoot = path.join(base, "media", "inbound", "staged");
       const rejectedPath = path.join(base, "private.png");
       await fs.mkdir(stagingRoot, { recursive: true });
@@ -102,7 +102,7 @@ describe("resolveCurrentTurnImages", () => {
           Body: "caption",
           media: [{ path: rejectedPath, contentType: "image/png", workspaceDir: stagingRoot }],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
       });
 
       expect(result.images).toBeUndefined();
@@ -118,7 +118,7 @@ describe("resolveCurrentTurnImages", () => {
 
     const result = await resolveCurrentTurnImages({
       ctx: { Body: "compare these" } satisfies MsgContext,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       images: [inlineImage],
       imageOrder: ["offloaded", "inline", "offloaded"],
     });
@@ -132,7 +132,7 @@ describe("resolveCurrentTurnImages", () => {
   it("preserves all-offloaded image order without inline payloads", async () => {
     const result = await resolveCurrentTurnImages({
       ctx: { Body: "compare these" } satisfies MsgContext,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       images: [],
       imageOrder: ["offloaded", "offloaded"],
     });
@@ -151,7 +151,7 @@ describe("resolveCurrentTurnImages", () => {
 
     const result = await resolveCurrentTurnImages({
       ctx: { Body: "compare these" } satisfies MsgContext,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       images: inlineImages,
       imageOrder: ["inline", "offloaded", "inline"],
     });
@@ -163,7 +163,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("appends extracted PDF page images without dropping current image attachments", async () => {
-    await withTempDir({ prefix: "openclaw-current-turn-pdf-images-" }, async (base) => {
+    await withTempDir({ prefix: "bot-current-turn-pdf-images-" }, async (base) => {
       const imagePath = path.join(base, "photo.png");
       const imageBytes = Buffer.from("current-photo");
       await fs.writeFile(imagePath, imageBytes);
@@ -187,7 +187,7 @@ describe("resolveCurrentTurnImages", () => {
             },
           ],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         extractedFileImages: [pdfPage],
       });
 
@@ -208,7 +208,7 @@ describe("resolveCurrentTurnImages", () => {
   });
 
   it("orders extracted PDF page images before later current image attachments", async () => {
-    await withTempDir({ prefix: "openclaw-current-turn-pdf-order-" }, async (base) => {
+    await withTempDir({ prefix: "bot-current-turn-pdf-order-" }, async (base) => {
       const imagePath = path.join(base, "photo.png");
       await fs.writeFile(imagePath, "current-photo");
       const pdfPage = {
@@ -230,7 +230,7 @@ describe("resolveCurrentTurnImages", () => {
             { path: imagePath, contentType: "image/png", workspaceDir: base },
           ],
         } satisfies MsgContext,
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         extractedFileImages: [pdfPage],
       });
 

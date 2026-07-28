@@ -44,7 +44,7 @@ describe("gateway startup benchmark script", () => {
 
   it("prints help without running benchmark cases", () => {
     expect(helpResult.status).toBe(0);
-    expect(helpResult.stdout).toContain("OpenClaw Gateway startup benchmark");
+    expect(helpResult.stdout).toContain("Bot Gateway startup benchmark");
     expect(helpResult.stdout).toContain("--case <id>");
     expect(helpResult.stdout).toContain("--cpu-prof-dir <dir>");
     expect(helpResult.stdout).toContain("default (gateway default)");
@@ -140,14 +140,14 @@ describe("gateway startup benchmark script", () => {
   });
 
   it("does not disable local-check policy in the child gateway environment", () => {
-    const env = testing.sanitizedEnv("/tmp/openclaw-bench", "/tmp/openclaw-bench/config.json", {
+    const env = testing.sanitizedEnv("/tmp/bot-bench", "/tmp/bot-bench/config.json", {
       config: {},
       id: "default",
       name: "gateway default",
     });
 
-    expect(env.OPENCLAW_LOCAL_CHECK).toBeUndefined();
-    expect(env.OPENCLAW_GATEWAY_STARTUP_TRACE).toBe("1");
+    expect(env.BOT_LOCAL_CHECK).toBeUndefined();
+    expect(env.BOT_GATEWAY_STARTUP_TRACE).toBe("1");
   });
 
   it("rejects malformed ps RSS samples", () => {
@@ -422,7 +422,7 @@ describe("gateway startup benchmark script", () => {
   });
 
   it("writes 50-plugin fixtures as a parent load path with explicit startup activation", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-config-test-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-bench-config-test-"));
     try {
       const configPath = testing.writeConfig(root, {
         config: {},
@@ -439,7 +439,7 @@ describe("gateway startup benchmark script", () => {
       expect(config.plugins?.allow).toEqual(["bench-plugin-01", "bench-plugin-02"]);
       const manifest = JSON.parse(
         fs.readFileSync(
-          path.join(root, "plugins", "bench-plugin-01", "openclaw.plugin.json"),
+          path.join(root, "plugins", "bench-plugin-01", "bot.plugin.json"),
           "utf8",
         ),
       ) as { activation?: { onStartup?: boolean } };
@@ -450,7 +450,7 @@ describe("gateway startup benchmark script", () => {
   });
 
   it("builds a deterministic prepared-runtime catalog stall case", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-config-test-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-bench-config-test-"));
     try {
       const benchCase = testing.parseOptions(["--case", "preparedRuntimeCatalogStall"]).cases[0];
       if (!benchCase) {
@@ -464,7 +464,7 @@ describe("gateway startup benchmark script", () => {
       expect(pluginId).toBe("bench-plugin-01");
       const pluginDir = path.join(root, "plugins", pluginId ?? "missing");
       const manifest = JSON.parse(
-        fs.readFileSync(path.join(pluginDir, "openclaw.plugin.json"), "utf8"),
+        fs.readFileSync(path.join(pluginDir, "bot.plugin.json"), "utf8"),
       ) as { providers?: string[] };
       const source = fs.readFileSync(path.join(pluginDir, "index.cjs"), "utf8");
 
@@ -477,7 +477,7 @@ describe("gateway startup benchmark script", () => {
   });
 
   it("keeps startup-lazy plugin fixtures opted out of startup activation", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-bench-config-test-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-bench-config-test-"));
     try {
       testing.writeConfig(root, {
         config: {},
@@ -488,7 +488,7 @@ describe("gateway startup benchmark script", () => {
       });
       const manifest = JSON.parse(
         fs.readFileSync(
-          path.join(root, "plugins", "bench-plugin-01", "openclaw.plugin.json"),
+          path.join(root, "plugins", "bench-plugin-01", "bot.plugin.json"),
           "utf8",
         ),
       ) as { activation?: { onStartup?: boolean } };

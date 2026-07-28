@@ -1,11 +1,11 @@
-# OpenClaw Discord
+# Bot Discord
 
-Official OpenClaw channel plugin for Discord servers, channels, DMs, slash commands, and app events.
+Official Bot channel plugin for Discord servers, channels, DMs, slash commands, and app events.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/discord
+bot plugins install @hanzo/bot-discord
 ```
 
-Configure a Discord bot token and the channels or servers OpenClaw should handle. The plugin lets OpenClaw agents receive Discord messages and respond through the configured Discord app.
+Configure a Discord bot token and the channels or servers Bot should handle. The plugin lets Bot agents receive Discord messages and respond through the configured Discord app.

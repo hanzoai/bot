@@ -5,7 +5,7 @@ import { readPairingQrReplyChannelData } from "./reply-payload.js";
 describe("pairing QR reply channel data", () => {
   it("reads the private pairing QR payload metadata", () => {
     const channelData = {
-      openclawPairingQr: {
+      botPairingQr: {
         setupCode: "setup-code",
         expiresAtMs: 1_800_000_000_000,
       },
@@ -21,7 +21,7 @@ describe("pairing QR reply channel data", () => {
     expect(
       readPairingQrReplyChannelData({
         channelData: {
-          openclawPairingQr: {
+          botPairingQr: {
             setupCode: "",
             expiresAtMs: 0,
           },

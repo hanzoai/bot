@@ -14,7 +14,7 @@ import {
 import type {
   PluginStateKeyedStore,
   PluginStateSyncKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/plugin-state-runtime";
 import { isRecord } from "../../record-shared.js";
 import { getMatrixRuntime } from "../../runtime.js";
 import { createAsyncLock } from "../async-lock.js";

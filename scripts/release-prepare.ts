@@ -325,7 +325,7 @@ function defaultManifestPath(rootDir: string, version: string, fingerprint: stri
   const gitPath = git(rootDir, [
     "rev-parse",
     "--git-path",
-    `openclaw-release-cache/candidates/${version}-${fingerprint.slice(0, 12)}.json`,
+    `bot-release-cache/candidates/${version}-${fingerprint.slice(0, 12)}.json`,
   ]);
   return path.resolve(rootDir, gitPath);
 }

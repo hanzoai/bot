@@ -3,9 +3,9 @@ import crypto from "node:crypto";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import zlib from "node:zlib";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import type { SessionSystemPromptReport } from "../../config/sessions/types.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredBotTmpDir } from "../../infra/tmp-bot-dir.js";
 import { estimateTokensFromChars } from "../../utils/cjk-chars.js";
 
 /** PNG treemap renderer for visualizing prompt context size by section. */
@@ -500,8 +500,8 @@ export async function renderContextTreemapPng(params: {
     1,
   );
   const outPath = path.join(
-    resolvePreferredOpenClawTmpDir(),
-    `openclaw-context-map-${crypto.randomUUID()}.png`,
+    resolvePreferredBotTmpDir(),
+    `bot-context-map-${crypto.randomUUID()}.png`,
   );
   await writeFile(outPath, encodePng(canvas.data));
   const caption = [

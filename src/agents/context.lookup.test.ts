@@ -1,7 +1,7 @@
 // Covers context-token lookup caches, catalog warmup, and provider-qualified
 // model resolution.
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { ANTHROPIC_CONTEXT_1M_TOKENS } from "./context-resolution.js";
 import { CONTEXT_WINDOW_RUNTIME_STATE } from "./context-runtime-state.js";
 
@@ -18,8 +18,8 @@ const contextTestState = vi.hoisted(() => {
     loadConfigImpl: () => ({}) as unknown,
     discoveredModels: [] as DiscoveredModel[],
     staticCatalogModels: [] as DiscoveredModel[],
-    runtimeConfigSnapshot: null as OpenClawConfig | null,
-    runtimeConfigSourceSnapshot: null as OpenClawConfig | null,
+    runtimeConfigSnapshot: null as BotConfig | null,
+    runtimeConfigSourceSnapshot: null as BotConfig | null,
     loadModelCatalogOwnerSnapshot: vi.fn(async (_params: unknown) => ({
       modelCatalog: {
         entries: state.discoveredModels,
@@ -36,7 +36,7 @@ vi.mock("../config/config.js", () => ({
 }));
 
 vi.mock("../config/runtime-source-projection.js", () => ({
-  projectConfigOntoRuntimeSourceSnapshot: (config: OpenClawConfig) =>
+  projectConfigOntoRuntimeSourceSnapshot: (config: BotConfig) =>
     contextTestState.runtimeConfigSnapshot && contextTestState.runtimeConfigSourceSnapshot
       ? contextTestState.runtimeConfigSourceSnapshot
       : config,
@@ -75,7 +75,7 @@ function createContextOverrideConfig(
   provider: string,
   model: string,
   contextWindow: number,
-): OpenClawConfig {
+): BotConfig {
   return {
     models: {
       providers: {
@@ -328,7 +328,7 @@ describe("lookupContextTokens", () => {
   it("loads the read-only catalog during warmup and preserves provider-owned context metadata", async () => {
     const config = {
       agents: { defaults: { workspace: "/tmp/context-catalog-workspace" } },
-    } as OpenClawConfig;
+    } as BotConfig;
     mockDiscoveryDeps([
       {
         id: "anthropic/claude-opus-4.7-20260219",

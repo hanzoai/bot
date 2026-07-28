@@ -52,7 +52,7 @@ describe("getHealthSnapshot plugin state", () => {
   });
 
   it("deduplicates canonical-root quarantine while retaining unrelated same-id errors", async () => {
-    const pluginRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-health-plugin-"));
+    const pluginRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-health-plugin-"));
     const pluginRootAlias = `${pluginRoot}-alias`;
     fs.symlinkSync(pluginRoot, pluginRootAlias, "dir");
     tempPaths.push(pluginRootAlias, pluginRoot);

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { saveCronStore } from "../cron/store.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { createBotTestState } from "../test-utils/bot-test-state.js";
 
 const mocks = vi.hoisted(() => ({
   abortEmbeddedAgentRun: vi.fn(),
@@ -152,7 +152,7 @@ describe("stuck session recovery", () => {
     const outcome = await recoverStuckDiagnosticSession({
       sessionId: "sibling-session",
       sessionKey: "agent:main:fallback",
-      sessionFile: "/tmp/openclaw-shared-session.jsonl",
+      sessionFile: "/tmp/bot-shared-session.jsonl",
       ageMs: 180_000,
       queueDepth: 1,
     });
@@ -310,11 +310,11 @@ describe("stuck session recovery", () => {
   });
 
   it("logs stopped cron context when aborting an active embedded run", async () => {
-    const openClawState = await createOpenClawTestState({
+    const botState = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-recovery-context-",
+      prefix: "bot-recovery-context-",
     });
-    const tempDir = openClawState.stateDir;
+    const tempDir = botState.stateDir;
     try {
       await saveCronStore(path.join(tempDir, "cron", "jobs.json"), {
         version: 1,
@@ -353,7 +353,7 @@ describe("stuck session recovery", () => {
         allowActiveAbort: true,
       });
     } finally {
-      await openClawState.cleanup();
+      await botState.cleanup();
     }
 
     expect(warnLogMessages()).toEqual([

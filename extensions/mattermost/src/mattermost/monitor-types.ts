@@ -6,14 +6,14 @@ import type { createMattermostMonitorResources } from "./monitor-resources.js";
 import type {
   ChannelAccountSnapshot,
   createChannelPairingController,
-  OpenClawConfig,
+  BotConfig,
   RuntimeEnv,
 } from "./runtime-api.js";
 
 export type MattermostMonitorContext = {
   core: ReturnType<typeof getMattermostRuntime>;
   runtime: RuntimeEnv;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   account: ResolvedMattermostAccount;
   client: MattermostClient;
   pairing: ReturnType<typeof createChannelPairingController>;

@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { SessionCreatedActor } from "../../packages/gateway-protocol/src/index.js";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { resolveContextTokensForModel } from "../agents/context.js";
@@ -22,7 +22,7 @@ import {
   type SessionEntry,
 } from "../config/sessions.js";
 import { sessionEntryForkedFromParent } from "../config/sessions/session-entry-lineage.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { projectPluginSessionExtensionsSync } from "../plugins/host-hook-state.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 import { resolveActiveSessionAgentStatus } from "../sessions/session-agent-status.js";
@@ -88,7 +88,7 @@ export function projectSessionActor(
 }
 
 export function buildGatewaySessionRow(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   storePath: string;
   store: Record<string, SessionEntry>;
   key: string;

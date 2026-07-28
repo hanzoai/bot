@@ -1,12 +1,12 @@
 import {
   createMessageReceiptFromOutboundResults,
   defineChannelMessageAdapter,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-outbound";
 import type {
   ChannelOutboundAdapter,
   OutboundDeliveryResult,
-} from "openclaw/plugin-sdk/channel-send-result";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
+} from "bot/plugin-sdk/channel-send-result";
+import { PlatformMessageNotDispatchedError } from "bot/plugin-sdk/error-runtime";
 import { canonicalBytes, REEF_MAX_PLAINTEXT_BYTES } from "../protocol/index.js";
 import { normalizeReefTarget } from "./config-schema.js";
 import { isPermanentReefOutboundRejection, prepareReefMessageId } from "./flow.js";

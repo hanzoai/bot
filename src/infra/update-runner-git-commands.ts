@@ -7,10 +7,10 @@ import type { UpdateRunResult, UpdateStepResult } from "./update-runner-types.js
 
 const BUILD_MAX_OLD_SPACE_MB = 8192;
 const DEV_PREFLIGHT_LINT_ENV: NodeJS.ProcessEnv = {
-  OPENCLAW_LOCAL_CHECK: "1",
-  OPENCLAW_LOCAL_CHECK_MODE: "throttled",
+  BOT_LOCAL_CHECK: "1",
+  BOT_LOCAL_CHECK_MODE: "throttled",
 };
-const DEV_PREFLIGHT_LINT_OPT_IN_ENV = "OPENCLAW_UPDATE_PREFLIGHT_LINT";
+const DEV_PREFLIGHT_LINT_OPT_IN_ENV = "BOT_UPDATE_PREFLIGHT_LINT";
 
 export function mapManagerResolutionFailure(
   reason: UpdatePackageManagerFailureReason,

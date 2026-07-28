@@ -2,8 +2,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { upsertSessionEntry } from "bot/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "bot/plugin-sdk/session-transcript-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { QaSuiteInfraError } from "./errors.js";
 import { runRuntimeToolFixture } from "./runtime-tool-fixture.js";
@@ -45,7 +45,7 @@ async function writeQaSessionTranscript(
   const sessionId = sessionKey.replace(/[^a-z0-9]+/giu, "-");
   const sessionEnv = {
     ...process.env,
-    OPENCLAW_STATE_DIR: path.join(env.gateway.tempRoot, "state"),
+    BOT_STATE_DIR: path.join(env.gateway.tempRoot, "state"),
   };
   await upsertSessionEntry({
     agentId: "qa",
@@ -251,8 +251,8 @@ async function runMockRuntimeToolFixtureWithOutputs(params: {
     {
       toolName: params.toolName,
       toolCoverage: {
-        bucket: "openclaw-dynamic-integration",
-        expectedLayer: "openclaw-dynamic",
+        bucket: "bot-dynamic-integration",
+        expectedLayer: "bot-dynamic",
       },
       promptSnippet,
       failurePromptSnippet,
@@ -301,8 +301,8 @@ describe("runtime tool fixture", () => {
       {
         toolName: "read",
         toolCoverage: {
-          bucket: "openclaw-dynamic-integration",
-          expectedLayer: "openclaw-dynamic",
+          bucket: "bot-dynamic-integration",
+          expectedLayer: "bot-dynamic",
         },
       },
       {
@@ -350,8 +350,8 @@ describe("runtime tool fixture", () => {
       {
         toolName: "read",
         toolCoverage: {
-          bucket: "openclaw-dynamic-integration",
-          expectedLayer: "openclaw-dynamic",
+          bucket: "bot-dynamic-integration",
+          expectedLayer: "bot-dynamic",
         },
       },
       {
@@ -388,8 +388,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "read",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
         },
         {
@@ -412,8 +412,8 @@ describe("runtime tool fixture", () => {
       {
         toolName: "read",
         toolCoverage: {
-          bucket: "openclaw-dynamic-integration",
-          expectedLayer: "openclaw-dynamic",
+          bucket: "bot-dynamic-integration",
+          expectedLayer: "bot-dynamic",
         },
       },
       {
@@ -471,8 +471,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "image_generate",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
           happyPathOutputRequired: false,
         },
@@ -519,8 +519,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "image_generate",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
           happyPathOutputRequired: false,
         },
@@ -582,8 +582,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "read",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
         },
         {
@@ -646,8 +646,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "read",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
         },
         {
@@ -661,14 +661,14 @@ describe("runtime tool fixture", () => {
     ).rejects.toThrow("expected live happy-path successful tool output for read");
   });
 
-  it("skips Codex-native fixtures when only OpenClaw dynamic exposure evidence is absent", async () => {
+  it("skips Codex-native fixtures when only Bot dynamic exposure evidence is absent", async () => {
     const env = await makeEnv({
       mock: { baseUrl: "http://127.0.0.1:9999" },
       gateway: {
         baseUrl: "http://127.0.0.1:1",
         tempRoot: "",
         workspaceDir: "",
-        runtimeEnv: { OPENCLAW_QA_FORCE_RUNTIME: "codex" },
+        runtimeEnv: { BOT_QA_FORCE_RUNTIME: "codex" },
         call: vi.fn(),
       },
     });
@@ -728,7 +728,7 @@ describe("runtime tool fixture", () => {
     "patch rejected: writing outside of the project; rejected by user approval settings",
   ])("verifies native Codex patch success and workspace denial: %s", async (failureOutput) => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(env, failureOutput);
     const promptEvidence: Array<{
       requireSuccessfulTranscriptToolResult?: boolean;
@@ -777,7 +777,7 @@ describe("runtime tool fixture", () => {
 
   it("rejects native patch transcripts that claim success without creating the workspace file", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(env);
 
     await expect(
@@ -806,7 +806,7 @@ describe("runtime tool fixture", () => {
 
   it("rejects native Codex patch failures that only report missing patch context", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(
       env,
       "apply_patch failed: failed to find expected lines in runtime-tool-fixture-denied.txt",
@@ -838,7 +838,7 @@ describe("runtime tool fixture", () => {
 
   it("rejects native Codex patch failures without a linked failure result", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(env, "apply_patch completed", {
       failureStructuredError: false,
     });
@@ -885,7 +885,7 @@ describe("runtime tool fixture", () => {
     },
   ])("rejects linked native Codex patch evidence for the wrong $label", async (testCase) => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME = "codex";
     await writeCodexNativePatchEvidence(
       env,
       "apply_patch failed: path escapes sandbox root",
@@ -916,7 +916,7 @@ describe("runtime tool fixture", () => {
 
   it("validates the native patch call linked to its result instead of the first plan", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME = "codex";
     await writeQaSessionTranscript(env, "agent:qa:runtime-tool:apply_patch:happy", [
       {
         role: "assistant",
@@ -969,8 +969,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "apply_patch",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
         },
         {
@@ -996,7 +996,7 @@ describe("runtime tool fixture", () => {
 
   it("fails closed when required native Codex patch execution has no linked transcript", async () => {
     const env = await makeEnv();
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME = "codex";
     await writeQaSessionTranscript(env, "agent:qa:runtime-tool:apply_patch:happy", [
       { role: "assistant", content: "The patch was applied." },
     ]);
@@ -1033,7 +1033,7 @@ describe("runtime tool fixture", () => {
     const env = await makeEnv({
       mock: { baseUrl: "http://127.0.0.1:9999" },
     });
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME = "codex";
     const promptEvidence: Array<{
       requireSuccessfulTranscriptToolResult?: boolean;
       transcriptToolName?: string;
@@ -1229,7 +1229,7 @@ describe("runtime tool fixture", () => {
     const env = await makeEnv({
       mock: { baseUrl: "http://127.0.0.1:9999" },
     });
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME = "codex";
+    env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME = "codex";
     const promptEvidence: Array<{
       requireSuccessfulTranscriptToolResult?: boolean;
       transcriptToolName?: string;
@@ -1296,7 +1296,7 @@ describe("runtime tool fixture", () => {
         baseUrl: "http://127.0.0.1:1",
         tempRoot: "",
         workspaceDir: "",
-        runtimeEnv: { OPENCLAW_QA_FORCE_RUNTIME: "codex" },
+        runtimeEnv: { BOT_QA_FORCE_RUNTIME: "codex" },
         call: vi.fn(),
       },
     });
@@ -1381,8 +1381,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "read",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
           promptSnippet: "target=read",
           failurePromptSnippet: "failure target=read",
@@ -1431,8 +1431,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "image_generate",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
           promptSnippet: "target=image_generate",
           failurePromptSnippet: "failure target=image_generate",
@@ -1486,8 +1486,8 @@ describe("runtime tool fixture", () => {
       {
         toolName: "read",
         toolCoverage: {
-          bucket: "openclaw-dynamic-integration",
-          expectedLayer: "openclaw-dynamic",
+          bucket: "bot-dynamic-integration",
+          expectedLayer: "bot-dynamic",
         },
         promptSnippet: "target=read",
         failurePromptSnippet: "failure target=read",
@@ -1533,8 +1533,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "image_generate",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
             required: false,
             action: "optional runtime parity gate with async image completion coverage",
           },
@@ -1585,8 +1585,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "image_generate",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
             required: false,
             action: "optional runtime parity gate with async image completion coverage",
           },
@@ -1637,8 +1637,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "image_generate",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
             required: false,
             action: "optional runtime parity gate with async image completion coverage",
           },
@@ -1684,8 +1684,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "image_generate",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
             required: false,
             action: "optional runtime parity gate with async image completion coverage",
           },
@@ -1731,8 +1731,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "image_generate",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
             required: false,
             action: "optional runtime parity gate with async image completion coverage",
           },
@@ -1788,8 +1788,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "read",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
           promptSnippet: "target=read",
           failurePromptSnippet: "failure target=read",
@@ -1849,8 +1849,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "read",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
           promptSnippet: "target=read",
           failurePromptSnippet: "failure target=read",
@@ -1877,7 +1877,7 @@ describe("runtime tool fixture", () => {
     {
       name: "unavailable-provider",
       toolName: "web_search",
-      happyArgs: { query: "OpenClaw runtime parity fixed query" },
+      happyArgs: { query: "Bot runtime parity fixed query" },
       happyOutput: "result",
       failureOutput: "web_search is disabled or no provider is available.",
     },
@@ -1902,7 +1902,7 @@ describe("runtime tool fixture", () => {
     {
       name: "unavailable-provider happy output",
       toolName: "web_search",
-      happyArgs: { query: "OpenClaw runtime parity fixed query" },
+      happyArgs: { query: "Bot runtime parity fixed query" },
       happyOutput: "web_search is disabled or no provider is available.",
       failureOutput: "web_search is disabled or no provider is available.",
       expectedError: "expected mock happy-path successful tool output for web_search",
@@ -1956,8 +1956,8 @@ describe("runtime tool fixture", () => {
       {
         toolName: "read",
         toolCoverage: {
-          bucket: "openclaw-dynamic-integration",
-          expectedLayer: "openclaw-dynamic",
+          bucket: "bot-dynamic-integration",
+          expectedLayer: "bot-dynamic",
         },
         promptSnippet: "target=read",
         failurePromptSnippet: "failure target=read",
@@ -2012,8 +2012,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "read",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
           promptSnippet: "target=read",
           failurePromptSnippet: "failure target=read",
@@ -2064,8 +2064,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "read",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
           promptSnippet: "target=read",
           failurePromptSnippet: "failure target=read",
@@ -2081,7 +2081,7 @@ describe("runtime tool fixture", () => {
     ).rejects.toThrow("expected mock happy-path tool output for read");
   });
 
-  it("still fails required OpenClaw dynamic fixtures when the tool is absent", async () => {
+  it("still fails required Bot dynamic fixtures when the tool is absent", async () => {
     const env = await makeEnv();
 
     await expect(
@@ -2090,8 +2090,8 @@ describe("runtime tool fixture", () => {
         {
           toolName: "web_search",
           toolCoverage: {
-            bucket: "openclaw-dynamic-integration",
-            expectedLayer: "openclaw-dynamic",
+            bucket: "bot-dynamic-integration",
+            expectedLayer: "bot-dynamic",
           },
         },
         {

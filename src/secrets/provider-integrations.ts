@@ -1,8 +1,8 @@
 /** Materializes trusted plugin secret-provider integrations into exec provider configs. */
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import type {
   ManualExecSecretProviderConfig,
   PluginIntegrationSecretProviderConfig,
@@ -253,7 +253,7 @@ function materializeExecProviderConfig(
 function canExposeSecretProviderIntegrations(params: {
   record: PluginManifestRecord;
   normalizedConfig: NormalizedPluginsConfig;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): boolean {
   if (params.record.origin !== "bundled" && params.record.origin !== "global") {
     return false;
@@ -321,7 +321,7 @@ export function resolveSecretProviderIntegrationConfig(params: {
   manifestRegistry: Pick<PluginManifestRegistry, "plugins">;
   providerAlias: string;
   providerConfig: PluginIntegrationSecretProviderConfig;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): SecretProviderIntegrationResolution {
   const config = params.config ?? {};
@@ -370,7 +370,7 @@ export function resolveSecretProviderIntegrationConfig(params: {
 /** Lists plugin secret-provider presets available to interactive configure flows. */
 export function listSecretProviderIntegrationPresets(params: {
   manifestRegistry: Pick<PluginManifestRegistry, "plugins">;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): SecretProviderIntegrationPreset[] {
   const presets: SecretProviderIntegrationPreset[] = [];

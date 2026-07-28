@@ -6,7 +6,7 @@ describe("ModelSetupWizardRunner", () => {
   it("starts, advances an unbounded note step, and guards duplicate answers", async () => {
     let resolveDone: ((value: unknown) => void) | null = null;
     const request = vi.fn((method: string, _params?: unknown, _options?: unknown) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "bot.setup.auth.start") {
         return Promise.resolve({ sessionId: "session-1", done: false, status: "running" });
       }
       if (method === "wizard.next" && !resolveDone) {
@@ -56,7 +56,7 @@ describe("ModelSetupWizardRunner", () => {
 
   it("cancels the gateway wizard when advancing fails", async () => {
     const request = vi.fn((method: string) => {
-      if (method === "openclaw.setup.auth.start") {
+      if (method === "bot.setup.auth.start") {
         return Promise.resolve({ sessionId: "session-1", done: false, status: "running" });
       }
       if (method === "wizard.next") {
@@ -85,7 +85,7 @@ describe("ModelSetupWizardRunner", () => {
 
   it("uses the prepare start method with the shared wizard transport", async () => {
     const request = vi.fn((method: string) => {
-      if (method === "openclaw.setup.prepare.start") {
+      if (method === "bot.setup.prepare.start") {
         return Promise.resolve({ sessionId: "prepare-session", done: false, status: "running" });
       }
       if (method === "wizard.next") {
@@ -106,11 +106,11 @@ describe("ModelSetupWizardRunner", () => {
       sessionExpiredMessage: () => "expired",
     });
 
-    await runner.start("llama-cpp", "openclaw.setup.prepare.start");
+    await runner.start("llama-cpp", "bot.setup.prepare.start");
 
     expect(request).toHaveBeenNthCalledWith(
       1,
-      "openclaw.setup.prepare.start",
+      "bot.setup.prepare.start",
       { sessionId: expect.any(String), authChoice: "llama-cpp" },
       expect.objectContaining({ signal: expect.any(AbortSignal) }),
     );
@@ -126,7 +126,7 @@ describe("ModelSetupWizardRunner", () => {
     let answerSignal: AbortSignal | undefined;
     const request = vi.fn(
       (method: string, _params?: unknown, options?: { signal?: AbortSignal }) => {
-        if (method === "openclaw.setup.auth.start") {
+        if (method === "bot.setup.auth.start") {
           return Promise.resolve({ sessionId: "session-expired", done: false, status: "running" });
         }
         if (method === "wizard.next" && nextCount++ === 0) {
@@ -169,7 +169,7 @@ describe("ModelSetupWizardRunner", () => {
     expect(answerSignal?.aborted).toBe(true);
     await runner.cancel();
     expect(
-      request.mock.calls.filter(([method]) => method === "openclaw.setup.auth.start"),
+      request.mock.calls.filter(([method]) => method === "bot.setup.auth.start"),
     ).toHaveLength(1);
     expect(request.mock.calls.filter(([method]) => method === "wizard.next")).toHaveLength(2);
     expect(request.mock.calls.filter(([method]) => method === "wizard.cancel")).toEqual([]);
@@ -182,7 +182,7 @@ describe("ModelSetupWizardRunner", () => {
     const messages = ["Preparing model download…", "Downloading… 7%", "Downloading… 16%"];
     let nextIndex = 0;
     const request = vi.fn((method: string) => {
-      if (method === "openclaw.setup.prepare.start") {
+      if (method === "bot.setup.prepare.start") {
         return Promise.resolve({ sessionId: "session-progress", done: false, status: "running" });
       }
       if (method === "wizard.next") {
@@ -215,9 +215,9 @@ describe("ModelSetupWizardRunner", () => {
       sessionExpiredMessage: () => "expired",
     });
 
-    await runner.start("llama-cpp", "openclaw.setup.prepare.start");
+    await runner.start("llama-cpp", "bot.setup.prepare.start");
     await vi.waitFor(() => {
-      expect(onDone).toHaveBeenCalledWith("openclaw.setup.prepare.start");
+      expect(onDone).toHaveBeenCalledWith("bot.setup.prepare.start");
     });
 
     expect(seen).toEqual(messages);

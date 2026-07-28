@@ -1,14 +1,14 @@
 import { html, nothing } from "lit";
 import { property } from "lit/decorators.js";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { BotLightDomContentsElement } from "../lit/bot-element.ts";
 import { icons } from "./icons.ts";
 import "./tooltip.ts";
 
 /** Sidebar identity row: who you're talking to. The whole body opens the
     agent menu (switcher + utilities) — the conversation itself lives on the
     Home page row, so this row carries profile semantics only. */
-class SidebarAgentCard extends OpenClawLightDomContentsElement {
+class SidebarAgentCard extends BotLightDomContentsElement {
   @property({ attribute: false }) agentName = "";
   @property({ attribute: false }) avatarUrl: string | null = null;
   @property({ attribute: false }) avatarText = "";
@@ -66,13 +66,13 @@ class SidebarAgentCard extends OpenClawLightDomContentsElement {
               : nothing}
           </span>
           ${this.approvalCount > 0
-            ? html`<openclaw-tooltip .content=${approvalLabel}>
+            ? html`<bot-tooltip .content=${approvalLabel}>
                 <span
                   class="sidebar-agent-approval-count sidebar-agent-card__approval-count"
                   aria-label=${approvalLabel}
                   >${this.approvalCount}</span
                 >
-              </openclaw-tooltip>`
+              </bot-tooltip>`
             : nothing}
           ${this.menuUnread && !this.menuOpen
             ? html`<span
@@ -87,6 +87,6 @@ class SidebarAgentCard extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-sidebar-agent-card")) {
-  customElements.define("openclaw-sidebar-agent-card", SidebarAgentCard);
+if (!customElements.get("bot-sidebar-agent-card")) {
+  customElements.define("bot-sidebar-agent-card", SidebarAgentCard);
 }

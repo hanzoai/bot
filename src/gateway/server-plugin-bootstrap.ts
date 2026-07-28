@@ -3,7 +3,7 @@
 import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
 import { primeConfiguredBindingRegistry } from "../channels/plugins/binding-registry.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginLookUpTable } from "../plugins/plugin-lookup-table.js";
 import type { PluginRegistryParams } from "../plugins/registry-types.js";
 import type { PluginRegistry } from "../plugins/registry.js";
@@ -44,8 +44,8 @@ type GatewayStartupTrace = {
 };
 
 type GatewayPluginBootstrapParams = {
-  cfg: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  cfg: BotConfig;
+  activationSourceConfig?: BotConfig;
   workspaceDir: string;
   log: GatewayPluginBootstrapLog;
   coreGatewayHandlers?: Record<string, GatewayRequestHandler>;
@@ -62,7 +62,7 @@ type GatewayPluginBootstrapParams = {
   ambientEnvTriggers?: AmbientEnvTriggerPolicy;
 };
 
-function installGatewayPluginRuntimeEnvironment(cfg: OpenClawConfig) {
+function installGatewayPluginRuntimeEnvironment(cfg: BotConfig) {
   setPluginSubagentOverridePolicies(cfg);
   setGatewaySubagentRuntime(createGatewaySubagentRuntime());
   setGatewayNodesRuntime(createGatewayNodesRuntime());

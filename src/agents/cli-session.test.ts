@@ -21,7 +21,7 @@ import {
 describe("cli-session helpers", () => {
   it("persists binding metadata alongside legacy session ids", () => {
     const entry: SessionEntry = {
-      sessionId: "openclaw-session",
+      sessionId: "bot-session",
       updatedAt: Date.now(),
     };
 
@@ -40,7 +40,7 @@ describe("cli-session helpers", () => {
       reseedReceipt: {
         version: 1,
         promptHash: "a".repeat(64),
-        localSessionId: "openclaw-session",
+        localSessionId: "bot-session",
         userTurnDisposition: "persisted",
       },
     });
@@ -62,7 +62,7 @@ describe("cli-session helpers", () => {
       reseedReceipt: {
         version: 1,
         promptHash: "a".repeat(64),
-        localSessionId: "openclaw-session",
+        localSessionId: "bot-session",
         userTurnDisposition: "persisted",
       },
     });
@@ -70,7 +70,7 @@ describe("cli-session helpers", () => {
 
   it("drops malformed reseed receipts while preserving the session binding", () => {
     const entry: SessionEntry = {
-      sessionId: "openclaw-session",
+      sessionId: "bot-session",
       updatedAt: Date.now(),
     };
 
@@ -79,7 +79,7 @@ describe("cli-session helpers", () => {
       reseedReceipt: {
         version: 1,
         promptHash: "not-a-digest",
-        localSessionId: "openclaw-session",
+        localSessionId: "bot-session",
         userTurnDisposition: "persisted",
       },
     });
@@ -113,7 +113,7 @@ describe("cli-session helpers", () => {
       normalizeCliSessionReseedReceipt({
         version: 1,
         promptHash: "a".repeat(64),
-        localSessionId: "openclaw-session",
+        localSessionId: "bot-session",
       } as CliSessionReseedReceipt),
     ).toBeUndefined();
   });
@@ -157,13 +157,13 @@ describe("cli-session helpers", () => {
 
   it("preserves receipts only while updating the same native CLI session", () => {
     const entry: SessionEntry = {
-      sessionId: "openclaw-session",
+      sessionId: "bot-session",
       updatedAt: Date.now(),
     };
     const receipt = {
       version: 1 as const,
       promptHash: "a".repeat(64),
-      localSessionId: "openclaw-session",
+      localSessionId: "bot-session",
       userTurnDisposition: "persisted" as const,
     };
 
@@ -208,7 +208,7 @@ describe("cli-session helpers", () => {
 
   it("keeps legacy bindings reusable until richer metadata is persisted", () => {
     const entry: SessionEntry = {
-      sessionId: "openclaw-session",
+      sessionId: "bot-session",
       updatedAt: Date.now(),
       cliSessionIds: { "claude-cli": "legacy-session" },
       claudeCliSessionId: "legacy-session",
@@ -225,7 +225,7 @@ describe("cli-session helpers", () => {
 
   it("invalidates legacy bindings on mechanical changes and resumes on content drift", () => {
     const entry: SessionEntry = {
-      sessionId: "openclaw-session",
+      sessionId: "bot-session",
       updatedAt: Date.now(),
       cliSessionIds: { "claude-cli": "legacy-session" },
       claudeCliSessionId: "legacy-session",
@@ -603,7 +603,7 @@ describe("cli-session helpers", () => {
 
   it("clears provider-scoped and global CLI session state", () => {
     const entry: SessionEntry = {
-      sessionId: "openclaw-session",
+      sessionId: "bot-session",
       updatedAt: Date.now(),
     };
     setCliSessionBinding(entry, "claude-cli", { sessionId: "claude-session" });

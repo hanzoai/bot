@@ -332,11 +332,11 @@ function createPlanningEvidenceFixture(
       },
     };
   }
-  if (scenario.execution.runtime === "openclaw" && artifactFile) {
+  if (scenario.execution.runtime === "bot" && artifactFile) {
     return {
       scenario,
       outboundText: `Built ${artifactFile}`,
-      failureMessage: "missing OpenClaw update_plan signal",
+      failureMessage: "missing Bot update_plan signal",
       currentSummary: {
         eventCursor: 9,
         successfulToolCallCounts: { update_plan: 1 },

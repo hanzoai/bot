@@ -17,7 +17,7 @@ describe("assertSupportedTurn", () => {
         config: {
           agents: {
             defaults: {
-              models: { "openai/gpt-5.4": { agentRuntime: { id: "openclaw" } } },
+              models: { "openai/gpt-5.4": { agentRuntime: { id: "bot" } } },
             },
           },
         },

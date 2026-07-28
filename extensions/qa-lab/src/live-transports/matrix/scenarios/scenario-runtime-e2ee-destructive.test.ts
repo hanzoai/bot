@@ -4,7 +4,7 @@ import path from "node:path";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { assertMatrixQaCliBackupRestoreFailed } from "./scenario-runtime-e2ee-destructive-recovery.js";
 import { mutateMatrixQaCliStateLoss } from "./scenario-runtime-e2ee-state.js";
@@ -26,7 +26,7 @@ const storageMetadataRuntime = vi.hoisted(() => ({
     return {
       namespace: "storage-meta",
       maxEntries: 10,
-      env: { ...process.env, OPENCLAW_STATE_DIR: storageRootDir },
+      env: { ...process.env, BOT_STATE_DIR: storageRootDir },
     };
   },
 }));
@@ -37,7 +37,7 @@ vi.mock("../substrate/e2ee-client.js", () => ({
     openMatrixRecoveryKeyStoreOptions: (storageRootDir: string) => ({
       namespace: "recovery-key",
       maxEntries: 10,
-      env: { ...process.env, OPENCLAW_STATE_DIR: storageRootDir },
+      env: { ...process.env, BOT_STATE_DIR: storageRootDir },
     }),
   }),
 }));

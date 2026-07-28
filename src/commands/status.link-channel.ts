@@ -4,7 +4,7 @@
 import { listReadOnlyChannelPluginsForConfig } from "../channels/plugins/read-only.js";
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 import type { ChannelAccountSnapshot } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveDefaultChannelAccountContext } from "./channel-account-context.js";
 
 type LinkChannelContext = {
@@ -17,8 +17,8 @@ type LinkChannelContext = {
 
 /** Returns link status for the first configured read-only channel that exposes linked state. */
 export async function resolveLinkChannelContext(
-  cfg: OpenClawConfig,
-  options: { sourceConfig?: OpenClawConfig } = {},
+  cfg: BotConfig,
+  options: { sourceConfig?: BotConfig } = {},
 ): Promise<LinkChannelContext | null> {
   const sourceConfig = options.sourceConfig ?? cfg;
   for (const plugin of listReadOnlyChannelPluginsForConfig(cfg, {

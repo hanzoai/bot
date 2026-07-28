@@ -1,5 +1,5 @@
-import { OpenClawFilePreviewModal } from "./file-preview-modal.ts";
+import { BotFilePreviewModal } from "./file-preview-modal.ts";
 
-if (!customElements.get("openclaw-file-preview-modal")) {
-  customElements.define("openclaw-file-preview-modal", OpenClawFilePreviewModal);
+if (!customElements.get("bot-file-preview-modal")) {
+  customElements.define("bot-file-preview-modal", BotFilePreviewModal);
 }

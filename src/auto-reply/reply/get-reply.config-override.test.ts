@@ -1,6 +1,6 @@
 // Tests get-reply config override handling for a single inbound turn.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import {
   buildGetReplyCtx,
   createGetReplySessionState,
@@ -27,7 +27,7 @@ async function loadGetReplyRuntimeForTest() {
 describe("getReplyFromConfig configOverride", () => {
   beforeEach(async () => {
     await loadGetReplyRuntimeForTest();
-    vi.stubEnv("OPENCLAW_ALLOW_SLOW_REPLY_TESTS", "1");
+    vi.stubEnv("BOT_ALLOW_SLOW_REPLY_TESTS", "1");
     mocks.resolveReplyDirectives.mockReset();
     mocks.initSessionState.mockReset();
     vi.mocked(loadConfigMock).mockReset();
@@ -53,7 +53,7 @@ describe("getReplyFromConfig configOverride", () => {
           userTimezone: "UTC",
         },
       },
-    } satisfies OpenClawConfig);
+    } satisfies BotConfig);
 
     await getReplyFromConfig(buildGetReplyCtx(), undefined, {
       agents: {
@@ -61,7 +61,7 @@ describe("getReplyFromConfig configOverride", () => {
           userTimezone: "America/New_York",
         },
       },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     expectResolvedTelegramTimezone(mocks.resolveReplyDirectives);
   });
@@ -86,7 +86,7 @@ describe("getReplyFromConfig configOverride", () => {
             userTimezone: "America/New_York",
           },
         },
-      } satisfies OpenClawConfig),
+      } satisfies BotConfig),
     );
 
     expect(loadConfigMock).not.toHaveBeenCalled();
@@ -98,7 +98,7 @@ describe("getReplyFromConfig configOverride", () => {
     const cfg = Object.freeze({
       agents: { defaults: { userTimezone: "America/New_York" } },
       channels: { telegram: { botToken: "resolved-telegram-token" } },
-    } satisfies OpenClawConfig);
+    } satisfies BotConfig);
     const ownKeys = Reflect.ownKeys(cfg);
     vi.mocked(loadConfigMock).mockImplementation(() => {
       throw new Error("getRuntimeConfig should not be called for complete runtime config");

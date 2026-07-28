@@ -4,7 +4,7 @@ import { property, query, state } from "lit/decorators.js";
 import { modalApprovalQueue } from "../app/approval-presentation.ts";
 import type { ExecApprovalDecision, ExecApprovalRequest } from "../app/exec-approval.ts";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { BotLightDomContentsElement } from "../lit/bot-element.ts";
 import {
   approvalRemainingLabel,
   approvalTitle,
@@ -12,7 +12,7 @@ import {
   renderExecApprovalCard,
   resolveApprovalDecisions,
 } from "./exec-approval-card.ts";
-import type { OpenClawModalDialog } from "./modal-dialog.ts";
+import type { BotModalDialog } from "./modal-dialog.ts";
 import "./modal-dialog.ts";
 
 type ExecApprovalProps = {
@@ -88,9 +88,9 @@ function shortcutDecision(event: KeyboardEvent): ExecApprovalDecision | null {
   return !event.shiftKey && event.key.toLowerCase() === "d" ? "deny" : null;
 }
 
-class ExecApproval extends OpenClawLightDomContentsElement {
+class ExecApproval extends BotLightDomContentsElement {
   @property({ attribute: false }) props?: ExecApprovalProps;
-  @query("openclaw-modal-dialog") private dialog?: OpenClawModalDialog;
+  @query("bot-modal-dialog") private dialog?: BotModalDialog;
   @state() private selectedApprovalId: string | null = null;
   @state() private forceShowAll = false;
 
@@ -157,7 +157,7 @@ class ExecApproval extends OpenClawLightDomContentsElement {
       }
     };
     return html`
-      <openclaw-modal-dialog
+      <bot-modal-dialog
         label=${approvalTitle(active)}
         description=${approvalRemainingLabel(active.expiresAtMs, props.nowMs)}
         @keydown=${(event: KeyboardEvent) => this.handleKeydown(event, active)}
@@ -182,11 +182,11 @@ class ExecApproval extends OpenClawLightDomContentsElement {
             },
           })}
         </div>
-      </openclaw-modal-dialog>
+      </bot-modal-dialog>
     `;
   }
 }
 
-if (!customElements.get("openclaw-exec-approval")) {
-  customElements.define("openclaw-exec-approval", ExecApproval);
+if (!customElements.get("bot-exec-approval")) {
+  customElements.define("bot-exec-approval", ExecApproval);
 }

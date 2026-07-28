@@ -1,10 +1,10 @@
 import Observation
-import OpenClawChatUI
+import BotChatUI
 import SwiftUI
 
 @MainActor
 struct ChatModelControlsMenuItems: View {
-    @Bindable var viewModel: OpenClawChatViewModel
+    @Bindable var viewModel: BotChatViewModel
 
     var body: some View {
         if self.viewModel.showsModelPicker {
@@ -26,8 +26,8 @@ struct ChatModelControlsMenuItems: View {
             set: { self.viewModel.selectModel($0) }))
         {
             Text(self.viewModel.defaultModelLabel)
-                .font(OpenClawType.body)
-                .tag(OpenClawChatViewModel.defaultModelSelectionID)
+                .font(BotType.body)
+                .tag(BotChatViewModel.defaultModelSelectionID)
             if !sections.pinned.isEmpty {
                 Section("Pinned") {
                     self.modelOptions(sections.pinned)
@@ -44,10 +44,10 @@ struct ChatModelControlsMenuItems: View {
                 } header: {
                     HStack(spacing: 4) {
                         Text(provider.displayName)
-                            .font(OpenClawType.body)
+                            .font(BotType.body)
                         if provider.isDefaultProvider {
                             Text("Default")
-                                .font(OpenClawType.caption)
+                                .font(BotType.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -55,7 +55,7 @@ struct ChatModelControlsMenuItems: View {
             }
         } label: {
             Text("Model")
-                .font(OpenClawType.body)
+                .font(BotType.body)
         }
         .disabled(self.viewModel.isUpdatingSessionSettings)
     }
@@ -66,16 +66,16 @@ struct ChatModelControlsMenuItems: View {
             set: { self.viewModel.selectThinkingLevel($0) }))
         {
             Text("Default (inherited)")
-                .font(OpenClawType.body)
-                .tag(OpenClawChatViewModel.inheritedThinkingSelectionID)
+                .font(BotType.body)
+                .tag(BotChatViewModel.inheritedThinkingSelectionID)
             ForEach(self.viewModel.thinkingLevelOptions) { option in
                 Text(verbatim: option.label)
-                    .font(OpenClawType.body)
+                    .font(BotType.body)
                     .tag(option.id)
             }
         } label: {
             Text("Thinking")
-                .font(OpenClawType.body)
+                .font(BotType.body)
         }
         .disabled(self.viewModel.isUpdatingSessionSettings)
     }
@@ -86,18 +86,18 @@ struct ChatModelControlsMenuItems: View {
             set: { self.viewModel.selectFastMode($0) }))
         {
             Text("Default (inherited)")
-                .font(OpenClawType.body)
-                .tag(OpenClawChatViewModel.inheritedThinkingSelectionID)
+                .font(BotType.body)
+                .tag(BotChatViewModel.inheritedThinkingSelectionID)
             Text("On")
-                .font(OpenClawType.body)
+                .font(BotType.body)
                 .tag("on")
             Text("Off")
-                .font(OpenClawType.body)
+                .font(BotType.body)
                 .tag("off")
         } label: {
             Label {
                 Text("Fast")
-                    .font(OpenClawType.body)
+                    .font(BotType.body)
             } icon: {
                 Image(systemName: "bolt.fill")
             }
@@ -111,32 +111,32 @@ struct ChatModelControlsMenuItems: View {
             set: { self.viewModel.selectVerboseLevel($0) }))
         {
             Text("Default (inherited)")
-                .font(OpenClawType.body)
-                .tag(OpenClawChatViewModel.inheritedThinkingSelectionID)
+                .font(BotType.body)
+                .tag(BotChatViewModel.inheritedThinkingSelectionID)
             Text("Off")
-                .font(OpenClawType.body)
+                .font(BotType.body)
                 .tag("off")
             Text("On")
-                .font(OpenClawType.body)
+                .font(BotType.body)
                 .tag("on")
             Text("Full")
-                .font(OpenClawType.body)
+                .font(BotType.body)
                 .tag("full")
         } label: {
             Text("Verbosity")
-                .font(OpenClawType.body)
+                .font(BotType.body)
         }
         .disabled(self.viewModel.isUpdatingSessionSettings)
     }
 
-    private func modelOptions(_ models: [OpenClawChatModelChoice]) -> some View {
+    private func modelOptions(_ models: [BotChatModelChoice]) -> some View {
         ForEach(models) { model in
             HStack(spacing: 4) {
                 Text(model.displayLabel)
-                    .font(OpenClawType.body)
+                    .font(BotType.body)
                 if self.viewModel.isDefaultModel(model) {
                     Text("Default")
-                        .font(OpenClawType.caption)
+                        .font(BotType.caption)
                         .foregroundStyle(.secondary)
                 }
             }

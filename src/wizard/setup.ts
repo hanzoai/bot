@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { formatCliCommand } from "../cli/command-format.js";
 import { resolveOnboardingAgentTarget } from "../commands/onboard-agent-target.js";
 import type { GatewayAuthChoice, OnboardMode, OnboardOptions } from "../commands/onboard-types.js";
@@ -8,7 +8,7 @@ import { ConfigMutationConflictError, resolveGatewayPort } from "../config/confi
 import { createMergePatch } from "../config/merge-patch.js";
 import { applyMergePatch } from "../config/merge-patch.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeSecretInputString } from "../config/types.secrets.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import {
@@ -49,7 +49,7 @@ const loadOnboardConfigModule = createLazyRuntimeModule(
   () => import("../commands/onboard-config.js"),
 );
 
-function hasConfiguredDefaultModel(config: OpenClawConfig): boolean {
+function hasConfiguredDefaultModel(config: BotConfig): boolean {
   return resolveAgentModelPrimaryValue(config.agents?.defaults?.model) !== undefined;
 }
 
@@ -85,16 +85,16 @@ async function runSetupWizardOnce(
 
   const snapshot = await readSetupConfigFileSnapshot();
   let currentSetupSnapshot = snapshot;
-  let baseConfig: OpenClawConfig = snapshot.valid
+  let baseConfig: BotConfig = snapshot.valid
     ? (snapshot.runtimeConfig ?? snapshot.config)
     : {};
   baseConfig = await requireRiskAcknowledgement({ opts, prompter, config: baseConfig });
   // Ordinary onboard reruns must preserve existing agents.list / bindings. Only
   // explicit reset or import flows are allowed to shrink the config — see issue
-  // openclaw#84692.
-  let pendingPluginInstallMigrationBaseConfig: OpenClawConfig | undefined = baseConfig;
+  // bot#84692.
+  let pendingPluginInstallMigrationBaseConfig: BotConfig | undefined = baseConfig;
   const writeSetupConfigFile = async (
-    config: OpenClawConfig,
+    config: BotConfig,
     optsLocal: { allowConfigSizeDrop?: boolean } = {},
   ) =>
     await writeWizardConfigFile(config, {
@@ -115,13 +115,13 @@ async function runSetupWizardOnce(
         [
           ...snapshot.issues.map((iss) => `- ${iss.path}: ${iss.message}`),
           "",
-          "Docs: https://docs.openclaw.ai/gateway/configuration",
+          "Docs: https://docs.bot.ai/gateway/configuration",
         ].join("\n"),
         "Config issues",
       );
     }
     await prompter.outro(
-      `Config invalid. Run \`${formatCliCommand("openclaw doctor")}\` to repair it, then re-run setup.`,
+      `Config invalid. Run \`${formatCliCommand("bot doctor")}\` to repair it, then re-run setup.`,
     );
     runtime.exit(1);
     return;
@@ -141,15 +141,15 @@ async function runSetupWizardOnce(
           ? [`- ... +${compatibilityNotices.length - 4} more`]
           : []),
         "",
-        `Review: ${formatCliCommand("openclaw doctor")}`,
-        `Inspect: ${formatCliCommand("openclaw plugins inspect --all")}`,
+        `Review: ${formatCliCommand("bot doctor")}`,
+        `Inspect: ${formatCliCommand("bot plugins inspect --all")}`,
       ].join("\n"),
       t("wizard.setup.pluginCompatibilityTitle"),
     );
   }
 
   const quickstartHint = t("wizard.setup.flowQuickstartHint", {
-    command: formatCliCommand("openclaw configure"),
+    command: formatCliCommand("bot configure"),
   });
   const manualHint = t("wizard.setup.flowAdvancedHint");
   const hasExistingModelConfig = hasConfiguredDefaultModel(baseConfig);
@@ -177,7 +177,7 @@ async function runSetupWizardOnce(
     normalizedExplicitFlow !== "import"
   ) {
     runtime.error(
-      "Invalid --flow. Use quickstart, manual, advanced, or import. Example: openclaw onboard --flow quickstart",
+      "Invalid --flow. Use quickstart, manual, advanced, or import. Example: bot onboard --flow quickstart",
     );
     runtime.exit(1);
     return;
@@ -252,7 +252,7 @@ async function runSetupWizardOnce(
       async commitConfigFile(cfg, expectedConfig) {
         const latest = await readSetupConfigFileSnapshot();
         if (!latest.valid) {
-          throw new Error("Migration target config became invalid. Run `openclaw doctor`.");
+          throw new Error("Migration target config became invalid. Run `bot doctor`.");
         }
         const latestConfig = latest.exists ? (latest.sourceConfig ?? latest.config) : {};
         if (!isDeepStrictEqual(latestConfig, expectedConfig)) {
@@ -271,7 +271,7 @@ async function runSetupWizardOnce(
     acknowledgeMigrationPromotion = migrationOutcome.acknowledgePromotion;
     const migratedSnapshot = await readSetupConfigFileSnapshot();
     if (!migratedSnapshot.valid) {
-      throw new Error("Migration produced an invalid OpenClaw config. Run `openclaw doctor`.");
+      throw new Error("Migration produced an invalid Bot config. Run `bot doctor`.");
     }
     currentSetupSnapshot = migratedSnapshot;
     baseConfig = migratedSnapshot.runtimeConfig ?? migratedSnapshot.config;
@@ -343,7 +343,7 @@ async function runSetupWizardOnce(
 
   const localPort = resolveGatewayPort(baseConfig);
   const localUrl = `ws://127.0.0.1:${localPort}`;
-  let localGatewayToken = process.env.OPENCLAW_GATEWAY_TOKEN;
+  let localGatewayToken = process.env.BOT_GATEWAY_TOKEN;
   try {
     const resolvedGatewayToken = await resolveSetupSecretInputString({
       config: baseConfig,
@@ -363,7 +363,7 @@ async function runSetupWizardOnce(
       t("wizard.gateway.auth"),
     );
   }
-  let localGatewayPassword = process.env.OPENCLAW_GATEWAY_PASSWORD;
+  let localGatewayPassword = process.env.BOT_GATEWAY_PASSWORD;
   try {
     const resolvedGatewayPassword = await resolveSetupSecretInputString({
       config: baseConfig,
@@ -392,7 +392,7 @@ async function runSetupWizardOnce(
   const storedRemoteUrl = normalizeOptionalString(baseConfig.gateway?.remote?.url);
   const optionRemoteUrl = normalizeOptionalString(opts.remoteUrl);
   const remoteUrlChanged = opts.remoteUrl !== undefined && optionRemoteUrl !== storedRemoteUrl;
-  const remoteSeedConfig: OpenClawConfig =
+  const remoteSeedConfig: BotConfig =
     opts.remoteUrl === undefined && opts.remoteToken === undefined
       ? baseConfig
       : {
@@ -513,7 +513,7 @@ async function runSetupWizardOnce(
     prompter,
     hasAuthoredRoster,
   });
-  let nextConfig: OpenClawConfig = applyLocalSetupWorkspaceConfig(
+  let nextConfig: BotConfig = applyLocalSetupWorkspaceConfig(
     baseConfig,
     requestedWorkspaceDir,
     { allowWorkspaceChange: allowWorkspaceChange || !hasAuthoredRoster },
@@ -585,7 +585,7 @@ async function runSetupWizardOnce(
       nextConfig = applyMergePatch(
         nextConfig,
         createMergePatch(stagedModelAuth.config, preModelAuthConfig),
-      ) as OpenClawConfig;
+      ) as BotConfig;
     } else if (!verification.verified && stagedModelAuth) {
       // Declining an optional probe is not a failed verification; keep the
       // provider/model choice the user just made and persist it once here.

@@ -239,13 +239,13 @@ describe("readRemoteMediaBuffer", () => {
   const botFileUrl = `https://files.example.test/file/bot${botToken}/photos/1.jpg`;
 
   beforeAll(async () => {
-    tempHome = await createTempHomeEnv("openclaw-test-home-");
+    tempHome = await createTempHomeEnv("bot-test-home-");
     const fetchModule = await import("./fetch.js");
     readRemoteMediaBuffer = fetchModule.readRemoteMediaBuffer;
     saveRemoteMedia = fetchModule.saveRemoteMedia;
     saveResponseMedia = fetchModule.saveResponseMedia;
     // Default cap mirrors the module-private DEFAULT_FETCH_MEDIA_MAX_BYTES.
-    defaultFetchMediaMaxBytes = (await import("@openclaw/media-core/constants")).MAX_DOCUMENT_BYTES;
+    defaultFetchMediaMaxBytes = (await import("@hanzo/bot-media-core/constants")).MAX_DOCUMENT_BYTES;
   });
 
   beforeEach(() => {
@@ -847,7 +847,7 @@ describe("readRemoteMediaBuffer", () => {
   });
 
   it("preserves content-disposition CSV detection for streamed downloads", async () => {
-    const csv = Buffer.from("name,value\nopenclaw,1\n");
+    const csv = Buffer.from("name,value\nbot,1\n");
     const fetchImpl = vi.fn(
       async () =>
         new Response(makeStream([csv.subarray(0, 8), csv.subarray(8)]), {
@@ -874,7 +874,7 @@ describe("readRemoteMediaBuffer", () => {
   });
 
   it("preserves content-disposition CSV detection for provided response streams", async () => {
-    const csv = Buffer.from("name,value\nopenclaw,1\n");
+    const csv = Buffer.from("name,value\nbot,1\n");
     const response = new Response(makeStream([csv.subarray(0, 8), csv.subarray(8)]), {
       status: 200,
       headers: {
@@ -895,7 +895,7 @@ describe("readRemoteMediaBuffer", () => {
   });
 
   it("preserves content-disposition CSV detection for buffered downloads", async () => {
-    const csv = Buffer.from("name,value\nopenclaw,1\n");
+    const csv = Buffer.from("name,value\nbot,1\n");
     const fetchImpl = vi.fn(
       async () =>
         new Response(makeStream([csv.subarray(0, 8), csv.subarray(8)]), {

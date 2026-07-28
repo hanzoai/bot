@@ -1,4 +1,4 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { resolveZoomMeetingsConfig } from "./config.js";
 import { getZoomMeetingsSetupStatus } from "./runtime-setup.js";

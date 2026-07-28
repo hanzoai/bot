@@ -1,12 +1,12 @@
 // Tlon plugin module implements channel behavior.
 import crypto from "node:crypto";
-import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/channel-contract";
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { readResponseTextLimited } from "openclaw/plugin-sdk/provider-http";
-import { runChannelProbe } from "openclaw/plugin-sdk/text-utility-runtime";
+import type { ChannelAccountSnapshot } from "bot/plugin-sdk/channel-contract";
+import type { ChannelOutboundAdapter } from "bot/plugin-sdk/channel-send-result";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { ChannelPlugin } from "bot/plugin-sdk/core";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { readResponseTextLimited } from "bot/plugin-sdk/provider-http";
+import { runChannelProbe } from "bot/plugin-sdk/text-utility-runtime";
 import { monitorTlonProvider } from "./monitor/index.js";
 import { tlonSetupWizard } from "./setup-surface.js";
 import {
@@ -95,7 +95,7 @@ async function createHttpPokeApi(params: {
 }
 
 function resolveOutboundContext(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   to: string;
 }) {

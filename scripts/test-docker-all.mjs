@@ -1,5 +1,5 @@
 // Docker E2E aggregate scheduler.
-// Builds shared Docker images, prepares one OpenClaw npm tarball, assigns lanes
+// Builds shared Docker images, prepares one Bot npm tarball, assigns lanes
 // to bare/functional images, and runs lanes through weighted resource pools.
 import { spawn } from "node:child_process";
 import fs from "node:fs";
@@ -20,7 +20,7 @@ import {
   laneSummary,
   laneWeight,
   lanesNeedE2eImageKind,
-  lanesNeedOpenClawPackage,
+  lanesNeedBotPackage,
   normalizeReleaseProfile,
   parseLaneSelection,
   parseLiveMode,
@@ -30,7 +30,7 @@ import {
 import { sleep } from "./lib/sleep.mjs";
 
 const SCRIPT_ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const ROOT_DIR = path.resolve(process.env.OPENCLAW_DOCKER_E2E_REPO_ROOT || SCRIPT_ROOT_DIR);
+const ROOT_DIR = path.resolve(process.env.BOT_DOCKER_E2E_REPO_ROOT || SCRIPT_ROOT_DIR);
 const LIVE_DOCKER_DEFAULT_HARNESS_DIR =
   path.basename(SCRIPT_ROOT_DIR) === ".release-harness" && ROOT_DIR !== SCRIPT_ROOT_DIR
     ? ".release-harness"
@@ -48,7 +48,7 @@ const SHELL_POST_FORCE_KILL_WAIT_MS = 1_000;
 const SHELL_PROCESS_GROUP_EXIT_POLL_MS = 25;
 const MAX_TIMER_TIMEOUT_MS = 2_147_000_000;
 const DEFAULT_TIMINGS_FILE = path.join(ROOT_DIR, ".artifacts/docker-tests/lane-timings.json");
-const DEFAULT_GITHUB_WORKFLOW = "openclaw-live-and-e2e-checks-reusable.yml";
+const DEFAULT_GITHUB_WORKFLOW = "bot-live-and-e2e-checks-reusable.yml";
 const IS_MAIN = process.argv[1]
   ? path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)
   : false;
@@ -61,7 +61,7 @@ function dockerAllUsage() {
     "  --plan-json    Print the resolved Docker E2E plan as JSON and exit.",
     "  -h, --help     Show this help.",
     "",
-    "Lane selection and scheduler settings are configured with OPENCLAW_DOCKER_ALL_* env vars.",
+    "Lane selection and scheduler settings are configured with BOT_DOCKER_ALL_* env vars.",
   ].join("\n");
 }
 
@@ -161,7 +161,7 @@ function resourceLimitsSummary(resourceLimits) {
 }
 
 function resourceLimitEnvName(resource) {
-  return `OPENCLAW_DOCKER_ALL_${resource.toUpperCase().replace(/[^A-Z0-9]+/g, "_")}_LIMIT`;
+  return `BOT_DOCKER_ALL_${resource.toUpperCase().replace(/[^A-Z0-9]+/g, "_")}_LIMIT`;
 }
 
 export function describeDockerSchedulerLimits(parallelism, options) {
@@ -177,9 +177,9 @@ function parseResourceLimit(env, resource, parallelism, fallback) {
 
 function parseSchedulerOptions(env, parallelism) {
   const weightLimit = parsePositiveInt(
-    env.OPENCLAW_DOCKER_ALL_WEIGHT_LIMIT,
+    env.BOT_DOCKER_ALL_WEIGHT_LIMIT,
     parallelism,
-    "OPENCLAW_DOCKER_ALL_WEIGHT_LIMIT",
+    "BOT_DOCKER_ALL_WEIGHT_LIMIT",
   );
   const resourceLimits = {};
   for (const [resource, fallback] of Object.entries(DEFAULT_RESOURCE_LIMITS)) {
@@ -235,12 +235,12 @@ function utcStamp() {
 }
 
 function appendExtension(env, extension) {
-  const current = env.OPENCLAW_DOCKER_BUILD_EXTENSIONS ?? env.OPENCLAW_EXTENSIONS ?? "";
+  const current = env.BOT_DOCKER_BUILD_EXTENSIONS ?? env.BOT_EXTENSIONS ?? "";
   const tokens = current.split(/\s+/).filter(Boolean);
   if (!tokens.includes(extension)) {
     tokens.push(extension);
   }
-  env.OPENCLAW_DOCKER_BUILD_EXTENSIONS = tokens.join(" ");
+  env.BOT_DOCKER_BUILD_EXTENSIONS = tokens.join(" ");
 }
 
 function commandEnv(extra = {}) {
@@ -265,7 +265,7 @@ function shellQuote(value) {
 }
 
 function githubWorkflowRef(env = process.env) {
-  return env.OPENCLAW_DOCKER_E2E_WORKFLOW_REF || undefined;
+  return env.BOT_DOCKER_E2E_WORKFLOW_REF || undefined;
 }
 
 function maybeGhcrImage(value) {
@@ -274,13 +274,13 @@ function maybeGhcrImage(value) {
 
 export function githubWorkflowRerunCommand(laneNames, ref, env = process.env) {
   const workflowRef = githubWorkflowRef(env);
-  const releasePath = env.OPENCLAW_DOCKER_ALL_PROFILE === RELEASE_PATH_PROFILE;
-  const allowUnreleasedChangelog = env.OPENCLAW_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG === "true";
-  const bareImage = maybeGhcrImage(env.OPENCLAW_DOCKER_E2E_BARE_IMAGE);
-  const functionalImage = maybeGhcrImage(env.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE);
+  const releasePath = env.BOT_DOCKER_ALL_PROFILE === RELEASE_PATH_PROFILE;
+  const allowUnreleasedChangelog = env.BOT_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG === "true";
+  const bareImage = maybeGhcrImage(env.BOT_DOCKER_E2E_BARE_IMAGE);
+  const functionalImage = maybeGhcrImage(env.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE);
   const fields = [
     "gh workflow run",
-    shellQuote(env.OPENCLAW_DOCKER_E2E_WORKFLOW || DEFAULT_GITHUB_WORKFLOW),
+    shellQuote(env.BOT_DOCKER_E2E_WORKFLOW || DEFAULT_GITHUB_WORKFLOW),
     ...(workflowRef ? ["--ref", shellQuote(workflowRef)] : []),
     "-f",
     `ref=${shellQuote(ref)}`,
@@ -300,22 +300,22 @@ export function githubWorkflowRerunCommand(laneNames, ref, env = process.env) {
   if (allowUnreleasedChangelog) {
     fields.push("-f", "allow_unreleased_changelog=true");
   }
-  if (env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC) {
+  if (env.BOT_UPGRADE_SURVIVOR_BASELINE_SPEC) {
     fields.push(
       "-f",
-      `published_upgrade_survivor_baseline=${shellQuote(env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC)}`,
+      `published_upgrade_survivor_baseline=${shellQuote(env.BOT_UPGRADE_SURVIVOR_BASELINE_SPEC)}`,
     );
   }
-  if (env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS) {
+  if (env.BOT_UPGRADE_SURVIVOR_BASELINE_SPECS) {
     fields.push(
       "-f",
-      `published_upgrade_survivor_baselines=${shellQuote(env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS)}`,
+      `published_upgrade_survivor_baselines=${shellQuote(env.BOT_UPGRADE_SURVIVOR_BASELINE_SPECS)}`,
     );
   }
-  if (env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS) {
+  if (env.BOT_UPGRADE_SURVIVOR_SCENARIOS) {
     fields.push(
       "-f",
-      `published_upgrade_survivor_scenarios=${shellQuote(env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS)}`,
+      `published_upgrade_survivor_scenarios=${shellQuote(env.BOT_UPGRADE_SURVIVOR_SCENARIOS)}`,
     );
   }
   if (bareImage) {
@@ -333,22 +333,22 @@ export function githubWorkflowRerunCommand(laneNames, ref, env = process.env) {
 function buildLaneRerunCommand(name, baseEnv) {
   const poolLane = findLaneByName(name);
   const build = name.startsWith("live-") ? "1" : "0";
-  const image = poolLane ? e2eImageForLane(poolLane, baseEnv) : baseEnv.OPENCLAW_DOCKER_E2E_IMAGE;
+  const image = poolLane ? e2eImageForLane(poolLane, baseEnv) : baseEnv.BOT_DOCKER_E2E_IMAGE;
   const env = [
-    ["OPENCLAW_DOCKER_ALL_LANES", name],
-    ["OPENCLAW_DOCKER_ALL_BUILD", build],
-    ["OPENCLAW_DOCKER_ALL_PREFLIGHT", "0"],
-    ["OPENCLAW_SKIP_DOCKER_BUILD", "1"],
-    ["OPENCLAW_DOCKER_E2E_IMAGE", image || DEFAULT_E2E_FUNCTIONAL_IMAGE],
-    ["OPENCLAW_DOCKER_E2E_BARE_IMAGE", baseEnv.OPENCLAW_DOCKER_E2E_BARE_IMAGE],
-    ["OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE", baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE],
-    ["OPENCLAW_CURRENT_PACKAGE_TGZ", baseEnv.OPENCLAW_CURRENT_PACKAGE_TGZ],
-    ["OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC", baseEnv.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC],
-    ["OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS", baseEnv.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS],
-    ["OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS", baseEnv.OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS],
+    ["BOT_DOCKER_ALL_LANES", name],
+    ["BOT_DOCKER_ALL_BUILD", build],
+    ["BOT_DOCKER_ALL_PREFLIGHT", "0"],
+    ["BOT_SKIP_DOCKER_BUILD", "1"],
+    ["BOT_DOCKER_E2E_IMAGE", image || DEFAULT_E2E_FUNCTIONAL_IMAGE],
+    ["BOT_DOCKER_E2E_BARE_IMAGE", baseEnv.BOT_DOCKER_E2E_BARE_IMAGE],
+    ["BOT_DOCKER_E2E_FUNCTIONAL_IMAGE", baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE],
+    ["BOT_CURRENT_PACKAGE_TGZ", baseEnv.BOT_CURRENT_PACKAGE_TGZ],
+    ["BOT_UPGRADE_SURVIVOR_BASELINE_SPEC", baseEnv.BOT_UPGRADE_SURVIVOR_BASELINE_SPEC],
+    ["BOT_UPGRADE_SURVIVOR_BASELINE_SPECS", baseEnv.BOT_UPGRADE_SURVIVOR_BASELINE_SPECS],
+    ["BOT_UPGRADE_SURVIVOR_SCENARIOS", baseEnv.BOT_UPGRADE_SURVIVOR_SCENARIOS],
   ];
-  if (baseEnv.OPENCLAW_DOCKER_ALL_PNPM_COMMAND) {
-    env.push(["OPENCLAW_DOCKER_ALL_PNPM_COMMAND", baseEnv.OPENCLAW_DOCKER_ALL_PNPM_COMMAND]);
+  if (baseEnv.BOT_DOCKER_ALL_PNPM_COMMAND) {
+    env.push(["BOT_DOCKER_ALL_PNPM_COMMAND", baseEnv.BOT_DOCKER_ALL_PNPM_COMMAND]);
   }
   return `${env
     .filter(([, value]) => value !== undefined && value !== "")
@@ -357,7 +357,7 @@ function buildLaneRerunCommand(name, baseEnv) {
 }
 
 function withResolvedPnpmCommand(command, env) {
-  const pnpmCommand = env.OPENCLAW_DOCKER_ALL_PNPM_COMMAND?.trim();
+  const pnpmCommand = env.BOT_DOCKER_ALL_PNPM_COMMAND?.trim();
   if (!pnpmCommand) {
     return command;
   }
@@ -365,7 +365,7 @@ function withResolvedPnpmCommand(command, env) {
 }
 
 function liveDockerHarnessScriptCommand(script) {
-  return `bash -c 'harness="\${OPENCLAW_DOCKER_E2E_TRUSTED_HARNESS_DIR:-${LIVE_DOCKER_DEFAULT_HARNESS_DIR}}"; OPENCLAW_LIVE_DOCKER_REPO_ROOT="\${OPENCLAW_DOCKER_E2E_REPO_ROOT:-$PWD}" bash "$harness/scripts/${script}"'`;
+  return `bash -c 'harness="\${BOT_DOCKER_E2E_TRUSTED_HARNESS_DIR:-${LIVE_DOCKER_DEFAULT_HARNESS_DIR}}"; BOT_LIVE_DOCKER_REPO_ROOT="\${BOT_DOCKER_E2E_REPO_ROOT:-$PWD}" bash "$harness/scripts/${script}"'`;
 }
 
 async function loadTimingStore(file, enabled) {
@@ -426,8 +426,8 @@ export async function writeRunSummary(logDir, summary, env = process.env) {
     ...summary,
     // Summary reruns do not carry failure-index commands, so preserve this exact package intent.
     allowUnreleasedChangelog:
-      env.OPENCLAW_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG === "true" ? true : undefined,
-    packageArtifactName: env.OPENCLAW_DOCKER_E2E_PACKAGE_ARTIFACT_NAME || undefined,
+      env.BOT_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG === "true" ? true : undefined,
+    packageArtifactName: env.BOT_DOCKER_E2E_PACKAGE_ARTIFACT_NAME || undefined,
     finishedAt: new Date().toISOString(),
     github: {
       ref: env.GITHUB_REF_NAME || undefined,
@@ -437,7 +437,7 @@ export async function writeRunSummary(logDir, summary, env = process.env) {
         env.GITHUB_SERVER_URL && env.GITHUB_REPOSITORY && env.GITHUB_RUN_ID
           ? `${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/actions/runs/${env.GITHUB_RUN_ID}`
           : undefined,
-      selectedSha: env.OPENCLAW_DOCKER_E2E_SELECTED_SHA || undefined,
+      selectedSha: env.BOT_DOCKER_E2E_SELECTED_SHA || undefined,
       sha: env.GITHUB_SHA || undefined,
       workflow: env.GITHUB_WORKFLOW || undefined,
     },
@@ -451,7 +451,7 @@ export async function writeRunSummary(logDir, summary, env = process.env) {
 async function writeFailureIndex(logDir, summary, env) {
   const ref =
     summary.github?.selectedSha ||
-    env.OPENCLAW_DOCKER_E2E_SELECTED_SHA ||
+    env.BOT_DOCKER_E2E_SELECTED_SHA ||
     summary.github?.sha ||
     summary.github?.ref ||
     env.GITHUB_SHA ||
@@ -489,12 +489,12 @@ async function writeFailureIndex(logDir, summary, env) {
     lanes,
     note: "Targeted GitHub reruns repack the exact selected ref and reuse only GHCR-backed shared images when the generated command includes docker_e2e_*_image inputs.",
     images: summary.images,
-    packageArtifactName: env.OPENCLAW_DOCKER_E2E_PACKAGE_ARTIFACT_NAME || undefined,
+    packageArtifactName: env.BOT_DOCKER_E2E_PACKAGE_ARTIFACT_NAME || undefined,
     ref,
     runUrl: summary.github?.runUrl,
     status: summary.status,
     version: 1,
-    workflow: env.OPENCLAW_DOCKER_E2E_WORKFLOW || DEFAULT_GITHUB_WORKFLOW,
+    workflow: env.BOT_DOCKER_E2E_WORKFLOW || DEFAULT_GITHUB_WORKFLOW,
   };
   await fs.promises.writeFile(
     path.join(logDir, "failures.json"),
@@ -543,7 +543,7 @@ export function dockerPreflightContainerNames(raw) {
     .split(/\r?\n/)
     .map((line) => line.trim().split(/\s+/, 1)[0])
     .filter((name) =>
-      /^(?:openclaw-[a-z0-9-]+-e2e-\d+|openclaw-openwebui(?:-gateway)?-\d+)$/u.test(name),
+      /^(?:bot-[a-z0-9-]+-e2e-\d+|bot-openwebui(?:-gateway)?-\d+)$/u.test(name),
     );
 }
 
@@ -813,7 +813,7 @@ async function recordCleanupSmokeFailure(error, baseEnv, logDir, command, starte
     ],
     elapsedSeconds: phaseElapsedSeconds(startedAtMs),
     finishedAt: new Date().toISOString(),
-    image: baseEnv.OPENCLAW_DOCKER_E2E_IMAGE,
+    image: baseEnv.BOT_DOCKER_E2E_IMAGE,
     logFile,
     name: CLEANUP_SMOKE_NAME,
     noOutputTimedOut: false,
@@ -851,7 +851,7 @@ async function runCleanupSmoke(baseEnv, logDir, command, startedAtMs) {
     ],
     elapsedSeconds: phaseElapsedSeconds(startedAtMs),
     finishedAt: new Date().toISOString(),
-    image: baseEnv.OPENCLAW_DOCKER_E2E_IMAGE,
+    image: baseEnv.BOT_DOCKER_E2E_IMAGE,
     logFile,
     name: CLEANUP_SMOKE_NAME,
     noOutputTimedOut: result.noOutputTimedOut,
@@ -974,41 +974,41 @@ async function runDockerPreflight(baseEnv, options) {
   console.log(`==> Docker preflight run: ${elapsedSeconds}s`);
 }
 
-async function prepareOpenClawPackage(baseEnv, logDir) {
-  const existing = baseEnv.OPENCLAW_CURRENT_PACKAGE_TGZ;
+async function prepareBotPackage(baseEnv, logDir) {
+  const existing = baseEnv.BOT_CURRENT_PACKAGE_TGZ;
   if (existing) {
     const packageTgz = path.resolve(existing);
-    baseEnv.OPENCLAW_CURRENT_PACKAGE_TGZ = packageTgz;
-    baseEnv.OPENCLAW_BUNDLED_CHANNEL_HOST_BUILD = "0";
-    baseEnv.OPENCLAW_NPM_ONBOARD_HOST_BUILD = "0";
-    console.log(`==> OpenClaw package: ${packageTgz}`);
+    baseEnv.BOT_CURRENT_PACKAGE_TGZ = packageTgz;
+    baseEnv.BOT_BUNDLED_CHANNEL_HOST_BUILD = "0";
+    baseEnv.BOT_NPM_ONBOARD_HOST_BUILD = "0";
+    console.log(`==> Bot package: ${packageTgz}`);
     return;
   }
 
-  const packDir = path.join(logDir, "openclaw-package");
+  const packDir = path.join(logDir, "bot-package");
   await mkdir(packDir, { recursive: true });
-  const packageTgz = path.join(packDir, "openclaw-current.tgz");
+  const packageTgz = path.join(packDir, "bot-current.tgz");
   await runForeground(
-    "Prepare OpenClaw package once",
-    `node scripts/package-openclaw-for-docker.mjs --allow-unreleased-changelog --output-dir ${shellQuote(packDir)} --output-name openclaw-current.tgz`,
+    "Prepare Bot package once",
+    `node scripts/package-bot-for-docker.mjs --allow-unreleased-changelog --output-dir ${shellQuote(packDir)} --output-name bot-current.tgz`,
     baseEnv,
   );
   await fs.promises.access(packageTgz);
   // Preserve current-tree package intent in generated GitHub reruns; otherwise a local QA
   // failure would retry through the strict release path and fail before reaching its lane.
-  baseEnv.OPENCLAW_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG = "true";
-  baseEnv.OPENCLAW_CURRENT_PACKAGE_TGZ = packageTgz;
-  baseEnv.OPENCLAW_BUNDLED_CHANNEL_HOST_BUILD = "0";
-  baseEnv.OPENCLAW_NPM_ONBOARD_HOST_BUILD = "0";
-  console.log(`==> OpenClaw package: ${baseEnv.OPENCLAW_CURRENT_PACKAGE_TGZ}`);
+  baseEnv.BOT_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG = "true";
+  baseEnv.BOT_CURRENT_PACKAGE_TGZ = packageTgz;
+  baseEnv.BOT_BUNDLED_CHANNEL_HOST_BUILD = "0";
+  baseEnv.BOT_NPM_ONBOARD_HOST_BUILD = "0";
+  console.log(`==> Bot package: ${baseEnv.BOT_CURRENT_PACKAGE_TGZ}`);
 }
 
 function e2eImageForLane(poolLane, baseEnv) {
   if (poolLane.e2eImageKind === "bare") {
-    return baseEnv.OPENCLAW_DOCKER_E2E_BARE_IMAGE;
+    return baseEnv.BOT_DOCKER_E2E_BARE_IMAGE;
   }
   if (poolLane.e2eImageKind === "functional") {
-    return baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE;
+    return baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE;
   }
   return undefined;
 }
@@ -1018,20 +1018,20 @@ function laneEnv(poolLane, baseEnv, logDir, cacheKey) {
     ...baseEnv,
   };
   const name = poolLane.name;
-  env.OPENCLAW_DOCKER_ALL_LANE_NAME = name;
+  env.BOT_DOCKER_ALL_LANE_NAME = name;
   const image = e2eImageForLane(poolLane, baseEnv);
   if (image) {
-    env.OPENCLAW_DOCKER_E2E_IMAGE = image;
+    env.BOT_DOCKER_E2E_IMAGE = image;
   }
   if (poolLane.e2eImageKind) {
-    env.OPENCLAW_DOCKER_E2E_IMAGE_KIND = poolLane.e2eImageKind;
+    env.BOT_DOCKER_E2E_IMAGE_KIND = poolLane.e2eImageKind;
   }
   const cacheName = cacheKey || name;
-  if (!process.env.OPENCLAW_DOCKER_CLI_TOOLS_DIR) {
-    env.OPENCLAW_DOCKER_CLI_TOOLS_DIR = path.join(logDir, `${cacheName}-cli-tools`);
+  if (!process.env.BOT_DOCKER_CLI_TOOLS_DIR) {
+    env.BOT_DOCKER_CLI_TOOLS_DIR = path.join(logDir, `${cacheName}-cli-tools`);
   }
-  if (!process.env.OPENCLAW_DOCKER_CACHE_HOME_DIR) {
-    env.OPENCLAW_DOCKER_CACHE_HOME_DIR = path.join(logDir, `${cacheName}-cache`);
+  if (!process.env.BOT_DOCKER_CACHE_HOME_DIR) {
+    env.BOT_DOCKER_CACHE_HOME_DIR = path.join(logDir, `${cacheName}-cache`);
   }
   return env;
 }
@@ -1043,18 +1043,18 @@ async function runLane(lane, baseEnv, logDir, fallbackTimeoutMs) {
   const logFile = path.join(logDir, `${name}.log`);
   const env = laneEnv(lane, baseEnv, logDir, lane.cacheKey);
   const command = withResolvedPnpmCommand(lane.command, env);
-  await mkdir(env.OPENCLAW_DOCKER_CLI_TOOLS_DIR, { recursive: true });
-  await mkdir(env.OPENCLAW_DOCKER_CACHE_HOME_DIR, { recursive: true });
+  await mkdir(env.BOT_DOCKER_CLI_TOOLS_DIR, { recursive: true });
+  await mkdir(env.BOT_DOCKER_CACHE_HOME_DIR, { recursive: true });
   await fs.promises.writeFile(
     logFile,
     [
-      `==> [${name}] cli tools dir: ${env.OPENCLAW_DOCKER_CLI_TOOLS_DIR}`,
-      `==> [${name}] cache dir: ${env.OPENCLAW_DOCKER_CACHE_HOME_DIR}`,
+      `==> [${name}] cli tools dir: ${env.BOT_DOCKER_CLI_TOOLS_DIR}`,
+      `==> [${name}] cache dir: ${env.BOT_DOCKER_CACHE_HOME_DIR}`,
       `==> [${name}] timeout: ${timeoutMs}ms`,
       `==> [${name}] no output timeout: ${noOutputTimeoutMs ?? 0}ms`,
       `==> [${name}] retries: ${lane.retries ?? 0}`,
       `==> [${name}] e2e image kind: ${lane.e2eImageKind ?? "none"}`,
-      `==> [${name}] e2e image: ${env.OPENCLAW_DOCKER_E2E_IMAGE ?? ""}`,
+      `==> [${name}] e2e image: ${env.BOT_DOCKER_E2E_IMAGE ?? ""}`,
       "",
     ].join("\n"),
   );
@@ -1109,7 +1109,7 @@ async function runLane(lane, baseEnv, logDir, fallbackTimeoutMs) {
     command,
     attempts,
     finishedAt: new Date().toISOString(),
-    image: env.OPENCLAW_DOCKER_E2E_IMAGE,
+    image: env.BOT_DOCKER_E2E_IMAGE,
     imageKind: lane.e2eImageKind,
     logFile,
     name,
@@ -1236,7 +1236,7 @@ async function runLanePool(poolLanes, baseEnv, logDir, parallelism, options) {
           `No Docker lanes fit scheduler limits (${describeDockerSchedulerLimits(
             parallelism,
             options,
-          )}): ${blocked}. Tune OPENCLAW_DOCKER_ALL_PARALLELISM, OPENCLAW_DOCKER_ALL_WEIGHT_LIMIT, or OPENCLAW_DOCKER_ALL_<RESOURCE>_LIMIT.`,
+          )}): ${blocked}. Tune BOT_DOCKER_ALL_PARALLELISM, BOT_DOCKER_ALL_WEIGHT_LIMIT, or BOT_DOCKER_ALL_<RESOURCE>_LIMIT.`,
         );
       }
 
@@ -1419,95 +1419,95 @@ async function main() {
   const runStartedAt = new Date().toISOString();
   const phases = [];
   const parallelism = parsePositiveInt(
-    process.env.OPENCLAW_DOCKER_ALL_PARALLELISM,
+    process.env.BOT_DOCKER_ALL_PARALLELISM,
     DEFAULT_PARALLELISM,
-    "OPENCLAW_DOCKER_ALL_PARALLELISM",
+    "BOT_DOCKER_ALL_PARALLELISM",
   );
   const tailParallelism = parsePositiveInt(
-    process.env.OPENCLAW_DOCKER_ALL_TAIL_PARALLELISM,
+    process.env.BOT_DOCKER_ALL_TAIL_PARALLELISM,
     Math.min(parallelism, DEFAULT_TAIL_PARALLELISM),
-    "OPENCLAW_DOCKER_ALL_TAIL_PARALLELISM",
+    "BOT_DOCKER_ALL_TAIL_PARALLELISM",
   );
   const tailLines = parsePositiveInt(
-    process.env.OPENCLAW_DOCKER_ALL_FAILURE_TAIL_LINES,
+    process.env.BOT_DOCKER_ALL_FAILURE_TAIL_LINES,
     DEFAULT_FAILURE_TAIL_LINES,
-    "OPENCLAW_DOCKER_ALL_FAILURE_TAIL_LINES",
+    "BOT_DOCKER_ALL_FAILURE_TAIL_LINES",
   );
   const laneTimeoutMs = parsePositiveInt(
-    process.env.OPENCLAW_DOCKER_ALL_LANE_TIMEOUT_MS,
+    process.env.BOT_DOCKER_ALL_LANE_TIMEOUT_MS,
     DEFAULT_LANE_TIMEOUT_MS,
-    "OPENCLAW_DOCKER_ALL_LANE_TIMEOUT_MS",
+    "BOT_DOCKER_ALL_LANE_TIMEOUT_MS",
   );
   const laneStartStaggerMs = parseNonNegativeInt(
-    process.env.OPENCLAW_DOCKER_ALL_START_STAGGER_MS,
+    process.env.BOT_DOCKER_ALL_START_STAGGER_MS,
     DEFAULT_LANE_START_STAGGER_MS,
-    "OPENCLAW_DOCKER_ALL_START_STAGGER_MS",
+    "BOT_DOCKER_ALL_START_STAGGER_MS",
   );
   const statusIntervalMs = parseNonNegativeInt(
-    process.env.OPENCLAW_DOCKER_ALL_STATUS_INTERVAL_MS,
+    process.env.BOT_DOCKER_ALL_STATUS_INTERVAL_MS,
     DEFAULT_STATUS_INTERVAL_MS,
-    "OPENCLAW_DOCKER_ALL_STATUS_INTERVAL_MS",
+    "BOT_DOCKER_ALL_STATUS_INTERVAL_MS",
   );
   const preflightRunTimeoutMs = parsePositiveInt(
-    process.env.OPENCLAW_DOCKER_ALL_PREFLIGHT_RUN_TIMEOUT_MS,
+    process.env.BOT_DOCKER_ALL_PREFLIGHT_RUN_TIMEOUT_MS,
     DEFAULT_PREFLIGHT_RUN_TIMEOUT_MS,
-    "OPENCLAW_DOCKER_ALL_PREFLIGHT_RUN_TIMEOUT_MS",
+    "BOT_DOCKER_ALL_PREFLIGHT_RUN_TIMEOUT_MS",
   );
-  const failFast = parseBool(process.env.OPENCLAW_DOCKER_ALL_FAIL_FAST, true);
-  const dryRun = parseBool(process.env.OPENCLAW_DOCKER_ALL_DRY_RUN, false);
-  const preflightEnabled = parseBool(process.env.OPENCLAW_DOCKER_ALL_PREFLIGHT, true);
-  const preflightCleanup = parseBool(process.env.OPENCLAW_DOCKER_ALL_PREFLIGHT_CLEANUP, true);
-  const timingsEnabled = parseBool(process.env.OPENCLAW_DOCKER_ALL_TIMINGS, true);
-  const buildEnabled = parseBool(process.env.OPENCLAW_DOCKER_ALL_BUILD, true);
+  const failFast = parseBool(process.env.BOT_DOCKER_ALL_FAIL_FAST, true);
+  const dryRun = parseBool(process.env.BOT_DOCKER_ALL_DRY_RUN, false);
+  const preflightEnabled = parseBool(process.env.BOT_DOCKER_ALL_PREFLIGHT, true);
+  const preflightCleanup = parseBool(process.env.BOT_DOCKER_ALL_PREFLIGHT_CLEANUP, true);
+  const timingsEnabled = parseBool(process.env.BOT_DOCKER_ALL_TIMINGS, true);
+  const buildEnabled = parseBool(process.env.BOT_DOCKER_ALL_BUILD, true);
   const allowFrozenTargetScenarioOmissions = parseBool(
-    process.env.OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS,
+    process.env.BOT_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS,
     false,
   );
   const planJson =
-    cliOptions.planJson || parseBool(process.env.OPENCLAW_DOCKER_ALL_PLAN_JSON, false);
-  const planReleaseAll = parseBool(process.env.OPENCLAW_DOCKER_ALL_PLAN_RELEASE_ALL, false);
-  const profile = parseProfile(process.env.OPENCLAW_DOCKER_ALL_PROFILE);
+    cliOptions.planJson || parseBool(process.env.BOT_DOCKER_ALL_PLAN_JSON, false);
+  const planReleaseAll = parseBool(process.env.BOT_DOCKER_ALL_PLAN_RELEASE_ALL, false);
+  const profile = parseProfile(process.env.BOT_DOCKER_ALL_PROFILE);
   const releaseProfile = normalizeReleaseProfile(
-    process.env.OPENCLAW_DOCKER_ALL_RELEASE_PROFILE || process.env.OPENCLAW_RELEASE_PROFILE,
+    process.env.BOT_DOCKER_ALL_RELEASE_PROFILE || process.env.BOT_RELEASE_PROFILE,
   );
-  const releaseChunk = process.env.OPENCLAW_DOCKER_ALL_CHUNK || process.env.DOCKER_E2E_CHUNK || "";
+  const releaseChunk = process.env.BOT_DOCKER_ALL_CHUNK || process.env.DOCKER_E2E_CHUNK || "";
   const includeOpenWebUI = parseBool(
-    process.env.OPENCLAW_DOCKER_ALL_INCLUDE_OPENWEBUI ?? process.env.INCLUDE_OPENWEBUI,
+    process.env.BOT_DOCKER_ALL_INCLUDE_OPENWEBUI ?? process.env.INCLUDE_OPENWEBUI,
     true,
   );
   const selectedLaneNamesRaw =
-    process.env.OPENCLAW_DOCKER_ALL_LANES || process.env.DOCKER_E2E_LANES || "";
+    process.env.BOT_DOCKER_ALL_LANES || process.env.DOCKER_E2E_LANES || "";
   const selectedLaneNames = parseLaneSelection(selectedLaneNamesRaw);
   if (selectedLaneNamesRaw && selectedLaneNames.length === 0) {
-    throw new Error("OPENCLAW_DOCKER_ALL_LANES must include at least one lane name");
+    throw new Error("BOT_DOCKER_ALL_LANES must include at least one lane name");
   }
-  const liveMode = parseLiveMode(process.env.OPENCLAW_DOCKER_ALL_LIVE_MODE);
+  const liveMode = parseLiveMode(process.env.BOT_DOCKER_ALL_LIVE_MODE);
   const liveRetries = parseNonNegativeInt(
-    process.env.OPENCLAW_DOCKER_ALL_LIVE_RETRIES,
+    process.env.BOT_DOCKER_ALL_LIVE_RETRIES,
     DEFAULT_LIVE_RETRIES,
-    "OPENCLAW_DOCKER_ALL_LIVE_RETRIES",
+    "BOT_DOCKER_ALL_LIVE_RETRIES",
   );
   const timingsFile = path.resolve(
-    process.env.OPENCLAW_DOCKER_ALL_TIMINGS_FILE || DEFAULT_TIMINGS_FILE,
+    process.env.BOT_DOCKER_ALL_TIMINGS_FILE || DEFAULT_TIMINGS_FILE,
   );
-  const runId = process.env.OPENCLAW_DOCKER_ALL_RUN_ID || utcStampForPath();
+  const runId = process.env.BOT_DOCKER_ALL_RUN_ID || utcStampForPath();
   const logDir = path.resolve(
-    process.env.OPENCLAW_DOCKER_ALL_LOG_DIR ||
+    process.env.BOT_DOCKER_ALL_LOG_DIR ||
       path.join(ROOT_DIR, ".artifacts/docker-tests", runId),
   );
 
   const baseEnv = commandEnv({
-    OPENCLAW_DOCKER_E2E_BARE_IMAGE:
-      process.env.OPENCLAW_DOCKER_E2E_BARE_IMAGE ||
-      process.env.OPENCLAW_DOCKER_E2E_IMAGE ||
+    BOT_DOCKER_E2E_BARE_IMAGE:
+      process.env.BOT_DOCKER_E2E_BARE_IMAGE ||
+      process.env.BOT_DOCKER_E2E_IMAGE ||
       DEFAULT_E2E_BARE_IMAGE,
-    OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE:
-      process.env.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE ||
-      process.env.OPENCLAW_DOCKER_E2E_IMAGE ||
+    BOT_DOCKER_E2E_FUNCTIONAL_IMAGE:
+      process.env.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE ||
+      process.env.BOT_DOCKER_E2E_IMAGE ||
       DEFAULT_E2E_FUNCTIONAL_IMAGE,
   });
-  baseEnv.OPENCLAW_DOCKER_E2E_IMAGE =
-    process.env.OPENCLAW_DOCKER_E2E_IMAGE || baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE;
+  baseEnv.BOT_DOCKER_E2E_IMAGE =
+    process.env.BOT_DOCKER_E2E_IMAGE || baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE;
   const writeSummary = (summary) => writeRunSummary(logDir, summary, baseEnv);
   appendExtension(baseEnv, "matrix");
   appendExtension(baseEnv, "acpx");
@@ -1526,9 +1526,9 @@ async function main() {
       releaseProfile,
       selectedLaneNames,
       timingStore,
-      upgradeSurvivorBaselines: process.env.OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS,
-      upgradeSurvivorScenarios: process.env.OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS,
-      upgradeSurvivorTargetRoot: process.env.OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT,
+      upgradeSurvivorBaselines: process.env.BOT_UPGRADE_SURVIVOR_BASELINE_SPECS,
+      upgradeSurvivorScenarios: process.env.BOT_UPGRADE_SURVIVOR_SCENARIOS,
+      upgradeSurvivorTargetRoot: process.env.BOT_UPGRADE_SURVIVOR_TARGET_ROOT,
       allowFrozenTargetScenarioOmissions,
     });
   if (omittedUnsupportedLaneNames.length > 0 && !allowFrozenTargetScenarioOmissions) {
@@ -1578,8 +1578,8 @@ async function main() {
     }`,
   );
   console.log(`==> Build shared Docker images: ${buildEnabled ? "yes" : "no"}`);
-  console.log(`==> Docker E2E bare image: ${baseEnv.OPENCLAW_DOCKER_E2E_BARE_IMAGE}`);
-  console.log(`==> Docker E2E functional image: ${baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE}`);
+  console.log(`==> Docker E2E bare image: ${baseEnv.BOT_DOCKER_E2E_BARE_IMAGE}`);
+  console.log(`==> Docker E2E functional image: ${baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE}`);
   if (profile === RELEASE_PATH_PROFILE) {
     console.log(`==> Include Open WebUI: ${includeOpenWebUI ? "yes" : "no"}`);
   }
@@ -1587,7 +1587,7 @@ async function main() {
     console.log(`==> Selected lanes: ${selectedLaneNames.join(", ")}`);
   }
   console.log(`==> Docker lane timings: ${timingStore.enabled ? timingsFile : "disabled"}`);
-  console.log(`==> Live-test bundled plugins: ${baseEnv.OPENCLAW_DOCKER_BUILD_EXTENSIONS}`);
+  console.log(`==> Live-test bundled plugins: ${baseEnv.BOT_DOCKER_BUILD_EXTENSIONS}`);
   const schedulerOptions = parseSchedulerOptions(process.env, parallelism);
   const tailSchedulerOptions = parseSchedulerOptions(process.env, tailParallelism);
   console.log(
@@ -1635,12 +1635,12 @@ async function main() {
       });
     },
   );
-  if (lanesNeedOpenClawPackage(scheduledLanes)) {
-    await runPhase(phases, "prepare-openclaw-package", {}, async () => {
-      await prepareOpenClawPackage(baseEnv, logDir);
+  if (lanesNeedBotPackage(scheduledLanes)) {
+    await runPhase(phases, "prepare-bot-package", {}, async () => {
+      await prepareBotPackage(baseEnv, logDir);
     });
   } else {
-    console.log("==> OpenClaw package: not needed for selected lanes");
+    console.log("==> Bot package: not needed for selected lanes");
   }
 
   if (buildEnabled) {
@@ -1657,11 +1657,11 @@ async function main() {
       buildEntries.push({
         command: "pnpm test:docker:e2e-build",
         env: {
-          OPENCLAW_DOCKER_E2E_IMAGE: baseEnv.OPENCLAW_DOCKER_E2E_BARE_IMAGE,
-          OPENCLAW_DOCKER_E2E_TARGET: "bare",
+          BOT_DOCKER_E2E_IMAGE: baseEnv.BOT_DOCKER_E2E_BARE_IMAGE,
+          BOT_DOCKER_E2E_TARGET: "bare",
         },
-        label: `shared bare Docker E2E image once: ${baseEnv.OPENCLAW_DOCKER_E2E_BARE_IMAGE}`,
-        phaseDetails: { image: baseEnv.OPENCLAW_DOCKER_E2E_BARE_IMAGE, imageKind: "bare" },
+        label: `shared bare Docker E2E image once: ${baseEnv.BOT_DOCKER_E2E_BARE_IMAGE}`,
+        phaseDetails: { image: baseEnv.BOT_DOCKER_E2E_BARE_IMAGE, imageKind: "bare" },
         phases,
       });
     }
@@ -1669,12 +1669,12 @@ async function main() {
       buildEntries.push({
         command: "pnpm test:docker:e2e-build",
         env: {
-          OPENCLAW_DOCKER_E2E_IMAGE: baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE,
-          OPENCLAW_DOCKER_E2E_TARGET: "functional",
+          BOT_DOCKER_E2E_IMAGE: baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE,
+          BOT_DOCKER_E2E_TARGET: "functional",
         },
-        label: `shared functional Docker E2E image once: ${baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE}`,
+        label: `shared functional Docker E2E image once: ${baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE}`,
         phaseDetails: {
-          image: baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE,
+          image: baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE,
           imageKind: "functional",
         },
         phases,
@@ -1703,10 +1703,10 @@ async function main() {
     await writeSummary({
       chunk: releaseChunk || undefined,
       failures,
-      image: baseEnv.OPENCLAW_DOCKER_E2E_IMAGE,
+      image: baseEnv.BOT_DOCKER_E2E_IMAGE,
       images: {
-        bare: baseEnv.OPENCLAW_DOCKER_E2E_BARE_IMAGE,
-        functional: baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE,
+        bare: baseEnv.BOT_DOCKER_E2E_BARE_IMAGE,
+        functional: baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE,
       },
       lanes: allResults,
       omittedUnsupportedLanes,
@@ -1743,10 +1743,10 @@ async function main() {
     await writeSummary({
       chunk: releaseChunk || undefined,
       failures,
-      image: baseEnv.OPENCLAW_DOCKER_E2E_IMAGE,
+      image: baseEnv.BOT_DOCKER_E2E_IMAGE,
       images: {
-        bare: baseEnv.OPENCLAW_DOCKER_E2E_BARE_IMAGE,
-        functional: baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE,
+        bare: baseEnv.BOT_DOCKER_E2E_BARE_IMAGE,
+        functional: baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE,
       },
       lanes: allResults,
       omittedUnsupportedLanes,
@@ -1773,10 +1773,10 @@ async function main() {
     await writeSummary({
       chunk: releaseChunk || undefined,
       failures,
-      image: baseEnv.OPENCLAW_DOCKER_E2E_IMAGE,
+      image: baseEnv.BOT_DOCKER_E2E_IMAGE,
       images: {
-        bare: baseEnv.OPENCLAW_DOCKER_E2E_BARE_IMAGE,
-        functional: baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE,
+        bare: baseEnv.BOT_DOCKER_E2E_BARE_IMAGE,
+        functional: baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE,
       },
       lanes: allResults,
       omittedUnsupportedLanes,
@@ -1792,10 +1792,10 @@ async function main() {
   await writeSummary({
     chunk: releaseChunk || undefined,
     failures,
-    image: baseEnv.OPENCLAW_DOCKER_E2E_IMAGE,
+    image: baseEnv.BOT_DOCKER_E2E_IMAGE,
     images: {
-      bare: baseEnv.OPENCLAW_DOCKER_E2E_BARE_IMAGE,
-      functional: baseEnv.OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE,
+      bare: baseEnv.BOT_DOCKER_E2E_BARE_IMAGE,
+      functional: baseEnv.BOT_DOCKER_E2E_FUNCTIONAL_IMAGE,
     },
     lanes: allResults,
     omittedUnsupportedLanes,

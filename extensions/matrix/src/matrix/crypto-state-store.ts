@@ -5,7 +5,7 @@ import path from "node:path";
 import type {
   PluginStateKeyedStore,
   PluginStateSyncKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/plugin-state-runtime";
 import { isRecord } from "../record-shared.js";
 import { getMatrixRuntime } from "../runtime.js";
 import type { MatrixStoredRecoveryKey } from "./sdk/types.js";
@@ -330,7 +330,7 @@ export function scoreMatrixCryptoStateInStore(storageRootDir: string): number {
 }
 
 function matrixCryptoStateDatabaseExists(storageRootDir: string): boolean {
-  return fs.existsSync(path.join(storageRootDir, "state", "openclaw.sqlite"));
+  return fs.existsSync(path.join(storageRootDir, "state", "bot.sqlite"));
 }
 
 function resolveRecoveryKeyStateKeyForPath(recoveryKeyPath: string): string {

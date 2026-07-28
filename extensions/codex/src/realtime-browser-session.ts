@@ -1,14 +1,14 @@
 // Experimental ChatGPT OAuth browser session broker for Control UI realtime Talk.
 import { randomBytes } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { resolveAgentDir, resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { resolveAgentDir, resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import type {
   RealtimeVoiceBrowserSession,
   RealtimeVoiceBrowserSessionCreateRequest,
   RealtimeVoiceProviderCapabilities,
-} from "openclaw/plugin-sdk/realtime-voice";
-import { readRequestBodyWithLimit } from "openclaw/plugin-sdk/webhook-request-guards";
+} from "bot/plugin-sdk/realtime-voice";
+import { readRequestBodyWithLimit } from "bot/plugin-sdk/webhook-request-guards";
 import {
   CODEX_APP_SERVER_UNSUBSCRIBE_TIMEOUT_MS,
   unsubscribeCodexThreadBestEffort,
@@ -111,7 +111,7 @@ function respondText(res: ServerResponse, statusCode: number, body: string): voi
 
 function resolveConfiguredControlUiOrigin(
   req: IncomingMessage,
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
 ): string | undefined {
   const rawOrigin = typeof req.headers.origin === "string" ? req.headers.origin.trim() : "";
   if (!rawOrigin) {
@@ -139,7 +139,7 @@ function resolveConfiguredControlUiOrigin(
 function applyRealtimeOfferCorsHeaders(
   req: IncomingMessage,
   res: ServerResponse,
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
 ): boolean {
   if (!req.headers.origin) {
     return true;
@@ -242,7 +242,7 @@ function waitForRealtimeSdpAnswer(
 }
 
 export function createCodexRealtimeBrowserSessionBroker(params: {
-  getConfig: () => OpenClawConfig | undefined;
+  getConfig: () => BotConfig | undefined;
   getPluginConfig: () => unknown;
 }): {
   broker: CodexRealtimeBrowserSessionFallback;
@@ -284,7 +284,7 @@ export function createCodexRealtimeBrowserSessionBroker(params: {
   };
 
   const resolveSubscriptionClientOptions = (request: {
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
     agentId?: string;
   }) => {
     const pluginConfig = readCodexPluginConfig(params.getPluginConfig());
@@ -305,7 +305,7 @@ export function createCodexRealtimeBrowserSessionBroker(params: {
     };
   };
 
-  const ensureSubscriptionRuntime = async (request: { cfg?: OpenClawConfig; agentId?: string }) => {
+  const ensureSubscriptionRuntime = async (request: { cfg?: BotConfig; agentId?: string }) => {
     const client = await getSharedCodexAppServerClient({
       ...resolveSubscriptionClientOptions(request),
       abandonSignal: shutdownController.signal,

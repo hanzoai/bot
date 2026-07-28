@@ -1,6 +1,6 @@
 // Msteams tests cover outbound plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 
 const mocks = vi.hoisted(() => ({
   sendAdaptiveCardMSTeams: vi.fn(),
@@ -29,7 +29,7 @@ const cfg = {
       appId: "resolved-app-id",
     },
   },
-} as OpenClawConfig;
+} as BotConfig;
 
 type MSTeamsSendText = NonNullable<typeof msteamsOutbound.sendText>;
 type MSTeamsSendMedia = NonNullable<typeof msteamsOutbound.sendMedia>;
@@ -132,7 +132,7 @@ describe("msteamsOutbound cfg threading", () => {
           appId: "resolved-app-id",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await requireSendText()({
       cfg: cfgResult,
@@ -154,7 +154,7 @@ describe("msteamsOutbound cfg threading", () => {
           appId: "resolved-app-id",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await requireSendMedia()({
       cfg: cfgValue,
@@ -423,7 +423,7 @@ describe("msteamsOutbound cfg threading", () => {
           appId: "resolved-app-id",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await requireSendPoll()({
       cfg: cfgLocal,

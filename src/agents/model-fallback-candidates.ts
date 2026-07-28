@@ -1,10 +1,10 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 /** Resolves ordered model and image fallback candidate chains. */
 import {
   resolveAgentModelFallbackValues,
   resolveAgentModelPrimaryValue,
 } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizePluginsConfig } from "../plugins/config-state.js";
 import { getCurrentPluginMetadataSnapshot } from "../plugins/current-plugin-metadata-snapshot.js";
 import { resolvePluginControlPlaneFingerprint } from "../plugins/plugin-control-plane-context.js";
@@ -37,7 +37,7 @@ const MAX_FALLBACK_CANDIDATE_CACHE_ENTRIES = 256;
 const fallbackCandidateCache = new Map<string, ModelFallbackCandidate[]>();
 
 function hasExactConfiguredProviderModel(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   model: string;
 }): boolean {
@@ -55,7 +55,7 @@ function hasExactConfiguredProviderModel(params: {
   return false;
 }
 
-function hasConfiguredProvider(params: { cfg?: OpenClawConfig; provider: string }): boolean {
+function hasConfiguredProvider(params: { cfg?: BotConfig; provider: string }): boolean {
   const normalizedProvider = normalizeProviderId(params.provider);
   if (!params.cfg || !normalizedProvider) {
     return false;
@@ -66,7 +66,7 @@ function hasConfiguredProvider(params: { cfg?: OpenClawConfig; provider: string 
 }
 
 function allowPluginModelNormalizationForRef(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   model: string;
 }): boolean {
@@ -115,7 +115,7 @@ function createModelCandidateCollector(): {
 
 export function resolveImageFallbackCandidates(
   params: {
-    cfg: OpenClawConfig | undefined;
+    cfg: BotConfig | undefined;
     defaultProvider: string;
     modelOverride?: string;
   } & ModelManifestNormalizationContext,
@@ -159,7 +159,7 @@ export function resolveImageFallbackCandidates(
   return candidates;
 }
 
-export function resolveImageFallbackDefaultProvider(cfg: OpenClawConfig | undefined): string {
+export function resolveImageFallbackDefaultProvider(cfg: BotConfig | undefined): string {
   const configuredPrimary = resolveAgentModelPrimaryValue(cfg?.agents?.defaults?.imageModel);
   if (configuredPrimary?.trim()) {
     const aliasIndex = buildModelAliasIndex({
@@ -181,7 +181,7 @@ export function resolveImageFallbackDefaultProvider(cfg: OpenClawConfig | undefi
 
 export function resolveModelCandidateChain(
   params: {
-    cfg: OpenClawConfig | undefined;
+    cfg: BotConfig | undefined;
     provider: string;
     model: string;
     /** Optional explicit fallbacks list; when provided (even empty), replaces agents.defaults.model.fallbacks. */
@@ -221,7 +221,7 @@ function cloneModelCandidate(candidate: ModelFallbackCandidate): ModelFallbackCa
 
 function resolveFallbackCandidateCacheKey(
   params: {
-    cfg: OpenClawConfig | undefined;
+    cfg: BotConfig | undefined;
     provider: string;
     model: string;
     fallbacksOverride?: string[];
@@ -277,7 +277,7 @@ function resolveFallbackCandidateCacheKey(
   });
 }
 
-function resolveFallbackCandidateModelProviderCacheParts(cfg: OpenClawConfig | undefined): unknown {
+function resolveFallbackCandidateModelProviderCacheParts(cfg: BotConfig | undefined): unknown {
   const providers = cfg?.models?.providers;
   if (!providers) {
     return undefined;
@@ -295,7 +295,7 @@ function resolveFallbackCandidateModelProviderCacheParts(cfg: OpenClawConfig | u
 
 function resolveFallbackCandidatesUncached(
   params: {
-    cfg: OpenClawConfig | undefined;
+    cfg: BotConfig | undefined;
     provider: string;
     model: string;
     fallbacksOverride?: string[];

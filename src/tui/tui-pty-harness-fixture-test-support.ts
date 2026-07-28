@@ -27,18 +27,18 @@ export async function writeTuiPtyFixtureScript(dir: string) {
       import type { TuiBackend } from ${JSON.stringify(tuiModuleUrl.replace("/tui.ts", "/tui-backend.ts"))};
       import { runTui } from ${JSON.stringify(tuiModuleUrl)};
 
-      const actionLogPath = process.env.OPENCLAW_TUI_PTY_LOG_PATH;
-      const gatewayStatus = process.env.OPENCLAW_TUI_PTY_GATEWAY_STATUS ?? "fixture gateway ok";
-      const startupDelayMs = Number(process.env.OPENCLAW_TUI_PTY_STARTUP_DELAY_MS ?? 0);
-      const footerModel = process.env.OPENCLAW_TUI_PTY_MODEL;
-      const footerThinkingLevel = process.env.OPENCLAW_TUI_PTY_THINKING_LEVEL;
-      const launchThinkingLevel = process.env.OPENCLAW_TUI_PTY_LAUNCH_THINKING;
-      const initialMessage = process.env.OPENCLAW_TUI_PTY_INITIAL_MESSAGE;
-      const enablePickerFixture = process.env.OPENCLAW_TUI_PTY_PICKER_FIXTURE === "1";
+      const actionLogPath = process.env.BOT_TUI_PTY_LOG_PATH;
+      const gatewayStatus = process.env.BOT_TUI_PTY_GATEWAY_STATUS ?? "fixture gateway ok";
+      const startupDelayMs = Number(process.env.BOT_TUI_PTY_STARTUP_DELAY_MS ?? 0);
+      const footerModel = process.env.BOT_TUI_PTY_MODEL;
+      const footerThinkingLevel = process.env.BOT_TUI_PTY_THINKING_LEVEL;
+      const launchThinkingLevel = process.env.BOT_TUI_PTY_LAUNCH_THINKING;
+      const initialMessage = process.env.BOT_TUI_PTY_INITIAL_MESSAGE;
+      const enablePickerFixture = process.env.BOT_TUI_PTY_PICKER_FIXTURE === "1";
       const xaiLimitError = '403 {"code":"The caller does not have permission to execute the specified operation","error":"Your team team-redacted has either used all available credits or reached its monthly spending limit. To continue making API requests, please purchase more credits or raise your spending limit."}';
       let currentModel = footerModel ?? "fixture-provider/fixture-model";
       let currentThinkingLevel = footerThinkingLevel;
-      let fastMode = process.env.OPENCLAW_TUI_PTY_FAST_MODE === "true";
+      let fastMode = process.env.BOT_TUI_PTY_FAST_MODE === "true";
       let pendingPluginApproval: {
         id: string;
         request: {
@@ -539,7 +539,7 @@ export async function writeTuiPtyFixtureScript(dir: string) {
           thinking: launchThinkingLevel,
           message: initialMessage,
           historyLimit: 5,
-          title: "openclaw tui pty fixture",
+          title: "bot tui pty fixture",
         });
       }
 
@@ -621,7 +621,7 @@ export async function exerciseFragmentedUnicodePrompt(
   startupTimeoutMs: number,
 ) {
   const fixture = await startFixture({
-    env: { OPENCLAW_TUI_PTY_TYPE_CHUNK_SIZE: "1", OPENCLAW_TUI_PTY_TYPE_DELAY_MS: "1" },
+    env: { BOT_TUI_PTY_TYPE_CHUNK_SIZE: "1", BOT_TUI_PTY_TYPE_DELAY_MS: "1" },
   });
   const message = "hello 👋 from pty";
 

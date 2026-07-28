@@ -3,11 +3,11 @@ import {
   defineChannelSetupContract,
   type ChannelSetupAdapter,
   type ChannelSetupInput,
-} from "openclaw/plugin-sdk/channel-setup";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/routing";
-import { patchTopLevelChannelConfigSection, splitSetupEntries } from "openclaw/plugin-sdk/setup";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/channel-setup";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { DEFAULT_ACCOUNT_ID } from "bot/plugin-sdk/routing";
+import { patchTopLevelChannelConfigSection, splitSetupEntries } from "bot/plugin-sdk/setup";
+import { uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 
 const channel = "nostr" as const;
 
@@ -40,7 +40,7 @@ export function parseRelayUrls(raw: string): { relays: string[]; error?: string 
 }
 
 export function createNostrSetupAdapter(params: {
-  resolveAccountId: (cfg: OpenClawConfig, accountId?: string | null) => string;
+  resolveAccountId: (cfg: BotConfig, accountId?: string | null) => string;
   validatePrivateKey: (privateKey: string) => boolean;
 }): ChannelSetupAdapter {
   return {

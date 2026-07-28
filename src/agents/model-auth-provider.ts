@@ -3,7 +3,7 @@
  */
 import path from "node:path";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import {
@@ -39,7 +39,7 @@ export type ProviderCredentialPrecedence = "profile-first" | "env-first";
 const log = createSubsystemLogger("model-auth");
 
 function shouldDeferSyntheticProfileAuth(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   resolvedApiKey: string | undefined;
   modelApi?: string;
@@ -62,7 +62,7 @@ function shouldDeferSyntheticProfileAuth(params: {
 
 export function resolveScopedAuthProfileStore(params: {
   agentDir?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   profileId?: string;
   preferredProfile?: string;
@@ -75,7 +75,7 @@ export function resolveScopedAuthProfileStore(params: {
 /** Resolves the credential that should be used for one provider request. */
 export async function resolveApiKeyForProvider(params: {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   profileId?: string;
   preferredProfile?: string;
   store?: AuthProfileStore;
@@ -564,7 +564,7 @@ export async function resolveApiKeyForProvider(params: {
     [
       `No API key found for provider "${provider}".`,
       `Auth store: ${authStorePath} (agentDir: ${resolvedAgentDir}).`,
-      `Configure auth for this agent (${formatCliCommand("openclaw agents add <id>")}) or copy only portable static auth profiles from the main agentDir.`,
+      `Configure auth for this agent (${formatCliCommand("bot agents add <id>")}) or copy only portable static auth profiles from the main agentDir.`,
     ].join(" "),
   );
 }

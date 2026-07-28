@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { StaleOpenClawUpdateLaunchdJob } from "../../daemon/launchd.js";
+import type { StaleBotUpdateLaunchdJob } from "../../daemon/launchd.js";
 import { createMockGatewayService } from "../../daemon/service.test-helpers.js";
 import type { PortListener, PortUsageStatus } from "../../infra/ports.js";
 import type { GatewayRestartHandoff } from "../../infra/restart-handoff.js";
@@ -37,8 +37,8 @@ const loadGatewayTlsRuntime = vi.fn(async (_cfg?: unknown) => ({
   fingerprintSha256: "sha256:11:22:33:44",
 }));
 const findExtraGatewayServices = vi.fn(async (_env?: unknown, _opts?: unknown) => []);
-const findStaleOpenClawUpdateLaunchdJobs = vi.fn<
-  (env?: NodeJS.ProcessEnv) => Promise<StaleOpenClawUpdateLaunchdJob[]>
+const findStaleBotUpdateLaunchdJobs = vi.fn<
+  (env?: NodeJS.ProcessEnv) => Promise<StaleBotUpdateLaunchdJob[]>
 >(async () => []);
 type PortUsageTestSummary = {
   port: number;
@@ -102,8 +102,8 @@ const serviceReadCommand = vi.fn<
 >(async (_env?: NodeJS.ProcessEnv) => ({
   programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
   environment: {
-    OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-    OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
+    BOT_STATE_DIR: "/tmp/bot-daemon",
+    BOT_CONFIG_PATH: "/tmp/bot-daemon/bot.json",
   },
 }));
 const resolveGatewayBindHost = vi.fn(
@@ -116,10 +116,10 @@ const resolveAdvertisedControlUiLinks = vi.fn(async (_opts?: unknown) => ({
 const pickPrimaryTailnetIPv4 = vi.fn(() => "100.64.0.9");
 const resolveGatewayPort = vi.fn((_cfg?: unknown, _env?: unknown) => 18789);
 const resolveStateDir = vi.fn(
-  (env: NodeJS.ProcessEnv) => env.OPENCLAW_STATE_DIR ?? "/tmp/openclaw-cli",
+  (env: NodeJS.ProcessEnv) => env.BOT_STATE_DIR ?? "/tmp/bot-cli",
 );
 const resolveConfigPath = vi.fn((env: NodeJS.ProcessEnv, stateDir: string) => {
-  return env.OPENCLAW_CONFIG_PATH ?? `${stateDir}/openclaw.json`;
+  return env.BOT_CONFIG_PATH ?? `${stateDir}/bot.json`;
 });
 const createConfigIOCalls = vi.fn((configPath: string, pluginValidation?: "full" | "skip") => ({
   configPath,
@@ -150,7 +150,7 @@ vi.mock("../../config/config.js", () => ({
     configPath: string;
     pluginValidation?: "full" | "skip";
   }) => {
-    const isDaemon = configPath.includes("/openclaw-daemon/");
+    const isDaemon = configPath.includes("/bot-daemon/");
     const runtimeConfig = isDaemon ? daemonLoadedConfig : cliLoadedConfig;
     const warnings = isDaemon ? daemonConfigWarnings : cliConfigWarnings;
     createConfigIOCalls(configPath, pluginValidation);
@@ -190,8 +190,8 @@ vi.mock("../../daemon/inspect.js", () => ({
 }));
 
 vi.mock("../../daemon/launchd.js", () => ({
-  findStaleOpenClawUpdateLaunchdJobs: (env?: NodeJS.ProcessEnv) =>
-    findStaleOpenClawUpdateLaunchdJobs(env),
+  findStaleBotUpdateLaunchdJobs: (env?: NodeJS.ProcessEnv) =>
+    findStaleBotUpdateLaunchdJobs(env),
 }));
 
 vi.mock("../../daemon/service-audit.js", () => ({
@@ -280,17 +280,17 @@ describe("gatherDaemonStatus", () => {
 
   beforeEach(() => {
     envSnapshot = captureEnv([
-      "OPENCLAW_STATE_DIR",
-      "OPENCLAW_CONFIG_PATH",
-      "OPENCLAW_GATEWAY_TOKEN",
-      "OPENCLAW_GATEWAY_PASSWORD",
+      "BOT_STATE_DIR",
+      "BOT_CONFIG_PATH",
+      "BOT_GATEWAY_TOKEN",
+      "BOT_GATEWAY_PASSWORD",
       "DAEMON_GATEWAY_TOKEN",
       "DAEMON_GATEWAY_PASSWORD",
     ]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", "/tmp/openclaw-cli");
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", "/tmp/openclaw-cli/openclaw.json");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_TOKEN");
-    deleteTestEnvValue("OPENCLAW_GATEWAY_PASSWORD");
+    setTestEnvValue("BOT_STATE_DIR", "/tmp/bot-cli");
+    setTestEnvValue("BOT_CONFIG_PATH", "/tmp/bot-cli/bot.json");
+    deleteTestEnvValue("BOT_GATEWAY_TOKEN");
+    deleteTestEnvValue("BOT_GATEWAY_PASSWORD");
     deleteTestEnvValue("DAEMON_GATEWAY_TOKEN");
     deleteTestEnvValue("DAEMON_GATEWAY_PASSWORD");
     callGatewayStatusProbe.mockClear();
@@ -301,8 +301,8 @@ describe("gatherDaemonStatus", () => {
     });
     resolveGatewayProbeAuthSafeWithSecretInputsCalls.mockClear();
     createConfigIOCalls.mockClear();
-    findStaleOpenClawUpdateLaunchdJobs.mockReset();
-    findStaleOpenClawUpdateLaunchdJobs.mockResolvedValue([]);
+    findStaleBotUpdateLaunchdJobs.mockReset();
+    findStaleBotUpdateLaunchdJobs.mockResolvedValue([]);
     loadInstalledPluginIndexInstallRecords.mockClear();
     loadInstalledPluginIndexInstallRecords.mockResolvedValue({});
     loadGatewayTlsRuntime.mockClear();
@@ -386,8 +386,8 @@ describe("gatherDaemonStatus", () => {
     serviceReadCommand.mockResolvedValueOnce({
       programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
       environment: {
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
+        BOT_STATE_DIR: "/tmp/bot-daemon",
+        BOT_CONFIG_PATH: "/tmp/bot-daemon/bot.json",
         NODE_OPTIONS: "--max-old-space-size=6144",
       },
     });
@@ -458,7 +458,7 @@ describe("gatherDaemonStatus", () => {
       configPath?: string;
     };
     expect(probeInput.requireRpc).toBe(true);
-    expect(probeInput.configPath).toBe("/tmp/openclaw-daemon/openclaw.json");
+    expect(probeInput.configPath).toBe("/tmp/bot-daemon/bot.json");
   });
 
   it("reuses the shared CLI config snapshot when the daemon uses the same config path", async () => {
@@ -473,7 +473,7 @@ describe("gatherDaemonStatus", () => {
     });
 
     expect(readConfigFileSnapshotCalls).toHaveBeenCalledTimes(1);
-    expect(readConfigFileSnapshotCalls).toHaveBeenCalledWith("/tmp/openclaw-cli/openclaw.json");
+    expect(readConfigFileSnapshotCalls).toHaveBeenCalledWith("/tmp/bot-cli/bot.json");
     expect(loadConfigCalls).not.toHaveBeenCalled();
   });
 
@@ -547,14 +547,14 @@ describe("gatherDaemonStatus", () => {
     serviceReadCommand.mockResolvedValueOnce({
       programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
       environment: {
-        OPENCLAW_GATEWAY_PORT: "19001",
-        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
+        BOT_GATEWAY_PORT: "19001",
+        BOT_CONFIG_PATH: "/tmp/bot-daemon/bot.json",
+        BOT_STATE_DIR: "/tmp/bot-daemon",
       } as Record<string, string>,
     });
     serviceReadRuntime.mockImplementationOnce(async (env?: NodeJS.ProcessEnv) => ({
-      status: env?.OPENCLAW_GATEWAY_PORT === "19001" ? "running" : "unknown",
-      detail: env?.OPENCLAW_GATEWAY_PORT ?? "missing-port",
+      status: env?.BOT_GATEWAY_PORT === "19001" ? "running" : "unknown",
+      detail: env?.BOT_GATEWAY_PORT ?? "missing-port",
     }));
 
     const status = await gatherDaemonStatus({
@@ -564,7 +564,7 @@ describe("gatherDaemonStatus", () => {
     });
 
     expect(
-      serviceReadRuntime.mock.calls.some(([env]) => env?.OPENCLAW_GATEWAY_PORT === "19001"),
+      serviceReadRuntime.mock.calls.some(([env]) => env?.BOT_GATEWAY_PORT === "19001"),
     ).toBe(true);
     expect(status.service.runtime?.status).toBe("running");
     expect((status.service.runtime as { detail?: string }).detail).toBe("19001");
@@ -614,8 +614,8 @@ describe("gatherDaemonStatus", () => {
     });
 
     const handoffInput = callArg(readGatewayRestartHandoffSync) as NodeJS.ProcessEnv;
-    expect(handoffInput.OPENCLAW_STATE_DIR).toBe("/tmp/openclaw-daemon");
-    expect(handoffInput.OPENCLAW_CONFIG_PATH).toBe("/tmp/openclaw-daemon/openclaw.json");
+    expect(handoffInput.BOT_STATE_DIR).toBe("/tmp/bot-daemon");
+    expect(handoffInput.BOT_CONFIG_PATH).toBe("/tmp/bot-daemon/bot.json");
     expect(status.service.restartHandoff?.reason).toBe("plugin source changed");
     expect(status.service.restartHandoff?.restartKind).toBe("full-process");
     expect(status.service.restartHandoff?.supervisorMode).toBe("launchd");
@@ -627,18 +627,18 @@ describe("gatherDaemonStatus", () => {
       serviceReadCommand.mockResolvedValueOnce({
         programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
         environment: {
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-          OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
-          OPENCLAW_LAUNCHD_LABEL: "ai.openclaw.manual-update.gateway",
+          BOT_STATE_DIR: "/tmp/bot-daemon",
+          BOT_CONFIG_PATH: "/tmp/bot-daemon/bot.json",
+          BOT_LAUNCHD_LABEL: "ai.bot.manual-update.gateway",
         },
       });
-      findStaleOpenClawUpdateLaunchdJobs.mockResolvedValueOnce([
+      findStaleBotUpdateLaunchdJobs.mockResolvedValueOnce([
         {
-          label: "ai.openclaw.update.2026.5.12",
+          label: "ai.bot.update.2026.5.12",
           lastExitStatus: 127,
         },
         {
-          label: "ai.openclaw.manual-update.1717168800",
+          label: "ai.bot.manual-update.1717168800",
           lastExitStatus: 0,
         },
       ]);
@@ -649,17 +649,17 @@ describe("gatherDaemonStatus", () => {
         deep: true,
       });
 
-      const staleScanEnv = findStaleOpenClawUpdateLaunchdJobs.mock.calls[0]?.[0];
-      expect(staleScanEnv?.OPENCLAW_STATE_DIR).toBe("/tmp/openclaw-daemon");
-      expect(staleScanEnv?.OPENCLAW_CONFIG_PATH).toBe("/tmp/openclaw-daemon/openclaw.json");
-      expect(staleScanEnv?.OPENCLAW_LAUNCHD_LABEL).toBe("ai.openclaw.manual-update.gateway");
+      const staleScanEnv = findStaleBotUpdateLaunchdJobs.mock.calls[0]?.[0];
+      expect(staleScanEnv?.BOT_STATE_DIR).toBe("/tmp/bot-daemon");
+      expect(staleScanEnv?.BOT_CONFIG_PATH).toBe("/tmp/bot-daemon/bot.json");
+      expect(staleScanEnv?.BOT_LAUNCHD_LABEL).toBe("ai.bot.manual-update.gateway");
       expect(status.service.staleUpdateLaunchdJobs).toEqual([
         {
-          label: "ai.openclaw.update.2026.5.12",
+          label: "ai.bot.update.2026.5.12",
           lastExitStatus: 127,
         },
         {
-          label: "ai.openclaw.manual-update.1717168800",
+          label: "ai.bot.manual-update.1717168800",
           lastExitStatus: 0,
         },
       ]);
@@ -674,7 +674,7 @@ describe("gatherDaemonStatus", () => {
     });
 
     expect(readGatewayRestartHandoffSync).not.toHaveBeenCalled();
-    expect(findStaleOpenClawUpdateLaunchdJobs).not.toHaveBeenCalled();
+    expect(findStaleBotUpdateLaunchdJobs).not.toHaveBeenCalled();
     expect(inspectPortConnections).not.toHaveBeenCalled();
   });
 
@@ -686,7 +686,7 @@ describe("gatherDaemonStatus", () => {
           pid: 4242,
           ppid: 1,
           command: "node",
-          commandLine: "node /tmp/newer-openclaw/dist/index.js logs --follow",
+          commandLine: "node /tmp/newer-bot/dist/index.js logs --follow",
           address: "TCP 127.0.0.1:50123->127.0.0.1:19001 (ESTABLISHED)",
           direction: "client",
         },
@@ -705,7 +705,7 @@ describe("gatherDaemonStatus", () => {
         pid: 4242,
         ppid: 1,
         command: "node",
-        commandLine: "node /tmp/newer-openclaw/dist/index.js logs --follow",
+        commandLine: "node /tmp/newer-bot/dist/index.js logs --follow",
         address: "TCP 127.0.0.1:50123->127.0.0.1:19001 (ESTABLISHED)",
         direction: "client",
       },
@@ -735,8 +735,8 @@ describe("gatherDaemonStatus", () => {
   });
 
   it("uses the fast config path for plain same-file status reads", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-status-config-"));
-    const configPath = path.join(tmp, "openclaw.json");
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-status-config-"));
+    const configPath = path.join(tmp, "bot.json");
     await fs.writeFile(
       configPath,
       JSON.stringify({
@@ -747,13 +747,13 @@ describe("gatherDaemonStatus", () => {
         },
       }),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tmp);
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+    setTestEnvValue("BOT_STATE_DIR", tmp);
+    setTestEnvValue("BOT_CONFIG_PATH", configPath);
     serviceReadCommand.mockResolvedValueOnce({
       programArguments: ["/bin/node", "cli", "gateway", "--port", "19001"],
       environment: {
-        OPENCLAW_STATE_DIR: tmp,
-        OPENCLAW_CONFIG_PATH: configPath,
+        BOT_STATE_DIR: tmp,
+        BOT_CONFIG_PATH: configPath,
       },
     });
 
@@ -779,8 +779,8 @@ describe("gatherDaemonStatus", () => {
   });
 
   it("uses full plugin-aware config validation for deep status", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-status-config-"));
-    const configPath = path.join(tmp, "openclaw.json");
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-status-config-"));
+    const configPath = path.join(tmp, "bot.json");
     await fs.writeFile(
       configPath,
       JSON.stringify({
@@ -789,8 +789,8 @@ describe("gatherDaemonStatus", () => {
         },
       }),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tmp);
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+    setTestEnvValue("BOT_STATE_DIR", tmp);
+    setTestEnvValue("BOT_CONFIG_PATH", configPath);
     cliLoadedConfig = {
       gateway: {
         bind: "loopback",
@@ -1091,8 +1091,8 @@ describe("gatherDaemonStatus", () => {
         },
       },
     };
-    setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", "env-token");
-    setTestEnvValue("OPENCLAW_GATEWAY_PASSWORD", "env-password"); // pragma: allowlist secret
+    setTestEnvValue("BOT_GATEWAY_TOKEN", "env-token");
+    setTestEnvValue("BOT_GATEWAY_PASSWORD", "env-password"); // pragma: allowlist secret
 
     await gatherDaemonStatus({
       rpc: {},
@@ -1128,7 +1128,7 @@ describe("gatherDaemonStatus", () => {
       portUsage: {
         port: 19001,
         status: "busy",
-        listeners: [{ pid: 9000, ppid: 8999, commandLine: "openclaw-gateway" }],
+        listeners: [{ pid: 9000, ppid: 8999, commandLine: "bot-gateway" }],
         hints: [],
       },
       healthy: false,
@@ -1152,7 +1152,7 @@ describe("gatherDaemonStatus", () => {
     inspectPortUsage.mockResolvedValueOnce({
       port: 19001,
       status: "busy",
-      listeners: [{ pid: 8000, ppid: 1, commandLine: "openclaw gateway" }],
+      listeners: [{ pid: 8000, ppid: 1, commandLine: "bot gateway" }],
       hints: [],
     });
     callGatewayStatusProbe.mockResolvedValueOnce({
@@ -1172,8 +1172,8 @@ describe("gatherDaemonStatus", () => {
 
     expect(readLastGatewayErrorLine).toHaveBeenCalledWith(
       expect.objectContaining({
-        OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
-        OPENCLAW_CONFIG_PATH: "/tmp/openclaw-daemon/openclaw.json",
+        BOT_STATE_DIR: "/tmp/bot-daemon",
+        BOT_CONFIG_PATH: "/tmp/bot-daemon/bot.json",
       }),
       { requirePatternMatch: true },
     );
@@ -1188,7 +1188,7 @@ describe("gatherDaemonStatus", () => {
     inspectPortUsage.mockResolvedValueOnce({
       port: 19001,
       status: "busy",
-      listeners: [{ pid: 8000, ppid: 1, commandLine: "openclaw gateway" }],
+      listeners: [{ pid: 8000, ppid: 1, commandLine: "bot gateway" }],
       hints: [],
     });
     callGatewayStatusProbe.mockResolvedValueOnce({
@@ -1218,7 +1218,7 @@ describe("gatherDaemonStatus", () => {
     inspectPortUsage.mockResolvedValueOnce({
       port: 19001,
       status: "busy",
-      listeners: [{ pid: 8000, ppid: 1, commandLine: "openclaw gateway" }],
+      listeners: [{ pid: 8000, ppid: 1, commandLine: "bot gateway" }],
       hints: [],
     });
     callGatewayStatusProbe.mockResolvedValueOnce({
@@ -1250,7 +1250,7 @@ describe("gatherDaemonStatus", () => {
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
       whatsapp: {
         source: "npm",
-        resolvedName: "@openclaw/whatsapp",
+        resolvedName: "@hanzo/bot-whatsapp",
         resolvedVersion: "2026.5.4",
       },
     } as never);
@@ -1275,7 +1275,7 @@ describe("gatherDaemonStatus", () => {
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
       whatsapp: {
         source: "npm",
-        resolvedName: "@openclaw/whatsapp",
+        resolvedName: "@hanzo/bot-whatsapp",
         resolvedVersion: "2026.5.3",
       },
     } as never);
@@ -1297,13 +1297,13 @@ describe("gatherDaemonStatus", () => {
       deep: true,
     });
 
-    // The mock daemon service command sets OPENCLAW_STATE_DIR=/tmp/openclaw-daemon,
-    // distinct from the CLI process OPENCLAW_STATE_DIR=/tmp/openclaw-cli. Drift
+    // The mock daemon service command sets BOT_STATE_DIR=/tmp/bot-daemon,
+    // distinct from the CLI process BOT_STATE_DIR=/tmp/bot-cli. Drift
     // detection must inspect the daemon profile's install records.
     expect(loadInstalledPluginIndexInstallRecords).toHaveBeenCalledWith(
       expect.objectContaining({
         env: expect.objectContaining({
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
+          BOT_STATE_DIR: "/tmp/bot-daemon",
         }),
       }),
     );
@@ -1313,7 +1313,7 @@ describe("gatherDaemonStatus", () => {
     loadInstalledPluginIndexInstallRecords.mockResolvedValueOnce({
       whatsapp: {
         source: "npm",
-        resolvedName: "@openclaw/whatsapp",
+        resolvedName: "@hanzo/bot-whatsapp",
         resolvedVersion: "2026.5.3",
       },
     } as never);
@@ -1327,7 +1327,7 @@ describe("gatherDaemonStatus", () => {
     expect(loadInstalledPluginIndexInstallRecords).toHaveBeenCalledWith(
       expect.objectContaining({
         env: expect.objectContaining({
-          OPENCLAW_STATE_DIR: "/tmp/openclaw-daemon",
+          BOT_STATE_DIR: "/tmp/bot-daemon",
         }),
       }),
     );

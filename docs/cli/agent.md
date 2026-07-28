@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for Gateway-backed `openclaw agent` turns and isolated `agent exec` runs"
+summary: "CLI reference for Gateway-backed `bot agent` turns and isolated `agent exec` runs"
 read_when:
   - You want to run one agent turn from scripts (optionally deliver reply)
   - You want a strict, ephemeral one-shot agent run for CI
 title: "Agent"
 ---
 
-# `openclaw agent`
+# `bot agent`
 
 Run one agent turn through the Gateway. The explicit `--local` flag is the only embedded execution path.
 
@@ -16,24 +16,24 @@ Related: [Agent send tool](/tools/agent-send)
 
 ## `agent exec`
 
-`openclaw agent exec` runs one embedded agent turn without connecting to a Gateway. It is the recommended headless entry point for CI and coding automation because it owns setup, cleanup, output projection, and process status.
+`bot agent exec` runs one embedded agent turn without connecting to a Gateway. It is the recommended headless entry point for CI and coding automation because it owns setup, cleanup, output projection, and process status.
 
 ```bash
-openclaw agent exec "Run the focused tests and fix failures"
-openclaw agent exec --message-file task.md --cwd ./repo
-cat task.md | openclaw agent exec --message-file - --json
+bot agent exec "Run the focused tests and fix failures"
+bot agent exec --message-file task.md --cwd ./repo
+cat task.md | bot agent exec --message-file - --json
 ```
 
 By default, the command creates and later removes a temporary state directory. Its implicit config skips workspace bootstrap files, disables the agent sandbox, selects the `coding` tool profile, restricts filesystem tools to `--cwd`, and enables full Gateway-host execution policy for the embedded local tool runtime. `--cwd` defaults to the process working directory and is passed as both the agent workspace and tool working directory.
 
-Use `--state-dir <dir>` to retain sessions and other run state. The directory must already exist and is never created or deleted by the command. The command still uses its isolated implicit policy config; it does not read the ordinary OpenClaw config from that directory.
+Use `--state-dir <dir>` to retain sessions and other run state. The directory must already exist and is never created or deleted by the command. The command still uses its isolated implicit policy config; it does not read the ordinary Bot config from that directory.
 
-`--auth-env-only` is enabled by default. In this mode, the run can use provider keys already present in the process environment, but it does not load OpenClaw auth profiles or external Codex, Claude, or other CLI credential stores. Provider auth variables remain available to model authentication but are omitted from agent-launched host commands. Use `--no-auth-env-only` only when the run intentionally relies on those stored credentials.
+`--auth-env-only` is enabled by default. In this mode, the run can use provider keys already present in the process environment, but it does not load Bot auth profiles or external Codex, Claude, or other CLI credential stores. Provider auth variables remain available to model authentication but are omitted from agent-launched host commands. Use `--no-auth-env-only` only when the run intentionally relies on those stored credentials.
 
 Select a primary and ordered fallback chain with repeatable flags:
 
 ```bash
-openclaw agent exec "Implement the change" \
+bot agent exec "Implement the change" \
   --model openai/gpt-5.6-sol \
   --fallback anthropic/claude-sonnet-4-6 \
   --fallback google/gemini-3.1-pro-preview
@@ -97,29 +97,29 @@ Plain output writes only the final assistant text to stdout. Diagnostics use std
 ## Examples
 
 ```bash
-openclaw agent --to +15555550123 --message "status update" --deliver
-openclaw agent --agent ops --message "Summarize logs"
-openclaw agent --agent ops --message-file ./task.md
-openclaw agent --agent ops --model openai/gpt-5.4 --message "Summarize logs"
-openclaw agent --session-key agent:ops:incident-42 --message "Summarize status"
-openclaw agent --agent ops --session-key incident-42 --message "Summarize status"
-openclaw agent --session-id 1234 --message "Summarize inbox" --thinking medium
-openclaw agent --to +15555550123 --message "Trace logs" --verbose on --json
-openclaw agent --agent ops --message "Generate report" --deliver --reply-channel slack --reply-to "#reports"
-openclaw agent --agent ops --message "Run locally" --local
+bot agent --to +15555550123 --message "status update" --deliver
+bot agent --agent ops --message "Summarize logs"
+bot agent --agent ops --message-file ./task.md
+bot agent --agent ops --model openai/gpt-5.4 --message "Summarize logs"
+bot agent --session-key agent:ops:incident-42 --message "Summarize status"
+bot agent --agent ops --session-key incident-42 --message "Summarize status"
+bot agent --session-id 1234 --message "Summarize inbox" --thinking medium
+bot agent --to +15555550123 --message "Trace logs" --verbose on --json
+bot agent --agent ops --message "Generate report" --deliver --reply-channel slack --reply-to "#reports"
+bot agent --agent ops --message "Run locally" --local
 ```
 
 ## Notes
 
 - Pass exactly one of `--message` or `--message-file`. `--message-file` strips a leading UTF-8 BOM and preserves multiline content; it rejects files that are not valid UTF-8. Files larger than 4 MiB are rejected before dispatch.
-- Slash commands (for example `/compact`) cannot run through `--message`. The CLI rejects them and points you at the first-class command instead (`openclaw sessions compact <key>` for compaction).
+- Slash commands (for example `/compact`) cannot run through `--message`. The CLI rejects them and points you at the first-class command instead (`bot sessions compact <key>` for compaction).
 - `--local` runs are one-shot: bundled MCP loopback resources and warm Claude stdio sessions opened for the run are retired after the reply, so scripted invocations do not leave local child processes running. Gateway-backed runs keep Gateway-owned MCP loopback resources under the running Gateway process instead.
 - Standalone embedded execution with `--local` refuses to reuse an existing main session while restart recovery is pending. Run the turn through a healthy Gateway, or reset it there with `/new` or `/reset`; an independent embedded process cannot safely coordinate that recovery owner with the Gateway scanner.
 - With `--agent`, `--channel` and `--to` together, session routing follows the channel's canonical recipient and `session.dmScope`. Channels with a stable outbound-only recipient identity use a provider-owned session isolated from the agent's main session. `--reply-channel` and `--reply-account` affect delivery only.
 - `--session-key` selects an explicit session key. Agent-prefixed keys must use `agent:<agent-id>:<session-key>`, and `--agent` must match the key's agent id when both are given. Bare non-sentinel keys scope to `--agent` when supplied, or to the configured default agent otherwise; for example `--agent ops --session-key incident-42` routes to `agent:ops:incident-42`. The literal keys `global` and `unknown` stay unscoped only when no `--agent` is supplied.
 - `--json` reserves stdout for the JSON response; Gateway, plugin, and `--local` diagnostics go to stderr so scripts can parse stdout directly.
-- After transient handshake retries are exhausted, a Gateway timeout or closed connection fails the command; the CLI never silently reruns the turn embedded. Transport loss is ambiguous — the Gateway may have accepted and may still finish the turn — so the stderr hint says to check `openclaw gateway status` and the session transcript before retrying or rerunning with `--local`, to avoid executing the turn twice.
-- `SIGTERM`/`SIGINT` interrupt a waiting Gateway-backed request; if the Gateway already accepted the run, the CLI also sends `chat.abort` for that run id before exiting. `--local` runs receive the same signal but do not send `chat.abort`. A launcher child that terminates from the first forwarded `SIGINT` or `SIGTERM` exits with status 130 or 143, respectively. If the internal run-dedup key already has an active run for this session, the response reports `status: "in_flight"` and the non-JSON CLI prints a stderr diagnostic instead of an empty reply. For external cron/systemd wrappers, keep a hard-kill backstop such as `timeout -k 60 600 openclaw agent ...` so the supervisor can reap the process if shutdown cannot drain.
+- After transient handshake retries are exhausted, a Gateway timeout or closed connection fails the command; the CLI never silently reruns the turn embedded. Transport loss is ambiguous — the Gateway may have accepted and may still finish the turn — so the stderr hint says to check `bot gateway status` and the session transcript before retrying or rerunning with `--local`, to avoid executing the turn twice.
+- `SIGTERM`/`SIGINT` interrupt a waiting Gateway-backed request; if the Gateway already accepted the run, the CLI also sends `chat.abort` for that run id before exiting. `--local` runs receive the same signal but do not send `chat.abort`. A launcher child that terminates from the first forwarded `SIGINT` or `SIGTERM` exits with status 130 or 143, respectively. If the internal run-dedup key already has an active run for this session, the response reports `status: "in_flight"` and the non-JSON CLI prints a stderr diagnostic instead of an empty reply. For external cron/systemd wrappers, keep a hard-kill backstop such as `timeout -k 60 600 bot agent ...` so the supervisor can reap the process if shutdown cannot drain.
 - When this command triggers `models.json` regeneration, SecretRef-managed provider credentials are persisted as non-secret markers (for example env var names, `secretref-env:ENV_VAR_NAME`, or `secretref-managed`), never resolved secret plaintext. Marker writes come from the active source config snapshot, not from resolved runtime secret values.
 
 ## JSON delivery status

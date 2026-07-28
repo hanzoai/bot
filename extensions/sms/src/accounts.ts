@@ -1,18 +1,18 @@
-import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
+import { createAccountListHelpers } from "bot/plugin-sdk/account-helpers";
 // Sms plugin module implements accounts behavior.
-import { normalizeOptionalAccountId } from "openclaw/plugin-sdk/account-id";
+import { normalizeOptionalAccountId } from "bot/plugin-sdk/account-id";
 import {
   DEFAULT_ACCOUNT_ID,
   hasConfiguredAccountValue,
   resolveAccountEntry,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/account-resolution";
-import { parseStrictInteger } from "openclaw/plugin-sdk/number-runtime";
+  type BotConfig,
+} from "bot/plugin-sdk/account-resolution";
+import { parseStrictInteger } from "bot/plugin-sdk/number-runtime";
 import {
   hasConfiguredSecretInput,
   normalizeResolvedSecretInputString,
-} from "openclaw/plugin-sdk/secret-input";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/secret-input";
+import { normalizeStringEntries } from "bot/plugin-sdk/string-coerce-runtime";
 import { normalizeSmsAllowFrom, normalizeSmsPhoneNumber } from "./phone.js";
 import type { ResolvedSmsAccount, SmsChannelConfig } from "./types.js";
 
@@ -20,7 +20,7 @@ const CHANNEL_ID = "sms";
 const DEFAULT_WEBHOOK_PATH = "/webhooks/sms";
 const DEFAULT_TEXT_CHUNK_LIMIT = 1500;
 
-function getChannelConfig(cfg: OpenClawConfig): SmsChannelConfig | undefined {
+function getChannelConfig(cfg: BotConfig): SmsChannelConfig | undefined {
   return cfg?.channels?.[CHANNEL_ID] as SmsChannelConfig | undefined;
 }
 
@@ -79,7 +79,7 @@ const {
 export { listSmsAccountIds, resolveDefaultSmsAccountId };
 
 export function resolveSmsAccount(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   accountId?: string | null,
 ): ResolvedSmsAccount {
   const channelCfg = getChannelConfig(cfg) ?? {};
@@ -133,7 +133,7 @@ export function resolveSmsAccount(
   };
 }
 
-export function inspectSmsAccount(cfg: OpenClawConfig, accountId?: string | null) {
+export function inspectSmsAccount(cfg: BotConfig, accountId?: string | null) {
   const account = resolveSmsAccount(cfg, accountId);
   const configured = isSmsAccountConfigured(account);
   return {

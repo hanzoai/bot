@@ -3,8 +3,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import type { ImageContent } from "openclaw/plugin-sdk/llm";
+import type { AgentMessage } from "bot/plugin-sdk/agent-core";
+import type { ImageContent } from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import {
   attachRuntimePromptMediaFacts,
@@ -120,14 +120,14 @@ describe("pruneProcessedHistoryImages", () => {
     const message = castAgentMessage({
       role: "user",
       content: [{ type: "text", text: "explicit image" }, { ...image }],
-      __openclaw: {
+      __bot: {
         mediaImageBlockFactIndexes: [null],
         mediaImageLayout: { slots: [{ kind: "inline" }] },
       },
     });
 
     const pruned = expectPrunedMessages([message, ...oldEnoughTail()]);
-    const meta = (pruned[0] as unknown as Record<string, unknown>)["__openclaw"];
+    const meta = (pruned[0] as unknown as Record<string, unknown>)["__bot"];
 
     expect(meta).toBeUndefined();
   });
@@ -191,7 +191,7 @@ describe("pruneProcessedHistoryImages", () => {
     const markedString = castAgentMessage({
       ...fields,
       content: "",
-      __openclaw: {
+      __bot: {
         lateMedia: true,
         media: [{ path: "media://inbound/stale-image.png" }],
       },
@@ -203,7 +203,7 @@ describe("pruneProcessedHistoryImages", () => {
     const markedArray = castAgentMessage({
       ...fields,
       content: [{ ...image }],
-      __openclaw: {
+      __bot: {
         lateMedia: true,
         media: [{ path: "media://inbound/stale-image.png" }],
       },
@@ -241,7 +241,7 @@ describe("pruneProcessedHistoryImages", () => {
     const message = castAgentMessage({
       role: "user",
       content: "resolved subtitle",
-      __openclaw: {
+      __bot: {
         lateMedia: true,
         media: [{ path: "media://inbound/stale-image.png" }],
       },
@@ -250,11 +250,11 @@ describe("pruneProcessedHistoryImages", () => {
     const pruned = expectPrunedMessages([message, ...oldEnoughTail()]);
     const output = pruned as unknown as Array<{
       content?: unknown;
-      __openclaw?: { media?: unknown; mediaImagePruned?: boolean };
+      __bot?: { media?: unknown; mediaImagePruned?: boolean };
     }>;
     expect(output[0]?.content).toBe("resolved subtitle");
-    expect(output[0]?.["__openclaw"]?.media).toBeUndefined();
-    expect(output[0]?.["__openclaw"]?.mediaImagePruned).toBe(true);
+    expect(output[0]?.["__bot"]?.media).toBeUndefined();
+    expect(output[0]?.["__bot"]?.mediaImagePruned).toBe(true);
   });
 
   it("drops runtime facts from captioned old turns without changing their text", () => {
@@ -291,7 +291,7 @@ describe("pruneProcessedHistoryImages", () => {
     const message = castAgentMessage({
       role: "user",
       content: `[media attached: ${imagePath} (image/png) | ${imageUrl}]`,
-      __openclaw: {
+      __bot: {
         media: [
           {
             path: imagePath,
@@ -395,7 +395,7 @@ describe("pruneProcessedHistoryImages", () => {
     const message = castAgentMessage({
       role: "user",
       content: `[Image: source: ${imagePath}]\ncaption stays`,
-      __openclaw: { media: [{ path: imagePath, contentType: "image/jpeg" }] },
+      __bot: { media: [{ path: imagePath, contentType: "image/jpeg" }] },
     });
 
     const pruned = expectPrunedMessages([message, ...oldEnoughTail()]);
@@ -408,7 +408,7 @@ describe("pruneProcessedHistoryImages", () => {
     const message = castAgentMessage({
       role: "user",
       content: `caption mentions ${mediaRef} as text`,
-      __openclaw: { media: [{ path: mediaRef, contentType: "image/png" }] },
+      __bot: { media: [{ path: mediaRef, contentType: "image/png" }] },
     });
 
     const pruned = expectPrunedMessages([message, ...oldEnoughTail()]);
@@ -648,7 +648,7 @@ describe("installHistoryImagePruneContextTransform", () => {
       castAgentMessage({
         role: "user",
         content: `caption mentions ${mediaRef} as text`,
-        __openclaw: { media: [{ url: mediaRef, contentType: "image/png" }] },
+        __bot: { media: [{ url: mediaRef, contentType: "image/png" }] },
       }),
       ...oldEnoughTail(),
     ];
@@ -667,7 +667,7 @@ describe("installHistoryImagePruneContextTransform", () => {
   });
 
   it("hydrates recent facts before an existing transform clones messages", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-history-hydrate-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-history-hydrate-"));
     const imagePath = path.join(workspaceDir, "photo.png");
     await fs.writeFile(imagePath, Buffer.from(TINY_PNG_BASE64, "base64"));
     const message = attachRuntimePromptMediaFacts(
@@ -707,7 +707,7 @@ describe("installHistoryImagePruneContextTransform", () => {
   });
 
   it("strips nested media metadata before old turns can rehydrate", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pruned-nested-media-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-pruned-nested-media-"));
     const imagePath = path.join(workspaceDir, "old.png");
     await fs.writeFile(imagePath, Buffer.from(TINY_PNG_BASE64, "base64"));
     const baseBridge = createHostSandboxFsBridge(workspaceDir);
@@ -722,7 +722,7 @@ describe("installHistoryImagePruneContextTransform", () => {
     const message = castAgentMessage({
       role: "user",
       content: "[media attached: ./old.png (image/png)]",
-      __openclaw: {
+      __bot: {
         media: [{ path: "./old.png", contentType: "image/png" }],
         mediaImageBlockFactIndexes: [0],
         mediaImageLayout: { slots: [{ kind: "offloaded", factIndex: 0 }] },
@@ -740,7 +740,7 @@ describe("installHistoryImagePruneContextTransform", () => {
 
     try {
       const replay = await agent.transformContext?.([message, ...oldEnoughTail()]);
-      const meta = (replay?.[0] as unknown as Record<string, unknown>)?.["__openclaw"] as
+      const meta = (replay?.[0] as unknown as Record<string, unknown>)?.["__bot"] as
         | Record<string, unknown>
         | undefined;
       expect(hydrationReadCount).toBe(0);
@@ -757,7 +757,7 @@ describe("installHistoryImagePruneContextTransform", () => {
     const message = castAgentMessage({
       role: "user",
       content: "[media attached: /tmp/unknown.png (image/png)]",
-      __openclaw: {
+      __bot: {
         media: [{ kind: "image" }],
         mediaImageLayout: { slots: [], suppressedFactIndexes: [0] },
       },
@@ -765,7 +765,7 @@ describe("installHistoryImagePruneContextTransform", () => {
 
     const pruned = expectPrunedMessages([message, ...oldEnoughTail()]);
     const first = pruned[0] as unknown as Record<string, unknown>;
-    const meta = first["__openclaw"] as Record<string, unknown> | undefined;
+    const meta = first["__bot"] as Record<string, unknown> | undefined;
     expect(first.content).toBe("[media attached: /tmp/unknown.png (image/png)]");
     expect(meta?.media).toBeUndefined();
     expect(meta?.mediaImageLayout).toBeUndefined();

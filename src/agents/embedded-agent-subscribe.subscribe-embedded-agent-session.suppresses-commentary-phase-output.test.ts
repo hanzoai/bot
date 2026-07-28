@@ -1,6 +1,6 @@
 // Commentary suppression tests ensure commentary-phase assistant messages do
 // not become replies or assistantTexts before tool use.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import { createSubscribedSessionHarness } from "./embedded-agent-subscribe.e2e-harness.js";
 

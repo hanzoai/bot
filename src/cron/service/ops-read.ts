@@ -1,5 +1,5 @@
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import { resolveBotStateSqlitePath } from "../../state/bot-state-db.paths.js";
 import { resolveCronListSnapshotRevision } from "../list-snapshot-revision.js";
 import { readCronJobScratchState, writeCronJobScratch } from "../scratch-store.js";
 import { createCronStreamSourceIdentity } from "../stream-schedule.js";
@@ -32,7 +32,7 @@ import { applyJobResult, armTimer } from "./timer.js";
 export async function status(state: CronServiceState) {
   return await locked(state, async () => {
     await ensureLoadedForRead(state);
-    const sqlitePath = resolveOpenClawStateSqlitePath();
+    const sqlitePath = resolveBotStateSqlitePath();
     return {
       enabled: state.deps.cronEnabled,
       storePath: sqlitePath,

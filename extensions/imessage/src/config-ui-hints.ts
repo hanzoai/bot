@@ -1,6 +1,6 @@
-import { createChannelConfigUiHints } from "openclaw/plugin-sdk/channel-core";
+import { createChannelConfigUiHints } from "bot/plugin-sdk/channel-core";
 // Imessage helper module supports config ui hints behavior.
-import type { ChannelConfigUiHint } from "openclaw/plugin-sdk/core";
+import type { ChannelConfigUiHint } from "bot/plugin-sdk/core";
 
 export const iMessageChannelConfigUiHints = {
   "": {

@@ -15,7 +15,7 @@ export type DockerSetupSandbox = {
   binDir: string;
 };
 
-const sandboxRootTracker = createSuiteTempRootTracker({ prefix: "openclaw-docker-setup-" });
+const sandboxRootTracker = createSuiteTempRootTracker({ prefix: "bot-docker-setup-" });
 
 export async function setupDockerSetupSandboxRoot(): Promise<void> {
   await sandboxRootTracker.setup();
@@ -94,7 +94,7 @@ if [[ "\${1:-}" == "compose" ]]; then
   for ((i = 0; i + 4 < \${#args[@]}; i++)); do
     if [[ "\${args[$i]}" == "--entrypoint" &&
       "\${args[$((i + 1))]}" == "node" &&
-      "\${args[$((i + 2))]}" == "openclaw-gateway" &&
+      "\${args[$((i + 2))]}" == "bot-gateway" &&
       "\${args[$((i + 3))]}" == "-e" ]]; then
       node -e "\${args[$((i + 4))]}" "\${args[@]:$((i + 5))}"
       exit $?
@@ -170,7 +170,7 @@ export async function createDockerSetupSandbox(): Promise<DockerSetupSandbox> {
   await writeFile(dockerfilePath, "FROM scratch\n");
   await writeFile(
     composePath,
-    "services:\n  openclaw-gateway:\n    image: noop\n  openclaw-cli:\n    image: noop\n",
+    "services:\n  bot-gateway:\n    image: noop\n  bot-cli:\n    image: noop\n",
   );
   await writeDockerStub(binDir, logPath);
 
@@ -179,11 +179,11 @@ export async function createDockerSetupSandbox(): Promise<DockerSetupSandbox> {
 
 export const prestartContainerEnvFlags = [
   "-e HOME=/home/node",
-  "-e OPENCLAW_HOME=/home/node",
-  "-e OPENCLAW_STATE_DIR=/home/node/.openclaw",
-  "-e OPENCLAW_CONFIG_PATH=/home/node/.openclaw/openclaw.json",
-  "-e OPENCLAW_CONFIG_DIR=/home/node/.openclaw",
-  "-e OPENCLAW_WORKSPACE_DIR=/home/node/.openclaw/workspace",
+  "-e BOT_HOME=/home/node",
+  "-e BOT_STATE_DIR=/home/node/.bot",
+  "-e BOT_CONFIG_PATH=/home/node/.hanzoai/bot.json",
+  "-e BOT_CONFIG_DIR=/home/node/.bot",
+  "-e BOT_WORKSPACE_DIR=/home/node/.bot/workspace",
 ].join(" ");
 
 export const noFollowOwnershipRepair = (root: string) =>
@@ -229,7 +229,7 @@ export function collectMatchingLines(
 }
 
 export function isGatewayStartLine(line: string) {
-  return line.includes("compose") && line.includes(" up -d") && line.includes("openclaw-gateway");
+  return line.includes("compose") && line.includes(" up -d") && line.includes("bot-gateway");
 }
 
 export function findGatewayStartLineIndex(lines: string[]) {

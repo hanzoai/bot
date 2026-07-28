@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ErrorCodes } from "../../../packages/gateway-protocol/src/index.js";
 import type { WorkerSessionPlacementRecord } from "../worker-environments/placement-store.js";
@@ -68,7 +68,7 @@ function targetWithEntry(entry?: {
     : undefined;
   return {
     agentId: "main",
-    storePath: "/tmp/openclaw-agent.sqlite",
+    storePath: "/tmp/bot-agent.sqlite",
     canonicalKey: sessionKey,
     storeKeys: [sessionKey],
     store: pinnedEntry ? { [sessionKey]: pinnedEntry } : {},
@@ -202,7 +202,7 @@ describe("sessions.dispatch", () => {
       targetWithEntry({
         sessionId,
         agentRuntimeOverride: "codex",
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "bot/cloud-test", repoRoot: "/repo" },
       }),
     );
     const dispatch = vi.fn();
@@ -219,7 +219,7 @@ describe("sessions.dispatch", () => {
       undefined,
       expect.objectContaining({
         code: ErrorCodes.INVALID_REQUEST,
-        message: expect.stringContaining("OpenClaw runtime"),
+        message: expect.stringContaining("Bot runtime"),
       }),
     );
   });
@@ -229,7 +229,7 @@ describe("sessions.dispatch", () => {
       targetWithEntry({
         sessionId,
         archivedAt: 2,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "bot/cloud-test", repoRoot: "/repo" },
       }),
     );
     const dispatch = vi.fn();
@@ -255,7 +255,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "bot/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -321,7 +321,7 @@ describe("sessions.dispatch", () => {
         sessionId,
         providerOverride: "anthropic",
         modelOverride: "claude-test",
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "bot/cloud-test", repoRoot: "/repo" },
       }),
     );
     const dispatch = vi.fn();
@@ -361,7 +361,7 @@ describe("sessions.dispatch", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "bot/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({
@@ -424,7 +424,7 @@ describe("sessions.reclaim", () => {
     mocks.resolveTarget.mockReturnValue(
       targetWithEntry({
         sessionId,
-        worktree: { id: "worktree-1", branch: "openclaw/cloud-test", repoRoot: "/repo" },
+        worktree: { id: "worktree-1", branch: "bot/cloud-test", repoRoot: "/repo" },
       }),
     );
     mocks.findLiveByOwner.mockReturnValue({

@@ -34,9 +34,9 @@ const {
   ),
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/channel-inbound")>(
-    "openclaw/plugin-sdk/channel-inbound",
+vi.mock("bot/plugin-sdk/channel-inbound", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/channel-inbound")>(
+    "bot/plugin-sdk/channel-inbound",
   );
   return {
     ...actual,
@@ -53,9 +53,9 @@ vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/session-store-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/session-store-runtime")>(
-    "openclaw/plugin-sdk/session-store-runtime",
+vi.mock("bot/plugin-sdk/session-store-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/session-store-runtime")>(
+    "bot/plugin-sdk/session-store-runtime",
   );
   return { ...actual, resolveStorePath: mockResolveStorePath };
 });

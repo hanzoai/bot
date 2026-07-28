@@ -7,20 +7,20 @@ struct DevicePermissionActionButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(OpenClawType.footnoteSemiBold)
+            .font(BotType.footnoteSemiBold)
             .padding(.horizontal, 14)
             .frame(height: 32)
             .foregroundStyle(
                 self.prominent
-                    ? OpenClawBrand.activationPrimaryActionText
-                    : OpenClawBrand.activationPrimaryAction)
+                    ? BotBrand.activationPrimaryActionText
+                    : BotBrand.activationPrimaryAction)
             .background {
                 if self.prominent {
                     Capsule(style: .continuous)
-                        .fill(OpenClawBrand.activationPrimaryGradient)
+                        .fill(BotBrand.activationPrimaryGradient)
                 } else {
                     Capsule(style: .continuous)
-                        .fill(OpenClawBrand.activationNeutralSurface)
+                        .fill(BotBrand.activationNeutralSurface)
                 }
             }
             .overlay {
@@ -28,7 +28,7 @@ struct DevicePermissionActionButtonStyle: ButtonStyle {
                     .stroke(
                         self.prominent
                             ? Color.white.opacity(0.26)
-                            : OpenClawBrand.activationNeutralStroke,
+                            : BotBrand.activationNeutralStroke,
                         lineWidth: 0.5)
             }
             .opacity(configuration.isPressed ? 0.86 : 1)
@@ -58,9 +58,9 @@ struct DevicePermissionRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(self.title)
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
                 Text(self.detail)
-                    .font(OpenClawType.footnote)
+                    .font(BotType.footnote)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
@@ -78,7 +78,7 @@ struct DevicePermissionRow: View {
 
     private var iconTile: some View {
         Image(systemName: self.symbol)
-            .font(OpenClawType.subheadSemiBold)
+            .font(BotType.subheadSemiBold)
             .foregroundStyle(self.isGrantedTile ? Color.white : self.tint)
             .frame(width: 36, height: 36)
             .background {
@@ -100,21 +100,21 @@ struct DevicePermissionRow: View {
                 if let actionTitle = self.actionTitle, let action = self.action {
                     Button(action: action) {
                         Text(actionTitle)
-                            .font(OpenClawType.footnoteSemiBold)
+                            .font(BotType.footnoteSemiBold)
                     }
                     .buttonStyle(DevicePermissionActionButtonStyle(prominent: self.grant == .notRequested))
                     .accessibilityIdentifier("\(self.identifierPrefix)-\(self.identifier)-action")
                 } else if self.grant == .granted || self.grant == .limited {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(OpenClawType.title3SemiBold)
-                        .foregroundStyle(OpenClawBrand.ok)
+                        .font(BotType.title3SemiBold)
+                        .foregroundStyle(BotBrand.ok)
                         .accessibilityLabel(Text(self.statusLabel ?? LocalizedStringResource("Allowed")))
                         .accessibilityIdentifier("\(self.identifierPrefix)-\(self.identifier)-status")
                 }
 
                 if let statusCaption {
                     Text(statusCaption)
-                        .font(OpenClawType.caption2Medium)
+                        .font(BotType.caption2Medium)
                         .foregroundStyle(self.statusCaptionColor)
                         .accessibilityIdentifier("\(self.identifierPrefix)-\(self.identifier)-status")
                 }
@@ -137,6 +137,6 @@ struct DevicePermissionRow: View {
     }
 
     private var statusCaptionColor: Color {
-        self.grant == .denied ? OpenClawBrand.danger : OpenClawBrand.warn
+        self.grant == .denied ? BotBrand.danger : BotBrand.warn
     }
 }

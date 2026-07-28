@@ -1,14 +1,14 @@
-// Line plugin entrypoint registers its OpenClaw integration.
+// Line plugin entrypoint registers its Bot integration.
 import {
   defineBundledChannelEntry,
-  type OpenClawPluginCommandDefinition,
-  type OpenClawPluginApi,
-} from "openclaw/plugin-sdk/channel-entry-contract";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+  type BotPluginCommandDefinition,
+  type BotPluginApi,
+} from "bot/plugin-sdk/channel-entry-contract";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 
-type RegisteredLineCardCommand = OpenClawPluginCommandDefinition;
+type RegisteredLineCardCommand = BotPluginCommandDefinition;
 
-function createLineCardCommandLoader(api: OpenClawPluginApi) {
+function createLineCardCommandLoader(api: BotPluginApi) {
   return createLazyRuntimeModule<RegisteredLineCardCommand>(async () => {
     let registered: RegisteredLineCardCommand | null = null;
     const { registerLineCardCommand } = await import("./src/card-command.js");

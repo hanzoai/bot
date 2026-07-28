@@ -92,7 +92,7 @@ function expectStringWithPrefix(value: unknown, prefix: string, label: string): 
 
 async function configureGlobalAgentSessionStore(dir: string) {
   const storeTemplate = path.join(dir, "agents", "{agentId}", "sessions", "sessions.json");
-  const configPath = expectStringValue(process.env.OPENCLAW_CONFIG_PATH, "OPENCLAW_CONFIG_PATH");
+  const configPath = expectStringValue(process.env.BOT_CONFIG_PATH, "BOT_CONFIG_PATH");
   const { clearConfigCache, clearRuntimeConfigSnapshot } = await import("../config/config.js");
   testState.sessionStorePath = storeTemplate;
   testState.sessionConfig = { scope: "global" };
@@ -907,7 +907,7 @@ test("sessions.reset drops cli session bindings so the next turn does not --resu
 
   await writeMainSessionEntry("sess-with-binding", {
     ...claudeCliBindings("claude-cli-old-session"),
-    agentHarnessId: "openclaw",
+    agentHarnessId: "bot",
   });
 
   await resetMainSession();

@@ -3,7 +3,7 @@
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import { applyPluginAutoEnable } from "../../config/plugin-auto-enable.js";
 import { resolveRuntimeConfigCacheKey } from "../../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { resolveRuntimePluginRegistry } from "../../plugins/loader.js";
 import type { PluginChannelRegistration } from "../../plugins/registry-types.js";
 import {
@@ -22,7 +22,7 @@ function resolveBootstrapRegistryGeneration(): string {
   return `${getActivePluginChannelRegistryVersion()}:${getActivePluginRegistryVersion()}`;
 }
 
-function resolveBootstrapAttemptedChannels(cfg: OpenClawConfig): Set<DeliverableMessageChannel> {
+function resolveBootstrapAttemptedChannels(cfg: BotConfig): Set<DeliverableMessageChannel> {
   const registryGeneration = resolveBootstrapRegistryGeneration();
   if (registryGeneration !== bootstrapRegistryGeneration) {
     bootstrapRegistryGeneration = registryGeneration;
@@ -82,7 +82,7 @@ function canResolveSendCapableChannel(channel: DeliverableMessageChannel): boole
 /** Loads runtime plugins on demand when a selected outbound channel has only a setup shell. */
 export function bootstrapOutboundChannelPlugin(params: {
   channel: DeliverableMessageChannel;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): void {
   const cfg = params.cfg;
   if (!cfg) {

@@ -6,41 +6,41 @@ export {
   listNodes,
   resolveNodeIdFromList,
   selectDefaultNodeFromList,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-export type { AnyAgentTool, NodeListNode } from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+export type { AnyAgentTool, NodeListNode } from "bot/plugin-sdk/agent-harness-runtime";
 export {
   imageResultFromFile,
   jsonResult,
   readPositiveIntegerParam,
   readStringParam,
-} from "openclaw/plugin-sdk/channel-actions";
+} from "bot/plugin-sdk/channel-actions";
 export {
   formatCliCommand,
   formatHelpExamples,
   inheritOptionFromParent,
   note,
   theme,
-} from "openclaw/plugin-sdk/cli-runtime";
-export { danger, info } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/cli-runtime";
+export { danger, info } from "bot/plugin-sdk/runtime-env";
 export {
   IMAGE_REDUCE_QUALITY_STEPS,
   buildImageResizeSideGrid,
   getImageMetadata,
   isImageProcessorUnavailableError,
   resizeToJpeg,
-} from "openclaw/plugin-sdk/media-runtime";
-export { detectMime } from "openclaw/plugin-sdk/media-mime";
-export { ensureMediaDir, saveMediaBuffer } from "openclaw/plugin-sdk/media-runtime";
-export { describeImageFile } from "openclaw/plugin-sdk/media-understanding-runtime";
-export { formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
+} from "bot/plugin-sdk/media-runtime";
+export { detectMime } from "bot/plugin-sdk/media-mime";
+export { ensureMediaDir, saveMediaBuffer } from "bot/plugin-sdk/media-runtime";
+export { describeImageFile } from "bot/plugin-sdk/media-understanding-runtime";
+export { formatDocsLink } from "bot/plugin-sdk/setup-tools";
 export {
   completeWithPreparedSimpleCompletionModel,
   extractAssistantText,
   prepareSimpleCompletionModelForAgent,
-} from "openclaw/plugin-sdk/simple-completion-runtime";
-export { validateJsonSchemaValue } from "openclaw/plugin-sdk/json-schema-runtime";
+} from "bot/plugin-sdk/simple-completion-runtime";
+export { validateJsonSchemaValue } from "bot/plugin-sdk/json-schema-runtime";
 export {
   htmlToMarkdown,
   normalizeWhitespace,
   sanitizeHtml,
-} from "openclaw/plugin-sdk/web-content-extractor";
+} from "bot/plugin-sdk/web-content-extractor";

@@ -8,7 +8,7 @@ import { detectDiscordLegacyStateMigrations } from "./model-picker-preferences-m
 const tempDirs: string[] = [];
 
 async function makeStateDir(): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-discord-model-picker-migration-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-discord-model-picker-migration-"));
   tempDirs.push(dir);
   return dir;
 }

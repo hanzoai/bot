@@ -10,18 +10,18 @@ describe("scripts/test-live-models-docker.sh", () => {
   it("validates optional live model limits before auth or Docker setup", () => {
     const script = fs.readFileSync(SCRIPT_PATH, "utf8");
 
-    expect(script).toContain('LIVE_MAX_MODELS="${OPENCLAW_LIVE_MAX_MODELS:-}"');
+    expect(script).toContain('LIVE_MAX_MODELS="${BOT_LIVE_MAX_MODELS:-}"');
     expect(script).toContain('[[ -n "$LIVE_MAX_MODELS" && ! "$LIVE_MAX_MODELS" =~ ^\\+?[0-9]+$ ]]');
     expect(script).toContain(
-      'openclaw_live_read_positive_int_env OPENCLAW_LIVE_MODEL_TIMEOUT_MS "$LIVE_MODEL_TIMEOUT_MS"',
+      'bot_live_read_positive_int_env BOT_LIVE_MODEL_TIMEOUT_MS "$LIVE_MODEL_TIMEOUT_MS"',
     );
-    expect(script).toContain('-e OPENCLAW_LIVE_MAX_MODELS="$LIVE_MAX_MODELS"');
-    expect(script).toContain('-e OPENCLAW_LIVE_MODEL_TIMEOUT_MS="$LIVE_MODEL_TIMEOUT_MS"');
+    expect(script).toContain('-e BOT_LIVE_MAX_MODELS="$LIVE_MAX_MODELS"');
+    expect(script).toContain('-e BOT_LIVE_MODEL_TIMEOUT_MS="$LIVE_MODEL_TIMEOUT_MS"');
   });
 
   it.each([
-    ["max models", "OPENCLAW_LIVE_MAX_MODELS", "3models"],
-    ["model timeout", "OPENCLAW_LIVE_MODEL_TIMEOUT_MS", "45s"],
+    ["max models", "BOT_LIVE_MAX_MODELS", "3models"],
+    ["model timeout", "BOT_LIVE_MODEL_TIMEOUT_MS", "45s"],
   ])("rejects invalid %s values before live Docker setup", (_label, envName, value) => {
     const result = spawnSync("bash", [SCRIPT_PATH], {
       encoding: "utf8",

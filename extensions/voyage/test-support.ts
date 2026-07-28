@@ -14,7 +14,7 @@ type VoyageEmbeddingBatchTestApi = {
   VOYAGE_BATCH_RESPONSE_MAX_BYTES: number;
 };
 
-const api = Reflect.get(globalThis, Symbol.for("openclaw.voyageEmbeddingBatchTestApi"));
+const api = Reflect.get(globalThis, Symbol.for("bot.voyageEmbeddingBatchTestApi"));
 if (!api) {
   throw new Error("Voyage embedding batch test API is unavailable");
 }

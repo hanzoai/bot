@@ -16,7 +16,7 @@ import {
   assertLegacyMemoryRowsCopied,
   ensureLegacyMemoryMigrationIndexes,
 } from "./memory-schema-migration.js";
-import { migrateSqliteSchemaToStrict } from "./openclaw-runtime-sqlite.js";
+import { migrateSqliteSchemaToStrict } from "./bot-runtime-sqlite.js";
 
 export {
   dropMemoryPathFtsTriggers,

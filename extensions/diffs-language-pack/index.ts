@@ -1,4 +1,4 @@
-// Diffs Language Pack plugin entrypoint registers its OpenClaw integration.
+// Diffs Language Pack plugin entrypoint registers its Bot integration.
 import { definePluginEntry } from "./api.js";
 import { registerDiffsLanguagePackPlugin } from "./src/plugin.js";
 

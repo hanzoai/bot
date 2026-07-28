@@ -1,4 +1,4 @@
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   isToolCallContentType,
   isToolResultContentType,
@@ -20,7 +20,7 @@ export function isKeyedAssistantStreamFallbackMessage(message: unknown): boolean
   if (normalizeLowercaseStringOrEmpty(record?.role) !== "assistant") {
     return false;
   }
-  const fallback = asRecord(record?.openclawStreamFallback);
+  const fallback = asRecord(record?.botStreamFallback);
   return typeof fallback?.itemId === "string" && fallback.itemId.trim().length > 0;
 }
 
@@ -78,7 +78,7 @@ export function groupMessages(items: ChatItem[]): Array<ChatItem | MessageGroup>
     const timestamp = normalized.timestamp || Date.now();
     const shouldSplitBySender = role === "user" || role === "assistant";
     const startsProjectedTurn =
-      asRecord(asRecord(item.message)?.["__openclaw"])?.turnBoundary === true;
+      asRecord(asRecord(item.message)?.["__bot"])?.turnBoundary === true;
     const splitsAssistantCommentary =
       role === "assistant" &&
       currentGroup?.role === "assistant" &&
@@ -449,7 +449,7 @@ function assistantGroupIsForwardedBoundary(group: MessageGroup): boolean {
 }
 
 function groupStartsProjectedTurnBoundary(group: MessageGroup): boolean {
-  return asRecord(asRecord(group.messages[0]?.message)?.["__openclaw"])?.turnBoundary === true;
+  return asRecord(asRecord(group.messages[0]?.message)?.["__bot"])?.turnBoundary === true;
 }
 
 export function annotateToolTurnOutcome(

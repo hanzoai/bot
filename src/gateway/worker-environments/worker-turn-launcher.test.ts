@@ -15,10 +15,10 @@ import {
 import { runCommandWithTimeout, type SpawnResult } from "../../process/exec.js";
 import { createDeferred } from "../../shared/deferred.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+  type BotStateDatabase,
+} from "../../state/bot-state-db.js";
 import {
   parseWorkerLaunchDescriptor,
   type WorkerLaunchDescriptor,
@@ -53,13 +53,13 @@ function hasLoneSurrogate(value: string): boolean {
 
 describe("worker turn launcher", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: BotStateDatabase;
   let placements: WorkerSessionPlacementStore;
   let sessionFile: string;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-turn-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "bot-worker-turn-"));
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     placements = createWorkerSessionPlacementStore({ database });
     const manager = SessionManager.create(path.join(root, "sessions"), path.join(root, "sessions"));
     const file = manager.getSessionFile();
@@ -70,7 +70,7 @@ describe("worker turn launcher", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -162,7 +162,7 @@ describe("worker turn launcher", () => {
       provisionOperationId: "provision-worker-turn",
       bootstrapReceipt: {
         bundleHash: BUNDLE_HASH,
-        openclawVersion: "2026.7.2",
+        botVersion: "2026.7.2",
         protocolFeatures: [],
       },
       ownerEpoch: OWNER_EPOCH,
@@ -238,7 +238,7 @@ describe("worker turn launcher", () => {
         agents: {
           defaults: {
             models: {
-              "openai/gpt-test": { agentRuntime: { id: "openclaw" } },
+              "openai/gpt-test": { agentRuntime: { id: "bot" } },
             },
           },
         },
@@ -476,7 +476,7 @@ describe("worker turn launcher", () => {
           },
           runLocal,
         ),
-      ).rejects.toThrow(`Cloud worker turns require the OpenClaw runtime, not ${runtimeId}`);
+      ).rejects.toThrow(`Cloud worker turns require the Bot runtime, not ${runtimeId}`);
 
       expect(runLocal).not.toHaveBeenCalled();
       expect(getEnvironment).not.toHaveBeenCalled();
@@ -558,8 +558,8 @@ describe("worker turn launcher", () => {
         expect(command.argv).toEqual([
           "sh",
           "-c",
-          'exec node "$HOME/.openclaw-worker/$1/openclaw.mjs" worker',
-          "openclaw-worker",
+          'exec node "$HOME/.bot-worker/$1/bot.mjs" worker',
+          "bot-worker",
           BUNDLE_HASH,
         ]);
         expect(command.argv.join(" ")).not.toContain(credential().credential);
@@ -642,14 +642,14 @@ describe("worker turn launcher", () => {
     });
     expect(reconcileWorkspace).toHaveBeenCalledWith(expect.objectContaining({ localPath: root }));
     const conflictSummary =
-      "Cloud result applied with 1 conflict(s); kept local versions: src/local.ts. Cloud versions staged at refs/openclaw/worker-results/";
+      "Cloud result applied with 1 conflict(s); kept local versions: src/local.ts. Cloud versions staged at refs/bot/worker-results/";
     expect(result.payloads).toEqual([
       { text: expect.stringContaining(`Worker reply\n\n${conflictSummary}`) },
     ]);
     expect(placements.get(SESSION_ID)?.turnClaim).toBeNull();
     expect(placements.get(SESSION_ID)?.workspaceResultConflict).toMatchObject({
       paths: ["src/local.ts"],
-      stagedResultRef: expect.stringMatching(/^refs\/openclaw\/worker-results\//u),
+      stagedResultRef: expect.stringMatching(/^refs\/bot\/worker-results\//u),
     });
     expect(onAgentEvent).toHaveBeenCalledWith({
       stream: "assistant",

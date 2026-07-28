@@ -1,5 +1,5 @@
 // Docs command tests cover docs lookup, fetch handling, and runtime output.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { RuntimeEnv } from "../runtime.js";
 
@@ -61,7 +61,7 @@ describe("docsSearchCommand", () => {
     if (!(url instanceof URL)) {
       throw new Error("expected docs search to call fetch with a URL");
     }
-    expect(url.href).toBe("https://docs.openclaw.ai/api/search?q=plugin+allowlist");
+    expect(url.href).toBe("https://docs.bot.ai/api/search?q=plugin+allowlist");
     expect(init).toMatchObject({ headers: { Accept: "application/json" } });
   });
 
@@ -109,7 +109,7 @@ describe("docsSearchCommand", () => {
     const body = new Uint8Array([
       ...new TextEncoder().encode('{"results":[{"title":"Plugin allow'),
       0xff,
-      ...new TextEncoder().encode('list","link":"https://docs.openclaw.ai/plugins/allowlist"}]}'),
+      ...new TextEncoder().encode('list","link":"https://docs.bot.ai/plugins/allowlist"}]}'),
     ]);
     fetchMock.mockResolvedValueOnce(
       new Response(body, { headers: { "Content-Type": "application/json" } }),
@@ -131,7 +131,7 @@ describe("docsSearchCommand", () => {
           results: [
             {
               title: "Plugin allowlist",
-              link: "https://docs.openclaw.ai/plugins/allowlist",
+              link: "https://docs.bot.ai/plugins/allowlist",
               snippet: "How to configure the allowlist.",
             },
           ],

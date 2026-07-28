@@ -1,6 +1,6 @@
 // Brave tests cover brave web search provider plugin behavior.
 import fs from "node:fs";
-import { validateJsonSchemaValue } from "openclaw/plugin-sdk/json-schema-runtime";
+import { validateJsonSchemaValue } from "bot/plugin-sdk/json-schema-runtime";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { testing } from "../test-api.js";
 import { createBraveWebSearchProvider as createBraveWebSearchContractProvider } from "../web-search-contract-api.js";
@@ -8,7 +8,7 @@ import { createBraveWebSearchProvider } from "./brave-web-search-provider.js";
 
 const loggerInfoMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/runtime-env", () => ({
+vi.mock("bot/plugin-sdk/runtime-env", () => ({
   createSubsystemLogger: () => ({
     info: loggerInfoMock,
     debug: vi.fn(),
@@ -33,13 +33,13 @@ vi.mock("openclaw/plugin-sdk/runtime-env", () => ({
 }));
 
 const braveManifest = JSON.parse(
-  fs.readFileSync(new URL("../openclaw.plugin.json", import.meta.url), "utf-8"),
+  fs.readFileSync(new URL("../bot.plugin.json", import.meta.url), "utf-8"),
 ) as {
   configSchema?: Record<string, unknown>;
 };
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/runtime-env");
+  vi.doUnmock("bot/plugin-sdk/runtime-env");
   vi.resetModules();
 });
 
@@ -161,10 +161,10 @@ describe("brave web search provider", () => {
 
   it("points provider metadata at the canonical Brave docs page", () => {
     expect(createBraveWebSearchProvider().docsUrl).toBe(
-      "https://docs.openclaw.ai/tools/brave-search",
+      "https://docs.bot.ai/tools/brave-search",
     );
     expect(createBraveWebSearchContractProvider().docsUrl).toBe(
-      "https://docs.openclaw.ai/tools/brave-search",
+      "https://docs.bot.ai/tools/brave-search",
     );
   });
 
@@ -172,13 +172,13 @@ describe("brave web search provider", () => {
     vi.stubEnv("BRAVE_API_KEY", "");
     const tool = createBraveTool();
 
-    const result = await tool.execute({ query: "OpenClaw docs" });
+    const result = await tool.execute({ query: "Bot docs" });
 
     expect(result).toEqual({
       error: "missing_brave_api_key",
       message:
-        "web_search (brave) needs a Brave Search API key. Run `openclaw configure --section web` to store it, or set BRAVE_API_KEY in the Gateway environment. If you do not want to configure a search API key, use web_fetch for a specific URL or the browser tool for interactive pages.",
-      docs: "https://docs.openclaw.ai/tools/web",
+        "web_search (brave) needs a Brave Search API key. Run `bot configure --section web` to store it, or set BRAVE_API_KEY in the Gateway environment. If you do not want to configure a search API key, use web_fetch for a specific URL or the browser tool for interactive pages.",
+      docs: "https://docs.bot.ai/tools/web",
     });
   });
 
@@ -470,7 +470,7 @@ describe("brave web search provider", () => {
     expect(result).toEqual({
       error: "invalid_date_range",
       message: "date_after must be before date_before.",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://docs.bot.ai/tools/web",
     });
   });
 
@@ -568,7 +568,7 @@ describe("brave web search provider", () => {
     expect(result).toEqual({
       error: "invalid_date_range",
       message: "date_after cannot be in the future for Brave llm-context mode.",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://docs.bot.ai/tools/web",
     });
     expect(mockFetch).not.toHaveBeenCalled();
   });
@@ -589,7 +589,7 @@ describe("brave web search provider", () => {
       error: "unsupported_date_filter",
       message:
         "Brave llm-context mode requires date_after when date_before is set. Use a bounded date range or freshness.",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://docs.bot.ai/tools/web",
     });
     expect(mockFetch).not.toHaveBeenCalled();
   });

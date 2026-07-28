@@ -61,7 +61,7 @@ function contextWithGateway(client: GatewayBrowserClient, connected: boolean): A
 }
 
 function createPage(context: ApplicationContext): TestMemoryPanel {
-  const page = document.createElement("openclaw-agent-memory-panel") as TestMemoryPanel;
+  const page = document.createElement("bot-agent-memory-panel") as TestMemoryPanel;
   page.context = context;
   page.agentId = "main";
   page.render = () => nothing;

@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw/media-core",
+  "name": "@hanzo/bot-media-core",
   "version": "0.0.0-private",
   "private": true,
   "files": [
@@ -61,7 +61,7 @@
     }
   },
   "dependencies": {
-    "@openclaw/normalization-core": "workspace:*",
+    "@hanzo/bot-normalization-core": "workspace:*",
     "file-type": "22.0.1"
   },
   "scripts": {

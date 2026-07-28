@@ -11,8 +11,8 @@ Adds web search provider support.
 
 ## Distribution
 
-- Package: `@openclaw/duckduckgo-plugin`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-duckduckgo-plugin`
+- Install route: included in Bot
 
 ## Surface
 

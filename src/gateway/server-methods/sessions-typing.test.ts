@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { upsertSessionEntry } from "../../config/sessions/session-accessor.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { closeBotAgentDatabasesForTest } from "../../state/bot-agent-db.js";
+import { withBotTestState } from "../../test-utils/bot-test-state.js";
 import { sessionSuggestionHandlers } from "./sessions-suggestions.js";
 import type { GatewayClient, GatewayRequestContext, RespondFn } from "./types.js";
 
@@ -23,7 +23,7 @@ function client(profileId: string, connId: string): GatewayClient {
       minProtocol: 1,
       maxProtocol: 1,
       client: {
-        id: "openclaw-control-ui",
+        id: "bot-control-ui",
         version: "test",
         platform: "test",
         mode: "webchat",
@@ -83,12 +83,12 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers();
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
+  closeBotAgentDatabasesForTest();
 });
 
 describe("session typing handler", () => {
   it("keeps an identity typing until its last active connection stops", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withBotTestState({ scenario: "minimal" }, async () => {
       vi.useFakeTimers();
       vi.setSystemTime(10_000);
       const sessionKey = "agent:main:main";
@@ -136,7 +136,7 @@ describe("session typing handler", () => {
   });
 
   it("does not carry active connections across a session replacement", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withBotTestState({ scenario: "minimal" }, async () => {
       vi.useFakeTimers();
       vi.setSystemTime(15_000);
       const sessionKey = "agent:main:typing-instance";
@@ -209,7 +209,7 @@ describe("session typing handler", () => {
   });
 
   it("drops a delayed refresh after the session is replaced", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withBotTestState({ scenario: "minimal" }, async () => {
       vi.useFakeTimers();
       vi.setSystemTime(20_000);
       const sessionKey = "agent:main:typing-reset";

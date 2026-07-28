@@ -208,7 +208,7 @@ describe("runMemoryFlushIfNeeded", () => {
   let rootDir = "";
 
   beforeEach(async () => {
-    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-memory-unit-"));
+    rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-memory-unit-"));
     registerMemoryFlushPlanResolverForTest(() => ({
       softThresholdTokens: 4_000,
       forceFlushTranscriptBytes: 1_000_000_000,
@@ -458,7 +458,7 @@ describe("runMemoryFlushIfNeeded", () => {
           defaults: {
             compaction: { memoryFlush: {} },
             models: {
-              "openai/gpt-5.6-sol": { agentRuntime: { id: "openclaw" } },
+              "openai/gpt-5.6-sol": { agentRuntime: { id: "bot" } },
             },
           },
         },
@@ -1362,7 +1362,7 @@ describe("runMemoryFlushIfNeeded", () => {
       updatedAt: Date.now(),
       totalTokens: 120,
       totalTokensFresh: true,
-      agentHarnessId: "openclaw",
+      agentHarnessId: "bot",
       modelSelectionLocked: true,
     };
     const onCompactionNotice = vi.fn();
@@ -1395,7 +1395,7 @@ describe("runMemoryFlushIfNeeded", () => {
       preflightCompactionTrigger: "tokens",
       deferOwningContextEngineCompaction: false,
       contextTokenBudget: 100,
-      agentHarnessId: "openclaw",
+      agentHarnessId: "bot",
       modelSelectionLocked: true,
     });
     expect(incrementCompactionCountMock).not.toHaveBeenCalled();
@@ -2031,7 +2031,7 @@ describe("runMemoryFlushIfNeeded", () => {
     expect(refreshQueuedFollowupSessionMock).not.toHaveBeenCalled();
   });
 
-  it("skips OpenClaw preflight compaction for explicit Codex runtime overrides", async () => {
+  it("skips Bot preflight compaction for explicit Codex runtime overrides", async () => {
     registerMemoryFlushPlanResolverForTest(() => ({
       softThresholdTokens: 4_000,
       forceFlushTranscriptBytes: 1_000_000_000,
@@ -2046,7 +2046,7 @@ describe("runMemoryFlushIfNeeded", () => {
       totalTokens: 347_000,
       totalTokensFresh: false,
       agentRuntimeOverride: "codex",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "bot",
     };
 
     const entry = await runPreflightCompactionIfNeeded({
@@ -2092,7 +2092,7 @@ describe("runMemoryFlushIfNeeded", () => {
       totalTokens: 347_000,
       totalTokensFresh: true,
       agentRuntimeOverride: "codex",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "bot",
     };
 
     const entry = await runPreflightCompactionIfNeeded({
@@ -2178,7 +2178,7 @@ describe("runMemoryFlushIfNeeded", () => {
     expect(compactEmbeddedAgentSessionMock).not.toHaveBeenCalled();
   });
 
-  it("keeps the OpenAI API context window for persisted OpenClaw runtime overrides", async () => {
+  it("keeps the OpenAI API context window for persisted Bot runtime overrides", async () => {
     registerMemoryFlushPlanResolverForTest(() => ({
       softThresholdTokens: 4_000,
       forceFlushTranscriptBytes: 1_000_000_000,
@@ -2192,7 +2192,7 @@ describe("runMemoryFlushIfNeeded", () => {
       updatedAt: Date.now(),
       totalTokens: 347_000,
       totalTokensFresh: false,
-      agentRuntimeOverride: "openclaw",
+      agentRuntimeOverride: "bot",
     };
 
     const entry = await runPreflightCompactionIfNeeded({

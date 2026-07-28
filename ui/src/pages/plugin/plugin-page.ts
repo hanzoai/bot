@@ -15,7 +15,7 @@ import { applicationContext, type ApplicationContext } from "../../app/context.t
 import { hasOperatorApprovalsAccess } from "../../app/operator-access.ts";
 import { t } from "../../i18n/index.ts";
 import { resolveEmbedSandbox } from "../../lib/chat/tool-display.ts";
-import { OpenClawLightDomContentsElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomContentsElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { pluginTabKey } from "./route.ts";
 
@@ -81,7 +81,7 @@ const BUNDLED_TAB_VIEWS: Record<string, () => Promise<BundledPluginTabView>> = {
   },
 };
 
-export class PluginPage extends OpenClawLightDomContentsElement {
+export class PluginPage extends BotLightDomContentsElement {
   @property({ attribute: false }) pluginId = "";
   @property({ attribute: false }) tabId = "";
 
@@ -608,6 +608,6 @@ export class PluginPage extends OpenClawLightDomContentsElement {
   }
 }
 
-if (!customElements.get("openclaw-plugin-page")) {
-  customElements.define("openclaw-plugin-page", PluginPage);
+if (!customElements.get("bot-plugin-page")) {
+  customElements.define("bot-plugin-page", PluginPage);
 }

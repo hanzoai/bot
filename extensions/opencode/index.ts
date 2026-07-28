@@ -1,13 +1,13 @@
-// Opencode plugin entrypoint registers its OpenClaw integration.
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
+// Opencode plugin entrypoint registers its Bot integration.
+import { defineSingleProviderPluginEntry } from "bot/plugin-sdk/provider-entry";
 import {
   buildProviderReplayFamilyHooks,
   matchesExactOrPrefix,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-model-shared";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { applyOpencodeZenConfig, OPENCODE_ZEN_DEFAULT_MODEL } from "./api.js";
 import { opencodeMediaUnderstandingProvider } from "./media-understanding-provider.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 import {
   buildOpencodeZenLiveProviderConfig,
   buildStaticOpencodeZenProviderConfig,

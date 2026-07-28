@@ -23,14 +23,14 @@ describe("Docker E2E client scripts", () => {
   it("keeps session runtime-context checks wired to packaged transcript behavior", () => {
     const source = readScript("scripts/e2e/session-runtime-context-docker-client.ts");
 
-    expect(source).toContain("openclaw/plugin-sdk/agent-sessions");
+    expect(source).toContain("bot/plugin-sdk/agent-sessions");
     expect(source).toContain(
       "../../dist/agents/embedded-agent-runner/run/runtime-context-prompt.js",
     );
     expect(source).toContain("verifyRuntimeContextTranscriptShape(root)");
     expect(source).toContain("verifyDoctorRepair(root)");
-    expect(source).toContain("<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>");
-    expect(source).toContain("openclaw.runtime-context");
+    expect(source).toContain("<<<BEGIN_BOT_INTERNAL_CONTEXT>>>");
+    expect(source).toContain("bot.runtime-context");
     expect(source).toContain("doctor repair left runtime context in active transcript");
   });
 });

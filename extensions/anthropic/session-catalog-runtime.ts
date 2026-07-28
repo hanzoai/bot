@@ -2,20 +2,20 @@ import {
   resolveAllowedModelRef,
   resolveDefaultAgentId,
   resolveDefaultModelForAgent,
-} from "openclaw/plugin-sdk/agent-runtime";
-import { resolveEffectiveAgentRuntime } from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+} from "bot/plugin-sdk/agent-runtime";
+import { resolveEffectiveAgentRuntime } from "bot/plugin-sdk/command-auth-native";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-entry";
 import {
   listSessionCatalogEntries,
   type SessionCatalogEntrySnapshot,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/session-catalog";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import { CLAUDE_CLI_BACKEND_ID, CLAUDE_CLI_ROUTE_PROBE_MODEL_IDS } from "./cli-constants.js";
 import { adoptedSourceKey, CLAUDE_LOCAL_SESSION_HOST_ID } from "./session-catalog-adoption.js";
 
-export function currentClaudeSessionCatalogConfig(api: OpenClawPluginApi): OpenClawConfig {
-  return (api.runtime.config?.current?.() ?? api.config ?? {}) as OpenClawConfig;
+export function currentClaudeSessionCatalogConfig(api: BotPluginApi): BotConfig {
+  return (api.runtime.config?.current?.() ?? api.config ?? {}) as BotConfig;
 }
 
 function boundClaudeSource(
@@ -51,7 +51,7 @@ function boundClaudeSource(
 }
 
 export function listBoundClaudeSessions(
-  api: OpenClawPluginApi,
+  api: BotPluginApi,
   sessionEntries?: SessionCatalogEntrySnapshot,
 ): Map<string, string> {
   const config = currentClaudeSessionCatalogConfig(api);
@@ -76,7 +76,7 @@ export function listBoundClaudeSessions(
  * select a model the operator never routed or allowed.
  */
 export function resolveClaudeCliRoutedModelId(
-  config: OpenClawConfig,
+  config: BotConfig,
   agentId: string,
 ): string | undefined {
   return CLAUDE_CLI_ROUTE_PROBE_MODEL_IDS.find(
@@ -91,7 +91,7 @@ export function resolveClaudeCliRoutedModelId(
 }
 
 export function resolveClaudeCatalogCreateSession(
-  api: OpenClawPluginApi,
+  api: BotPluginApi,
   requestedAgentId?: string,
 ): { model: string; agentRuntime: string } | undefined {
   const config = currentClaudeSessionCatalogConfig(api);

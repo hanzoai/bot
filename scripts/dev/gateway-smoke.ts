@@ -1,4 +1,4 @@
-// Gateway Smoke script supports OpenClaw repository automation.
+// Gateway Smoke script supports Bot repository automation.
 import { fileURLToPath } from "node:url";
 import {
   MIN_CLIENT_PROTOCOL_VERSION,
@@ -39,7 +39,7 @@ const VALUE_FLAGS = new Set(["--url", "--token"]);
 function usage(): string {
   return [
     "Usage: bun scripts/dev/gateway-smoke.ts --url <wss://host[:port]> --token <gateway.auth.token>",
-    "Or set env: OPENCLAW_GATEWAY_URL / OPENCLAW_GATEWAY_TOKEN",
+    "Or set env: BOT_GATEWAY_URL / BOT_GATEWAY_TOKEN",
     "",
     "Options:",
     "  --url <url>       Gateway websocket URL",
@@ -83,8 +83,8 @@ function parseGatewaySmokeCli(
   const { get: getArg, has } = createArgReader([...argv]);
   return {
     help: has("--help") || has("-h"),
-    token: getArg("--token") ?? env.OPENCLAW_GATEWAY_TOKEN,
-    urlRaw: getArg("--url") ?? env.OPENCLAW_GATEWAY_URL,
+    token: getArg("--token") ?? env.BOT_GATEWAY_TOKEN,
+    urlRaw: getArg("--url") ?? env.BOT_GATEWAY_URL,
   };
 }
 
@@ -171,12 +171,12 @@ export async function runGatewaySmoke(
       minProtocol: MIN_CLIENT_PROTOCOL_VERSION,
       maxProtocol: PROTOCOL_VERSION,
       client: {
-        id: "openclaw-ios",
-        displayName: "openclaw gateway smoke test",
+        id: "bot-ios",
+        displayName: "bot gateway smoke test",
         version: "dev",
         platform: "dev",
         mode: "ui",
-        instanceId: "openclaw-dev-smoke",
+        instanceId: "bot-dev-smoke",
       },
       locale: "en-US",
       userAgent: "gateway-smoke",

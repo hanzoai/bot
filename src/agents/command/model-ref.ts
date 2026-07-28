@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { normalizePluginsConfig } from "../../plugins/config-state.js";
 import { normalizeConfiguredProviderCatalogModelId } from "../model-ref-shared.js";
 import type { ModelManifestNormalizationContext } from "../model-ref-shared.js";
@@ -10,7 +10,7 @@ import {
 } from "../model-selection.js";
 
 function hasExactConfiguredProviderModel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider: string;
   model: string;
 }): boolean {
@@ -28,7 +28,7 @@ function hasExactConfiguredProviderModel(params: {
   return false;
 }
 
-function hasConfiguredProvider(params: { cfg: OpenClawConfig; provider: string }): boolean {
+function hasConfiguredProvider(params: { cfg: BotConfig; provider: string }): boolean {
   const normalizedProvider = normalizeProviderId(params.provider);
   if (!normalizedProvider) {
     return false;
@@ -39,7 +39,7 @@ function hasConfiguredProvider(params: { cfg: OpenClawConfig; provider: string }
 }
 
 function allowPluginModelNormalizationForRef(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider: string;
   model: string;
 }): boolean {
@@ -50,7 +50,7 @@ function allowPluginModelNormalizationForRef(params: {
 }
 
 export function normalizeAgentCommandModelRef(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   provider: string,
   model: string,
   modelManifestContext: ModelManifestNormalizationContext,
@@ -62,7 +62,7 @@ export function normalizeAgentCommandModelRef(
 }
 
 export function normalizeAgentCommandDefaultModelRef(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   provider: string,
   model: string,
   modelManifestContext: ModelManifestNormalizationContext,
@@ -80,7 +80,7 @@ export function normalizeAgentCommandDefaultModelRef(
 }
 
 export function parseAgentCommandModelRef(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   raw: string,
   defaultProvider: string,
   modelManifestContext: ModelManifestNormalizationContext,

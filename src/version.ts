@@ -1,10 +1,10 @@
 // Resolves package version metadata for CLI and library callers.
 import { createRequire } from "node:module";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 
 // oxlint-disable-next-line eslint/no-underscore-dangle -- Bundled builds replace this compile-time define identifier.
-declare const __OPENCLAW_VERSION__: string | undefined;
-const CORE_PACKAGE_NAME = "openclaw";
+declare const __BOT_VERSION__: string | undefined;
+const CORE_PACKAGE_NAME = "bot";
 
 const PACKAGE_JSON_CANDIDATES = [
   "../package.json",
@@ -58,7 +58,7 @@ function firstNonEmpty(...values: Array<string | undefined>): string | undefined
 }
 
 function readInjectedVersion(): string | undefined {
-  return typeof __OPENCLAW_VERSION__ === "string" ? __OPENCLAW_VERSION__ : undefined;
+  return typeof __BOT_VERSION__ === "string" ? __BOT_VERSION__ : undefined;
 }
 
 export function readVersionFromPackageJsonForModuleUrl(moduleUrl: string): string | null {
@@ -118,12 +118,12 @@ function resolveVersionFromRuntimeSources(params: {
 }): string {
   const preferredCandidates =
     params.preference === "env-first"
-      ? [params.env["OPENCLAW_VERSION"], params.runtimeVersion]
-      : [params.runtimeVersion, params.env["OPENCLAW_VERSION"]];
+      ? [params.env["BOT_VERSION"], params.runtimeVersion]
+      : [params.runtimeVersion, params.env["BOT_VERSION"]];
   return (
     firstNonEmpty(
       ...preferredCandidates,
-      params.env["OPENCLAW_SERVICE_VERSION"],
+      params.env["BOT_SERVICE_VERSION"],
       params.env["npm_package_version"],
     ) ?? params.fallback
   );
@@ -145,7 +145,7 @@ export function resolveCompatibilityHostVersion(
   env: RuntimeVersionEnv = process.env as RuntimeVersionEnv,
   fallback = RUNTIME_SERVICE_VERSION_FALLBACK,
 ): string {
-  const explicitCompatibilityVersion = firstNonEmpty(env.OPENCLAW_COMPATIBILITY_HOST_VERSION);
+  const explicitCompatibilityVersion = firstNonEmpty(env.BOT_COMPATIBILITY_HOST_VERSION);
   if (explicitCompatibilityVersion) {
     return explicitCompatibilityVersion;
   }
@@ -157,11 +157,11 @@ export function resolveCompatibilityHostVersion(
   });
 }
 
-// Single source of truth for the current OpenClaw version.
+// Single source of truth for the current Bot version.
 // - Embedded/bundled builds: injected define or env var.
 // - Dev/npm builds: package.json.
 export const VERSION = resolveBinaryVersion({
   moduleUrl: import.meta.url,
   injectedVersion: readInjectedVersion(),
-  bundledVersion: process.env.OPENCLAW_BUNDLED_VERSION,
+  bundledVersion: process.env.BOT_BUNDLED_VERSION,
 });

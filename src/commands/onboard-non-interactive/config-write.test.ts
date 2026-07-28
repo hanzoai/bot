@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
 const writeWizardConfigFile = vi.hoisted(() => vi.fn());
 
@@ -10,16 +10,16 @@ import { commitNonInteractiveOnboardConfig } from "./config-write.js";
 describe("commitNonInteractiveOnboardConfig", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    writeWizardConfigFile.mockImplementation(async (config: OpenClawConfig) => config);
+    writeWizardConfigFile.mockImplementation(async (config: BotConfig) => config);
   });
 
   it("keeps the verified config hash and pending-install owner on the canonical writer", async () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: BotConfig = {
       plugins: {
         installs: { demo: { source: "npm", spec: "demo@1.0.0" } },
       },
     };
-    const nextConfig: OpenClawConfig = {
+    const nextConfig: BotConfig = {
       ...baseConfig,
       gateway: { port: 19_001 },
     };
@@ -40,8 +40,8 @@ describe("commitNonInteractiveOnboardConfig", () => {
   });
 
   it("permits config size reduction only for an explicitly requested reset", async () => {
-    const baseConfig: OpenClawConfig = { gateway: { port: 19_001 } };
-    const nextConfig: OpenClawConfig = {};
+    const baseConfig: BotConfig = { gateway: { port: 19_001 } };
+    const nextConfig: BotConfig = {};
 
     await commitNonInteractiveOnboardConfig({
       nextConfig,

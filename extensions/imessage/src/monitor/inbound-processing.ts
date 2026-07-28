@@ -15,26 +15,26 @@ import {
   toInboundMediaFacts,
   type ChannelInboundMediaInput,
   type MediaPlaceholderTextFact,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "bot/plugin-sdk/channel-inbound";
 import {
   createChannelIngressResolver,
   defineStableChannelIngressIdentity,
   type ChannelIngressIdentityDescriptor,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "bot/plugin-sdk/channel-ingress-runtime";
 import {
   buildChannelGroupsScopeTree,
   resolveChannelGroupPolicy,
   resolveScopeRequireMention,
-} from "openclaw/plugin-sdk/channel-policy";
-import { hasControlCommand } from "openclaw/plugin-sdk/command-auth-native";
-import type { DmPolicy, GroupPolicy, OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveChannelContextVisibilityMode } from "openclaw/plugin-sdk/context-visibility-runtime";
-import { createChannelHistoryWindow, type HistoryEntry } from "openclaw/plugin-sdk/reply-history";
-import type { FinalizedMsgContext } from "openclaw/plugin-sdk/reply-runtime";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeTerminalText } from "openclaw/plugin-sdk/text-chunking";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/channel-policy";
+import { hasControlCommand } from "bot/plugin-sdk/command-auth-native";
+import type { DmPolicy, GroupPolicy, BotConfig } from "bot/plugin-sdk/config-contracts";
+import { resolveChannelContextVisibilityMode } from "bot/plugin-sdk/context-visibility-runtime";
+import { createChannelHistoryWindow, type HistoryEntry } from "bot/plugin-sdk/reply-history";
+import type { FinalizedMsgContext } from "bot/plugin-sdk/reply-runtime";
+import { resolveAgentRoute } from "bot/plugin-sdk/routing";
+import { uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
+import { sanitizeTerminalText } from "bot/plugin-sdk/text-chunking";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { resolveIMessageAccount } from "../accounts.js";
 import { resolveIMessageConversationRoute } from "../conversation-route.js";
 import {
@@ -394,7 +394,7 @@ type IMessageInboundDecision =
   | IMessageInboundDispatchDecision;
 
 export async function resolveIMessageInboundDecision(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   message: IMessagePayload;
   opts?: Pick<MonitorIMessageOpts, "requireMention">;
@@ -879,7 +879,7 @@ export async function resolveIMessageInboundDecision(params: {
 }
 
 export async function buildIMessageInboundContext(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   decision: IMessageInboundDispatchDecision;
   message: IMessagePayload;
   envelopeOptions?: EnvelopeFormatOptions;
@@ -1097,7 +1097,7 @@ function buildIMessageEchoScope(params: {
 }
 
 export function buildDirectIMessageReplyTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   sender: string;
 }): string {

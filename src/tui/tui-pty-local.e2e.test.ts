@@ -6,11 +6,11 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { afterAll, beforeAll, describe, expect, it, type TestFunction } from "vitest";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "../../test/helpers/openclaw-test-instance.js";
+  createBotTestInstance,
+  type BotTestInstance,
+} from "../../test/helpers/bot-test-instance.js";
 import type { ModelProviderConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { connectGatewayClient } from "../gateway/test-helpers.e2e.js";
 import { createDeferred } from "../test-utils/deferred.js";
 import { GatewayChatClient } from "./gateway-chat.js";
@@ -425,7 +425,7 @@ function buildTuiCliScript(args: string[]) {
     `const program = new Command();`,
     `program.exitOverride();`,
     `registerTuiCli(program);`,
-    `program.parseAsync([process.execPath, "openclaw", ...${JSON.stringify(args)}], { from: "node" }).catch((error) => {`,
+    `program.parseAsync([process.execPath, "bot", ...${JSON.stringify(args)}], { from: "node" }).catch((error) => {`,
     `  console.error(error);`,
     `  process.exit(1);`,
     `});`,
@@ -509,7 +509,7 @@ function buildLocalModeConfig(params: {
         workspace: params.workspaceDir,
         model: { primary: "tui-pty-mock/gpt-5.5" },
         models: {
-          "tui-pty-mock/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+          "tui-pty-mock/gpt-5.5": { agentRuntime: { id: "bot" } },
         },
         skills: [],
         skipBootstrap: true,
@@ -536,7 +536,7 @@ function buildLocalModeConfig(params: {
       auth: { mode: "token", token: "tui-pty-local" },
     },
     discovery: { mdns: { mode: "off" } },
-  } satisfies OpenClawConfig;
+  } satisfies BotConfig;
 }
 
 async function startLocalModeTui(
@@ -548,14 +548,14 @@ async function startLocalModeTui(
   } = {},
 ) {
   const replyText = "LOCAL_PTY_RESPONSE";
-  const tempDir = await mkdtemp(path.join(tmpdir(), "openclaw-tui-pty-local-"));
+  const tempDir = await mkdtemp(path.join(tmpdir(), "bot-tui-pty-local-"));
   const workspaceDir = path.join(tempDir, "workspace");
   const homeDir = path.join(tempDir, "home");
   const stateDir = path.join(tempDir, "state");
   const xdgConfigHome = path.join(tempDir, "xdg-config");
   const xdgDataHome = path.join(tempDir, "xdg-data");
   const xdgCacheHome = path.join(tempDir, "xdg-cache");
-  const configPath = path.join(tempDir, "openclaw.json");
+  const configPath = path.join(tempDir, "bot.json");
   const mockModel = await startMockModelServer(replyText, {
     invalidEditLoop: opts.invalidEditLoop,
     holdFirstResponse: opts.holdFirstResponse,
@@ -583,14 +583,14 @@ async function startLocalModeTui(
     cwd: process.cwd(),
     env: {
       HOME: homeDir,
-      OPENCLAW_HOME: homeDir,
-      OPENCLAW_CONFIG_PATH: configPath,
-      OPENCLAW_STATE_DIR: stateDir,
+      BOT_HOME: homeDir,
+      BOT_CONFIG_PATH: configPath,
+      BOT_STATE_DIR: stateDir,
       XDG_CONFIG_HOME: xdgConfigHome,
       XDG_DATA_HOME: xdgDataHome,
       XDG_CACHE_HOME: xdgCacheHome,
-      OPENCLAW_THEME: "dark",
-      OPENCLAW_CODEX_DISCOVERY_LIVE: "0",
+      BOT_THEME: "dark",
+      BOT_CODEX_DISCOVERY_LIVE: "0",
       NO_COLOR: undefined,
     },
     exitTimeoutMs: LOCAL_EXIT_TIMEOUT_MS,
@@ -612,7 +612,7 @@ async function startLocalModeTui(
 }
 
 type SharedGatewayFixture = {
-  gateway: OpenClawTestInstance;
+  gateway: BotTestInstance;
   controlClient: GatewayChatClient;
   mockModel: MockModelServer;
   cleanup: () => Promise<void>;
@@ -637,7 +637,7 @@ function buildGatewayModeConfig(params: { tempDir: string; providerBaseUrl: stri
         workspace: path.join(params.tempDir, defaultScenario.agentId),
         model: { primary: defaultModelRef },
         models: Object.fromEntries(
-          modelRefs.map((modelRef) => [modelRef, { agentRuntime: { id: "openclaw" } }]),
+          modelRefs.map((modelRef) => [modelRef, { agentRuntime: { id: "bot" } }]),
         ),
         skills: [],
         skipBootstrap: true,
@@ -669,13 +669,13 @@ function buildGatewayModeConfig(params: { tempDir: string; providerBaseUrl: stri
         mode: "followup",
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies BotConfig;
 }
 
 async function startSharedGatewayFixture(): Promise<SharedGatewayFixture> {
-  const tempDir = await mkdtemp(path.join(tmpdir(), "openclaw-tui-pty-gateway-"));
+  const tempDir = await mkdtemp(path.join(tmpdir(), "bot-tui-pty-gateway-"));
   let mockModel: MockModelServer | undefined;
-  let gateway: OpenClawTestInstance | undefined;
+  let gateway: BotTestInstance | undefined;
   let controlClient: GatewayChatClient | undefined;
   try {
     const scenarios: GatewayScenario[] = Object.values(GATEWAY_SCENARIOS);
@@ -695,13 +695,13 @@ async function startSharedGatewayFixture(): Promise<SharedGatewayFixture> {
         ]),
       ),
     );
-    gateway = await createOpenClawTestInstance({
+    gateway = await createBotTestInstance({
       name: "tui-pty-shared-gateway",
       gatewayToken: "tui-pty-local",
       config: buildGatewayModeConfig({ tempDir, providerBaseUrl: mockModel.baseUrl }),
       env: {
-        OPENCLAW_CODEX_DISCOVERY_LIVE: "0",
-        OPENCLAW_SKIP_PROVIDERS: undefined,
+        BOT_CODEX_DISCOVERY_LIVE: "0",
+        BOT_SKIP_PROVIDERS: undefined,
       },
     });
     await gateway.startGateway();
@@ -803,7 +803,7 @@ async function startGatewayModeTui(
     cwd: process.cwd(),
     env: {
       ...shared.gateway.env,
-      OPENCLAW_THEME: "dark",
+      BOT_THEME: "dark",
       NO_COLOR: undefined,
     },
     exitTimeoutMs: LOCAL_EXIT_TIMEOUT_MS,
@@ -983,7 +983,7 @@ describe("TUI PTY real backends", () => {
           "steer the active local turn",
         );
         await fixture.run.waitForOutput("LOCAL_STEER_COMPLETE");
-        if (process.env.OPENCLAW_BEHAVIOR_EVIDENCE === "1") {
+        if (process.env.BOT_BEHAVIOR_EVIDENCE === "1") {
           console.info(
             "[behavior-evidence] local-steer",
             JSON.stringify({

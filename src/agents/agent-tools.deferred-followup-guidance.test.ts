@@ -2,7 +2,7 @@
  * Tests cron-aware deferred follow-up guidance in exec/process descriptions.
  * Protects the model-facing text selected after tool filtering.
  */
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import { getPluginToolMeta, setPluginToolMeta } from "../plugins/tools.js";
 import { applyDeferredFollowupToolDescriptions } from "./agent-tools.deferred-followup.js";
@@ -22,7 +22,7 @@ function findToolDescription(toolName: string, includeCron: boolean) {
   };
 }
 
-describe("createOpenClawCodingTools deferred follow-up guidance", () => {
+describe("createBotCodingTools deferred follow-up guidance", () => {
   it("keeps cron-specific guidance when cron survives filtering", () => {
     const exec = findToolDescription("exec", true);
     const process = findToolDescription("process", true);

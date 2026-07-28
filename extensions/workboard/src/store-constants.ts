@@ -1,8 +1,8 @@
-import type { WorkboardClaim } from "@openclaw/workboard-contract";
+import type { WorkboardClaim } from "@hanzo/bot-workboard-contract";
 import {
   MAX_DATE_TIMESTAMP_MS,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 
 export const POSITION_STEP = 1000;
 export const MAX_CARDS = 2000;

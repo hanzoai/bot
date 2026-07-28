@@ -27,7 +27,7 @@ export function shouldSkipLinuxArmAndroidGradle(options = {}) {
   const platform = options.platform ?? process.platform;
   const arch = options.arch ?? process.arch;
   const env = options.env ?? process.env;
-  if (env.OPENCLAW_ANDROID_GRADLE_ALLOW_LINUX_ARM === "1") {
+  if (env.BOT_ANDROID_GRADLE_ALLOW_LINUX_ARM === "1") {
     return false;
   }
   return platform === "linux" && (arch === "arm64" || arch === "arm");
@@ -37,7 +37,7 @@ export function linuxArmAndroidGradleSkipMessage(platform = process.platform, ar
   return (
     `[android-gradle] skipped on ${platform}/${arch}: ` +
     "Android Gradle resource tasks require the Linux x86_64 AAPT2 artifact. " +
-    "Run this task on x64 Linux/macOS or set OPENCLAW_ANDROID_GRADLE_ALLOW_LINUX_ARM=1 to try anyway."
+    "Run this task on x64 Linux/macOS or set BOT_ANDROID_GRADLE_ALLOW_LINUX_ARM=1 to try anyway."
   );
 }
 

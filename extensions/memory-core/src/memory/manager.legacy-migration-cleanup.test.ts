@@ -3,22 +3,22 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import type { BotConfig } from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import {
   ensureMemoryIndexSchema,
   loadSqliteVecExtension,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { resolveOpenClawAgentSqlitePath } from "openclaw/plugin-sdk/sqlite-runtime";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { resolveBotAgentSqlitePath } from "bot/plugin-sdk/sqlite-runtime";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  closeOpenClawStateDatabaseForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+  closeBotAgentDatabasesForTest,
+  closeBotStateDatabaseForTest,
+} from "bot/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import "./test-runtime-mocks.js";
 import { closeAllMemorySearchManagers, getMemorySearchManager } from "./index.js";
 import type { MemoryIndexManager } from "./manager.js";
 
-const originalStateDir = process.env.OPENCLAW_STATE_DIR;
+const originalStateDir = process.env.BOT_STATE_DIR;
 
 describe("memory legacy migration cleanup", () => {
   let fixtureRoot = "";
@@ -26,28 +26,28 @@ describe("memory legacy migration cleanup", () => {
   let manager: MemoryIndexManager | undefined;
 
   beforeEach(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-memory-migration-cleanup-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-memory-migration-cleanup-"));
     workspaceDir = path.join(fixtureRoot, "workspace");
     await fs.mkdir(path.join(workspaceDir, "memory"), { recursive: true });
-    Reflect.set(process.env, "OPENCLAW_STATE_DIR", path.join(fixtureRoot, "state"));
+    Reflect.set(process.env, "BOT_STATE_DIR", path.join(fixtureRoot, "state"));
   });
 
   afterEach(async () => {
     await manager?.close();
     manager = undefined;
     await closeAllMemorySearchManagers();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
     if (originalStateDir === undefined) {
-      Reflect.deleteProperty(process.env, "OPENCLAW_STATE_DIR");
+      Reflect.deleteProperty(process.env, "BOT_STATE_DIR");
     } else {
-      Reflect.set(process.env, "OPENCLAW_STATE_DIR", originalStateDir);
+      Reflect.set(process.env, "BOT_STATE_DIR", originalStateDir);
     }
     await fs.rm(fixtureRoot, { recursive: true, force: true });
   });
 
   it("removes migrated chunks and FTS rows when the dirty source file is already deleted", async () => {
-    const dbPath = resolveOpenClawAgentSqlitePath({ agentId: "main" });
+    const dbPath = resolveBotAgentSqlitePath({ agentId: "main" });
     await fs.mkdir(path.dirname(dbPath), { recursive: true });
     const seedDb = new DatabaseSync(dbPath, { allowExtension: true });
     let vectorExtensionPath: string | undefined;
@@ -154,7 +154,7 @@ describe("memory legacy migration cleanup", () => {
           },
           list: [{ id: "main", default: true }],
         },
-      }) as OpenClawConfig;
+      }) as BotConfig;
     const cfg = createConfig({ provider: "none", vectorEnabled: false });
     const result = await getMemorySearchManager({ cfg, agentId: "main" });
     if (!result.manager) {

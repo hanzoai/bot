@@ -2,7 +2,7 @@
 // filtering, plugin metadata, payload validation, and response shaping.
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   GATEWAY_CLIENT_MODES,
@@ -31,7 +31,7 @@ const hookMocks = vi.hoisted(() => ({
 const sessionEntries = vi.hoisted(() => new Map<string, Record<string, unknown>>());
 
 let cfg: Record<string, unknown> = {};
-let lastCreateOpenClawToolsContext: Record<string, unknown> | undefined;
+let lastCreateBotToolsContext: Record<string, unknown> | undefined;
 
 // Perf: keep this suite pure unit. Mock heavyweight config/session modules.
 vi.mock("../config/config.js", () => ({
@@ -92,7 +92,7 @@ vi.mock("../plugins/tools.js", () => ({
 
 // Perf: the real tool factory instantiates many tools per request; for these HTTP
 // routing/policy tests we only need a small set of tool names.
-vi.mock("../agents/openclaw-tools.js", () => {
+vi.mock("../agents/bot-tools.js", () => {
   const toolInputError = (message: string) => {
     const err = new Error(message);
     err.name = "ToolInputError";
@@ -122,10 +122,10 @@ vi.mock("../agents/openclaw-tools.js", () => {
       execute: async () => ({
         ok: true,
         route: {
-          agentTo: lastCreateOpenClawToolsContext?.agentTo,
-          agentThreadId: lastCreateOpenClawToolsContext?.agentThreadId,
+          agentTo: lastCreateBotToolsContext?.agentTo,
+          agentThreadId: lastCreateBotToolsContext?.agentThreadId,
         },
-        inheritedToolDenylist: lastCreateOpenClawToolsContext?.inheritedToolDenylist,
+        inheritedToolDenylist: lastCreateBotToolsContext?.inheritedToolDenylist,
       }),
     },
     {
@@ -221,8 +221,8 @@ vi.mock("../agents/openclaw-tools.js", () => {
   ];
 
   return {
-    createOpenClawTools: (ctx: Record<string, unknown>) => {
-      lastCreateOpenClawToolsContext = ctx;
+    createBotTools: (ctx: Record<string, unknown>) => {
+      lastCreateBotToolsContext = ctx;
       return ctx.disablePluginTools ? tools.filter((tool) => tool.name !== "browser") : tools;
     },
   };
@@ -289,11 +289,11 @@ afterAll(async () => {
 });
 
 beforeEach(() => {
-  delete process.env.OPENCLAW_GATEWAY_TOKEN;
-  delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+  delete process.env.BOT_GATEWAY_TOKEN;
+  delete process.env.BOT_GATEWAY_PASSWORD;
   pluginHttpHandlers = [];
   cfg = {};
-  lastCreateOpenClawToolsContext = undefined;
+  lastCreateBotToolsContext = undefined;
   pluginToolMetaState.clear();
   sessionEntries.clear();
   pluginToolMetaState.set("plugin_doctor", { pluginId: "test-plugin", optional: true });
@@ -309,8 +309,8 @@ beforeEach(() => {
   vi.mocked(authorizeHttpGatewayConnect).mockResolvedValue({ ok: true });
 });
 
-const gatewayAuthHeaders = () => ({ "x-openclaw-scopes": "operator.write" });
-const gatewayAdminHeaders = () => ({ "x-openclaw-scopes": "operator.admin" });
+const gatewayAuthHeaders = () => ({ "x-bot-scopes": "operator.write" });
+const gatewayAdminHeaders = () => ({ "x-bot-scopes": "operator.admin" });
 
 const allowAgentsListForMain = () => {
   cfg = {
@@ -492,7 +492,7 @@ describe("POST /tools/invoke", () => {
       ok: false,
       error: { type: "invalid_request", message: expect.stringContaining("reserved") },
     });
-    expect(lastCreateOpenClawToolsContext).toBeUndefined();
+    expect(lastCreateBotToolsContext).toBeUndefined();
   });
 
   it("allows tools for an existing unlocked legacy harness-prefixed session", async () => {
@@ -518,7 +518,7 @@ describe("POST /tools/invoke", () => {
     const res = await invokeAgentsListAuthed({ sessionKey });
 
     expect(res.status).toBe(400);
-    expect(lastCreateOpenClawToolsContext).toBeUndefined();
+    expect(lastCreateBotToolsContext).toBeUndefined();
   });
 
   it("invokes a tool and returns {ok:true,result}", async () => {
@@ -529,9 +529,9 @@ describe("POST /tools/invoke", () => {
     const body = await res.json();
     expect(body.ok).toBe(true);
     expect(body).toHaveProperty("result");
-    expect(lastCreateOpenClawToolsContext?.allowMediaInvokeCommands).toBe(true);
-    expect(lastCreateOpenClawToolsContext?.disablePluginTools).toBe(true);
-    expect(lastCreateOpenClawToolsContext?.conversationReadOrigin).toBe("direct-operator");
+    expect(lastCreateBotToolsContext?.allowMediaInvokeCommands).toBe(true);
+    expect(lastCreateBotToolsContext?.disablePluginTools).toBe(true);
+    expect(lastCreateBotToolsContext?.conversationReadOrigin).toBe("direct-operator");
     const hookArg = firstHookCallArg();
     expect(hookArg.toolName).toBe("agents_list");
     const hookCtx = hookArg.ctx;
@@ -549,7 +549,7 @@ describe("POST /tools/invoke", () => {
     const res = await invokeAgentsListAuthed({ sessionKey: "main" });
 
     expect(res.status).toBe(200);
-    expect(lastCreateOpenClawToolsContext?.allowGatewaySubagentBinding).toBe(true);
+    expect(lastCreateBotToolsContext?.allowGatewaySubagentBinding).toBe(true);
   });
 
   it("keeps plugin tools enabled for non-core tool invokes", async () => {
@@ -562,7 +562,7 @@ describe("POST /tools/invoke", () => {
     });
 
     expect(res.status).toBe(200);
-    expect(lastCreateOpenClawToolsContext?.disablePluginTools).toBe(false);
+    expect(lastCreateBotToolsContext?.disablePluginTools).toBe(false);
   });
 
   it("allows the requested plugin tool through Gateway profile filtering", async () => {
@@ -580,7 +580,7 @@ describe("POST /tools/invoke", () => {
     const body = await expectOkInvokeResponse(res);
     expect(body.result?.ok).toBe(true);
     expect(body.result?.permissionFlow).toBe(true);
-    expect(lastCreateOpenClawToolsContext?.pluginToolAllowlist).toContain("plugin_doctor");
+    expect(lastCreateBotToolsContext?.pluginToolAllowlist).toContain("plugin_doctor");
   });
 
   it("uses tools.alsoAllow for optional plugin discovery without loading every plugin tool", async () => {
@@ -598,8 +598,8 @@ describe("POST /tools/invoke", () => {
     const body = await expectOkInvokeResponse(res);
     expect(body.result?.ok).toBe(true);
     expect(body.result?.permissionFlow).toBe(true);
-    expect(lastCreateOpenClawToolsContext?.pluginToolAllowlist).toContain("plugin_doctor");
-    expect(lastCreateOpenClawToolsContext?.pluginToolAllowlist).not.toContain("*");
+    expect(lastCreateBotToolsContext?.pluginToolAllowlist).toContain("plugin_doctor");
+    expect(lastCreateBotToolsContext?.pluginToolAllowlist).not.toContain("*");
   });
 
   it("blocks tool execution when before_tool_call rejects the invoke", async () => {
@@ -759,8 +759,8 @@ describe("POST /tools/invoke", () => {
       port: sharedPort,
       headers: {
         ...gatewayAuthHeaders(),
-        "x-openclaw-message-to": "channel:24514",
-        "x-openclaw-thread-id": "thread-24514",
+        "x-bot-message-to": "channel:24514",
+        "x-bot-thread-id": "thread-24514",
       },
       tool: "sessions_spawn",
       sessionKey: "main",
@@ -869,7 +869,7 @@ describe("POST /tools/invoke", () => {
       port: sharedPort,
       headers: {
         authorization: "Bearer secret",
-        "x-openclaw-scopes": "operator.write",
+        "x-bot-scopes": "operator.write",
       },
       tool: "nodes",
       sessionKey: "main",
@@ -877,7 +877,7 @@ describe("POST /tools/invoke", () => {
 
     const body = await expectOkInvokeResponse(res);
     expect(body.result).toEqual({ ok: true, result: "nodes" });
-    expect(lastCreateOpenClawToolsContext?.senderIsOwner).toBe(true);
+    expect(lastCreateBotToolsContext?.senderIsOwner).toBe(true);
   });
 
   it("treats gateway.tools.deny as higher priority than gateway.tools.allow", async () => {
@@ -991,7 +991,7 @@ describe("POST /tools/invoke", () => {
     const res = await invokeTool({
       port: sharedPort,
       headers: {
-        "x-openclaw-scopes": "",
+        "x-bot-scopes": "",
       },
       tool: "agents_list",
       sessionKey: "main",
@@ -1026,7 +1026,7 @@ describe("POST /tools/invoke", () => {
       port: sharedPort,
       headers: {
         authorization: "Bearer secret",
-        "x-openclaw-scopes": "operator.approvals",
+        "x-bot-scopes": "operator.approvals",
       },
       tool: "write_scoped_test",
       sessionKey: "main",
@@ -1034,7 +1034,7 @@ describe("POST /tools/invoke", () => {
 
     const writeScopedBody = await expectOkInvokeResponse(writeScopedRes);
     expect(writeScopedBody.result).toEqual({ ok: true, result: "write-scoped" });
-    expect(lastCreateOpenClawToolsContext?.senderIsOwner).toBe(true);
+    expect(lastCreateBotToolsContext?.senderIsOwner).toBe(true);
   });
 
   it("executes tools for write-scoped callers on the HTTP path", async () => {
@@ -1055,13 +1055,13 @@ describe("POST /tools/invoke", () => {
       port: sharedPort,
       headers: {
         ...gatewayAuthHeaders(),
-        "x-openclaw-sender-is-owner": "true",
+        "x-bot-sender-is-owner": "true",
       },
       tool: "session_status",
       sessionKey: "main",
     });
     expect(writeRes.status).toBe(200);
-    expect(lastCreateOpenClawToolsContext?.senderIsOwner).toBe(false);
+    expect(lastCreateBotToolsContext?.senderIsOwner).toBe(false);
 
     const adminRes = await invokeTool({
       port: sharedPort,
@@ -1070,7 +1070,7 @@ describe("POST /tools/invoke", () => {
       sessionKey: "main",
     });
     expect(adminRes.status).toBe(200);
-    expect(lastCreateOpenClawToolsContext?.senderIsOwner).toBe(true);
+    expect(lastCreateBotToolsContext?.senderIsOwner).toBe(true);
   });
 
   it("extends the HTTP deny list to high-risk execution and file tools", async () => {
@@ -1111,7 +1111,7 @@ describe("POST /tools/invoke", () => {
 
     const body = await expectOkInvokeResponse(res);
     expect(body.result).toEqual({ ok: true, result: "browser" });
-    expect(lastCreateOpenClawToolsContext?.disablePluginTools).toBe(false);
+    expect(lastCreateBotToolsContext?.disablePluginTools).toBe(false);
   });
 });
 
@@ -1129,7 +1129,7 @@ describe("tools.invoke Gateway RPC", () => {
       ok: false,
       error: { code: "validation_error", message: expect.stringContaining("reserved") },
     });
-    expect(lastCreateOpenClawToolsContext).toBeUndefined();
+    expect(lastCreateBotToolsContext).toBeUndefined();
   });
 
   it("allows existing unlocked legacy harness-prefixed sessions", async () => {
@@ -1162,7 +1162,7 @@ describe("tools.invoke Gateway RPC", () => {
     expect(call?.[1]?.toolName).toBe("agents_list");
     expect(call?.[1]?.output).toEqual({ ok: true, result: [] });
     expect((call?.[1] as { source?: unknown } | undefined)?.source).toBe("core");
-    expect(lastCreateOpenClawToolsContext?.allowGatewaySubagentBinding).toBe(true);
+    expect(lastCreateBotToolsContext?.allowGatewaySubagentBinding).toBe(true);
     const hookArg = firstHookCallArg();
     expect(hookArg.approvalMode).toBe("report");
     expect(hookArg.toolName).toBe("agents_list");
@@ -1174,7 +1174,7 @@ describe("tools.invoke Gateway RPC", () => {
     expect(hookCtx.agentId).toBe("main");
     expect(hookCtx.config).toBe(cfg);
     expect(hookCtx.sessionKey).toBe("agent:main:main");
-    expect(lastCreateOpenClawToolsContext?.conversationReadOrigin).toBe("delegated");
+    expect(lastCreateBotToolsContext?.conversationReadOrigin).toBe("delegated");
   });
 
   it("requires an operation-local marker for direct conversation reads", async () => {
@@ -1194,8 +1194,8 @@ describe("tools.invoke Gateway RPC", () => {
       },
       ["tool-events", "inline-widgets"],
     );
-    expect(lastCreateOpenClawToolsContext?.conversationReadOrigin).toBe("direct-operator");
-    expect(lastCreateOpenClawToolsContext?.clientCaps).toEqual(["tool-events", "inline-widgets"]);
+    expect(lastCreateBotToolsContext?.conversationReadOrigin).toBe("direct-operator");
+    expect(lastCreateBotToolsContext?.clientCaps).toEqual(["tool-events", "inline-widgets"]);
 
     await invokeToolsRpc(
       {
@@ -1209,7 +1209,7 @@ describe("tools.invoke Gateway RPC", () => {
         mode: GATEWAY_CLIENT_MODES.CLI,
       },
     );
-    expect(lastCreateOpenClawToolsContext?.conversationReadOrigin).toBe("delegated");
+    expect(lastCreateBotToolsContext?.conversationReadOrigin).toBe("delegated");
   });
 
   it("keeps owner-only tools unavailable to non-owner RPC callers despite gateway.tools.allow", async () => {
@@ -1231,7 +1231,7 @@ describe("tools.invoke Gateway RPC", () => {
       const error = call?.[1]?.error as { code?: string; message?: string } | undefined;
       expect(error?.code, tool).toBe("not_found");
     }
-    expect(lastCreateOpenClawToolsContext?.senderIsOwner).toBe(false);
+    expect(lastCreateBotToolsContext?.senderIsOwner).toBe(false);
   });
 
   it("keeps operator.admin RPC callers as owner for explicitly allowed owner-only tools", async () => {
@@ -1250,7 +1250,7 @@ describe("tools.invoke Gateway RPC", () => {
     expect(call?.[1]?.ok).toBe(true);
     expect(call?.[1]?.toolName).toBe("nodes");
     expect(call?.[1]?.output).toEqual({ ok: true, result: "nodes" });
-    expect(lastCreateOpenClawToolsContext?.senderIsOwner).toBe(true);
+    expect(lastCreateBotToolsContext?.senderIsOwner).toBe(true);
   });
 
   it("returns typed approval-needed refusal when the policy hook blocks", async () => {

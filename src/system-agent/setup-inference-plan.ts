@@ -15,7 +15,7 @@ import {
   normalizeAgentModelRefForConfig,
   resolveAgentModelPrimaryValue,
 } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { enablePluginInConfig } from "../plugins/enable.js";
 import {
@@ -58,8 +58,8 @@ export async function buildTestPlan(params: {
   modelRef?: string;
   authChoice?: string;
   apiKey?: string;
-  cfg: OpenClawConfig;
-  sourceCfg: OpenClawConfig;
+  cfg: BotConfig;
+  sourceCfg: BotConfig;
   workspaceDir: string;
   pluginWorkspaceDir: string;
   agentDir: string;
@@ -196,7 +196,7 @@ export async function buildTestPlan(params: {
         modelRef,
         agentDir: params.agentDir,
         config: prepared.config,
-        agentId: "openclaw",
+        agentId: "bot",
         routeAgentId: resolveDefaultAgentId(prepared.config),
         ...(prepared.selectedProfileId ? { authProfileId: prepared.selectedProfileId } : {}),
         persistModelRef: modelRef,
@@ -249,7 +249,7 @@ export async function buildTestPlan(params: {
         model: route.model,
         modelRef: route.modelLabel,
         config: route.runConfig,
-        agentId: "openclaw",
+        agentId: "bot",
         routeAgentId: route.agentId,
         agentDir: route.agentDir,
         ...(route.runner === "embedded"
@@ -269,7 +269,7 @@ export async function buildTestPlan(params: {
         ...ref,
         modelRef,
         config: cfg,
-        agentId: "openclaw",
+        agentId: "bot",
         routeAgentId: resolveDefaultAgentId(cfg),
         persistModelRef: modelRef,
       };
@@ -285,7 +285,7 @@ export async function buildTestPlan(params: {
         ...ref,
         modelRef,
         config: cfg,
-        agentId: "openclaw",
+        agentId: "bot",
         routeAgentId: resolveDefaultAgentId(cfg),
         persistModelRef: modelRef,
       };
@@ -316,7 +316,7 @@ export async function buildTestPlan(params: {
           modelRef,
           agentHarnessRuntimeOverride: "codex",
           config: preparedAuth.config,
-          agentId: "openclaw",
+          agentId: "bot",
           routeAgentId: resolveDefaultAgentId(preparedAuth.config),
           agentDir: params.agentDir,
           cleanupBundleMcpOnRunEnd: true,
@@ -336,7 +336,7 @@ export async function buildTestPlan(params: {
         modelRef,
         agentHarnessRuntimeOverride: "codex",
         config: cfg,
-        agentId: "openclaw",
+        agentId: "bot",
         routeAgentId: resolveDefaultAgentId(cfg),
         agentDir: params.agentDir,
         cleanupBundleMcpOnRunEnd: true,
@@ -354,7 +354,7 @@ export async function buildTestPlan(params: {
         ...ref,
         modelRef,
         config: cfg,
-        agentId: "openclaw",
+        agentId: "bot",
         routeAgentId: resolveDefaultAgentId(cfg),
         persistModelRef: modelRef,
       };
@@ -370,7 +370,7 @@ export async function buildTestPlan(params: {
         ...ref,
         modelRef,
         config: cfg,
-        agentId: "openclaw",
+        agentId: "bot",
         routeAgentId: resolveDefaultAgentId(cfg),
         persistModelRef: modelRef,
       };
@@ -445,7 +445,7 @@ export async function buildTestPlan(params: {
         };
       }
       let result: ProviderAuthResult;
-      let preparedConfig: OpenClawConfig;
+      let preparedConfig: BotConfig;
       try {
         if (interactive) {
           if (!params.prompter) {
@@ -546,7 +546,7 @@ export async function buildTestPlan(params: {
         modelRef,
         agentDir: params.agentDir,
         config: preparedAuth.config,
-        agentId: "openclaw",
+        agentId: "bot",
         routeAgentId: resolveDefaultAgentId(preparedAuth.config),
         authProfileId: preparedAuth.selectedProfileId,
         persistModelRef: modelRef,
@@ -565,14 +565,14 @@ export async function buildTestPlan(params: {
 }
 
 async function runProviderManualSecretMethod(params: {
-  config: OpenClawConfig;
-  baseConfig: OpenClawConfig;
+  config: BotConfig;
+  baseConfig: BotConfig;
   choice: ProviderAuthChoiceMetadata;
   method: ProviderAuthMethod;
   apiKey: string;
   agentDir: string;
   workspaceDir: string;
-}): Promise<{ result: ProviderAuthResult; config: OpenClawConfig }> {
+}): Promise<{ result: ProviderAuthResult; config: BotConfig }> {
   const optionKey = params.choice.optionKey;
   const runNonInteractive = params.method.runNonInteractive;
   if (!optionKey || !params.choice.cliOption || !runNonInteractive) {

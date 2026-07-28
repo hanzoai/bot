@@ -1,6 +1,6 @@
 // Search setup tests cover search provider setup and config changes.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
 import { createNonExitingRuntime } from "../runtime.js";
@@ -23,7 +23,7 @@ const mockGrokProvider = vi.hoisted(() => ({
   pluginId: "xai",
   label: "Grok",
   hint: "Search with xAI",
-  docsUrl: "https://docs.openclaw.ai/tools/web",
+  docsUrl: "https://docs.bot.ai/tools/web",
   requiresCredential: true,
   credentialLabel: "xAI API key",
   placeholder: "xai-...",
@@ -114,7 +114,7 @@ const mockCodexProvider = vi.hoisted(() => ({
   pluginId: "codex",
   label: "Codex Hosted Search",
   hint: "Grounded answers through your Codex app-server account",
-  docsUrl: "https://docs.openclaw.ai/tools/web",
+  docsUrl: "https://docs.bot.ai/tools/web",
   requiresCredential: false,
   credentialLabel: "Codex app-server account",
   placeholder: "",
@@ -146,7 +146,7 @@ const ensureOnboardingPluginInstalled = vi.hoisted(() =>
             [entry.pluginId]: {
               source: "npm",
               spec: entry.install.npmSpec,
-              installPath: `/tmp/openclaw-plugins/${entry.pluginId}`,
+              installPath: `/tmp/bot-plugins/${entry.pluginId}`,
             },
           },
         },
@@ -202,7 +202,7 @@ describe("runSearchSetupFlow", () => {
       select: select as never,
     });
 
-    await withEnvAsync({ OPENCLAW_LOCALE: "zh-CN" }, async () => {
+    await withEnvAsync({ BOT_LOCALE: "zh-CN" }, async () => {
       await runSearchSetupFlow(
         { plugins: { allow: ["xai"] } },
         createNonExitingRuntime(),
@@ -217,7 +217,7 @@ describe("runSearchSetupFlow", () => {
         options: expect.arrayContaining([
           expect.objectContaining({
             label: "暂时跳过",
-            hint: "稍后可用 openclaw configure --section web 配置",
+            hint: "稍后可用 bot configure --section web 配置",
           }),
         ]),
       }),
@@ -395,10 +395,10 @@ describe("runSearchSetupFlow", () => {
     expect(note).toHaveBeenNthCalledWith(
       3,
       [
-        "Secret references enabled — OpenClaw will store a reference instead of the API key.",
+        "Secret references enabled — Bot will store a reference instead of the API key.",
         "Env var: XAI_API_KEY.",
         "Set XAI_API_KEY in the Gateway environment.",
-        "Docs: https://docs.openclaw.ai/tools/web",
+        "Docs: https://docs.bot.ai/tools/web",
       ].join("\n"),
       "Web search",
     );
@@ -538,7 +538,7 @@ describe("runSearchSetupFlow", () => {
     expect(installRequest.entry?.pluginId).toBe("brave");
     expect(installRequest.entry?.label).toBe("Brave");
     expect(installRequest.entry?.trustedSourceLinkedOfficialInstall).toBe(true);
-    expect(installRequest.entry?.install?.npmSpec).toBe("@openclaw/brave-plugin");
+    expect(installRequest.entry?.install?.npmSpec).toBe("@hanzo/bot-brave-plugin");
     expect(installRequest.autoConfirmSingleSource).toBe(true);
     expect(next.tools?.web?.search?.provider).toBe("brave");
     expect(next.tools?.web?.search?.enabled).toBe(true);
@@ -547,7 +547,7 @@ describe("runSearchSetupFlow", () => {
       | undefined;
     expect(braveConfig?.webSearch?.apiKey).toBe("brave-test-key");
     expect(next.plugins?.installs?.brave?.source).toBe("npm");
-    expect(next.plugins?.installs?.brave?.spec).toBe("@openclaw/brave-plugin");
+    expect(next.plugins?.installs?.brave?.spec).toBe("@hanzo/bot-brave-plugin");
   });
 
   it("installs an external catalog search provider when web search stays disabled", async () => {
@@ -578,7 +578,7 @@ describe("runSearchSetupFlow", () => {
     expect(installRequest.entry?.pluginId).toBe("brave");
     expect(installRequest.entry?.label).toBe("Brave");
     expect(installRequest.entry?.trustedSourceLinkedOfficialInstall).toBe(true);
-    expect(installRequest.entry?.install?.npmSpec).toBe("@openclaw/brave-plugin");
+    expect(installRequest.entry?.install?.npmSpec).toBe("@hanzo/bot-brave-plugin");
     expect(installRequest.autoConfirmSingleSource).toBe(true);
     expect(next.tools?.web?.search?.provider).toBe("brave");
     expect(next.tools?.web?.search?.enabled).toBe(false);
@@ -588,6 +588,6 @@ describe("runSearchSetupFlow", () => {
     expect(braveConfig?.webSearch?.apiKey).toBe("brave-disabled-key");
     expect(next.plugins?.entries?.brave?.enabled).toBeUndefined();
     expect(next.plugins?.installs?.brave?.source).toBe("npm");
-    expect(next.plugins?.installs?.brave?.spec).toBe("@openclaw/brave-plugin");
+    expect(next.plugins?.installs?.brave?.spec).toBe("@hanzo/bot-brave-plugin");
   });
 });

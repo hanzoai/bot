@@ -1,8 +1,8 @@
 // Implements commitment listing and dismissal commands for scheduled follow-up records.
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { timestampMsToIsoString } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { isRich, theme } from "../../packages/terminal-core/src/theme.js";
 import { formatCliCommand } from "../cli/command-format.js";
@@ -129,7 +129,7 @@ export async function commitmentsListCommand(
   }
   if (commitments.length === 0) {
     runtime.log(
-      `No commitments found. Run ${formatCliCommand("openclaw commitments --all")} to include dismissed and expired commitments.`,
+      `No commitments found. Run ${formatCliCommand("bot commitments --all")} to include dismissed and expired commitments.`,
     );
     return;
   }
@@ -146,7 +146,7 @@ export async function commitmentsDismissCommand(
   const ids = normalizeStringEntries(opts.ids);
   if (ids.length === 0) {
     runtime.error(
-      `At least one commitment id is required. Run ${formatCliCommand("openclaw commitments list")} to choose one.`,
+      `At least one commitment id is required. Run ${formatCliCommand("bot commitments list")} to choose one.`,
     );
     runtime.exit(1);
     return;

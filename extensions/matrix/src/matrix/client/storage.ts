@@ -2,12 +2,12 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { loadJsonFile } from "openclaw/plugin-sdk/json-store";
+import { normalizeAccountId } from "bot/plugin-sdk/account-id";
+import { loadJsonFile } from "bot/plugin-sdk/json-store";
 import type {
   PluginStateKeyedStore,
   PluginStateSyncKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/plugin-state-runtime";
 import { isRecord } from "../../record-shared.js";
 import { getMatrixRuntime } from "../../runtime.js";
 import { resolveMatrixAccountStorageRoot } from "../../storage-paths.js";
@@ -152,7 +152,7 @@ export async function writeMatrixStorageMetaStateToStore(params: {
 }
 
 function readStoredRootMetadata(rootDir: string): MatrixStorageMetadata {
-  if (fs.existsSync(path.join(rootDir, "state", "openclaw.sqlite"))) {
+  if (fs.existsSync(path.join(rootDir, "state", "bot.sqlite"))) {
     try {
       const stored = normalizeMatrixStorageMetadata(
         openStorageMetaStore(rootDir).lookup(STORAGE_META_STATE_KEY),

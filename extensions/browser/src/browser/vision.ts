@@ -4,8 +4,8 @@
  */
 
 import { readFile } from "node:fs/promises";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { describeImageFile as DescribeImageFileFn } from "openclaw/plugin-sdk/media-understanding-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { describeImageFile as DescribeImageFileFn } from "bot/plugin-sdk/media-understanding-runtime";
 import type { saveMediaBuffer as SaveMediaBufferFn } from "../sdk-setup-tools.js";
 import type { normalizeBrowserScreenshot as NormalizeBrowserScreenshotFn } from "./screenshot.js";
 
@@ -15,7 +15,7 @@ const DEFAULT_BROWSER_SCREENSHOT_DESCRIPTION_PROMPT =
 
 /** Input context for browser screenshot image understanding. */
 type BrowserScreenshotDescriptionContext = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   filePath: string;
   agentDir?: string;
   workspaceDir?: string;

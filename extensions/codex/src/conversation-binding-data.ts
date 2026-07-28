@@ -1,8 +1,8 @@
 // Codex plugin module implements conversation binding data behavior.
 import { createHash, randomUUID } from "node:crypto";
 import process from "node:process";
-import type { PluginConversationBinding } from "openclaw/plugin-sdk/plugin-entry";
-import { asOptionalRecord as readRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { PluginConversationBinding } from "bot/plugin-sdk/plugin-entry";
+import { asOptionalRecord as readRecord } from "bot/plugin-sdk/string-coerce-runtime";
 
 const APP_SERVER_BINDING_DATA_VERSION = 2;
 const CLI_BINDING_DATA_VERSION = 1;

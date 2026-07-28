@@ -1,4 +1,4 @@
-import { normalizeAgentId } from "@openclaw/normalization-core/agent-id";
+import { normalizeAgentId } from "@hanzo/bot-normalization-core/agent-id";
 import { readAgentRosterProperty } from "../agents/agent-scope-config.js";
 
 /** Every missing or empty roster is the shipped implicit-main shape. */

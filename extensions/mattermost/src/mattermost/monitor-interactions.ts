@@ -1,5 +1,5 @@
 // Mattermost plugin module registers interactive callback transport handling.
-import { resolveHumanDelayConfig } from "openclaw/plugin-sdk/agent-runtime";
+import { resolveHumanDelayConfig } from "bot/plugin-sdk/agent-runtime";
 import { createMattermostInteractionHandler } from "./interactions.js";
 import { authorizeMattermostCommandInvocation } from "./monitor-auth.js";
 import { resolveMattermostReplyRootId } from "./monitor-context.js";
@@ -62,7 +62,7 @@ export function registerMattermostInteractions(params: {
               message: post.message ?? "",
               props: post.props ?? undefined,
             },
-            ephemeral_text: `OpenClaw ignored this action for ${decision.roomLabel}.`,
+            ephemeral_text: `Bot ignored this action for ${decision.roomLabel}.`,
           },
         };
       },

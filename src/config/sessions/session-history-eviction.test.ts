@@ -4,14 +4,14 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { beginSessionWorkAdmission } from "../../sessions/session-lifecycle-admission.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+} from "../../state/bot-agent-db.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-  withOpenClawTestState,
-} from "../../test-utils/openclaw-test-state.js";
+  createBotTestState,
+  type BotTestState,
+  withBotTestState,
+} from "../../test-utils/bot-test-state.js";
 import { appendSqliteTrajectoryRuntimeEvents } from "../../trajectory/runtime-store.sqlite.js";
 import type { TrajectoryEvent } from "../../trajectory/types.js";
 import { measureSessionPhysicalDiskUsage } from "./disk-budget.js";
@@ -29,13 +29,13 @@ import {
 import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target.js";
 
 describe("SQLite historical session disk budget", () => {
-  let testState: OpenClawTestState;
+  let testState: BotTestState;
   let tempDir: string;
   let storePath: string;
 
   beforeEach(async () => {
-    testState = await createOpenClawTestState({
-      prefix: "openclaw-session-history-budget-",
+    testState = await createBotTestState({
+      prefix: "bot-session-history-budget-",
       layout: "state-only",
     });
     tempDir = testState.sessionsDir();
@@ -49,7 +49,7 @@ describe("SQLite historical session disk budget", () => {
       mode: "warn",
       maintenance: { maxDiskBytes: null, highWaterBytes: null },
     });
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
     await testState.cleanup();
   });
 
@@ -238,7 +238,7 @@ describe("SQLite historical session disk budget", () => {
     if (!target.path) {
       throw new Error("expected SQLite database path");
     }
-    return openOpenClawAgentDatabase({ agentId: target.agentId ?? "main", path: target.path });
+    return openBotAgentDatabase({ agentId: target.agentId ?? "main", path: target.path });
   }
 
   function settlePhysicalUsage(): void {
@@ -298,7 +298,7 @@ describe("SQLite historical session disk budget", () => {
 
 function createTrajectoryEvent(sessionId: string, sessionKey: string): TrajectoryEvent {
   return {
-    traceSchema: "openclaw-trajectory",
+    traceSchema: "bot-trajectory",
     schemaVersion: 1,
     traceId: sessionId,
     source: "runtime",
@@ -312,8 +312,8 @@ function createTrajectoryEvent(sessionId: string, sessionKey: string): Trajector
 
 describe("kickSessionHistoryDiskBudgetMaintenance", () => {
   it("throttles repeat kicks and skips warn mode entirely", async () => {
-    await withOpenClawTestState(
-      { prefix: "openclaw-session-history-kick-", layout: "state-only" },
+    await withBotTestState(
+      { prefix: "bot-session-history-kick-", layout: "state-only" },
       async (testState) => {
         const tempDir = testState.sessionsDir();
         fs.mkdirSync(tempDir, { recursive: true });
@@ -351,7 +351,7 @@ describe("kickSessionHistoryDiskBudgetMaintenance", () => {
           mode: "warn",
           maintenance: { maxDiskBytes: null, highWaterBytes: null },
         });
-        closeOpenClawAgentDatabasesForTest();
+        closeBotAgentDatabasesForTest();
       },
     );
   });

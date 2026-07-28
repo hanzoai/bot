@@ -1,12 +1,12 @@
 // Synology Chat tests cover core plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
 import {
   createPluginSetupWizardConfigure,
   createTestWizardPrompter,
   runSetupWizardConfigure,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import type { WizardPrompter } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
+import type { WizardPrompter } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { listAccountIds, resolveAccount } from "./accounts.js";
 import { SynologyChatChannelConfigSchema } from "./config-schema.js";
@@ -26,7 +26,7 @@ const synologyChatSetupPlugin = {
   config: {
     listAccountIds,
     defaultAccountId: () => "default",
-    resolveAllowFrom: ({ cfg, accountId }: { cfg: OpenClawConfig; accountId?: string }) =>
+    resolveAllowFrom: ({ cfg, accountId }: { cfg: BotConfig; accountId?: string }) =>
       resolveAccount(cfg, accountId).allowedUserIds,
   },
 };
@@ -88,7 +88,7 @@ describe("synology-chat core", () => {
     delete process.env.SYNOLOGY_NAS_HOST;
     delete process.env.SYNOLOGY_ALLOWED_USER_IDS;
     delete process.env.SYNOLOGY_RATE_LIMIT;
-    delete process.env.OPENCLAW_BOT_NAME;
+    delete process.env.BOT_BOT_NAME;
   });
 
   it("exports dangerouslyAllowNameMatching in the JSON schema", () => {
@@ -133,7 +133,7 @@ describe("synology-chat core", () => {
 
     const result = await runSetupWizardConfigure({
       configure: synologyChatConfigure,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       prompter,
       options: {},
     });
@@ -153,7 +153,7 @@ describe("synology-chat core", () => {
 
     const result = await runSetupWizardConfigure({
       configure: synologyChatConfigure,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       prompter,
       options: {},
       forceAllowFrom: true,
@@ -226,7 +226,7 @@ describe("synology-chat account resolution", () => {
     expect(account.dangerouslyAllowInheritedWebhookPath).toBe(false);
     expect(account.dmPolicy).toBe("allowlist");
     expect(account.rateLimitPerMinute).toBe(30);
-    expect(account.botName).toBe("OpenClaw");
+    expect(account.botName).toBe("Bot");
   });
 
   it("uses env var fallbacks", () => {
@@ -234,7 +234,7 @@ describe("synology-chat account resolution", () => {
     vi.stubEnv("SYNOLOGY_CHAT_TOKEN", padded);
     vi.stubEnv("SYNOLOGY_CHAT_INCOMING_URL", " https://nas/incoming ");
     vi.stubEnv("SYNOLOGY_NAS_HOST", " 192.0.2.1 ");
-    vi.stubEnv("OPENCLAW_BOT_NAME", " TestBot ");
+    vi.stubEnv("BOT_BOT_NAME", " TestBot ");
 
     const cfg = { channels: { "synology-chat": {} } };
     const account = resolveAccount(cfg);
@@ -250,7 +250,7 @@ describe("synology-chat account resolution", () => {
     vi.stubEnv("SYNOLOGY_CHAT_INCOMING_URL", whitespace);
     vi.stubEnv("SYNOLOGY_NAS_HOST", whitespace);
     vi.stubEnv("SYNOLOGY_ALLOWED_USER_IDS", whitespace);
-    vi.stubEnv("OPENCLAW_BOT_NAME", whitespace);
+    vi.stubEnv("BOT_BOT_NAME", whitespace);
 
     const account = resolveAccount({ channels: { "synology-chat": {} } });
 
@@ -258,7 +258,7 @@ describe("synology-chat account resolution", () => {
     expect(account.incomingUrl).toBe("");
     expect(account.nasHost).toBe("localhost");
     expect(account.allowedUserIds).toEqual([]);
-    expect(account.botName).toBe("OpenClaw");
+    expect(account.botName).toBe("Bot");
   });
 
   it("lets config and account overrides win over env/base config", () => {

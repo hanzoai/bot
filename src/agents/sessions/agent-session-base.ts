@@ -1,4 +1,4 @@
-import { cleanupSessionResources } from "@openclaw/ai/internal/runtime";
+import { cleanupSessionResources } from "@hanzo/bot-ai/internal/runtime";
 import type { AssistantMessage, Model } from "../../llm/types.js";
 import type {
   Agent,

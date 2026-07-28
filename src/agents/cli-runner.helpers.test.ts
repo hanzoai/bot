@@ -2,13 +2,13 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { ImageContent } from "openclaw/plugin-sdk/llm";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@hanzo/bot-ai/internal/shared";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import type { ImageContent } from "bot/plugin-sdk/llm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createSolidPngBuffer } from "../../test/helpers/image-fixtures.js";
 import { buildInboundMediaNoteProjection } from "../auto-reply/media-note.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 import { escapeRegExp } from "../shared/regexp.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import {
@@ -64,7 +64,7 @@ describe("prepareCliPromptImagePayload prompt references", () => {
     );
   });
 
-  it("does not reload OpenClaw CLI image cache paths from prior prompt text", async () => {
+  it("does not reload Bot CLI image cache paths from prior prompt text", async () => {
     const detectAndLoadPromptImagesSpy = vi.spyOn(promptImageUtils, "detectAndLoadPromptImages");
     const sanitizeImageBlocksSpy = vi.spyOn(toolImages, "sanitizeImageBlocks");
 
@@ -72,11 +72,11 @@ describe("prepareCliPromptImagePayload prompt references", () => {
       prepareCliPromptImagePayload({
         backend: { command: "gemini", imagePathScope: "workspace" },
         prompt:
-          'Called the Read tool with {"file_path":"/workspace/.openclaw-cli-images/stale.png"}',
+          'Called the Read tool with {"file_path":"/workspace/.bot-cli-images/stale.png"}',
         workspaceDir: "/workspace",
       }),
     ).resolves.toStrictEqual({
-      prompt: 'Called the Read tool with {"file_path":"/workspace/.openclaw-cli-images/stale.png"}',
+      prompt: 'Called the Read tool with {"file_path":"/workspace/.bot-cli-images/stale.png"}',
     });
 
     // Cached image paths are generated output, not fresh user references.
@@ -86,7 +86,7 @@ describe("prepareCliPromptImagePayload prompt references", () => {
 
   it("hydrates explicit prompt refs through the shared image loader", async () => {
     const workspaceDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cli-ref-image-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-cli-ref-image-"),
     );
     const imagePath = path.join(workspaceDir, "photo.png");
     const image = createSolidPngBuffer(1, 1, { r: 255, g: 0, b: 0 });
@@ -110,7 +110,7 @@ describe("prepareCliPromptImagePayload prompt references", () => {
 
   it("dedupes repeated refs and skips failed loads before sanitizing", async () => {
     const workspaceDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cli-ref-dedupe-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-cli-ref-dedupe-"),
     );
     const imagePath = path.join(workspaceDir, "a.png");
     await fs.writeFile(imagePath, createSolidPngBuffer(1, 1, { r: 0, g: 255, b: 0 }));
@@ -129,7 +129,7 @@ describe("prepareCliPromptImagePayload prompt references", () => {
 
   it("surfaces structured image hydration failures", async () => {
     const workspaceDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cli-structured-failure-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-cli-structured-failure-"),
     );
     try {
       await expect(
@@ -232,10 +232,10 @@ describe("buildCliArgs", () => {
         baseArgs: ["exec", "--json"],
         modelId: "gpt-5.4",
         systemPrompt: "Stable prefix",
-        systemPromptFilePath: "/tmp/openclaw/system-prompt.md",
+        systemPromptFilePath: "/tmp/bot/system-prompt.md",
         useResume: false,
       }),
-    ).toEqual(["exec", "--json", "-c", 'model_instructions_file="/tmp/openclaw/system-prompt.md"']);
+    ).toEqual(["exec", "--json", "-c", 'model_instructions_file="/tmp/bot/system-prompt.md"']);
   });
 
   it("passes Claude system prompts through its file flag", () => {
@@ -248,10 +248,10 @@ describe("buildCliArgs", () => {
         baseArgs: ["-p"],
         modelId: "claude-sonnet-4-6",
         systemPrompt: "Stable prefix",
-        systemPromptFilePath: "/tmp/openclaw/system-prompt.md",
+        systemPromptFilePath: "/tmp/bot/system-prompt.md",
         useResume: false,
       }),
-    ).toEqual(["-p", "--append-system-prompt-file", "/tmp/openclaw/system-prompt.md"]);
+    ).toEqual(["-p", "--append-system-prompt-file", "/tmp/bot/system-prompt.md"]);
   });
 
   it("replaces prompt placeholders before falling back to a trailing positional prompt", () => {
@@ -280,7 +280,7 @@ describe("buildCliArgs", () => {
 describe("writeCliImages", () => {
   it("uses stable hashed file paths so repeated image hydration reuses the same path", async () => {
     const workspaceDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cli-write-images-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-cli-write-images-"),
     );
     const image: ImageContent = {
       type: "image",
@@ -305,7 +305,7 @@ describe("writeCliImages", () => {
       expect(first.imagePaths).toStrictEqual([
         expect.stringMatching(
           new RegExp(
-            `^${escapeRegExp(`${resolvePreferredOpenClawTmpDir()}/openclaw-cli-images/`)}.*\\.png$`,
+            `^${escapeRegExp(`${resolvePreferredBotTmpDir()}/bot-cli-images/`)}.*\\.png$`,
           ),
         ),
       ]);
@@ -323,7 +323,7 @@ describe("writeCliImages", () => {
 
   it("uses the shared media extension map for image formats beyond the tiny builtin list", async () => {
     const workspaceDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cli-write-heic-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-cli-write-heic-"),
     );
     const image: ImageContent = {
       type: "image",
@@ -350,9 +350,9 @@ describe("writeCliImages", () => {
 
   it("sweeps stale workspace-scoped CLI image files", async () => {
     const workspaceDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cli-write-sweep-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-cli-write-sweep-"),
     );
-    const imageRoot = path.join(workspaceDir, ".openclaw-cli-images");
+    const imageRoot = path.join(workspaceDir, ".bot-cli-images");
     const stalePath = path.join(imageRoot, "stale.png");
     const freshPath = path.join(imageRoot, "fresh.png");
     const image: ImageContent = {
@@ -387,7 +387,7 @@ describe("writeCliImages", () => {
 
   it("hydrates prompt media refs into codex image args through the helper seams", async () => {
     const tempDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cli-prompt-image-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-cli-prompt-image-"),
     );
     const sourceImage = path.join(tempDir, "bb-image.png");
     await fs.writeFile(sourceImage, createSolidPngBuffer(1, 1, { r: 255, g: 255, b: 255 }));
@@ -422,7 +422,7 @@ describe("writeCliImages", () => {
         "--json",
         "describe the attached image",
         "--image",
-        expect.stringContaining("openclaw-cli-images"),
+        expect.stringContaining("bot-cli-images"),
       ]);
       expect(argv[4]).not.toBe(sourceImage);
 
@@ -434,7 +434,7 @@ describe("writeCliImages", () => {
 
   it("appends hydrated prompt media refs for stdin backends through the helper seams", async () => {
     const tempDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cli-prompt-image-generic-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-cli-prompt-image-generic-"),
     );
     const sourceImage = path.join(tempDir, "claude-image.png");
     await fs.writeFile(sourceImage, createSolidPngBuffer(1, 1, { r: 255, g: 255, b: 255 }));
@@ -452,7 +452,7 @@ describe("writeCliImages", () => {
       });
       const promptWithImages = prepared.prompt;
 
-      expect(promptWithImages).toContain("openclaw-cli-images");
+      expect(promptWithImages).toContain("bot-cli-images");
       expect(promptWithImages).toContain(prepared.imagePaths?.[0] ?? "");
       expect(promptWithImages.trimEnd().endsWith(prepared.imagePaths?.[0] ?? "")).toBe(true);
 
@@ -464,7 +464,7 @@ describe("writeCliImages", () => {
 
   it("appends Gemini prompt refs with @-prefixed image paths", async () => {
     const tempDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cli-prompt-image-gemini-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-cli-prompt-image-gemini-"),
     );
     const explicitImage: ImageContent = {
       type: "image",
@@ -488,7 +488,7 @@ describe("writeCliImages", () => {
       expect(prepared.prompt).toContain("\n\n@");
       expect(prepared.prompt).toContain(prepared.imagePaths?.[0] ?? "");
       expect(prepared.prompt.trimEnd().endsWith(`@${prepared.imagePaths?.[0] ?? ""}`)).toBe(true);
-      expect(prepared.imagePaths?.[0]?.startsWith(path.join(tempDir, ".openclaw-cli-images"))).toBe(
+      expect(prepared.imagePaths?.[0]?.startsWith(path.join(tempDir, ".bot-cli-images"))).toBe(
         true,
       );
 
@@ -515,7 +515,7 @@ describe("writeCliImages", () => {
 
   it("prefers explicit images over prompt refs through the helper seams", async () => {
     const tempDir = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-cli-explicit-images-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-cli-explicit-images-"),
     );
     const sourceImage = path.join(tempDir, "ignored-prompt-image.png");
     await fs.writeFile(sourceImage, createSolidPngBuffer(1, 1, { r: 255, g: 255, b: 255 }));
@@ -550,7 +550,7 @@ describe("writeCliImages", () => {
       });
 
       expect(argv.reduce((count, arg) => count + (arg === "--image" ? 1 : 0), 0)).toBe(1);
-      expect(argv[argv.indexOf("--image") + 1]).toContain("openclaw-cli-images");
+      expect(argv[argv.indexOf("--image") + 1]).toContain("bot-cli-images");
       await expect(fs.readFile(prepared.imagePaths?.[0] ?? "")).resolves.toEqual(
         Buffer.from(explicitImage.data, "base64"),
       );
@@ -562,7 +562,7 @@ describe("writeCliImages", () => {
   });
 
   it("merges inline payloads with offloaded refs in attachment order", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cli-mixed-images-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-cli-mixed-images-"));
     const workspaceDir = path.join(stateDir, "workspace");
     const inboundDir = path.join(stateDir, "media", "inbound");
     const mediaId = "offloaded.png";
@@ -574,8 +574,8 @@ describe("writeCliImages", () => {
     await fs.mkdir(inboundDir, { recursive: true });
     await fs.writeFile(path.join(inboundDir, mediaId), offloadedImage);
     await fs.writeFile(historyImagePath, historyImage);
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
+    setTestEnvValue("BOT_STATE_DIR", stateDir);
     const currentTurn = `compare these\n[media attached: media://inbound/${mediaId}]`;
 
     try {
@@ -623,7 +623,7 @@ describe("writeCliSystemPromptFile", () => {
     });
 
     try {
-      expect(written.filePath).toContain("openclaw-cli-system-prompt-");
+      expect(written.filePath).toContain("bot-cli-system-prompt-");
       await expect(fs.readFile(written.filePath ?? "", "utf-8")).resolves.toBe(
         "Stable prefix\nDynamic suffix",
       );

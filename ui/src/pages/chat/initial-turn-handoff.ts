@@ -72,7 +72,7 @@ export function prepareInitialUserMessageHandoff(
       renderInlineImageDataUrls: true,
     }),
     timestamp: item.createdAt,
-    ...(hasMetadata ? { __openclaw: metadata } : {}),
+    ...(hasMetadata ? { __bot: metadata } : {}),
   };
   // Keep the projection until terminal history owns it so active first turns
   // survive later pane/history resets.
@@ -131,7 +131,7 @@ function preserveInlineInitialImageProjection(
       : {};
   const {
     content: _content,
-    __openclaw: authoritativeMetadata,
+    __bot: authoritativeMetadata,
     ...authoritativeFields
   } = authoritativeRecord;
   const normalizedAuthoritativeMetadata =
@@ -149,9 +149,9 @@ function preserveInlineInitialImageProjection(
     ...message,
     ...authoritativeFields,
     content: message.content,
-    __openclaw: {
+    __bot: {
       ...authoritativeMetadataFields,
-      ...message["__openclaw"],
+      ...message["__bot"],
     },
   };
   host.chatMessages = nextMessages;

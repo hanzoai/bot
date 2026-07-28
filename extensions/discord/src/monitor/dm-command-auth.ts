@@ -7,9 +7,9 @@ import {
   defineStableChannelIngressIdentity,
   type ChannelIngressIdentitySubjectInput,
   type ResolveChannelMessageIngressParams,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/channel-ingress-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import type { RequestClient } from "../internal/discord.js";
 import { canViewDiscordGuildChannel } from "../send.permissions.js";
 import { normalizeDiscordAllowList } from "./allow-list.js";
@@ -92,7 +92,7 @@ function createDiscordDmIngressSubject(sender: {
 }
 
 function createDiscordDynamicAccessGroupResolver(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   token?: string;
   rest?: RequestClient;
 }): ResolveChannelMessageIngressParams["resolveAccessGroupMembership"] {
@@ -128,7 +128,7 @@ function createDiscordDynamicAccessGroupResolver(params: {
 
 function createDiscordIngressResolver(params: {
   accountId: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   token?: string;
   rest?: RequestClient;
   readStoreAllowFrom?: ResolveChannelMessageIngressParams["readStoreAllowFrom"];
@@ -175,7 +175,7 @@ export async function resolveDiscordDmCommandAccess(params: {
   configuredAllowFrom: string[];
   sender: { id: string; name?: string; tag?: string };
   allowNameMatching: boolean;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   token?: string;
   rest?: RequestClient;
   readStoreAllowFrom?: ResolveChannelMessageIngressParams["readStoreAllowFrom"];
@@ -221,7 +221,7 @@ export async function resolveDiscordTextCommandAccess(params: {
   allowNameMatching: boolean;
   allowTextCommands: boolean;
   hasControlCommand: boolean;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   token?: string;
   rest?: RequestClient;
 }) {

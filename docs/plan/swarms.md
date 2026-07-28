@@ -11,7 +11,7 @@ stateful prioritizer, loop on decision gates. Control flow (`Promise.all`,
 `while`, `if`) _is_ the orchestration — there is deliberately **no graph DSL,
 no new mode, no new top-level tool surface**.
 
-OpenClaw code mode (QuickJS-WASI, snapshot/resume, bridge requests) is the
+Bot code mode (QuickJS-WASI, snapshot/resume, bridge requests) is the
 substrate. A parked bridge call survives VM snapshot, gateway restart, and
 resumes exactly where it stopped — stronger than journal-replay designs, with
 no determinism constraints on scripts.

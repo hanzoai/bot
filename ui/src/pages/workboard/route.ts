@@ -31,6 +31,6 @@ export const page = definePage({
     import("./workboard-page.ts").then(() => ({
       header: true,
       render: (data: WorkboardRouteData | undefined) =>
-        html`<openclaw-workboard-page .routeData=${data}></openclaw-workboard-page>`,
+        html`<bot-workboard-page .routeData=${data}></bot-workboard-page>`,
     })),
 });

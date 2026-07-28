@@ -1,7 +1,7 @@
 /** CLI commands for listing, inspecting, and cancelling TaskFlow records. */
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { timestampMsToIsoString } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { isRich, theme } from "../../packages/terminal-core/src/theme.js";
 import { formatCliCommand } from "../cli/command-format.js";
@@ -25,7 +25,7 @@ const REV_PAD = 6;
 const CTRL_PAD = 20;
 
 function formatFlowLookupMiss(lookup: string): string {
-  return `TaskFlow not found: ${lookup}. Run ${formatCliCommand("openclaw tasks flow list")} to see recent flow ids.`;
+  return `TaskFlow not found: ${lookup}. Run ${formatCliCommand("bot tasks flow list")} to see recent flow ids.`;
 }
 
 function truncate(value: string, maxChars: number) {
@@ -182,7 +182,7 @@ export async function flowsListCommand(
   }
   if (flows.length === 0) {
     runtime.log(
-      `No TaskFlows found. Run ${formatCliCommand("openclaw tasks list")} to inspect standalone background tasks.`,
+      `No TaskFlows found. Run ${formatCliCommand("bot tasks list")} to inspect standalone background tasks.`,
     );
     return;
   }

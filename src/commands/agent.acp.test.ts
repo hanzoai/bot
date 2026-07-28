@@ -1,14 +1,14 @@
 // Agent ACP tests cover ACP runtime integration, embedded agent dispatch, and agent command behavior.
 import fs from "node:fs";
 import path from "node:path";
-import { withTempHome as withTempHomeBase } from "openclaw/plugin-sdk/test-env";
+import { withTempHome as withTempHomeBase } from "bot/plugin-sdk/test-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import "./agent-command.test-mocks.js";
 import * as acpManagerModule from "../acp/control-plane/manager.js";
 import { AcpRuntimeError } from "../acp/runtime/errors.js";
 import * as embeddedModule from "../agents/embedded-agent.js";
 import * as configIoModule from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { agentCommand } from "./agent.js";
 import { createThrowingTestRuntime } from "./test-runtime-config-helpers.js";
@@ -136,10 +136,10 @@ const getAcpSessionManagerSpy = vi.spyOn(acpManagerModule, "getAcpSessionManager
 const runtime = createThrowingTestRuntime();
 
 async function withTempHome<T>(fn: (home: string) => Promise<T>): Promise<T> {
-  return withTempHomeBase(fn, { prefix: "openclaw-agent-acp-" });
+  return withTempHomeBase(fn, { prefix: "bot-agent-acp-" });
 }
 
-function createAcpEnabledConfig(home: string, storePath: string): OpenClawConfig {
+function createAcpEnabledConfig(home: string, storePath: string): BotConfig {
   return {
     acp: {
       enabled: true,
@@ -151,7 +151,7 @@ function createAcpEnabledConfig(home: string, storePath: string): OpenClawConfig
       defaults: {
         model: { primary: "openai/gpt-5.5" },
         models: { "openai/gpt-5.5": {} },
-        workspace: path.join(home, "openclaw"),
+        workspace: path.join(home, "bot"),
       },
     },
     session: { store: storePath, mainKey: "main" },
@@ -167,7 +167,7 @@ function mockConfig(home: string, storePath: string) {
 function mockConfigWithAcpOverrides(
   home: string,
   storePath: string,
-  acpOverrides: Partial<NonNullable<OpenClawConfig["acp"]>>,
+  acpOverrides: Partial<NonNullable<BotConfig["acp"]>>,
 ) {
   const cfg = createAcpEnabledConfig(home, storePath);
   cfg.acp = {
@@ -221,7 +221,7 @@ function resolveReadySession(
 function mockAcpManager(params: {
   runTurn: (params: unknown) => Promise<void>;
   resolveSession?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     sessionKey: string;
   }) => ReturnType<ReturnType<typeof acpManagerModule.getAcpSessionManager>["resolveSession"]>;
 }) {
@@ -331,7 +331,7 @@ function firstRunTurnInput(runTurn: { mock: { calls: unknown[][] } }) {
 }
 
 async function runAcpSessionWithPolicyOverridesAndExpectBlocked(params: {
-  acpOverrides: Partial<NonNullable<OpenClawConfig["acp"]>>;
+  acpOverrides: Partial<NonNullable<BotConfig["acp"]>>;
   resolveSession?: Parameters<typeof mockAcpManager>[0]["resolveSession"];
 }) {
   await withTempHome(async (home) => {
@@ -468,7 +468,7 @@ describe("agentCommand ACP runtime routing", () => {
     for (const acpOverrides of [
       { enabled: false },
       { dispatch: { enabled: false } },
-    ] satisfies Array<Partial<NonNullable<OpenClawConfig["acp"]>>>) {
+    ] satisfies Array<Partial<NonNullable<BotConfig["acp"]>>>) {
       await runAcpSessionWithPolicyOverridesAndExpectBlocked({ acpOverrides });
     }
   });

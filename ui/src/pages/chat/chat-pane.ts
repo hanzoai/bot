@@ -3,12 +3,12 @@ import { ChatPaneRender } from "./chat-pane-render.ts";
 
 class ChatPane extends ChatPaneRender {}
 
-if (!customElements.get("openclaw-chat-pane")) {
-  customElements.define("openclaw-chat-pane", ChatPane);
+if (!customElements.get("bot-chat-pane")) {
+  customElements.define("bot-chat-pane", ChatPane);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-chat-pane": ChatPane;
+    "bot-chat-pane": ChatPane;
   }
 }

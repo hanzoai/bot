@@ -259,7 +259,7 @@ name: json5-metadata
 description: JSON5-style metadata
 metadata:
   {
-    "openclaw":
+    "bot":
       {
         "requires":
           {

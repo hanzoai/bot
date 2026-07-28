@@ -1,7 +1,7 @@
 /** Registry state for plugin memory runtimes, prompt supplements, and flush planning. */
 import { AsyncLocalStorage } from "node:async_hooks";
 import type { MemoryCitationsMode } from "../config/types.memory.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import type { MemorySearchManager } from "../memory-host-sdk/host/types.js";
 
@@ -114,7 +114,7 @@ export type MemoryFlushPlan = {
 };
 
 export type MemoryFlushPlanResolver = (params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   nowMs?: number;
 }) => MemoryFlushPlan | null;
 
@@ -135,7 +135,7 @@ type MemoryRuntimeBackendConfig =
 
 export type MemoryPluginRuntime = {
   getMemorySearchManager(params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     agentId: string;
     purpose?: "default" | "status" | "cli";
   }): Promise<{
@@ -158,10 +158,10 @@ export type MemoryPluginRuntime = {
     error?: string;
   }>;
   resolveMemoryBackendConfig(params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     agentId: string;
   }): MemoryRuntimeBackendConfig;
-  closeMemorySearchManager?(params: { cfg: OpenClawConfig; agentId: string }): Promise<void>;
+  closeMemorySearchManager?(params: { cfg: BotConfig; agentId: string }): Promise<void>;
   closeAllMemorySearchManagers?(): Promise<void>;
 };
 
@@ -177,7 +177,7 @@ export type MemoryPluginPublicArtifact = {
 };
 
 export type MemoryPluginPublicArtifactsProvider = {
-  listArtifacts(params: { cfg: OpenClawConfig }): Promise<MemoryPluginPublicArtifact[]>;
+  listArtifacts(params: { cfg: BotConfig }): Promise<MemoryPluginPublicArtifact[]>;
 };
 
 export type MemoryPluginCapability = {
@@ -407,7 +407,7 @@ export function listMemoryPromptPreparations(): MemoryPromptPreparationRegistrat
   return [...memoryPluginState.promptPreparations];
 }
 export function resolveMemoryFlushPlan(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   nowMs?: number;
 }): MemoryFlushPlan | null {
   return memoryPluginState.capability?.capability.flushPlanResolver?.(params) ?? null;
@@ -445,7 +445,7 @@ function isValidMemoryPublicArtifact(
 }
 
 export async function listActiveMemoryPublicArtifacts(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): Promise<MemoryPluginPublicArtifact[]> {
   const pluginId = memoryPluginState.capability?.pluginId;
   const listed =

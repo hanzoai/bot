@@ -1,7 +1,7 @@
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import { expectDefined } from "@openclaw/normalization-core";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@hanzo/bot-ai/internal/shared";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import OpenAI from "openai";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import { buildOpenAICompletionsParams } from "./openai-transport-stream.js";
 import {
@@ -350,7 +350,7 @@ describe("openai transport stream", () => {
                   id: "rs_prior",
                   encrypted_content: "ciphertext",
                 }),
-                openclawReasoningReplay: testing.buildOpenAIResponsesReasoningReplayMetadata(
+                botReasoningReplay: testing.buildOpenAIResponsesReasoningReplayMetadata(
                   model,
                   {
                     authProfileId: "openai:oauth",
@@ -398,7 +398,7 @@ describe("openai transport stream", () => {
       summary: [],
     });
     expect(reasoningItem?.id).toBeUndefined();
-    expect(reasoningItem).not.toHaveProperty("__openclaw_replay");
+    expect(reasoningItem).not.toHaveProperty("__bot_replay");
     const assistantMessage = params.input?.find(
       (item) => item.type === "message" && item.role === "assistant",
     );
@@ -571,7 +571,7 @@ describe("openai transport stream", () => {
                   id: "rs_prior",
                   encrypted_content: "ciphertext",
                 }),
-                openclawReasoningReplay: testing.buildOpenAIResponsesReasoningReplayMetadata(
+                botReasoningReplay: testing.buildOpenAIResponsesReasoningReplayMetadata(
                   model,
                   {
                     authProfileId: "openai:oauth",
@@ -640,7 +640,7 @@ describe("openai transport stream", () => {
                   id: "rs_prior",
                   encrypted_content: "ciphertext",
                 }),
-                openclawReasoningReplay: testing.buildOpenAIResponsesReasoningReplayMetadata(
+                botReasoningReplay: testing.buildOpenAIResponsesReasoningReplayMetadata(
                   model,
                   {
                     authProfileId: "openai:old-oauth",
@@ -741,7 +741,7 @@ describe("openai transport stream", () => {
       summary: [],
     });
     expect(reasoningItem?.id).toBeUndefined();
-    expect(reasoningItem).not.toHaveProperty("__openclaw_replay");
+    expect(reasoningItem).not.toHaveProperty("__bot_replay");
   });
 
   it("strips nested encrypted reasoning content from retry payloads without changing ids", () => {

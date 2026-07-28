@@ -1,5 +1,5 @@
 ---
-summary: "Adds Chutes model provider support to OpenClaw."
+summary: "Adds Chutes model provider support to Bot."
 read_when:
   - You are installing, configuring, or auditing the chutes plugin
 title: "Chutes plugin"
@@ -7,12 +7,12 @@ title: "Chutes plugin"
 
 # Chutes plugin
 
-Adds Chutes model provider support to OpenClaw.
+Adds Chutes model provider support to Bot.
 
 ## Distribution
 
-- Package: `@openclaw/chutes-provider`
-- Install route: npm; ClawHub: `clawhub:@openclaw/chutes-provider`
+- Package: `@hanzo/bot-chutes-provider`
+- Install route: npm; ClawHub: `clawhub:@hanzo/bot-chutes-provider`
 
 ## Surface
 

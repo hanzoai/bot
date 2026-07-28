@@ -15,9 +15,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const artifactDir = process.env.BOT_UI_E2E_ARTIFACT_DIR?.trim();
 const viewport = { height: 900, width: 1280 };
 
 let browser: Browser;
@@ -75,7 +75,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
     await gateway.waitForRequest("connect");
     const splash = page.locator(".connect-splash");
     await splash.waitFor();
-    const mascot = splash.locator('openclaw-mascot[mood="thinking"]');
+    const mascot = splash.locator('bot-mascot[mood="thinking"]');
     await mascot.waitFor();
     const mascotBounds = await mascot.boundingBox();
     expect(mascotBounds).not.toBeNull();
@@ -86,12 +86,12 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
       Math.abs((mascotBounds?.y ?? 0) + (mascotBounds?.height ?? 0) / 2 - viewport.height / 2),
     ).toBeLessThanOrEqual(1);
     expect(await page.getByText("Loading panel", { exact: true }).count()).toBe(0);
-    expect(await page.locator("openclaw-app-sidebar").count()).toBe(0);
-    expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+    expect(await page.locator("bot-app-sidebar").count()).toBe(0);
+    expect(await page.locator("bot-login-gate").count()).toBe(0);
     await captureProof(page, "01-centered-connecting-mascot");
 
     await gateway.resolveDeferred("connect");
-    await page.locator("openclaw-app-shell").waitFor();
+    await page.locator("bot-app-shell").waitFor();
     expect(await page.locator(".connect-splash").count()).toBe(0);
     await captureProof(page, "02-connected-content");
   });
@@ -116,7 +116,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
       await page.goto(`${server.baseUrl}chat?session=main`, {
         waitUntil: "domcontentloaded",
       });
-      await page.locator("openclaw-app-shell").waitFor();
+      await page.locator("bot-app-shell").waitFor();
       await expect.poll(() => chatModuleRequested).toBe(true);
 
       const loadingState = page.locator(".lazy-view-state--loading");
@@ -126,7 +126,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
       expect((await loadingState.textContent())?.trim()).toBe("");
       expect(await page.getByText("Loading panel", { exact: true }).count()).toBe(0);
 
-      const mascot = loadingState.locator('openclaw-mascot[mood="thinking"]');
+      const mascot = loadingState.locator('bot-mascot[mood="thinking"]');
       await mascot.waitFor();
       const [loadingBounds, mascotBounds] = await Promise.all([
         loadingState.boundingBox(),
@@ -151,7 +151,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
       await captureProof(page, "03-centered-pending-chat-mascot");
 
       releaseChatModule();
-      await page.locator("openclaw-chat-page").waitFor();
+      await page.locator("bot-chat-page").waitFor();
       expect(await loadingState.count()).toBe(0);
       await captureProof(page, "04-loaded-chat-content");
     } finally {
@@ -165,7 +165,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
 
     await page.goto(server.baseUrl);
     await gateway.waitForRequest("connect");
-    await page.locator("openclaw-login-gate").waitFor();
+    await page.locator("bot-login-gate").waitFor();
     expect(await page.locator(".connect-splash").count()).toBe(0);
   });
 
@@ -182,7 +182,7 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
       message: "unauthorized: gateway token mismatch",
       details: { code: ConnectErrorDetailCodes.AUTH_TOKEN_MISMATCH },
     });
-    await page.locator("openclaw-login-gate").waitFor();
+    await page.locator("bot-login-gate").waitFor();
     expect(await page.locator(".connect-splash").count()).toBe(0);
   });
 
@@ -193,18 +193,18 @@ describeControlUiE2e("Control UI initial connect splash E2E", () => {
     // First visit has no credentials: the login gate owns the pending connect.
     await page.goto(server.baseUrl);
     await gateway.waitForRequest("connect");
-    await page.locator("openclaw-login-gate").waitFor();
+    await page.locator("bot-login-gate").waitFor();
     await gateway.resolveDeferred("connect");
-    await page.locator("openclaw-app-shell").waitFor();
+    await page.locator("bot-app-shell").waitFor();
 
     // The hello stored a device token, so the reload connect is authenticated
     // and must paint the splash instead of flashing the gate.
     await page.reload();
     await gateway.waitForRequest("connect");
     await page.locator(".connect-splash").waitFor();
-    expect(await page.locator("openclaw-login-gate").count()).toBe(0);
+    expect(await page.locator("bot-login-gate").count()).toBe(0);
 
     await gateway.resolveDeferred("connect");
-    await page.locator("openclaw-app-shell").waitFor();
+    await page.locator("bot-app-shell").waitFor();
   });
 });

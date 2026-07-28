@@ -3,35 +3,35 @@ import {
   buildLegacyDmAccountAllowlistAdapter,
   createAccountScopedAllowlistNameResolver,
   createFlatAllowlistOverrideResolver,
-} from "openclaw/plugin-sdk/allowlist-config-edit";
-import { adaptScopedAccountAccessor } from "openclaw/plugin-sdk/channel-config-helpers";
+} from "bot/plugin-sdk/allowlist-config-edit";
+import { adaptScopedAccountAccessor } from "bot/plugin-sdk/channel-config-helpers";
 import {
   buildThreadAwareOutboundSessionRoute,
   createChatChannelPlugin,
-} from "openclaw/plugin-sdk/channel-core";
+} from "bot/plugin-sdk/channel-core";
 import {
   createChannelMessageAdapterFromOutbound,
   createRuntimeOutboundDelegates,
   resolveOutboundSendDep,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createPairingPrefixStripper } from "openclaw/plugin-sdk/channel-pairing";
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-send-result";
+} from "bot/plugin-sdk/channel-outbound";
+import { createPairingPrefixStripper } from "bot/plugin-sdk/channel-pairing";
+import type { ChannelOutboundAdapter } from "bot/plugin-sdk/channel-send-result";
 import {
   createChannelDirectoryAdapter,
   createRuntimeDirectoryLiveAdapter,
-} from "openclaw/plugin-sdk/directory-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { buildOutboundBaseSessionKey, type RoutePeer } from "openclaw/plugin-sdk/routing";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/directory-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { buildOutboundBaseSessionKey, type RoutePeer } from "bot/plugin-sdk/routing";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import {
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "bot/plugin-sdk/status-helpers";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import { sanitizeAssistantVisibleText } from "bot/plugin-sdk/text-chunking";
 import {
   mergeSlackAccountConfig,
   resolveDefaultSlackAccountId,
@@ -53,7 +53,7 @@ import {
   projectCredentialSnapshotFields,
   resolveConfiguredFromRequiredCredentialStatuses,
   type ChannelPlugin,
-  type OpenClawConfig,
+  type BotConfig,
 } from "./channel-api.js";
 import { resolveSlackChannelType, resolveSlackConversationInfo } from "./channel-type.js";
 import { createSlackWebClient } from "./client.js";
@@ -87,7 +87,7 @@ import { buildSlackThreadingToolContext } from "./threading-tool-context.js";
 // module id and typed by a hand-written structural alias so TypeScript does
 // not have to crawl the SDK module's type graph just to type the loader.
 //
-// `openclaw/plugin-sdk/channel-policy` is intentionally NOT lazy here —
+// `bot/plugin-sdk/channel-policy` is intentionally NOT lazy here —
 // `./group-policy.js` already imports it eagerly, so deferring it from
 // `channel.ts` would not change the load graph.
 
@@ -132,8 +132,8 @@ type TargetResolverRuntimeSurface = {
   >;
 };
 
-const EXTENSION_SHARED_MODULE_ID = "openclaw/plugin-sdk/extension-shared";
-const TARGET_RESOLVER_RUNTIME_MODULE_ID = "openclaw/plugin-sdk/target-resolver-runtime";
+const EXTENSION_SHARED_MODULE_ID = "bot/plugin-sdk/extension-shared";
+const TARGET_RESOLVER_RUNTIME_MODULE_ID = "bot/plugin-sdk/target-resolver-runtime";
 
 const loadExtensionSharedSdk = createLazyRuntimeModule(
   () => import(EXTENSION_SHARED_MODULE_ID) as Promise<ExtensionSharedSurface>,
@@ -206,7 +206,7 @@ async function resolveSlackSendContext(params: {
 }
 
 async function setSlackHeartbeatThreadStatus(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   to: string;
   accountId?: string | null;
   threadId?: string | number | null;
@@ -325,7 +325,7 @@ function matchSlackAcpConversation(params: {
 }
 
 function buildSlackBaseSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   accountId?: string | null;
   peer: RoutePeer;
@@ -334,7 +334,7 @@ function buildSlackBaseSessionKey(params: {
 }
 
 function shouldRecoverSlackThreadFromCurrentSession(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   peerKind: RoutePeer["kind"];
 }): boolean {
   // Shared DM sessions (dmScope="main") do not encode the DM peer in the base key,
@@ -346,7 +346,7 @@ function shouldRecoverSlackThreadFromCurrentSession(params: {
 }
 
 async function resolveSlackOutboundSessionRoute(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   accountId?: string | null;
   target: string;
@@ -650,7 +650,7 @@ export const slackPlugin: ChannelPlugin<ResolvedSlackAccount, SlackProbe> = crea
     },
     conversationBindings: {
       isCurrentConversationBindingSupported: ({ accountId }) => {
-        const cfg = getOptionalSlackRuntime()?.config.current() as OpenClawConfig | undefined;
+        const cfg = getOptionalSlackRuntime()?.config.current() as BotConfig | undefined;
         return cfg ? mergeSlackAccountConfig(cfg, accountId).enterpriseOrgInstall !== true : false;
       },
     },
@@ -756,7 +756,7 @@ export const slackPlugin: ChannelPlugin<ResolvedSlackAccount, SlackProbe> = crea
       invoke: async (action, cfg, toolContext) =>
         await (
           await resolveSlackHandleAction()
-        )(action, cfg as OpenClawConfig, toolContext as SlackActionContext | undefined),
+        )(action, cfg as BotConfig, toolContext as SlackActionContext | undefined),
     }),
     message: slackMessageAdapter,
     heartbeat: {

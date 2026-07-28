@@ -1,17 +1,17 @@
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { shortenHomePath } from "../utils.js";
 import { isReservedSystemAgentId } from "./agent-id.js";
 
 export function requireValidSystemAgentSetupSnapshot(snapshot: ConfigFileSnapshot): {
-  sourceConfig: OpenClawConfig;
-  runtimeConfig: OpenClawConfig;
+  sourceConfig: BotConfig;
+  runtimeConfig: BotConfig;
 } {
   if (snapshot.exists && !snapshot.valid) {
     const issue = snapshot.issues?.[0];
     const detail = issue ? ` (${issue.path ? `${issue.path}: ` : ""}${issue.message})` : "";
     throw new Error(
-      `OpenClaw config ${shortenHomePath(snapshot.path)} is invalid${detail}. Fix it before running setup.`,
+      `Bot config ${shortenHomePath(snapshot.path)} is invalid${detail}. Fix it before running setup.`,
     );
   }
   const sourceConfig = snapshot.exists ? (snapshot.sourceConfig ?? snapshot.config) : {};

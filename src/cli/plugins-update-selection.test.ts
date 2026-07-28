@@ -38,18 +38,18 @@ describe("resolvePluginUpdateSelection", () => {
     expect(
       resolvePluginUpdateSelection({
         installs: {
-          "openclaw-codex-app-server": createNpmInstall({
-            spec: "openclaw-codex-app-server",
-            installPath: "/tmp/openclaw-codex-app-server",
-            resolvedName: "openclaw-codex-app-server",
+          "bot-codex-app-server": createNpmInstall({
+            spec: "bot-codex-app-server",
+            installPath: "/tmp/bot-codex-app-server",
+            resolvedName: "bot-codex-app-server",
           }),
         },
-        rawId: "openclaw-codex-app-server@beta",
+        rawId: "bot-codex-app-server@beta",
       }),
     ).toEqual({
-      pluginIds: ["openclaw-codex-app-server"],
+      pluginIds: ["bot-codex-app-server"],
       specOverrides: {
-        "openclaw-codex-app-server": "openclaw-codex-app-server@beta",
+        "bot-codex-app-server": "bot-codex-app-server@beta",
       },
     });
   });
@@ -59,17 +59,17 @@ describe("resolvePluginUpdateSelection", () => {
       resolvePluginUpdateSelection({
         installs: {
           "voice-call": createNpmInstall({
-            spec: "@openclaw/voice-call",
+            spec: "@hanzo/bot-voice-call",
             installPath: "/tmp/voice-call",
-            resolvedName: "@openclaw/voice-call",
+            resolvedName: "@hanzo/bot-voice-call",
           }),
         },
-        rawId: "@openclaw/voice-call@beta",
+        rawId: "@hanzo/bot-voice-call@beta",
       }),
     ).toEqual({
       pluginIds: ["voice-call"],
       specOverrides: {
-        "voice-call": "@openclaw/voice-call@beta",
+        "voice-call": "@hanzo/bot-voice-call@beta",
       },
     });
   });
@@ -78,18 +78,18 @@ describe("resolvePluginUpdateSelection", () => {
     expect(
       resolvePluginUpdateSelection({
         installs: {
-          "openclaw-codex-app-server": createNpmInstall({
-            spec: "openclaw-codex-app-server",
-            installPath: "/tmp/openclaw-codex-app-server",
-            resolvedName: "openclaw-codex-app-server",
+          "bot-codex-app-server": createNpmInstall({
+            spec: "bot-codex-app-server",
+            installPath: "/tmp/bot-codex-app-server",
+            resolvedName: "bot-codex-app-server",
           }),
         },
-        rawId: "openclaw-codex-app-server@0.2.0-beta.4",
+        rawId: "bot-codex-app-server@0.2.0-beta.4",
       }),
     ).toEqual({
-      pluginIds: ["openclaw-codex-app-server"],
+      pluginIds: ["bot-codex-app-server"],
       specOverrides: {
-        "openclaw-codex-app-server": "openclaw-codex-app-server@0.2.0-beta.4",
+        "bot-codex-app-server": "bot-codex-app-server@0.2.0-beta.4",
       },
     });
   });
@@ -98,16 +98,16 @@ describe("resolvePluginUpdateSelection", () => {
     expect(
       resolvePluginUpdateSelection({
         installs: {
-          "openclaw-codex-app-server": createNpmInstall({
-            spec: "openclaw-codex-app-server@beta",
-            installPath: "/tmp/openclaw-codex-app-server",
-            resolvedName: "openclaw-codex-app-server",
+          "bot-codex-app-server": createNpmInstall({
+            spec: "bot-codex-app-server@beta",
+            installPath: "/tmp/bot-codex-app-server",
+            resolvedName: "bot-codex-app-server",
           }),
         },
-        rawId: "openclaw-codex-app-server",
+        rawId: "bot-codex-app-server",
       }),
     ).toEqual({
-      pluginIds: ["openclaw-codex-app-server"],
+      pluginIds: ["bot-codex-app-server"],
     });
   });
 
@@ -168,8 +168,8 @@ describe("resolveHookPackUpdateSelection", () => {
       resolveHookPackUpdateSelection({
         installs: {
           constructor: createNpmHookInstall({
-            spec: "openclaw-hooks-constructor",
-            resolvedName: "openclaw-hooks-constructor",
+            spec: "bot-hooks-constructor",
+            resolvedName: "bot-hooks-constructor",
           }),
         },
         rawId: "constructor",

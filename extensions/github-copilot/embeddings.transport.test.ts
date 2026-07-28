@@ -21,8 +21,8 @@ vi.mock("./token.js", () => ({
   resolveCopilotApiToken: resolveCopilotApiTokenMock,
 }));
 
-// Intentionally NOT mocked: openclaw/plugin-sdk/ssrf-runtime, global fetch, and
-// openclaw/plugin-sdk/logging-core (redactSensitiveText is the unit under proof).
+// Intentionally NOT mocked: bot/plugin-sdk/ssrf-runtime, global fetch, and
+// bot/plugin-sdk/logging-core (redactSensitiveText is the unit under proof).
 import { githubCopilotMemoryEmbeddingProviderAdapter } from "./embeddings.js";
 
 type CopilotServer = {
@@ -97,15 +97,15 @@ function defaultCreateOptions() {
 // than inheriting the operator's `logging.redactSensitive` preference.
 function withRedactionDisabledConfig(): () => void {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "copilot-redact-off-"));
-  const configPath = path.join(dir, "openclaw.json");
+  const configPath = path.join(dir, "bot.json");
   fs.writeFileSync(configPath, JSON.stringify({ logging: { redactSensitive: "off" } }));
-  const previous = process.env.OPENCLAW_CONFIG_PATH;
-  process.env.OPENCLAW_CONFIG_PATH = configPath;
+  const previous = process.env.BOT_CONFIG_PATH;
+  process.env.BOT_CONFIG_PATH = configPath;
   return () => {
     if (previous === undefined) {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.BOT_CONFIG_PATH;
     } else {
-      process.env.OPENCLAW_CONFIG_PATH = previous;
+      process.env.BOT_CONFIG_PATH = previous;
     }
     fs.rmSync(dir, { recursive: true, force: true });
   };

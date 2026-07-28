@@ -281,8 +281,8 @@ describe("commands registry", () => {
       "/skill demo_skill first line\nsecond line",
     );
     expect(
-      normalizeCommandBody("/skill@openclaw: demo_skill first line\nsecond line", {
-        botUsername: "openclaw",
+      normalizeCommandBody("/skill@bot: demo_skill first line\nsecond line", {
+        botUsername: "bot",
       }),
     ).toBe("/skill demo_skill first line\nsecond line");
     expect(resolveTextCommand("/skill demo_skill first line\nsecond line")?.args).toBe(
@@ -651,21 +651,21 @@ describe("commands registry", () => {
   });
 
   it("normalizes telegram-style command mentions for the current bot", () => {
-    expect(normalizeCommandBody("/help@openclaw", { botUsername: "openclaw" })).toBe("/help");
+    expect(normalizeCommandBody("/help@bot", { botUsername: "bot" })).toBe("/help");
     expect(
-      normalizeCommandBody("/help@openclaw args", {
-        botUsername: "openclaw",
+      normalizeCommandBody("/help@bot args", {
+        botUsername: "bot",
       }),
     ).toBe("/help args");
     expect(
-      normalizeCommandBody("/help@openclaw: args", {
-        botUsername: "openclaw",
+      normalizeCommandBody("/help@bot: args", {
+        botUsername: "bot",
       }),
     ).toBe("/help args");
   });
 
   it("keeps telegram-style command mentions for other bots", () => {
-    expect(normalizeCommandBody("/help@otherbot", { botUsername: "openclaw" })).toBe(
+    expect(normalizeCommandBody("/help@otherbot", { botUsername: "bot" })).toBe(
       "/help@otherbot",
     );
   });
@@ -836,7 +836,7 @@ describe("commands registry args", () => {
     { model: "gpt-5.6-sol", agentRuntime: "codex", supportsUltra: true },
     { model: "gpt-5.6-terra", agentRuntime: "codex", supportsUltra: true },
     { model: "gpt-5.6-luna", agentRuntime: "codex", supportsUltra: false },
-    { model: "gpt-5.6-luna", agentRuntime: "openclaw", supportsUltra: true },
+    { model: "gpt-5.6-luna", agentRuntime: "bot", supportsUltra: true },
   ])(
     "uses the $agentRuntime thinking profile for openai/$model native menus",
     ({ model, agentRuntime, supportsUltra }) => {

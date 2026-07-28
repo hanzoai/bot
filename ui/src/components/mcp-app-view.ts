@@ -6,7 +6,7 @@ import {
   ListToolsRequestSchema,
   type ListToolsResult,
 } from "@modelcontextprotocol/sdk/types.js";
-import { isMcpAppViewExpiredError } from "@openclaw/gateway-protocol";
+import { isMcpAppViewExpiredError } from "@hanzo/bot-gateway-protocol";
 import { LitElement, css, html, nothing, type PropertyValues } from "lit";
 import { property, state } from "lit/decorators.js";
 import { createRef, ref } from "lit/directives/ref.js";
@@ -40,7 +40,7 @@ type HostContext = NonNullable<
 type ScheduleFrame = (callback: FrameRequestCallback) => number;
 type ScheduleFallback = (callback: () => void, delayMs: number) => number;
 type McpAppResources = {
-  bridge: OpenClawAppBridge | null;
+  bridge: BotAppBridge | null;
   cleanups: Set<() => void>;
   frameHeight: number;
   iframe: HTMLIFrameElement;
@@ -97,7 +97,7 @@ function hostContext(element: Element | undefined, height: number): HostContext 
   };
 }
 
-class OpenClawAppBridge extends AppBridge {
+class BotAppBridge extends AppBridge {
   setMessageHandler(handler: NonNullable<AppBridge["onmessage"]>) {
     Reflect.set(this, "onmessage", handler);
   }
@@ -335,9 +335,9 @@ export class McpAppView extends LitElement {
         return;
       }
 
-      const bridge = new OpenClawAppBridge(
+      const bridge = new BotAppBridge(
         null,
-        { name: "OpenClaw", version: "1.0.0" },
+        { name: "Bot", version: "1.0.0" },
         buildMcpAppHostCapabilities(
           payload.csp,
           payload.messageSupported === true,

@@ -1,6 +1,6 @@
 // Covers exec approval config normalization and safe-bin policy.
 import { describe, expect, it } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { makeTempDir } from "./exec-approvals-test-helpers.js";
 import {
   isSafeBinUsage,
@@ -18,10 +18,10 @@ import {
 describe("exec approvals wildcard agent", () => {
   it("merges wildcard allowlist entries with agent entries", () => {
     const dir = makeTempDir();
-    const prevOpenClawHome = process.env.OPENCLAW_HOME;
+    const prevBotHome = process.env.BOT_HOME;
 
     try {
-      process.env.OPENCLAW_HOME = dir;
+      process.env.BOT_HOME = dir;
       saveExecApprovals({
         version: 1,
         agents: {
@@ -36,11 +36,11 @@ describe("exec approvals wildcard agent", () => {
         "/usr/bin/uname",
       ]);
     } finally {
-      closeOpenClawStateDatabaseForTest();
-      if (prevOpenClawHome === undefined) {
-        delete process.env.OPENCLAW_HOME;
+      closeBotStateDatabaseForTest();
+      if (prevBotHome === undefined) {
+        delete process.env.BOT_HOME;
       } else {
-        process.env.OPENCLAW_HOME = prevOpenClawHome;
+        process.env.BOT_HOME = prevBotHome;
       }
     }
   });

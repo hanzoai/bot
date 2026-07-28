@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import { listAgentIds, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import { isExecApprovalFollowupSessionRebound } from "../../agents/bash-tools.exec-approval-followup-state.js";
@@ -6,7 +6,7 @@ import {
   resolveAgentIdFromSessionKey,
   resolveExplicitAgentSessionKey,
 } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { emitDiagnosticEvent } from "../../infra/diagnostic-events.js";
 import { resolveAgentExplicitRecipientSession } from "../../infra/outbound/agent-delivery.js";
 import {
@@ -49,7 +49,7 @@ type AgentRequestRouting = {
 
 export async function prepareAgentRequestRouting(params: {
   request: AgentRunRequest;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   expectedSession?: ExpectedExistingSessionConstraint;
   isRawModelRun: boolean;
   execApprovalFollowupApprovalId?: string;
@@ -258,7 +258,7 @@ export async function prepareAgentRequestRouting(params: {
   };
 }
 
-function resolveAgentExplicitRecipientSessionKey(cfg: OpenClawConfig, agentId?: string) {
+function resolveAgentExplicitRecipientSessionKey(cfg: BotConfig, agentId?: string) {
   return resolveExplicitAgentSessionKey({ cfg, agentId });
 }
 

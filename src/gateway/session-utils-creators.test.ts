@@ -1,6 +1,6 @@
 import { expect, it, vi } from "vitest";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 const getUserProfileListItem = vi.hoisted(() =>
   vi.fn((profileId: string) => ({
@@ -30,8 +30,8 @@ it("returns the complete deterministic creator facet independently of pagination
   };
 
   const result = listSessionsFromStore({
-    cfg: {} as OpenClawConfig,
-    storePath: "/tmp/openclaw-session-creators",
+    cfg: {} as BotConfig,
+    storePath: "/tmp/bot-session-creators",
     store,
     opts: { archived: "all", limit: 1 },
   });
@@ -55,8 +55,8 @@ it("returns the complete deterministic creator facet independently of pagination
   expect(getUserProfileListItem).toHaveBeenCalledTimes(2);
 
   const filtered = listSessionsFromStore({
-    cfg: {} as OpenClawConfig,
-    storePath: "/tmp/openclaw-session-creators",
+    cfg: {} as BotConfig,
+    storePath: "/tmp/bot-session-creators",
     store,
     opts: { archived: "all", creatorId: "profile-bob", limit: 1 },
   });

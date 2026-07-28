@@ -3,7 +3,7 @@
  * Used by discovery, browsing, visibility, and provider-auth code so renderers
  * and filters agree on stable model metadata.
  */
-import type { ModelCatalogStatus } from "@openclaw/model-catalog-core/model-catalog-types";
+import type { ModelCatalogStatus } from "@hanzo/bot-model-catalog-core/model-catalog-types";
 import type { ModelApi, ModelCompatConfig, ModelMediaInputConfig } from "../config/types.models.js";
 
 /** Input modalities a catalog entry can advertise. */

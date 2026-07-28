@@ -1,12 +1,12 @@
-# OpenClaw Cerebras Provider
+# Bot Cerebras Provider
 
-Official OpenClaw provider plugin for Cerebras.
+Official Bot provider plugin for Cerebras.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/cerebras-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-cerebras-provider
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/cerebras> for setup and configuration.
+See <https://docs.bot.ai/providers/cerebras> for setup and configuration.

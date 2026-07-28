@@ -1,6 +1,6 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createSuiteLogPathTracker } from "../logging/log-test-helpers.js";
 import { resetLogger } from "../logging/logger.js";
 import { loggingState } from "../logging/state.js";
@@ -32,17 +32,17 @@ const readConfigFileSnapshot = vi.hoisted(() =>
   vi.fn(async () => ({
     exists: false,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     issues: [] as Array<{ path?: string; message: string }>,
     config: {},
   })),
 );
 
-const logPathTracker = createSuiteLogPathTracker("openclaw-guided-onboard-log-");
+const logPathTracker = createSuiteLogPathTracker("bot-guided-onboard-log-");
 
 vi.mock("../config/config.js", () => ({ readConfigFileSnapshot }));
 vi.mock("./onboard-agent.js", () => ({
-  ensureOnboardingAgent: async ({ config }: { config: OpenClawConfig }) => ({
+  ensureOnboardingAgent: async ({ config }: { config: BotConfig }) => ({
     config: {
       ...config,
       agents: { ...config.agents, list: [{ id: "main", default: true }] },
@@ -53,7 +53,7 @@ vi.mock("./onboard-agent.js", () => ({
 }));
 
 vi.mock("./onboard-helpers.js", () => ({
-  DEFAULT_WORKSPACE: "/tmp/openclaw-workspace",
+  DEFAULT_WORKSPACE: "/tmp/bot-workspace",
   printWizardHeader: vi.fn(),
 }));
 
@@ -96,7 +96,7 @@ function detection(
     manualProviders: [],
     authOptions: [],
     recommendedInstalls: [],
-    workspace: "/tmp/openclaw-workspace",
+    workspace: "/tmp/bot-workspace",
     setupComplete: false,
     ...overrides,
   };
@@ -122,7 +122,7 @@ function setupDeps(params: {
     applySetup:
       params.applySetup ??
       vi.fn(async () => ({
-        configPath: "/tmp/openclaw.json",
+        configPath: "/tmp/bot.json",
         configHashBefore: null,
         configHashAfter: null,
         bootstrapPending: false,
@@ -132,7 +132,7 @@ function setupDeps(params: {
     listManualOptions: vi.fn(async () => ({
       manualProviders: [],
       authOptions: [],
-      workspace: "/tmp/openclaw-workspace",
+      workspace: "/tmp/bot-workspace",
       setupComplete: false,
     })),
     detect: params.detect ?? vi.fn(async () => detection()),
@@ -167,7 +167,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     readConfigFileSnapshot.mockResolvedValue({
       exists: false,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       issues: [],
       config: {},
     });
@@ -190,7 +190,7 @@ describe("runGuidedOnboarding custodian flow", () => {
       listManualOptions: vi.fn(async () => ({
         manualProviders: [{ id: "openai-api-key", label: "OpenAI" }],
         authOptions: [],
-        workspace: "/tmp/openclaw-workspace",
+        workspace: "/tmp/bot-workspace",
         setupComplete: false,
       })),
     };
@@ -215,7 +215,7 @@ describe("runGuidedOnboarding custodian flow", () => {
       listManualOptions: vi.fn(async () => ({
         manualProviders: [{ id: "openai-api-key", label: "OpenAI" }],
         authOptions: [],
-        workspace: "/tmp/openclaw-workspace",
+        workspace: "/tmp/bot-workspace",
         setupComplete: false,
       })),
     };
@@ -275,7 +275,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     readConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       issues: [],
       config: {
         wizard: { accessMode: "full", securityAcknowledgedAt: "2026-01-01T00:00:00.000Z" },
@@ -374,7 +374,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     readConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       issues: [],
       config: {
         gateway: { mode: "local" },
@@ -388,7 +388,7 @@ describe("runGuidedOnboarding custodian flow", () => {
 
     expect(deps.applySetup).not.toHaveBeenCalled();
     // Configured reruns hatch the persisted default workspace, not the probe context.
-    expect(deps.launchHatchTui).toHaveBeenCalledWith("/tmp/openclaw-workspace");
+    expect(deps.launchHatchTui).toHaveBeenCalledWith("/tmp/bot-workspace");
     expect(prompter.note).toHaveBeenCalledWith(
       expect.stringContaining("already set up"),
       expect.anything(),
@@ -399,7 +399,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     readConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       issues: [],
       config: {
         agents: { defaults: { workspace: "/tmp/authored" } },
@@ -424,7 +424,7 @@ describe("runGuidedOnboarding custodian flow", () => {
     expect(deps.launchHatchTui).toHaveBeenCalledWith("/tmp/authored");
   });
 
-  it("falls back to the OpenClaw chat when applying setup fails", async () => {
+  it("falls back to the Bot chat when applying setup fails", async () => {
     const prompter = createWizardPrompter();
     const applySetup = vi.fn(async () => {
       throw new Error("config write raced");

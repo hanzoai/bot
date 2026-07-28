@@ -1,16 +1,16 @@
 // Formats port probe results for diagnostics and CLI output.
 import net from "node:net";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { formatCliCommand } from "../cli/command-format.js";
 import type { PortListener, PortListenerKind, PortUsage } from "./ports-types.js";
 
-/** Classifies a listener as OpenClaw Gateway, SSH tunnel, known non-gateway, or unknown. */
+/** Classifies a listener as Bot Gateway, SSH tunnel, known non-gateway, or unknown. */
 export function classifyPortListener(listener: PortListener, _port: number): PortListenerKind {
   const raw = normalizeLowercaseStringOrEmpty(
     `${listener.commandLine ?? ""} ${listener.command ?? ""}`,
   );
-  if (raw.includes("openclaw")) {
+  if (raw.includes("bot")) {
     return "gateway";
   }
   const command = normalizeLowercaseStringOrEmpty(listener.command ?? "");
@@ -211,7 +211,7 @@ export function buildPortHints(listeners: PortListener[], port: number): string[
   const expectedGatewayListeners = isExpectedGatewayListeners(listeners, port);
   if (kinds.has("gateway") && !expectedGatewayListeners) {
     hints.push(
-      `Gateway already running locally. Stop it (${formatCliCommand("openclaw gateway stop")}) or use a different port.`,
+      `Gateway already running locally. Stop it (${formatCliCommand("bot gateway stop")}) or use a different port.`,
     );
   }
   if (kinds.has("ssh")) {

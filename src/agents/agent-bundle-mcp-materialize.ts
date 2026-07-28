@@ -1,9 +1,9 @@
 /** Materializes configured MCP catalog entries into agent tools and runtime helpers. */
 import crypto from "node:crypto";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { normalizeToolParameterSchema } from "@openclaw/ai/internal/openai";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeToolParameterSchema } from "@hanzo/bot-ai/internal/openai";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import { logWarn } from "../logger.js";
 import { getPluginToolMeta, setPluginToolMeta, type PluginToolMcpMeta } from "../plugins/tools.js";
 import { matchesMcpToolFilterPattern } from "./agent-bundle-mcp-filter.js";
@@ -547,12 +547,12 @@ export async function materializeBundleMcpToolsForRun(params: {
 
 export async function createBundleMcpToolRuntime(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   reservedToolNames?: Iterable<string>;
   createRuntime?: (params: {
     sessionId: string;
     workspaceDir: string;
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
   }) => SessionMcpRuntime;
 }): Promise<BundleMcpToolRuntime> {
   const createRuntime =

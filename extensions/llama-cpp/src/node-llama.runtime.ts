@@ -27,7 +27,7 @@ export function formatLlamaCppSetupError(error: unknown): string {
         : undefined,
     missing && detail ? `Detail: ${detail}` : null,
     "To enable local GGUF models:",
-    "1) Install the official provider plugin: openclaw plugins install @openclaw/llama-cpp-provider",
+    "1) Install the official provider plugin: bot plugins install @hanzo/bot-llama-cpp-provider",
     "2) Use Node 24 for native installs/updates.",
     "3) If you use pnpm from source: pnpm approve-builds, then pnpm rebuild node-llama-cpp.",
   ]
@@ -43,6 +43,6 @@ export function resolveNodeLlamaCppImportUrl(): string {
 
 export async function importNodeLlamaCpp(): Promise<NodeLlamaCppModule> {
   // Keep this runtime-resolved: bundling node-llama-cpp rewrites its import.meta.url,
-  // which makes its package-relative native assets resolve from the OpenClaw bundle.
+  // which makes its package-relative native assets resolve from the Bot bundle.
   return await import(resolveNodeLlamaCppImportUrl());
 }

@@ -1,7 +1,7 @@
 /**
  * Resolves per-attempt runtime decisions from config and channel context.
  */
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { BotConfig } from "../../../config/config.js";
 import {
   resolveSessionLockMaxHoldFromTimeout,
   resolveSessionWriteLockOptions,
@@ -15,7 +15,7 @@ import type { EmbeddedRunAttemptParams } from "./types.js";
  * but should not inherit the much larger full run timeout.
  */
 export function resolveEmbeddedAttemptSessionWriteLockOptions(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   compactionTimeoutMs: number;
   env?: NodeJS.ProcessEnv;
 }): { timeoutMs: number; staleMs: number; maxHoldMs: number } {

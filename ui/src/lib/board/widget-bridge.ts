@@ -1,7 +1,7 @@
 import { dispatchWidgetPrompt } from "../../components/mcp-app-security.ts";
 
 type BoardWidgetBridgeRequest = {
-  type: "openclaw:widget-bridge-request";
+  type: "bot:widget-bridge-request";
   id: string;
   method: string;
   params: unknown;
@@ -25,7 +25,7 @@ export function isBoardWidgetBridgeRequest(value: unknown): value is BoardWidget
   }
   const request = value as Partial<BoardWidgetBridgeRequest>;
   return (
-    request.type === "openclaw:widget-bridge-request" &&
+    request.type === "bot:widget-bridge-request" &&
     typeof request.id === "string" &&
     request.id.length > 0 &&
     request.id.length <= 128 &&

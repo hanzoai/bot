@@ -2,7 +2,7 @@
 // timeout propagation, and proxy dispatcher construction.
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-const TEST_UNDICI_RUNTIME_DEPS_KEY = "__OPENCLAW_TEST_UNDICI_RUNTIME_DEPS__";
+const TEST_UNDICI_RUNTIME_DEPS_KEY = "__BOT_TEST_UNDICI_RUNTIME_DEPS__";
 
 const { agentCtor, envHttpProxyAgentCtor, proxyAgentCtor } = vi.hoisted(() => ({
   agentCtor: vi.fn(function MockAgent(this: { options: unknown }, options: unknown) {

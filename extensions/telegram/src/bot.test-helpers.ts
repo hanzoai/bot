@@ -8,10 +8,10 @@ type MiddlewareUseSpy = {
   mock: { calls: unknown[][] };
 };
 
-type ChannelInboundModule = typeof import("openclaw/plugin-sdk/channel-inbound");
+type ChannelInboundModule = typeof import("bot/plugin-sdk/channel-inbound");
 type ChannelInboundRunParams = Parameters<ChannelInboundModule["runChannelInboundEvent"]>[0];
 type BufferedReplyDispatcher =
-  typeof import("openclaw/plugin-sdk/reply-dispatch-runtime").dispatchReplyWithBufferedBlockDispatcher;
+  typeof import("bot/plugin-sdk/reply-dispatch-runtime").dispatchReplyWithBufferedBlockDispatcher;
 
 export async function runTelegramChannelInboundEventWithHarness(
   actual: ChannelInboundModule,
@@ -29,7 +29,7 @@ export async function runTelegramChannelInboundEventWithHarness(
           return resolved;
         }
         const plan =
-          resolved as unknown as import("openclaw/plugin-sdk/channel-inbound").ChannelInboundTurnPlan<"provider_message_sending">;
+          resolved as unknown as import("bot/plugin-sdk/channel-inbound").ChannelInboundTurnPlan<"provider_message_sending">;
         return {
           ...plan,
           runDispatch: async () =>
@@ -81,7 +81,7 @@ export function createTelegramCallbackContext(params: {
         ? {}
         : { update: { update_id: params.updateId, callback_query: callbackQuery } }),
     callbackQuery,
-    me: { username: "openclaw_bot" },
+    me: { username: "bot_bot" },
     getFile: async () => ({ download: async () => new Uint8Array() }),
   };
 }

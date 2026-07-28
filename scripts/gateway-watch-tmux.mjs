@@ -10,36 +10,36 @@ const TMUX_ATTACH_FORCE_VALUES = new Set(["1", "true", "yes", "on"]);
 const DEFAULT_PROFILE_NAME = "main";
 const DEFAULT_BENCHMARK_PROFILE_DIR = ".artifacts/gateway-watch-profiles";
 const DEFAULT_BENCHMARK_PROFILE_MAX_FILES = "40";
-const RUN_NODE_CPU_PROF_DIR_ENV = "OPENCLAW_RUN_NODE_CPU_PROF_DIR";
-const RUN_NODE_CPU_PROF_MAX_FILES_ENV = "OPENCLAW_RUN_NODE_CPU_PROF_MAX_FILES";
-const RUN_NODE_OUTPUT_LOG_ENV = "OPENCLAW_RUN_NODE_OUTPUT_LOG";
-const RUN_NODE_FILTER_SYNC_IO_STDERR_ENV = "OPENCLAW_RUN_NODE_FILTER_SYNC_IO_STDERR";
+const RUN_NODE_CPU_PROF_DIR_ENV = "BOT_RUN_NODE_CPU_PROF_DIR";
+const RUN_NODE_CPU_PROF_MAX_FILES_ENV = "BOT_RUN_NODE_CPU_PROF_MAX_FILES";
+const RUN_NODE_OUTPUT_LOG_ENV = "BOT_RUN_NODE_OUTPUT_LOG";
+const RUN_NODE_FILTER_SYNC_IO_STDERR_ENV = "BOT_RUN_NODE_FILTER_SYNC_IO_STDERR";
 const RAW_WATCH_SCRIPT = "scripts/watch-node.mjs";
 const RUN_NODE_SCRIPT = "scripts/run-node.mjs";
 const GATEWAY_WATCH_TMUX_SCRIPT = "scripts/gateway-watch-tmux.mjs";
 const SERVICE_HANDOFF_ARG = "--handoff-managed-service";
 const DEFAULT_GATEWAY_PORT = "18789";
-const TMUX_CWD_ENV_KEY = "OPENCLAW_GATEWAY_WATCH_CWD";
-const TMUX_CWD_OPTION_KEY = "@openclaw.gateway_watch.cwd";
+const TMUX_CWD_ENV_KEY = "BOT_GATEWAY_WATCH_CWD";
+const TMUX_CWD_OPTION_KEY = "@bot.gateway_watch.cwd";
 const TMUX_CHILD_ENV_KEYS = [
   "NODE_OPTIONS",
-  "OPENCLAW_CONFIG_PATH",
-  "OPENCLAW_DIAGNOSTICS",
-  "OPENCLAW_DIAGNOSTICS_EVENT_LOOP",
-  "OPENCLAW_DIAGNOSTICS_TIMELINE_PATH",
-  "OPENCLAW_GATEWAY_PORT",
-  "OPENCLAW_GATEWAY_RESTART_TRACE",
-  "OPENCLAW_GATEWAY_STARTUP_TRACE",
-  "OPENCLAW_GATEWAY_WATCH_AUTO_DOCTOR",
-  "OPENCLAW_HOME",
-  "OPENCLAW_PROFILE",
+  "BOT_CONFIG_PATH",
+  "BOT_DIAGNOSTICS",
+  "BOT_DIAGNOSTICS_EVENT_LOOP",
+  "BOT_DIAGNOSTICS_TIMELINE_PATH",
+  "BOT_GATEWAY_PORT",
+  "BOT_GATEWAY_RESTART_TRACE",
+  "BOT_GATEWAY_STARTUP_TRACE",
+  "BOT_GATEWAY_WATCH_AUTO_DOCTOR",
+  "BOT_HOME",
+  "BOT_PROFILE",
   RUN_NODE_CPU_PROF_DIR_ENV,
   RUN_NODE_CPU_PROF_MAX_FILES_ENV,
   RUN_NODE_FILTER_SYNC_IO_STDERR_ENV,
   RUN_NODE_OUTPUT_LOG_ENV,
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_STATE_DIR",
-  "OPENCLAW_TRACE_SYNC_IO",
+  "BOT_SKIP_CHANNELS",
+  "BOT_STATE_DIR",
+  "BOT_TRACE_SYNC_IO",
 ];
 
 const sanitizeSessionPart = (value) => {
@@ -98,7 +98,7 @@ const resolveGatewayWatchPort = ({ args, env }) => {
   }
   return {
     explicitCli: false,
-    port: parsePortValue(env.OPENCLAW_GATEWAY_PORT, { allowHost: true }),
+    port: parsePortValue(env.BOT_GATEWAY_PORT, { allowHost: true }),
   };
 };
 
@@ -111,7 +111,7 @@ const resolveGatewayWatchProfile = ({ args, env }) => {
   if (devIndex >= 0 && (gatewayIndex < 0 || devIndex < gatewayIndex)) {
     return "dev";
   }
-  return env.OPENCLAW_PROFILE || null;
+  return env.BOT_PROFILE || null;
 };
 
 const joinArtifactPath = (dir, basename) => {
@@ -167,8 +167,8 @@ const resolveGatewayWatchBenchmarkArgs = ({ args = [], env = process.env } = {})
     nextEnv[RUN_NODE_CPU_PROF_DIR_ENV] =
       benchmarkDir || nextEnv[RUN_NODE_CPU_PROF_DIR_ENV] || DEFAULT_BENCHMARK_PROFILE_DIR;
     nextEnv[RUN_NODE_CPU_PROF_MAX_FILES_ENV] ??= DEFAULT_BENCHMARK_PROFILE_MAX_FILES;
-    nextEnv.OPENCLAW_TRACE_SYNC_IO ??= "0";
-    if (nextEnv.OPENCLAW_TRACE_SYNC_IO === "1") {
+    nextEnv.BOT_TRACE_SYNC_IO ??= "0";
+    if (nextEnv.BOT_TRACE_SYNC_IO === "1") {
       nextEnv[RUN_NODE_OUTPUT_LOG_ENV] ??= joinArtifactPath(
         nextEnv[RUN_NODE_CPU_PROF_DIR_ENV],
         "gateway-watch-output.log",
@@ -197,7 +197,7 @@ export const resolveGatewayWatchTmuxSessionName = ({ args = [], env = process.en
   const profile = resolveGatewayWatchProfile({ args, env });
   const { port } = resolveGatewayWatchPort({ args, env });
   const parts = [
-    "openclaw",
+    "bot",
     "gateway",
     "watch",
     sanitizeSessionPart(profile ?? DEFAULT_PROFILE_NAME),
@@ -239,8 +239,8 @@ export const buildGatewayWatchTmuxCommand = ({
     "env",
     ...colorEnv.options,
     ...TMUX_CHILD_ENV_KEYS.flatMap((key) => ["-u", key]),
-    `OPENCLAW_GATEWAY_WATCH_TMUX_CHILD=1`,
-    `OPENCLAW_GATEWAY_WATCH_SESSION=${sessionName}`,
+    `BOT_GATEWAY_WATCH_TMUX_CHILD=1`,
+    `BOT_GATEWAY_WATCH_SESSION=${sessionName}`,
     ...colorEnv.assignments,
     ...TMUX_CHILD_ENV_KEYS.flatMap((key) =>
       env[key] == null || env[key] === "" ? [] : [`${key}=${env[key]}`],
@@ -342,7 +342,7 @@ export const runGatewayWatchServiceHandoff = (params = {}) => {
   // the watch target instead of a lower-precedence environment port.
   const stopEnv = { ...env };
   if (explicitCli) {
-    stopEnv.OPENCLAW_GATEWAY_PORT = String(watchPort);
+    stopEnv.BOT_GATEWAY_PORT = String(watchPort);
   }
   const stopResult = spawnSyncImpl(nodePath, [RUN_NODE_SCRIPT, ...profileArgs, "gateway", "stop"], {
     cwd,
@@ -376,7 +376,7 @@ const runTmux = (spawnSyncImpl, args, options = {}) =>
   });
 
 const log = (stderr, message) => {
-  stderr.write(`[openclaw] ${message}\n`);
+  stderr.write(`[bot] ${message}\n`);
 };
 
 const getTmuxErrorText = (result) =>
@@ -386,7 +386,7 @@ const isMissingTmuxTarget = (result) =>
   /can't find (?:session|window|pane)|no current target/i.test(getTmuxErrorText(result));
 
 const shouldAttachTmux = ({ env, stdinIsTTY, stdoutIsTTY }) => {
-  const raw = String(env.OPENCLAW_GATEWAY_WATCH_ATTACH ?? "").toLowerCase();
+  const raw = String(env.BOT_GATEWAY_WATCH_ATTACH ?? "").toLowerCase();
   if (TMUX_ATTACH_FORCE_VALUES.has(raw)) {
     return true;
   }
@@ -462,7 +462,7 @@ export const runGatewayWatchTmuxMain = (params = {}) => {
     log(deps.stderr, "gateway:watch benchmark running without --force");
   }
 
-  if (TMUX_DISABLE_VALUES.has((deps.env.OPENCLAW_GATEWAY_WATCH_TMUX ?? "").toLowerCase())) {
+  if (TMUX_DISABLE_VALUES.has((deps.env.BOT_GATEWAY_WATCH_TMUX ?? "").toLowerCase())) {
     return runForegroundWatcher({
       args: deps.args,
       cwd: deps.cwd,
@@ -472,7 +472,7 @@ export const runGatewayWatchTmuxMain = (params = {}) => {
     });
   }
 
-  if (deps.env.OPENCLAW_GATEWAY_WATCH_TMUX_CHILD === "1") {
+  if (deps.env.BOT_GATEWAY_WATCH_TMUX_CHILD === "1") {
     return runForegroundWatcher({
       args: deps.args,
       cwd: deps.cwd,

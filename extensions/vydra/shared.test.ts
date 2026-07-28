@@ -1,8 +1,8 @@
 // Vydra tests cover shared download timeout plugin behavior.
 import { once } from "node:events";
 import http from "node:http";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { installPinnedHostnameTestHooks } from "openclaw/plugin-sdk/test-media-understanding";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
+import { installPinnedHostnameTestHooks } from "bot/plugin-sdk/test-media-understanding";
 import { afterEach, describe, expect, it } from "vitest";
 import { downloadVydraAsset } from "./shared.js";
 

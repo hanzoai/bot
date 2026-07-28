@@ -1,8 +1,8 @@
-import type { RealtimeVoiceProviderPlugin } from "openclaw/plugin-sdk/realtime-voice";
+import type { RealtimeVoiceProviderPlugin } from "bot/plugin-sdk/realtime-voice";
 import {
   REALTIME_VOICE_AUDIO_FORMAT_G711_ULAW_8KHZ,
   REALTIME_VOICE_AUDIO_FORMAT_PCM16_24KHZ,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "bot/plugin-sdk/realtime-voice";
 import { XaiRealtimeVoiceBridge } from "./realtime-voice-bridge.js";
 import {
   XAI_REALTIME_DEFAULT_MODEL,

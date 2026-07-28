@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeBotStateDatabaseForTest,
   createChannelIngressQueueForTests as createChannelIngressQueue,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { setTelegramRuntime } from "./runtime.js";
 import { clearTelegramRuntimeForTest } from "./runtime.test-support.js";
@@ -23,10 +23,10 @@ import {
 async function withTempState<T>(
   fn: (stateDir: string, spoolDir: string) => Promise<T>,
 ): Promise<T> {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tg-spool-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-tg-spool-"));
   const spoolDir = resolveTelegramIngressSpoolDir({
     accountId: "acct",
-    env: { OPENCLAW_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
+    env: { BOT_STATE_DIR: stateDir } as NodeJS.ProcessEnv,
   });
   setTelegramRuntime({
     state: {
@@ -40,14 +40,14 @@ async function withTempState<T>(
     return await fn(stateDir, spoolDir);
   } finally {
     clearTelegramRuntimeForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
 
 afterEach(() => {
   clearTelegramRuntimeForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
 });
 
 describe("telegram ingress spool mapping", () => {

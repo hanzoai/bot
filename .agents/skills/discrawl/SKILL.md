@@ -2,14 +2,14 @@
 name: discrawl
 description: "Discord archive: search, sync freshness, DMs, summaries, TUI, repo/release work."
 metadata:
-  openclaw:
-    homepage: https://github.com/openclaw/discrawl
+  bot:
+    homepage: https://github.com/bot/discrawl
     requires:
       bins:
         - discrawl
     install:
       - kind: go
-        module: github.com/openclaw/discrawl/cmd/discrawl@latest
+        module: github.com/bot/discrawl/cmd/discrawl@latest
         bins:
           - discrawl
 ---
@@ -30,8 +30,8 @@ for current external context.
 - Cache: platform-native XDG cache dir
 - Logs: platform-native XDG state dir
 - Git share repo: platform-native XDG data dir
-- Repo: `openclaw/discrawl`; use `~/GIT/_Perso/discrawl` only after verifying
-  its remote targets `openclaw/discrawl`, otherwise use a fresh checkout
+- Repo: `bot/discrawl`; use `~/GIT/_Perso/discrawl` only after verifying
+  its remote targets `bot/discrawl`, otherwise use a fresh checkout
 - Preferred CLI: `discrawl`; fallback to `go run ./cmd/discrawl` from the repo
   if the installed binary is stale
 
@@ -125,7 +125,7 @@ Never use `--unsafe --confirm` unless the user explicitly asks for a database
 mutation and the write has been reviewed.
 
 When the installed CLI lacks a new feature, build or run from a verified
-`openclaw/discrawl` checkout before concluding the feature is missing.
+`bot/discrawl` checkout before concluding the feature is missing.
 
 ## Discord Boundaries
 
@@ -162,7 +162,7 @@ discrawl-sandbox messages --channel clawtributors --days 7 --all
 discrawl-sandbox status --json
 ```
 
-This reader imports `https://github.com/openclaw/discord-store.git` into
+This reader imports `https://github.com/bot/discord-store.git` into
 `/root/clawsweeper-sandbox-workspace/.discrawl/discrawl.db` with
 `discord.token_source = "none"`. The published Git snapshot is public-channel
 filtered; do not use `/root/.discrawl/config.toml` or the rich writer DB from

@@ -156,7 +156,7 @@ describe("matrix observed event normalization", () => {
         content: {
           body: "React here: ✅ Allow once, ❌ Deny",
           msgtype: "m.text",
-          "com.openclaw.approval": {
+          "com.bot.approval": {
             allowedDecisions: ["allow-once", "deny"],
             commandText,
             id: "approval-1",
@@ -200,7 +200,7 @@ describe("matrix observed event normalization", () => {
         content: {
           body: "Plugin approval required",
           msgtype: "m.text",
-          "com.openclaw.approval": {
+          "com.bot.approval": {
             agentId: "qa",
             allowedDecisions: ["allow-once", "deny"],
             id: "plugin:approval-1",

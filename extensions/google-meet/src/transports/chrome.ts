@@ -1,5 +1,5 @@
 // Google Meet plugin module implements chrome behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   createMeetingRealtimeEngineBindings,
   createLocalMeetingRealtimeAudioTransport,
@@ -13,11 +13,11 @@ import {
   startMeetingAgentRealtimeEngine,
   startMeetingRealtimeEngine,
   type MeetingRealtimeAudioEngineHandle,
-} from "openclaw/plugin-sdk/meeting-runtime";
-import { addTimerTimeoutGraceMs } from "openclaw/plugin-sdk/number-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import type { RuntimeLogger } from "openclaw/plugin-sdk/plugin-runtime";
-import { resolveTranscriptsConfig } from "openclaw/plugin-sdk/transcripts";
+} from "bot/plugin-sdk/meeting-runtime";
+import { addTimerTimeoutGraceMs } from "bot/plugin-sdk/number-runtime";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
+import type { RuntimeLogger } from "bot/plugin-sdk/plugin-runtime";
+import { resolveTranscriptsConfig } from "bot/plugin-sdk/transcripts";
 import type { GoogleMeetConfig, GoogleMeetMode } from "../config.js";
 import {
   GOOGLE_MEET_SYSTEM_PROFILER_COMMAND,
@@ -47,7 +47,7 @@ type ChromeNodeRealtimeAudioBridgeHandle = MeetingRealtimeAudioEngineHandle & {
   bridgeId: string;
 };
 
-function shouldCaptureCaptions(mode: GoogleMeetMode, fullConfig?: OpenClawConfig): boolean {
+function shouldCaptureCaptions(mode: GoogleMeetMode, fullConfig?: BotConfig): boolean {
   return (
     mode === "transcribe" || !fullConfig || resolveTranscriptsConfig(fullConfig.transcripts).enabled
   );
@@ -75,7 +75,7 @@ export async function assertBlackHole2chAvailable(params: {
     throw new Error(
       [
         "BlackHole 2ch audio device not found.",
-        "Install BlackHole 2ch and route Chrome input/output through the OpenClaw audio bridge.",
+        "Install BlackHole 2ch and route Chrome input/output through the Bot audio bridge.",
         hint,
       ]
         .filter(Boolean)
@@ -87,7 +87,7 @@ export async function assertBlackHole2chAvailable(params: {
 export async function launchChromeMeet(params: {
   runtime: PluginRuntime;
   config: GoogleMeetConfig;
-  fullConfig: OpenClawConfig;
+  fullConfig: BotConfig;
   meetingSessionId: string;
   requesterSessionKey?: string;
   mode: GoogleMeetMode;
@@ -134,7 +134,7 @@ export async function launchChromeMeet(params: {
     if (params.config.chrome.audioBridgeCommand) {
       if (params.mode === "agent") {
         throw new Error(
-          "Chrome agent mode requires chrome.audioInputCommand and chrome.audioOutputCommand so OpenClaw can run STT and regular TTS directly.",
+          "Chrome agent mode requires chrome.audioInputCommand and chrome.audioOutputCommand so Bot can run STT and regular TTS directly.",
         );
       }
       const bridge = await params.runtime.system.runCommandWithTimeout(
@@ -389,7 +389,7 @@ async function openMeetWithBrowserProxy(params: {
 export async function recoverCurrentMeetTab(params: {
   runtime: PluginRuntime;
   config: GoogleMeetConfig;
-  fullConfig?: OpenClawConfig;
+  fullConfig?: BotConfig;
   mode?: GoogleMeetMode;
   readOnly?: boolean;
   trackedMeetingUrl?: string;
@@ -424,7 +424,7 @@ export async function recoverCurrentMeetTab(params: {
 export async function recoverCurrentMeetTabOnNode(params: {
   runtime: PluginRuntime;
   config: GoogleMeetConfig;
-  fullConfig?: OpenClawConfig;
+  fullConfig?: BotConfig;
   mode?: GoogleMeetMode;
   readOnly?: boolean;
   trackedMeetingUrl?: string;
@@ -472,7 +472,7 @@ export async function recoverCurrentMeetTabOnNode(params: {
 export async function launchChromeMeetOnNode(params: {
   runtime: PluginRuntime;
   config: GoogleMeetConfig;
-  fullConfig: OpenClawConfig;
+  fullConfig: BotConfig;
   meetingSessionId: string;
   requesterSessionKey?: string;
   mode: GoogleMeetMode;

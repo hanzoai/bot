@@ -37,11 +37,11 @@ const { registeredRoutes, routeUnregisters, registerPluginHttpRoute, waitUntilAb
   },
 );
 
-vi.mock("openclaw/plugin-sdk/channel-outbound", () => ({ waitUntilAbort }));
+vi.mock("bot/plugin-sdk/channel-outbound", () => ({ waitUntilAbort }));
 
 vi.mock("./ingress-spool.js", () => ({ createSmsIngressSpool }));
 
-vi.mock("openclaw/plugin-sdk/webhook-ingress", () => ({
+vi.mock("bot/plugin-sdk/webhook-ingress", () => ({
   createFixedWindowRateLimiter: () => ({
     clear: vi.fn(),
     isRateLimited: vi.fn(() => false),

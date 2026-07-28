@@ -4,7 +4,7 @@ import path from "node:path";
 import { normalizeAgentId } from "./config-utils.js";
 import { readRegularFile, statRegularFile } from "./fs-utils.js";
 import { hashText } from "./hash.js";
-import { createSubsystemLogger, redactSensitiveText } from "./openclaw-runtime-io.js";
+import { createSubsystemLogger, redactSensitiveText } from "./bot-runtime-io.js";
 import {
   DREAMING_NARRATIVE_RUN_PREFIX,
   isDreamingNarrativeSessionStoreKey,
@@ -27,7 +27,7 @@ import {
   resolveSessionTranscriptsDirForAgent,
   stripInboundMetadata,
   stripInternalRuntimeContext,
-} from "./openclaw-runtime-session.js";
+} from "./bot-runtime-session.js";
 import { retryTransientMemoryRead } from "./read-retry.js";
 import {
   listSessionTranscriptCorpusEntriesForAgent,
@@ -145,7 +145,7 @@ function isDreamingNarrativeBootstrapRecord(record: unknown): boolean {
   };
   if (
     candidate.type !== "custom" ||
-    candidate.customType !== "openclaw:bootstrap-context:full" ||
+    candidate.customType !== "bot:bootstrap-context:full" ||
     !candidate.data ||
     typeof candidate.data !== "object" ||
     Array.isArray(candidate.data)
@@ -381,7 +381,7 @@ export function sessionPathForSessionIdentity(agentId: string, sessionId: string
 
 /**
  * Parses a deprecated path-shaped memory sync hint only when it points at an
- * OpenClaw-owned usage-counted transcript in the canonical agent sessions dir.
+ * Bot-owned usage-counted transcript in the canonical agent sessions dir.
  */
 export function parseCanonicalSessionSyncTargetFromPath(
   sessionFile: string,
@@ -548,7 +548,7 @@ function renderSessionExportLines(label: string, text: string): string[] {
 }
 
 /**
- * Strip OpenClaw-injected inbound metadata envelopes from a raw text block.
+ * Strip Bot-injected inbound metadata envelopes from a raw text block.
  *
  * User-role messages arriving from external channels (Telegram, Discord,
  * Slack, …) are stored with a multi-line prefix containing Conversation info,
@@ -558,7 +558,7 @@ function renderSessionExportLines(label: string, text: string): string[] {
  * `normalizeSessionText` collapses newlines into spaces, stripping is
  * impossible.
  *
- * See: https://github.com/openclaw/openclaw/issues/63921
+ * See: https://github.com/hanzoai/bot/issues/63921
  */
 function stripInboundMetadataForUserRole(text: string, role: "user" | "assistant"): string {
   if (role !== "user") {

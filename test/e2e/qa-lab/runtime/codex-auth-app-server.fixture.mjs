@@ -5,9 +5,9 @@ import {
   runFakeCodexAppServer,
 } from "../../../../scripts/e2e/lib/codex-app-server-fixture.mjs";
 
-const requestLog = process.env.OPENCLAW_QA_CODEX_AUTH_APP_SERVER_LOG;
+const requestLog = process.env.BOT_QA_CODEX_AUTH_APP_SERVER_LOG;
 if (!requestLog) {
-  throw new Error("missing OPENCLAW_QA_CODEX_AUTH_APP_SERVER_LOG");
+  throw new Error("missing BOT_QA_CODEX_AUTH_APP_SERVER_LOG");
 }
 
 runFakeCodexAppServer({
@@ -17,9 +17,9 @@ runFakeCodexAppServer({
     initialize: ({ sendResult }) =>
       sendResult(
         createFakeInitializeResponse({
-          name: "openclaw-qa-codex-auth",
+          name: "bot-qa-codex-auth",
           version: "0.143.0",
-          userAgent: "openclaw/0.143.0 (test)",
+          userAgent: "bot/0.143.0 (test)",
         }),
       ),
     "account/login/start": ({ params, sendResult }) => sendResult({ type: params?.type }),

@@ -300,15 +300,15 @@ describe("runDoctorConfigPreflight state migration", () => {
 
   it("releases the startup lease when the fresh config guard rejects", async () => {
     needsStartupMigrationCheckpoint.mockReturnValue(true);
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-original-state";
+    const previousStateDir = process.env.BOT_STATE_DIR;
+    process.env.BOT_STATE_DIR = "/tmp/bot-original-state";
     let leaseEnv: NodeJS.ProcessEnv | undefined;
     acquireStartupMigrationLease.mockImplementationOnce(({ env }) => {
       leaseEnv = env;
       return {
         ...startupMigrationLease,
         release: vi.fn(() => {
-          expect(env.OPENCLAW_STATE_DIR).toBe("/tmp/openclaw-original-state");
+          expect(env.BOT_STATE_DIR).toBe("/tmp/bot-original-state");
           startupMigrationLeaseRelease();
         }),
       };
@@ -317,7 +317,7 @@ describe("runDoctorConfigPreflight state migration", () => {
       .fn<(_snapshot?: Record<string, unknown>) => Promise<boolean>>()
       .mockResolvedValueOnce(true)
       .mockImplementationOnce(async () => {
-        process.env.OPENCLAW_STATE_DIR = "/tmp/openclaw-drifted-state";
+        process.env.BOT_STATE_DIR = "/tmp/bot-drifted-state";
         return false;
       });
 
@@ -332,9 +332,9 @@ describe("runDoctorConfigPreflight state migration", () => {
       ).rejects.toThrow("selected config changed during startup");
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.BOT_STATE_DIR = previousStateDir;
       }
     }
 
@@ -580,7 +580,7 @@ describe("runDoctorConfigPreflight state migration", () => {
             pluginId: "discord",
             reason: "missing-install-path: install path missing",
             message: 'Plugin "discord" has no install path.',
-            guidance: ["Run `openclaw update repair` to retry plugin repair."],
+            guidance: ["Run `bot update repair` to retry plugin repair."],
           },
         ],
         smokeFailures: [
@@ -701,7 +701,7 @@ describe("runDoctorConfigPreflight state migration", () => {
         requireStartupMigrationCheckpoint: true,
       }),
     ).rejects.toThrow(
-      "OpenClaw startup migrations did not complete cleanly; refusing to report the gateway ready.",
+      "Bot startup migrations did not complete cleanly; refusing to report the gateway ready.",
     );
 
     expect(recordSuccessfulStartupMigrations).not.toHaveBeenCalled();
@@ -716,7 +716,7 @@ describe("runDoctorConfigPreflight state migration", () => {
           {
             reason: "Configured plugin discord is not installed.",
             message: "Configured plugin discord is not installed.",
-            guidance: ["Run `openclaw update repair` to retry plugin repair."],
+            guidance: ["Run `bot update repair` to retry plugin repair."],
           },
         ],
       }),
@@ -732,7 +732,7 @@ describe("runDoctorConfigPreflight state migration", () => {
 
     expect(recordSuccessfulStartupMigrations).not.toHaveBeenCalled();
     expect(note).toHaveBeenCalledWith(
-      "- Configured plugin discord is not installed. Run `openclaw update repair` to retry plugin repair.",
+      "- Configured plugin discord is not installed. Run `bot update repair` to retry plugin repair.",
       "Doctor warnings",
     );
     expect(startupMigrationLeaseRelease).toHaveBeenCalledOnce();
@@ -768,8 +768,8 @@ describe("runDoctorConfigPreflight state migration", () => {
             reason: "missing-main-entry: index.js",
             message: 'Plugin "discord" failed post-core payload smoke check (missing): index.js',
             guidance: [
-              "Run `openclaw update repair` to retry plugin repair.",
-              "Run `openclaw plugins inspect discord --runtime --json` for details.",
+              "Run `bot update repair` to retry plugin repair.",
+              "Run `bot plugins inspect discord --runtime --json` for details.",
             ],
           },
         ],
@@ -832,7 +832,7 @@ describe("runDoctorConfigPreflight state migration", () => {
         invalidConfigNote: false,
         requireStartupMigrationCheckpoint: true,
       }),
-    ).rejects.toThrow("OpenClaw config is invalid");
+    ).rejects.toThrow("Bot config is invalid");
 
     expect(recordSuccessfulStartupMigrations).not.toHaveBeenCalled();
     expect(startupMigrationLeaseRelease).toHaveBeenCalledOnce();

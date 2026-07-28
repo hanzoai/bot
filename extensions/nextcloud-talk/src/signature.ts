@@ -1,7 +1,7 @@
 // Nextcloud Talk plugin module implements signature behavior.
 import { createHmac, randomBytes } from "node:crypto";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { safeEqualSecret } from "bot/plugin-sdk/security-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import type { NextcloudTalkWebhookHeaders } from "./types.js";
 
 const SIGNATURE_HEADER = "x-nextcloud-talk-signature";

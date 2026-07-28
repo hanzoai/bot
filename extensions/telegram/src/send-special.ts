@@ -1,4 +1,4 @@
-import type { RetryConfig } from "openclaw/plugin-sdk/retry-runtime";
+import type { RetryConfig } from "bot/plugin-sdk/retry-runtime";
 import {
   resolveTelegramApiContext,
   withTelegramApiContextLease,
@@ -7,12 +7,12 @@ import {
 } from "./send-context.js";
 import type { TelegramSendResult } from "./send-message-types.js";
 import { finalizeTelegramOutbound, prepareTelegramOutbound } from "./send-outbound.js";
-import { normalizePollInput, type OpenClawConfig, type PollInput } from "./send.runtime.js";
+import { normalizePollInput, type BotConfig, type PollInput } from "./send.runtime.js";
 
 type TelegramSendPollParams = Parameters<TelegramApiContext["api"]["sendPoll"]>[3];
 
 type TelegramStickerOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   token?: string;
   accountId?: string;
   verbose?: boolean;
@@ -80,7 +80,7 @@ async function sendStickerTelegramWithContext(
 }
 
 type TelegramPollOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   token?: string;
   accountId?: string;
   verbose?: boolean;

@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { applyAgentBindings, parseBindingSpecs } from "../commands/agents.bindings.js";
 import {
   applyAgentConfig,
@@ -9,7 +9,7 @@ import {
 import { transformConfigFileWithRetry, withConfigMutationExclusive } from "../config/config.js";
 import { resolveSessionTranscriptsDirForAgent } from "../config/sessions/paths.js";
 import type { OptionalBootstrapFileName } from "../config/types.agent-defaults.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { FsSafeError, root } from "../infra/fs-safe.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { readAgentDeletionJournal } from "../state/agent-deletion-journal.js";
@@ -53,7 +53,7 @@ type CreateAgentResult =
     };
 
 type CreateError = Extract<CreateAgentResult, { status: "error" }>;
-type AgentEntryConfig = NonNullable<NonNullable<OpenClawConfig["agents"]>["entries"]>[string];
+type AgentEntryConfig = NonNullable<NonNullable<BotConfig["agents"]>["entries"]>[string];
 type CreateAgentEntry = AgentEntryConfig & { id: string };
 
 type CreateAgentParams = {

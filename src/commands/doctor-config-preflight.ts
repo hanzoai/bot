@@ -14,7 +14,7 @@ import {
 import { formatConfigIssueLines } from "../config/issue-format.js";
 import { resolveCanonicalConfigPath } from "../config/paths.js";
 import type { ConfigFileSnapshot, LegacyConfigIssue } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import type { StartupMigrationLease } from "../infra/startup-migration-checkpoint.js";
 import { normalizePluginsConfig, resolveEffectiveEnableState } from "../plugins/config-state.js";
@@ -42,9 +42,9 @@ const loadLegacyCronRepair = createLazyRuntimeModule(
 const startupPreflightTraceStartedAt = performance.now();
 
 function withLegacyCronWebhook(
-  config: OpenClawConfig,
-  legacyConfig: OpenClawConfig | undefined,
-): OpenClawConfig {
+  config: BotConfig,
+  legacyConfig: BotConfig | undefined,
+): BotConfig {
   const legacyCron = legacyConfig?.cron as Record<string, unknown> | undefined;
   if (!legacyCron || !Object.hasOwn(legacyCron, "webhook")) {
     return config;
@@ -55,11 +55,11 @@ function withLegacyCronWebhook(
       ...config.cron,
       webhook: legacyCron.webhook,
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 async function measureStartupPreflightStep<T>(name: string, run: () => T | Promise<T>): Promise<T> {
-  if (!isTruthyEnvValue(process.env.OPENCLAW_GATEWAY_STARTUP_TRACE)) {
+  if (!isTruthyEnvValue(process.env.BOT_GATEWAY_STARTUP_TRACE)) {
     return await run();
   }
   const startedAt = performance.now();
@@ -119,7 +119,7 @@ async function maybeMigrateLegacyConfig(): Promise<string[]> {
 
 export type DoctorConfigPreflightResult = {
   snapshot: Awaited<ReturnType<typeof readConfigFileSnapshot>>;
-  baseConfig: OpenClawConfig;
+  baseConfig: BotConfig;
   cronCodexRuntimePolicyTargets?: CronCodexRuntimePolicyTarget[];
 };
 
@@ -148,7 +148,7 @@ function addDoctorLegacyIssues(
 export function shouldSkipPluginValidationForDoctorConfigPreflight(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  return isTruthyEnvValue(env.OPENCLAW_UPDATE_IN_PROGRESS);
+  return isTruthyEnvValue(env.BOT_UPDATE_IN_PROGRESS);
 }
 
 function noteStateMigrationResult(result: {
@@ -179,7 +179,7 @@ type StartupPluginConvergenceResult = {
 };
 
 async function planStartupPluginVerification(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
 }) {
   const { planStartupPluginConvergence } = await measureStartupPreflightStep(
@@ -195,7 +195,7 @@ async function planStartupPluginVerification(params: {
 }
 
 function buildStartupPluginQuarantine(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   failures: readonly PluginPayloadSmokeFailure[];
 }): DegradedPlugin[] {
   return buildDegradedPluginsFromVerificationFailures(
@@ -208,7 +208,7 @@ function buildStartupPluginQuarantine(params: {
 }
 
 function isStartupPluginVerificationFailureActive(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   failure: PluginPayloadSmokeFailure;
 }): boolean {
   return resolveEffectiveEnableState({
@@ -225,11 +225,11 @@ function formatStartupPluginSmokeFailure(failure: PluginPayloadSmokeFailure): st
     reason: failure.reason,
     detail: failure.detail,
     ...(failure.installPath ? { installPath: failure.installPath } : {}),
-  })}. Run \`openclaw update repair\` to retry plugin repair.`;
+  })}. Run \`bot update repair\` to retry plugin repair.`;
 }
 
 async function runStartupUpgradeConvergence(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
 }): Promise<StartupPluginConvergenceResult> {
   const plan = await planStartupPluginVerification(params);
@@ -293,7 +293,7 @@ async function runStartupUpgradeConvergence(params: {
 }
 
 async function refreshStartupPluginQuarantine(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
 }): Promise<StartupPluginConvergenceResult> {
   const plan = await planStartupPluginVerification(params);
@@ -338,7 +338,7 @@ async function refreshStartupPluginQuarantine(params: {
 
 /** Map payload verification failures into startup quarantine and blocking diagnostics. */
 export function mapStartupPluginQuarantineRefresh(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   failures: readonly PluginPayloadSmokeFailure[];
 }): StartupPluginConvergenceResult {
   const quarantinedPlugins = buildStartupPluginQuarantine(params);
@@ -365,9 +365,9 @@ function formatStartupMigrationFailure(params: { warnings: string[]; blockers: s
     ...params.blockers.map((blocker) => `- ${blocker}`),
   ];
   return [
-    "OpenClaw startup migrations did not complete cleanly; refusing to report the gateway ready.",
+    "Bot startup migrations did not complete cleanly; refusing to report the gateway ready.",
     ...details,
-    'Run "openclaw doctor --fix" against the mounted state/config, then restart the container.',
+    'Run "bot doctor --fix" against the mounted state/config, then restart the container.',
   ].join("\n");
 }
 
@@ -375,7 +375,7 @@ function formatStartupPluginVerificationFailure(
   diagnostic: StartupPluginVerificationDiagnostic,
 ): string {
   return [
-    "OpenClaw plugin verification failed; refusing to report the gateway ready.",
+    "Bot plugin verification failed; refusing to report the gateway ready.",
     ...diagnostic.messages.map((message) => `- ${message}`),
     "Resolve the plugin verification errors above, then restart the container.",
   ].join("\n");
@@ -389,7 +389,7 @@ function throwStartupMigrationRefusal(message: string): never {
 
 function throwStartupMigrationGuardRejected(): never {
   throw new Error(
-    "OpenClaw startup migrations were skipped because the selected config changed during startup; refusing to report the gateway ready. Retry startup so the new config can be validated.",
+    "Bot startup migrations were skipped because the selected config changed during startup; refusing to report the gateway ready. Retry startup so the new config can be validated.",
   );
 }
 
@@ -520,7 +520,7 @@ export async function runDoctorConfigPreflight(
     if (options.repairPrefixedConfig === true && snapshot.exists && !snapshot.valid) {
       if (await recoverConfigFromJsonRootSuffix(snapshot)) {
         note(
-          "Removed non-JSON prefix from openclaw.json; original saved as .clobbered.*.",
+          "Removed non-JSON prefix from bot.json; original saved as .clobbered.*.",
           "Config",
         );
         snapshot = addDoctorLegacyIssues(await readConfigFileSnapshot(readOptions));
@@ -528,7 +528,7 @@ export async function runDoctorConfigPreflight(
         await recoverConfigFromLastKnownGood({ snapshot, reason: "doctor-invalid-config" })
       ) {
         note(
-          "Restored openclaw.json from last-known-good; original saved as .clobbered.*.",
+          "Restored bot.json from last-known-good; original saved as .clobbered.*.",
           "Config",
         );
         snapshot = addDoctorLegacyIssues(await readConfigFileSnapshot(readOptions));
@@ -663,7 +663,7 @@ export async function runDoctorConfigPreflight(
         if (startupMigrationHeartbeatError) {
           throw startupMigrationHeartbeatError instanceof Error
             ? startupMigrationHeartbeatError
-            : new Error("OpenClaw startup migration lease heartbeat failed.");
+            : new Error("Bot startup migration lease heartbeat failed.");
         }
         if (startupMigrationWarnings.length > 0) {
           throwStartupMigrationRefusal(
@@ -677,7 +677,7 @@ export async function runDoctorConfigPreflight(
           throwStartupMigrationRefusal(
             formatStartupMigrationFailure({
               warnings: [],
-              blockers: ['OpenClaw config is invalid; run "openclaw doctor --fix" before startup.'],
+              blockers: ['Bot config is invalid; run "bot doctor --fix" before startup.'],
             }),
           );
         }

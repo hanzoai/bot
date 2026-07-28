@@ -1,4 +1,4 @@
-import type { MemorySearchManager } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import type { MemorySearchManager } from "bot/plugin-sdk/memory-core-host-engine-storage";
 import { resolveQmdManagerRuntimeConfig, type QmdManagerCreateParams } from "./qmd-manager-base.js";
 import { QmdManagerIo } from "./qmd-manager-io.js";
 

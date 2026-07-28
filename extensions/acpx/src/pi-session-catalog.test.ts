@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-entry";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 type ResolveAcpSessionAvailability =
-  (typeof import("openclaw/plugin-sdk/acp-runtime"))["resolveAcpSessionAvailability"];
+  (typeof import("bot/plugin-sdk/acp-runtime"))["resolveAcpSessionAvailability"];
 
 const nodeHostMocks = vi.hoisted(() => ({
   runNodePtyCommand: vi.fn(async () => ({ exitCode: 0 })),
@@ -14,13 +14,13 @@ const acpRuntimeMocks = vi.hoisted(() => ({
   resolveAcpSessionAvailability: vi.fn<ResolveAcpSessionAvailability>(() => ({ available: true })),
 }));
 
-vi.mock("openclaw/plugin-sdk/acp-runtime", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/acp-runtime")>()),
+vi.mock("bot/plugin-sdk/acp-runtime", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("bot/plugin-sdk/acp-runtime")>()),
   resolveAcpSessionAvailability: acpRuntimeMocks.resolveAcpSessionAvailability,
 }));
 
-vi.mock("openclaw/plugin-sdk/node-host", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/node-host")>();
+vi.mock("bot/plugin-sdk/node-host", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/node-host")>();
   return {
     ...actual,
     runNodePtyCommand: nodeHostMocks.runNodePtyCommand,
@@ -173,7 +173,7 @@ describe("Pi session catalog", () => {
       readLocalPiTranscriptPage({ threadId: "pi-session", cursor: 123 }),
     ).rejects.toThrow("cursor is invalid");
 
-    let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
+    let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
     registerPiSessionCatalog({
       pluginConfig: {},
       runtime: { nodes: { list: vi.fn().mockResolvedValue({ nodes: [] }) } },
@@ -182,7 +182,7 @@ describe("Pi session catalog", () => {
       },
       registerNodeHostCommand: vi.fn(),
       registerNodeInvokePolicy: vi.fn(),
-    } as unknown as OpenClawPluginApi);
+    } as unknown as BotPluginApi);
     await expect(
       provider!.read({ hostId: "gateway", threadId: "pi-session", limit: 2 }),
     ).resolves.toMatchObject({ threadId: "pi-session", items: expect.any(Array) });
@@ -193,8 +193,8 @@ describe("Pi session catalog", () => {
 
   it("recognizes Pi sessions when the agent directory uses a symlinked path", async () => {
     const sessionDirectory = await createPiStore();
-    const agentDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pi-agent-real-"));
-    const symlinkParent = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pi-agent-link-"));
+    const agentDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "bot-pi-agent-real-"));
+    const symlinkParent = await fs.mkdtemp(path.join(os.tmpdir(), "bot-pi-agent-link-"));
     const linkedAgentDirectory = path.join(symlinkParent, "agent");
     temporaryDirectories.push(agentDirectory, symlinkParent);
     await fs.mkdir(path.join(agentDirectory, "sessions"), { recursive: true });
@@ -221,7 +221,7 @@ describe("Pi session catalog", () => {
     );
     const agentDirectory = path.dirname(path.dirname(sessionDirectory));
     const unrelatedAgentDirectory = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-pi-agent-unrelated-"),
+      path.join(os.tmpdir(), "bot-pi-agent-unrelated-"),
     );
     temporaryDirectories.push(unrelatedAgentDirectory);
     const baseEnv = {
@@ -462,7 +462,7 @@ describe("Pi session catalog", () => {
   });
 
   it("paginates, searches, and reads beyond the newest summary batch", async () => {
-    const directory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pi-catalog-"));
+    const directory = await fs.mkdtemp(path.join(os.tmpdir(), "bot-pi-catalog-"));
     temporaryDirectories.push(directory);
     process.env.PI_CODING_AGENT_SESSION_DIR = directory;
     const baseTime = Date.parse("2026-07-13T10:00:00Z") / 1_000;
@@ -507,8 +507,8 @@ describe("Pi session catalog", () => {
   });
 
   it("uses the configured Pi session directory and lists oversized sessions", async () => {
-    const agentDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pi-agent-"));
-    const homeDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-pi-home-"));
+    const agentDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "bot-pi-agent-"));
+    const homeDirectory = await fs.mkdtemp(path.join(os.tmpdir(), "bot-pi-home-"));
     temporaryDirectories.push(agentDirectory, homeDirectory);
     const sessionDirectory = path.join(homeDirectory, "custom-sessions");
     await fs.mkdir(sessionDirectory, { recursive: true });
@@ -620,8 +620,8 @@ describe("Pi session catalog", () => {
     async () => {
       await createPiStore();
       await installFakePi();
-      let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
-      const commands: Parameters<OpenClawPluginApi["registerNodeHostCommand"]>[0][] = [];
+      let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
+      const commands: Parameters<BotPluginApi["registerNodeHostCommand"]>[0][] = [];
       registerPiSessionCatalog({
         pluginConfig: {},
         runtime: { nodes: { list: vi.fn().mockResolvedValue({ nodes: [] }) } },
@@ -629,10 +629,10 @@ describe("Pi session catalog", () => {
           provider = value;
         },
         registerNodeHostCommand: (
-          command: Parameters<OpenClawPluginApi["registerNodeHostCommand"]>[0],
+          command: Parameters<BotPluginApi["registerNodeHostCommand"]>[0],
         ) => commands.push(command),
         registerNodeInvokePolicy: vi.fn(),
-      } as unknown as OpenClawPluginApi);
+      } as unknown as BotPluginApi);
 
       await expect(provider!.list({ hostIds: ["gateway"] })).resolves.toEqual([
         expect.objectContaining({
@@ -729,7 +729,7 @@ describe("Pi session catalog", () => {
   });
 
   it("opens paired-node Pi sessions only through the advertised terminal command", async () => {
-    let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
+    let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
     const page = {
       payloadJSON: JSON.stringify({
         sessions: [
@@ -767,7 +767,7 @@ describe("Pi session catalog", () => {
       },
       registerNodeHostCommand: vi.fn(),
       registerNodeInvokePolicy: vi.fn(),
-    } as unknown as OpenClawPluginApi);
+    } as unknown as BotPluginApi);
 
     await expect(
       provider!.list({
@@ -819,13 +819,13 @@ describe("Pi session catalog", () => {
     const api = {
       pluginConfig: { piSessionCatalog: { enabled: false } },
       registerSessionCatalog,
-    } as unknown as OpenClawPluginApi;
+    } as unknown as BotPluginApi;
     registerPiSessionCatalog(api);
     expect(registerSessionCatalog).not.toHaveBeenCalled();
   });
 
   it("bridges paired-node list and read requests without undefined transport fields", async () => {
-    let provider: Parameters<OpenClawPluginApi["registerSessionCatalog"]>[0] | undefined;
+    let provider: Parameters<BotPluginApi["registerSessionCatalog"]>[0] | undefined;
     const invoke = vi
       .fn()
       .mockResolvedValueOnce({
@@ -870,7 +870,7 @@ describe("Pi session catalog", () => {
       },
       registerNodeHostCommand: vi.fn(),
       registerNodeInvokePolicy: vi.fn(),
-    } as unknown as OpenClawPluginApi;
+    } as unknown as BotPluginApi;
 
     registerPiSessionCatalog(api);
     const catalog = provider;

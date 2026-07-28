@@ -1,6 +1,6 @@
 import { createServer } from "node:http";
-import { createOpenAICompletionsTransportStreamFn } from "@openclaw/ai/transports";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import { createOpenAICompletionsTransportStreamFn } from "@hanzo/bot-ai/transports";
+import type { Model } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import {
   classifyAssistantFailoverReason,

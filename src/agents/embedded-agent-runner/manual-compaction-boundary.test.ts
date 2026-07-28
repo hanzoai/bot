@@ -2,9 +2,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AgentMessage } from "bot/plugin-sdk/agent-core";
+import { SessionManager } from "bot/plugin-sdk/agent-sessions";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { hardenManualCompactionBoundary } from "./manual-compaction-boundary.js";
 

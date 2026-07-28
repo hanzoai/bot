@@ -5,7 +5,7 @@ import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { HEARTBEAT_PROMPT } from "../auto-reply/heartbeat.js";
 import type { ChannelOutboundAdapter } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import {
   resolveAgentIdFromSessionKey,
   resolveAgentMainSessionKey,
@@ -14,7 +14,7 @@ import {
 } from "../config/sessions.js";
 import { getActivePluginRegistry, setActivePluginRegistry } from "../plugins/runtime.js";
 import { buildAgentPeerSessionKey } from "../routing/session-key.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import {
   createDirectOutboundTestAdapter,
   createOutboundTestPlugin,
@@ -205,7 +205,7 @@ function expectReplyCall(
   index: number,
   bodyFields: Record<string, unknown>,
   optionsFields?: Record<string, unknown>,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ) {
   const call = replySpy.mock.calls[index];
   if (!call) {
@@ -327,9 +327,9 @@ beforeAll(async () => {
   ]);
   setActivePluginRegistry(testRegistry);
 
-  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-heartbeat-suite-"));
-  previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  process.env.OPENCLAW_STATE_DIR = path.join(fixtureRoot, "state");
+  fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-heartbeat-suite-"));
+  previousStateDir = process.env.BOT_STATE_DIR;
+  process.env.BOT_STATE_DIR = path.join(fixtureRoot, "state");
 });
 
 beforeEach(() => {
@@ -340,11 +340,11 @@ beforeEach(() => {
 });
 
 afterAll(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   if (previousStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.BOT_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = previousStateDir;
+    process.env.BOT_STATE_DIR = previousStateDir;
   }
   if (fixtureRoot) {
     await fs.rm(fixtureRoot, { recursive: true, force: true });
@@ -403,12 +403,12 @@ describe("resolveHeartbeatIntervalMs", () => {
 
 describe("resolveHeartbeatPrompt", () => {
   it.each([
-    { name: "default prompt", cfg: {} as OpenClawConfig, expected: HEARTBEAT_PROMPT },
+    { name: "default prompt", cfg: {} as BotConfig, expected: HEARTBEAT_PROMPT },
     {
       name: "trimmed override prompt",
       cfg: {
         agents: { defaults: { heartbeat: { prompt: "  ping  " } } },
-      } as OpenClawConfig,
+      } as BotConfig,
       expected: "ping",
     },
   ])("uses $name", ({ cfg, expected }) => {
@@ -418,7 +418,7 @@ describe("resolveHeartbeatPrompt", () => {
 
 describe("isHeartbeatEnabledForAgent", () => {
   it("enables only explicit heartbeat agents when configured", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: { heartbeat: { every: "30m" } },
         list: [{ id: "main" }, { id: "ops", heartbeat: { every: "1h" } }],
@@ -429,7 +429,7 @@ describe("isHeartbeatEnabledForAgent", () => {
   });
 
   it("uses global heartbeat defaults for all agents when no explicit heartbeat entries exist", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: { heartbeat: { every: "30m" } },
         list: [{ id: "main" }, { id: "ops" }],
@@ -440,7 +440,7 @@ describe("isHeartbeatEnabledForAgent", () => {
   });
 
   it("falls back to default agent when no heartbeat config exists", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         list: [{ id: "main" }, { id: "ops" }],
       },
@@ -463,7 +463,7 @@ describe("resolveHeartbeatDeliveryTarget", () => {
   it("resolves target variants across route and allowlist rules", () => {
     const cases: Array<{
       name: string;
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       entry: typeof baseEntry & { delivery?: ReturnType<typeof normalizeSessionDeliveryState> };
       expected: ReturnType<typeof resolveHeartbeatDeliveryTarget>;
     }> = [
@@ -613,7 +613,7 @@ describe("resolveHeartbeatDeliveryTarget", () => {
   ])(
     "parses optional telegram :topic: threadId suffix through session route: $name",
     async ({ to, expectedTo, expectedThreadId }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             heartbeat: { target: "telegram", to },
@@ -658,7 +658,7 @@ describe("resolveHeartbeatDeliveryTarget", () => {
   ] as const)(
     "handles explicit heartbeat accountId allow/deny: $name",
     ({ accountId, expected }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             heartbeat: { target: "telegram", to: "-100123", accountId },
@@ -671,7 +671,7 @@ describe("resolveHeartbeatDeliveryTarget", () => {
   );
 
   it("prefers per-agent heartbeat overrides when provided", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: { defaults: { heartbeat: { target: "telegram", to: "-100123" } } },
     };
     const heartbeat = { target: "whatsapp", to: "120363401234567890@g.us" } as const;
@@ -698,7 +698,7 @@ describe("resolveHeartbeatDeliveryTarget", () => {
 
 describe("resolveHeartbeatSenderContext", () => {
   it("prefers delivery accountId for allowFrom resolution", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         telegram: {
           allowFrom: ["111"],
@@ -754,7 +754,7 @@ describe("runHeartbeatOnce", () => {
   });
 
   it("skips when agent heartbeat is not enabled", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: { heartbeat: { every: "30m" } },
         list: [{ id: "main" }, { id: "ops", heartbeat: { every: "1h" } }],
@@ -769,10 +769,10 @@ describe("runHeartbeatOnce", () => {
   });
 
   it.each([
-    ["the heartbeat main session", (cfg: OpenClawConfig) => resolveMainSessionKey(cfg)],
+    ["the heartbeat main session", (cfg: BotConfig) => resolveMainSessionKey(cfg)],
     ["another session for the same agent", () => "agent:main:telegram:alerts"],
   ])("retries instead of dispatching while %s has an embedded run", async (_name, activeKey) => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           heartbeat: { every: "5m", target: "none" },
@@ -796,7 +796,7 @@ describe("runHeartbeatOnce", () => {
   });
 
   it("skips outside active hours", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           userTimezone: "UTC",
@@ -820,7 +820,7 @@ describe("runHeartbeatOnce", () => {
   });
 
   it("keeps active-hours protection for cron-carried heartbeat tasks", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           userTimezone: "UTC",
@@ -849,7 +849,7 @@ describe("runHeartbeatOnce", () => {
     const storePath = path.join(tmpDir, "sessions.json");
     const replySpy = vi.fn();
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -897,7 +897,7 @@ describe("runHeartbeatOnce", () => {
     const storePath = path.join(tmpDir, "sessions.json");
     const replySpy = vi.fn();
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             heartbeat: { every: "30m", prompt: "Default prompt" },
@@ -966,7 +966,7 @@ describe("runHeartbeatOnce", () => {
     const replySpy = vi.fn();
     const agentId = "ops";
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             heartbeat: { every: "30m", prompt: "Default prompt" },
@@ -1042,7 +1042,7 @@ describe("runHeartbeatOnce", () => {
       peerKind: "group" as const,
       peerId: "120363401234567890@g.us",
       message: "Group alert",
-      applyOverride: ({ cfg, sessionKey }: { cfg: OpenClawConfig; sessionKey: string }) => {
+      applyOverride: ({ cfg, sessionKey }: { cfg: BotConfig; sessionKey: string }) => {
         if (cfg.agents?.defaults?.heartbeat) {
           cfg.agents.defaults.heartbeat.session = sessionKey;
         }
@@ -1067,7 +1067,7 @@ describe("runHeartbeatOnce", () => {
       try {
         const tmpDir = await createCaseDir(caseDir);
         const storePath = path.join(tmpDir, "sessions.json");
-        const cfg: OpenClawConfig = {
+        const cfg: BotConfig = {
           agents: {
             defaults: {
               workspace: tmpDir,
@@ -1149,7 +1149,7 @@ describe("runHeartbeatOnce", () => {
     try {
       const tmpDir = await createCaseDir("hb-subagent-guard");
       const storePath = path.join(tmpDir, "sessions.json");
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -1213,7 +1213,7 @@ describe("runHeartbeatOnce", () => {
     const storePath = path.join(tmpDir, "sessions.json");
     const replySpy = vi.fn();
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -1313,7 +1313,7 @@ describe("runHeartbeatOnce", () => {
       try {
         const tmpDir = await createCaseDir(caseDir);
         const storePath = path.join(tmpDir, "sessions.json");
-        const cfg: OpenClawConfig = {
+        const cfg: BotConfig = {
           agents: {
             defaults: {
               workspace: tmpDir,
@@ -1368,7 +1368,7 @@ describe("runHeartbeatOnce", () => {
     try {
       const tmpDir = await createCaseDir("hb-legacy-reasoning-unset");
       const storePath = path.join(tmpDir, "sessions.json");
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -1411,11 +1411,11 @@ describe("runHeartbeatOnce", () => {
   });
 
   it("loads the default agent session from templated stores", async () => {
-    const tmpDir = await createCaseDir("openclaw-hb");
+    const tmpDir = await createCaseDir("bot-hb");
     const storeTemplate = path.join(tmpDir, "agents", "{agentId}", "sessions.json");
     const replySpy = vi.fn();
     try {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: { workspace: tmpDir, heartbeat: { every: "5m", target: "whatsapp" } },
           list: [{ id: "work", default: true }],
@@ -1473,7 +1473,7 @@ describe("runHeartbeatOnce", () => {
     queueSystemEvent?: boolean;
     replyText?: string;
   }) {
-    const tmpDir = await createCaseDir("openclaw-hb");
+    const tmpDir = await createCaseDir("bot-hb");
     const storePath = path.join(tmpDir, "sessions.json");
     const workspaceDir = path.join(tmpDir, "workspace");
     await fs.mkdir(workspaceDir, { recursive: true });
@@ -1501,7 +1501,7 @@ describe("runHeartbeatOnce", () => {
 `
               : null;
 
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           workspace: workspaceDir,
@@ -1568,7 +1568,7 @@ describe("runHeartbeatOnce", () => {
   });
 
   it("reads heartbeat scratch from a configured cron store partition", async () => {
-    const tmpDir = await createCaseDir("openclaw-hb-custom-store");
+    const tmpDir = await createCaseDir("bot-hb-custom-store");
     const storePath = path.join(tmpDir, "sessions.json");
     const customCronStore = path.join(tmpDir, "custom-cron", "jobs.json");
     const workspaceDir = path.join(tmpDir, "workspace");
@@ -1581,7 +1581,7 @@ describe("runHeartbeatOnce", () => {
       agents: { defaults: { workspace: workspaceDir, heartbeat: { every: "5m" } } },
       cron: { store: customCronStore },
       session: { store: storePath },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     await seedWhatsAppSession(storePath, resolveMainSessionKey(cfg));
     const replySpy = vi.fn().mockResolvedValue({ text: "Checked custom partition" });
 
@@ -1595,7 +1595,7 @@ describe("runHeartbeatOnce", () => {
   });
 
   it("treats blank-line-separated legacy task blocks as ordinary scratch", async () => {
-    const tmpDir = await createCaseDir("openclaw-hb-tasks-context");
+    const tmpDir = await createCaseDir("bot-hb-tasks-context");
     const storePath = path.join(tmpDir, "sessions.json");
     const workspaceDir = path.join(tmpDir, "workspace");
     await fs.mkdir(workspaceDir, { recursive: true });
@@ -1619,7 +1619,7 @@ Some global directive after tasks.
 `,
     });
 
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           workspace: workspaceDir,
@@ -1657,7 +1657,7 @@ Some global directive after tasks.
   });
 
   it("keeps unindented legacy task entries as ordinary scratch", async () => {
-    const tmpDir = await createCaseDir("openclaw-hb-unindented-tasks-context");
+    const tmpDir = await createCaseDir("bot-hb-unindented-tasks-context");
     const storePath = path.join(tmpDir, "sessions.json");
     const workspaceDir = path.join(tmpDir, "workspace");
     await fs.mkdir(workspaceDir, { recursive: true });
@@ -1677,7 +1677,7 @@ tasks:
 `,
     });
 
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           workspace: workspaceDir,
@@ -1852,7 +1852,7 @@ tasks:
   it("uses an internal-only cron prompt when heartbeat delivery target is none", async () => {
     const tmpDir = await createCaseDir("hb-cron-target-none");
     const storePath = path.join(tmpDir, "sessions.json");
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           workspace: tmpDir,
@@ -1899,7 +1899,7 @@ tasks:
   it("uses an internal-only exec prompt when heartbeat delivery target is none", async () => {
     const tmpDir = await createCaseDir("hb-exec-target-none");
     const storePath = path.join(tmpDir, "sessions.json");
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           workspace: tmpDir,

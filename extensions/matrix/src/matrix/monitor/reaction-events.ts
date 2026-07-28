@@ -1,8 +1,8 @@
 // Matrix plugin module implements reaction events behavior.
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { normalizeAccountId } from "openclaw/plugin-sdk/routing";
-import { getSessionBindingService } from "openclaw/plugin-sdk/session-binding-runtime";
+import type { ApprovalResolveResult } from "bot/plugin-sdk/approval-gateway-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { normalizeAccountId } from "bot/plugin-sdk/routing";
+import { getSessionBindingService } from "bot/plugin-sdk/session-binding-runtime";
 import {
   resolveMatrixApprovalReactionTargetWithPersistence,
   unregisterMatrixApprovalReactionTargetsForApproval,

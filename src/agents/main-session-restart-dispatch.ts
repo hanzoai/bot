@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { GatewayClientRequestError } from "../../packages/gateway-client/src/index.js";
 import { sanitizePendingFinalDeliveryText } from "../auto-reply/reply/pending-final-delivery.js";
 import type { SessionEntry } from "../config/sessions.js";
@@ -9,7 +9,7 @@ import {
   resolveRestartRecoveryChannelAuthority,
 } from "../config/sessions/restart-recovery-state.js";
 import { applySessionEntryReplacements } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isTrustedMessageActionTurnIngress } from "../gateway/message-action-turn-capability.js";
 import type { GatewayRecoveryRuntime } from "../gateway/server-instance-runtime.types.js";
 import { getAgentEventLifecycleGeneration } from "../infra/agent-events.js";
@@ -47,7 +47,7 @@ const RESERVATION_ROLLBACK_RETRY_DELAY_MS = 1_000;
 const RESERVATION_ROLLBACK_RETRY_MAX_DELAY_MS = 30_000;
 const RESTART_RECOVERY_RESUME_MESSAGE =
   "[System] Your previous turn was interrupted by a gateway restart while " +
-  "OpenClaw was waiting on tool/model work. Continue from the existing " +
+  "Bot was waiting on tool/model work. Continue from the existing " +
   "transcript and finish the interrupted response.";
 
 type RestartRecoveryTerminalStatus = "error" | "ok" | "timeout";
@@ -73,7 +73,7 @@ export function requiresRestartRecoveryMessageActionAuthority(entry: SessionEntr
 }
 
 export function resolveRestartRecoveryResumeBlockReason(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   entry: SessionEntry;
   sessionKey: string;
 }): string | undefined {
@@ -130,7 +130,7 @@ function buildResumeMessage(pendingFinalDeliveryText?: string | null): string {
 }
 
 export function resolveRestartRecoveryDeliveryContext(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   entry: SessionEntry;
   includeSessionDeliveryFallback?: boolean;
   sessionKey: string;
@@ -341,7 +341,7 @@ function scheduleRestartRecoveryReservationRollback(
 
 export async function resumeMainSession(params: {
   canonicalSessionKey?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   entry: SessionEntry;
   observation: MainSessionRecoveryObservation;
   recoveryAttempt: number;

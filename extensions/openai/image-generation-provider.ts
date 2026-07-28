@@ -1,31 +1,31 @@
 // Openai provider module implements model/runtime integration.
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import type {
   ImageGenerationOutputFormat,
   ImageGenerationProvider,
   ImageGenerationResult,
-} from "openclaw/plugin-sdk/image-generation";
+} from "bot/plugin-sdk/image-generation";
 import {
   parseOpenAiCompatibleImageResponse,
   resolveInlineImageJsonResponseMaxBytes,
   toImageDataUrl,
-} from "openclaw/plugin-sdk/image-generation";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/logging-core";
+} from "bot/plugin-sdk/image-generation";
+import { createSubsystemLogger } from "bot/plugin-sdk/logging-core";
 import {
   resolveClosestSize,
   resolveGeneratedMediaMaxBytes,
-} from "openclaw/plugin-sdk/media-generation-runtime";
-import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
-import { canonicalizeBase64 } from "openclaw/plugin-sdk/media-runtime";
+} from "bot/plugin-sdk/media-generation-runtime";
+import { extensionForMime } from "bot/plugin-sdk/media-mime";
+import { canonicalizeBase64 } from "bot/plugin-sdk/media-runtime";
 import {
   ensureAuthProfileStore,
   hasConfiguredSecretInput,
   isProviderApiKeyConfigured,
   listProfilesForProvider,
   type AuthProfileStore,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
+} from "bot/plugin-sdk/provider-auth";
+import { resolveApiKeyForProvider } from "bot/plugin-sdk/provider-auth-runtime";
 import {
   assertOkOrThrowHttpError,
   postJsonRequest,
@@ -33,9 +33,9 @@ import {
   readProviderJsonResponse,
   resolveProviderHttpRequestConfig,
   sanitizeConfiguredModelProviderRequest,
-} from "openclaw/plugin-sdk/provider-http";
-import { isPrivateNetworkOptInEnabled } from "openclaw/plugin-sdk/ssrf-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/provider-http";
+import { isPrivateNetworkOptInEnabled } from "bot/plugin-sdk/ssrf-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import {
   canonicalizeCodexResponsesBaseUrl,
   isOpenAICodexBaseUrl,
@@ -260,7 +260,7 @@ function resolveNativeOpenAIImageSizesForModel(model: string): readonly string[]
   }
 }
 
-function resolveConfiguredOpenAIImageBaseUrl(cfg: OpenClawConfig | undefined, model: string) {
+function resolveConfiguredOpenAIImageBaseUrl(cfg: BotConfig | undefined, model: string) {
   const modelId = model.trim().replace(/^openai\//u, "");
   const modelBaseUrl = cfg?.models?.providers?.openai?.models
     ?.find((candidate) => candidate.id.trim().replace(/^openai\//u, "") === modelId)
@@ -301,7 +301,7 @@ function resolveOpenAIImageRequestSize(params: {
 function shouldAllowPrivateImageEndpoint(req: {
   provider: string;
   model: string;
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
 }) {
   if (req.provider === MOCK_OPENAI_PROVIDER_ID) {
     return true;
@@ -313,7 +313,7 @@ function shouldAllowPrivateImageEndpoint(req: {
   if (!baseUrl.startsWith("http://127.0.0.1:") && !baseUrl.startsWith("http://localhost:")) {
     return false;
   }
-  return process.env.OPENCLAW_QA_ALLOW_LOCAL_IMAGE_PROVIDER === "1";
+  return process.env.BOT_QA_ALLOW_LOCAL_IMAGE_PROVIDER === "1";
 }
 
 function resolveRequestAuthStore(req: {
@@ -333,7 +333,7 @@ function resolveRequestAuthStore(req: {
 }
 
 function hasDirectOpenAIImageApiKeyAuth(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
 }): boolean {
   if (hasExplicitOpenAIImageApiKeyConfig(params.cfg)) {
@@ -372,7 +372,7 @@ function hasCodexResponseTransportProfileConfigured(req: {
 }
 
 function resolveOpenAIImageAuthProvider(req: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   authStore?: AuthProfileStore;
   agentDir?: string;
 }): string {
@@ -387,12 +387,12 @@ function resolveOpenAIImageAuthProvider(req: {
   return "openai";
 }
 
-function hasExplicitOpenAIImageApiKeyConfig(cfg: OpenClawConfig | undefined): boolean {
+function hasExplicitOpenAIImageApiKeyConfig(cfg: BotConfig | undefined): boolean {
   const providerConfig = cfg?.models?.providers?.openai;
   return providerConfig?.apiKey !== undefined || providerConfig?.auth === "api-key";
 }
 
-function hasExplicitDirectOpenAIImageConfig(cfg: OpenClawConfig | undefined): boolean {
+function hasExplicitDirectOpenAIImageConfig(cfg: BotConfig | undefined): boolean {
   const providerConfig = cfg?.models?.providers?.openai;
   if (!providerConfig) {
     return false;
@@ -406,7 +406,7 @@ function hasExplicitDirectOpenAIImageConfig(cfg: OpenClawConfig | undefined): bo
   );
 }
 
-function hasChatGPTImageRouteConfig(cfg: OpenClawConfig | undefined): boolean {
+function hasChatGPTImageRouteConfig(cfg: BotConfig | undefined): boolean {
   const providerConfig = cfg?.models?.providers?.openai;
   return (
     isOpenAICodexBaseUrl(resolveConfiguredOpenAIBaseUrl(cfg)) ||
@@ -415,7 +415,7 @@ function hasChatGPTImageRouteConfig(cfg: OpenClawConfig | undefined): boolean {
 }
 
 function resolveConfiguredOpenAIImageHeaders(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
 ): Record<string, string> | undefined {
   const headers = cfg?.models?.providers?.openai?.headers;
   if (!headers) {
@@ -429,7 +429,7 @@ function resolveConfiguredOpenAIImageHeaders(
   return Object.keys(stringHeaders).length > 0 ? stringHeaders : undefined;
 }
 
-function forceOpenAIImageApiKeyAuth(cfg: OpenClawConfig | undefined): OpenClawConfig | undefined {
+function forceOpenAIImageApiKeyAuth(cfg: BotConfig | undefined): BotConfig | undefined {
   if (!hasExplicitOpenAIImageApiKeyConfig(cfg)) {
     return cfg;
   }
@@ -453,7 +453,7 @@ function forceOpenAIImageApiKeyAuth(cfg: OpenClawConfig | undefined): OpenClawCo
 }
 
 async function resolveOpenAIImageAuth(req: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
   authStore?: AuthProfileStore;
 }) {

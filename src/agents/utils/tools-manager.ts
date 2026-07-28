@@ -42,7 +42,7 @@ async function cancelUnreadResponseBody(response: Response): Promise<void> {
 }
 
 function isOfflineModeEnabled(): boolean {
-  const value = process.env.OPENCLAW_OFFLINE;
+  const value = process.env.BOT_OFFLINE;
   if (!value) {
     return false;
   }
@@ -430,7 +430,7 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.toolsManagerTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.toolsManagerTestApi")] = {
     testing,
   };
 }

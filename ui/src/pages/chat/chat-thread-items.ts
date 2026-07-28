@@ -1,4 +1,4 @@
-import { asNullableRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { resolveToolUseId } from "../../../../src/chat/tool-content.js";
 import { escapeRegExp } from "../../../../src/shared/regexp.js";
 import type { ChatItem, NormalizedMessage, ToolCard } from "../../lib/chat/chat-types.ts";
@@ -308,7 +308,7 @@ export function resolveToolBlockId(
 }
 
 export function isPendingSendMessage(message: unknown): boolean {
-  return asRecord(asRecord(message)?.["__openclaw"])?.kind === "pending-send";
+  return asRecord(asRecord(message)?.["__bot"])?.kind === "pending-send";
 }
 
 /** Every projection of one composer submit (pending queue row, locally
@@ -319,7 +319,7 @@ export function userTurnSendIdentity(message: unknown): string | null {
   if (typeof record?.role !== "string" || record.role.toLowerCase() !== "user") {
     return null;
   }
-  const idempotencyKey = asRecord(record["__openclaw"])?.idempotencyKey;
+  const idempotencyKey = asRecord(record["__bot"])?.idempotencyKey;
   if (typeof idempotencyKey !== "string" || !idempotencyKey.trim()) {
     return null;
   }
@@ -334,9 +334,9 @@ function sourceMessageId(message: unknown): string | null {
   if (!record) {
     return null;
   }
-  const openclawId = asRecord(record["__openclaw"])?.id;
-  if (typeof openclawId === "string" && openclawId.trim()) {
-    return openclawId.trim();
+  const botId = asRecord(record["__bot"])?.id;
+  if (typeof botId === "string" && botId.trim()) {
+    return botId.trim();
   }
   const messageId = typeof record.messageId === "string" ? record.messageId.trim() : "";
   if (messageId) {
@@ -366,7 +366,7 @@ function transcriptMessageSourceKey(message: unknown): string | null {
   if (id) {
     return `id:${id}`;
   }
-  const seq = asRecord(record["__openclaw"])?.seq;
+  const seq = asRecord(record["__bot"])?.seq;
   const normalizedSeq =
     typeof seq === "number" && Number.isSafeInteger(seq) && seq > 0 ? seq : null;
   return normalizedSeq == null ? null : `seq:${normalizedSeq}`;
@@ -574,7 +574,7 @@ export function queuedSendThreadMessage(item: ChatQueueItem): Record<string, unk
     role: "user",
     content,
     timestamp: item.createdAt,
-    __openclaw: {
+    __bot: {
       kind: "pending-send",
       id: item.id,
       state: item.sendState,

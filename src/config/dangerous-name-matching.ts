@@ -1,6 +1,6 @@
 // Detects dangerous config names used by validation and warnings.
 import { asBoolean } from "../utils/boolean.js";
-import type { OpenClawConfig } from "./config.js";
+import type { BotConfig } from "./config.js";
 
 type DangerousNameMatchingConfig = {
   dangerouslyAllowNameMatching?: boolean;
@@ -44,7 +44,7 @@ export function resolveDangerousNameMatchingEnabled(
 
 /** Collects provider/account scopes that policy and doctor surfaces can audit. */
 export function collectProviderDangerousNameMatchingScopes(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   provider: string,
 ): ProviderDangerousNameMatchingScope[] {
   const scopes: ProviderDangerousNameMatchingScope[] = [];

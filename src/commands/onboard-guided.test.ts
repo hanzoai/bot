@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter } from "../../test/helpers/wizard-prompter.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { CallGatewayCliOptions } from "../gateway/call.js";
 import { createSuiteLogPathTracker } from "../logging/log-test-helpers.js";
 import { flushLogger, resetLogger, setLoggerOverride } from "../logging/logger.js";
@@ -40,21 +40,21 @@ const readConfigFileSnapshot = vi.hoisted(() =>
   vi.fn(async () => ({
     exists: false,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     issues: [] as Array<{ path?: string; message: string }>,
     config: {},
   })),
 );
 
-const logPathTracker = createSuiteLogPathTracker("openclaw-guided-onboard-log-");
+const logPathTracker = createSuiteLogPathTracker("bot-guided-onboard-log-");
 
 vi.mock("../config/config.js", () => ({ readConfigFileSnapshot }));
 vi.mock("./onboard-agent.js", () => ({
-  ensureOnboardingAgent: async ({ config }: { config: OpenClawConfig }) => ({ config }),
+  ensureOnboardingAgent: async ({ config }: { config: BotConfig }) => ({ config }),
 }));
 
 vi.mock("./onboard-helpers.js", () => ({
-  DEFAULT_WORKSPACE: "/tmp/openclaw-workspace",
+  DEFAULT_WORKSPACE: "/tmp/bot-workspace",
   printWizardHeader: vi.fn(),
 }));
 
@@ -97,7 +97,7 @@ function detection(
     manualProviders: [],
     authOptions: [],
     recommendedInstalls: [],
-    workspace: "/tmp/openclaw-workspace",
+    workspace: "/tmp/bot-workspace",
     setupComplete: false,
     ...overrides,
   };
@@ -105,7 +105,7 @@ function detection(
 
 function setupApplyResult() {
   return {
-    configPath: "/tmp/openclaw.json",
+    configPath: "/tmp/bot.json",
     configHashBefore: null,
     configHashAfter: null,
     bootstrapPending: false,
@@ -113,7 +113,7 @@ function setupApplyResult() {
   };
 }
 
-function recommendationOutcome(config: OpenClawConfig) {
+function recommendationOutcome(config: BotConfig) {
   return { config, commitResult: vi.fn() };
 }
 
@@ -142,7 +142,7 @@ function setupDeps(params: {
     listManualOptions: vi.fn(async () => ({
       manualProviders: [],
       authOptions: [],
-      workspace: "/tmp/openclaw-workspace",
+      workspace: "/tmp/bot-workspace",
       setupComplete: false,
     })),
     detect: params.detect ?? vi.fn(async () => detection()),
@@ -186,7 +186,7 @@ describe("runGuidedOnboarding", () => {
     readConfigFileSnapshot.mockResolvedValue({
       exists: false,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       issues: [],
       config: {},
     });
@@ -202,10 +202,10 @@ describe("runGuidedOnboarding", () => {
   });
 
   it("auto-connects one credentialed candidate before any workspace prompt", async () => {
-    const persistedConfig: OpenClawConfig = {
+    const persistedConfig: BotConfig = {
       agents: { defaults: { model: { primary: "claude-cli/opus" } } },
     };
-    const appliedConfig: OpenClawConfig = {
+    const appliedConfig: BotConfig = {
       ...persistedConfig,
       gateway: { mode: "local" },
     };
@@ -213,21 +213,21 @@ describe("runGuidedOnboarding", () => {
       .mockResolvedValueOnce({
         exists: false,
         valid: true,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         issues: [],
         config: {},
       })
       .mockResolvedValueOnce({
         exists: true,
         valid: true,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         issues: [],
         config: persistedConfig,
       })
       .mockResolvedValueOnce({
         exists: true,
         valid: true,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         issues: [],
         config: appliedConfig,
       });
@@ -372,21 +372,21 @@ describe("runGuidedOnboarding", () => {
   });
 
   it("offers memory import after successful inference using the persisted config", async () => {
-    const persistedConfig: OpenClawConfig = {
+    const persistedConfig: BotConfig = {
       agents: { defaults: { workspace: "/tmp/persisted-workspace" } },
     };
     readConfigFileSnapshot
       .mockResolvedValueOnce({
         exists: false,
         valid: true,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         issues: [],
         config: {},
       })
       .mockResolvedValueOnce({
         exists: true,
         valid: true,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         issues: [],
         config: persistedConfig,
       });
@@ -443,11 +443,11 @@ describe("runGuidedOnboarding", () => {
     );
   });
 
-  it("uses the configured workspace only as inference and OpenClaw context", async () => {
+  it("uses the configured workspace only as inference and Bot context", async () => {
     readConfigFileSnapshot.mockResolvedValueOnce({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       issues: [],
       config: { agents: { defaults: { workspace: "/tmp/configured" } } },
     });
@@ -475,9 +475,9 @@ describe("runGuidedOnboarding", () => {
 
     expect(text).not.toHaveBeenCalled();
     expect(deps.activate).toHaveBeenCalledWith(
-      expect.objectContaining({ workspace: "/tmp/openclaw-workspace" }),
+      expect.objectContaining({ workspace: "/tmp/bot-workspace" }),
     );
-    expect(deps.launchHatchTui).toHaveBeenCalledWith("/tmp/openclaw-workspace");
+    expect(deps.launchHatchTui).toHaveBeenCalledWith("/tmp/bot-workspace");
   });
 
   it("live-tests an unverified CLI before automatic setup", async () => {
@@ -849,7 +849,7 @@ describe("runGuidedOnboarding", () => {
     );
   });
 
-  it("keeps OpenClaw unavailable until a manual key passes", async () => {
+  it("keeps Bot unavailable until a manual key passes", async () => {
     promptAuthChoiceGrouped.mockResolvedValue("openai-api-key");
     const text = vi.fn().mockResolvedValueOnce("bad-key").mockResolvedValueOnce("good-key");
     const prompter = createWizardPrompter({
@@ -928,7 +928,7 @@ describe("runGuidedOnboarding", () => {
     readConfigFileSnapshot.mockResolvedValueOnce({
       exists: true,
       valid: false,
-      path: "/tmp/broken-openclaw.json",
+      path: "/tmp/broken-bot.json",
       issues: [{ path: "agents.defaults.model", message: "Expected a model reference" }],
       config: {},
     });
@@ -939,11 +939,11 @@ describe("runGuidedOnboarding", () => {
     await runGuidedOnboarding({ workspace: "/tmp/repair" }, runtime, deps);
 
     const notes = JSON.stringify((prompter.note as ReturnType<typeof vi.fn>).mock.calls);
-    expect(notes).toContain("/tmp/broken-openclaw.json");
+    expect(notes).toContain("/tmp/broken-bot.json");
     expect(notes).toContain("agents.defaults.model: Expected a model reference");
-    expect(prompter.outro).toHaveBeenCalledWith(expect.stringContaining("openclaw doctor --fix"));
+    expect(prompter.outro).toHaveBeenCalledWith(expect.stringContaining("bot doctor --fix"));
     expect(prompter.outro).toHaveBeenCalledWith(
-      expect.stringContaining("openclaw config validate"),
+      expect.stringContaining("bot config validate"),
     );
     expect(runtime.exit).toHaveBeenCalledWith(1);
     expect(deps.runSystemAgentChat).not.toHaveBeenCalled();
@@ -951,7 +951,7 @@ describe("runGuidedOnboarding", () => {
     expect(deps.activate).not.toHaveBeenCalled();
   });
 
-  it("converges remote inference before remote OpenClaw without mutating local config", async () => {
+  it("converges remote inference before remote Bot without mutating local config", async () => {
     const localConfig = {
       wizard: { securityAcknowledgedAt: "2026-07-11T00:00:00.000Z" },
       agents: {
@@ -964,12 +964,12 @@ describe("runGuidedOnboarding", () => {
         mode: "remote",
         remote: { url: "wss://configured.example/ws", token: "configured-token" },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const localConfigBefore = structuredClone(localConfig);
     readConfigFileSnapshot.mockResolvedValueOnce({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       issues: [],
       config: localConfig,
     });
@@ -983,7 +983,7 @@ describe("runGuidedOnboarding", () => {
       expect(options.ignoreEnvUrlOverride).toBe(true);
       expect(options.config?.gateway?.remote?.url).toBe("wss://selected.example/ws");
       order.push(options.method);
-      if (options.method === "openclaw.setup.detect") {
+      if (options.method === "bot.setup.detect") {
         return {
           candidates: [
             {
@@ -1011,7 +1011,7 @@ describe("runGuidedOnboarding", () => {
           setupComplete: false,
         };
       }
-      if (options.method === "openclaw.setup.activate") {
+      if (options.method === "bot.setup.activate") {
         expect(options.params).toEqual({
           kind: "claude-cli",
           modelRef: "claude-cli/opus",
@@ -1025,11 +1025,11 @@ describe("runGuidedOnboarding", () => {
           lines: ["Default model: claude-cli/opus"],
         };
       }
-      if (options.method === "openclaw.setup.verify") {
+      if (options.method === "bot.setup.verify") {
         expect(remoteConfig.modelRef).toBe("claude-cli/opus");
         return { ok: true, modelRef: remoteConfig.modelRef, latencyMs: 100 };
       }
-      if (options.method === "openclaw.chat") {
+      if (options.method === "bot.chat") {
         expect(remoteConfig.modelRef).toBe("claude-cli/opus");
         expect(options.params).toEqual({
           sessionId: expect.any(String),
@@ -1082,10 +1082,10 @@ describe("runGuidedOnboarding", () => {
     );
 
     expect(order).toEqual([
-      "openclaw.setup.detect",
-      "openclaw.setup.activate",
-      "openclaw.setup.verify",
-      "openclaw.chat",
+      "bot.setup.detect",
+      "bot.setup.activate",
+      "bot.setup.verify",
+      "bot.chat",
       "tui",
     ]);
     expect(remoteConfig.modelRef).toBe("claude-cli/opus");

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { ensureCompletionState } from "./subagent-delivery-state.js";
 import { SUBAGENT_ENDED_REASON_KILLED } from "./subagent-lifecycle-events.js";
 import { backfillCollectorArchiveAtMs } from "./subagent-registry-helpers.js";
@@ -27,7 +27,7 @@ function resolveStatus(
 /** Freeze the waitable collector record after raw completion capture. */
 export function updateSwarmCollectorCompletion(
   entry: SubagentRunRecord,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): boolean {
   if (!entry.collect) {
     return false;

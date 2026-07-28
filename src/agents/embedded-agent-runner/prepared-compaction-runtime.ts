@@ -27,7 +27,7 @@ import { isReasoningTagProvider } from "../../utils/provider-utils.js";
 import { createBundleLspToolRuntime } from "../agent-bundle-lsp-runtime.js";
 import { createBundleMcpToolRuntime } from "../agent-bundle-mcp-tools.js";
 import { resolveSessionAgentIds } from "../agent-scope.js";
-import { createOpenClawCodingTools, resolveProcessToolScopeKey } from "../agent-tools.js";
+import { createBotCodingTools, resolveProcessToolScopeKey } from "../agent-tools.js";
 import { listActiveProcessSessionReferences } from "../bash-process-references.js";
 import {
   makeBootstrapWarn,
@@ -41,7 +41,7 @@ import {
 } from "../channel-tools.js";
 import { resolveConversationCapabilityProfile } from "../conversation-capability-profile.js";
 import { formatUserTime, resolveUserTimeFormat, resolveUserTimezone } from "../date-time.js";
-import { resolveOpenClawReferencePaths } from "../docs-path.js";
+import { resolveBotReferencePaths } from "../docs-path.js";
 import { resolveHeartbeatPromptForSystemPrompt } from "../heartbeat-system-prompt.js";
 import { prepareAgentMemoryPrompt } from "../memory-prompt-prepare.js";
 import {
@@ -288,7 +288,7 @@ export async function buildPreparedCompactionRuntime(prepared: DirectCompactionP
     });
     const toolsEnabled = supportsModelTools(effectiveModel);
     const toolsRaw = toolsEnabled
-      ? createOpenClawCodingTools({
+      ? createBotCodingTools({
           exec: {
             ...params.execOverrides,
             config: params.config,
@@ -511,7 +511,7 @@ export async function buildPreparedCompactionRuntime(prepared: DirectCompactionP
     const nativeCommandGuidanceLines = listRegisteredPluginAgentPromptGuidance({
       surface: promptSurface,
     });
-    const openClawReferences = await resolveOpenClawReferencePaths({
+    const botReferences = await resolveBotReferencePaths({
       workspaceDir: effectiveWorkspace,
       argv1: process.argv[1],
       cwd: effectiveCwd,
@@ -556,8 +556,8 @@ export async function buildPreparedCompactionRuntime(prepared: DirectCompactionP
           defaultAgentId,
         }),
         skillsPrompt,
-        docsPath: openClawReferences.docsPath ?? undefined,
-        sourcePath: openClawReferences.sourcePath ?? undefined,
+        docsPath: botReferences.docsPath ?? undefined,
+        sourcePath: botReferences.sourcePath ?? undefined,
         promptMode,
         promptSurface,
         sourceReplyDeliveryMode: params.sourceReplyDeliveryMode,

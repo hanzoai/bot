@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
 import { describe, expect, it } from "vitest";
 import { registerZoomMeetingsCli, resolveZoomMeetingsCliGatewayTimeoutMs } from "./cli.js";
 import { resolveZoomMeetingsConfig } from "./config.js";

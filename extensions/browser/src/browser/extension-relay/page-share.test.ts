@@ -37,7 +37,7 @@ describe("page share delivery", () => {
     const [text, options] = enqueueSystemEvent.mock.calls[0] as [string, { sessionKey: string }];
     expect(options).toEqual({ sessionKey: "agent:main:main" });
     expect(text).toContain(
-      "Page shared from the OpenClaw Chrome extension.\nNote: Summarize for me",
+      "Page shared from the Bot Chrome extension.\nNote: Summarize for me",
     );
     expect(text).toContain('<<<EXTERNAL_UNTRUSTED_CONTENT id="');
     expect(text).toContain("Source: Browser");

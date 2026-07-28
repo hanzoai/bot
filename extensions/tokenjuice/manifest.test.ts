@@ -23,9 +23,9 @@ describe("tokenjuice package manifest", () => {
 
   it("declares runtime-neutral tool result middleware ownership in the manifest contract", () => {
     const manifest = JSON.parse(
-      fs.readFileSync(new URL("./openclaw.plugin.json", import.meta.url), "utf8"),
+      fs.readFileSync(new URL("./bot.plugin.json", import.meta.url), "utf8"),
     ) as TokenjuicePluginManifest;
 
-    expect(manifest.contracts?.agentToolResultMiddleware).toEqual(["openclaw", "codex"]);
+    expect(manifest.contracts?.agentToolResultMiddleware).toEqual(["bot", "codex"]);
   });
 });

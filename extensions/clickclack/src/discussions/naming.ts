@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
+import type { PluginRuntime } from "bot/plugin-sdk/core";
 
 function shortSessionHash(sessionKey: string): string {
   return createHash("sha256").update(sessionKey).digest("hex").slice(0, 32);
@@ -84,7 +84,7 @@ export function discussionExternalRef(
   destinationIdentity: string,
   bindingGeneration: string,
 ): string {
-  return `openclaw:${installationId}:${shortSessionHash(
+  return `bot:${installationId}:${shortSessionHash(
     [mainSessionKey, sessionId, destinationIdentity, bindingGeneration].join("\0"),
   )}`;
 }

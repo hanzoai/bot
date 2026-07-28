@@ -1,11 +1,11 @@
 /**
- * Periodic cleanup for browser tabs tracked to primary OpenClaw sessions.
+ * Periodic cleanup for browser tabs tracked to primary Bot sessions.
  */
 import {
   isAcpSessionKey,
   isCronSessionKey,
   isSubagentSessionKey,
-} from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/routing";
 import { getRuntimeConfig } from "../config/config.js";
 import { resolveBrowserConfig, type ResolvedBrowserTabCleanupConfig } from "./config.js";
 import { sweepTrackedBrowserTabs } from "./session-tab-registry.js";

@@ -86,7 +86,7 @@ describe("setInputFilesViaPlaywright", () => {
     locator = null;
     resolveStrictExistingUploadPaths.mockResolvedValue({
       ok: true,
-      paths: ["/private/tmp/openclaw/uploads/ok.txt"],
+      paths: ["/private/tmp/bot/uploads/ok.txt"],
     });
   });
 
@@ -97,14 +97,14 @@ describe("setInputFilesViaPlaywright", () => {
       cdpUrl: "http://127.0.0.1:18792",
       targetId: "T1",
       inputRef: "e7",
-      paths: ["/tmp/openclaw/uploads/ok.txt"],
+      paths: ["/tmp/bot/uploads/ok.txt"],
     });
 
     expect(resolveStrictExistingUploadPaths).toHaveBeenCalledWith({
-      requestedPaths: ["/tmp/openclaw/uploads/ok.txt"],
+      requestedPaths: ["/tmp/bot/uploads/ok.txt"],
     });
     expect(refLocator).toHaveBeenCalledWith(page, "e7");
-    expect(setInputFiles).toHaveBeenCalledWith(["/private/tmp/openclaw/uploads/ok.txt"]);
+    expect(setInputFiles).toHaveBeenCalledWith(["/private/tmp/bot/uploads/ok.txt"]);
     expect(setInputFiles).toHaveBeenCalledTimes(1);
     expect(elementHandle).not.toHaveBeenCalled();
   });
@@ -116,7 +116,7 @@ describe("setInputFilesViaPlaywright", () => {
       cdpUrl: "http://127.0.0.1:18792",
       targetId: "T1",
       inputRef: "e7",
-      paths: ["/tmp/openclaw/uploads/ok.txt"],
+      paths: ["/tmp/bot/uploads/ok.txt"],
       ssrfPolicy: { dangerouslyAllowPrivateNetwork: true },
     });
 
@@ -138,7 +138,7 @@ describe("setInputFilesViaPlaywright", () => {
         cdpUrl: "http://127.0.0.1:18792",
         targetId: "T1",
         element: "input[type=file]",
-        paths: ["/tmp/openclaw/uploads/missing.txt"],
+        paths: ["/tmp/bot/uploads/missing.txt"],
       }),
     ).rejects.toThrow("Invalid path: must stay within inbound media directory");
 

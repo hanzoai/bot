@@ -268,13 +268,13 @@ export function renderRecentSession(params: {
               >${icons.layoutDashboard}</span
             >`
           : nothing}
-        <openclaw-viewer-facepile
+        <bot-viewer-facepile
           .presencePayload=${host.sessionData.presencePayload}
           .selfInstanceId=${host.sessionData.presenceInstanceId}
           .sessionKey=${session.key}
           .maxVisible=${3}
           variant="session"
-        ></openclaw-viewer-facepile>
+        ></bot-viewer-facepile>
         ${renderSessionRowBadges({
           ...session,
           pullRequest: session.pullRequest ?? display?.pullRequest,
@@ -316,15 +316,15 @@ export function renderRecentSession(params: {
         <span class="session-row-trail" id=${metaId ?? nothing}
           >${session.isChild && session.runtimeMs != null
             ? session.hasActiveRun || session.status === "running"
-              ? html`<openclaw-elapsed-time
+              ? html`<bot-elapsed-time
                   .startMs=${session.runtimeSampledAt! - session.runtimeMs}
-                ></openclaw-elapsed-time>`
+                ></bot-elapsed-time>`
               : (formatDurationCompact(session.runtimeMs, { spaced: true }) ?? "0ms")
             : session.isChild && session.startedAt != null
-              ? html`<openclaw-elapsed-time
+              ? html`<bot-elapsed-time
                   .startMs=${session.startedAt}
                   .endMs=${session.endedAt ?? null}
-                ></openclaw-elapsed-time>`
+                ></bot-elapsed-time>`
               : nothing}</span
         >
         ${session.isChild

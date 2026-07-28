@@ -1,6 +1,6 @@
-// Imports machine-owned openclaw.json values into the shared SQLite state store.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { compareOpenClawVersions } from "../config/version.js";
+// Imports machine-owned bot.json values into the shared SQLite state store.
+import type { BotConfig } from "../config/types.bot.js";
+import { compareBotVersions } from "../config/version.js";
 import {
   importConfigMachineState,
   updateConfigMachineState,
@@ -21,7 +21,7 @@ function record(value: unknown): Record<string, unknown> | undefined {
 
 /** Preserve retired machine-owned config fields before Doctor strips them. */
 export function migrateLegacyConfigMachineState(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
 }): { changes: string[]; warnings: string[] } {
   const raw = params.config as Record<string, unknown>;
@@ -54,7 +54,7 @@ export function migrateLegacyConfigMachineState(params: {
     Array.isArray(plugins?.allow) &&
     plugins.allow.length > 0 &&
     (typeof meta?.lastTouchedVersion !== "string" ||
-      compareOpenClawVersions(meta.lastTouchedVersion, BUNDLED_DISCOVERY_STATE_CUTOVER_VERSION) ===
+      compareBotVersions(meta.lastTouchedVersion, BUNDLED_DISCOVERY_STATE_CUTOVER_VERSION) ===
         -1)
   ) {
     entries.push(["plugins.bundledDiscovery", "compat"]);

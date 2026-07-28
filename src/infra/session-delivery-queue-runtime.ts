@@ -206,5 +206,5 @@ const testing = {
 };
 
 (globalThis as Record<PropertyKey, unknown>)[
-  Symbol.for("openclaw.sessionDeliveryQueueRuntimeTestApi")
+  Symbol.for("bot.sessionDeliveryQueueRuntimeTestApi")
 ] = testing;

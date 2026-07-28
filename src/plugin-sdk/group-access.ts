@@ -49,7 +49,7 @@ export type MatchedGroupAccessDecision = {
   reason: MatchedGroupAccessReason;
 };
 
-/** @deprecated Use `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`. */
+/** @deprecated Use `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`. */
 export function resolveSenderScopedGroupPolicy(params: {
   groupPolicy: GroupPolicy;
   groupAllowFrom: string[];
@@ -60,7 +60,7 @@ export function resolveSenderScopedGroupPolicy(params: {
   return params.groupAllowFrom.length > 0 ? "allowlist" : "open";
 }
 
-/** @deprecated Use route descriptors with `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`. */
+/** @deprecated Use route descriptors with `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`. */
 export function evaluateGroupRouteAccessForPolicy(params: {
   groupPolicy: GroupPolicy;
   routeAllowlistConfigured: boolean;
@@ -84,7 +84,7 @@ export function evaluateGroupRouteAccessForPolicy(params: {
   return { allowed: true, groupPolicy: params.groupPolicy, reason: "allowed" };
 }
 
-/** @deprecated Use `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`. */
+/** @deprecated Use `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`. */
 export function evaluateMatchedGroupAccessForPolicy(params: {
   groupPolicy: GroupPolicy;
   allowlistConfigured: boolean;
@@ -109,7 +109,7 @@ export function evaluateMatchedGroupAccessForPolicy(params: {
   return { allowed: true, groupPolicy: params.groupPolicy, reason: "allowed" };
 }
 
-/** @deprecated Use `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`. */
+/** @deprecated Use `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`. */
 export function evaluateSenderGroupAccessForPolicy(params: {
   groupPolicy: GroupPolicy;
   providerMissingFallbackApplied?: boolean;
@@ -152,7 +152,7 @@ export function evaluateSenderGroupAccessForPolicy(params: {
   };
 }
 
-/** @deprecated Use `resolveOpenProviderRuntimeGroupPolicy` plus `resolveChannelMessageIngress` from `openclaw/plugin-sdk/channel-ingress-runtime`. */
+/** @deprecated Use `resolveOpenProviderRuntimeGroupPolicy` plus `resolveChannelMessageIngress` from `bot/plugin-sdk/channel-ingress-runtime`. */
 export function evaluateSenderGroupAccess(params: {
   providerConfigPresent: boolean;
   configuredGroupPolicy?: GroupPolicy;

@@ -10,7 +10,7 @@ import {
   resetTaskRegistryForTests,
   setDetachedTaskLifecycleRuntime,
 } from "../../tasks/task-runtime.test-helpers.js";
-import { withOpenClawTestState } from "../../test-utils/openclaw-test-state.js";
+import { withBotTestState } from "../../test-utils/bot-test-state.js";
 import { cronStoreKey } from "../store/key.js";
 import { readCronTaskRunHistoryPage } from "../task-run-history.js";
 import type { CronJob } from "../types.js";
@@ -69,8 +69,8 @@ describe("cron task run terminal records", () => {
   );
 
   it("uses a scoped child owner when the job agent id is blank", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-scoped-task-owner-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-scoped-task-owner-" },
       async () => {
         resetTaskRegistryForTests();
         const job = {
@@ -114,8 +114,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("uses the scoped owner for a current-session task run", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-current-task-owner-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-current-task-owner-" },
       async () => {
         resetTaskRegistryForTests();
         const job = {
@@ -159,8 +159,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("uses the scoped owner for an isolated task run", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-isolated-scoped-owner-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-isolated-scoped-owner-" },
       async () => {
         resetTaskRegistryForTests();
         const job = {
@@ -203,8 +203,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("persists canonical history directly when a detached runtime is registered", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-core-ledger-runtime-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-core-ledger-runtime-" },
       async () => {
         resetTaskRegistryForTests();
         const customCreate = vi.fn(() => null);
@@ -318,8 +318,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("creates an immediately terminal task row for a skipped-only event", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-skipped-task-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-skipped-task-" },
       async () => {
         resetTaskRegistryForTests();
         const startedAt = 1_000;
@@ -398,8 +398,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("keeps same-millisecond cron executions as distinct task rows", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-distinct-task-runs-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-distinct-task-runs-" },
       async () => {
         resetTaskRegistryForTests();
         const startedAt = 1_500;
@@ -469,8 +469,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("keeps operator cancellation while attaching terminal run history", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-cancelled-task-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-cancelled-task-" },
       async () => {
         resetTaskRegistryForTests();
         const startedAt = 2_000;
@@ -549,8 +549,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("retries the original outcome after an empty finalization result", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-task-retry-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-task-retry-" },
       async () => {
         resetTaskRegistryForTests();
         const startedAt = 3_000;
@@ -616,8 +616,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("overwrites a lost canonical row with restart terminal history", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-task-lost-recovery-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-task-lost-recovery-" },
       async () => {
         resetTaskRegistryForTests();
         const startedAt = 4_000;
@@ -707,8 +707,8 @@ describe("cron task run terminal records", () => {
     "cron: isolated agent run stalled before execution start",
     "cron: isolated agent run stalled before execution start (last phase: preparing)",
   ])("preserves %j as a provisional timed-out task", async (error) => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-provisional-watchdog-timeout-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-provisional-watchdog-timeout-" },
       async () => {
         resetTaskRegistryForTests();
         const startedAt = 5_000;
@@ -762,8 +762,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("overwrites a provisional timeout with restart terminal history", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-task-timeout-recovery-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-task-timeout-recovery-" },
       async () => {
         resetTaskRegistryForTests();
         const startedAt = 5_000;
@@ -828,8 +828,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("recovers pre-discriminator task rows written by older releases", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-task-legacy-runid-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-task-legacy-runid-" },
       async () => {
         resetTaskRegistryForTests();
         const startedAt = 7_000;
@@ -891,8 +891,8 @@ describe("cron task run terminal records", () => {
   });
 
   it("keeps suffixed recovery identities scoped to the current cron store", async () => {
-    await withOpenClawTestState(
-      { layout: "state-only", prefix: "openclaw-cron-task-store-recovery-" },
+    await withBotTestState(
+      { layout: "state-only", prefix: "bot-cron-task-store-recovery-" },
       async (fixture) => {
         resetTaskRegistryForTests();
         const startedAt = 8_000;

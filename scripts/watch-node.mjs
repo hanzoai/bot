@@ -83,7 +83,7 @@ const shouldRunAutoDoctor = (deps, autoDoctorAttempted) =>
   !autoDoctorAttempted &&
   isGatewayWatchCommand(deps.args) &&
   !AUTO_DOCTOR_DISABLE_VALUES.has(
-    String(deps.env.OPENCLAW_GATEWAY_WATCH_AUTO_DOCTOR ?? "").toLowerCase(),
+    String(deps.env.BOT_GATEWAY_WATCH_AUTO_DOCTOR ?? "").toLowerCase(),
   );
 
 const isProcessAlive = (pid, signalProcess) => {
@@ -132,7 +132,7 @@ const writeWatchLock = (lockPath, payload) => {
 };
 
 const logWatcher = (message, deps) => {
-  deps.process.stderr?.write?.(`[openclaw] ${message}\n`);
+  deps.process.stderr?.write?.(`[bot] ${message}\n`);
 };
 
 const isInvalidPackageConfigError = (err) => err?.code === "ERR_INVALID_PACKAGE_CONFIG";
@@ -148,18 +148,18 @@ const printFriendlyWatchStartupError = (err) => {
 
   console.error("");
   console.error(
-    "[openclaw] gateway:watch could not start because a dependency package config looks corrupted.",
+    "[bot] gateway:watch could not start because a dependency package config looks corrupted.",
   );
   if (packageConfigPath) {
-    console.error(`[openclaw] Invalid package config: ${packageConfigPath}`);
+    console.error(`[bot] Invalid package config: ${packageConfigPath}`);
   }
-  console.error("[openclaw] This usually means a file in node_modules is empty or truncated.");
-  console.error("[openclaw] Recommended recovery:");
-  console.error("[openclaw]   rm -rf node_modules");
-  console.error("[openclaw]   pnpm store prune");
-  console.error("[openclaw]   pnpm install");
+  console.error("[bot] This usually means a file in node_modules is empty or truncated.");
+  console.error("[bot] Recommended recovery:");
+  console.error("[bot]   rm -rf node_modules");
+  console.error("[bot]   pnpm store prune");
+  console.error("[bot]   pnpm install");
   console.error("");
-  console.error("[openclaw] Original error:");
+  console.error("[bot] Original error:");
   console.error(err);
 };
 
@@ -289,13 +289,13 @@ export async function runWatchMain(params = {}) {
   const childEnv = { ...deps.env };
   const watchSession = `${deps.now()}-${deps.process.pid}`;
   const useChildProcessGroup = process.platform !== "win32" && deps.process.stdin?.isTTY !== true;
-  childEnv.OPENCLAW_WATCH_MODE = "1";
-  childEnv.OPENCLAW_WATCH_SESSION = watchSession;
+  childEnv.BOT_WATCH_MODE = "1";
+  childEnv.BOT_WATCH_SESSION = watchSession;
   // The watcher owns process restarts; keep SIGUSR1/config reloads in-process
   // so inherited launchd/systemd markers do not make the child exit and stall.
-  childEnv.OPENCLAW_NO_RESPAWN = "1";
+  childEnv.BOT_NO_RESPAWN = "1";
   if (deps.args.length > 0) {
-    childEnv.OPENCLAW_WATCH_COMMAND = deps.args.join(" ");
+    childEnv.BOT_WATCH_COMMAND = deps.args.join(" ");
   }
 
   return await new Promise((resolve, reject) => {
@@ -491,7 +491,7 @@ export async function runWatchMain(params = {}) {
     const runAutoDoctorAndRestart = () => {
       autoDoctorAttempted = true;
       logWatcher(
-        "Gateway exited early; running `openclaw doctor --fix --non-interactive` once.",
+        "Gateway exited early; running `bot doctor --fix --non-interactive` once.",
         deps,
       );
       watchProcess = deps.spawn(deps.process.execPath, buildDoctorRunnerArgs(), {

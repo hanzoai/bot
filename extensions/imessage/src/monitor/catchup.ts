@@ -1,7 +1,7 @@
 // Imessage plugin module implements catchup behavior.
 import { createHash } from "node:crypto";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { KeyedAsyncQueue } from "bot/plugin-sdk/keyed-async-queue";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 import { getIMessageRuntime } from "../runtime.js";
 
 // iMessage inbound catchup. When the gateway is offline (crash, restart, mac
@@ -14,7 +14,7 @@ import { getIMessageRuntime } from "../runtime.js";
 // `dispatch` callback so `evaluateIMessageInbound` + `runChannelInboundEvent`
 // runs unchanged on replayed rows.
 //
-// See https://github.com/openclaw/openclaw/issues/78649 for design discussion.
+// See https://github.com/hanzoai/bot/issues/78649 for design discussion.
 
 const DEFAULT_MAX_AGE_MINUTES = 120;
 const MAX_MAX_AGE_MINUTES = 12 * 60;

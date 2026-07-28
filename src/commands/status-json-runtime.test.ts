@@ -21,7 +21,7 @@ function createScan() {
     sourceConfig: { gateway: {} },
     summary: { ok: true },
     update: {
-      root: "/tmp/openclaw",
+      root: "/tmp/bot",
       installKind: "package",
       packageManager: "npm",
     },

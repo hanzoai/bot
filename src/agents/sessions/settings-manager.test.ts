@@ -35,15 +35,15 @@ describe("SettingsManager runtime overrides", () => {
     });
 
     settingsManager.applyOverrides({ compaction: { reserveTokens: 50_000 } });
-    settingsManager.setProjectPackages(["npm:@openclaw/example"]);
+    settingsManager.setProjectPackages(["npm:@hanzo/bot-example"]);
 
-    expect(settingsManager.getPackages()).toEqual(["npm:@openclaw/example"]);
+    expect(settingsManager.getPackages()).toEqual(["npm:@hanzo/bot-example"]);
     expect(settingsManager.getCompactionReserveTokens()).toBe(50_000);
 
     await settingsManager.flush();
     await settingsManager.reload();
 
-    expect(settingsManager.getPackages()).toEqual(["npm:@openclaw/example"]);
+    expect(settingsManager.getPackages()).toEqual(["npm:@hanzo/bot-example"]);
     expect(settingsManager.getCompactionReserveTokens()).toBe(50_000);
   });
 
@@ -52,12 +52,12 @@ describe("SettingsManager runtime overrides", () => {
       retry: {
         provider: { timeoutMs: 30_000, maxRetries: 2, maxRetryDelayMs: 60_000 },
       },
-      packages: ["npm:@openclaw/base"],
+      packages: ["npm:@hanzo/bot-base"],
     });
 
     settingsManager.applyOverrides({
       retry: { provider: { maxRetries: 5 } },
-      packages: ["npm:@openclaw/override"],
+      packages: ["npm:@hanzo/bot-override"],
     });
 
     expect(settingsManager.getProviderRetrySettings()).toEqual({
@@ -65,6 +65,6 @@ describe("SettingsManager runtime overrides", () => {
       maxRetries: 5,
       maxRetryDelayMs: 60_000,
     });
-    expect(settingsManager.getPackages()).toEqual(["npm:@openclaw/override"]);
+    expect(settingsManager.getPackages()).toEqual(["npm:@hanzo/bot-override"]);
   });
 });

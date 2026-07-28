@@ -1,5 +1,5 @@
 // Control UI chat module implements user message content behavior.
-import type { MediaKind } from "@openclaw/media-core/constants";
+import type { MediaKind } from "@hanzo/bot-media-core/constants";
 import type { ChatAttachment } from "../../lib/chat/chat-types.ts";
 import { getChatAttachmentPreviewUrl } from "./attachment-payload-store.ts";
 

@@ -46,7 +46,7 @@ type ConversationTurnReplyClaim = {
 // Gateway RPC execution and inbound dispatch can live in different bundled chunks.
 // Keep one process-wide registry so either chunk observes the same pending turn.
 const pendingTurns = resolveGlobalSingleton(
-  Symbol.for("openclaw.pendingConversationTurns"),
+  Symbol.for("bot.pendingConversationTurns"),
   () => new Map<string, PendingConversationTurn>(),
 );
 function normalize(value: string | undefined): string | undefined {

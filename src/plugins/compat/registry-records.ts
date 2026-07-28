@@ -20,8 +20,8 @@ export const PLUGIN_COMPAT_RECORDS = [
       "provider plugins via `api.registerProvider(...)`; host/runtime code registers against its lifecycle-owned `ApiRegistry`",
     docsPath: "/plugins/sdk-migration#process-global-api-provider-publication",
     surfaces: [
-      "openclaw/plugin-sdk/llm registerApiProvider",
-      "openclaw/plugin-sdk/llm unregisterApiProviders",
+      "bot/plugin-sdk/llm registerApiProvider",
+      "bot/plugin-sdk/llm unregisterApiProviders",
     ],
     diagnostics: ["plugin SDK compatibility registry and migration guide"],
     tests: ["src/plugins/compat/registry.test.ts"],
@@ -90,7 +90,7 @@ export const PLUGIN_COMPAT_RECORDS = [
     surfaces: [
       "api.registerMemoryEmbeddingProvider(...)",
       "contracts.memoryEmbeddingProviders",
-      "openclaw/plugin-sdk/memory-core-host-engine-embeddings registerMemoryEmbeddingProvider",
+      "bot/plugin-sdk/memory-core-host-engine-embeddings registerMemoryEmbeddingProvider",
       "plugins inspect compatibility notices",
     ],
     diagnostics: ["plugin compatibility notice", "plugin SDK package guardrail"],
@@ -114,12 +114,12 @@ export const PLUGIN_COMPAT_RECORDS = [
       "`getSessionEntry(...)`, `listSessionEntries(...)`, and row-level session mutations",
     docsPath: "/plugins/sdk-migration#removed-session-and-transcript-file-apis",
     surfaces: [
-      "openclaw/plugin-sdk/session-store-runtime loadSessionStore",
-      "openclaw/plugin-sdk/session-store-runtime updateSessionStore",
-      "openclaw/plugin-sdk/session-store-runtime resolveSessionFilePath",
-      "openclaw/plugin-sdk/session-store-runtime resolveSessionStoreEntry",
-      "openclaw package root loadSessionStore",
-      "openclaw package root saveSessionStore",
+      "bot/plugin-sdk/session-store-runtime loadSessionStore",
+      "bot/plugin-sdk/session-store-runtime updateSessionStore",
+      "bot/plugin-sdk/session-store-runtime resolveSessionFilePath",
+      "bot/plugin-sdk/session-store-runtime resolveSessionStoreEntry",
+      "bot package root loadSessionStore",
+      "bot package root saveSessionStore",
     ],
     diagnostics: ["plugin SDK deprecation"],
     tests: [
@@ -186,7 +186,7 @@ export const PLUGIN_COMPAT_RECORDS = [
     surfaces: [
       "createCapturedPluginRegistration",
       "capturePluginRegistration",
-      "OpenClawPluginApi",
+      "BotPluginApi",
     ],
     diagnostics: ["runtime registration capture contract probe"],
     tests: ["src/plugins/captured-registration.test.ts"],
@@ -216,7 +216,7 @@ export const PLUGIN_COMPAT_RECORDS = [
       "WhatsApp `WebInboundCallbackMessage` nested contexts: `event`, `payload`, `quote`, `group`, and `platform`",
     docsPath: "/plugins/compatibility",
     surfaces: [
-      "@openclaw/whatsapp WebInboundMessage flat fields",
+      "@hanzo/bot-whatsapp WebInboundMessage flat fields",
       "WhatsApp monitorWebInbox onMessage callback",
       "WhatsApp monitorWebChannel listenerFactory injected messages",
     ],
@@ -237,7 +237,7 @@ export const PLUGIN_COMPAT_RECORDS = [
       "WhatsApp `WebInboundMessage.admission` fields: `conversation.id`, `accountId`, `ingress.decision`, and `conversation.kind`",
     docsPath: "/plugins/compatibility",
     surfaces: [
-      "@openclaw/whatsapp WebInboundMessage top-level admission fields",
+      "@hanzo/bot-whatsapp WebInboundMessage top-level admission fields",
       "WhatsApp monitorWebInbox onMessage callback",
       "WhatsApp monitorWebChannel listenerFactory injected messages",
     ],
@@ -258,10 +258,10 @@ export const PLUGIN_COMPAT_RECORDS = [
       "`MsgContext.ChannelPromptContext`, `MsgContext.ChannelStructuredContext`, `ChannelStructuredContextEntry`, `SupplementalContextFacts.channelStructuredContext`, and `buildChannelMetadata`",
     docsPath: "/plugins/compatibility",
     surfaces: [
-      "openclaw/plugin-sdk reply-runtime MsgContext.UntrustedContext and UntrustedStructuredContext",
-      "openclaw/plugin-sdk reply-runtime UntrustedStructuredContextEntry",
-      "openclaw/plugin-sdk channel-inbound SupplementalContextFacts.untrustedContext",
-      "openclaw/plugin-sdk security-runtime buildUntrustedChannelMetadata",
+      "bot/plugin-sdk reply-runtime MsgContext.UntrustedContext and UntrustedStructuredContext",
+      "bot/plugin-sdk reply-runtime UntrustedStructuredContextEntry",
+      "bot/plugin-sdk channel-inbound SupplementalContextFacts.untrustedContext",
+      "bot/plugin-sdk security-runtime buildUntrustedChannelMetadata",
     ],
     diagnostics: ["TypeScript deprecated SDK alias annotations"],
     tests: ["src/auto-reply/reply/inbound-context.test.ts"],
@@ -277,8 +277,8 @@ export const PLUGIN_COMPAT_RECORDS = [
       "generic channel SDK subpaths or plugin-local `api.ts` / `runtime-api.ts` barrels for new plugins",
     docsPath: "/plugins/sdk-overview",
     surfaces: [
-      "openclaw/plugin-sdk/discord component message helpers",
-      "openclaw/plugin-sdk/telegram-account resolveTelegramAccount",
+      "bot/plugin-sdk/discord component message helpers",
+      "bot/plugin-sdk/telegram-account resolveTelegramAccount",
     ],
     diagnostics: ["plugin SDK compatibility registry"],
     tests: [
@@ -300,9 +300,9 @@ export const PLUGIN_COMPAT_RECORDS = [
     docsPath: "/plugins/sdk-migration",
     surfaces: [
       "ChannelMessagingAdapter.parseExplicitTarget",
-      "openclaw/plugin-sdk/channel-route ChannelRouteExplicitTarget",
-      "openclaw/plugin-sdk/channel-route ChannelRouteExplicitTargetParser",
-      "openclaw/plugin-sdk/channel-route resolveChannelRouteTargetWithParser",
+      "bot/plugin-sdk/channel-route ChannelRouteExplicitTarget",
+      "bot/plugin-sdk/channel-route ChannelRouteExplicitTargetParser",
+      "bot/plugin-sdk/channel-route resolveChannelRouteTargetWithParser",
     ],
     diagnostics: ["plugin SDK compatibility warning"],
     tests: [
@@ -318,9 +318,9 @@ export const PLUGIN_COMPAT_RECORDS = [
     deprecated: "2026-05-23",
     warningStarts: "2026-05-23",
     removeAfter: "2026-08-23",
-    replacement: "`openclaw/plugin-sdk/channel-targets`",
+    replacement: "`bot/plugin-sdk/channel-targets`",
     docsPath: "/plugins/sdk-migration",
-    surfaces: ["openclaw/plugin-sdk/messaging-targets"],
+    surfaces: ["bot/plugin-sdk/messaging-targets"],
     diagnostics: ["plugin SDK compatibility warning"],
     tests: [
       "src/plugins/compat/registry.test.ts",
@@ -447,9 +447,9 @@ export const PLUGIN_COMPAT_RECORDS = [
     warningStarts: "2026-04-25",
     removeAfter: "2026-07-25",
     replacement:
-      "`openclaw/plugin-sdk/agent-runtime`; retain the public aliases until the shipped SDK contract has a replacement window backed by external-usage proof",
+      "`bot/plugin-sdk/agent-runtime`; retain the public aliases until the shipped SDK contract has a replacement window backed by external-usage proof",
     docsPath: "/plugins/sdk-agent-harness",
-    surfaces: ["openclaw/plugin-sdk/agent-harness", "openclaw/plugin-sdk/agent-harness-runtime"],
+    surfaces: ["bot/plugin-sdk/agent-harness", "bot/plugin-sdk/agent-harness-runtime"],
     diagnostics: ["plugin SDK compatibility warning"],
     tests: ["src/plugins/contracts/plugin-sdk-subpaths.test.ts"],
   },
@@ -465,8 +465,8 @@ export const PLUGIN_COMPAT_RECORDS = [
     docsPath: "/plugins/sdk-runtime",
     surfaces: [
       "api.runtime.agent.runEmbeddedPiAgent",
-      "openclaw/extension-api runEmbeddedPiAgent",
-      "openclaw/plugin-sdk/agent-harness-runtime EmbeddedPi* aliases",
+      "bot/extension-api runEmbeddedPiAgent",
+      "bot/plugin-sdk/agent-harness-runtime EmbeddedPi* aliases",
     ],
     diagnostics: ["plugin SDK compatibility registry"],
     tests: [
@@ -485,22 +485,22 @@ export const PLUGIN_COMPAT_RECORDS = [
     warningStarts: "2026-07-23",
     removeAfter: "2026-08-30",
     replacement:
-      "plugin-owned config schemas plus generic `openclaw/plugin-sdk/channel-config-schema` and `openclaw/plugin-sdk/setup-runtime` primitives",
+      "plugin-owned config schemas plus generic `bot/plugin-sdk/channel-config-schema` and `bot/plugin-sdk/setup-runtime` primitives",
     docsPath: "/plugins/sdk-migration#published-channel-setup-compatibility",
     surfaces: [
-      "openclaw/plugin-sdk/bundled-channel-config-schema SlackConfigSchema",
-      "openclaw/plugin-sdk/bundled-channel-config-schema DiscordConfigSchema",
-      "openclaw/plugin-sdk/bundled-channel-config-schema SignalConfigSchema",
-      "openclaw/plugin-sdk/bundled-channel-config-schema MSTeamsConfigSchema",
-      "openclaw/plugin-sdk/setup-runtime createLegacyCompatChannelDmPolicy",
-      "openclaw/plugin-sdk/setup-runtime promptLegacyChannelAllowFromForAccount",
+      "bot/plugin-sdk/bundled-channel-config-schema SlackConfigSchema",
+      "bot/plugin-sdk/bundled-channel-config-schema DiscordConfigSchema",
+      "bot/plugin-sdk/bundled-channel-config-schema SignalConfigSchema",
+      "bot/plugin-sdk/bundled-channel-config-schema MSTeamsConfigSchema",
+      "bot/plugin-sdk/setup-runtime createLegacyCompatChannelDmPolicy",
+      "bot/plugin-sdk/setup-runtime promptLegacyChannelAllowFromForAccount",
     ],
     diagnostics: [
       "repository deprecated API usage guard for core and bundled plugins; no external runtime import warning",
     ],
     tests: ["src/plugin-sdk/shipped-channel-compat.test.ts", "src/plugins/compat/registry.test.ts"],
     releaseNote:
-      "Published OpenClaw channel packages through 2026.7.1 remain loadable while they migrate to plugin-owned config and setup helpers.",
+      "Published Bot channel packages through 2026.7.1 remain loadable while they migrate to plugin-owned config and setup helpers.",
   },
   {
     code: "generated-bundled-channel-config-fallback",

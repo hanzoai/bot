@@ -2,7 +2,7 @@
 import { normalizeChatType, type ChatType } from "../channels/chat-type.js";
 import { listRouteBindings } from "../config/bindings.js";
 import type { AgentRouteBinding } from "../config/types.agents.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   normalizeRouteBindingChannelId,
   normalizeRouteBindingId,
@@ -59,7 +59,7 @@ function buildExactPeerIdSet(params: {
 }
 
 export function resolveFirstBoundAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelId: string;
   agentId: string;
   peerId?: string;

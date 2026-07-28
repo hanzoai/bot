@@ -119,7 +119,7 @@ describe("appendPreparedModelCatalogRows", () => {
       },
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: { evaluateModelAuth },
         configuredByKey: new Map(),
         discoveredKeys: new Set(),
@@ -167,7 +167,7 @@ describe("appendPreparedModelCatalogRows", () => {
       },
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: { evaluateModelAuth },
         configuredByKey: new Map(),
         discoveredKeys: new Set(),
@@ -207,7 +207,7 @@ describe("appendPreparedModelCatalogRows", () => {
       },
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: { evaluateModelAuth: () => authEvaluation(true) },
         configuredByKey: new Map(),
         discoveredKeys: new Set<string>(),
@@ -246,8 +246,8 @@ describe("appendPreparedModelCatalogRows", () => {
       context: {
         cfg: {},
         agentId: "worker",
-        agentDir: "/tmp/openclaw-worker",
-        workspaceDir: "/tmp/openclaw-workspace",
+        agentDir: "/tmp/bot-worker",
+        workspaceDir: "/tmp/bot-workspace",
         authIndex: { evaluateModelAuth: () => authEvaluation(true) },
         configuredByKey: new Map(),
         discoveredKeys: new Set(),
@@ -260,8 +260,8 @@ describe("appendPreparedModelCatalogRows", () => {
     expect(mocks.loadModelCatalogSnapshot).toHaveBeenCalledExactlyOnceWith({
       config: {},
       agentId: "worker",
-      agentDir: "/tmp/openclaw-worker",
-      workspaceDir: "/tmp/openclaw-workspace",
+      agentDir: "/tmp/bot-worker",
+      workspaceDir: "/tmp/bot-workspace",
       readOnly: true,
     });
   });
@@ -287,7 +287,7 @@ describe("appendDiscoveredRows", () => {
       ] as never,
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: { evaluateModelAuth: () => authEvaluation(undefined) },
         configuredByKey: new Map(),
         discoveredKeys: new Set(["openai/gpt-5.5"]),
@@ -339,7 +339,7 @@ describe("appendDiscoveredRows", () => {
       ] as never,
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth: () => ({
             availability: true,
@@ -383,7 +383,7 @@ describe("appendDiscoveredRows", () => {
       ] as never,
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth: () => ({
             availability: false,
@@ -442,7 +442,7 @@ describe("appendConfiguredRows", () => {
             },
           },
         },
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth: () => ({ availability: undefined, routeResolution: null }),
         },
@@ -483,7 +483,7 @@ describe("prepared provider catalog projection", () => {
           agents: { defaults: { model: { primary: "openai/gpt-5.5" } } },
           models: { providers: {} },
         },
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth: () => authEvaluation(false),
         },
@@ -533,7 +533,7 @@ describe("prepared provider catalog projection", () => {
           agents: { defaults: { model: { primary: "openai/gpt-5.5" } } },
           models: { providers: {} },
         },
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth,
         },
@@ -591,7 +591,7 @@ describe("prepared provider catalog projection", () => {
       ],
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth: () => authEvaluation(undefined),
         },
@@ -626,7 +626,7 @@ describe("prepared provider catalog projection", () => {
       ],
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth: () => authEvaluation(true),
         },
@@ -661,7 +661,7 @@ describe("prepared provider catalog projection", () => {
       ],
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth: () => authEvaluation(undefined),
         },
@@ -712,7 +712,7 @@ describe("appendConfiguredProviderRows", () => {
             },
           },
         },
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex,
         configuredByKey: new Map(),
         discoveredKeys: new Set(),
@@ -754,7 +754,7 @@ describe("appendConfiguredProviderRows", () => {
             },
           },
         },
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth,
         },
@@ -811,7 +811,7 @@ describe("appendConfiguredProviderRows", () => {
             },
           },
         },
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth,
         },
@@ -856,8 +856,8 @@ describe("appendAuthenticatedCatalogRows", () => {
       seenKeys: new Set(),
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
-        workspaceDir: "/tmp/openclaw-workspace",
+        agentDir: "/tmp/bot-agent",
+        workspaceDir: "/tmp/bot-workspace",
         authIndex: {
           evaluateModelAuth: () => ({
             availability: undefined,
@@ -879,8 +879,8 @@ describe("appendAuthenticatedCatalogRows", () => {
     });
     expect(mocks.loadModelCatalogSnapshot).toHaveBeenCalledWith({
       config: {},
-      agentDir: "/tmp/openclaw-agent",
-      workspaceDir: "/tmp/openclaw-workspace",
+      agentDir: "/tmp/bot-agent",
+      workspaceDir: "/tmp/bot-workspace",
       readOnly: true,
     });
   });
@@ -908,7 +908,7 @@ describe("appendAuthenticatedCatalogRows", () => {
       seenKeys: new Set(),
       context: {
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         authIndex: {
           evaluateModelAuth: () => ({ availability: undefined, routeResolution: null }),
         },

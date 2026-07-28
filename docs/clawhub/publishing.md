@@ -13,7 +13,7 @@ server decides whether the signed-in user can publish there.
 
 ## Owners
 
-An owner is a ClawHub publisher handle, such as `@alice` or `@openclaw`.
+An owner is a ClawHub publisher handle, such as `@alice` or `@bot`.
 Every user gets a personal owner; org owners can have multiple members with
 `owner`, `admin`, or `publisher` roles.
 
@@ -49,7 +49,7 @@ Scoped names include the owner in the first path segment:
 ```
 
 The scope must match the selected publish owner. A package named
-`@openclaw/dronzer` can only be published as `@openclaw`. To publish as
+`@hanzo/bot-dronzer` can only be published as `@bot`. To publish as
 `@vintageayu`, rename the package to `@vintageayu/dronzer`.
 
 This stops a package from claiming an org namespace the publisher does not
@@ -74,8 +74,8 @@ If the package scope and selected owner do not match, ClawHub rejects the
 publish:
 
 ```text
-Package scope "@openclaw" must match selected owner "@vintageayu".
-Publish as "@openclaw" or rename this package to "@vintageayu/dronzer".
+Package scope "@bot" must match selected owner "@vintageayu".
+Publish as "@bot" or rename this package to "@vintageayu/dronzer".
 ```
 
 Fix it by either publishing as the owner named in the scope, or renaming the
@@ -85,11 +85,11 @@ If the package already has the right scope but the wrong publisher owns it,
 transfer it instead:
 
 ```sh
-clawhub package transfer @opik/opik-openclaw --to opik
+clawhub package transfer @opik/opik-bot --to opik
 ```
 
 Package transfer needs admin access to both the current owner and the
 destination publisher; it does not let you publish into a scope you do not
 control. This is the same namespace protection: a package named
-`@openclaw/dronzer` claims the `@openclaw` namespace, so only publishers with
-access to `@openclaw` can publish or transfer into it.
+`@hanzo/bot-dronzer` claims the `@bot` namespace, so only publishers with
+access to `@bot` can publish or transfer into it.

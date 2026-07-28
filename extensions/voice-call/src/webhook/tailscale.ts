@@ -1,5 +1,5 @@
 // Voice Call plugin module implements tailscale behavior.
-import { runCommandWithTimeout } from "openclaw/plugin-sdk/process-runtime";
+import { runCommandWithTimeout } from "bot/plugin-sdk/process-runtime";
 import type { VoiceCallConfig } from "../config.js";
 
 type TailscaleSelfInfo = {

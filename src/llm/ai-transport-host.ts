@@ -1,7 +1,7 @@
-// Installs OpenClaw-owned policy ports before package providers or shared
+// Installs Bot-owned policy ports before package providers or shared
 // transport helpers run. Direct transport imports need the same wiring as the
 // process-default stream facade.
-import { configureAiTransportHost } from "@openclaw/ai";
+import { configureAiTransportHost } from "@hanzo/bot-ai";
 import { resolveOpenAIStrictToolSetting } from "../agents/openai-strict-tool-setting.js";
 import {
   buildGuardedModelFetch,

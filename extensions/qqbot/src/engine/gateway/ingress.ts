@@ -3,8 +3,8 @@ import {
   createChannelIngressMonitor,
   DEFAULT_INGRESS_ADOPTION_STALL_MS,
   type ChannelIngressQueue,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import { dispatchEvent } from "./event-dispatcher.js";
 import { inspectQQBotIngressEnvelope, QQBotIngressPayloadError } from "./ingress-envelope.js";
 import { isQQBotAuthenticationFailure } from "./ingress-errors.js";

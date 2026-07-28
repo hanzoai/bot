@@ -1,6 +1,6 @@
 /** Tests live image-generation helper parsing and provider selection. */
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import {
   parseCaseFilter,
   parseCsvFilter,
@@ -48,7 +48,7 @@ describe("image-generation live-test helpers", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(resolveConfiguredLiveImageModels(cfg)).toEqual(
       new Map([

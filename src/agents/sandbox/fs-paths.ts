@@ -5,8 +5,8 @@
  */
 import os from "node:os";
 import path from "node:path";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { isPathInside } from "../../infra/path-guards.js";
 import { resolveSandboxInputPath, resolveSandboxPath } from "../sandbox-paths.js";
 import type { SandboxFsBridgeContext } from "./backend-handle.types.js";

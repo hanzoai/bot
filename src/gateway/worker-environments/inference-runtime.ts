@@ -1,5 +1,5 @@
-import { normalizeCodexResponsesBaseUrlForOpenAISdk } from "@openclaw/ai/transports";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { normalizeCodexResponsesBaseUrlForOpenAISdk } from "@hanzo/bot-ai/transports";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { TSchema } from "typebox";
 import type {
   WorkerInferenceContext,
@@ -48,7 +48,7 @@ import {
 import { bindSimpleCompletionModelResolverWorkspace } from "../../agents/simple-completion-scope.js";
 import { normalizeUsage, hasNonzeroUsage } from "../../agents/usage.js";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { emitTrustedDiagnosticEvent, isDiagnosticsEnabled } from "../../infra/diagnostic-events.js";
 import { resolveDiagnosticModelContentCapturePolicy } from "../../infra/diagnostic-llm-content.js";
 import {
@@ -85,7 +85,7 @@ type WorkerInferenceSessionTarget = Pick<
 > & { agentId: string };
 
 type WorkerInferenceUsageParams = {
-  config: OpenClawConfig;
+  config: BotConfig;
   target: WorkerInferenceSessionTarget;
   request: WorkerInferenceStartParams;
   model: Model;
@@ -97,7 +97,7 @@ type WorkerInferenceUsageParams = {
 type WorkerInferenceRuntimeDependencies = {
   now: () => number;
   resolveSessionTarget: (
-    config: OpenClawConfig,
+    config: BotConfig,
     sessionId: string,
   ) => WorkerInferenceSessionTarget | undefined;
   acquireRuntimeLease: typeof acquireAgentRunPreparedModelRuntime;
@@ -115,7 +115,7 @@ type WorkerInferenceRuntimeDependencies = {
 };
 
 function resolveWorkerInferenceAuthProfileMode(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   agentDir: string;
   profileId: string;
 }): string | undefined {
@@ -372,7 +372,7 @@ function resolveReturnedProfileSource(
 }
 
 async function resolveApprovedModel(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   target: WorkerInferenceSessionTarget;
   request: WorkerInferenceStartParams;
   dependencies: WorkerInferenceRuntimeDependencies;
@@ -380,7 +380,7 @@ async function resolveApprovedModel(params: {
   | {
       provider: string;
       model: string;
-      config: OpenClawConfig;
+      config: BotConfig;
       agentDir: string;
       workspaceDir: string;
       prepared: PreparedSimpleCompletionModel;

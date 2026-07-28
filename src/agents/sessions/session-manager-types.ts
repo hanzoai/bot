@@ -2,7 +2,7 @@ import type {
   OwnedSessionTranscriptCacheSnapshot,
   OwnedSessionTranscriptPublishedEntry,
 } from "../../config/sessions/transcript-write-context.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { ImageContent, TextContent } from "../../llm/types.js";
 import type { AgentMessage } from "../runtime/index.js";
 
@@ -116,7 +116,7 @@ export type SessionEntry =
 export type FileEntry = SessionHeader | SessionEntry;
 
 export type AppendPersistenceOptions = {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   idempotencyLookup?: "scan" | "scan-assistant" | "caller-checked";
   invalidateSerializedPrefixCache?: boolean;
 };

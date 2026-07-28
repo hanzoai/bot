@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bot Debugging"
+  short_description: "Debug model, tool, stream, and live behavior"
+  default_prompt: "Use $bot-debugging to identify the right Bot debug boundary, turn on targeted logs, and choose the narrowest local or Crabbox proof."

@@ -1,11 +1,11 @@
 // Together setup module handles plugin onboarding behavior.
-import { readManifestProviderDefaultModelRef } from "openclaw/plugin-sdk/provider-catalog-shared";
+import { readManifestProviderDefaultModelRef } from "bot/plugin-sdk/provider-catalog-shared";
 import {
   createModelCatalogPresetAppliers,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-onboard";
+  type BotConfig,
+} from "bot/plugin-sdk/provider-onboard";
 import { TOGETHER_BASE_URL, TOGETHER_MODEL_CATALOG } from "./models.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 
 export const TOGETHER_DEFAULT_MODEL_REF = readManifestProviderDefaultModelRef(
   manifest,
@@ -14,7 +14,7 @@ export const TOGETHER_DEFAULT_MODEL_REF = readManifestProviderDefaultModelRef(
 
 const togetherPresetAppliers = createModelCatalogPresetAppliers({
   primaryModelRef: TOGETHER_DEFAULT_MODEL_REF,
-  resolveParams: (_cfg: OpenClawConfig) => ({
+  resolveParams: (_cfg: BotConfig) => ({
     providerId: "together",
     api: "openai-completions",
     baseUrl: TOGETHER_BASE_URL,
@@ -23,6 +23,6 @@ const togetherPresetAppliers = createModelCatalogPresetAppliers({
   }),
 });
 
-export function applyTogetherConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyTogetherConfig(cfg: BotConfig): BotConfig {
   return togetherPresetAppliers.applyConfig(cfg);
 }

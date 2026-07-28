@@ -7,7 +7,7 @@ import {
 
 describe("normalizeAgentToolResultMiddlewareRuntimes", () => {
   it("defaults omitted runtimes to every supported runtime", () => {
-    expect(normalizeAgentToolResultMiddlewareRuntimes()).toEqual(["openclaw", "codex"]);
+    expect(normalizeAgentToolResultMiddlewareRuntimes()).toEqual(["bot", "codex"]);
   });
 
   it("preserves an explicit empty runtime list", () => {
@@ -15,8 +15,8 @@ describe("normalizeAgentToolResultMiddlewareRuntimes", () => {
   });
 
   it("ignores unknown runtime ids from manifest metadata", () => {
-    expect(normalizeAgentToolResultMiddlewareRuntimeIds(["codex-app-server", "openclaw"])).toEqual([
-      "openclaw",
+    expect(normalizeAgentToolResultMiddlewareRuntimeIds(["codex-app-server", "bot"])).toEqual([
+      "bot",
     ]);
   });
 });

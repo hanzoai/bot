@@ -1,7 +1,7 @@
 ---
-summary: "Shared Docker VM runtime steps for long-lived OpenClaw Gateway hosts"
+summary: "Shared Docker VM runtime steps for long-lived Bot Gateway hosts"
 read_when:
-  - You are deploying OpenClaw on a cloud VM with Docker
+  - You are deploying Bot on a cloud VM with Docker
   - You need the shared binary bake, persistence, and update flow
 title: "Docker VM runtime"
 ---
@@ -81,7 +81,7 @@ The URLs above are examples. For ARM-based VMs, choose the `arm64` assets. For r
 
 ```bash
 docker compose build
-docker compose up -d openclaw-gateway
+docker compose up -d bot-gateway
 ```
 
 If the build fails with `Killed` or exit code 137 during `pnpm install --frozen-lockfile`, the VM is out of memory. Use a larger machine class before retrying.
@@ -89,9 +89,9 @@ If the build fails with `Killed` or exit code 137 during `pnpm install --frozen-
 Verify binaries:
 
 ```bash
-docker compose exec openclaw-gateway which gog
-docker compose exec openclaw-gateway which goplaces
-docker compose exec openclaw-gateway which wacli
+docker compose exec bot-gateway which gog
+docker compose exec bot-gateway which goplaces
+docker compose exec bot-gateway which wacli
 ```
 
 Expected output:
@@ -105,7 +105,7 @@ Expected output:
 Verify the gateway is up:
 
 ```bash
-docker compose logs -f openclaw-gateway
+docker compose logs -f bot-gateway
 curl -fsS http://127.0.0.1:18789/healthz
 ```
 
@@ -113,19 +113,19 @@ curl -fsS http://127.0.0.1:18789/healthz
 
 ## What persists where
 
-OpenClaw runs in Docker, but Docker is not the source of truth. All long-lived state must survive restarts, rebuilds, and reboots.
+Bot runs in Docker, but Docker is not the source of truth. All long-lived state must survive restarts, rebuilds, and reboots.
 
 | Component              | Location                                               | Persistence mechanism  | Notes                                                                                                               |
 | ---------------------- | ------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Gateway config         | `/home/node/.openclaw/`                                | Host volume mount      | Includes `openclaw.json`                                                                                            |
-| Channel/provider creds | `/home/node/.openclaw/credentials/`                    | Host volume mount      | Channel and provider credential material                                                                            |
-| Model auth profiles    | `/home/node/.openclaw/agents/`                         | Host volume mount      | `agents/<agentId>/agent/auth-profiles.json` (OAuth, API keys)                                                       |
-| Legacy OAuth key file  | `/home/node/.config/openclaw/`                         | Host volume mount      | Read-only compat for pre-migration OAuth sidecars; `openclaw doctor --fix` migrates these into `auth-profiles.json` |
-| Skill configs          | `/home/node/.openclaw/skills/`                         | Host volume mount      | Skill-level state                                                                                                   |
-| Agent workspace        | `/home/node/.openclaw/workspace/`                      | Host volume mount      | Code and agent artifacts                                                                                            |
-| WhatsApp session       | `/home/node/.openclaw/`                                | Host volume mount      | Preserves QR login                                                                                                  |
-| Gmail keyring          | `/home/node/.openclaw/`                                | Host volume + password | Requires `GOG_KEYRING_PASSWORD`                                                                                     |
-| Plugin packages        | `/home/node/.openclaw/npm`, `/home/node/.openclaw/git` | Host volume mount      | Downloadable plugin package roots                                                                                   |
+| Gateway config         | `/home/node/.bot/`                                | Host volume mount      | Includes `bot.json`                                                                                            |
+| Channel/provider creds | `/home/node/.bot/credentials/`                    | Host volume mount      | Channel and provider credential material                                                                            |
+| Model auth profiles    | `/home/node/.bot/agents/`                         | Host volume mount      | `agents/<agentId>/agent/auth-profiles.json` (OAuth, API keys)                                                       |
+| Legacy OAuth key file  | `/home/node/.config/bot/`                         | Host volume mount      | Read-only compat for pre-migration OAuth sidecars; `bot doctor --fix` migrates these into `auth-profiles.json` |
+| Skill configs          | `/home/node/.bot/skills/`                         | Host volume mount      | Skill-level state                                                                                                   |
+| Agent workspace        | `/home/node/.bot/workspace/`                      | Host volume mount      | Code and agent artifacts                                                                                            |
+| WhatsApp session       | `/home/node/.bot/`                                | Host volume mount      | Preserves QR login                                                                                                  |
+| Gmail keyring          | `/home/node/.bot/`                                | Host volume + password | Requires `GOG_KEYRING_PASSWORD`                                                                                     |
+| Plugin packages        | `/home/node/.bot/npm`, `/home/node/.bot/git` | Host volume mount      | Downloadable plugin package roots                                                                                   |
 | External binaries      | `/usr/local/bin/`                                      | Docker image           | Must be baked at build time                                                                                         |
 | Node runtime           | Container filesystem                                   | Docker image           | Rebuilt every image build                                                                                           |
 | OS packages            | Container filesystem                                   | Docker image           | Do not install at runtime                                                                                           |
@@ -133,7 +133,7 @@ OpenClaw runs in Docker, but Docker is not the source of truth. All long-lived s
 
 ## Updates
 
-To update OpenClaw on the VM:
+To update Bot on the VM:
 
 ```bash
 git pull

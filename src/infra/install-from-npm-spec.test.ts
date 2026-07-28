@@ -25,7 +25,7 @@ describe("installFromValidatedNpmSpecArchive", () => {
       installFromValidatedNpmSpecArchive({
         spec: "  nope  ",
         timeoutMs: 30_000,
-        tempDirPrefix: "openclaw-npm-",
+        tempDirPrefix: "bot-npm-",
         installFromArchive: vi.fn(),
         archiveInstallParams: {},
       }),
@@ -52,9 +52,9 @@ describe("installFromValidatedNpmSpecArchive", () => {
 
     await expect(
       installFromValidatedNpmSpecArchive({
-        spec: "  @openclaw/demo@beta  ",
+        spec: "  @hanzo/bot-demo@beta  ",
         timeoutMs: 45_000,
-        tempDirPrefix: "openclaw-npm-",
+        tempDirPrefix: "bot-npm-",
         expectedIntegrity: "sha512-demo",
         onIntegrityDrift,
         warn,
@@ -64,8 +64,8 @@ describe("installFromValidatedNpmSpecArchive", () => {
     ).resolves.toBe(finalized);
 
     expect(installFromNpmSpecArchiveWithInstallerMock).toHaveBeenCalledWith({
-      tempDirPrefix: "openclaw-npm-",
-      spec: "@openclaw/demo@beta",
+      tempDirPrefix: "bot-npm-",
+      spec: "@hanzo/bot-demo@beta",
       timeoutMs: 45_000,
       expectedIntegrity: "sha512-demo",
       onIntegrityDrift,

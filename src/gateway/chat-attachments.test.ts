@@ -1,13 +1,13 @@
 // Chat attachment tests cover inbound image/file parsing, media-store cleanup,
 // warning surfaces, size limits, and outbound message block assembly.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const saveMediaBufferMock = vi.hoisted(() =>
   vi.fn(async (_buffer: Buffer, mime?: string, _subdir?: string) => ({
     id: `fake-id-${Math.random().toString(36).slice(2, 10)}`,
-    path: `/tmp/openclaw-test-media/inbound/fake.${mime?.split("/")[1] ?? "bin"}`,
+    path: `/tmp/bot-test-media/inbound/fake.${mime?.split("/")[1] ?? "bin"}`,
     size: 0,
     contentType: mime,
   })),
@@ -25,8 +25,8 @@ vi.mock("../media/store.js", async (importOriginal) => {
   };
 });
 
-import { MAX_IMAGE_BYTES } from "@openclaw/media-core/constants";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { MAX_IMAGE_BYTES } from "@hanzo/bot-media-core/constants";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   type ChatAttachment,
   parseMessageWithAttachments,
@@ -315,7 +315,7 @@ describe("parseMessageWithAttachments", () => {
       parseMessageWithAttachments(
         "x",
         [{ type: "image", mimeType: "image/png", fileName: "huge.png", content: big }],
-        { maxBytes: resolveChatAttachmentMaxBytes({} as OpenClawConfig), log: { warn: () => {} } },
+        { maxBytes: resolveChatAttachmentMaxBytes({} as BotConfig), log: { warn: () => {} } },
       ),
     ).rejects.toThrow(/image exceeds size limit/i);
     expect(saveMediaBufferMock).not.toHaveBeenCalled();
@@ -556,8 +556,8 @@ describe("resolveChatAttachmentMaxBytes", () => {
   const MB = 1024 * 1024;
   const DEFAULT_BYTES = 20 * MB;
 
-  const cfgWithMediaMaxMb = (value: unknown): OpenClawConfig =>
-    ({ agents: { defaults: { mediaMaxMb: value } } }) as unknown as OpenClawConfig;
+  const cfgWithMediaMaxMb = (value: unknown): BotConfig =>
+    ({ agents: { defaults: { mediaMaxMb: value } } }) as unknown as BotConfig;
 
   it("honours a configured agents.defaults.mediaMaxMb", () => {
     expect(resolveChatAttachmentMaxBytes(cfgWithMediaMaxMb(10))).toBe(10 * MB);
@@ -565,8 +565,8 @@ describe("resolveChatAttachmentMaxBytes", () => {
   });
 
   it("falls back to DEFAULT_CHAT_ATTACHMENT_MAX_MB when unset", () => {
-    expect(resolveChatAttachmentMaxBytes({} as OpenClawConfig)).toBe(DEFAULT_BYTES);
-    expect(resolveChatAttachmentMaxBytes({ agents: {} } as unknown as OpenClawConfig)).toBe(
+    expect(resolveChatAttachmentMaxBytes({} as BotConfig)).toBe(DEFAULT_BYTES);
+    expect(resolveChatAttachmentMaxBytes({ agents: {} } as unknown as BotConfig)).toBe(
       DEFAULT_BYTES,
     );
   });

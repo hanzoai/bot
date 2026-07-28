@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { writeSessionStore } from "./test-helpers.js";
 import {
   directSessionReq,
@@ -20,7 +20,7 @@ function createAgentModelCatalogLoader() {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
 });
 
 test.each([

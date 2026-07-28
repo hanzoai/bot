@@ -1,12 +1,12 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { ChannelDoctorLegacyConfigRule } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ChannelDoctorLegacyConfigRule } from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   archiveLegacyStateSource,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/runtime-doctor";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import { z } from "zod";
 import {
   parseReefRelayUrl,
@@ -101,7 +101,7 @@ type ConfiguredReefIdentityBinding =
   | { status: "invalid" }
   | { status: "valid"; binding: ReefIdentityBinding };
 
-function configuredReefIdentityBinding(cfg: OpenClawConfig): ConfiguredReefIdentityBinding {
+function configuredReefIdentityBinding(cfg: BotConfig): ConfiguredReefIdentityBinding {
   const reef = cfg.channels?.reef;
   if (!isRecord(reef) || !Object.hasOwn(reef, "handle") || reef.handle === undefined) {
     return { status: "absent" };
@@ -126,7 +126,7 @@ function hasRetiredReefPolicyConfig(value: unknown): boolean {
   return isRecord(value) && ["dmPolicy", "allowFrom"].some((key) => Object.hasOwn(value, key));
 }
 
-function inspectLegacyReefFriends(cfg: OpenClawConfig) {
+function inspectLegacyReefFriends(cfg: BotConfig) {
   const reef = cfg.channels?.reef;
   if (!isRecord(reef) || !Object.hasOwn(reef, "friends")) {
     return null;
@@ -155,13 +155,13 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "reef"],
     message:
-      'channels.reef dmPolicy/allowFrom are legacy; run "openclaw doctor --fix" to remove them. Peer trust is SQLite-backed.',
+      'channels.reef dmPolicy/allowFrom are legacy; run "bot doctor --fix" to remove them. Peer trust is SQLite-backed.',
     match: hasRetiredReefPolicyConfig,
   },
 ];
 
-export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): {
-  config: OpenClawConfig;
+export function normalizeCompatibilityConfig({ cfg }: { cfg: BotConfig }): {
+  config: BotConfig;
   changes: string[];
 } {
   const reef = cfg.channels?.reef;

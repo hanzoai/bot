@@ -22,7 +22,7 @@ export function renderChatViewNotices(props: ChatViewNoticesProps) {
             <span class="chat-error__content">${props.error}</span>
             ${props.onDismissError
               ? html`
-                  <openclaw-tooltip .content=${t("chat.actions.dismissError")}>
+                  <bot-tooltip .content=${t("chat.actions.dismissError")}>
                     <button
                       class="chat-error__dismiss"
                       type="button"
@@ -31,7 +31,7 @@ export function renderChatViewNotices(props: ChatViewNoticesProps) {
                     >
                       ${icons.x}
                     </button>
-                  </openclaw-tooltip>
+                  </bot-tooltip>
                 `
               : nothing}
           </div>
@@ -43,7 +43,7 @@ export function renderChatViewNotices(props: ChatViewNoticesProps) {
     })}
     ${props.focusMode && props.onToggleFocusMode
       ? html`
-          <openclaw-tooltip .content=${t("chat.actions.exitFocusMode")}>
+          <bot-tooltip .content=${t("chat.actions.exitFocusMode")}>
             <button
               class="chat-focus-exit"
               type="button"
@@ -52,7 +52,7 @@ export function renderChatViewNotices(props: ChatViewNoticesProps) {
             >
               ${icons.x}
             </button>
-          </openclaw-tooltip>
+          </bot-tooltip>
         `
       : nothing}
   `;

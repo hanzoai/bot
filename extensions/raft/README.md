@@ -1,5 +1,5 @@
-# Raft (OpenClaw plugin)
+# Raft (Bot plugin)
 
-Raft CLI wake bridge channel plugin for OpenClaw.
+Raft CLI wake bridge channel plugin for Bot.
 
-Docs: https://docs.openclaw.ai/channels/raft
+Docs: https://docs.bot.ai/channels/raft

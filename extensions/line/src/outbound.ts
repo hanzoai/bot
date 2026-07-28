@@ -3,15 +3,15 @@ import {
   defineChannelMessageAdapter,
   type ChannelMessageSendResult,
   type MessageReceiptPartKind,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-outbound";
 import {
   createAttachedChannelResultAdapter,
   createEmptyChannelResult,
-} from "openclaw/plugin-sdk/channel-send-result";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { resolveOutboundMediaUrls } from "openclaw/plugin-sdk/reply-payload";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/channel-send-result";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { resolveOutboundMediaUrls } from "bot/plugin-sdk/reply-payload";
+import { sanitizeAssistantVisibleText } from "bot/plugin-sdk/text-chunking";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { ChannelPlugin, ResolvedLineAccount } from "./channel-api.js";
 import {
   buildLineMediaMessage,

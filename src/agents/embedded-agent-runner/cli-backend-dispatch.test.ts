@@ -343,7 +343,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
       requireExplicitMessageTarget: true,
       cliToolAvailability: {
         native: [],
-        openClaw: ["memory_search", "memory_get", "notes_retrieve_context"],
+        bot: ["memory_search", "memory_get", "notes_retrieve_context"],
       },
     });
     // Embedded toolsAllow must never reach the CLI runner: it fails closed.
@@ -430,7 +430,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
         stream: "tool",
         data: {
           phase: "result",
-          name: "mcp__openclaw__memory_search",
+          name: "mcp__bot__memory_search",
           result: { content: [] },
           isError: false,
         },
@@ -441,7 +441,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
         stream: "tool",
         data: {
           phase: "result",
-          name: "mcp__openclaw__memory_get",
+          name: "mcp__bot__memory_get",
           result: { details: { status: "error" } },
           isError: false,
         },
@@ -449,7 +449,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
       emitAgentEvent({
         runId: "other-run",
         stream: "tool",
-        data: { phase: "result", name: "mcp__openclaw__memory_get", isError: true },
+        data: { phase: "result", name: "mcp__bot__memory_get", isError: true },
       });
       return cliRunResult();
     });
@@ -465,7 +465,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
     emitAgentEvent({
       runId: params.runId,
       stream: "tool",
-      data: { phase: "result", name: "mcp__openclaw__memory_search", isError: false },
+      data: { phase: "result", name: "mcp__bot__memory_search", isError: false },
     });
     expect(observed).toHaveLength(2);
   });
@@ -501,7 +501,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
         stream: "tool",
         data: {
           phase: "start",
-          name: "mcp__openclaw__memory_search",
+          name: "mcp__bot__memory_search",
           toolCallId: "call-1",
           args: { query: "wings" },
         },
@@ -511,7 +511,7 @@ describe("runEmbeddedAgentViaCliBackendIfEligible execution", () => {
         stream: "tool",
         data: {
           phase: "result",
-          name: "mcp__openclaw__memory_search",
+          name: "mcp__bot__memory_search",
           toolCallId: "call-1",
           result: { content: [] },
           isError: false,

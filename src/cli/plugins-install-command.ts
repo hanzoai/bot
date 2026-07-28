@@ -1,12 +1,12 @@
 // Plugin install command implementation for bundled, npm, path, git, ClawHub, and hook packs.
 import fs from "node:fs";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { theme } from "../../packages/terminal-core/src/theme.js";
 import {
   assertConfigWriteAllowedInCurrentMode,
   readConfigFileSnapshotForWrite,
 } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   installHooksFromNpmSpec,
   installHooksFromPath,
@@ -462,7 +462,7 @@ function extractMissingPluginLoadPath(issue: { path?: string; message?: string }
 }
 
 function collectRequestedPluginInstallPaths(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   installRecords: Awaited<ReturnType<typeof loadInstalledPluginIndexInstallRecords>>,
   request: PluginInstallRequestContext,
   env: NodeJS.ProcessEnv = process.env,
@@ -507,11 +507,11 @@ async function collectRequestedPluginLocationBridgePaths(
 }
 
 function removeOwnedMissingPluginLoadPaths(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   issues: readonly { path?: string; message?: string }[],
   ownedLoadPaths: ReadonlySet<string>,
   env: NodeJS.ProcessEnv = process.env,
-): OpenClawConfig {
+): BotConfig {
   const missingPaths = new Set<string>();
   for (const issue of issues) {
     const missingPath = extractMissingPluginLoadPath(issue);
@@ -546,7 +546,7 @@ function removeOwnedMissingPluginLoadPaths(
 }
 
 async function resolveRequestedPluginInstallPaths(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   issues: readonly { path?: string; message?: string }[],
   request: PluginInstallRequestContext,
   env: NodeJS.ProcessEnv = process.env,
@@ -579,13 +579,13 @@ async function loadConfigFromSnapshotForInstall(
   const mutationWriteOptions = selectInstallMutationWriteOptions(writeOptions);
   if (resolvePluginInstallInvalidConfigPolicy(request) !== "allow-plugin-recovery") {
     throw buildInvalidPluginInstallConfigError(
-      "Config invalid; run `openclaw doctor --fix` before installing plugins.",
+      "Config invalid; run `bot doctor --fix` before installing plugins.",
     );
   }
   const parsed = (snapshot.parsed ?? {}) as Record<string, unknown>;
   if (!snapshot.exists || Object.keys(parsed).length === 0) {
     throw buildInvalidPluginInstallConfigError(
-      "Config file could not be parsed; run `openclaw doctor` to repair it.",
+      "Config file could not be parsed; run `bot doctor` to repair it.",
     );
   }
   const ownedLoadPaths = await resolveRequestedPluginInstallPaths(
@@ -601,12 +601,12 @@ async function loadConfigFromSnapshotForInstall(
   ) {
     const pluginLabel = request.bundledPluginId ?? "the requested plugin";
     throw buildInvalidPluginInstallConfigError(
-      `Config invalid outside the plugin recovery path for ${pluginLabel}; run \`openclaw doctor --fix\` before reinstalling it.`,
+      `Config invalid outside the plugin recovery path for ${pluginLabel}; run \`bot doctor --fix\` before reinstalling it.`,
     );
   }
   if (!supportsPluginRecoveryIncludeShape(parsed)) {
     throw buildInvalidPluginInstallConfigError(
-      "Config plugin recovery uses an unsupported $include shape; use a single-file top-level plugins include or run `openclaw doctor --fix` before reinstalling it.",
+      "Config plugin recovery uses an unsupported $include shape; use a single-file top-level plugins include or run `bot doctor --fix` before reinstalling it.",
     );
   }
   const { hookMutation, pluginMutation } = resolveInstallConfigMutationPreflights({
@@ -663,7 +663,7 @@ async function loadConfigForInstall(
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.pluginsInstallCommandTestApi")
+    Symbol.for("bot.pluginsInstallCommandTestApi")
   ] = { loadConfigForInstall };
 }
 
@@ -720,13 +720,13 @@ async function runPluginInstallCommandUnlocked(params: RunPluginInstallCommandPa
   if (opts.marketplace) {
     if (opts.link) {
       runtime.error(
-        `--link is not supported with --marketplace. Remove --link, or install a local path with ${formatCliCommand(`openclaw plugins install --link <path> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)}.`,
+        `--link is not supported with --marketplace. Remove --link, or install a local path with ${formatCliCommand(`bot plugins install --link <path> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)}.`,
       );
       return runtime.exit(1);
     }
     if (opts.pin) {
       runtime.error(
-        `--pin is not supported with --marketplace. Use ${formatCliCommand(`openclaw plugins install <plugin> --marketplace <name> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)} without --pin.`,
+        `--pin is not supported with --marketplace. Use ${formatCliCommand(`bot plugins install <plugin> --marketplace <name> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)} without --pin.`,
       );
       return runtime.exit(1);
     }
@@ -743,19 +743,19 @@ async function runPluginInstallCommandUnlocked(params: RunPluginInstallCommandPa
   const sourceRequest = sourcePlan?.request;
   if (sourceRequest?.source === "git" && opts.link) {
     runtime.error(
-      `--link is not supported with git: installs. Use ${formatCliCommand(`openclaw plugins install git:<repo>@<ref> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)} for Git installs or ${formatCliCommand(`openclaw plugins install --link <path> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)} for local paths.`,
+      `--link is not supported with git: installs. Use ${formatCliCommand(`bot plugins install git:<repo>@<ref> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)} for Git installs or ${formatCliCommand(`bot plugins install --link <path> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)} for local paths.`,
     );
     return runtime.exit(1);
   }
   if (sourceRequest?.source === "git" && opts.pin) {
     runtime.error(
-      `--pin is not supported with git: installs. Pin the ref in the spec instead, for example ${formatCliCommand(`openclaw plugins install git:<repo>@<ref> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)}.`,
+      `--pin is not supported with git: installs. Pin the ref in the spec instead, for example ${formatCliCommand(`bot plugins install git:<repo>@<ref> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)}.`,
     );
     return runtime.exit(1);
   }
   if (opts.link && sourceRequest?.source !== "local") {
     runtime.error(
-      `--link requires a local path. Run ${formatCliCommand(`openclaw plugins install --link <path> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)}.`,
+      `--link requires a local path. Run ${formatCliCommand(`bot plugins install --link <path> ${NON_CLAWHUB_INSTALL_FORCE_FLAG}`)}.`,
     );
     return runtime.exit(1);
   }

@@ -1,7 +1,7 @@
 // Subagent registry steer-restart tests cover replacing child runs after steer
 // commands while preserving lifecycle hooks and completion delivery.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ContextEngine } from "../context-engine/types.js";
 import { getDetachedTaskLifecycleRuntime } from "../tasks/detached-task-runtime.js";

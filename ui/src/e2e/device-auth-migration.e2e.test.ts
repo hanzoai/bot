@@ -12,7 +12,7 @@ import {
 } from "../test-helpers/control-ui-e2e.ts";
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
-const captureProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureProof = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const artifactDir = path.join(
   process.cwd(),
   ".artifacts",

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 
 export type MutableRecord = Record<string, unknown>;
 
@@ -46,7 +46,7 @@ export type DisabledCodexPluginRouteIssue = {
 export type SharedDefaultCompactionOverrideConsumers = Record<CompactionOverrideKey, boolean>;
 
 export type ConfigRouteRepairResult = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   changes: CodexRouteHit[];
   runtimePinChanges: string[];
   runtimePolicyChanges: string[];

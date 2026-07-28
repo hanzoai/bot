@@ -1,5 +1,5 @@
 // Telegram plugin module implements runtime behavior.
-import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
+import { createPluginRuntimeStore } from "bot/plugin-sdk/runtime-store";
 import type { TelegramRuntime } from "./runtime.types.js";
 
 const {

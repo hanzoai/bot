@@ -10,7 +10,7 @@ import { readConfiguredLogTail } from "./log-tail.js";
 let tempDirs: string[] = [];
 
 async function makeTempDir(): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-log-tail-redaction-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-log-tail-redaction-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -25,10 +25,10 @@ afterEach(async () => {
 describe("readConfiguredLogTail redaction", () => {
   it("redacts raw auth headers before returning log lines", async () => {
     const dir = await makeTempDir();
-    const logFile = path.join(dir, "openclaw.log");
-    const configFile = path.join(dir, "openclaw.json");
+    const logFile = path.join(dir, "bot.log");
+    const configFile = path.join(dir, "bot.json");
     const basicSecret = "c2VjcmV0OnBhc3M=";
-    const openClawToken = "supersecretgatewaytoken1234567890";
+    const botToken = "supersecretgatewaytoken1234567890";
     const pomeriumJwt = "eyJheaderabcd.eyJpayloadabcd.signatureabcd123456";
 
     await fs.writeFile(
@@ -40,7 +40,7 @@ describe("readConfiguredLogTail redaction", () => {
       logFile,
       [
         `Authorization: Basic ${basicSecret}`,
-        `X-OpenClaw-Token: ${openClawToken}`,
+        `X-Bot-Token: ${botToken}`,
         `x-pomerium-jwt-assertion: ${pomeriumJwt}`,
         "normal diagnostic line",
       ].join("\n"),
@@ -49,17 +49,17 @@ describe("readConfiguredLogTail redaction", () => {
     setLoggerOverride({ file: logFile });
 
     const payload = await withEnvAsync(
-      { OPENCLAW_CONFIG_PATH: configFile },
+      { BOT_CONFIG_PATH: configFile },
       async () => await readConfiguredLogTail({ limit: 10 }),
     );
     const text = payload.lines.join("\n");
 
     expect(text).toContain("Authorization: Basic ***");
-    expect(text).toContain("X-OpenClaw-Token: supers…7890");
+    expect(text).toContain("X-Bot-Token: supers…7890");
     expect(text).toContain("x-pomerium-jwt-assertion: eyJhea…3456");
     expect(text).toContain("normal diagnostic line");
     expect(text).not.toContain(basicSecret);
-    expect(text).not.toContain(openClawToken);
+    expect(text).not.toContain(botToken);
     expect(text).not.toContain(pomeriumJwt);
   });
 });

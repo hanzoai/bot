@@ -68,7 +68,7 @@ describe("createQQWSClient", () => {
   it("sets a bounded handshake without a proxy agent", async () => {
     await createQQWSClient({
       gatewayUrl: "wss://qq.example.test/ws",
-      userAgent: "openclaw-qqbot-test",
+      userAgent: "bot-qqbot-test",
     });
 
     expect(webSocketCtorMock).toHaveBeenCalledTimes(1);
@@ -76,7 +76,7 @@ describe("createQQWSClient", () => {
     expectWebSocketCtorCall([
       "wss://qq.example.test/ws",
       {
-        headers: { "User-Agent": "openclaw-qqbot-test" },
+        headers: { "User-Agent": "bot-qqbot-test" },
         handshakeTimeout: 30_000,
       },
     ]);
@@ -87,7 +87,7 @@ describe("createQQWSClient", () => {
 
     await createQQWSClient({
       gatewayUrl: "wss://qq.example.test/ws",
-      userAgent: "openclaw-qqbot-test",
+      userAgent: "bot-qqbot-test",
     });
 
     expect(webSocketCtorMock).toHaveBeenCalledTimes(1);
@@ -96,7 +96,7 @@ describe("createQQWSClient", () => {
       "wss://qq.example.test/ws",
       {
         agent: { proxied: true },
-        headers: { "User-Agent": "openclaw-qqbot-test" },
+        headers: { "User-Agent": "bot-qqbot-test" },
         handshakeTimeout: 30_000,
       },
     ]);
@@ -107,7 +107,7 @@ describe("createQQWSClient", () => {
 
     await createQQWSClient({
       gatewayUrl: "wss://qq.example.test/ws",
-      userAgent: "openclaw-qqbot-test",
+      userAgent: "bot-qqbot-test",
     });
 
     expect(webSocketCtorMock).toHaveBeenCalledTimes(1);
@@ -116,7 +116,7 @@ describe("createQQWSClient", () => {
       "wss://qq.example.test/ws",
       {
         agent: { proxied: true },
-        headers: { "User-Agent": "openclaw-qqbot-test" },
+        headers: { "User-Agent": "bot-qqbot-test" },
         handshakeTimeout: 30_000,
       },
     ]);
@@ -127,7 +127,7 @@ describe("createQQWSClient", () => {
 
     await createQQWSClient({
       gatewayUrl: "wss://qq.example.test/ws",
-      userAgent: "openclaw-qqbot-test",
+      userAgent: "bot-qqbot-test",
     });
 
     expect(webSocketCtorMock).toHaveBeenCalledTimes(1);
@@ -136,7 +136,7 @@ describe("createQQWSClient", () => {
       "wss://qq.example.test/ws",
       {
         agent: { proxied: true },
-        headers: { "User-Agent": "openclaw-qqbot-test" },
+        headers: { "User-Agent": "bot-qqbot-test" },
         handshakeTimeout: 30_000,
       },
     ]);

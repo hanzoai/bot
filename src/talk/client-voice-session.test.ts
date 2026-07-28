@@ -7,8 +7,8 @@ import {
   emitTrustedDiagnosticEvent,
   waitForDiagnosticEventsDrained,
 } from "../infra/diagnostic-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import {
   normalizeSessionDeliveryState,
@@ -33,7 +33,7 @@ const { sendDurableMessageBatch } = vi.hoisted(() => ({
 
 vi.mock("../channels/message/runtime.js", () => ({ sendDurableMessageBatch }));
 
-const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
 let tempDir: string;
 
 async function seedSession(sessionKey: string, context: DeliveryContext = {}): Promise<void> {
@@ -83,16 +83,16 @@ async function completeRun(runId: string): Promise<void> {
 describe("client voice session", () => {
   beforeEach(async () => {
     tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-voice-session-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "bot-voice-session-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     sendDurableMessageBatch.mockClear();
   });
 
   afterEach(async () => {
     clientVoiceSessionTesting.reset();
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
     envSnapshot.restore();
     await fs.rm(tempDir, { recursive: true, force: true });
   });

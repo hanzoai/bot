@@ -77,11 +77,11 @@ export function rememberAuthoritativeTerminal(options: {
   });
 }
 
-function messageOpenClawId(message: unknown): string | null {
+function messageBotId(message: unknown): string | null {
   if (!message || typeof message !== "object" || Array.isArray(message)) {
     return null;
   }
-  const meta = (message as Record<string, unknown>)["__openclaw"];
+  const meta = (message as Record<string, unknown>)["__bot"];
   if (!meta || typeof meta !== "object" || Array.isArray(meta)) {
     return null;
   }
@@ -100,7 +100,7 @@ export function reconcileAuthoritativeTerminalHistory<T>(options: {
   const historyContainsTerminal = Boolean(
     terminal &&
     areUiSessionKeysEquivalent(terminal.sessionKey, options.sessionKey) &&
-    options.visibleMessages.some((message) => messageOpenClawId(message) === terminal.messageId),
+    options.visibleMessages.some((message) => messageBotId(message) === terminal.messageId),
   );
   if (!terminal || !historyContainsTerminal) {
     return options;

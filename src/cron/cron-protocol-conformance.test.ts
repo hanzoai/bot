@@ -1,7 +1,7 @@
 // Cron protocol conformance tests cover schema compatibility for cron messages.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import {
   CronDeliverySchema,
@@ -42,7 +42,7 @@ function extractConstUnionValues(schema: SchemaLike): string[] {
 
 const UI_FILES = ["ui/src/api/types.ts", "ui/src/lib/cron/index.ts", "ui/src/pages/cron/view.ts"];
 
-const MACOS_APP_SOURCES_DIR = "apps/macos/Sources/OpenClaw";
+const MACOS_APP_SOURCES_DIR = "apps/macos/Sources/Bot";
 const SWIFT_MODEL_CANDIDATES = [`${MACOS_APP_SOURCES_DIR}/CronModels.swift`];
 const SWIFT_STATUS_CANDIDATES = [`${MACOS_APP_SOURCES_DIR}/GatewayConnection.swift`];
 

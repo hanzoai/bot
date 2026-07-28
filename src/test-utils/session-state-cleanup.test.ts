@@ -50,8 +50,8 @@ describe("cleanupSessionStateForTest", () => {
   });
 
   it("waits for in-flight session store writer queues before clearing test state", async () => {
-    const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-cleanup-"));
-    const storePath = path.join(fixtureRoot, "openclaw-sessions.json");
+    const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-session-cleanup-"));
+    const storePath = path.join(fixtureRoot, "bot-sessions.json");
     const started = createDeferred();
     const release = createDeferred();
     const drainRequested = createDeferred();

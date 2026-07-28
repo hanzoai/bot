@@ -1,5 +1,5 @@
 // Qa Lab plugin module implements coverage report behavior.
-import { normalizeStringEntriesLower } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeStringEntriesLower } from "bot/plugin-sdk/string-coerce-runtime";
 import { QA_SCENARIO_PACKS, type QaSeedScenarioWithSource } from "./scenario-catalog.js";
 import {
   readQaScorecardTaxonomyReport,
@@ -455,7 +455,7 @@ function formatSuiteCommand(matches: readonly QaScenarioSearchMatch[]) {
   const selectedDriver = channels.length === 1 && channel !== "qa-channel" ? "live" : undefined;
   const driverArg = selectedDriver ? ` --channel-driver ${selectedDriver}` : "";
   const channelArg = driverArg && channel ? ` --channel ${channel}` : "";
-  return `pnpm openclaw qa suite${driverArg}${channelArg} ${scenarioArgs}`;
+  return `pnpm bot qa suite${driverArg}${channelArg} ${scenarioArgs}`;
 }
 
 function scenarioMatchCommandGroups(matches: readonly QaScenarioSearchMatch[]) {

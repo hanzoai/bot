@@ -1,5 +1,5 @@
 // Qa Lab plugin module implements auth behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   applyAuthProfileConfig,
   coerceSecretRef,
@@ -9,23 +9,23 @@ import {
   readCodexCliCredentialsCached,
   resolveEnvApiKey,
   validateAnthropicSetupToken,
-} from "openclaw/plugin-sdk/provider-auth";
-import { normalizeStringEntries, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-auth";
+import { normalizeStringEntries, uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveQaAgentAuthDir, writeQaAuthProfiles } from "../shared/auth-store.js";
 
-export const QA_LIVE_ANTHROPIC_SETUP_TOKEN_ENV = "OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN";
-export const QA_LIVE_SETUP_TOKEN_VALUE_ENV = "OPENCLAW_LIVE_SETUP_TOKEN_VALUE";
-const QA_LIVE_ANTHROPIC_SETUP_TOKEN_PROFILE_ENV = "OPENCLAW_QA_LIVE_ANTHROPIC_SETUP_TOKEN_PROFILE";
+export const QA_LIVE_ANTHROPIC_SETUP_TOKEN_ENV = "BOT_QA_LIVE_ANTHROPIC_SETUP_TOKEN";
+export const QA_LIVE_SETUP_TOKEN_VALUE_ENV = "BOT_LIVE_SETUP_TOKEN_VALUE";
+const QA_LIVE_ANTHROPIC_SETUP_TOKEN_PROFILE_ENV = "BOT_QA_LIVE_ANTHROPIC_SETUP_TOKEN_PROFILE";
 const QA_LIVE_ANTHROPIC_SETUP_TOKEN_PROFILE_ID = "anthropic:qa-setup-token";
 const QA_LIVE_API_KEY_AGENT_IDS = Object.freeze(["main", "qa"] as const);
 const QA_OPENAI_PROVIDER_ID = "openai";
 const QA_LIVE_API_KEY_ALIASES: Readonly<Record<string, readonly string[]>> = Object.freeze({
-  anthropic: ["OPENCLAW_LIVE_ANTHROPIC_KEY"],
-  gemini: ["OPENCLAW_LIVE_GEMINI_KEY"],
+  anthropic: ["BOT_LIVE_ANTHROPIC_KEY"],
+  gemini: ["BOT_LIVE_GEMINI_KEY"],
   openai: [
     "CODEX_API_KEY",
-    "OPENCLAW_LIVE_CODEX_API_KEY",
-    "OPENCLAW_LIVE_OPENAI_KEY",
+    "BOT_LIVE_CODEX_API_KEY",
+    "BOT_LIVE_OPENAI_KEY",
     "OPENAI_API_KEY",
   ],
 });
@@ -57,14 +57,14 @@ function isQaLiveOfficialOpenAiBaseUrl(baseUrl: unknown): boolean {
   }
 }
 
-function qaLiveOpenAiUsesCodexByDefault(cfg: OpenClawConfig): boolean {
+function qaLiveOpenAiUsesCodexByDefault(cfg: BotConfig): boolean {
   return isQaLiveOfficialOpenAiBaseUrl(
     resolveQaLiveProviderConfig({ cfg, providerId: "openai" })?.baseUrl,
   );
 }
 
 function expandQaLiveApiKeyProviderIds(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   providerIds: readonly string[];
 }) {
   const expanded = new Set(normalizeQaLiveProviderIds(params.providerIds));
@@ -77,7 +77,7 @@ function expandQaLiveApiKeyProviderIds(params: {
 function resolveQaLiveEnvApiKey(params: {
   providerId: string;
   env: NodeJS.ProcessEnv;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }) {
   const resolved = resolveEnvApiKey(params.providerId, params.env, { config: params.cfg });
   if (resolved?.apiKey) {
@@ -95,7 +95,7 @@ function resolveQaLiveEnvApiKey(params: {
 function resolveQaLiveConfiguredApiKey(params: {
   providerId: string;
   env: NodeJS.ProcessEnv;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }) {
   const providerConfig = resolveQaLiveProviderConfig(params);
   const apiKey = providerConfig?.apiKey;
@@ -129,12 +129,12 @@ function resolveQaLiveConfiguredApiKey(params: {
 function resolveQaLiveApiKey(params: {
   providerId: string;
   env: NodeJS.ProcessEnv;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }) {
   return resolveQaLiveEnvApiKey(params) ?? resolveQaLiveConfiguredApiKey(params);
 }
 
-function resolveQaLiveProviderConfig(params: { cfg: OpenClawConfig; providerId: string }) {
+function resolveQaLiveProviderConfig(params: { cfg: BotConfig; providerId: string }) {
   const providers = params.cfg.models?.providers;
   if (!providers) {
     return undefined;
@@ -145,12 +145,12 @@ function resolveQaLiveProviderConfig(params: { cfg: OpenClawConfig; providerId: 
   );
 }
 
-function hasQaLiveStagedApiKeyProfile(params: { cfg: OpenClawConfig; providerId: string }) {
+function hasQaLiveStagedApiKeyProfile(params: { cfg: BotConfig; providerId: string }) {
   return Boolean(params.cfg.auth?.profiles?.[buildQaLiveApiKeyProfileId(params.providerId)]);
 }
 
 function qaLiveRequiresCodexAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   providerIds: readonly string[];
   env: NodeJS.ProcessEnv;
 }) {
@@ -158,8 +158,8 @@ function qaLiveRequiresCodexAuth(params: {
   if (!providerIds.includes(QA_OPENAI_PROVIDER_ID)) {
     return false;
   }
-  const forcedRuntime = params.env.OPENCLAW_QA_FORCE_RUNTIME?.trim().toLowerCase();
-  if (forcedRuntime === "openclaw") {
+  const forcedRuntime = params.env.BOT_QA_FORCE_RUNTIME?.trim().toLowerCase();
+  if (forcedRuntime === "bot") {
     return false;
   }
   if (forcedRuntime === "codex") {
@@ -188,10 +188,10 @@ function resolveQaLiveAnthropicSetupToken(env: NodeJS.ProcessEnv = process.env) 
 }
 
 export async function stageQaLiveAnthropicSetupToken(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   stateDir: string;
   env?: NodeJS.ProcessEnv;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const resolved = resolveQaLiveAnthropicSetupToken(params.env);
   if (!resolved) {
     return params.cfg;
@@ -215,12 +215,12 @@ export async function stageQaLiveAnthropicSetupToken(params: {
 }
 
 export async function stageQaLiveApiKeyProfiles(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   stateDir: string;
   providerIds: readonly string[];
   env?: NodeJS.ProcessEnv;
   agentIds?: readonly string[];
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const env = params.env ?? process.env;
   const providerIds = uniqueStrings(normalizeStringEntries(params.providerIds)).toSorted();
   const profiles: Record<
@@ -269,7 +269,7 @@ export async function stageQaLiveApiKeyProfiles(params: {
 }
 
 export function assertQaLiveCodexAuthAvailable(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   providerIds: readonly string[];
   env?: NodeJS.ProcessEnv;
   readCodexCredentials?: typeof readCodexCliCredentialsCached;
@@ -297,8 +297,8 @@ export function assertQaLiveCodexAuthAvailable(params: {
   throw new Error(
     [
       "QA live-frontier cannot run Codex-backed OpenAI models inside an isolated QA agent because no portable Codex auth is available.",
-      "Set OPENAI_API_KEY or OPENCLAW_LIVE_OPENAI_KEY for an API-key fallback, or set CODEX_HOME to a logged-in Codex CLI home.",
-      "Host OpenClaw OAuth refresh profiles are not copied into QA temp stores.",
+      "Set OPENAI_API_KEY or BOT_LIVE_OPENAI_KEY for an API-key fallback, or set CODEX_HOME to a logged-in Codex CLI home.",
+      "Host Bot OAuth refresh profiles are not copied into QA temp stores.",
     ].join(" "),
   );
 }

@@ -1,28 +1,28 @@
 /**
- * Twitch channel plugin for OpenClaw.
+ * Twitch channel plugin for Bot.
  *
  * Main plugin export combining all adapters (outbound, actions, status, gateway).
  * This is the primary entry point for the Twitch channel integration.
  */
 
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import { buildChannelConfigSchema } from "openclaw/plugin-sdk/channel-config-schema";
+import { describeAccountSnapshot } from "bot/plugin-sdk/account-helpers";
+import { buildChannelConfigSchema } from "bot/plugin-sdk/channel-config-schema";
 import {
   buildChannelOutboundSessionRoute,
   createChatChannelPlugin,
   stripChannelTargetPrefix,
-} from "openclaw/plugin-sdk/channel-core";
-import { runPassiveAccountLifecycle } from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-core";
+import { runPassiveAccountLifecycle } from "bot/plugin-sdk/channel-outbound";
 import {
   createLoggedPairingApprovalNotifier,
   createPairingPrefixStripper,
-} from "openclaw/plugin-sdk/channel-pairing";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { buildPassiveProbedChannelStatusSummary } from "openclaw/plugin-sdk/extension-shared";
+} from "bot/plugin-sdk/channel-pairing";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { buildPassiveProbedChannelStatusSummary } from "bot/plugin-sdk/extension-shared";
 import {
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "bot/plugin-sdk/status-helpers";
 import { twitchMessageActions } from "./actions.js";
 import { removeClientManager } from "./client-manager-registry.js";
 import { TwitchConfigSchema } from "./config-schema.js";
@@ -64,7 +64,7 @@ function normalizeTwitchMessagingTarget(target: string): string {
  * Twitch channel plugin.
  *
  * Implements the ChannelPlugin interface to provide Twitch chat integration
- * for OpenClaw. Supports message sending, receiving, access control, and
+ * for Bot. Supports message sending, receiving, access control, and
  * status monitoring.
  */
 export const twitchPlugin: ChannelPlugin<ResolvedTwitchAccount> =
@@ -138,11 +138,11 @@ export const twitchPlugin: ChannelPlugin<ResolvedTwitchAccount> =
           kind,
           runtime,
         }: {
-          cfg: OpenClawConfig;
+          cfg: BotConfig;
           accountId?: string | null;
           inputs: string[];
           kind: ChannelResolveKind;
-          runtime: import("openclaw/plugin-sdk/runtime-env").RuntimeEnv;
+          runtime: import("bot/plugin-sdk/runtime-env").RuntimeEnv;
         }): Promise<ChannelResolveResult[]> => {
           const account = getAccountConfig(cfg, accountId ?? resolveDefaultTwitchAccountId(cfg));
           if (!account) {

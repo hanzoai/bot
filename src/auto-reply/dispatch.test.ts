@@ -1,6 +1,6 @@
 /** Tests inbound dispatch hook composition, diagnostics, and dispatcher integration. */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { onDiagnosticEvent, resetDiagnosticEventsForTest } from "../infra/diagnostic-events.js";
 import { registerReplyDispatcherSettledTask } from "./dispatch-dispatcher.js";
 import { getReplyPayloadMetadata, setReplyPayloadMetadata } from "./reply-payload.js";
@@ -124,7 +124,7 @@ async function installProjectedBeforeDeliver(
   hoisted.dispatchReplyFromConfigMock.mockResolvedValueOnce({ text: "ok" });
   await dispatchInboundMessageWithProjectedDispatcher({
     ctx: buildTestCtx({ Surface: "webchat", SessionKey: "agent:test:main" }),
-    cfg: {} as OpenClawConfig,
+    cfg: {} as BotConfig,
     dispatcherOptions: { deliver: async () => undefined },
     ...overrides,
   });
@@ -180,7 +180,7 @@ describe("withReplyDispatcher", () => {
 
     await dispatchInboundMessage({
       ctx: buildTestCtx(),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcher,
       onSettled: () => {
         order.push("onSettled");
@@ -208,7 +208,7 @@ describe("withReplyDispatcher", () => {
           Surface: "signal",
           SessionKey: "agent:main:signal:direct:u1",
         }),
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         dispatcher,
       });
     } finally {
@@ -291,7 +291,7 @@ describe("withReplyDispatcher", () => {
 
     await dispatchInboundMessageWithBufferedDispatcher({
       ctx: buildTestCtx(),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: {
         deliver: async () => undefined,
       },
@@ -321,7 +321,7 @@ describe("withReplyDispatcher", () => {
 
     await dispatchInboundMessageWithBufferedDispatcher({
       ctx: buildTestCtx(),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: { deliver: async () => undefined },
       replyOptions: { onTypingController: channelObserver },
     });
@@ -347,7 +347,7 @@ describe("withReplyDispatcher", () => {
 
     await dispatchInboundMessageWithBufferedDispatcher({
       ctx: buildTestCtx(),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       toolsAllow: ["message"],
       dispatcherOptions: {
         deliver: async () => undefined,
@@ -373,7 +373,7 @@ describe("withReplyDispatcher", () => {
         To: "whatsapp:+15557654321",
         OriginatingTo: "whatsapp:+15551234567",
       }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: {
         deliver: async () => undefined,
       },
@@ -433,7 +433,7 @@ describe("withReplyDispatcher", () => {
 
     await dispatchInboundMessageWithDispatcher({
       ctx: buildTestCtx({ Surface: "telegram", SessionKey: "agent:test:session" }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: {
         deliver: async () => undefined,
       },
@@ -505,7 +505,7 @@ describe("withReplyDispatcher", () => {
 
     await dispatchInboundMessageWithDispatcher({
       ctx: buildTestCtx({ Surface: "telegram", SessionKey: "agent:test:session" }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: {
         deliver: async () => undefined,
       },
@@ -562,7 +562,7 @@ describe("withReplyDispatcher", () => {
         SessionKey: "agent:test:session",
         OriginatingTo: "telegram:chat-1",
       }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: {
         deliver: async () => undefined,
       },
@@ -630,7 +630,7 @@ describe("withReplyDispatcher", () => {
         SessionKey: "agent:test:main",
         OriginatingTo: "main",
       }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: { deliver: async () => undefined },
       onSessionMetadataChanges,
       replyOptions: { runId: "run-web" },
@@ -763,7 +763,7 @@ describe("withReplyDispatcher", () => {
 
     await dispatchInboundMessageWithDispatcher({
       ctx: buildTestCtx({ Surface: "telegram", SessionKey: "agent:test:session" }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: {
         deliver: async () => undefined,
       },
@@ -807,7 +807,7 @@ describe("withReplyDispatcher", () => {
 
     await dispatchInboundMessage({
       ctx: buildTestCtx({ Surface: "discord", SessionKey: "agent:test:session" }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcher,
       replyOptions: { runId: "run-456" },
       replyResolver: async () => ({ text: "ok" }),
@@ -852,7 +852,7 @@ describe("withReplyDispatcher", () => {
 
     await dispatchInboundMessage({
       ctx: buildTestCtx({ Surface: "discord", SessionKey: "agent:test:session" }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcher,
       replyOptions: { runId: "run-789" },
       replyResolver: async () => ({ text: "ok" }),
@@ -879,7 +879,7 @@ describe("withReplyDispatcher", () => {
 
     const result = await dispatchInboundMessage({
       ctx: buildTestCtx(),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcher,
       replyResolver: async () => ({ text: "ok" }),
     });
@@ -908,7 +908,7 @@ describe("withReplyDispatcher", () => {
 
     const result = await dispatchInboundMessage({
       ctx: buildTestCtx(),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcher,
       replyResolver: async () => ({ text: "ok" }),
     });
@@ -936,7 +936,7 @@ describe("withReplyDispatcher", () => {
         CommandTargetSessionKey: "agent:test:telegram:direct:8231046597",
         Surface: "telegram",
       }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: {
         deliver: async () => undefined,
       },
@@ -965,7 +965,7 @@ describe("withReplyDispatcher", () => {
         ChatType: "dm",
         Surface: "discord",
       }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: {
         deliver: async () => undefined,
       },
@@ -1002,7 +1002,7 @@ describe("withReplyDispatcher", () => {
 
     await dispatchInboundMessageWithDispatcher({
       ctx: buildTestCtx({ Surface: "telegram", SessionKey: "agent:test:session" }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: {
         deliver: async () => undefined,
         beforeDeliver: customBeforeDeliver,
@@ -1063,7 +1063,7 @@ describe("withReplyDispatcher", () => {
         ChatType: "group",
         Surface: "telegram",
       }),
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       dispatcherOptions: {
         deliver: async () => undefined,
       },

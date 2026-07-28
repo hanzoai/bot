@@ -14,7 +14,7 @@ generic policy: DM/group allowlists, pairing-store DM entries, route gates,
 command gates, event auth, mention activation, redacted diagnostics, and
 admission.
 
-Use `openclaw/plugin-sdk/channel-ingress-runtime` for receive paths.
+Use `bot/plugin-sdk/channel-ingress-runtime` for receive paths.
 
 ## Runtime resolver
 
@@ -22,7 +22,7 @@ Use `openclaw/plugin-sdk/channel-ingress-runtime` for receive paths.
 import {
   defineStableChannelIngressIdentity,
   resolveChannelMessageIngress,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
+} from "bot/plugin-sdk/channel-ingress-runtime";
 
 const identity = defineStableChannelIngressIdentity({
   key: "platform-user-id",

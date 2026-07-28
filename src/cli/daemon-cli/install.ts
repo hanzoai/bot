@@ -1,5 +1,5 @@
 // Gateway service installer: writes config defaults, resolves credentials, and installs service definitions.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveNodeStartupTlsEnvironment } from "../../bootstrap/node-startup-env.js";
 import { buildGatewayInstallPlan } from "../../commands/daemon-install-helpers.js";
 import {
@@ -13,8 +13,8 @@ import { readConfigFileSnapshotForWrite } from "../../config/io.js";
 import { replaceConfigFile } from "../../config/mutate.js";
 import { resolveGatewayPort } from "../../config/paths.js";
 import type { GatewayBindMode } from "../../config/types.gateway.js";
-import type { OpenClawConfig } from "../../config/types.js";
-import { OPENCLAW_WRAPPER_ENV_KEY, resolveOpenClawWrapperPath } from "../../daemon/program-args.js";
+import type { BotConfig } from "../../config/types.js";
+import { BOT_WRAPPER_ENV_KEY, resolveBotWrapperPath } from "../../daemon/program-args.js";
 import { readEmbeddedGatewayToken } from "../../daemon/service-audit.js";
 import { resolveGatewayService } from "../../daemon/service.js";
 import type { GatewayServiceCommandConfig } from "../../daemon/service.js";
@@ -45,14 +45,14 @@ import {
 } from "./shared.js";
 import type { DaemonInstallOptions } from "./types.js";
 
-function resolveGatewayInstallBindMode(cfg: OpenClawConfig): GatewayBindMode {
+function resolveGatewayInstallBindMode(cfg: BotConfig): GatewayBindMode {
   return cfg.gateway?.bind ?? defaultGatewayBindMode(cfg.gateway?.tailscale?.mode ?? "off");
 }
 
 function formatNoAuthNonLoopbackInstallBlock(params: {
   bind: GatewayBindMode;
   bindHost: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
 }): string | undefined {
   const auth = resolveGatewayAuth({
@@ -71,15 +71,15 @@ function formatNoAuthNonLoopbackInstallBlock(params: {
   const hints: string[] = [`${bindReason}, but gateway.auth.mode=none disables Gateway auth.`];
   if (normalizeOptionalString(auth.token)) {
     hints.push(
-      `This config already has gateway.auth.token; run ${formatCliCommand("openclaw config set gateway.auth.mode token")} and then rerun ${formatCliCommand("openclaw gateway install --force")}.`,
+      `This config already has gateway.auth.token; run ${formatCliCommand("bot config set gateway.auth.mode token")} and then rerun ${formatCliCommand("bot gateway install --force")}.`,
     );
   } else if (normalizeOptionalString(auth.password)) {
     hints.push(
-      `This config already has gateway.auth.password; run ${formatCliCommand("openclaw config set gateway.auth.mode password")} and then rerun ${formatCliCommand("openclaw gateway install --force")}.`,
+      `This config already has gateway.auth.password; run ${formatCliCommand("bot config set gateway.auth.mode password")} and then rerun ${formatCliCommand("bot gateway install --force")}.`,
     );
   } else {
     hints.push(
-      `Configure token/password auth, use trusted-proxy auth, or set ${formatCliCommand("openclaw config set gateway.bind loopback")} before installing the managed service.`,
+      `Configure token/password auth, use trusted-proxy auth, or set ${formatCliCommand("bot config set gateway.bind loopback")} before installing the managed service.`,
     );
   }
   return hints.join(" ");
@@ -111,10 +111,10 @@ export function mergeInstallInvocationEnv(params: {
       continue;
     }
     const upper = key.toUpperCase();
-    if (upper === OPENCLAW_WRAPPER_ENV_KEY) {
+    if (upper === BOT_WRAPPER_ENV_KEY) {
       const value = rawValue.trim();
       if (value) {
-        preservedServiceEnv[normalizeInstallEnvKey(OPENCLAW_WRAPPER_ENV_KEY)] = value;
+        preservedServiceEnv[normalizeInstallEnvKey(BOT_WRAPPER_ENV_KEY)] = value;
       }
       continue;
     }
@@ -122,7 +122,7 @@ export function mergeInstallInvocationEnv(params: {
       upper === "HOME" ||
       upper === "PATH" ||
       upper === "TMPDIR" ||
-      upper.startsWith("OPENCLAW_")
+      upper.startsWith("BOT_")
     ) {
       continue;
     }
@@ -185,7 +185,7 @@ export async function runDaemonInstall(opts: DaemonInstallOptions) {
   let wrapperPath: string | undefined;
   if (opts.wrapper !== undefined) {
     try {
-      wrapperPath = await resolveOpenClawWrapperPath(opts.wrapper);
+      wrapperPath = await resolveBotWrapperPath(opts.wrapper);
       if (!wrapperPath) {
         fail("Invalid --wrapper");
         return;
@@ -246,9 +246,9 @@ export async function runDaemonInstall(opts: DaemonInstallOptions) {
   });
   if (!wrapperPath) {
     try {
-      wrapperPath = await resolveOpenClawWrapperPath(installEnv[OPENCLAW_WRAPPER_ENV_KEY]);
+      wrapperPath = await resolveBotWrapperPath(installEnv[BOT_WRAPPER_ENV_KEY]);
     } catch (err) {
-      fail(`Invalid ${OPENCLAW_WRAPPER_ENV_KEY}: ${String(err)}`);
+      fail(`Invalid ${BOT_WRAPPER_ENV_KEY}: ${String(err)}`);
       return;
     }
   }
@@ -293,7 +293,7 @@ export async function runDaemonInstall(opts: DaemonInstallOptions) {
         if (!json) {
           defaultRuntime.log(`Gateway service already ${service.loadedText}.`);
           defaultRuntime.log(
-            `Reinstall with: ${formatCliCommand("openclaw gateway install --force")}`,
+            `Reinstall with: ${formatCliCommand("bot gateway install --force")}`,
           );
         }
         return;
@@ -376,7 +376,7 @@ async function getGatewayServiceAutoRefreshMessage(params: {
   wrapperPath?: string;
   existingEnvironment?: Record<string, string | undefined>;
   existingEnvironmentValueSources?: GatewayServiceCommandConfig["environmentValueSources"];
-  config: OpenClawConfig;
+  config: BotConfig;
 }): Promise<string | undefined> {
   try {
     const currentCommand = params.currentCommand;
@@ -396,14 +396,14 @@ async function getGatewayServiceAutoRefreshMessage(params: {
         config: params.config,
       });
       const plannedEmbeddedToken = normalizeOptionalString(
-        plannedInstall.environment.OPENCLAW_GATEWAY_TOKEN,
+        plannedInstall.environment.BOT_GATEWAY_TOKEN,
       );
       if (currentEmbeddedToken !== plannedEmbeddedToken) {
-        return "Gateway service OPENCLAW_GATEWAY_TOKEN differs from the current install plan; refreshing the install.";
+        return "Gateway service BOT_GATEWAY_TOKEN differs from the current install plan; refreshing the install.";
       }
     }
     const wrapperRequested = Boolean(
-      params.wrapperPath || normalizeOptionalString(params.installEnv[OPENCLAW_WRAPPER_ENV_KEY]),
+      params.wrapperPath || normalizeOptionalString(params.installEnv[BOT_WRAPPER_ENV_KEY]),
     );
     if (wrapperRequested) {
       const plannedInstall = await buildGatewayInstallPlan({
@@ -423,13 +423,13 @@ async function getGatewayServiceAutoRefreshMessage(params: {
         return "Gateway service command differs from the current wrapper install plan; refreshing the install.";
       }
       const plannedWrapperPath = normalizeOptionalString(
-        plannedInstall.environment[OPENCLAW_WRAPPER_ENV_KEY],
+        plannedInstall.environment[BOT_WRAPPER_ENV_KEY],
       );
       const currentWrapperPath = normalizeOptionalString(
-        currentCommand.environment?.[OPENCLAW_WRAPPER_ENV_KEY],
+        currentCommand.environment?.[BOT_WRAPPER_ENV_KEY],
       );
       if (plannedWrapperPath !== currentWrapperPath) {
-        return `Gateway service ${OPENCLAW_WRAPPER_ENV_KEY} differs from the current wrapper install plan; refreshing the install.`;
+        return `Gateway service ${BOT_WRAPPER_ENV_KEY} differs from the current wrapper install plan; refreshing the install.`;
       }
     }
     const currentExecPath = currentCommand.programArguments[0]?.trim();

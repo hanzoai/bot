@@ -3,8 +3,8 @@ import {
   addTimerTimeoutGraceMs,
   MAX_TIMER_TIMEOUT_MS,
   resolveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/number-runtime";
+import { createSubsystemLogger } from "bot/plugin-sdk/runtime-env";
 import { isBrowserControlHostUnavailableError } from "./browser-node-fallback.js";
 import {
   BROWSER_PROXY_ERROR_ENVELOPE,

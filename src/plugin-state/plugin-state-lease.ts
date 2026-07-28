@@ -1,10 +1,10 @@
 // Plugin validation and public errors wrap the host-owned SQLite lease engine.
 import { MAX_TIMER_TIMEOUT_MS } from "../shared/number-coercion.js";
 import {
-  OpenClawStateLeaseError,
-  type OpenClawStateLeaseErrorCode,
-  withOpenClawStateLease,
-} from "../state/openclaw-state-lease.js";
+  BotStateLeaseError,
+  type BotStateLeaseErrorCode,
+  withBotStateLease,
+} from "../state/bot-state-lease.js";
 import {
   PluginStateLeaseError,
   type PluginStateLeaseContext,
@@ -98,25 +98,25 @@ function validateOptions(pluginId: string, options: PluginStateLeaseOptions) {
   };
 }
 
-function mapErrorCode(code: OpenClawStateLeaseErrorCode): PluginStateLeaseErrorCode {
+function mapErrorCode(code: BotStateLeaseErrorCode): PluginStateLeaseErrorCode {
   switch (code) {
-    case "OPENCLAW_STATE_LEASE_INVALID_INPUT":
+    case "BOT_STATE_LEASE_INVALID_INPUT":
       return "PLUGIN_STATE_LEASE_INVALID_INPUT";
-    case "OPENCLAW_STATE_LEASE_TIMEOUT":
+    case "BOT_STATE_LEASE_TIMEOUT":
       return "PLUGIN_STATE_LEASE_TIMEOUT";
-    case "OPENCLAW_STATE_LEASE_ABORTED":
+    case "BOT_STATE_LEASE_ABORTED":
       return "PLUGIN_STATE_LEASE_ABORTED";
-    case "OPENCLAW_STATE_LEASE_LOST":
+    case "BOT_STATE_LEASE_LOST":
       return "PLUGIN_STATE_LEASE_LOST";
-    case "OPENCLAW_STATE_LEASE_STORAGE_FAILED":
+    case "BOT_STATE_LEASE_STORAGE_FAILED":
       return "PLUGIN_STATE_LEASE_STORAGE_FAILED";
     default:
-      throw new Error(`unsupported OpenClaw state lease error code: ${String(code)}`);
+      throw new Error(`unsupported Bot state lease error code: ${String(code)}`);
   }
 }
 
 function mapLeaseError(error: unknown): unknown {
-  if (!(error instanceof OpenClawStateLeaseError)) {
+  if (!(error instanceof BotStateLeaseError)) {
     return error;
   }
   return leaseError(mapErrorCode(error.code), error.message, error.cause);
@@ -147,7 +147,7 @@ export async function withPluginStateLease<T>(
 ): Promise<T> {
   const validated = validateOptions(pluginId, options);
   try {
-    return await withOpenClawStateLease(
+    return await withBotStateLease(
       {
         ...validated,
         leaseLabel: "plugin lease",

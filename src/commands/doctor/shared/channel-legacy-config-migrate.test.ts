@@ -1,6 +1,6 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 // Channel legacy config migration tests cover doctor repair of old channel config shapes.
-import type { OpenClawConfig } from "../../../config/types.js";
+import type { BotConfig } from "../../../config/types.js";
 
 const { applyPluginDoctorCompatibilityMigrations, collectRelevantDoctorPluginIds } = vi.hoisted(
   () => ({
@@ -51,7 +51,7 @@ describe("bundled channel legacy config migrations", () => {
   it("only renames heartbeat blocks that use the common visibility shape", () => {
     collectRelevantDoctorPluginIds.mockReturnValue([]);
     loadBundledChannelDoctorContractApi.mockReturnValue({
-      normalizeCompatibilityConfig: ({ cfg }: { cfg: OpenClawConfig }) => ({
+      normalizeCompatibilityConfig: ({ cfg }: { cfg: BotConfig }) => ({
         config: cfg,
         changes: [],
       }),

@@ -3,12 +3,12 @@ import type { Chat, Message, MessageOrigin, User } from "grammy/types";
 import type {
   ChannelInboundMediaInput,
   NormalizedLocation,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "bot/plugin-sdk/channel-inbound";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { telegramHtmlToPlainTextFallback } from "../format.js";
 
 type TelegramMediaMessage = Pick<

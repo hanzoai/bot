@@ -3,7 +3,7 @@
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { initSubagentRegistry } from "../agents/subagent-registry.js";
 import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   collectRegisteredEmbeddingProviderIds,
   collectUnregisteredConfiguredMemoryEmbeddingProviders,
@@ -31,9 +31,9 @@ type GatewayStartupTrace = {
 
 /** Returns the config snapshot used by channel/plugin startup maintenance. */
 export function resolveGatewayStartupMaintenanceConfig(params: {
-  cfgAtStart: OpenClawConfig;
-  startupRuntimeConfig: OpenClawConfig;
-}): OpenClawConfig {
+  cfgAtStart: BotConfig;
+  startupRuntimeConfig: BotConfig;
+}): BotConfig {
   // Early config recovery may supply channel blocks after the start snapshot; startup
   // maintenance needs those owner configs even when the original snapshot was sparse.
   return params.cfgAtStart.channels === undefined &&
@@ -47,9 +47,9 @@ export function resolveGatewayStartupMaintenanceConfig(params: {
 
 /** Builds plugin startup state and gateway method lists before the server binds. */
 export async function prepareGatewayPluginBootstrap(params: {
-  cfgAtStart: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
-  startupRuntimeConfig: OpenClawConfig;
+  cfgAtStart: BotConfig;
+  activationSourceConfig?: BotConfig;
+  startupRuntimeConfig: BotConfig;
   pluginMetadataSnapshot?: PluginMetadataSnapshot;
   workerProviderIds?: readonly string[];
   minimalTestGateway: boolean;
@@ -238,7 +238,7 @@ export async function prepareGatewayPluginBootstrap(params: {
  * cannot embed and silently falls back to keyword/FTS-only recall.
  */
 export function warnUnregisteredConfiguredMemoryEmbeddingProviders(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginRegistry: Partial<Pick<PluginRegistry, "embeddingProviders" | "memoryEmbeddingProviders">>;
   log: Pick<GatewayPluginBootstrapLog, "warn">;
 }): void {
@@ -256,8 +256,8 @@ export function warnUnregisteredConfiguredMemoryEmbeddingProviders(params: {
 
 /** Loads startup plugin runtimes through the deferred bootstrap boundary. */
 export async function loadGatewayStartupPluginRuntime(params: {
-  cfg: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  cfg: BotConfig;
+  activationSourceConfig?: BotConfig;
   workspaceDir: string;
   log: GatewayPluginBootstrapLog;
   baseMethods: string[];

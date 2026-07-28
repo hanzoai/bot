@@ -1,6 +1,6 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { Option } from "commander";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { parseStrictNonNegativeInteger } from "../../infra/parse-finite-number.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import type { ChannelSetupAdapter } from "./setup-adapter.types.js";
@@ -115,12 +115,12 @@ export type ChannelOwnedSetupContract = {
   metadata: ChannelSetupMetadata;
   parseInput: (input: unknown) => ChannelSetupParseResult;
   resolveAccountId?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string;
     input?: unknown;
   }) => string;
   prepareAccountConfigInput?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId: string;
     input: unknown;
     runtime: RuntimeEnv;
@@ -130,19 +130,19 @@ export type ChannelOwnedSetupContract = {
   }>["resolveBindingAccountId"];
   applyAccountName?: ChannelOwnedSetupAdapterShape<{ name?: string }>["applyAccountName"];
   applyAccountConfig: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId: string;
     input: unknown;
-  }) => OpenClawConfig;
+  }) => BotConfig;
   afterAccountConfigWritten?: (params: {
-    previousCfg: OpenClawConfig;
-    cfg: OpenClawConfig;
+    previousCfg: BotConfig;
+    cfg: BotConfig;
     accountId: string;
     input: unknown;
     runtime: RuntimeEnv;
   }) => Promise<void> | void;
   validateInput?: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId: string;
     input: unknown;
   }) => string | null;

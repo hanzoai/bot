@@ -354,7 +354,7 @@ src/agents/agent-hooks/compaction-safeguard.ts
 src/agents/agent-scope.test.ts
 src/agents/agent-tools.before-tool-call.e2e.test.ts
 src/agents/agent-tools.before-tool-call.integration.e2e.test.ts
-src/agents/agent-tools.create-openclaw-coding-tools.test.ts
+src/agents/agent-tools.create-bot-coding-tools.test.ts
 src/agents/agent-tools.read.ts
 src/agents/agent-tools.schema.test.ts
 src/agents/agent-tools.ts
@@ -459,9 +459,9 @@ src/agents/openai-transport-stream.reasoning-and-cache.test.ts
 src/agents/openai-transport-stream.replay-and-tools.test.ts
 src/agents/openai-transport-stream.streaming.test.ts
 src/agents/openai-transport-stream.usage-and-calls.test.ts
-src/agents/openclaw-tools.media-factory-plan.test.ts
-src/agents/openclaw-tools.session-status.test.ts
-src/agents/openclaw-tools.sessions.test.ts
+src/agents/bot-tools.media-factory-plan.test.ts
+src/agents/bot-tools.session-status.test.ts
+src/agents/bot-tools.sessions.test.ts
 src/agents/provider-attribution.test.ts
 src/agents/provider-local-service.ts
 src/agents/provider-request-config.ts
@@ -959,8 +959,8 @@ src/skills/workshop/service.test.ts
 src/skills/workshop/service.ts
 src/snapshot/local-repository.test.ts
 src/snapshot/local-repository.ts
-src/state/openclaw-agent-db.test.ts
-src/state/openclaw-state-db.test.ts
+src/state/bot-agent-db.test.ts
+src/state/bot-state-db.test.ts
 src/status/status-message.ts
 src/system-agent/chat-engine.test.ts
 src/system-agent/chat-engine.ts

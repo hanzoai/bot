@@ -24,7 +24,7 @@ import {
   isPluginLocalInvalidConfigSnapshot,
   shouldAttemptLastKnownGoodRecovery,
 } from "./recovery-policy.js";
-import type { ConfigFileSnapshot } from "./types.openclaw.js";
+import type { ConfigFileSnapshot } from "./types.bot.js";
 
 /** Dependencies injected into config recovery observation for testable filesystem behavior. */
 type ObserveRecoveryDeps = {

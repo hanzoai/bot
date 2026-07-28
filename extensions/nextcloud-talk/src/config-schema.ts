@@ -7,8 +7,8 @@ import {
   buildGroupEntrySchema,
   buildMultiAccountChannelSchema,
   requireOpenAllowFrom,
-} from "openclaw/plugin-sdk/channel-config-schema";
-import { requireChannelOpenAllowFrom } from "openclaw/plugin-sdk/extension-shared";
+} from "bot/plugin-sdk/channel-config-schema";
+import { requireChannelOpenAllowFrom } from "bot/plugin-sdk/extension-shared";
 import { z } from "zod";
 import { buildSecretInputSchema } from "./secret-input.js";
 

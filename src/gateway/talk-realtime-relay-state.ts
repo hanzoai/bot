@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import type { RealtimeVoiceProviderPlugin } from "../plugins/types.js";
 import type { RealtimeVoiceAgentControlResult } from "../talk/agent-run-control.js";
 import type {
@@ -109,7 +109,7 @@ export type RelaySession = {
   forcedTerminalProviderResults: Map<string, ForcedTerminalProviderResult>;
   // Turn cancellation invalidates async acceptance callbacks from the prior turn.
   toolResultEpoch: number;
-  voiceConfig?: OpenClawConfig;
+  voiceConfig?: BotConfig;
   voiceSessionCreated: boolean;
   voiceTranscriptSeq: number;
   voiceTranscriptWrites: Promise<void>;
@@ -119,7 +119,7 @@ export type RelaySession = {
 export type CreateTalkRealtimeRelaySessionParams = {
   context: GatewayRequestContext;
   connId: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: RealtimeVoiceProviderPlugin;
   providerConfig: RealtimeVoiceProviderConfig;
   instructions: string;

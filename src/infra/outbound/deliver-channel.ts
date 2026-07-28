@@ -13,7 +13,7 @@ import type {
   ChannelOutboundPayloadContext,
   ChannelOutboundTargetRef,
 } from "../../channels/plugins/types.adapters.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { normalizeMessagePresentation } from "../../interactive/payload.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { createLazyRuntimeModule } from "../../shared/lazy-runtime.js";
@@ -40,7 +40,7 @@ const loadChannelBootstrapRuntime = createLazyRuntimeModule(
   () => import("./channel-bootstrap.runtime.js"),
 );
 export async function resolveChannelOutboundDirectiveOptions(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: Exclude<OutboundChannel, "none">;
 }): Promise<{ extractMarkdownImages?: boolean }> {
   const outbound = await loadBootstrappedOutboundAdapter(params);
@@ -60,7 +60,7 @@ export async function createChannelHandler(params: ChannelHandlerParams): Promis
 }
 
 async function loadBootstrappedOutboundAdapter(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: Exclude<OutboundChannel, "none">;
 }): Promise<ChannelOutboundAdapter | undefined> {
   let outbound = await loadChannelOutboundAdapter(params.channel);
@@ -128,7 +128,7 @@ async function runChannelMessageSendWithLifecycle<
 }
 
 export async function resolveOutboundDurableFinalDeliverySupport(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: Exclude<OutboundChannel, "none">;
   requirements?: DurableFinalDeliveryRequirements;
 }): Promise<OutboundDurableDeliverySupport> {

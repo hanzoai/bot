@@ -5,21 +5,21 @@ import {
   listAgentIds,
   resolveAgentDir,
   resolveSessionAgentIds,
-} from "openclaw/plugin-sdk/agent-runtime";
-import { withFileLock, type FileLockOptions } from "openclaw/plugin-sdk/file-lock";
-import type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/agent-runtime";
+import { withFileLock, type FileLockOptions } from "bot/plugin-sdk/file-lock";
+import type { PluginStateKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   archiveLegacyStateSource,
   legacyStateFileExists,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/runtime-doctor";
 import {
   canonicalPathFromExistingAncestor,
   isPathInside,
   pathExists,
-} from "openclaw/plugin-sdk/security-runtime";
-import { patchSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/security-runtime";
+import { patchSessionEntry, resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   CODEX_APP_SERVER_BINDING_MAX_ENTRIES,
   CODEX_APP_SERVER_BINDING_NAMESPACE,

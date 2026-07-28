@@ -1,9 +1,9 @@
 // Applies immutable path removals to config-like objects.
 import { isDeepStrictEqual } from "node:util";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";
 import { parseConfigPathArrayIndex } from "../shared/path-array-index.js";
-import type { OpenClawConfig } from "./types.js";
+import type { BotConfig } from "./types.js";
 
 const MANAGED_CONFIG_UNSET_PATHS = [["plugins", "installs"]] as const;
 const WRITE_PRUNED_OBJECT = Symbol("write-pruned-object");
@@ -12,11 +12,11 @@ function isWritePlainObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function coerceConfig(value: unknown): OpenClawConfig {
+function coerceConfig(value: unknown): BotConfig {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return {};
   }
-  return value as OpenClawConfig;
+  return value as BotConfig;
 }
 
 function unsetPathForWriteAt(
@@ -82,9 +82,9 @@ function unsetPathForWriteAt(
 }
 
 function unsetPathForWrite(
-  root: OpenClawConfig,
+  root: BotConfig,
   pathSegments: string[],
-): { changed: boolean; next: OpenClawConfig } {
+): { changed: boolean; next: BotConfig } {
   if (pathSegments.length === 0) {
     return { changed: false, next: root };
   }
@@ -102,9 +102,9 @@ function unsetPathForWrite(
 }
 
 export function applyUnsetPathsForWrite(
-  root: OpenClawConfig,
+  root: BotConfig,
   unsetPaths: readonly string[][] | undefined,
-): OpenClawConfig {
+): BotConfig {
   let next = root;
   for (const unsetPath of unsetPaths ?? []) {
     if (!Array.isArray(unsetPath) || unsetPath.length === 0) {

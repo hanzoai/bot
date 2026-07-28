@@ -3,10 +3,10 @@ import { statSync } from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
+import { openBotStateDatabase } from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
+import { withBotTestState } from "../test-utils/bot-test-state.js";
 import {
   createManagedTaskFlow as createManagedTaskFlowOrNull,
   getTaskFlowById,
@@ -38,7 +38,7 @@ function createManagedTaskFlow(
   return flow;
 }
 
-type TaskFlowRegistryTestDatabase = Pick<OpenClawStateKyselyDatabase, "flow_runs">;
+type TaskFlowRegistryTestDatabase = Pick<BotStateKyselyDatabase, "flow_runs">;
 
 function createStoredFlow(): TaskFlowRecord {
   return {
@@ -63,14 +63,14 @@ function createStoredFlow(): TaskFlowRecord {
 }
 
 async function withFlowRegistryTempDir<T>(run: (root: string) => Promise<T>): Promise<T> {
-  return await withOpenClawTestState(
+  return await withBotTestState(
     {
       layout: "state-only",
-      prefix: "openclaw-task-flow-store-",
+      prefix: "bot-task-flow-store-",
     },
     async (state) => {
       const root = state.stateDir;
-      process.env.OPENCLAW_STATE_DIR = root;
+      process.env.BOT_STATE_DIR = root;
       resetTaskFlowRegistryForTests();
       try {
         return await run(root);
@@ -81,13 +81,13 @@ async function withFlowRegistryTempDir<T>(run: (root: string) => Promise<T>): Pr
   );
 }
 
-const ORIGINAL_STATE_DIR = process.env.OPENCLAW_STATE_DIR;
+const ORIGINAL_STATE_DIR = process.env.BOT_STATE_DIR;
 
 function restoreOriginalStateDir(): void {
   if (ORIGINAL_STATE_DIR === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.BOT_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = ORIGINAL_STATE_DIR;
+    process.env.BOT_STATE_DIR = ORIGINAL_STATE_DIR;
   }
 }
 
@@ -173,7 +173,7 @@ describe("task-flow-registry store runtime", () => {
         status: "running",
       });
 
-      const database = openOpenClawStateDatabase();
+      const database = openBotStateDatabase();
       const db = getNodeSqliteKysely<TaskFlowRegistryTestDatabase>(database.db);
       executeSqliteQuerySync(
         database.db,
@@ -200,7 +200,7 @@ describe("task-flow-registry store runtime", () => {
         },
       });
 
-      const database = openOpenClawStateDatabase();
+      const database = openBotStateDatabase();
       const db = getNodeSqliteKysely<TaskFlowRegistryTestDatabase>(database.db);
       executeSqliteQuerySync(
         database.db,
@@ -325,9 +325,9 @@ describe("task-flow-registry store runtime", () => {
         waitJson: { kind: "task", taskId: "task-secured" },
       });
 
-      const databasePath = resolveOpenClawStateSqlitePath(process.env);
+      const databasePath = resolveBotStateSqlitePath(process.env);
       const registryDir = path.dirname(databasePath);
-      expect(databasePath.endsWith(path.join("state", "openclaw.sqlite"))).toBe(true);
+      expect(databasePath.endsWith(path.join("state", "bot.sqlite"))).toBe(true);
       expect(statSync(registryDir).mode & 0o777).toBe(0o700);
       expect(statSync(databasePath).mode & 0o777).toBe(0o600);
     });

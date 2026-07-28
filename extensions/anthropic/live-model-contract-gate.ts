@@ -15,8 +15,8 @@ import {
   supportsClaudeAdaptiveThinking,
   supportsClaudeNativeMaxEffort,
   supportsClaudeNativeXhighEffort,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-model-shared";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 
 function readCapabilityFlag(root: unknown, path: readonly string[]): boolean | undefined {
   let current: unknown = root;

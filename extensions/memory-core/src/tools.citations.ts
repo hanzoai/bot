@@ -2,13 +2,13 @@
 import {
   parseAgentSessionKey,
   type MemoryCitationsMode,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+  type BotConfig,
+} from "bot/plugin-sdk/memory-core-host-runtime-core";
+import type { MemorySearchResult } from "bot/plugin-sdk/memory-core-host-runtime-files";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 
-export function resolveMemoryCitationsMode(cfg: OpenClawConfig): MemoryCitationsMode {
+export function resolveMemoryCitationsMode(cfg: BotConfig): MemoryCitationsMode {
   const mode = cfg.memory?.citations;
   if (mode === "on" || mode === "off" || mode === "auto") {
     return mode;

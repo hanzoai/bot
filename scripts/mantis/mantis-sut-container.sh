@@ -2,14 +2,14 @@
 set -euo pipefail
 
 readonly image="node:24-bookworm-slim@sha256:6f7b03f7c2c8e2e784dcf9295400527b9b1270fd37b7e9a7285cf83b6951452d"
-readonly worktree_root_file="/etc/openclaw-mantis-sut-worktrees"
-readonly revisions_file="/etc/openclaw-mantis-sut-revisions"
-readonly runtime_root_file="/etc/openclaw-mantis-sut-runtime-root"
+readonly worktree_root_file="/etc/bot-mantis-sut-worktrees"
+readonly revisions_file="/etc/bot-mantis-sut-revisions"
+readonly runtime_root_file="/etc/bot-mantis-sut-runtime-root"
 readonly docker_bin="/usr/bin/docker"
 readonly flock_bin="/usr/bin/flock"
 readonly iptables_bin="/usr/sbin/iptables"
-readonly network_lock_file="/run/lock/openclaw-mantis-sut-network.lock"
-readonly network_state_root="/run/openclaw-mantis-sut-networks"
+readonly network_lock_file="/run/lock/bot-mantis-sut-network.lock"
+readonly network_state_root="/run/bot-mantis-sut-networks"
 
 die() {
   echo "mantis SUT container: $*" >&2
@@ -17,7 +17,7 @@ die() {
 }
 
 require_container_name() {
-  [[ "$1" =~ ^openclaw-telegram-sut-[0-9a-f-]+$ ]] || die "invalid container name"
+  [[ "$1" =~ ^bot-telegram-sut-[0-9a-f-]+$ ]] || die "invalid container name"
 }
 
 require_port() {
@@ -60,7 +60,7 @@ read_runtime_claim() {
   [[ "$(stat -c %a "$claim_path")" == "400" ]] || return 1
   [[ "$(stat -c %h "$claim_path")" == "1" ]] || return 1
   IFS=$'\t' read -r claimed_runtime claimed_pid claimed_pgid claimed_start <"$claim_path"
-  [[ "$claimed_runtime" =~ ^/tmp/openclaw-tg-crabbox-sut-[A-Za-z0-9]+$ ]] || return 1
+  [[ "$claimed_runtime" =~ ^/tmp/bot-tg-crabbox-sut-[A-Za-z0-9]+$ ]] || return 1
   [[ "$claimed_pid" =~ ^[1-9][0-9]*$ ]] || return 1
   [[ "$claimed_pgid" =~ ^[1-9][0-9]*$ ]] || return 1
   [[ "$claimed_start" =~ ^[1-9][0-9]*$ ]] || return 1
@@ -450,7 +450,7 @@ write_root_attestation() {
 lock_runtime_root() {
   local runtime_source="$1"
   local container_name="$2"
-  [[ "$runtime_source" =~ ^/tmp/openclaw-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
+  [[ "$runtime_source" =~ ^/tmp/bot-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
     || die "invalid runtime root"
   [[ -d "$runtime_source" && ! -L "$runtime_source" ]] || die "runtime root is not a directory"
   [[ "$(stat -c %u "$runtime_source")" == "$(id -u codex)" ]] || die "runtime root owner mismatch"
@@ -592,7 +592,7 @@ readonly sut_command='
     [ "$attempt" -lt 100 ] || exit 1
     sleep 0.1
   done
-  node openclaw.mjs gateway --port "$OPENCLAW_GATEWAY_PORT" >"$GATEWAY_LOG" 2>&1 &
+  node bot.mjs gateway --port "$BOT_GATEWAY_PORT" >"$GATEWAY_LOG" 2>&1 &
   gateway_pid=$!
   wait "$gateway_pid"
 '
@@ -616,7 +616,7 @@ case "$command" in
     [[ "$candidate_git_link" == "gitdir: "* ]] || die "candidate Git link is invalid"
     candidate_sha="$(attest_worktree "$candidate_root" candidate)"
 
-    container_name="openclaw-mantis-build-$$"
+    container_name="bot-mantis-build-$$"
     runtime_parent="$(realpath -e "$(<"$runtime_root_file")")"
     build_mount="$runtime_parent/${container_name}-fs"
     build_image="$runtime_parent/${container_name}-fs.ext4"
@@ -653,8 +653,8 @@ case "$command" in
       --env COREPACK_HOME=/tmp/corepack \
       --env GIT_COMMIT="$candidate_sha" \
       --env HOME=/tmp/home \
-      --env OPENCLAW_BUILD_PRIVATE_QA=1 \
-      --env OPENCLAW_ENABLE_PRIVATE_QA_CLI=1 \
+      --env BOT_BUILD_PRIVATE_QA=1 \
+      --env BOT_ENABLE_PRIVATE_QA_CLI=1 \
       "$image" sh -c "$build_command"
     build_result=$?
     remove_container_or_fail "$container_name"
@@ -684,7 +684,7 @@ case "$command" in
   check)
     [[ $# -eq 1 ]] || die "check expects a proxy port"
     require_port "$1"
-    network_name="openclaw-mantis-check-$$"
+    network_name="bot-mantis-check-$$"
     create_public_only_network "$network_name"
     # shellcheck disable=SC2329
     cleanup_check() {
@@ -711,7 +711,7 @@ case "$command" in
     require_port "$gateway_port"
     require_port "$mock_port"
     require_port "$proxy_port"
-    [[ "$runtime_source" =~ ^/tmp/openclaw-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
+    [[ "$runtime_source" =~ ^/tmp/bot-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
       || die "invalid runtime root"
     create_runtime_claim "$container_name" "$runtime_source"
 
@@ -757,28 +757,28 @@ case "$command" in
     export MOCK_PORT="$mock_port"
     export MOCK_REQUEST_LOG="$request_log"
     export NODE_DISABLE_COMPILE_CACHE=1
-    export OPENAI_API_KEY=sk-openclaw-e2e-mock
-    export OPENCLAW_BUILD_PRIVATE_QA=1
-    export OPENCLAW_CONFIG_PATH="$runtime_source/openclaw.json"
-    export OPENCLAW_ENABLE_PRIVATE_QA_CLI=1
-    export OPENCLAW_GATEWAY_PORT="$gateway_port"
-    export OPENCLAW_STATE_DIR="$runtime_source/state"
+    export OPENAI_API_KEY=sk-bot-e2e-mock
+    export BOT_BUILD_PRIVATE_QA=1
+    export BOT_CONFIG_PATH="$runtime_source/bot.json"
+    export BOT_ENABLE_PRIVATE_QA_CLI=1
+    export BOT_GATEWAY_PORT="$gateway_port"
+    export BOT_STATE_DIR="$runtime_source/state"
     if [[ -n "$mock_response_chunk_delay_ms" ]]; then
       require_positive_integer "$mock_response_chunk_delay_ms"
       export MOCK_RESPONSE_CHUNK_DELAY_MS="$mock_response_chunk_delay_ms"
     fi
     if [[ -n "$gateway_password" ]]; then
-      export OPENCLAW_GATEWAY_PASSWORD="$gateway_password"
+      export BOT_GATEWAY_PASSWORD="$gateway_password"
     fi
 
     forwarded_env=(
       CI GATEWAY_LOG GIT_COMMIT HOME MOCK_LOG MOCK_PORT MOCK_REQUEST_LOG NODE_DISABLE_COMPILE_CACHE
-      OPENAI_API_KEY OPENCLAW_BUILD_PRIVATE_QA OPENCLAW_CONFIG_PATH
-      OPENCLAW_ENABLE_PRIVATE_QA_CLI OPENCLAW_GATEWAY_PORT OPENCLAW_STATE_DIR
+      OPENAI_API_KEY BOT_BUILD_PRIVATE_QA BOT_CONFIG_PATH
+      BOT_ENABLE_PRIVATE_QA_CLI BOT_GATEWAY_PORT BOT_STATE_DIR
       SUCCESS_MARKER TELEGRAM_BOT_TOKEN
     )
     [[ -z "${MOCK_RESPONSE_CHUNK_DELAY_MS:-}" ]] || forwarded_env+=(MOCK_RESPONSE_CHUNK_DELAY_MS)
-    [[ -z "${OPENCLAW_GATEWAY_PASSWORD:-}" ]] || forwarded_env+=(OPENCLAW_GATEWAY_PASSWORD)
+    [[ -z "${BOT_GATEWAY_PASSWORD:-}" ]] || forwarded_env+=(BOT_GATEWAY_PASSWORD)
     docker_env=()
     for name in "${forwarded_env[@]}"; do
       docker_env+=(--env "$name")
@@ -813,7 +813,7 @@ case "$command" in
     [[ $# -eq 2 ]] || die "stop expects a container name and runtime root"
     require_container_name "$1"
     runtime_source="$2"
-    [[ "$runtime_source" =~ ^/tmp/openclaw-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
+    [[ "$runtime_source" =~ ^/tmp/bot-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
       || die "invalid runtime source"
     cancel_runtime_claim "$1" "$runtime_source"
     stop_result=0
@@ -826,7 +826,7 @@ case "$command" in
     [[ $# -eq 2 ]] || die "destroy expects a container name and runtime root"
     require_container_name "$1"
     runtime_source="$2"
-    [[ "$runtime_source" =~ ^/tmp/openclaw-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
+    [[ "$runtime_source" =~ ^/tmp/bot-tg-crabbox-sut-[A-Za-z0-9]+$ ]] \
       || die "invalid runtime source"
     read_runtime_claim "$1" || die "missing or invalid runtime claim"
     [[ "$claimed_runtime" == "$runtime_source" ]] || die "runtime claim path mismatch"

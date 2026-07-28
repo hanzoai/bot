@@ -45,7 +45,7 @@ describe("plugin board widget cells", () => {
       revision: 1,
     };
     const cellCallbacks = callbacks();
-    const cell = document.createElement("openclaw-board-widget-cell");
+    const cell = document.createElement("bot-board-widget-cell");
     cell.widget = widget;
     cell.rect = { name: widget.name, x: 0, y: 0, w: 6, h: 4 };
     cell.sessionKey = "agent:main:test";
@@ -90,7 +90,7 @@ describe("plugin board widget cells", () => {
       },
     } as unknown as ApplicationContext;
     const provider = createApplicationContextProvider(context);
-    const cell = document.createElement("openclaw-board-widget-cell");
+    const cell = document.createElement("bot-board-widget-cell");
     cell.widget = widget;
     cell.rect = { name: widget.name, x: 0, y: 0, w: 6, h: 4 };
     cell.sessionKey = "agent:main:test";
@@ -98,7 +98,7 @@ describe("plugin board widget cells", () => {
     provider.append(cell);
     document.body.append(provider);
     await vi.waitFor(() =>
-      expect(cell.querySelector("openclaw-workboard-card-widget")).not.toBeNull(),
+      expect(cell.querySelector("bot-workboard-card-widget")).not.toBeNull(),
     );
 
     Reflect.set(cell, "pluginRenderer", null);
@@ -112,7 +112,7 @@ describe("plugin board widget cells", () => {
     retry?.click();
 
     await vi.waitFor(() =>
-      expect(cell.querySelector("openclaw-workboard-card-widget")).not.toBeNull(),
+      expect(cell.querySelector("bot-workboard-card-widget")).not.toBeNull(),
     );
     expect(cell.querySelector('[data-test-id="board-widget-error"]')).toBeNull();
   });
@@ -175,7 +175,7 @@ describe("plugin board widget cells", () => {
         Reflect.set(widget, "readOnly", true);
       }
       const provider = createApplicationContextProvider(context);
-      const cell = document.createElement("openclaw-board-widget-cell");
+      const cell = document.createElement("bot-board-widget-cell");
       cell.widget = widget;
       cell.rect = { name: widget.name, x: 0, y: 0, w: 6, h: 4 };
       cell.sessionKey = "agent:main:test";
@@ -185,11 +185,11 @@ describe("plugin board widget cells", () => {
       document.body.append(provider);
 
       await vi.waitFor(() =>
-        expect(cell.querySelector("openclaw-workboard-card-widget")?.textContent).toContain(
+        expect(cell.querySelector("bot-workboard-card-widget")?.textContent).toContain(
           "Read-only embedded card",
         ),
       );
-      const select = cell.querySelector<HTMLSelectElement>("openclaw-workboard-card-widget select");
+      const select = cell.querySelector<HTMLSelectElement>("bot-workboard-card-widget select");
       expect(select).not.toBeNull();
       expect(select?.disabled).toBe(true);
       if (select) {

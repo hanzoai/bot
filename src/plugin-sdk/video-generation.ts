@@ -4,7 +4,7 @@
 // emitted declaration surface stays stable for package-boundary consumers.
 
 import type { AuthProfileStore } from "../agents/auth-profiles/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type {
   GeneratedVideoAsset as CoreGeneratedVideoAsset,
   VideoGenerationAssetRole as CoreVideoGenerationAssetRole,
@@ -75,7 +75,7 @@ export type VideoGenerationSourceAsset = {
 
 /** Context passed when checking whether a video provider is configured. */
 export type VideoGenerationProviderConfiguredContext = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
 };
 
@@ -83,7 +83,7 @@ export type VideoGenerationProviderConfiguredContext = {
 export type VideoGenerationModelCapabilitiesContext = {
   provider: string;
   model: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentDir?: string;
   authStore?: AuthProfileStore;
   timeoutMs?: number;
@@ -94,7 +94,7 @@ export type VideoGenerationRequest = {
   provider: string;
   model: string;
   prompt: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentDir?: string;
   authStore?: AuthProfileStore;
   timeoutMs?: number;

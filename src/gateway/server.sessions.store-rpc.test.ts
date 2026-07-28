@@ -3,7 +3,7 @@
  */
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { expect, test, vi } from "vitest";
 import {
   loadSessionEntry,
@@ -503,7 +503,7 @@ test("lists and patches session store via sessions.* RPC", async () => {
   expect(modelPatched.payload?.resolved?.modelProvider).toBe("openai");
   expect(modelPatched.payload?.resolved?.model).toBe("gpt-test-a");
   expect(modelPatched.payload?.resolved?.agentRuntime).toEqual({
-    id: "openclaw",
+    id: "bot",
     source: "implicit",
   });
 
@@ -521,7 +521,7 @@ test("lists and patches session store via sessions.* RPC", async () => {
   );
   expect(mainAfterModelPatch?.modelProvider).toBe("openai");
   expect(mainAfterModelPatch?.model).toBe("gpt-test-a");
-  expect(mainAfterModelPatch?.agentRuntime).toEqual({ id: "openclaw", source: "implicit" });
+  expect(mainAfterModelPatch?.agentRuntime).toEqual({ id: "bot", source: "implicit" });
 
   const compacted = await directSessionReq<{ ok: true; compacted: boolean }>("sessions.compact", {
     key: "agent:main:main",
@@ -603,14 +603,14 @@ test("lists and patches session store via sessions.* RPC", async () => {
 });
 
 test("sessions.list configuredAgentsOnly keeps configured-agent children and hides unrelated stores", async () => {
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  const stateDir = process.env.BOT_STATE_DIR;
   if (!stateDir) {
-    throw new Error("OPENCLAW_STATE_DIR is required for gateway session tests");
+    throw new Error("BOT_STATE_DIR is required for gateway session tests");
   }
   testState.agentsConfig = { list: [{ id: "main", default: true }] };
-  const configPath = process.env.OPENCLAW_CONFIG_PATH;
+  const configPath = process.env.BOT_CONFIG_PATH;
   if (!configPath) {
-    throw new Error("OPENCLAW_CONFIG_PATH is required for gateway session tests");
+    throw new Error("BOT_CONFIG_PATH is required for gateway session tests");
   }
   await fs.writeFile(
     configPath,

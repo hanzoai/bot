@@ -11,8 +11,8 @@ Join Microsoft Teams meetings as a Chrome browser guest.
 
 ## Distribution
 
-- Package: `@openclaw/teams-meetings`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-teams-meetings`
+- Install route: included in Bot
 
 ## Surface
 

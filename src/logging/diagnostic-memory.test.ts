@@ -228,7 +228,7 @@ describe("diagnostic memory", () => {
   });
 
   it("resolves session store paths only for enabled critical bundle writes", () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-memory-pressure-lazy-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-memory-pressure-lazy-"));
     const resolveSessionStorePaths = vi.fn(() => []);
     try {
       emitDiagnosticMemorySample({
@@ -273,7 +273,7 @@ describe("diagnostic memory", () => {
   });
 
   it("can disable critical pressure bundle writes", () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-memory-pressure-disabled-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-memory-pressure-disabled-"));
     const resolveSessionStorePaths = vi.fn(() => []);
     try {
       startDiagnosticStabilityRecorder();
@@ -300,7 +300,7 @@ describe("diagnostic memory", () => {
 
   it("leaves critical pressure bundle writes off by default", () => {
     const stateDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "openclaw-memory-pressure-default-off-"),
+      path.join(os.tmpdir(), "bot-memory-pressure-default-off-"),
     );
     const resolveSessionStorePaths = vi.fn(() => []);
     try {
@@ -407,13 +407,13 @@ describe("diagnostic memory", () => {
     expect(records.at(-1)?.message).toContain("rssBytes=2012905472");
     expect(records.at(-1)?.message).toContain("heapUsedBytes=1307038712");
     expect(records.at(-1)?.message).toContain(
-      "nextStep=run openclaw gateway status --deep and openclaw gateway diagnostics export; restart gateway if pressure persists",
+      "nextStep=run bot gateway status --deep and bot gateway diagnostics export; restart gateway if pressure persists",
     );
   });
 
   it("writes a stability bundle when critical pressure is emitted", () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-memory-pressure-"));
-    const customRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-memory-custom-sessions-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-memory-pressure-"));
+    const customRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-memory-custom-sessions-"));
     try {
       const sessionsDir = path.join(stateDir, "agents", "main", "sessions");
       const customSessionsDir = path.join(customRoot, "custom-sessions");

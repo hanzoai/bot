@@ -1,9 +1,9 @@
-import type { MemorySearchRuntimeDebug } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+import type { MemorySearchRuntimeDebug } from "bot/plugin-sdk/memory-core-host-runtime-files";
 // Memory Core tests cover tools plugin behavior.
 import {
   clearMemoryPluginState,
   registerMemoryCorpusSupplement,
-} from "openclaw/plugin-sdk/memory-host-core";
+} from "bot/plugin-sdk/memory-host-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMemoryCloseMockCalls,
@@ -30,7 +30,7 @@ import {
   MemorySearchSchema,
 } from "./tools.shared.js";
 import {
-  asOpenClawConfig,
+  asBotConfig,
   createMemorySearchToolOrThrow,
   expectUnavailableMemorySearchDetails,
 } from "./tools.test-helpers.js";
@@ -54,7 +54,7 @@ const QMD_SEARCH_TIMEOUT_MS = 45_000;
 
 function createQmdTimeoutSearchTool(options?: { oneShotCliRun?: boolean }) {
   return createMemorySearchToolOrThrow({
-    config: asOpenClawConfig({
+    config: asBotConfig({
       agents: { list: [{ id: "main", default: true }] },
       memory: {
         backend: "qmd",
@@ -95,9 +95,9 @@ function createTestSearchManager(params: {
   };
 }
 
-vi.mock("openclaw/plugin-sdk/session-transcript-hit", async (importOriginal) => {
+vi.mock("bot/plugin-sdk/session-transcript-hit", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/session-transcript-hit")>();
+    await importOriginal<typeof import("bot/plugin-sdk/session-transcript-hit")>();
   return {
     ...actual,
     loadCombinedSessionStoreForGateway: vi.fn(() => ({
@@ -250,7 +250,7 @@ describe("memory_search unavailable payloads", () => {
   it("passes the host local-service hook to tool memory managers", async () => {
     const acquireLocalService = vi.fn(async () => undefined);
     const tool = createMemorySearchTool({
-      config: asOpenClawConfig({
+      config: asBotConfig({
         agents: { list: [{ id: "main", default: true }] },
       }),
       acquireLocalService,
@@ -269,7 +269,7 @@ describe("memory_search unavailable payloads", () => {
   it("passes the host SQLite lease hook to tool memory managers", async () => {
     const withLease = vi.fn();
     const tool = createMemorySearchTool({
-      config: asOpenClawConfig({
+      config: asBotConfig({
         agents: { list: [{ id: "main", default: true }] },
       }),
       withLease,
@@ -309,9 +309,9 @@ describe("memory_search unavailable payloads", () => {
     expectUnavailableMemorySearchDetails(result.details, {
       error,
       warning:
-        "Memory search is unavailable because this OpenClaw Node runtime does not provide SQLite support.",
+        "Memory search is unavailable because this Bot Node runtime does not provide SQLite support.",
       action:
-        "Run OpenClaw with a Node runtime that includes node:sqlite, then retry memory_search.",
+        "Run Bot with a Node runtime that includes node:sqlite, then retry memory_search.",
     });
   });
 
@@ -1089,7 +1089,7 @@ describe("memory_search unavailable payloads", () => {
       warning:
         "Tell the user: memory search is paused because the memory index was built with a different embedding provider/model/settings.",
       action:
-        "Tell the user to run: openclaw memory status --index or openclaw memory index --force.",
+        "Tell the user to run: bot memory status --index or bot memory index --force.",
     });
     expect(searchCalls).toBe(1);
     expect(getMemorySyncMockCalls()).toBe(0);
@@ -1275,7 +1275,7 @@ describe("memory_search corpus labels", () => {
 
   it("uses explicit plugin context agent over synthetic active-memory session keys", async () => {
     const tool = createMemorySearchToolOrThrow({
-      config: asOpenClawConfig({
+      config: asBotConfig({
         agents: {
           list: [
             { id: "main", default: true, memory: { search: { enabled: false } } },
@@ -1293,7 +1293,7 @@ describe("memory_search corpus labels", () => {
   });
 
   it("re-resolves config when executing a previously created tool", async () => {
-    const startupConfig = asOpenClawConfig({
+    const startupConfig = asBotConfig({
       agents: {
         defaults: {},
         list: [{ id: "main", default: true }],
@@ -1307,7 +1307,7 @@ describe("memory_search corpus labels", () => {
         },
       },
     });
-    const patchedConfig = asOpenClawConfig({
+    const patchedConfig = asBotConfig({
       agents: {
         defaults: {},
         list: [{ id: "main", default: true }],

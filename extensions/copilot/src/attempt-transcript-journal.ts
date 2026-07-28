@@ -1,16 +1,16 @@
 import { isDeepStrictEqual } from "node:util";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "bot/plugin-sdk/agent-harness-runtime";
 import {
   projectAgentHarnessTranscriptMessageForDisplay,
   runAgentHarnessBeforeMessageWriteHook,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   appendSessionTranscriptMessageByIdentityStrict,
   appendSessionTranscriptMessagesByIdentity,
   publishSessionTranscriptUpdateByIdentity,
   readVisibleSessionTranscriptMessageEntries,
   type SessionTranscriptTargetParams,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "bot/plugin-sdk/session-transcript-runtime";
 import type { AttemptParamsLike } from "./attempt-types.js";
 
 type TranscriptMessage = Extract<AgentMessage, { role: "user" | "assistant" | "toolResult" }>;

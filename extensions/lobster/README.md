@@ -5,7 +5,7 @@ Adds the `lobster` agent tool as an **optional** plugin tool.
 ## Install
 
 ```bash
-openclaw plugins install @openclaw/lobster
+bot plugins install @hanzo/bot-lobster
 ```
 
 Restart the Gateway after installing or updating the plugin.
@@ -13,7 +13,7 @@ Restart the Gateway after installing or updating the plugin.
 ## What this is
 
 - Lobster is a standalone workflow shell (typed JSON-first pipelines + approvals/resume).
-- This plugin integrates Lobster with OpenClaw _without core changes_.
+- This plugin integrates Lobster with Bot _without core changes_.
 
 ## Enable
 
@@ -38,19 +38,19 @@ Enable it in an agent allowlist:
 }
 ```
 
-## Using `openclaw.invoke` (Lobster → OpenClaw tools)
+## Using `bot.invoke` (Lobster → Bot tools)
 
-Some Lobster pipelines may include a `openclaw.invoke` step to call back into OpenClaw tools/plugins (for example: `gog` for Google Workspace, `gh` for GitHub, `message.send`, etc.).
+Some Lobster pipelines may include a `bot.invoke` step to call back into Bot tools/plugins (for example: `gog` for Google Workspace, `gh` for GitHub, `message.send`, etc.).
 
-For this to work, the OpenClaw Gateway must expose the tool bridge endpoint and the target tool must be allowed by policy:
+For this to work, the Bot Gateway must expose the tool bridge endpoint and the target tool must be allowed by policy:
 
-- OpenClaw provides an HTTP endpoint: `POST /tools/invoke`.
+- Bot provides an HTTP endpoint: `POST /tools/invoke`.
 - The request is gated by **gateway auth** (e.g. `Authorization: Bearer …` when token auth is enabled).
-- The invoked tool is gated by **tool policy** (global + per-agent + provider + group policy). If the tool is not allowed, OpenClaw returns `404 Tool not available`.
+- The invoked tool is gated by **tool policy** (global + per-agent + provider + group policy). If the tool is not allowed, Bot returns `404 Tool not available`.
 
 ### Allowlisting recommended
 
-To avoid letting workflows call arbitrary tools, set a tight allowlist on the agent that will be used by `openclaw.invoke`.
+To avoid letting workflows call arbitrary tools, set a tight allowlist on the agent that will be used by `bot.invoke`.
 
 Example (allow only a small set of tools):
 
@@ -83,11 +83,11 @@ Notes:
 
 ## Docs
 
-- https://docs.openclaw.ai/tools/lobster
+- https://docs.bot.ai/tools/lobster
 
 ## Package
 
 - Plugin id: `lobster`
 - Tool: `lobster`
-- Package: `@openclaw/lobster`
-- Minimum OpenClaw host: `2026.4.25`
+- Package: `@hanzo/bot-lobster`
+- Minimum Bot host: `2026.4.25`

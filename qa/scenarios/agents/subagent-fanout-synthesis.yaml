@@ -113,7 +113,7 @@ flow:
                           - if:
                               # The parent reply can arrive before child transcript writes finish.
                               # Wait before opening the store so its integrity check sees settled FTS state.
-                              expr: "Boolean(env.mock) && env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME !== 'codex'"
+                              expr: "Boolean(env.mock) && env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME !== 'codex'"
                               then:
                                 - forEach:
                                     items:

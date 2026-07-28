@@ -2,7 +2,7 @@
  * Message normalization utilities for chat rendering.
  */
 
-import { mediaKindFromMime } from "@openclaw/media-core/constants";
+import { mediaKindFromMime } from "@hanzo/bot-media-core/constants";
 import { stripInboundMetadata } from "../../../../src/auto-reply/reply/strip-inbound-meta.js";
 import { extractCanvasShortcodes } from "../../../../src/chat/canvas-render.js";
 import {
@@ -160,7 +160,7 @@ function isRenderableAssistantAttachment(url: string): boolean {
   return (
     /^https?:\/\//i.test(trimmed) ||
     /^data:(?:image|audio|video)\//i.test(trimmed) ||
-    /^\/(?:__openclaw__|media)\//.test(trimmed) ||
+    /^\/(?:__bot__|media)\//.test(trimmed) ||
     trimmed.startsWith("file://") ||
     trimmed.startsWith("~") ||
     trimmed.startsWith("/") ||
@@ -176,7 +176,7 @@ function shouldPreserveRelativeAssistantAttachment(url: string): boolean {
   return (
     !/^https?:\/\//i.test(trimmed) &&
     !/^data:(?:image|audio|video)\//i.test(trimmed) &&
-    !/^\/(?:__openclaw__|media)\//.test(trimmed) &&
+    !/^\/(?:__bot__|media)\//.test(trimmed) &&
     !trimmed.startsWith("file://") &&
     !trimmed.startsWith("~") &&
     !trimmed.startsWith("/") &&
@@ -552,16 +552,16 @@ export function normalizeMessage(message: unknown): NormalizedMessage {
 
   const timestamp = typeof m.timestamp === "number" ? m.timestamp : Date.now();
   const id = typeof m.id === "string" ? m.id : undefined;
-  const rawOpenClawMeta = m["__openclaw"];
-  const openClawMeta =
-    rawOpenClawMeta && typeof rawOpenClawMeta === "object" && !Array.isArray(rawOpenClawMeta)
-      ? (rawOpenClawMeta as Record<string, unknown>)
+  const rawBotMeta = m["__bot"];
+  const botMeta =
+    rawBotMeta && typeof rawBotMeta === "object" && !Array.isArray(rawBotMeta)
+      ? (rawBotMeta as Record<string, unknown>)
       : undefined;
   const metaSender = normalizeSenderIdentity({
-    id: openClawMeta?.senderId,
-    name: openClawMeta?.senderName,
-    username: openClawMeta?.senderUsername,
-    profileAvatarUrl: openClawMeta?.senderProfileAvatarUrl,
+    id: botMeta?.senderId,
+    name: botMeta?.senderName,
+    username: botMeta?.senderUsername,
+    profileAvatarUrl: botMeta?.senderProfileAvatarUrl,
   });
   const rawLabel = typeof m.senderLabel === "string" ? m.senderLabel.trim() : "";
   const legacyLabelIdentity = rawLabel ? splitOpaqueIdLabel(rawLabel) : null;

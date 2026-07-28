@@ -1,12 +1,12 @@
 // Zalouser tests cover setup surface plugin behavior.
-import { installChannelDmPolicyContractSuite } from "openclaw/plugin-sdk/channel-test-helpers";
+import { installChannelDmPolicyContractSuite } from "bot/plugin-sdk/channel-test-helpers";
 import {
   createPluginSetupWizardConfigure,
   createTestWizardPrompter,
   runSetupWizardConfigure,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import "./zalo-js.test-mocks.js";
 import { zalouserSetupWizard } from "./setup-surface.js";
 import { zalouserSetupPlugin } from "./setup-test-helpers.js";
@@ -21,7 +21,7 @@ import {
 const zalouserConfigure = createPluginSetupWizardConfigure(zalouserSetupPlugin);
 
 async function runSetup(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   prompter: ReturnType<typeof createTestWizardPrompter>;
   options?: Record<string, unknown>;
   forceAllowFrom?: boolean;
@@ -127,7 +127,7 @@ describe("zalouser setup wizard", () => {
     checkZaloAuthenticatedMock.mockResolvedValueOnce(true);
 
     await expect(
-      zalouserSetupWizard.status.resolveConfigured({ cfg: {} as OpenClawConfig }),
+      zalouserSetupWizard.status.resolveConfigured({ cfg: {} as BotConfig }),
     ).resolves.toBe(true);
 
     expect(checkZaloAuthenticatedMock).toHaveBeenCalledWith("default", {
@@ -367,7 +367,7 @@ describe("zalouser setup wizard", () => {
         plugins: {
           allow: ["telegram"],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       prompter,
     });
 
@@ -408,7 +408,7 @@ describe("zalouser setup wizard", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       prompter,
       options: { quickstartDefaults: true },
       accountOverrides: { zalouser: "work" },

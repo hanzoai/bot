@@ -1,5 +1,5 @@
 // Builds prompt context facts from inbound channel and sender metadata.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeChatType } from "../../channels/chat-type.js";
 import { resolveConversationLabel } from "../../channels/conversation-label.js";
 import {
@@ -25,7 +25,7 @@ export type FinalizeInboundContextOptions = {
   forceConversationLabel?: boolean;
 };
 
-const FINALIZED_INBOUND_CONTEXT = Symbol("openclaw.finalizedInboundContext");
+const FINALIZED_INBOUND_CONTEXT = Symbol("bot.finalizedInboundContext");
 
 function normalizeTextField(value: unknown): string | undefined {
   if (typeof value !== "string") {

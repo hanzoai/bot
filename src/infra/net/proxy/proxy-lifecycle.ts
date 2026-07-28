@@ -8,8 +8,8 @@ import {
 import type { ProxyConfig } from "../../../config/zod-schema.proxy.js";
 
 type ProxyLoopbackMode = NonNullable<NonNullable<ProxyConfig>["loopbackMode"]>;
-import { isLoopbackIpAddress } from "@openclaw/net-policy/ip";
-import { isHttpUrl, isWebSocketUrl } from "@openclaw/net-policy/url-protocol";
+import { isLoopbackIpAddress } from "@hanzo/bot-net-policy/ip";
+import { isHttpUrl, isWebSocketUrl } from "@hanzo/bot-net-policy/url-protocol";
 import { logInfo, logWarn } from "../../../logger.js";
 import { forceResetGlobalDispatcher } from "../undici-global-dispatcher.js";
 import {
@@ -38,9 +38,9 @@ export type ProxyHandle = {
 const PROXY_ENV_KEYS = ["http_proxy", "https_proxy", "HTTP_PROXY", "HTTPS_PROXY"] as const;
 const NO_PROXY_ENV_KEYS = ["no_proxy", "NO_PROXY"] as const;
 const PROXY_ACTIVE_KEYS = [
-  "OPENCLAW_PROXY_ACTIVE",
-  "OPENCLAW_PROXY_LOOPBACK_MODE",
-  "OPENCLAW_PROXY_CA_FILE",
+  "BOT_PROXY_ACTIVE",
+  "BOT_PROXY_LOOPBACK_MODE",
+  "BOT_PROXY_CA_FILE",
 ] as const;
 const ALL_PROXY_ENV_KEYS = [...PROXY_ENV_KEYS, ...NO_PROXY_ENV_KEYS, ...PROXY_ACTIVE_KEYS] as const;
 type ProxyEnvKey = (typeof ALL_PROXY_ENV_KEYS)[number];
@@ -67,9 +67,9 @@ function captureProxyEnv(): ProxyEnvSnapshot {
     HTTPS_PROXY: process.env["HTTPS_PROXY"],
     no_proxy: process.env["no_proxy"],
     NO_PROXY: process.env["NO_PROXY"],
-    OPENCLAW_PROXY_ACTIVE: process.env["OPENCLAW_PROXY_ACTIVE"],
-    OPENCLAW_PROXY_LOOPBACK_MODE: process.env["OPENCLAW_PROXY_LOOPBACK_MODE"],
-    OPENCLAW_PROXY_CA_FILE: process.env["OPENCLAW_PROXY_CA_FILE"],
+    BOT_PROXY_ACTIVE: process.env["BOT_PROXY_ACTIVE"],
+    BOT_PROXY_LOOPBACK_MODE: process.env["BOT_PROXY_LOOPBACK_MODE"],
+    BOT_PROXY_CA_FILE: process.env["BOT_PROXY_CA_FILE"],
   };
 }
 
@@ -91,12 +91,12 @@ function applyProxyEnv(
   for (const key of PROXY_ENV_KEYS) {
     process.env[key] = proxyUrl;
   }
-  process.env["OPENCLAW_PROXY_ACTIVE"] = "1";
-  process.env["OPENCLAW_PROXY_LOOPBACK_MODE"] = loopbackMode;
+  process.env["BOT_PROXY_ACTIVE"] = "1";
+  process.env["BOT_PROXY_LOOPBACK_MODE"] = loopbackMode;
   if (proxyCaFile) {
-    process.env["OPENCLAW_PROXY_CA_FILE"] = proxyCaFile;
+    process.env["BOT_PROXY_CA_FILE"] = proxyCaFile;
   } else {
-    delete process.env["OPENCLAW_PROXY_CA_FILE"];
+    delete process.env["BOT_PROXY_CA_FILE"];
   }
   for (const key of NO_PROXY_ENV_KEYS) {
     process.env[key] = "";
@@ -148,17 +148,17 @@ function stopActiveProxyRegistration(registration: ActiveManagedProxyRegistratio
 }
 
 function resolveProxyUrl(config: ProxyConfig | undefined): string {
-  const candidate = config?.proxyUrl?.trim() || process.env["OPENCLAW_PROXY_URL"]?.trim();
+  const candidate = config?.proxyUrl?.trim() || process.env["BOT_PROXY_URL"]?.trim();
   if (!candidate) {
     throw new Error(
       "proxy: enabled but no HTTP proxy URL is configured; set proxy.proxyUrl " +
-        "or OPENCLAW_PROXY_URL to an http:// or https:// forward proxy.",
+        "or BOT_PROXY_URL to an http:// or https:// forward proxy.",
     );
   }
   if (!isHttpUrl(candidate)) {
     throw new Error(
       "proxy: enabled but proxy URL is invalid; set proxy.proxyUrl " +
-        "or OPENCLAW_PROXY_URL to an http:// or https:// forward proxy.",
+        "or BOT_PROXY_URL to an http:// or https:// forward proxy.",
     );
   }
   return candidate;
@@ -175,7 +175,7 @@ function redactProxyUrlForLog(value: string): string {
 
 /** Reinstalls Proxyline routing in child processes that inherited active proxy env. */
 export function ensureInheritedManagedProxyRoutingActive(): void {
-  if (process.env["OPENCLAW_PROXY_ACTIVE"] !== "1") {
+  if (process.env["BOT_PROXY_ACTIVE"] !== "1") {
     return;
   }
   const proxyUrl = process.env["HTTP_PROXY"];
@@ -184,7 +184,7 @@ export function ensureInheritedManagedProxyRoutingActive(): void {
   }
   const proxyCaFile = resolveManagedProxyCaFileForUrl({
     proxyUrl,
-    caFileOverride: process.env["OPENCLAW_PROXY_CA_FILE"],
+    caFileOverride: process.env["BOT_PROXY_CA_FILE"],
   });
   const proxyTls = loadManagedProxyTlsOptionsSync(proxyCaFile);
   proxylineHandle = installGlobalProxy({
@@ -201,7 +201,7 @@ export function ensureInheritedManagedProxyRoutingActive(): void {
 export async function startProxy(config: ProxyConfig | undefined): Promise<ProxyHandle | null> {
   if (
     config?.enabled === false ||
-    (!config?.proxyUrl?.trim() && !process.env["OPENCLAW_PROXY_URL"]?.trim())
+    (!config?.proxyUrl?.trim() && !process.env["BOT_PROXY_URL"]?.trim())
   ) {
     return null;
   }
@@ -332,7 +332,7 @@ function isGatewayControlPlaneLoopbackHost(hostname: string): boolean {
 
 /**
  * Carve out the operator-managed external proxy for the Browser plugin's
- * loopback CDP probe to a Chromium instance OpenClaw spawned itself.
+ * loopback CDP probe to a Chromium instance Bot spawned itself.
  *
  * The managed proxy installs a process-wide undici dispatcher that would
  * otherwise route `http://127.0.0.1:<cdpPort>/json/version` and the

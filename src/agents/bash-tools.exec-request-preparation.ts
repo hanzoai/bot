@@ -1,5 +1,5 @@
 /** Prepares exec workdir and environment facts before policy and host dispatch. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeChatChannelId } from "../channels/ids.js";
 import type { ExecHost } from "../infra/exec-approvals.js";
 import {
@@ -8,7 +8,7 @@ import {
   normalizeHostOverrideEnvVarKey,
   sanitizeHostExecEnvWithDiagnostics,
 } from "../infra/host-env-security.js";
-import { OPENCLAW_CLI_ENV_VAR } from "../infra/openclaw-exec-env.js";
+import { BOT_CLI_ENV_VAR } from "../infra/bot-exec-env.js";
 import {
   getShellPathFromLoginShell,
   resolveShellEnvFallbackTimeoutMs,
@@ -52,7 +52,7 @@ type ResolvedExecWorkdirPreparedState = {
   resolution: ExecWorkdirResolution;
 };
 
-const CHANNEL_CONTEXT_ENV_KEY = "OPENCLAW_CHANNEL_CONTEXT";
+const CHANNEL_CONTEXT_ENV_KEY = "BOT_CHANNEL_CONTEXT";
 const resolvedExecEnvPreparedStates = new WeakMap<ExecToolArgs, ResolvedExecEnvPreparedState>();
 const deferredResolveExecEnvPreparedStates = new WeakMap<
   ExecToolArgs,
@@ -108,7 +108,7 @@ function filterPluginExecEnv(rawEnv: Record<string, string>): Record<string, str
     const upperKey = key.toUpperCase();
     if (
       upperKey === "PATH" ||
-      upperKey === OPENCLAW_CLI_ENV_VAR ||
+      upperKey === BOT_CLI_ENV_VAR ||
       isDangerousHostEnvVarName(upperKey) ||
       isDangerousHostEnvOverrideVarName(upperKey)
     ) {

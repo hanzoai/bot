@@ -1,7 +1,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { updateSessionEntry } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
@@ -304,7 +304,7 @@ export const handleLoginCommand: CommandHandler = async (params, allowTextComman
     return {
       shouldContinue: false,
       reply: {
-        text: "Only a configured OpenClaw owner/admin can start Codex login from this channel.",
+        text: "Only a configured Bot owner/admin can start Codex login from this channel.",
       },
     };
   }
@@ -330,7 +330,7 @@ export const handleLoginCommand: CommandHandler = async (params, allowTextComman
     return {
       shouldContinue: false,
       reply: {
-        text: "Codex login codes are only sent in a private chat or Web UI session. Open a private chat with OpenClaw and send `/login codex` there.",
+        text: "Codex login codes are only sent in a private chat or Web UI session. Open a private chat with Bot and send `/login codex` there.",
       },
     };
   }
@@ -350,6 +350,6 @@ const commandsLoginTestApi = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.commandsLoginTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.commandsLoginTestApi")] =
     commandsLoginTestApi;
 }

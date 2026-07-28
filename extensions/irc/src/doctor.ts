@@ -3,7 +3,7 @@ import {
   buildMutableAllowEntryDetector,
   collectStandardAllowlistLists,
   createDangerousNameMatchingMutableAllowlistWarningCollector,
-} from "openclaw/plugin-sdk/channel-policy";
+} from "bot/plugin-sdk/channel-policy";
 
 const isIrcMutableAllowEntry = buildMutableAllowEntryDetector({
   stableIdPattern: /^(?:(?:irc|user):)*[^@]*@/i,

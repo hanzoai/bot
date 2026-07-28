@@ -8,14 +8,14 @@ import type {
   TextContent,
   ThinkingLevel,
   Usage,
-} from "@openclaw/llm-core";
-import { toErrorObject } from "@openclaw/normalization-core/error-coercion";
+} from "@hanzo/bot-llm-core";
+import { toErrorObject } from "@hanzo/bot-normalization-core/error-coercion";
 /**
  * Native Anthropic Messages streaming transport.
- * Converts OpenClaw contexts/tools into Anthropic payloads, streams SSE events
+ * Converts Bot contexts/tools into Anthropic payloads, streams SSE events
  * back into runtime output blocks, and applies provider request policy.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { getAiTransportHost } from "../host.js";
 import {
   createAnthropicInlineImageBudget,

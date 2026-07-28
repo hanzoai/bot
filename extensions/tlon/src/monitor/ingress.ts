@@ -4,9 +4,9 @@ import {
   type ChannelIngressQueue,
   type ChannelIngressMonitorDeliveryResult,
   type ChannelIngressMonitorLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { collectErrorGraphCandidates, formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/channel-outbound";
+import { collectErrorGraphCandidates, formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
 import { getTlonRuntime } from "../runtime.js";
 import { UrbitAuthError, UrbitHttpError } from "../urbit/errors.js";
 

@@ -41,7 +41,7 @@ flow:
             senderId: qa-command-operator
             senderName: QA Command Operator
             text:
-              expr: "transport.id === 'telegram' ? '/commands@openclaw' : '/commands'"
+              expr: "transport.id === 'telegram' ? '/commands@bot' : '/commands'"
         - waitForOutbound:
             conversation: { id: telegram-command-room, kind: group }
             sinceIndex: { ref: startIndex }

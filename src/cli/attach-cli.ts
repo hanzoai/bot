@@ -24,7 +24,7 @@ export function writeClaudeMcpConfig(mcpConfig: AttachGrant["mcpConfig"]): {
   path: string;
   cleanup: () => void;
 } {
-  const dir = mkdtempSync(join(tmpdir(), "openclaw-attach-"));
+  const dir = mkdtempSync(join(tmpdir(), "bot-attach-"));
   const path = join(dir, ".mcp.json");
   writeFileSync(path, JSON.stringify(mcpConfig, null, 2), { encoding: "utf8", mode: 0o600 });
   return { path, cleanup: () => rmSync(dir, { recursive: true, force: true }) };
@@ -47,7 +47,7 @@ export async function registerAttachCli(program: Command, _argv: string[] = proc
     )
     .addHelpText(
       "after",
-      "\nExamples:\n  openclaw attach                       Attach Claude Code to the main session\n  openclaw attach --session agent:main:telegram:123 --ttl 600000\n  openclaw attach --print-config        Set up the grant + config and print how to launch it yourself\n",
+      "\nExamples:\n  bot attach                       Attach Claude Code to the main session\n  bot attach --session agent:main:telegram:123 --ttl 600000\n  bot attach --print-config        Set up the grant + config and print how to launch it yourself\n",
     )
     .action(async (opts: { session?: string; ttl?: string; bin: string; printConfig: boolean }) => {
       let ttlMs: number | undefined;

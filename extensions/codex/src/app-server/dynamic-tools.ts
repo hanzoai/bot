@@ -1,9 +1,9 @@
 /**
- * Bridges OpenClaw runtime tools into Codex app-server dynamic tool specs and
+ * Bridges Bot runtime tools into Codex app-server dynamic tool specs and
  * tool-call responses.
  */
 import { createHash } from "node:crypto";
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
+import type { AgentToolResult } from "bot/plugin-sdk/agent-core";
 import {
   consumeAdjustedParamsForToolCall,
   consumePreExecutionBlockedToolCall,
@@ -40,13 +40,13 @@ import {
   type MessagingToolSend,
   type MessagingToolSourceReplyPayload,
   wrapToolWithBeforeToolCallHook,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { emitTrustedDiagnosticEvent } from "openclaw/plugin-sdk/diagnostic-runtime";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import type { ImageContent, TextContent } from "openclaw/plugin-sdk/llm";
-import { normalizeOpenAIToolSchemas } from "openclaw/plugin-sdk/provider-tools";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { emitTrustedDiagnosticEvent } from "bot/plugin-sdk/diagnostic-runtime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import type { ImageContent, TextContent } from "bot/plugin-sdk/llm";
+import { normalizeOpenAIToolSchemas } from "bot/plugin-sdk/provider-tools";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { CodexDynamicToolsLoading } from "./config.js";
 import {
   createFailedDynamicToolResponse,
@@ -56,7 +56,7 @@ import {
 } from "./dynamic-tool-response-state.js";
 import { invalidInlineImageText, sanitizeInlineImageDataUrl } from "./image-payload-sanitizer.js";
 import {
-  CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+  CODEX_BOT_DIRECT_DYNAMIC_TOOL_NAMESPACE,
   type CodexDynamicToolCallOutputContentItem,
   type CodexDynamicToolCallParams,
   type CodexDynamicToolCallResponse,
@@ -371,10 +371,10 @@ export type CodexDynamicToolBridge = {
   };
 };
 
-/** Namespace attached to OpenClaw-owned dynamic tools exposed to Codex. */
-const CODEX_OPENCLAW_DYNAMIC_TOOL_NAMESPACE = "openclaw";
+/** Namespace attached to Bot-owned dynamic tools exposed to Codex. */
+const CODEX_BOT_DYNAMIC_TOOL_NAMESPACE = "bot";
 
-// Keep OpenClaw control-path tools directly callable even when Codex tool_search
+// Keep Bot control-path tools directly callable even when Codex tool_search
 // is unavailable or resolves a connector-only universe. Developer instructions
 // still steer normal Codex subagents to native spawn_agent.
 // sessions_yield is normally routed by its catalogMode "direct-only" before
@@ -440,7 +440,7 @@ function invalidateComputerFrame(contextEpoch: {
 }
 
 /**
- * Creates dynamic tool specs and a call handler that executes OpenClaw tools,
+ * Creates dynamic tool specs and a call handler that executes Bot tools,
  * applies hooks/middleware, and records delivery/media telemetry.
  */
 export function createCodexDynamicToolBridge(params: {
@@ -549,8 +549,8 @@ export function createCodexDynamicToolBridge(params: {
       if (!toolEntry) {
         const executedArguments = jsonObjectToRecord(call.arguments);
         const message = registeredToolNames.has(call.tool)
-          ? `OpenClaw tool is not available for this turn: ${call.tool}`
-          : `Unknown OpenClaw tool: ${call.tool}`;
+          ? `Bot tool is not available for this turn: ${call.tool}`
+          : `Unknown Bot tool: ${call.tool}`;
         finalizeToolTerminalPresentation({
           toolCallId: call.callId,
           runId: toolResultHookContext.runId,
@@ -822,7 +822,7 @@ export function createCodexDynamicToolBridge(params: {
             : resolveToolExecutionErrorKind(error));
         const errorMessage = formatToolExecutionErrorMessage(
           error,
-          "OpenClaw dynamic tool call failed.",
+          "Bot dynamic tool call failed.",
         );
         executionPrevented =
           executionPrevented ||
@@ -965,8 +965,8 @@ function createCodexDynamicToolSpecs(params: {
   const directOnlyNamespaceTools: CodexDynamicToolFunctionSpec[] = [];
   for (const entry of params.entries) {
     const functionSpec = createCodexDynamicToolFunctionSpec({ entry });
-    if (entry.name === "openclaw" && params.directToolNames.has(entry.name)) {
-      // OpenClaw is ring-zero and its whole turn surface. Keep its canonical
+    if (entry.name === "bot" && params.directToolNames.has(entry.name)) {
+      // Bot is ring-zero and its whole turn surface. Keep its canonical
       // root name even though generic direct-only tools use a model namespace.
       specs.push(functionSpec);
       continue;
@@ -984,7 +984,7 @@ function createCodexDynamicToolSpecs(params: {
   if (namespaceTools.length > 0) {
     specs.push({
       type: "namespace",
-      name: CODEX_OPENCLAW_DYNAMIC_TOOL_NAMESPACE,
+      name: CODEX_BOT_DYNAMIC_TOOL_NAMESPACE,
       description: "",
       tools: namespaceTools,
     });
@@ -992,7 +992,7 @@ function createCodexDynamicToolSpecs(params: {
   if (directOnlyNamespaceTools.length > 0) {
     specs.push({
       type: "namespace",
-      name: CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+      name: CODEX_BOT_DIRECT_DYNAMIC_TOOL_NAMESPACE,
       description: "",
       tools: directOnlyNamespaceTools,
     });
@@ -1416,7 +1416,7 @@ function convertToolContents(
   if (totalTextChars <= maxChars) {
     return content.flatMap(convertToolContent);
   }
-  const noticeText = `...(OpenClaw truncated dynamic tool result: original ${totalTextChars} chars, showing ${maxChars}; rerun with narrower args.)`;
+  const noticeText = `...(Bot truncated dynamic tool result: original ${totalTextChars} chars, showing ${maxChars}; rerun with narrower args.)`;
   const notice = `\n${noticeText}`;
   const textBudget = Math.max(0, maxChars - notice.length);
   let remainingTextBudget = textBudget;

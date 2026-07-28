@@ -1,8 +1,8 @@
 ---
-summary: "ClawHub CLI entry points for discovering, installing, publishing, and verifying OpenClaw skills and plugins."
+summary: "ClawHub CLI entry points for discovering, installing, publishing, and verifying Bot skills and plugins."
 read_when:
   - You want to use ClawHub from the command line
-  - You want to install ClawHub skills or plugins through OpenClaw
+  - You want to install ClawHub skills or plugins through Bot
   - You want to publish ClawHub packages
 title: "ClawHub CLI"
 ---
@@ -11,36 +11,36 @@ title: "ClawHub CLI"
 
 Two command-line surfaces talk to ClawHub:
 
-- `openclaw skills` / `openclaw plugins` - discover, install, and update
-  packages for a local OpenClaw agent or Gateway.
+- `bot skills` / `bot plugins` - discover, install, and update
+  packages for a local Bot agent or Gateway.
 - The standalone `clawhub` CLI - publisher workflows: login, publish, sync,
   and transfer.
 
 ## Discover and install
 
 ```bash
-openclaw skills search "calendar"
-openclaw skills install @owner/<slug>
-openclaw skills install @owner/<slug> --version <version> --global
-openclaw skills install skills-sh:<owner>/<repo>/<slug>
-openclaw skills update @owner/<slug>
-openclaw skills update --all --acknowledge-clawhub-risk
-openclaw skills verify @owner/<slug> --card
+bot skills search "calendar"
+bot skills install @owner/<slug>
+bot skills install @owner/<slug> --version <version> --global
+bot skills install skills-sh:<owner>/<repo>/<slug>
+bot skills update @owner/<slug>
+bot skills update --all --acknowledge-clawhub-risk
+bot skills verify @owner/<slug> --card
 
-openclaw plugins search "calendar"
-openclaw plugins install clawhub:<package>
-openclaw plugins install clawhub:<package> --acknowledge-clawhub-risk
-openclaw plugins update <id-or-npm-spec>
-openclaw plugins update --all
+bot plugins search "calendar"
+bot plugins install clawhub:<package>
+bot plugins install clawhub:<package> --acknowledge-clawhub-risk
+bot plugins update <id-or-npm-spec>
+bot plugins update --all
 ```
 
 Skill installs target the active workspace `skills/` directory by default; add
 `--global` for the shared managed skills directory. Plugin installs need the
 explicit `clawhub:` prefix to force ClawHub resolution over npm, git, or a
-local path. Full flag reference: [`openclaw skills`](/cli/skills) and
-[`openclaw plugins`](/cli/plugins).
+local path. Full flag reference: [`bot skills`](/cli/skills) and
+[`bot plugins`](/cli/plugins).
 
-`skills-sh:` is an explicitly external catalog reference. OpenClaw sends it to
+`skills-sh:` is an explicitly external catalog reference. Bot sends it to
 ClawHub and installs the exact commit-pinned GitHub source returned by the
 resolver; it never downloads skill content from skills.sh directly. Unclaimed
 entries are labeled **Not scanned by ClawHub**. Claimed and ClawHub-scanned
@@ -48,7 +48,7 @@ skills use the native `@owner/<slug>` form instead.
 
 ### Release trust
 
-OpenClaw checks a release's ClawHub trust state before downloading it, for
+Bot checks a release's ClawHub trust state before downloading it, for
 both skills and plugins. Versioned releases use exact-release trust metadata;
 resolver-backed GitHub skills go through ClawHub's install resolver, which
 enforces scan and force-install policy before returning a pinned commit.
@@ -57,7 +57,7 @@ enforces scan and force-install policy before returning a pinned commit.
 - **Risky** releases (non-clean scan, non-blocking moderation state) print a
   warning and require `--acknowledge-clawhub-risk` to continue
   non-interactively.
-- **Official ClawHub publishers/packages and bundled OpenClaw sources** skip
+- **Official ClawHub publishers/packages and bundled Bot sources** skip
   the trust prompt and security-verdict fetch entirely.
 
 ## Publish and maintain
@@ -96,9 +96,9 @@ clawhub explore --sort trending                              # browse the regist
 
 ## Related
 
-- [`openclaw skills`](/cli/skills) - local skill search, install, update, and
+- [`bot skills`](/cli/skills) - local skill search, install, update, and
   verification
-- [`openclaw plugins`](/cli/plugins) - plugin search, install, update, and
+- [`bot plugins`](/cli/plugins) - plugin search, install, update, and
   inspection
 - [ClawHub publishing](/clawhub/publishing) - owner scope, release validation,
   and review flow

@@ -5,20 +5,20 @@ import {
   onAgentEvent,
   resolveActiveEmbeddedRunSessionId,
   type AgentEventPayload,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { SessionManager } from "bot/plugin-sdk/agent-sessions";
 import {
   onInternalDiagnosticEvent,
   waitForDiagnosticEventsDrained,
   type DiagnosticEventPayload,
   type DiagnosticEventPrivateData,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
-import { initializeGlobalHookRunner } from "openclaw/plugin-sdk/hook-runtime";
+} from "bot/plugin-sdk/diagnostic-runtime";
+import { initializeGlobalHookRunner } from "bot/plugin-sdk/hook-runtime";
 import {
   createMockPluginRegistry,
   onTrustedInternalDiagnosticEvent,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { GPT5_BEHAVIOR_CONTRACT as CODEX_GPT5_BEHAVIOR_CONTRACT } from "openclaw/plugin-sdk/provider-model-shared";
+} from "bot/plugin-sdk/plugin-test-runtime";
+import { GPT5_BEHAVIOR_CONTRACT as CODEX_GPT5_BEHAVIOR_CONTRACT } from "bot/plugin-sdk/provider-model-shared";
 import { describe, expect, it, vi } from "vitest";
 import { readAttemptTerminal } from "./attempt-terminal.test-helper.js";
 import {
@@ -150,7 +150,7 @@ describe("runCodexAppServerAttempt hooks and model diagnostics", () => {
     expect(llmInputPayload.imagesCount).toBe(0);
     expect(llmInputPayload.historyMessages).toEqual([]);
     expect(llmInputPayload.systemPrompt).toContain(
-      "You are a personal agent running inside OpenClaw.",
+      "You are a personal agent running inside Bot.",
     );
     expect(llmInputPayload.systemPrompt).not.toContain(CODEX_GPT5_BEHAVIOR_CONTRACT);
     expect(llmInputContext.runId).toBe("run-1");

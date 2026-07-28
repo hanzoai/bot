@@ -4,20 +4,20 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import process from "node:process";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { timestampMsToIsoString } from "openclaw/plugin-sdk/number-runtime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { timestampMsToIsoString } from "bot/plugin-sdk/number-runtime";
 import type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+  BotPluginNodeHostCommand,
+  BotPluginNodeInvokePolicy,
+} from "bot/plugin-sdk/plugin-entry";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import {
   materializeWindowsSpawnProgram,
   resolveWindowsSpawnProgram,
-} from "openclaw/plugin-sdk/windows-spawn";
+} from "bot/plugin-sdk/windows-spawn";
 import { formatCodexDisplayText } from "./command-formatters.js";
 
 const CODEX_CLI_SESSIONS_LIST_COMMAND = "codex.cli.sessions.list";
@@ -69,7 +69,7 @@ const DEFAULT_RESUME_SPAWN_RUNTIME: CodexCliResumeSpawnRuntime = {
   execPath: process.execPath,
 };
 
-export function createCodexCliSessionNodeHostCommands(): OpenClawPluginNodeHostCommand[] {
+export function createCodexCliSessionNodeHostCommands(): BotPluginNodeHostCommand[] {
   return [
     {
       command: CODEX_CLI_SESSIONS_LIST_COMMAND,
@@ -85,7 +85,7 @@ export function createCodexCliSessionNodeHostCommands(): OpenClawPluginNodeHostC
   ];
 }
 
-export function createCodexCliSessionNodeInvokePolicies(): OpenClawPluginNodeInvokePolicy[] {
+export function createCodexCliSessionNodeInvokePolicies(): BotPluginNodeInvokePolicy[] {
   return [
     {
       commands: [CODEX_CLI_SESSIONS_LIST_COMMAND],
@@ -259,7 +259,7 @@ async function runCodexExecResume(params: {
   timeoutMs: number;
 }): Promise<string> {
   const outputPath = path.join(
-    await fs.mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), "openclaw-codex-cli-")),
+    await fs.mkdtemp(path.join(resolvePreferredBotTmpDir(), "bot-codex-cli-")),
     "last-message.txt",
   );
   try {

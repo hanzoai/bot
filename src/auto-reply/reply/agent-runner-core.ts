@@ -1,8 +1,8 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { hasSessionAutoModelFallbackProvenance } from "../../agents/agent-scope.js";
 import { hasVisibleCommittedMessagingToolDeliveryEvidence } from "../../agents/embedded-agent-runner/delivery-evidence.js";
 import { enqueueCommitmentExtraction } from "../../commitments/runtime.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import {
   resolveSessionPluginStatusLines,
   resolveSessionPluginTraceLines,
@@ -119,7 +119,7 @@ export function buildSilentFallbackFailurePayload(params: {
 }
 
 export function resolveSourceReplyPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionCtx: TemplateContext;
   sessionEntry?: SessionEntry;
   sessionKey: string;
@@ -146,7 +146,7 @@ export function resolveSourceReplyPolicy(params: {
 }
 
 export function resolveReplyRunDeliveryContext(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionCtx: TemplateContext;
   sessionEntry?: SessionEntry;
   sessionKey: string;
@@ -277,7 +277,7 @@ export function normalizeAssistantFinalDeliveryText(text: string): string {
 }
 
 export function enqueueCommitmentExtractionForTurn(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   commandBody: string;
   isHeartbeat: boolean;
   followupRun: FollowupRun;
@@ -377,7 +377,7 @@ export function resolveAdmittedRunSessionFile(params: {
 export async function handleReplyAgentRunError(
   error: unknown,
   context: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     isRestartRecoveryArmed: () => boolean;
     replyOperation: ReplyOperation;
     resolvedVerboseLevel: VerboseLevel;

@@ -1,13 +1,13 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
   missingScopeErrorShape,
 } from "../../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { assertAgentRunLifecycleGenerationCurrent } from "../../infra/agent-events.js";
 import { AGENT_SESSION_RESET_COMMAND_RE } from "../agent-command-policy.js";
 import { ADMIN_SCOPE } from "../method-scopes.js";
@@ -44,7 +44,7 @@ type AgentResetPhaseResult = {
 
 export async function runAgentResetPhase(params: {
   request: AgentRunRequest;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   requestedSessionKey?: string;
   resolvedSessionId?: string;
   effectiveTranscriptInputText: string;

@@ -19,7 +19,7 @@ import {
   type SqliteSessionFileMarker,
 } from "../../../config/sessions/sqlite-marker.js";
 import { selectVisibleTranscriptEvents } from "../../../config/sessions/transcript-visible-events.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { isVitestRuntimeEnv } from "../../../infra/env.js";
 import { root } from "../../../infra/fs-safe.js";
 import { createSubsystemLogger } from "../../../logging/subsystem.js";
@@ -140,7 +140,7 @@ async function getRecentSqliteSessionContent(
 }
 
 function resolveDisplaySessionKey(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   sessionKey: string;
 }): string {
@@ -172,7 +172,7 @@ async function saveSessionMemoryNow(event: Parameters<HookHandler>[0]): Promise<
     log.debug("Hook triggered for reset/new command", { action: event.action });
 
     const context = event.context || {};
-    const cfg = context.cfg as OpenClawConfig | undefined;
+    const cfg = context.cfg as BotConfig | undefined;
     const contextWorkspaceDir =
       typeof context.workspaceDir === "string" && context.workspaceDir.trim().length > 0
         ? context.workspaceDir

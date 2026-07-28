@@ -1,7 +1,7 @@
 /** Resolves media attachments available to the current agent turn. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { AcpTurnAttachment as AgentTurnAttachment } from "../../acp/control-plane/manager.types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { logVerbose } from "../../globals.js";
 import type { MediaAttachment } from "../../media-understanding/types.js";
 import { createLazyImportLoader } from "../../shared/lazy-promise.js";
@@ -47,7 +47,7 @@ function hasInboundHistoryMedia(ctx: MsgContext): boolean {
 /** Resolves image attachments for the current agent turn and recent image history. */
 export async function resolveAgentTurnAttachments(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime?: AgentTurnAttachmentRuntime;
   includeRecentHistoryImages?: boolean;
   includeAttachmentIndexes?: boolean;

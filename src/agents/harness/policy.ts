@@ -1,7 +1,7 @@
 /**
  * Resolves configured native harness policy for agent ids.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { ProviderRouteOverridePresence } from "../../plugin-sdk/provider-model-types.js";
 import { AUTO_AGENT_RUNTIME_ID, type EmbeddedAgentRuntime } from "../agent-runtime-id.js";
 import { normalizeOptionalAgentRuntimeId } from "../agent-runtime-id.js";
@@ -23,7 +23,7 @@ export function resolveAgentHarnessPolicy(params: {
   modelApi?: string | null;
   modelBaseUrl?: unknown;
   requestTransportOverrides?: ProviderRouteOverridePresence;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   agentId?: string;
   sessionKey?: string;
   env?: NodeJS.ProcessEnv;

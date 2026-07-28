@@ -228,7 +228,7 @@ describe("config footprint guardrails", () => {
       expect(source).not.toContain(schemaName);
     }
     expect(bundledSource).toContain("Bundled-channel config schemas");
-    expect(bundledSource).toContain("openclaw/plugin-sdk/channel-config-schema");
+    expect(bundledSource).toContain("bot/plugin-sdk/channel-config-schema");
     expect(bundledSource).toMatch(
       /loadBundledConfigSchema<[^;]+?>\(\s*"imessage",\s*"IMessageConfigSchema",?\s*\)/u,
     );

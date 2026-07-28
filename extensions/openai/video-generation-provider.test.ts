@@ -5,12 +5,12 @@ import path from "node:path";
 import {
   clearRuntimeAuthProfileStoreSnapshots,
   saveAuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "bot/plugin-sdk/agent-runtime";
 import {
   getProviderHttpMocks,
   installProviderHttpMockCleanup,
-} from "openclaw/plugin-sdk/provider-http-test-mocks";
-import { expectExplicitVideoGenerationCapabilities } from "openclaw/plugin-sdk/provider-test-contracts";
+} from "bot/plugin-sdk/provider-http-test-mocks";
+import { expectExplicitVideoGenerationCapabilities } from "bot/plugin-sdk/provider-test-contracts";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 const {
@@ -130,7 +130,7 @@ describe("openai video generation provider", () => {
   });
 
   it("does not advertise video generation for OAuth-only OpenAI profiles", () => {
-    const agentDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-openai-video-auth-"));
+    const agentDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-openai-video-auth-"));
     const previousOpenAIKey = process.env.OPENAI_API_KEY;
     delete process.env.OPENAI_API_KEY;
     try {

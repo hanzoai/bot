@@ -1,7 +1,7 @@
 ---
-summary: "Run OpenClaw in a sandboxed macOS VM (local or hosted) when you need isolation or iMessage"
+summary: "Run Bot in a sandboxed macOS VM (local or hosted) when you need isolation or iMessage"
 read_when:
-  - You want OpenClaw isolated from your main macOS environment
+  - You want Bot isolated from your main macOS environment
   - You want iMessage integration in a sandbox
   - You want a resettable macOS environment you can clone
   - You want to compare local vs hosted macOS VM options
@@ -20,7 +20,7 @@ Use a macOS VM only when you specifically need macOS-only capabilities such as i
 
 ### Local VM on your Apple Silicon Mac (Lume)
 
-Run OpenClaw in a sandboxed macOS VM on your existing Apple Silicon Mac using [Lume](https://cua.ai/docs/lume). This gives you:
+Run Bot in a sandboxed macOS VM on your existing Apple Silicon Mac using [Lume](https://cua.ai/docs/lume). This gives you:
 
 - Full macOS environment in isolation (your host stays clean)
 - iMessage support via `imsg`; the default local path is impossible on Linux/Windows
@@ -34,15 +34,15 @@ If you want macOS in the cloud, hosted Mac providers work too:
 - [MacStadium](https://www.macstadium.com/) (hosted Macs)
 - Other hosted Mac vendors also work; follow their VM + SSH docs
 
-Once you have SSH access to a macOS VM, continue at [Install OpenClaw](#6-install-openclaw) below.
+Once you have SSH access to a macOS VM, continue at [Install Bot](#6-install-bot) below.
 
 ## Quick path (Lume, experienced users)
 
 1. Install Lume.
-2. `lume create openclaw --os macos --ipsw latest`
+2. `lume create bot --os macos --ipsw latest`
 3. Complete Setup Assistant, enable Remote Login (SSH).
-4. `lume run openclaw --no-display`
-5. SSH in, install OpenClaw, configure channels.
+4. `lume run bot --no-display`
+5. SSH in, install Bot, configure channels.
 6. Done.
 
 ## What you need (Lume)
@@ -75,7 +75,7 @@ Docs: [Lume Installation](https://cua.ai/docs/lume/guide/getting-started/install
 ## 2) Create the macOS VM
 
 ```bash
-lume create openclaw --os macos --ipsw latest
+lume create bot --os macos --ipsw latest
 ```
 
 This downloads macOS and creates the VM. A VNC window opens automatically.
@@ -101,7 +101,7 @@ After setup completes:
 ## 4) Get the VM IP address
 
 ```bash
-lume get openclaw
+lume get bot
 ```
 
 Look for the IP address (usually `192.168.64.x`).
@@ -114,13 +114,13 @@ ssh youruser@192.168.64.X
 
 Replace `youruser` with the account you created, and the IP with your VM's IP.
 
-## 6) Install OpenClaw
+## 6) Install Bot
 
 Inside the VM:
 
 ```bash
-npm install -g openclaw@latest
-openclaw onboard --install-daemon
+npm install -g bot@latest
+bot onboard --install-daemon
 ```
 
 Follow the onboarding prompts to set up your model provider (Anthropic, OpenAI, etc.).
@@ -130,7 +130,7 @@ Follow the onboarding prompts to set up your model provider (Anthropic, OpenAI, 
 Edit the config file:
 
 ```bash
-nano ~/.openclaw/openclaw.json
+nano ~/.hanzoai/bot.json
 ```
 
 Add your channels:
@@ -152,7 +152,7 @@ Add your channels:
 Then log in to WhatsApp (scan QR):
 
 ```bash
-openclaw channels login
+bot channels login
 ```
 
 ## 8) Run the VM headlessly
@@ -160,28 +160,28 @@ openclaw channels login
 Stop the VM and restart without display:
 
 ```bash
-lume stop openclaw
-lume run openclaw --no-display
+lume stop bot
+lume run bot --no-display
 ```
 
-The VM runs in the background; OpenClaw's daemon keeps the gateway running. To check status:
+The VM runs in the background; Bot's daemon keeps the gateway running. To check status:
 
 ```bash
-ssh youruser@192.168.64.X "openclaw status"
+ssh youruser@192.168.64.X "bot status"
 ```
 
 ## Bonus: iMessage integration
 
-This is the killer feature of running on macOS. Use [iMessage](/channels/imessage) with `imsg` to add Messages to OpenClaw.
+This is the killer feature of running on macOS. Use [iMessage](/channels/imessage) with `imsg` to add Messages to Bot.
 
 Inside the VM:
 
 1. Sign in to Messages.
 2. Install `imsg`.
-3. Grant Full Disk Access and Automation permission for the process running OpenClaw/`imsg`.
+3. Grant Full Disk Access and Automation permission for the process running Bot/`imsg`.
 4. Verify RPC support with `imsg rpc --help`.
 
-Add to your OpenClaw config:
+Add to your Bot config:
 
 ```json5
 {
@@ -202,16 +202,16 @@ Restart the gateway. Your agent can now send and receive iMessages. Full setup d
 Before customizing further, snapshot your clean state:
 
 ```bash
-lume stop openclaw
-lume clone openclaw openclaw-golden
+lume stop bot
+lume clone bot bot-golden
 ```
 
 Reset anytime:
 
 ```bash
-lume stop openclaw && lume delete openclaw
-lume clone openclaw-golden openclaw
-lume run openclaw --no-display
+lume stop bot && lume delete bot
+lume clone bot-golden bot
+lume run bot --no-display
 ```
 
 ## Running 24/7
@@ -229,9 +229,9 @@ For true always-on, consider a dedicated Mac mini or a small VPS. See [VPS hosti
 | Problem                  | Solution                                                                            |
 | ------------------------ | ----------------------------------------------------------------------------------- |
 | Cannot SSH into VM       | Check "Remote Login" is enabled in the VM's System Settings                         |
-| VM IP not showing        | Wait for VM to fully boot, run `lume get openclaw` again                            |
+| VM IP not showing        | Wait for VM to fully boot, run `lume get bot` again                            |
 | Lume command not found   | Add `~/.local/bin` to your PATH                                                     |
-| WhatsApp QR not scanning | Ensure you are logged into the VM (not host) when running `openclaw channels login` |
+| WhatsApp QR not scanning | Ensure you are logged into the VM (not host) when running `bot channels login` |
 
 ## Related docs
 

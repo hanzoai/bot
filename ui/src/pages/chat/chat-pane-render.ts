@@ -605,7 +605,7 @@ export class ChatPaneRender extends ChatPaneHeaderRender {
       chat,
       ...(state.sidebarContent
         ? {
-            detail: html`<openclaw-chat-detail-panel
+            detail: html`<bot-chat-detail-panel
               class="chat-sidebar"
               .content=${state.sidebarContent}
               .loadFullMessage=${loadSidebarFullMessage}
@@ -619,19 +619,19 @@ export class ChatPaneRender extends ChatPaneHeaderRender {
                 state.handleOpenImage(item, state.beginImageOpen())}
               .embedded=${true}
               @chat-detail-panel-close=${() => state.handleCloseSidebar()}
-            ></openclaw-chat-detail-panel>`,
+            ></bot-chat-detail-panel>`,
           }
         : {}),
       ...(discussion
         ? {
-            discussion: html`<openclaw-session-discussion
+            discussion: html`<bot-session-discussion
               .sessionKey=${discussion.sessionKey}
               .canOpen=${discussion.canOpen}
               .sourceGeneration=${this.connectionGeneration}
               .loadInfo=${discussion.loadInfo}
               .openDiscussion=${discussion.openDiscussion}
               .onStateChange=${discussion.onStateChange}
-            ></openclaw-session-discussion>`,
+            ></bot-session-discussion>`,
           }
         : {}),
     };

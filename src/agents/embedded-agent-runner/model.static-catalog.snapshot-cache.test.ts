@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const manifestMocks = vi.hoisted(() => ({
   getCurrentPluginMetadataSnapshot: vi.fn(),
-  listOpenClawPluginManifestMetadata: vi.fn(),
+  listBotPluginManifestMetadata: vi.fn(),
   loadPluginManifest: vi.fn(),
   loadPluginManifestRegistry: vi.fn(),
 }));
@@ -20,7 +20,7 @@ vi.mock("../../plugins/current-plugin-metadata-snapshot.js", () => ({
 }));
 
 vi.mock("../../plugins/manifest-metadata-scan.js", () => ({
-  listOpenClawPluginManifestMetadata: manifestMocks.listOpenClawPluginManifestMetadata,
+  listBotPluginManifestMetadata: manifestMocks.listBotPluginManifestMetadata,
 }));
 
 vi.mock("../../plugins/manifest.js", async (importOriginal) => ({
@@ -91,7 +91,7 @@ function setManifestPlugins(plugins: unknown[]) {
       return [`/fixtures/${id}`, plugin];
     }),
   );
-  manifestMocks.listOpenClawPluginManifestMetadata.mockReturnValue(
+  manifestMocks.listBotPluginManifestMetadata.mockReturnValue(
     [...byPluginDir].map(([pluginDir, plugin]) => ({
       pluginDir,
       manifest: plugin,
@@ -102,7 +102,7 @@ function setManifestPlugins(plugins: unknown[]) {
     const plugin = byPluginDir.get(pluginDir);
     return plugin
       ? { ok: true, manifest: plugin }
-      : { ok: false, error: "missing manifest", manifestPath: `${pluginDir}/openclaw.plugin.json` };
+      : { ok: false, error: "missing manifest", manifestPath: `${pluginDir}/bot.plugin.json` };
   });
 }
 
@@ -113,7 +113,7 @@ beforeEach(() => {
   for (const mock of Object.values(providerMocks)) {
     mock.mockReset();
   }
-  manifestMocks.listOpenClawPluginManifestMetadata.mockReturnValue([]);
+  manifestMocks.listBotPluginManifestMetadata.mockReturnValue([]);
   manifestMocks.loadPluginManifestRegistry.mockReturnValue({ plugins: [] });
   providerMocks.resolveActivatableProviderOwnerPluginIds.mockImplementation(
     ({ pluginIds }: { pluginIds: string[] }) => pluginIds,
@@ -146,7 +146,7 @@ describe("bundled static model catalog snapshot cache", () => {
       workspaceDir: undefined,
       allowWorkspaceScopedSnapshot: true,
     });
-    expect(manifestMocks.listOpenClawPluginManifestMetadata).not.toHaveBeenCalled();
+    expect(manifestMocks.listBotPluginManifestMetadata).not.toHaveBeenCalled();
     expect(manifestMocks.loadPluginManifest).not.toHaveBeenCalled();
   });
 
@@ -172,7 +172,7 @@ describe("bundled static model catalog snapshot cache", () => {
     expect(resolveModel({ provider: "mistral", modelId: "mistral-medium-next" })?.name).toBe(
       "Mistral Medium Next",
     );
-    expect(manifestMocks.listOpenClawPluginManifestMetadata).not.toHaveBeenCalled();
+    expect(manifestMocks.listBotPluginManifestMetadata).not.toHaveBeenCalled();
     expect(manifestMocks.loadPluginManifest).not.toHaveBeenCalled();
   });
 
@@ -194,7 +194,7 @@ describe("bundled static model catalog snapshot cache", () => {
       env: process.env,
       workspaceDir,
     });
-    expect(manifestMocks.listOpenClawPluginManifestMetadata).not.toHaveBeenCalled();
+    expect(manifestMocks.listBotPluginManifestMetadata).not.toHaveBeenCalled();
   });
 
   it("requires the default discovery context for unconfigured snapshot lookups", () => {
@@ -210,7 +210,7 @@ describe("bundled static model catalog snapshot cache", () => {
       allowWorkspaceScopedSnapshot: true,
       requireDefaultDiscoveryContext: true,
     });
-    expect(manifestMocks.listOpenClawPluginManifestMetadata).not.toHaveBeenCalled();
+    expect(manifestMocks.listBotPluginManifestMetadata).not.toHaveBeenCalled();
   });
 
   it("keeps a custom environment on its own manifest discovery path", () => {
@@ -230,7 +230,7 @@ describe("bundled static model catalog snapshot cache", () => {
     expect(manifestMocks.getCurrentPluginMetadataSnapshot).not.toHaveBeenCalledWith(
       expect.objectContaining({ env }),
     );
-    expect(manifestMocks.listOpenClawPluginManifestMetadata).toHaveBeenCalledWith(env);
+    expect(manifestMocks.listBotPluginManifestMetadata).toHaveBeenCalledWith(env);
     expect(manifestMocks.loadPluginManifest).toHaveBeenCalledTimes(1);
   });
 
@@ -252,7 +252,7 @@ describe("bundled static model catalog snapshot cache", () => {
       ).toBeUndefined();
     }
 
-    expect(manifestMocks.listOpenClawPluginManifestMetadata).not.toHaveBeenCalled();
+    expect(manifestMocks.listBotPluginManifestMetadata).not.toHaveBeenCalled();
     expect(manifestMocks.loadPluginManifest).not.toHaveBeenCalled();
   });
 
@@ -265,7 +265,7 @@ describe("bundled static model catalog snapshot cache", () => {
 
     expect(bundledStaticCatalogProviderUsesRuntimeAugment({ provider: "mistral", cfg })).toBe(true);
     expect(bundledStaticCatalogProviderUsesRuntimeAugment({ provider: "mistral", cfg })).toBe(true);
-    expect(manifestMocks.listOpenClawPluginManifestMetadata).not.toHaveBeenCalled();
+    expect(manifestMocks.listBotPluginManifestMetadata).not.toHaveBeenCalled();
     expect(manifestMocks.loadPluginManifest).not.toHaveBeenCalled();
   });
 

@@ -1,4 +1,4 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "bot/plugin-sdk/agent-harness-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { captureCodexSettledTurnFinalizationContext } from "./settled-turn-context.js";
 import { attachCodexMirrorIdentity } from "./upstream-prompt-provenance.js";
@@ -72,7 +72,7 @@ describe("captureCodexSettledTurnFinalizationContext", () => {
     });
 
     expect(context).toEqual({
-      source: "openclaw-transcript",
+      source: "bot-transcript",
       messages: [prior, ...settledMessages],
     });
     expect(Object.isFrozen(context?.messages)).toBe(true);

@@ -99,15 +99,15 @@ describe("createCanvasSurfaceLease", () => {
       .fn<(method: string, params: unknown) => Promise<unknown>>()
       .mockResolvedValueOnce({
         surface: "canvas",
-        pluginSurfaceUrls: { canvas: "https://canvas.test/__openclaw__/cap/two" },
+        pluginSurfaceUrls: { canvas: "https://canvas.test/__bot__/cap/two" },
         expiresAtMs: 200_000,
       })
       .mockResolvedValueOnce({
         surface: "canvas",
-        pluginSurfaceUrls: { canvas: "https://canvas.test/__openclaw__/cap/three" },
+        pluginSurfaceUrls: { canvas: "https://canvas.test/__bot__/cap/three" },
       });
     const { changes, clock, lease } = createLeaseHarness(request);
-    const helloUrl = "https://canvas.test/__openclaw__/cap/one";
+    const helloUrl = "https://canvas.test/__bot__/cap/one";
 
     lease.start(helloUrl);
     expect(changes).toEqual([helloUrl]);
@@ -118,11 +118,11 @@ describe("createCanvasSurfaceLease", () => {
       surface: "canvas",
       observedUrl: helloUrl,
     });
-    expect(changes.at(-1)).toBe("https://canvas.test/__openclaw__/cap/two");
+    expect(changes.at(-1)).toBe("https://canvas.test/__bot__/cap/two");
     expect(clock.nextDelayMs).toBe(85_000);
 
     await clock.advanceBy(85_000);
-    expect(changes.at(-1)).toBe("https://canvas.test/__openclaw__/cap/three");
+    expect(changes.at(-1)).toBe("https://canvas.test/__bot__/cap/three");
     expect(clock.nextDelayMs).toBe(60_000);
   });
 
@@ -132,12 +132,12 @@ describe("createCanvasSurfaceLease", () => {
       .fn<(method: string, params: unknown) => Promise<unknown>>()
       .mockResolvedValueOnce({
         surface: "canvas",
-        pluginSurfaceUrls: { canvas: "https://canvas.test/__openclaw__/cap/two" },
+        pluginSurfaceUrls: { canvas: "https://canvas.test/__bot__/cap/two" },
         expiresAtMs: 116_000,
       })
       .mockImplementation(() => pending.promise);
     const { clock, lease } = createLeaseHarness(request);
-    lease.start("https://canvas.test/__openclaw__/cap/one");
+    lease.start("https://canvas.test/__bot__/cap/one");
     await flushPromises();
 
     const callback = clock.takeNextCallback();
@@ -149,7 +149,7 @@ describe("createCanvasSurfaceLease", () => {
 
     pending.resolve({
       surface: "canvas",
-      pluginSurfaceUrls: { canvas: "https://canvas.test/__openclaw__/cap/two" },
+      pluginSurfaceUrls: { canvas: "https://canvas.test/__bot__/cap/two" },
     });
     await flushPromises();
     expect(clock.pendingCount).toBe(1);
@@ -164,11 +164,11 @@ describe("createCanvasSurfaceLease", () => {
       }
       return {
         surface: "canvas",
-        pluginSurfaceUrls: { canvas: "https://canvas.test/__openclaw__/cap/fresh" },
+        pluginSurfaceUrls: { canvas: "https://canvas.test/__bot__/cap/fresh" },
       };
     });
     const { changes, clock, lease } = createLeaseHarness(request);
-    const originalUrl = "https://canvas.test/__openclaw__/cap/one";
+    const originalUrl = "https://canvas.test/__bot__/cap/one";
     lease.start(originalUrl);
 
     await flushPromises();
@@ -181,27 +181,27 @@ describe("createCanvasSurfaceLease", () => {
     }
 
     expect(request).toHaveBeenCalledTimes(11);
-    expect(changes.at(-1)).toBe("https://canvas.test/__openclaw__/cap/fresh");
+    expect(changes.at(-1)).toBe("https://canvas.test/__bot__/cap/fresh");
     expect(clock.nextDelayMs).toBe(60_000);
   });
 
   it("stop clears timers, ignores an in-flight result, and publishes null once", async () => {
     const pending = deferred<unknown>();
     const { changes, clock, connectionChanges, lease } = createLeaseHarness(() => pending.promise);
-    lease.start("https://canvas.test/__openclaw__/cap/one");
+    lease.start("https://canvas.test/__bot__/cap/one");
     await flushPromises();
 
     lease.stop();
     lease.stop();
     expect(clock.pendingCount).toBe(0);
-    expect(changes).toEqual(["https://canvas.test/__openclaw__/cap/one", null]);
+    expect(changes).toEqual(["https://canvas.test/__bot__/cap/one", null]);
     expect(connectionChanges).toHaveLength(2);
 
     pending.resolve({
       surface: "canvas",
-      pluginSurfaceUrls: { canvas: "https://canvas.test/__openclaw__/cap/two" },
+      pluginSurfaceUrls: { canvas: "https://canvas.test/__bot__/cap/two" },
     });
     await flushPromises();
-    expect(changes).toEqual(["https://canvas.test/__openclaw__/cap/one", null]);
+    expect(changes).toEqual(["https://canvas.test/__bot__/cap/one", null]);
   });
 });

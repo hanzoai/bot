@@ -3,7 +3,7 @@ import { normalizeAgentId } from "../../lib/sessions/session-key.ts";
 import { normalizeOptionalString } from "../../lib/string-coerce.ts";
 import { getSafeLocalStorage } from "../../local-storage.ts";
 
-const STORAGE_KEY_PREFIX = "openclaw.new-session.preferences.v1:";
+const STORAGE_KEY_PREFIX = "bot.new-session.preferences.v1:";
 
 export type NewSessionPreference = {
   workspace?: string;

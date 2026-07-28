@@ -6,12 +6,12 @@ import { createHash } from "node:crypto";
 import {
   emitTrustedDiagnosticEventWithPrivateData,
   type DiagnosticModelCallContent,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "bot/plugin-sdk/diagnostic-runtime";
 import type { CodexAppServerRuntimeOptions, resolveCodexPluginsPolicy } from "./config.js";
 
 type TrustedDiagnosticEventInput = Parameters<typeof emitTrustedDiagnosticEventWithPrivateData>[0];
 
-/** Reads a tool schema field in either app-server or OpenClaw naming. */
+/** Reads a tool schema field in either app-server or Bot naming. */
 function readCodexDiagnosticToolParameters(tool: {
   inputSchema?: unknown;
   parameters?: unknown;
@@ -79,7 +79,7 @@ export function buildCodexPluginThreadConfigEligibilityLogData(params: {
       .toSorted(),
     enabledPluginConfigKeys: params.enabledPluginConfigKeys,
     appCacheKeyFingerprint: fingerprintCodexLogValue(
-      "openclaw:codex:plugin-app-cache-key:v1",
+      "bot:codex:plugin-app-cache-key:v1",
       params.pluginAppCacheKey,
     ),
     authProfileId: params.startupAuthProfileId,

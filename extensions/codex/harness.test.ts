@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import { upsertSessionEntry } from "bot/plugin-sdk/session-store-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { createCodexAppServerAgentHarness } from "./harness.js";
 import {
@@ -35,7 +35,7 @@ describe("Codex agent harness supports()", () => {
     expect(harness.delegatedExecutionPluginIds).toEqual(["voice-call"]);
   });
 
-  it("supports openai as the primary OpenClaw routing id", () => {
+  it("supports openai as the primary Bot routing id", () => {
     expect(harness.supports({ provider: "openai", requestedRuntime: "codex" })).toEqual({
       supported: true,
       priority: 100,
@@ -58,7 +58,7 @@ describe("Codex agent harness supports()", () => {
           api: "openai-responses",
           baseUrl: "https://api.openai.com/v1",
           requestTransportOverrides: "none",
-          runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+          runtimePolicy: { compatibleIds: ["bot", "codex"] },
         },
       }),
     ).toEqual({ supported: true, priority: 100 });
@@ -125,7 +125,7 @@ describe("Codex agent harness supports()", () => {
             ? "https://api.openai.com/v1"
             : "https://chatgpt.com/backend-api/codex",
         requestTransportOverrides: "none",
-        runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+        runtimePolicy: { compatibleIds: ["bot", "codex"] },
         preparedAuth,
       },
     });
@@ -143,7 +143,7 @@ describe("Codex agent harness supports()", () => {
         api: "openai-responses",
         baseUrl: "https://relay.example.test/v1",
         requestTransportOverrides: "none" as const,
-        runtimePolicy: { compatibleIds: ["openclaw"] },
+        runtimePolicy: { compatibleIds: ["bot"] },
       },
     },
     {
@@ -152,7 +152,7 @@ describe("Codex agent harness supports()", () => {
         api: "openai-completions",
         baseUrl: "https://api.openai.com/v1",
         requestTransportOverrides: "none" as const,
-        runtimePolicy: { compatibleIds: ["openclaw"] },
+        runtimePolicy: { compatibleIds: ["bot"] },
       },
     },
     {
@@ -161,7 +161,7 @@ describe("Codex agent harness supports()", () => {
         api: "openai-responses",
         baseUrl: "http://api.openai.com/v1",
         requestTransportOverrides: "none" as const,
-        runtimePolicy: { compatibleIds: ["openclaw"] },
+        runtimePolicy: { compatibleIds: ["bot"] },
       },
     },
   ])("rejects a $name that Codex cannot reproduce", ({ modelProvider }) => {
@@ -182,7 +182,7 @@ describe("Codex agent harness supports()", () => {
         api: "openai-responses",
         baseUrl: "https://api.openai.com/v1",
         requestTransportOverrides: "present",
-        runtimePolicy: { compatibleIds: ["openclaw", "codex"] },
+        runtimePolicy: { compatibleIds: ["bot", "codex"] },
         preparedAuth: { source: "harness" },
       },
     });
@@ -275,7 +275,7 @@ describe("Codex agent harness reset()", () => {
   });
 
   it("repairs a retirement fence left by an earlier in-place reset", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-harness-reset-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-codex-harness-reset-"));
     const storePath = path.join(root, "sessions.json");
     const bindingStore = createCodexTestBindingStore();
     const sessionKey = "agent:worker:main";
@@ -350,7 +350,7 @@ describe("Codex agent harness reset()", () => {
 
 describe("Codex agent harness dispose()", () => {
   it("uses the preloaded shared-client lifecycle seam", async () => {
-    const sharedDisposer = Symbol.for("openclaw.codexAppServerClientDisposer");
+    const sharedDisposer = Symbol.for("bot.codexAppServerClientDisposer");
     const state = globalThis as typeof globalThis & {
       [sharedDisposer]?: () => Promise<void>;
     };

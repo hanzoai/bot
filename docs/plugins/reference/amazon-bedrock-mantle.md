@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Amazon Bedrock Mantle provider plugin for OpenAI-compatible model routing."
+summary: "Bot Amazon Bedrock Mantle provider plugin for OpenAI-compatible model routing."
 read_when:
   - You are installing, configuring, or auditing the amazon-bedrock-mantle plugin
 title: "Amazon Bedrock Mantle plugin"
@@ -7,11 +7,11 @@ title: "Amazon Bedrock Mantle plugin"
 
 # Amazon Bedrock Mantle plugin
 
-OpenClaw Amazon Bedrock Mantle provider plugin for OpenAI-compatible model routing.
+Bot Amazon Bedrock Mantle provider plugin for OpenAI-compatible model routing.
 
 ## Distribution
 
-- Package: `@openclaw/amazon-bedrock-mantle-provider`
+- Package: `@hanzo/bot-amazon-bedrock-mantle-provider`
 - Install route: npm; ClawHub
 
 ## Surface

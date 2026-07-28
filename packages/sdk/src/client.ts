@@ -1,4 +1,4 @@
-// OpenClaw SDK module implements client behavior.
+// Bot SDK module implements client behavior.
 import { randomUUID } from "node:crypto";
 import { EventHub } from "./event-hub.js";
 import { normalizeGatewayEvent } from "./normalize.js";
@@ -18,8 +18,8 @@ import type {
   EnvironmentsListResult,
   GatewayEvent,
   GatewayRequestOptions,
-  OpenClawEvent,
-  OpenClawTransport,
+  BotEvent,
+  BotTransport,
   RunCreateParams,
   RunResult,
   RunTimestamp,
@@ -35,23 +35,23 @@ import type {
   ToolInvokeResult,
 } from "./types.js";
 
-// High-level OpenClaw SDK client. Namespaces below translate friendly SDK calls
+// High-level Bot SDK client. Namespaces below translate friendly SDK calls
 // into current Gateway RPC methods and normalize event streams for consumers.
 const MAX_REPLAY_RUNS = 100;
 const MAX_REPLAY_EVENTS_PER_RUN = 500;
 const MAX_NORMALIZED_REPLAY_EVENTS = 2000;
 
-/** Connection and transport options for the OpenClaw SDK client. */
-export type OpenClawOptions = {
+/** Connection and transport options for the Bot SDK client. */
+export type BotOptions = {
   gateway?: "auto" | (string & {});
   url?: string;
   token?: string;
   password?: string;
   requestTimeoutMs?: number;
-  transport?: OpenClawTransport;
+  transport?: BotTransport;
 };
 
-function resolveGatewayUrl(options: OpenClawOptions): string | undefined {
+function resolveGatewayUrl(options: BotOptions): string | undefined {
   if (options.url) {
     return options.url;
   }
@@ -185,7 +185,7 @@ function assertNoUnsupportedRunOptions(params: AgentRunParams): void {
     return;
   }
   throw new Error(
-    `OpenClaw Gateway does not support per-run SDK option${
+    `Bot Gateway does not support per-run SDK option${
       unsupported.length === 1 ? "" : "s"
     } yet: ${unsupported.join(", ")}`,
   );
@@ -212,7 +212,7 @@ function buildAgentParams(params: AgentRunParams): Record<string, unknown> {
 }
 
 function unsupportedGatewayApi(api: string): never {
-  throw new Error(`${api} is not supported by the current OpenClaw Gateway yet`);
+  throw new Error(`${api} is not supported by the current Bot Gateway yet`);
 }
 
 type ChatProjectionState = "delta" | "final";
@@ -252,7 +252,7 @@ function requireToolsEffectiveSessionKey(params: unknown): ToolsEffectiveParams 
   return params;
 }
 
-function readChatProjection(event: OpenClawEvent): ChatProjection | undefined {
+function readChatProjection(event: BotEvent): ChatProjection | undefined {
   const raw = event.raw;
   if (event.type !== "raw" || raw?.event !== "chat") {
     return undefined;
@@ -289,11 +289,11 @@ function readChatProjectionReplace(payload: Record<string, unknown>): boolean {
   return payload.replace === true;
 }
 
-function isAssistantRunEvent(event: OpenClawEvent): boolean {
+function isAssistantRunEvent(event: BotEvent): boolean {
   return event.type === "assistant.delta" || event.type === "assistant.message";
 }
 
-function isTerminalRunEvent(event: OpenClawEvent): boolean {
+function isTerminalRunEvent(event: BotEvent): boolean {
   return (
     event.type === "run.completed" ||
     event.type === "run.failed" ||
@@ -303,10 +303,10 @@ function isTerminalRunEvent(event: OpenClawEvent): boolean {
 }
 
 function normalizeChatProjectionEvent(
-  event: OpenClawEvent,
+  event: BotEvent,
   projection: ChatProjection,
   previousText: string | undefined,
-): OpenClawEvent {
+): BotEvent {
   const text = readChatProjectionText(projection.payload);
   const deltaText = readChatProjectionDeltaText(projection.payload);
   const hasPreviousText = previousText !== undefined;
@@ -328,7 +328,7 @@ function normalizeChatProjectionEvent(
 }
 
 /** Root SDK client with namespaces for agents, sessions, runs, and gateway APIs. */
-export class OpenClaw {
+export class Bot {
   readonly agents: AgentsNamespace;
   readonly sessions: SessionsNamespace;
   readonly runs: RunsNamespace;
@@ -339,18 +339,18 @@ export class OpenClaw {
   readonly approvals: ApprovalsNamespace;
   readonly environments: EnvironmentsNamespace;
 
-  private readonly transport: OpenClawTransport;
-  private readonly normalizedEvents = new EventHub<OpenClawEvent>({
+  private readonly transport: BotTransport;
+  private readonly normalizedEvents = new EventHub<BotEvent>({
     replayLimit: MAX_NORMALIZED_REPLAY_EVENTS,
   });
-  private readonly replayByRunId = new Map<string, OpenClawEvent[]>();
+  private readonly replayByRunId = new Map<string, BotEvent[]>();
   private connected = false;
   private closed = false;
   private eventPumpPromise: Promise<void> | null = null;
   private eventPumpReady: Promise<void> | null = null;
   private closePromise: Promise<void> | null = null;
 
-  constructor(options: OpenClawOptions = {}) {
+  constructor(options: BotOptions = {}) {
     this.transport =
       options.transport ??
       new GatewayClientTransport({
@@ -422,14 +422,14 @@ export class OpenClaw {
     return await this.transport.request<T>(method, params, options);
   }
 
-  events(filter?: (event: OpenClawEvent) => boolean): AsyncIterable<OpenClawEvent> {
+  events(filter?: (event: BotEvent) => boolean): AsyncIterable<BotEvent> {
     return this.iterateEvents(filter);
   }
 
   runEvents(
     runId: string,
-    filter?: (event: OpenClawEvent) => boolean,
-  ): AsyncIterable<OpenClawEvent> {
+    filter?: (event: BotEvent) => boolean,
+  ): AsyncIterable<BotEvent> {
     return this.iterateRunEvents(runId, filter);
   }
 
@@ -440,13 +440,13 @@ export class OpenClaw {
 
   private assertOpen(): void {
     if (this.closed) {
-      throw new Error("OpenClaw SDK client is closed");
+      throw new Error("Bot SDK client is closed");
     }
   }
 
   private async *iterateEvents(
-    filter?: (event: OpenClawEvent) => boolean,
-  ): AsyncIterable<OpenClawEvent> {
+    filter?: (event: BotEvent) => boolean,
+  ): AsyncIterable<BotEvent> {
     await this.connect();
     this.assertOpen();
     for await (const event of this.normalizedEvents.stream(filter)) {
@@ -456,15 +456,15 @@ export class OpenClaw {
 
   private async *iterateRunEvents(
     runId: string,
-    filter?: (event: OpenClawEvent) => boolean,
-  ): AsyncIterable<OpenClawEvent> {
+    filter?: (event: BotEvent) => boolean,
+  ): AsyncIterable<BotEvent> {
     await this.connect();
     this.assertOpen();
     const replayEvents = this.replaySnapshot(runId);
     let hasCanonicalAssistantRunEvent = replayEvents.some(isAssistantRunEvent);
     let hasTerminalRunEvent = replayEvents.some(isTerminalRunEvent);
     let previousChatProjectionText: string | undefined;
-    const toRunStreamEvent = (event: OpenClawEvent): OpenClawEvent | undefined => {
+    const toRunStreamEvent = (event: BotEvent): BotEvent | undefined => {
       const chatProjection = readChatProjection(event);
       if (chatProjection?.state === "delta") {
         if (hasCanonicalAssistantRunEvent) {
@@ -496,7 +496,7 @@ export class OpenClaw {
       }
       return event;
     };
-    const matches = (event: OpenClawEvent) => event.runId === runId;
+    const matches = (event: BotEvent) => event.runId === runId;
     const liveSource = this.normalizedEvents.stream(matches, { replay: true });
     const live = liveSource[Symbol.asyncIterator]();
     const seen = new Set<string>();
@@ -591,7 +591,7 @@ export class OpenClaw {
     return this.eventPumpReady;
   }
 
-  private recordReplayEvent(event: OpenClawEvent): void {
+  private recordReplayEvent(event: BotEvent): void {
     if (!event.runId) {
       return;
     }
@@ -612,7 +612,7 @@ export class OpenClaw {
     }
   }
 
-  private replaySnapshot(runId: string): OpenClawEvent[] {
+  private replaySnapshot(runId: string): BotEvent[] {
     return [...(this.replayByRunId.get(runId) ?? [])];
   }
 }
@@ -620,7 +620,7 @@ export class OpenClaw {
 /** Agent-scoped helper for runs and identity lookups. */
 export class Agent {
   constructor(
-    private readonly client: OpenClaw,
+    private readonly client: Bot,
     readonly id: string,
   ) {}
 
@@ -641,12 +641,12 @@ export class Agent {
 /** Run handle for streaming events, waiting, and cancellation. */
 export class Run {
   constructor(
-    private readonly client: OpenClaw,
+    private readonly client: Bot,
     readonly id: string,
     readonly sessionKey?: string,
   ) {}
 
-  events(filter?: (event: OpenClawEvent) => boolean): AsyncIterable<OpenClawEvent> {
+  events(filter?: (event: BotEvent) => boolean): AsyncIterable<BotEvent> {
     return this.client.runEvents(this.id, filter);
   }
 
@@ -688,7 +688,7 @@ export class Run {
 /** Session handle for sending messages and session-scoped mutations. */
 export class Session {
   constructor(
-    private readonly client: OpenClaw,
+    private readonly client: Bot,
     readonly key: string,
     readonly info?: unknown,
   ) {}
@@ -735,7 +735,7 @@ export class Session {
 
 /** Agent management namespace. */
 export class AgentsNamespace {
-  constructor(private readonly client: OpenClaw) {}
+  constructor(private readonly client: Bot) {}
 
   async list(params?: Record<string, unknown>): Promise<unknown> {
     return await this.client.request("agents.list", params === undefined ? {} : params);
@@ -760,7 +760,7 @@ export class AgentsNamespace {
 
 /** Session management namespace. */
 export class SessionsNamespace {
-  constructor(private readonly client: OpenClaw) {}
+  constructor(private readonly client: Bot) {}
 
   async list(params?: Record<string, unknown>): Promise<unknown> {
     return await this.client.request("sessions.list", params === undefined ? {} : params);
@@ -793,7 +793,7 @@ export class SessionsNamespace {
 
 /** Run creation and lifecycle namespace. */
 export class RunsNamespace {
-  constructor(private readonly client: OpenClaw) {}
+  constructor(private readonly client: Bot) {}
 
   async create(params: RunCreateParams): Promise<Run> {
     const timeoutMs = normalizeTimeoutMs(params.timeoutMs);
@@ -814,7 +814,7 @@ export class RunsNamespace {
     return new Run(this.client, runId);
   }
 
-  events(runId: string): AsyncIterable<OpenClawEvent> {
+  events(runId: string): AsyncIterable<BotEvent> {
     return new Run(this.client, runId).events();
   }
 
@@ -829,7 +829,7 @@ export class RunsNamespace {
 
 class RpcNamespace {
   constructor(
-    protected readonly client: OpenClaw,
+    protected readonly client: Bot,
     private readonly prefix: string,
   ) {}
 
@@ -844,7 +844,7 @@ class RpcNamespace {
 
 /** Task query and cancellation namespace. */
 export class TasksNamespace extends RpcNamespace {
-  constructor(client: OpenClaw) {
+  constructor(client: Bot) {
     super(client, "tasks");
   }
 
@@ -866,7 +866,7 @@ export class TasksNamespace extends RpcNamespace {
 
 /** Model catalog and auth status namespace. */
 export class ModelsNamespace extends RpcNamespace {
-  constructor(client: OpenClaw) {
+  constructor(client: Bot) {
     super(client, "models");
   }
 
@@ -881,7 +881,7 @@ export class ModelsNamespace extends RpcNamespace {
 
 /** Tool catalog, effective tool, and direct invocation namespace. */
 export class ToolsNamespace extends RpcNamespace {
-  constructor(client: OpenClaw) {
+  constructor(client: Bot) {
     super(client, "tools");
   }
 
@@ -908,7 +908,7 @@ export class ToolsNamespace extends RpcNamespace {
 
 /** Run/session artifact listing and download namespace. */
 export class ArtifactsNamespace extends RpcNamespace {
-  constructor(client: OpenClaw) {
+  constructor(client: Bot) {
     super(client, "artifacts");
   }
 
@@ -933,7 +933,7 @@ export class ArtifactsNamespace extends RpcNamespace {
 
 /** Approval request listing and response namespace. */
 export class ApprovalsNamespace {
-  constructor(private readonly client: OpenClaw) {}
+  constructor(private readonly client: Bot) {}
 
   async list(params?: unknown): Promise<unknown> {
     return await this.client.request("exec.approval.list", params === undefined ? {} : params);
@@ -949,7 +949,7 @@ export class ApprovalsNamespace {
 
 /** Environment discovery namespace. */
 export class EnvironmentsNamespace extends RpcNamespace {
-  constructor(client: OpenClaw) {
+  constructor(client: Bot) {
     super(client, "environments");
   }
 

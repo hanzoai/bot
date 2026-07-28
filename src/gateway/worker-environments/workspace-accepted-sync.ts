@@ -146,7 +146,7 @@ function createAcceptedWorkspacePublisher(params: {
       const transferPaths = [...changed].filter((entryPath) => acceptedNodes.has(entryPath));
       if (transferPaths.length > 0) {
         const temporaryDirectory = await fs.mkdtemp(
-          path.join(os.tmpdir(), "openclaw-worker-workspace-accepted-"),
+          path.join(os.tmpdir(), "bot-worker-workspace-accepted-"),
         );
         const transferListPath = path.join(temporaryDirectory, "transfer-list");
         try {

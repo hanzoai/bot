@@ -7,7 +7,7 @@ read_when:
 title: "Audit records"
 ---
 
-# `openclaw audit`
+# `bot audit`
 
 Query the Gateway's metadata-only audit ledger for agent runs, tool actions, and
 opt-in message lifecycle records.
@@ -26,12 +26,12 @@ privacy semantics, storage/retention bounds, and coverage limits; this page
 covers the command surface.
 
 ```bash
-openclaw audit
-openclaw audit --agent main --status failed
-openclaw audit --session "agent:main:main" --after 2026-07-01T00:00:00Z
-openclaw audit --run 8c69f72e-8b11-4c54-98d5-1a3dd67450c3
-openclaw audit --kind tool_action --limit 50 --json
-openclaw audit --kind message --direction outbound --channel telegram --json
+bot audit
+bot audit --agent main --status failed
+bot audit --session "agent:main:main" --after 2026-07-01T00:00:00Z
+bot audit --run 8c69f72e-8b11-4c54-98d5-1a3dd67450c3
+bot audit --kind tool_action --limit 50 --json
+bot audit --kind message --direction outbound --channel telegram --json
 ```
 
 ## Filters
@@ -52,7 +52,7 @@ openclaw audit --kind message --direction outbound --channel telegram --json
 
 The CLI queries the versioned activity RPC so one command shows the complete
 configured ledger. Text output shows time, kind, direction, channel, status,
-agent, run, and action. Missing message provenance renders as `-`; OpenClaw
+agent, run, and action. Missing message provenance renders as `-`; Bot
 does not invent agent or run ids. Tool actions also show the tool name. JSON
 output includes `nextCursor` when another page exists. Pass that value to
 `--cursor` to continue without reordering records that arrive during paging.
@@ -118,7 +118,7 @@ returns the named V1 activity event union, including run, tool, inbound-message,
 and outbound-message records.
 
 ```bash
-openclaw gateway call audit.activity.list --params '{"channel":"telegram","limit":50}'
+bot gateway call audit.activity.list --params '{"channel":"telegram","limit":50}'
 ```
 
 The result is `{ "events": AuditActivityEventV1[], "nextCursor"?: string }`.

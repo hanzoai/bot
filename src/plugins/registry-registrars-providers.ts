@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   getRegisteredAgentHarness,
   registerAgentHarness as registerGlobalAgentHarness,
@@ -160,7 +160,7 @@ export function createProviderRegistrars(state: PluginRegistryState) {
     registry.cliBackends.push({
       pluginId: record.id,
       pluginName: record.name,
-      builtWithOpenClawVersion: record.builtWithOpenClawVersion,
+      builtWithBotVersion: record.builtWithBotVersion,
       backend: { ...backend, id },
       source: record.source,
       rootDir: record.rootDir,

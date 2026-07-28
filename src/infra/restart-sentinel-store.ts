@@ -1,6 +1,6 @@
 import type { DatabaseSync } from "node:sqlite";
-import { isRecord as isPlainRecord } from "@openclaw/normalization-core/record-coerce";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import { isRecord as isPlainRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -90,7 +90,7 @@ const RESTART_SENTINEL_STATUSES = new Set<RestartSentinelPayload["status"]>([
   "skipped",
 ]);
 
-type GatewayRestartSentinelDatabase = Pick<OpenClawStateKyselyDatabase, "gateway_restart_sentinel">;
+type GatewayRestartSentinelDatabase = Pick<BotStateKyselyDatabase, "gateway_restart_sentinel">;
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);

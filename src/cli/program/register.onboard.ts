@@ -186,7 +186,7 @@ export function registerOnboardCommand(program: Command): void {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/onboard", "docs.openclaw.ai/cli/onboard")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/onboard", "docs.bot.ai/cli/onboard")}\n`,
     )
     .option(
       "--workspace <dir>",
@@ -198,7 +198,7 @@ export function registerOnboardCommand(program: Command): void {
     )
     .option("--reset-scope <scope>", "Reset scope: config|config+creds+sessions|full")
     .option("--non-interactive", "Run without prompts", false)
-    .option("--modern", "Open inference-gated OpenClaw (kept for compatibility)", false)
+    .option("--modern", "Open inference-gated Bot (kept for compatibility)", false)
     .option("--classic", "Use the classic multi-step setup wizard", false)
     .option("--tui", "Use the terminal hatch instead of the browser handoff", false)
     .option(
@@ -218,7 +218,7 @@ export function registerOnboardCommand(program: Command): void {
     .option("--gateway-token <token>", "Gateway token (token auth)")
     .option(
       "--gateway-token-ref-env <name>",
-      "Gateway token SecretRef env var name (token auth; e.g. OPENCLAW_GATEWAY_TOKEN)",
+      "Gateway token SecretRef env var name (token auth; e.g. BOT_GATEWAY_TOKEN)",
     )
     .option("--gateway-password <password>", "Gateway password (password auth)")
     .option("--remote-url <url>", "Remote Gateway WebSocket URL")
@@ -296,7 +296,7 @@ export function registerOnboardCommand(program: Command): void {
           defaultRuntime.error(
             [
               `--modern cannot be combined with: ${unsupportedOptions.join(", ")}.`,
-              "Run those setup options without --modern, or remove them to open OpenClaw.",
+              "Run those setup options without --modern, or remove them to open Bot.",
             ].join("\n"),
           );
           defaultRuntime.exit(1);
@@ -306,8 +306,8 @@ export function registerOnboardCommand(program: Command): void {
           defaultRuntime.error(
             [
               "Non-interactive setup requires explicit risk acknowledgement.",
-              "Read: https://docs.openclaw.ai/security",
-              `Re-run with: ${formatCliCommand("openclaw onboard --modern --non-interactive --accept-risk ...")}`,
+              "Read: https://docs.bot.ai/security",
+              `Re-run with: ${formatCliCommand("bot onboard --modern --non-interactive --accept-risk ...")}`,
             ].join("\n"),
           );
           defaultRuntime.exit(1);

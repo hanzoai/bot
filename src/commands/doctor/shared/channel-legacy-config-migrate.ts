@@ -1,7 +1,7 @@
 // Legacy config migration bridge for channel doctor compatibility contracts.
 import { getBootstrapChannelPlugin } from "../../../channels/plugins/bootstrap-registry.js";
 import { loadBundledChannelDoctorContractApi } from "../../../channels/plugins/doctor-contract-api.js";
-import type { OpenClawConfig } from "../../../config/types.js";
+import type { BotConfig } from "../../../config/types.js";
 import {
   applyPluginDoctorCompatibilityMigrations,
   collectRelevantDoctorPluginIds,
@@ -9,12 +9,12 @@ import {
 import { isRecord } from "./legacy-config-record-shared.js";
 
 type ChannelDoctorCompatibilityMutation = {
-  config: OpenClawConfig;
+  config: BotConfig;
   changes: string[];
 };
 
 type ChannelDoctorCompatibilityNormalizer = (params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }) => ChannelDoctorCompatibilityMutation;
 
 function collectRelevantDoctorChannelIds(raw: unknown): string[] {
@@ -111,7 +111,7 @@ export function applyChannelDoctorCompatibilityMigrations(cfg: Record<string, un
   next: Record<string, unknown>;
   changes: string[];
 } {
-  let nextCfg = cfg as OpenClawConfig;
+  let nextCfg = cfg as BotConfig;
   const changes: string[] = [];
   migrateHeartbeatVisibility(cfg, changes);
   const unresolvedChannelIds: string[] = [];
@@ -133,7 +133,7 @@ export function applyChannelDoctorCompatibilityMigrations(cfg: Record<string, un
   const pluginIds = collectPluginDoctorCompatibilityIds({ raw: cfg, unresolvedChannelIds });
   if (pluginIds.length > 0) {
     const compat = applyPluginDoctorCompatibilityMigrations(nextCfg, {
-      config: cfg as OpenClawConfig,
+      config: cfg as BotConfig,
       pluginIds,
     });
     nextCfg = compat.config;
@@ -141,7 +141,7 @@ export function applyChannelDoctorCompatibilityMigrations(cfg: Record<string, un
   }
 
   return {
-    next: nextCfg as OpenClawConfig & Record<string, unknown>,
+    next: nextCfg as BotConfig & Record<string, unknown>,
     changes,
   };
 }

@@ -236,13 +236,13 @@ describe("pairing setup code", () => {
 
   beforeEach(() => {
     gatewayEnvSnapshot = captureEnv([
-      "OPENCLAW_GATEWAY_TOKEN",
-      "OPENCLAW_GATEWAY_PASSWORD",
-      "OPENCLAW_GATEWAY_PORT",
+      "BOT_GATEWAY_TOKEN",
+      "BOT_GATEWAY_PASSWORD",
+      "BOT_GATEWAY_PORT",
     ]);
-    process.env.OPENCLAW_GATEWAY_TOKEN = "";
-    process.env.OPENCLAW_GATEWAY_PASSWORD = "";
-    process.env.OPENCLAW_GATEWAY_PORT = "";
+    process.env.BOT_GATEWAY_TOKEN = "";
+    process.env.BOT_GATEWAY_PASSWORD = "";
+    process.env.BOT_GATEWAY_PORT = "";
   });
 
   beforeEach(() => {
@@ -409,7 +409,7 @@ describe("pairing setup code", () => {
       expectedError: "MISSING_GW_TOKEN",
     },
     {
-      name: "does not let OPENCLAW_GATEWAY_PASSWORD mask a configured password SecretRef",
+      name: "does not let BOT_GATEWAY_PASSWORD mask a configured password SecretRef",
       config: createCustomGatewayConfig(
         {
           mode: "password",
@@ -418,7 +418,7 @@ describe("pairing setup code", () => {
         defaultEnvSecretProviderConfig,
       ),
       options: {
-        env: { OPENCLAW_GATEWAY_PASSWORD: "password-from-env" },
+        env: { BOT_GATEWAY_PASSWORD: "password-from-env" },
       },
       expectedError: "MISSING_GW_PASSWORD",
     },
@@ -438,7 +438,7 @@ describe("pairing setup code", () => {
       },
       {
         env: {
-          OPENCLAW_GATEWAY_PASSWORD: "password-from-env", // pragma: allowlist secret
+          BOT_GATEWAY_PASSWORD: "password-from-env", // pragma: allowlist secret
         },
       },
     );
@@ -525,7 +525,7 @@ describe("pairing setup code", () => {
       } satisfies ResolveSetupConfig,
       options: {
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "new-token",
+          BOT_GATEWAY_TOKEN: "new-token",
         },
       } satisfies ResolveSetupOptions,
       expected: {
@@ -856,13 +856,13 @@ describe("pairing setup code", () => {
       },
       config: {
         gateway: {
-          tailscale: { mode: "serve", serviceName: "svc:openclaw" },
+          tailscale: { mode: "serve", serviceName: "svc:bot" },
           auth: { mode: "password", password: "secret" },
         },
       } satisfies ResolveSetupConfig,
       expected: {
         authLabel: "password",
-        url: "wss://openclaw.tailnet.ts.net",
+        url: "wss://bot.tailnet.ts.net",
         urlSource: "gateway.tailscale.mode=serve",
       },
     },
@@ -907,7 +907,7 @@ describe("pairing setup code", () => {
     await expectResolvedSetupFailureCase({
       config: {
         gateway: {
-          tailscale: { mode: "serve", serviceName: "svc:openclaw" },
+          tailscale: { mode: "serve", serviceName: "svc:bot" },
           auth: { mode: "password", password: "secret" },
         },
       } satisfies ResolveSetupConfig,

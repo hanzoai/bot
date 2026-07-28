@@ -1,7 +1,7 @@
 // Discord plugin module implements session behavior.
-import type { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import type { TranscriptUtterance } from "openclaw/plugin-sdk/transcripts";
+import type { resolveAgentRoute } from "bot/plugin-sdk/routing";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import type { TranscriptUtterance } from "bot/plugin-sdk/transcripts";
 import { ChannelType } from "../internal/discord.js";
 import type { VoiceCaptureState } from "./capture-state.js";
 import type { VoiceReceiveRecoveryState } from "./receive-recovery.js";

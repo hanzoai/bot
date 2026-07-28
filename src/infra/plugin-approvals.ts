@@ -1,5 +1,5 @@
 // Defines plugin approval request/resolution payloads and actions.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import type { ExecApprovalDecision } from "./exec-approvals.js";
 
 // Plugin approval types and renderers mirror exec approval decisions while

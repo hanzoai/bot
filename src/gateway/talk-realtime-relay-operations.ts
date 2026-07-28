@@ -215,7 +215,7 @@ export function submitTalkRealtimeRelayToolResult(params: {
 
   if (cancelledAgentCall) {
     const providerResult = buildRealtimeVoiceAgentCancelProviderResult(
-      "OpenClaw cancelled this consult before completion. Do not restart it.",
+      "Bot cancelled this consult before completion. Do not restart it.",
     );
     const submitCancellation = () =>
       submitFinalProviderToolResult({
@@ -378,7 +378,7 @@ export async function steerTalkRealtimeRelayAgentRun(params: {
       type: "tool.progress",
       turnId,
       payload: {
-        name: "openclaw_agent_control",
+        name: "bot_agent_control",
         phase: finalResult.mode,
         result: finalResult,
       },

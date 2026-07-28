@@ -1,7 +1,7 @@
 // Slack plugin module implements assistant behavior.
 import type { Block, KnownBlock } from "@slack/web-api";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { danger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { danger, logVerbose } from "bot/plugin-sdk/runtime-env";
 import { buildSlackAssistantThreadMetadata, DEFAULT_SLACK_SUGGESTED_PROMPTS } from "../context.js";
 import type { SlackMonitorContext, SlackAssistantThreadContext } from "../context.js";
 

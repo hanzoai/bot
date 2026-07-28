@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "bot/plugin-sdk/agent-harness-runtime";
 import { readUpstreamUserText } from "./upstream-prompt-provenance.js";
 
 type MirroredAgentMessage = Extract<AgentMessage, { role: "user" | "assistant" | "toolResult" }>;
@@ -13,14 +13,14 @@ export function attachCodexMirrorAttestation(
   sourceFingerprint?: string,
 ): AgentMessage {
   const record = message as unknown as Record<string, unknown>;
-  const existing = record["__openclaw"];
+  const existing = record["__bot"];
   const baseMeta =
     existing && typeof existing === "object" && !Array.isArray(existing)
       ? (existing as Record<string, unknown>)
       : {};
   return {
     ...record,
-    __openclaw: {
+    __bot: {
       ...baseMeta,
       [MIRROR_ORIGIN_META_KEY]: CODEX_APP_SERVER_MIRROR_ORIGIN,
       ...(sourceFingerprint ? { [MIRROR_SOURCE_FINGERPRINT_META_KEY]: sourceFingerprint } : {}),
@@ -29,7 +29,7 @@ export function attachCodexMirrorAttestation(
 }
 
 export function readCodexMirrorSourceFingerprint(message: AgentMessage): string | undefined {
-  const meta = (message as unknown as Record<string, unknown>)["__openclaw"];
+  const meta = (message as unknown as Record<string, unknown>)["__bot"];
   if (!meta || typeof meta !== "object" || Array.isArray(meta)) {
     return undefined;
   }

@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/matrix",
+  "name": "@hanzo/bot-matrix",
   "version": "2026.7.2",
-  "description": "OpenClaw Matrix channel plugin for rooms and direct messages.",
+  "description": "Bot Matrix channel plugin for rooms and direct messages.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
@@ -18,18 +18,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -74,16 +74,88 @@
       },
       "setup": {
         "fields": [
-          { "key": "homeserver", "kind": "string", "cli": { "flags": "--homeserver <url>", "description": "Matrix homeserver URL" } },
-          { "key": "userId", "kind": "string", "cli": { "flags": "--user-id <id>", "description": "Matrix user id" } },
-          { "key": "accessToken", "kind": "string", "sensitive": true, "cli": { "flags": "--access-token <token>", "description": "Matrix access token" } },
-          { "key": "password", "kind": "string", "sensitive": true, "cli": { "flags": "--password <password>", "description": "Matrix password" } },
-          { "key": "deviceName", "kind": "string", "cli": { "flags": "--device-name <name>", "description": "Matrix device name" } },
-          { "key": "avatarUrl", "kind": "string", "cli": { "flags": "--avatar-url <url>", "description": "Matrix avatar URL" } },
-          { "key": "initialSyncLimit", "kind": "integer", "cli": { "flags": "--initial-sync-limit <n>", "description": "Matrix initial sync room limit" } },
-          { "key": "proxy", "kind": "string", "cli": { "flags": "--proxy <url>", "description": "Matrix proxy URL" } },
-          { "key": "dangerouslyAllowPrivateNetwork", "kind": "boolean", "cli": { "flags": "--dangerously-allow-private-network", "description": "Allow private-network Matrix homeservers" } },
-          { "key": "useEnv", "kind": "boolean", "cli": { "flags": "--use-env", "description": "Use Matrix environment credentials" } }
+          {
+            "key": "homeserver",
+            "kind": "string",
+            "cli": {
+              "flags": "--homeserver <url>",
+              "description": "Matrix homeserver URL"
+            }
+          },
+          {
+            "key": "userId",
+            "kind": "string",
+            "cli": {
+              "flags": "--user-id <id>",
+              "description": "Matrix user id"
+            }
+          },
+          {
+            "key": "accessToken",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--access-token <token>",
+              "description": "Matrix access token"
+            }
+          },
+          {
+            "key": "password",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--password <password>",
+              "description": "Matrix password"
+            }
+          },
+          {
+            "key": "deviceName",
+            "kind": "string",
+            "cli": {
+              "flags": "--device-name <name>",
+              "description": "Matrix device name"
+            }
+          },
+          {
+            "key": "avatarUrl",
+            "kind": "string",
+            "cli": {
+              "flags": "--avatar-url <url>",
+              "description": "Matrix avatar URL"
+            }
+          },
+          {
+            "key": "initialSyncLimit",
+            "kind": "integer",
+            "cli": {
+              "flags": "--initial-sync-limit <n>",
+              "description": "Matrix initial sync room limit"
+            }
+          },
+          {
+            "key": "proxy",
+            "kind": "string",
+            "cli": {
+              "flags": "--proxy <url>",
+              "description": "Matrix proxy URL"
+            }
+          },
+          {
+            "key": "dangerouslyAllowPrivateNetwork",
+            "kind": "boolean",
+            "cli": {
+              "flags": "--dangerously-allow-private-network",
+              "description": "Allow private-network Matrix homeservers"
+            }
+          },
+          {
+            "key": "useEnv",
+            "kind": "boolean",
+            "cli": {
+              "flags": "--use-env",
+              "description": "Use Matrix environment credentials"
+            }
+          }
         ]
       },
       "persistedAuthState": {
@@ -92,8 +164,8 @@
       }
     },
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/matrix",
-      "npmSpec": "@openclaw/matrix",
+      "clawhubSpec": "clawhub:@hanzo/bot-matrix",
+      "npmSpec": "@hanzo/bot-matrix",
       "defaultChoice": "clawhub",
       "minHostVersion": ">=2026.4.10",
       "allowInvalidConfigRecovery": true
@@ -102,7 +174,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2"
+      "botVersion": "2026.7.2"
     },
     "release": {
       "publishToClawHub": true,

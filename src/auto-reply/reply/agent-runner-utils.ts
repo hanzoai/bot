@@ -2,7 +2,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveFastModeState } from "../../agents/fast-mode.js";
 import { normalizeChatType } from "../../channels/chat-type.js";
 import { getChannelPlugin } from "../../channels/plugins/index.js";
@@ -19,7 +19,7 @@ import {
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
   selectApplicableRuntimeConfig,
-  type OpenClawConfig,
+  type BotConfig,
 } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import { isReasoningTagProvider } from "../../utils/provider-utils.js";
@@ -44,7 +44,7 @@ type EmbeddedReplyRoute = Pick<
 >;
 
 /** Selects the freshest runtime config usable by queued reply execution. */
-export function resolveQueuedReplyRuntimeConfig(config: OpenClawConfig): OpenClawConfig {
+export function resolveQueuedReplyRuntimeConfig(config: BotConfig): BotConfig {
   const runtimeConfig =
     typeof getRuntimeConfigSnapshot === "function" ? getRuntimeConfigSnapshot() : null;
   const runtimeSourceConfig =
@@ -60,14 +60,14 @@ export function resolveQueuedReplyRuntimeConfig(config: OpenClawConfig): OpenCla
 
 /** Resolves command secrets for queued reply execution, scoped to the origin route. */
 export async function resolveQueuedReplyExecutionConfig(
-  config: OpenClawConfig,
+  config: BotConfig,
   params?: {
     originatingChannel?: string;
     messageProvider?: string;
     originatingAccountId?: string;
     agentAccountId?: string;
   },
-): Promise<OpenClawConfig> {
+): Promise<BotConfig> {
   const runtimeConfig = resolveQueuedReplyRuntimeConfig(config);
   const { resolvedConfig } = await resolveCommandSecretRefsViaGateway({
     config: runtimeConfig,
@@ -110,7 +110,7 @@ export async function resolveQueuedReplyExecutionConfig(
 /** Builds channel threading context for message-tool replies. */
 export function buildThreadingToolContext(params: {
   sessionCtx: TemplateContext;
-  config: OpenClawConfig | undefined;
+  config: BotConfig | undefined;
   hasRepliedRef: { value: boolean } | undefined;
 }): InternalChannelThreadingToolContext {
   const { sessionCtx, config, hasRepliedRef } = params;
@@ -203,7 +203,7 @@ export const formatBunFetchSocketError = (message: string) => {
 /** Resolves candidate-scoped fast mode after model fallback changes provider/model. */
 export function resolveRunFastModeForFallbackCandidate(params: {
   run: FollowupRun["run"];
-  config: OpenClawConfig;
+  config: BotConfig;
   provider: string;
   model: string;
   sessionEntry?: Pick<SessionEntry, "fastMode">;

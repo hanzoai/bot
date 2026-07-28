@@ -96,7 +96,7 @@ describe("buildCompactAnnounceStatsLine", () => {
         totalTokens: 999_999,
       })) as ReadSessionEntry,
       resolveAgentIdFromSessionKey: (() => "main") as ResolveAgentIdFromSessionKey,
-      resolveStorePath: (() => "/tmp/openclaw-session-store") as ResolveStorePath,
+      resolveStorePath: (() => "/tmp/bot-session-store") as ResolveStorePath,
     });
 
     await expect(
@@ -128,7 +128,7 @@ describe("readSubagentOutput", () => {
         {
           role: "system",
           content: [{ type: "text", text: "Compaction" }],
-          __openclaw: { kind: "compaction" },
+          __bot: { kind: "compaction" },
         },
         {
           role: "assistant",
@@ -229,12 +229,12 @@ describe("readSubagentOutput", () => {
     // stale gateway-visible history after an internal completion is persisted.
     await expect(
       readSubagentOutput("agent:main:subagent:child", undefined, {
-        sessionFile: "/tmp/openclaw-internal-run.jsonl",
+        sessionFile: "/tmp/bot-internal-run.jsonl",
       }),
     ).resolves.toBe("fresh recovered output");
     expect(deps.readSessionMessagesAsync).toHaveBeenCalledWith(
       {
-        sessionFile: "/tmp/openclaw-internal-run.jsonl",
+        sessionFile: "/tmp/bot-internal-run.jsonl",
         sessionId: "agent:main:subagent:child",
       },
       { mode: "recent", maxMessages: 100, maxBytes: 1024 * 1024 },
@@ -255,7 +255,7 @@ describe("readSubagentOutput", () => {
 
     await expect(
       readSubagentOutput("agent:main:subagent:child", undefined, {
-        sessionFile: "/tmp/openclaw-empty-internal-run.jsonl",
+        sessionFile: "/tmp/bot-empty-internal-run.jsonl",
       }),
     ).resolves.toBeUndefined();
     expect(deps.callGateway).not.toHaveBeenCalled();

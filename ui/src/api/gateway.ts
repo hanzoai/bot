@@ -29,7 +29,7 @@ import {
   resolveGatewayStartupRetryAfterMs,
   MIN_CLIENT_PROTOCOL_VERSION,
   PROTOCOL_VERSION,
-} from "@openclaw/gateway-client/browser";
+} from "@hanzo/bot-gateway-client/browser";
 import type { ControlUiSessionPullRequests } from "../../../src/gateway/control-ui-contract.js";
 import {
   clearDeviceAuthToken,

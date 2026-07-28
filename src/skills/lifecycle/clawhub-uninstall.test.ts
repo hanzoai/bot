@@ -9,7 +9,7 @@ import { digestClawHubSkillTree } from "./skill-tree-digest.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 async function fixture() {
-  const workspaceDir = tempDirs.make("openclaw-skill-uninstall-");
+  const workspaceDir = tempDirs.make("bot-skill-uninstall-");
   const slug = "triage";
   const skillDir = join(workspaceDir, "skills", slug);
   const content = "---\nname: triage\n---\n";

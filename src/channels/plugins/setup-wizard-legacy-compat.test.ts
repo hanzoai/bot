@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { WizardPrompter } from "../../wizard/prompts.js";
 import {
   createLegacyCompatChannelDmPolicy,
@@ -16,7 +16,7 @@ describe("legacy channel setup compatibility", () => {
           accounts: { work: { dmPolicy: "disabled", allowFrom: ["U1"] } },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(policy.getCurrent(initial, "work")).toBe("disabled");
     expect(policy.setPolicy(initial, "open", "work")).toMatchObject({
@@ -45,7 +45,7 @@ describe("legacy channel setup compatibility", () => {
     const prompter = { note, text } as unknown as WizardPrompter;
     const cfg = {
       channels: { slack: { allowFrom: ["U1"] } },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const next = await promptLegacyChannelAllowFromForAccount({
       cfg,

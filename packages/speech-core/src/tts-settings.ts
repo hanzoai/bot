@@ -2,19 +2,19 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type {
-  OpenClawConfig,
+  BotConfig,
   ResolvedTtsPersona,
   TtsAutoMode,
   TtsConfig,
   TtsModelOverrideConfig,
   TtsProvider,
-} from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/config-contracts";
 import {
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
   selectApplicableRuntimeConfig,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import type { SpeechProviderConfig } from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/runtime-config-snapshot";
+import type { SpeechProviderConfig } from "bot/plugin-sdk/speech-core";
 import {
   normalizeSpeechProviderId,
   normalizeTtsAutoMode,
@@ -22,12 +22,12 @@ import {
   type ResolvedTtsConfig,
   type ResolvedTtsModelOverrides,
   type TtsConfigResolutionContext,
-} from "openclaw/plugin-sdk/speech-settings";
+} from "bot/plugin-sdk/speech-settings";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolveConfigDir, resolveUserPath } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import { resolveConfigDir, resolveUserPath } from "bot/plugin-sdk/text-utility-runtime";
 import { withSpeakerSelectionCompat } from "../speaker.js";
 
 export type { ResolvedTtsConfig, ResolvedTtsModelOverrides };
@@ -76,7 +76,7 @@ function resolveTtsPrefsPathValue(prefsPath: string | undefined): string {
   if (prefsPath?.trim()) {
     return resolveUserPath(prefsPath.trim());
   }
-  const envPath = process.env.OPENCLAW_TTS_PREFS?.trim();
+  const envPath = process.env.BOT_TTS_PREFS?.trim();
   if (envPath) {
     return resolveUserPath(envPath);
   }
@@ -116,7 +116,7 @@ export function resolveModelOverridePolicy(
   };
 }
 
-export function resolveTtsRuntimeConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function resolveTtsRuntimeConfig(cfg: BotConfig): BotConfig {
   return (
     selectApplicableRuntimeConfig({
       inputConfig: cfg,
@@ -211,7 +211,7 @@ function collectDirectProviderConfigEntries(raw: TtsConfig): Record<string, Spee
 }
 
 export function resolveTtsConfig(
-  cfgInput: OpenClawConfig,
+  cfgInput: BotConfig,
   contextOrAgentId?: string | TtsConfigResolutionContext,
 ): ResolvedTtsConfig {
   const cfg = resolveTtsRuntimeConfig(cfgInput);
@@ -311,7 +311,7 @@ type ResolvedTtsSettingsSnapshot = {
 };
 
 export function resolveTtsSettingsSnapshot(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionAuto?: string;
   agentId?: string;
   channelId?: string;
@@ -346,7 +346,7 @@ export function resolveTtsSettingsSnapshot(params: {
 }
 
 export function buildTtsSystemPromptHint(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId?: string,
 ): string | undefined {
   const settings = resolveTtsSettingsSnapshot({ cfg, agentId });

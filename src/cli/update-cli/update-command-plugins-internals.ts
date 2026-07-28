@@ -1,6 +1,6 @@
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { PluginInstallRecord } from "../../config/types.plugins.js";
 import { pathExists } from "../../infra/fs-safe.js";
 import type { UpdateRunResult } from "../../infra/update-runner.js";
@@ -49,7 +49,7 @@ function isTrackedPackageInstallRecord(record: PluginInstallRecord): boolean {
 
 export async function collectMissingPluginInstallPayloads(params: {
   records: Record<string, PluginInstallRecord>;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   skipDisabledPlugins?: boolean;
   syncOfficialPluginInstalls?: boolean;
   env?: NodeJS.ProcessEnv;
@@ -130,8 +130,8 @@ export function buildInvalidConfigPostCoreUpdateResult(): {
   result: PostCorePluginUpdateResult;
 } {
   const guidance = [
-    "Run `openclaw doctor` to inspect the config validation errors.",
-    "Once the config parses, rerun `openclaw update repair`.",
+    "Run `bot doctor` to inspect the config validation errors.",
+    "Once the config parses, rerun `bot update repair`.",
   ];
   const message =
     "Plugin post-update convergence skipped because the config is invalid; refusing to restart the gateway with an unverified plugin set.";

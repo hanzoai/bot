@@ -1,7 +1,7 @@
-import { asPositiveSafeInteger } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { isOpenClawDeliveryMirrorAssistantMessage } from "../shared/transcript-only-openclaw-assistant.js";
+import { asPositiveSafeInteger } from "@hanzo/bot-normalization-core/number-coercion";
+import { asOptionalRecord as readRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { isBotDeliveryMirrorAssistantMessage } from "../shared/transcript-only-bot-assistant.js";
 import { stripInlineDirectiveTagsForDisplay } from "../utils/directive-tags.js";
 import {
   extractAssistantTextForSilentCheck,
@@ -372,11 +372,11 @@ function readMessageToolSourceReplySink(
 function buildMessageToolVisibleReplyMirror(
   pending: PendingMessageToolVisibleReply,
 ): Record<string, unknown> {
-  const sourceMessageSeq = asPositiveSafeInteger(readRecord(pending.anchor["__openclaw"])?.seq);
+  const sourceMessageSeq = asPositiveSafeInteger(readRecord(pending.anchor["__bot"])?.seq);
   const mirror: Record<string, unknown> = {
     role: "assistant",
     content: [{ type: "text", text: pending.text }],
-    openclawMessageToolMirror: {
+    botMessageToolMirror: {
       toolName: "message",
       ...(pending.toolCallId ? { toolCallId: pending.toolCallId } : {}),
       ...(pending.sourceReplySink ? { sourceReplySink: pending.sourceReplySink } : {}),
@@ -388,9 +388,9 @@ function buildMessageToolVisibleReplyMirror(
       mirror[field] = pending.anchor[field];
     }
   }
-  const transcriptMeta = readRecord((pending.completionAnchor ?? pending.anchor)["__openclaw"]);
+  const transcriptMeta = readRecord((pending.completionAnchor ?? pending.anchor)["__bot"]);
   if (transcriptMeta) {
-    mirror["__openclaw"] = { ...transcriptMeta };
+    mirror["__bot"] = { ...transcriptMeta };
   }
   return mirror;
 }
@@ -399,7 +399,7 @@ function readMessageToolDeliveryMirrorText(message: Record<string, unknown>): st
   // Delivery mirrors can arrive between a successful message-tool result and
   // the final NO_REPLY. The pending mirror is the display row; the raw mirror
   // would duplicate that same send.
-  if (!isOpenClawDeliveryMirrorAssistantMessage(message)) {
+  if (!isBotDeliveryMirrorAssistantMessage(message)) {
     return undefined;
   }
   return displayTextForDuplicateCheck(message);

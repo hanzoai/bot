@@ -1,5 +1,5 @@
 // Store entry lookup resolves canonical keys and safe legacy aliases.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   normalizeSessionKeyPreservingOpaquePeerIds,
   parseThreadSessionSuffix,
@@ -159,7 +159,7 @@ export function resolveSessionEntryCandidates(params: {
     }
   }
   // An exact (opaque-preserving-normalized) entry always wins over any folded
-  // legacy alias, regardless of freshness (openclaw#75670). Only when no exact
+  // legacy alias, regardless of freshness (bot#75670). Only when no exact
   // entry exists do we fall back to a confirmed legacy alias.
   const exactEntry = entries.get(normalizedKey);
   const usableExactEntry = hasMismatchedCaseSensitiveDeliveryProof(exactEntry?.entry, normalizedKey)

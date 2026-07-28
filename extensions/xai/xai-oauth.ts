@@ -1,19 +1,19 @@
 // Xai plugin module implements xai oauth behavior.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   positiveSecondsToSafeMilliseconds,
   resolveExpiresAtMsFromDurationSeconds,
   resolveExpiresAtMsFromEpochSeconds,
-} from "openclaw/plugin-sdk/number-runtime";
-import type { ProviderAuthContext, ProviderAuthMethod } from "openclaw/plugin-sdk/plugin-entry";
+} from "bot/plugin-sdk/number-runtime";
+import type { ProviderAuthContext, ProviderAuthMethod } from "bot/plugin-sdk/plugin-entry";
 import {
   buildOauthProviderAuthResult,
   toFormUrlEncoded,
   type OAuthCredential,
   type ProviderAuthResult,
-} from "openclaw/plugin-sdk/provider-auth";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { sleep } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/provider-auth";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
+import { sleep } from "bot/plugin-sdk/runtime-env";
 import { applyXaiConfig, XAI_DEFAULT_MODEL_REF } from "./onboard.js";
 import { xaiUserAgent } from "./src/xai-user-agent.js";
 
@@ -669,7 +669,7 @@ async function loginXaiDeviceCode(ctx: ProviderAuthContext): Promise<ProviderAut
       },
       notes: [
         "xAI OAuth uses device-code verification without requiring a localhost callback.",
-        "xAI may label the consent app as Grok Build because OpenClaw uses xAI's shared OAuth client.",
+        "xAI may label the consent app as Grok Build because Bot uses xAI's shared OAuth client.",
       ],
     });
   } catch (err) {

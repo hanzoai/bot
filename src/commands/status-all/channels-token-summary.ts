@@ -1,9 +1,9 @@
-// Summarizes channel token/account credential fields for `openclaw status --all`.
+// Summarizes channel token/account credential fields for `bot status --all`.
 // The display path is intentionally secret-safe unless the caller explicitly requests disclosure.
 
-import { asRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { hasConfiguredUnavailableCredentialStatus } from "../../channels/account-snapshot-fields.js";
 import type { ChannelAccountSnapshot } from "../../channels/plugins/types.public.js";
 import { sha256HexPrefix } from "../../logging/redact-identifier.js";

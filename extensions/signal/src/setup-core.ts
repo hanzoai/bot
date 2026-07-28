@@ -1,8 +1,8 @@
 // Signal plugin module implements setup core behavior.
-import { normalizeAccountId, resolveAccountEntry } from "openclaw/plugin-sdk/account-resolution";
-import { parseAllowFromEntries } from "openclaw/plugin-sdk/allow-from";
-import { createChannelDmPolicy } from "openclaw/plugin-sdk/channel-dm-policy";
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { normalizeAccountId, resolveAccountEntry } from "bot/plugin-sdk/account-resolution";
+import { parseAllowFromEntries } from "bot/plugin-sdk/allow-from";
+import { createChannelDmPolicy } from "bot/plugin-sdk/channel-dm-policy";
+import { defineChannelSetupContract } from "bot/plugin-sdk/channel-setup";
 import {
   createCliPathTextInput,
   createDelegatedSetupWizardProxy,
@@ -16,16 +16,16 @@ import {
   type ChannelSetupAdapter,
   type ChannelSetupWizard,
   type ChannelSetupWizardTextInput,
-  type OpenClawConfig,
+  type BotConfig,
   createSetupTranslator,
   type WizardPrompter,
-} from "openclaw/plugin-sdk/setup-runtime";
-import { formatCliCommand, formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
+} from "bot/plugin-sdk/setup-runtime";
+import { formatCliCommand, formatDocsLink } from "bot/plugin-sdk/setup-tools";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { normalizeE164 } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import { normalizeE164 } from "bot/plugin-sdk/text-utility-runtime";
 import type { SignalTransportConfig } from "./account-types.js";
 import { resolveDefaultSignalAccountId, resolveSignalAccount } from "./accounts.js";
 import {
@@ -156,7 +156,7 @@ export function buildSignalSetupPatch(input: SignalSetupInput) {
 }
 
 async function prepareSignalSetupInput(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   input: SignalSetupInput;
 }): Promise<SignalSetupInput> {
@@ -202,7 +202,7 @@ function managedTransportOverridesFromSetupInput(
 }
 
 function resolveSignalSetupAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string;
 }): string | undefined {
   const accountId = normalizeAccountId(
@@ -214,10 +214,10 @@ function resolveSignalSetupAccount(params: {
 }
 
 async function promptSignalAllowFrom(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: WizardPrompter;
   accountId?: string;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   return promptParsedAllowFromForAccount({
     cfg: params.cfg,
     accountId: params.accountId,
@@ -258,7 +258,7 @@ export const signalDmPolicy = createChannelDmPolicy({
 });
 
 function resolveSignalCliPath(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   credentialValues: Record<string, unknown>;
 }) {
@@ -303,7 +303,7 @@ export const signalCompletionNote = {
   lines: [
     t("wizard.signal.nextLinkDevice"),
     t("wizard.signal.nextScanQr"),
-    `Then run: ${formatCliCommand("openclaw gateway call channels.status --params '{\"probe\":true}'")}`,
+    `Then run: ${formatCliCommand("bot gateway call channels.status --params '{\"probe\":true}'")}`,
     `Docs: ${formatDocsLink("/signal", "signal")}`,
   ],
 };
@@ -354,7 +354,7 @@ const signalSetupAdapterBase = createPatchedAccountSetupAdapter<SignalSetupInput
   buildPatch: (input) => buildSignalSetupPatch(input),
 });
 
-function restorePromotedSignalDefaultAccount(cfg: OpenClawConfig): OpenClawConfig {
+function restorePromotedSignalDefaultAccount(cfg: BotConfig): BotConfig {
   const signal = cfg.channels?.signal;
   const promoted = signal?.accounts?.[DEFAULT_ACCOUNT_ID];
   if (!signal?.transport || signal.account || !promoted?.account) {
@@ -456,6 +456,6 @@ export function createSignalSetupWizardProxy(loadWizard: () => Promise<ChannelSe
     ],
     completionNote: signalCompletionNote,
     dmPolicy: signalDmPolicy,
-    disable: (cfg: OpenClawConfig) => setSetupChannelEnabled(cfg, channel, false),
+    disable: (cfg: BotConfig) => setSetupChannelEnabled(cfg, channel, false),
   });
 }

@@ -1,4 +1,4 @@
-# OpenClaw live proof routing
+# Bot live proof routing
 
 Determine the actual current command and owner from root and scoped
 `AGENTS.md`, the current source tree, package scripts, and existing scenario
@@ -6,7 +6,7 @@ inventory. Do not preserve stale invocation details as product contracts.
 
 ## Providers and scenarios
 
-Read `.agents/skills/openclaw-qa-testing/SKILL.md`,
+Read `.agents/skills/bot-qa-testing/SKILL.md`,
 `qa/scenarios/index.yaml`, and the currently owning QA suite. Derive the
 `live-frontier` provider and current authorized `openai/<model>` from the
 user's request, the current QA skill, and the actual available model catalog.
@@ -24,7 +24,7 @@ Preserve redacted artifact paths, provider/model identity, exact command, run
 ID, and the actual executed/passed/skipped counts.
 
 A standard `pnpm build` intentionally excludes private QA plugins. Run QA from
-the source checkout or explicitly build with `OPENCLAW_BUILD_PRIVATE_QA=1`.
+the source checkout or explicitly build with `BOT_BUILD_PRIVATE_QA=1`.
 Place QA output under the repo-relative `.artifacts/` directory.
 
 ## Gateway, package, and apps

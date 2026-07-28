@@ -27,13 +27,13 @@ const {
   })),
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => ({
+vi.mock("bot/plugin-sdk/provider-auth-runtime", () => ({
   resolveApiKeyForProvider: resolveApiKeyForProviderMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-http", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/provider-http")>(
-    "openclaw/plugin-sdk/provider-http",
+vi.mock("bot/plugin-sdk/provider-http", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/provider-http")>(
+    "bot/plugin-sdk/provider-http",
   );
   return {
     assertOkOrThrowHttpError: assertOkOrThrowHttpErrorMock,
@@ -48,8 +48,8 @@ vi.mock("openclaw/plugin-sdk/provider-http", async () => {
 });
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/provider-auth-runtime");
-  vi.doUnmock("openclaw/plugin-sdk/provider-http");
+  vi.doUnmock("bot/plugin-sdk/provider-auth-runtime");
+  vi.doUnmock("bot/plugin-sdk/provider-http");
   vi.resetModules();
 });
 

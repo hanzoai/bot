@@ -8,7 +8,7 @@ import {
 } from "../config/config.js";
 import { resolveMergedModelProviderConfig } from "../config/model-provider-config.js";
 import type { ModelProviderAuthMode, ModelProviderConfig } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { coerceSecretRef } from "../config/types.secrets.js";
 import { getShellEnvAppliedKeys } from "../infra/shell-env.js";
 import { resolveDefaultSecretProviderAlias } from "../secrets/ref-contract.js";
@@ -60,7 +60,7 @@ export function sentinelizeSecretRefProfileApiKey(params: {
 }
 
 export function resolveConfigAwareEnvApiKey(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider: string,
   workspaceDir?: string,
   skipSetupProviderFallback?: boolean,
@@ -73,7 +73,7 @@ export function resolveConfigAwareEnvApiKey(
 }
 
 export function resolveProviderConfig(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider: string,
 ): ModelProviderConfig | undefined {
   return resolveMergedModelProviderConfig(cfg, provider);
@@ -81,7 +81,7 @@ export function resolveProviderConfig(
 
 /** Reads a literal or env-secret marker for a custom provider entry. */
 export function getCustomProviderApiKey(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider: string,
 ): string | undefined {
   const entry = resolveProviderConfig(cfg, provider);
@@ -106,7 +106,7 @@ type ResolvedCustomProviderApiKey = {
 };
 
 function canResolveEnvSecretRefInReadOnlyPath(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   id: string;
 }): boolean {
@@ -123,7 +123,7 @@ function canResolveEnvSecretRefInReadOnlyPath(params: {
 
 /** Resolves custom provider API keys that are usable without mutating secret stores. */
 export function resolveUsableCustomProviderApiKey(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   env?: NodeJS.ProcessEnv;
   secretSentinels?: boolean;
@@ -203,7 +203,7 @@ export function resolveUsableCustomProviderApiKey(params: {
 
 /** True when a custom provider has a literal/env/local key available now. */
 export function hasUsableCustomProviderApiKey(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider: string,
   env?: NodeJS.ProcessEnv,
 ): boolean {
@@ -212,7 +212,7 @@ export function hasUsableCustomProviderApiKey(
 
 /** True when explicit provider config should outrank profile/environment auth. */
 export function shouldPreferExplicitConfigApiKeyAuth(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider: string,
 ): boolean {
   const providerConfig = resolveProviderConfig(cfg, provider);
@@ -224,7 +224,7 @@ export function shouldPreferExplicitConfigApiKeyAuth(
 }
 
 export function resolveProviderAuthOverride(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider: string,
 ): ModelProviderAuthMode | undefined {
   const entry = resolveProviderConfig(cfg, provider);
@@ -236,7 +236,7 @@ export function resolveProviderAuthOverride(
 }
 
 export function resolveDirectProviderCredentialMode(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   inferredMode: ResolvedProviderAuth["mode"];
 }): ResolvedProviderAuth["mode"] {
@@ -249,7 +249,7 @@ export function resolveDirectProviderCredentialMode(params: {
 }
 
 export function shouldUseImplicitAwsSdkAuth(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   modelApi: string | undefined;
 }): boolean {
@@ -320,7 +320,7 @@ function normalizeProviderEntryBaseUrlForBinding(baseUrl: string | undefined): s
 }
 
 function providerEntriesShareBaseUrl(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   credentialProvider: string;
 }): boolean {
@@ -341,7 +341,7 @@ function isBearerProfileCredential(credential: AuthProfileCredential): boolean {
 
 /** True when a bearer auth profile can safely satisfy a provider-entry apiKey reference. */
 export function canUseProfileAsProviderEntryApiKey(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   credential: AuthProfileCredential;
 }): boolean {
@@ -369,7 +369,7 @@ export function canUseProfileAsProviderEntryApiKey(params: {
 
 /** Classifies a provider entry apiKey as literal/profile/marker before resolving secrets. */
 export function resolveProviderEntryApiKeyProfileReference(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   store: AuthProfileStore;
 }): ProviderEntryApiKeyProfileReference {
@@ -418,7 +418,7 @@ export function resolveProviderEntryApiKeyProfileReference(params: {
 
 /** Resolves a provider-entry apiKey profile reference into runtime auth when possible. */
 export async function resolveProviderEntryApiKeyBinding(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   store: AuthProfileStore;
   agentDir?: string;
@@ -469,7 +469,7 @@ export async function resolveProviderEntryApiKeyBinding(params: {
 }
 
 export function resolveConfiguredAwsSdkProfileAuth(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   profileId: string;
 }): ResolvedProviderAuth | null {
@@ -510,7 +510,7 @@ export function isManagedSecretRefApiKeyMarker(apiKey: string | undefined): bool
 }
 
 export function hasSecretRefProviderApiKey(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
   provider: string,
 ): boolean {
   const apiKey = resolveProviderConfig(cfg, provider)?.apiKey;
@@ -525,8 +525,8 @@ export function hasSecretRefProviderApiKey(
 }
 
 export function providerConfigMatchesRuntimeSnapshot(params: {
-  inputConfig: OpenClawConfig | undefined;
-  runtimeConfig: OpenClawConfig | null;
+  inputConfig: BotConfig | undefined;
+  runtimeConfig: BotConfig | null;
   provider: string;
 }): boolean {
   const inputProvider = resolveProviderConfig(params.inputConfig, params.provider);
@@ -534,7 +534,7 @@ export function providerConfigMatchesRuntimeSnapshot(params: {
   if (!inputProvider || !runtimeProvider) {
     return false;
   }
-  const toComparableConfig = (providerConfig: ModelProviderConfig): OpenClawConfig => ({
+  const toComparableConfig = (providerConfig: ModelProviderConfig): BotConfig => ({
     models: { providers: { [params.provider]: providerConfig } },
   });
   return (
@@ -546,7 +546,7 @@ export function providerConfigMatchesRuntimeSnapshot(params: {
 export function sentinelizeConfigSecretRefEnvApiKey(params: {
   apiKey: string;
   source: string;
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   enabled?: boolean;
 }): string {
@@ -577,7 +577,7 @@ export function sentinelizeConfigSecretRefEnvApiKey(params: {
 }
 
 export function resolveLiteralProviderConfigApiKeyAuth(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
 }): ResolvedProviderAuth | undefined {
   const apiKey = normalizeOptionalSecretInput(

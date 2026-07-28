@@ -6,7 +6,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import {
   createSandboxedEditTool,
   createSandboxedReadTool,
@@ -46,7 +46,7 @@ const APPLY_PATCH_PAYLOAD = `*** Begin Patch
 
 function resolveApplyPatchTool(params: {
   sandbox: UnsafeMountedSandbox;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): ToolWithExecute {
   return createApplyPatchTool({
     cwd: params.sandbox.workspaceDir,
@@ -180,7 +180,7 @@ describe("tools.fs.workspaceOnly", () => {
         const skillDir = path.join(skillsWorkspaceDir!, "skills", "demo");
         const userOwnedShadowDir = path.join(
           sandbox.workspaceDir,
-          ".openclaw",
+          ".bot",
           "sandbox-skills",
           "skills",
           "demo",
@@ -196,18 +196,18 @@ describe("tools.fs.workspaceOnly", () => {
 
         const tools = createSandboxFsTools({ sandbox, workspaceOnly: true });
         const { readTool } = expectReadWriteEditTools(tools);
-        const containerSkillPath = "/workspace/.openclaw/sandbox-skills/skills/demo/SKILL.md";
+        const containerSkillPath = "/workspace/.bot/sandbox-skills/skills/demo/SKILL.md";
 
         const readResult = await readTool?.execute("t1", { path: containerSkillPath });
         expect(getTextContent(readResult)).toContain("materialized");
         expect(getTextContent(readResult)).not.toContain("user-owned shadow");
         const relativeReadResult = await readTool?.execute("t2", {
-          path: ".openclaw/sandbox-skills/skills/demo/SKILL.md",
+          path: ".bot/sandbox-skills/skills/demo/SKILL.md",
         });
         expect(getTextContent(relativeReadResult)).toContain("materialized");
         expect(getTextContent(relativeReadResult)).not.toContain("user-owned shadow");
         const fileUrlReadResult = await readTool?.execute("t3", {
-          path: "file:///workspace/.openclaw/sandbox-skills/skills/demo/SKILL.md",
+          path: "file:///workspace/.bot/sandbox-skills/skills/demo/SKILL.md",
         });
         expect(getTextContent(fileUrlReadResult)).toContain("materialized");
         expect(getTextContent(fileUrlReadResult)).not.toContain("user-owned shadow");
@@ -231,7 +231,7 @@ describe("tools.fs.workspaceOnly", () => {
             allow: ["read", "write", "exec"],
             exec: { applyPatch: {} },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
       });
 
       await expect(applyPatchTool.execute("t1", { input: APPLY_PATCH_PAYLOAD })).rejects.toThrow(
@@ -253,7 +253,7 @@ describe("tools.fs.workspaceOnly", () => {
             allow: ["read", "write", "exec"],
             exec: { applyPatch: { workspaceOnly: false } },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
       });
 
       await applyPatchTool.execute("t2", { input: APPLY_PATCH_PAYLOAD });

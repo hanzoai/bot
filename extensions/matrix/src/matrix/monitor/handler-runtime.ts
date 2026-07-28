@@ -1,6 +1,6 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import type { MatrixClient } from "../sdk.js";
-import { MATRIX_OPENCLAW_FINALIZED_PREVIEW_KEY } from "../send/types.js";
+import { MATRIX_BOT_FINALIZED_PREVIEW_KEY } from "../send/types.js";
 
 export type MatrixDraftStreamHandle = {
   update: (text: string) => void;
@@ -22,17 +22,17 @@ export async function redactMatrixDraftEvent(
 }
 
 export function buildMatrixFinalizedPreviewContent(): Record<string, unknown> {
-  return { [MATRIX_OPENCLAW_FINALIZED_PREVIEW_KEY]: true };
+  return { [MATRIX_BOT_FINALIZED_PREVIEW_KEY]: true };
 }
 
 export const loadMatrixSendModule = createLazyRuntimeModule(() => import("../send.js"));
 
 export const loadAcpBindingRuntime = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/acp-binding-runtime"),
+  () => import("bot/plugin-sdk/acp-binding-runtime"),
 );
 
 export const loadSessionBindingRuntime = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/session-binding-runtime"),
+  () => import("bot/plugin-sdk/session-binding-runtime"),
 );
 
 export const loadMatrixReactionEvents = createLazyRuntimeModule(

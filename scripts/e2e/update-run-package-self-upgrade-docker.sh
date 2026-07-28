@@ -6,25 +6,25 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 source "$ROOT_DIR/scripts/lib/docker-e2e-package.sh"
 
-ALLOW_ENV="OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF"
+ALLOW_ENV="BOT_QA_ALLOW_UPDATE_RUN_SELF"
 SOURCE_VERSION="2026.4.26"
 SOURCE_TAG="v$SOURCE_VERSION"
 SOURCE_COMMIT="be8c24633aaa7ef0425ae1178f096ee8dd6226c0"
 
-if [ "${OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF:-0}" != "1" ]; then
+if [ "${BOT_QA_ALLOW_UPDATE_RUN_SELF:-0}" != "1" ]; then
   echo "blocked destructive package self-upgrade; set $ALLOW_ENV=1 to run" >&2
   exit 2
 fi
 
 IMAGE_NAME="$(
   docker_e2e_resolve_image \
-    "openclaw-update-run-package-self-upgrade-e2e" \
-    OPENCLAW_UPDATE_RUN_SELF_UPGRADE_E2E_IMAGE
+    "bot-update-run-package-self-upgrade-e2e" \
+    BOT_UPDATE_RUN_SELF_UPGRADE_E2E_IMAGE
 )"
-SKIP_BUILD="${OPENCLAW_UPDATE_RUN_SELF_UPGRADE_E2E_SKIP_BUILD:-0}"
-DOCKER_RUN_TIMEOUT="${OPENCLAW_UPDATE_RUN_SELF_UPGRADE_DOCKER_RUN_TIMEOUT:-1800s}"
-ARTIFACT_DIR="${OPENCLAW_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/update-run-package-self-upgrade}"
-QA_CHANNEL_FIXTURE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-update-run-qa-channel.XXXXXX")"
+SKIP_BUILD="${BOT_UPDATE_RUN_SELF_UPGRADE_E2E_SKIP_BUILD:-0}"
+DOCKER_RUN_TIMEOUT="${BOT_UPDATE_RUN_SELF_UPGRADE_DOCKER_RUN_TIMEOUT:-1800s}"
+ARTIFACT_DIR="${BOT_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR:-$ROOT_DIR/.artifacts/update-run-package-self-upgrade}"
+QA_CHANNEL_FIXTURE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/bot-update-run-qa-channel.XXXXXX")"
 
 cleanup() {
   rm -rf "$QA_CHANNEL_FIXTURE_ROOT"
@@ -47,7 +47,7 @@ prepare_qa_channel_fixture() {
       --filter=blob:none \
       --single-branch \
       --branch "$SOURCE_TAG" \
-      https://github.com/openclaw/openclaw.git \
+      https://github.com/hanzoai/bot.git \
       "$clone_root"
     source_repo="$clone_root"
     source_ref="HEAD"
@@ -71,7 +71,7 @@ prepare_qa_channel_fixture() {
           tag: process.env.SOURCE_TAG,
           tagObject: process.env.TAG_OBJECT,
           commit: process.env.SOURCE_COMMIT,
-          buildCommand: "OPENCLAW_BUILD_PRIVATE_QA=1 corepack pnpm build:docker",
+          buildCommand: "BOT_BUILD_PRIVATE_QA=1 corepack pnpm build:docker",
         }, null, 2)}\n`,
       );
     ' "$ARTIFACT_DIR/qa-channel-fixture-provenance.json"
@@ -92,11 +92,11 @@ prepare_qa_channel_fixture() {
   (
     cd "$checkout_root"
     COREPACK_ENABLE_DOWNLOAD_PROMPT=0 corepack pnpm install --frozen-lockfile
-    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 OPENCLAW_BUILD_PRIVATE_QA=1 corepack pnpm build:docker
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 BOT_BUILD_PRIVATE_QA=1 corepack pnpm build:docker
   ) >>"$ARTIFACT_DIR/historical-qa-channel-build.log" 2>&1
 
   local compiled_plugin="$checkout_root/dist/extensions/qa-channel"
-  for required_file in package.json openclaw.plugin.json index.js setup-entry.js; do
+  for required_file in package.json bot.plugin.json index.js setup-entry.js; do
     if [ ! -f "$compiled_plugin/$required_file" ]; then
       echo "shipped build omitted QA channel artifact $required_file" >&2
       return 1
@@ -119,11 +119,11 @@ docker_e2e_build_or_reuse \
 echo "Running Gateway update.run package self-upgrade Docker E2E..."
 docker_e2e_run_with_harness \
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
-  -e OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF=1 \
-  -e OPENCLAW_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR=/tmp/openclaw-update-run-artifacts \
-  -e OPENCLAW_UPDATE_RUN_SELF_UPGRADE_SOURCE_VERSION="$SOURCE_VERSION" \
-  -v "$ARTIFACT_DIR:/tmp/openclaw-update-run-artifacts" \
-  -v "$QA_CHANNEL_FIXTURE_ROOT/checkout:/tmp/openclaw-update-run-build:ro" \
+  -e BOT_QA_ALLOW_UPDATE_RUN_SELF=1 \
+  -e BOT_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR=/tmp/bot-update-run-artifacts \
+  -e BOT_UPDATE_RUN_SELF_UPGRADE_SOURCE_VERSION="$SOURCE_VERSION" \
+  -v "$ARTIFACT_DIR:/tmp/bot-update-run-artifacts" \
+  -v "$QA_CHANNEL_FIXTURE_ROOT/checkout:/tmp/bot-update-run-build:ro" \
   "$IMAGE_NAME" \
   timeout --kill-after=30s "$DOCKER_RUN_TIMEOUT" \
   bash scripts/e2e/lib/upgrade-survivor/update-run-package-self-upgrade.sh

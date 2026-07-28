@@ -4,7 +4,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { AVATAR_MAX_DATA_URL_CHARS } from "../shared/avatar-limits.js";
 import { AVATAR_MAX_BYTES } from "../shared/avatar-policy.js";
 import { withTempDir } from "../test-helpers/temp-dir.js";
@@ -12,7 +12,7 @@ import { DEFAULT_ASSISTANT_IDENTITY, resolveAssistantIdentity } from "./assistan
 
 describe("resolveAssistantIdentity", () => {
   it("keeps ui.assistant identity authoritative for the default agent", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       ui: {
         assistant: {
           name: "Main assistant",
@@ -31,7 +31,7 @@ describe("resolveAssistantIdentity", () => {
   });
 
   it("prefers non-default agent identity over global ui.assistant identity", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       ui: {
         assistant: {
           name: "AI大管家",
@@ -50,7 +50,7 @@ describe("resolveAssistantIdentity", () => {
   });
 
   it("falls back to ui.assistant identity for non-default agents without their own identity", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       ui: {
         assistant: {
           name: "Main assistant",
@@ -69,7 +69,7 @@ describe("resolveAssistantIdentity", () => {
   });
 
   it("drops sentence-like avatar placeholders", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       ui: {
         assistant: {
           avatar: "workspace-relative path, http(s) URL, or data URI",
@@ -83,7 +83,7 @@ describe("resolveAssistantIdentity", () => {
   });
 
   it("keeps short text avatars", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       ui: {
         assistant: {
           avatar: "PS",
@@ -95,20 +95,20 @@ describe("resolveAssistantIdentity", () => {
   });
 
   it("keeps path avatars", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       ui: {
         assistant: {
-          avatar: "avatars/openclaw.png",
+          avatar: "avatars/bot.png",
         },
       },
     };
 
-    expect(resolveAssistantIdentity({ cfg, workspaceDir: "" }).avatar).toBe("avatars/openclaw.png");
+    expect(resolveAssistantIdentity({ cfg, workspaceDir: "" }).avatar).toBe("avatars/bot.png");
   });
 
   it("preserves long image data URLs without truncating past 200 chars", () => {
     const dataUrl = `data:image/png;base64,${"A".repeat(50_000)}`;
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       ui: {
         assistant: {
           avatar: dataUrl,
@@ -120,7 +120,7 @@ describe("resolveAssistantIdentity", () => {
   });
 
   it("preserves an exact shared-cap IDENTITY.md data URL without truncation", async () => {
-    await withTempDir({ prefix: "openclaw-assistant-identity-cap-" }, async (workspace) => {
+    await withTempDir({ prefix: "bot-assistant-identity-cap-" }, async (workspace) => {
       const dataUrl = `data:image/svg+xml;base64,${Buffer.alloc(AVATAR_MAX_BYTES).toString("base64")}`;
       expect(dataUrl).toHaveLength(AVATAR_MAX_DATA_URL_CHARS);
       await fs.writeFile(path.join(workspace, "IDENTITY.md"), `- Avatar: ${dataUrl}\n`);
@@ -130,7 +130,7 @@ describe("resolveAssistantIdentity", () => {
   });
 
   it("rejects an oversized IDENTITY.md data URL without truncating it", async () => {
-    await withTempDir({ prefix: "openclaw-assistant-identity-overflow-" }, async (workspace) => {
+    await withTempDir({ prefix: "bot-assistant-identity-overflow-" }, async (workspace) => {
       const exact = `data:image/svg+xml;base64,${Buffer.alloc(AVATAR_MAX_BYTES).toString("base64")}`;
       const oversized = `${exact}A`;
       expect(oversized).toHaveLength(AVATAR_MAX_DATA_URL_CHARS + 1);
@@ -144,7 +144,7 @@ describe("resolveAssistantIdentity", () => {
   });
 
   it("rejects a non-image IDENTITY.md data URL and uses its emoji fallback", async () => {
-    await withTempDir({ prefix: "openclaw-assistant-identity-data-type-" }, async (workspace) => {
+    await withTempDir({ prefix: "bot-assistant-identity-data-type-" }, async (workspace) => {
       await fs.writeFile(
         path.join(workspace, "IDENTITY.md"),
         "- Avatar: data:text/plain,avatar\n- Emoji: 🦞\n",
@@ -157,7 +157,7 @@ describe("resolveAssistantIdentity", () => {
   it.each(["data:text/plain,avatar", "slack://avatar.png"])(
     "lets a valid agent avatar win when the UI override is unsupported: %s",
     (avatar) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         ui: { assistant: { avatar } },
         agents: { list: [{ id: "main", identity: { avatar: "agent.png" } }] },
       };
@@ -167,9 +167,9 @@ describe("resolveAssistantIdentity", () => {
   );
 
   it("lets a valid IDENTITY.md avatar win when the agent URI scheme is unsupported", async () => {
-    await withTempDir({ prefix: "openclaw-assistant-identity-fallback-" }, async (workspace) => {
+    await withTempDir({ prefix: "bot-assistant-identity-fallback-" }, async (workspace) => {
       await fs.writeFile(path.join(workspace, "IDENTITY.md"), "- Avatar: identity.png\n");
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           list: [{ id: "main", workspace, identity: { avatar: "slack://avatar.png" } }],
         },

@@ -14,7 +14,7 @@ import {
   shouldSpawnWithShell,
 } from "./exec.js";
 
-const OPENCLAW_CLI_ENV_VALUE = "1";
+const BOT_CLI_ENV_VALUE = "1";
 
 describe("runCommandWithTimeout", () => {
   it("never enables shell execution (Windows cmd.exe injection hardening)", () => {
@@ -30,21 +30,21 @@ describe("runCommandWithTimeout", () => {
     const resolved = resolveCommandEnv({
       argv: ["node", "script.js"],
       baseEnv: {
-        OPENCLAW_BASE_ENV: "base",
-        OPENCLAW_CHILD_ENV_REMOVE: "base",
-        OPENCLAW_TO_REMOVE: undefined,
+        BOT_BASE_ENV: "base",
+        BOT_CHILD_ENV_REMOVE: "base",
+        BOT_TO_REMOVE: undefined,
       },
       env: {
-        OPENCLAW_CHILD_ENV_REMOVE: undefined,
-        OPENCLAW_TEST_ENV: "ok",
+        BOT_CHILD_ENV_REMOVE: undefined,
+        BOT_TEST_ENV: "ok",
       },
     });
 
-    expect(resolved.OPENCLAW_BASE_ENV).toBe("base");
-    expect(resolved.OPENCLAW_CHILD_ENV_REMOVE).toBeUndefined();
-    expect(resolved.OPENCLAW_TEST_ENV).toBe("ok");
-    expect(resolved.OPENCLAW_TO_REMOVE).toBeUndefined();
-    expect(resolved.OPENCLAW_CLI).toBe(OPENCLAW_CLI_ENV_VALUE);
+    expect(resolved.BOT_BASE_ENV).toBe("base");
+    expect(resolved.BOT_CHILD_ENV_REMOVE).toBeUndefined();
+    expect(resolved.BOT_TEST_ENV).toBe("ok");
+    expect(resolved.BOT_TO_REMOVE).toBeUndefined();
+    expect(resolved.BOT_CLI).toBe(BOT_CLI_ENV_VALUE);
   });
 
   it("collapses case-insensitive duplicate env keys on Windows", () => {
@@ -53,18 +53,18 @@ describe("runCommandWithTimeout", () => {
       platform: "win32",
       baseEnv: {
         Path: "C:\\base\\bin",
-        OPENCLAW_BASE_ENV: "base",
+        BOT_BASE_ENV: "base",
       },
       env: {
         PATH: "C:\\override\\bin",
-        OPENCLAW_TEST_ENV: "ok",
+        BOT_TEST_ENV: "ok",
       },
     });
 
     expect(resolved.Path).toBeUndefined();
     expect(resolved.PATH).toBe("C:\\override\\bin");
-    expect(resolved.OPENCLAW_BASE_ENV).toBe("base");
-    expect(resolved.OPENCLAW_TEST_ENV).toBe("ok");
+    expect(resolved.BOT_BASE_ENV).toBe("base");
+    expect(resolved.BOT_TEST_ENV).toBe("ok");
   });
 
   it("removes case-insensitive inherited env keys on Windows", () => {
@@ -96,7 +96,7 @@ describe("runCommandWithTimeout", () => {
   });
 
   it("does not restore parent variables excluded from the child environment", async () => {
-    const key = "OPENCLAW_EXECA_PARENT_ONLY_TEST";
+    const key = "BOT_EXECA_PARENT_ONLY_TEST";
     const previous = process.env[key];
     process.env[key] = "parent-value";
     try {
@@ -207,7 +207,7 @@ describe("runCommandWithTimeout", () => {
   it.runIf(process.platform === "win32")(
     "rejects unresolved commands before Execa can fall through to ambient ComSpec",
     async () => {
-      const command = `openclaw-missing-${process.pid}\r\ncalc.exe`;
+      const command = `bot-missing-${process.pid}\r\ncalc.exe`;
       const previousComspec = process.env.comspec;
       process.env.comspec = process.execPath;
       try {
@@ -455,7 +455,7 @@ describe("runCommandWithTimeout", () => {
   it("keeps argv values out of transport errors", async () => {
     const privateArg = "private-command-argument";
     const error = await runCommandWithTimeout(
-      [`openclaw-missing-${process.pid}-${Date.now()}`, "--token", privateArg],
+      [`bot-missing-${process.pid}-${Date.now()}`, "--token", privateArg],
       { timeoutMs: 3_000 },
     ).catch((caught: unknown) => caught);
 
@@ -590,7 +590,7 @@ describe("runCommandBuffered", () => {
   it("keeps argv values out of buffered transport errors", async () => {
     const privateArg = "private-buffered-argument";
     const result = await runCommandBuffered(
-      [`openclaw-missing-${process.pid}-${Date.now()}`, privateArg],
+      [`bot-missing-${process.pid}-${Date.now()}`, privateArg],
       { timeoutMs: 3_000 },
     );
 
@@ -619,10 +619,10 @@ describe("runExec", () => {
       process.execPath,
       [
         "-e",
-        "process.stdin.pipe(process.stdout); process.stderr.write(process.env.OPENCLAW_RUN_EXEC_TEST ?? 'missing')",
+        "process.stdin.pipe(process.stdout); process.stderr.write(process.env.BOT_RUN_EXEC_TEST ?? 'missing')",
       ],
       {
-        baseEnv: { OPENCLAW_RUN_EXEC_TEST: "base" },
+        baseEnv: { BOT_RUN_EXEC_TEST: "base" },
         input: Buffer.from("input"),
         timeoutMs: 3_000,
       },

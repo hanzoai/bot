@@ -1,6 +1,6 @@
 // Qa Lab plugin module implements process tree cpu behavior.
 import { spawnSync } from "node:child_process";
-import { parseStrictFiniteNumber, parseStrictInteger } from "openclaw/plugin-sdk/number-runtime";
+import { parseStrictFiniteNumber, parseStrictInteger } from "bot/plugin-sdk/number-runtime";
 import { resolveQaWindowsPowerShellExePath } from "./windows-system-tools.js";
 
 type ProcessTreeSnapshot = {

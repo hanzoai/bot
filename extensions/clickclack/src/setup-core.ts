@@ -1,19 +1,19 @@
 // ClickClack plugin module implements non-interactive setup behavior.
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
 import {
   defineChannelSetupContract,
   type ChannelSetupAdapter,
   type ChannelSetupInput,
-} from "openclaw/plugin-sdk/channel-setup";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "bot/plugin-sdk/channel-setup";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   applyAccountNameToChannelSection,
   migrateBaseNameToDefaultAccount,
   moveSingleAccountChannelSectionToDefaultAccount,
   patchScopedAccountConfig,
-} from "openclaw/plugin-sdk/setup";
-import { createSetupInputPresenceValidator } from "openclaw/plugin-sdk/setup-runtime";
+} from "bot/plugin-sdk/setup";
+import { createSetupInputPresenceValidator } from "bot/plugin-sdk/setup-runtime";
 import { resolveClickClackAccountConfig } from "./accounts.js";
 import {
   buildClickClackSetupClaimUrl,
@@ -156,12 +156,12 @@ function formatClickClackSetupCodeClaimError(error: unknown): Error {
 }
 
 export function applyClickClackSetupConfigPatch(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   name?: string;
   patch: Record<string, unknown>;
   clearFields?: readonly string[];
-}): OpenClawConfig {
+}): BotConfig {
   const accountId = normalizeAccountId(params.accountId);
   const scopedConfig =
     accountId === DEFAULT_ACCOUNT_ID
@@ -194,12 +194,12 @@ export function applyClickClackSetupConfigPatch(params: {
 }
 
 export function applyClickClackCredentialConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   token?: unknown;
   tokenFile?: string;
   useEnv?: boolean;
-}): OpenClawConfig {
+}): BotConfig {
   const fieldsToClear = params.useEnv
     ? ["token", "tokenFile"]
     : params.tokenFile

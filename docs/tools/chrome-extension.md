@@ -1,5 +1,5 @@
 ---
-summary: "Chrome extension: let OpenClaw drive your signed-in Chrome with no remote-debugging prompt"
+summary: "Chrome extension: let Bot drive your signed-in Chrome with no remote-debugging prompt"
 read_when:
   - You want an agent to drive your real signed-in Chrome from your phone
   - You keep hitting the Chrome "Allow remote debugging?" prompt with nobody at the desk
@@ -9,15 +9,15 @@ title: "Chrome Extension"
 
 # Chrome extension
 
-The OpenClaw Chrome extension lets an agent control your **signed-in Chrome
+The Bot Chrome extension lets an agent control your **signed-in Chrome
 tabs** without launching a separate managed browser, and **without** Chrome's
 blocking "Allow remote debugging?" prompt.
 
-This matters when you drive OpenClaw from a phone (Telegram, WhatsApp, etc.):
-the [`user` profile](/tools/browser#profiles-openclaw-user-chrome) attaches over
+This matters when you drive Bot from a phone (Telegram, WhatsApp, etc.):
+the [`user` profile](/tools/browser#profiles-bot-user-chrome) attaches over
 Chrome's remote-debugging port, which pops a desktop consent dialog nobody can
 click when you are away. The extension uses the `chrome.debugger` API instead,
-so the only in-page hint is Chrome's dismissible "OpenClaw started debugging
+so the only in-page hint is Chrome's dismissible "Bot started debugging
 this browser" banner.
 
 This is the same shape used by Anthropic's Claude in Chrome and OpenAI's Codex
@@ -31,12 +31,12 @@ Three parts:
   tool calls.
 - **Extension relay** (loopback WebSocket): a small server the control service
   starts on `127.0.0.1`. It presents a Chrome DevTools Protocol endpoint to
-  OpenClaw and speaks to the extension. Both sides authenticate with a
+  Bot and speaks to the extension. Both sides authenticate with a
   host-local token (see below).
-- **OpenClaw Chrome extension** (MV3): attaches to tabs with `chrome.debugger`,
-  forwards CDP traffic, and manages the **OpenClaw tab group**.
+- **Bot Chrome extension** (MV3): attaches to tabs with `chrome.debugger`,
+  forwards CDP traffic, and manages the **Bot tab group**.
 
-OpenClaw only sees and controls tabs that are in the **OpenClaw tab group**. The
+Bot only sees and controls tabs that are in the **Bot tab group**. The
 group is the consent boundary: drag a tab in to share it, drag it out (or click
 the toolbar button) to revoke access instantly.
 
@@ -45,7 +45,7 @@ the toolbar button) to revoke access instantly.
 1. Print the unpacked extension path:
 
    ```bash
-   openclaw browser extension path
+   bot browser extension path
    ```
 
 2. Open `chrome://extensions`, enable **Developer mode**, click **Load
@@ -54,10 +54,10 @@ the toolbar button) to revoke access instantly.
 3. Print the pairing string:
 
    ```bash
-   openclaw browser extension pair
+   bot browser extension pair
    ```
 
-4. Click the OpenClaw toolbar icon and paste the pairing string into the popup.
+4. Click the Bot toolbar icon and paste the pairing string into the popup.
    The badge turns **ON** when the extension connects to the relay.
 
 The pairing token is a **host-local secret** created on first use and stored
@@ -72,7 +72,7 @@ Select the built-in `chrome` profile in a `browser` tool call, or make it the
 default:
 
 ```bash
-openclaw config set browser.defaultProfile chrome
+bot config set browser.defaultProfile chrome
 ```
 
 ```json5
@@ -85,8 +85,8 @@ openclaw config set browser.defaultProfile chrome
 }
 ```
 
-- Share a tab: click the OpenClaw toolbar button on that tab (it joins the
-  OpenClaw tab group), or drag any tab into the group.
+- Share a tab: click the Bot toolbar button on that tab (it joins the
+  Bot tab group), or drag any tab into the group.
 - The agent can also open new tabs; those land in the group automatically.
 - Revoke: click the button again, drag the tab out of the group, or dismiss
   Chrome's debugging banner. The agent loses access to that tab immediately.
@@ -94,7 +94,7 @@ openclaw config set browser.defaultProfile chrome
 ### Tab copilot side panel
 
 After pairing the extension, click **Open tab copilot** in its toolbar popup.
-OpenClaw configures `sidepanel.html` for that exact Chrome tab; the manifest has
+Bot configures `sidepanel.html` for that exact Chrome tab; the manifest has
 no global side-panel path. Each tab therefore gets a separate panel document,
 Gateway session, message subscription, and typed browser-tool binding.
 
@@ -109,8 +109,8 @@ The copilot is a dedicated paired Gateway device with `operator.read` and
 `operator.write` scopes. On first use, inspect and approve its request:
 
 ```bash
-openclaw devices list
-openclaw devices approve <requestId>
+bot devices list
+bot devices approve <requestId>
 ```
 
 The extension retains that device identity and the Gateway-issued device token,
@@ -141,21 +141,21 @@ direct remote Gateway relay. A loopback relay on a browser node cannot yet
 provide the node route required by the typed tab binding, so the panel denies
 that topology instead of falling back to browser-wide routing.
 
-## Send a page to OpenClaw
+## Send a page to Bot
 
-Use **Send page to OpenClaw** in the toolbar popup to share readable page text
-with your main OpenClaw session. You can add an optional note, use the page or
-selection right-click menu, or press `Alt+Shift+S`. OpenClaw prefers your current
+Use **Send page to Bot** in the toolbar popup to share readable page text
+with your main Bot session. You can add an optional note, use the page or
+selection right-click menu, or press `Alt+Shift+S`. Bot prefers your current
 selection when one exists, enqueues the share as a system event, and wakes the
 main session immediately.
 
-The tab does not need to be in the OpenClaw tab group. This is a one-shot,
+The tab does not need to be in the Bot tab group. This is a one-shot,
 explicit share: nothing else on the page is exposed, and it grants no ongoing
 access. Google Docs are exported as plain text with your signed-in browser
 session, without Google API setup. X and Twitter threads are extracted without
 the surrounding interface chrome.
 
-Page text is wrapped in OpenClaw's external-content safety boundary. Your
+Page text is wrapped in Bot's external-content safety boundary. Your
 optional note stays outside that boundary as your own instruction. Page text
 and selections are capped at about 120,000 characters and include a truncation
 marker when shortened.
@@ -170,17 +170,17 @@ a clear error for now. To remap the keyboard shortcut, open
 Chrome does not have to run on the Gateway host. Three topologies work:
 
 - **Same host** (Gateway + Chrome on one machine): pair on that machine with
-  `openclaw browser extension pair`. The relay is loopback-only.
+  `bot browser extension pair`. The relay is loopback-only.
   If the local Gateway uses TLS, pass its certificate hostname explicitly with
   `--gateway-url wss://gateway-host.example`; pairing never substitutes a loopback IP.
 - **Direct to a remote Gateway** (Chrome on your laptop, Gateway on a VPS, and
   **nothing else on the laptop**): on the Gateway, run
-  `openclaw browser extension pair --gateway-url wss://your-gateway.example.com`.
+  `bot browser extension pair --gateway-url wss://your-gateway.example.com`.
   It prints a `wss://…/browser/extension#<secret>` string; load and pair the
   extension on the laptop. The extension connects **straight to the Gateway**
-  over `wss://` — no OpenClaw install, Node, CLI, or open inbound port on the
+  over `wss://` — no Bot install, Node, CLI, or open inbound port on the
   laptop. This is the managed-hosting path.
-- **Via a browser node host** (Chrome on a machine already running an OpenClaw
+- **Via a browser node host** (Chrome on a machine already running an Bot
   node): run `pair` on the node and pair locally; the Gateway proxies browser
   actions to the node over its existing authenticated node link.
 
@@ -195,8 +195,8 @@ the standard `Sec-WebSocket-Protocol` header.
 ## Diagnostics
 
 ```bash
-openclaw browser status --browser-profile chrome
-openclaw browser doctor --browser-profile chrome
+bot browser status --browser-profile chrome
+bot browser doctor --browser-profile chrome
 ```
 
 `doctor` reports the **Chrome extension relay** check as failing until the
@@ -208,7 +208,7 @@ extension popup shows **Connected**.
   derived token, and the extension side is origin-checked to `chrome-extension://`.
 - Direct Gateway pairing does not accept the relay token in the request URL;
   the bundled extension carries it in the WebSocket subprotocol list instead.
-- The agent can only see and drive tabs in the **OpenClaw tab group**. Your
+- The agent can only see and drive tabs in the **Bot tab group**. Your
   other tabs stay private.
 - Side-panel runs are scoped twice: Gateway delivery uses a per-session
   allowlist, and browser tools enforce the Chrome tab/target binding carried
@@ -218,4 +218,4 @@ extension popup shows **Connected**.
   keeps the shared surface scoped to a tab group you control at a glance.
 
 See also: [Browser](/tools/browser) for the full profile model and the
-managed `openclaw` and Chrome MCP `user` profiles.
+managed `bot` and Chrome MCP `user` profiles.

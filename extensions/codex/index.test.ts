@@ -1,6 +1,6 @@
 // Codex tests cover index plugin behavior.
 import fs from "node:fs";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { createTestPluginApi } from "bot/plugin-sdk/plugin-test-api";
 import { describe, expect, it, vi } from "vitest";
 import openAIPlugin from "../openai/index.js";
 import { createCodexAppServerAgentHarness } from "./harness.js";
@@ -48,7 +48,7 @@ function mockCallArg(mock: { mock: { calls: unknown[][] } }, index = 0, argIndex
 describe("codex plugin", () => {
   it("is opt-in and does not advertise a text provider", () => {
     const manifest = JSON.parse(
-      fs.readFileSync(new URL("./openclaw.plugin.json", import.meta.url), "utf8"),
+      fs.readFileSync(new URL("./bot.plugin.json", import.meta.url), "utf8"),
     ) as { enabledByDefault?: unknown; providers?: unknown };
 
     expect(manifest.enabledByDefault).toBeUndefined();

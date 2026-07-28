@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { stableStringify } from "../agents/stable-stringify.js";
 import { preflightPluginInstall } from "../plugins/plugin-install-preflight.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { BotStateDatabaseOptions } from "../state/bot-state-db.js";
 import {
   digestClawPackageRef,
   replaceClawPackageRefExpected,
@@ -46,7 +46,7 @@ export async function applyClawPackageUpdate(
   updatePlan: ClawUpdatePlan,
   targetManifest: ClawManifest,
   targetAddPlan: ClawAddPlan,
-  options: OpenClawStateDatabaseOptions & {
+  options: BotStateDatabaseOptions & {
     installPackages?: typeof installClawPackages;
     readRefs?: typeof readClawPackageRefs;
     replaceExpected?: typeof replaceClawPackageRefExpected;

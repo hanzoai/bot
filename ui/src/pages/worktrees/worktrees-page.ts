@@ -21,7 +21,7 @@ import {
   resolveSessionPreferredFaceForKey,
   sessionNavigationTarget,
 } from "../../lib/sessions/route-navigation.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 
 type WorktreesListResult = { worktrees: WorktreeRecord[] };
@@ -42,7 +42,7 @@ function repoName(repoRoot: string): string {
   return repoRoot.split(/[\\/]/).findLast(Boolean) ?? repoRoot;
 }
 
-class WorktreesPage extends OpenClawLightDomElement {
+class WorktreesPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -508,6 +508,6 @@ class WorktreesPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-worktrees-page")) {
-  customElements.define("openclaw-worktrees-page", WorktreesPage);
+if (!customElements.get("bot-worktrees-page")) {
+  customElements.define("bot-worktrees-page", WorktreesPage);
 }

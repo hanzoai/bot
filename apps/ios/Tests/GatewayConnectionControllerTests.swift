@@ -1,11 +1,11 @@
 import Foundation
 import Network
-import OpenClawChatUI
+import BotChatUI
 import os
 import Testing
 import UIKit
-@testable import OpenClaw
-@testable import OpenClawKit
+@testable import Bot
+@testable import BotKit
 
 @discardableResult
 private func saveActiveManualGateway(
@@ -235,33 +235,33 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
             "node.instanceId": "ios-test",
             "node.displayName": "Test Node",
             "camera.enabled": true,
-            "location.enabledMode": OpenClawLocationMode.always.rawValue,
+            "location.enabledMode": BotLocationMode.always.rawValue,
             VoiceWakePreferences.enabledKey: true,
         ]) {
             let appModel = NodeAppModel()
             let controller = GatewayConnectionController(appModel: appModel, startDiscovery: false)
             let caps = Set(controller._test_currentCaps())
 
-            #expect(caps.contains(OpenClawCapability.canvas.rawValue))
-            #expect(caps.contains(OpenClawCapability.screen.rawValue))
-            #expect(!caps.contains(OpenClawGatewayClientCapability.inlineWidgets))
-            #expect(caps.contains(OpenClawCapability.camera.rawValue))
-            #expect(caps.contains(OpenClawCapability.location.rawValue))
-            #expect(caps.contains(OpenClawCapability.voiceWake.rawValue))
-            #expect(caps.contains(OpenClawCapability.talk.rawValue))
+            #expect(caps.contains(BotCapability.canvas.rawValue))
+            #expect(caps.contains(BotCapability.screen.rawValue))
+            #expect(!caps.contains(BotGatewayClientCapability.inlineWidgets))
+            #expect(caps.contains(BotCapability.camera.rawValue))
+            #expect(caps.contains(BotCapability.location.rawValue))
+            #expect(caps.contains(BotCapability.voiceWake.rawValue))
+            #expect(caps.contains(BotCapability.talk.rawValue))
         }
     }
 
     @Test @MainActor func `current commands include location when enabled`() {
         withUserDefaults([
             "node.instanceId": "ios-test",
-            "location.enabledMode": OpenClawLocationMode.whileUsing.rawValue,
+            "location.enabledMode": BotLocationMode.whileUsing.rawValue,
         ]) {
             let appModel = NodeAppModel()
             let controller = GatewayConnectionController(appModel: appModel, startDiscovery: false)
             let commands = Set(controller._test_currentCommands())
 
-            #expect(commands.contains(OpenClawLocationCommand.get.rawValue))
+            #expect(commands.contains(BotLocationCommand.get.rawValue))
         }
     }
 
@@ -298,34 +298,34 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
         withUserDefaults([
             "node.instanceId": "ios-test",
             "camera.enabled": true,
-            "location.enabledMode": OpenClawLocationMode.whileUsing.rawValue,
+            "location.enabledMode": BotLocationMode.whileUsing.rawValue,
         ]) {
             let appModel = NodeAppModel()
             let controller = GatewayConnectionController(appModel: appModel, startDiscovery: false)
             let commands = Set(controller._test_currentCommands())
 
             // iOS should expose notify, but not host shell/exec-approval commands.
-            #expect(commands.contains(OpenClawSystemCommand.notify.rawValue))
-            #expect(!commands.contains(OpenClawSystemCommand.run.rawValue))
-            #expect(!commands.contains(OpenClawSystemCommand.which.rawValue))
-            #expect(!commands.contains(OpenClawSystemCommand.execApprovalsGet.rawValue))
-            #expect(!commands.contains(OpenClawSystemCommand.execApprovalsSet.rawValue))
+            #expect(commands.contains(BotSystemCommand.notify.rawValue))
+            #expect(!commands.contains(BotSystemCommand.run.rawValue))
+            #expect(!commands.contains(BotSystemCommand.which.rawValue))
+            #expect(!commands.contains(BotSystemCommand.execApprovalsGet.rawValue))
+            #expect(!commands.contains(BotSystemCommand.execApprovalsSet.rawValue))
         }
     }
 
     @Test @MainActor func `operator connect options only request approval scope when enabled`() {
         let appModel = NodeAppModel()
         let withoutApprovalScope = appModel._test_makeOperatorConnectOptions(
-            clientId: "openclaw-ios",
-            displayName: "OpenClaw iOS",
+            clientId: "bot-ios",
+            displayName: "Bot iOS",
             includeApprovalScope: false)
         let withApprovalScope = appModel._test_makeOperatorConnectOptions(
-            clientId: "openclaw-ios",
-            displayName: "OpenClaw iOS",
+            clientId: "bot-ios",
+            displayName: "Bot iOS",
             includeApprovalScope: true)
         let withAdminScope = appModel._test_makeOperatorConnectOptions(
-            clientId: "openclaw-ios",
-            displayName: "OpenClaw iOS",
+            clientId: "bot-ios",
+            displayName: "Bot iOS",
             includeAdminScope: true,
             includeApprovalScope: false)
 
@@ -338,8 +338,8 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
         #expect(withoutApprovalScope.scopes.contains("operator.talk.secrets"))
         #expect(!withoutApprovalScope.scopesAreExplicit)
         #expect(withoutApprovalScope.caps == [
-            OpenClawGatewayClientCapability.agentKind,
-            OpenClawGatewayClientCapability.inlineWidgets,
+            BotGatewayClientCapability.agentKind,
+            BotGatewayClientCapability.inlineWidgets,
         ])
 
         #expect(withApprovalScope.scopes.contains("operator.approvals"))
@@ -350,8 +350,8 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
     @Test @MainActor func `operator talk permission upgrade uses explicit least privilege scopes`() {
         let appModel = NodeAppModel()
         let options = appModel._test_makeOperatorConnectOptions(
-            clientId: "openclaw-ios",
-            displayName: "OpenClaw iOS",
+            clientId: "bot-ios",
+            displayName: "Bot iOS",
             includeApprovalScope: false,
             forceExplicitScopes: true)
 
@@ -858,8 +858,8 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        let previousStateDir = ProcessInfo.processInfo.environment["OPENCLAW_STATE_DIR"]
-        setenv("OPENCLAW_STATE_DIR", tempDir.path, 1)
+        let previousStateDir = ProcessInfo.processInfo.environment["BOT_STATE_DIR"]
+        setenv("BOT_STATE_DIR", tempDir.path, 1)
         let defaults = UserDefaults.standard
         let previousInstanceID = defaults.object(forKey: "node.instanceId")
         let instanceID = "ios-test-\(UUID().uuidString)"
@@ -879,9 +879,9 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
                 defaults.removeObject(forKey: "node.instanceId")
             }
             if let previousStateDir {
-                setenv("OPENCLAW_STATE_DIR", previousStateDir, 1)
+                setenv("BOT_STATE_DIR", previousStateDir, 1)
             } else {
-                unsetenv("OPENCLAW_STATE_DIR")
+                unsetenv("BOT_STATE_DIR")
             }
             try? FileManager.default.removeItem(at: tempDir)
         }
@@ -922,7 +922,7 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        let previousStateDir = ProcessInfo.processInfo.environment["OPENCLAW_STATE_DIR"]
+        let previousStateDir = ProcessInfo.processInfo.environment["BOT_STATE_DIR"]
         let defaults = UserDefaults.standard
         let previousInstanceID = defaults.string(forKey: "node.instanceId")
         let instanceID = "legacy-relay-\(UUID().uuidString)"
@@ -932,7 +932,7 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
             service: gatewayService,
             account: lastConnectionAccount)
         let previousRelay = ShareGatewayRelaySettings.loadConfig()
-        setenv("OPENCLAW_STATE_DIR", tempDir.path, 1)
+        setenv("BOT_STATE_DIR", tempDir.path, 1)
         defaults.set(instanceID, forKey: "node.instanceId")
         defer {
             GatewaySettingsStore.deleteAllGatewayCredentials(instanceId: instanceID)
@@ -942,9 +942,9 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
                 defaults.removeObject(forKey: "node.instanceId")
             }
             if let previousStateDir {
-                setenv("OPENCLAW_STATE_DIR", previousStateDir, 1)
+                setenv("BOT_STATE_DIR", previousStateDir, 1)
             } else {
-                unsetenv("OPENCLAW_STATE_DIR")
+                unsetenv("BOT_STATE_DIR")
             }
             if let previousLastConnection {
                 _ = KeychainStore.saveString(
@@ -1077,13 +1077,13 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        let previousStateDir = ProcessInfo.processInfo.environment["OPENCLAW_STATE_DIR"]
-        setenv("OPENCLAW_STATE_DIR", tempDir.path, 1)
+        let previousStateDir = ProcessInfo.processInfo.environment["BOT_STATE_DIR"]
+        setenv("BOT_STATE_DIR", tempDir.path, 1)
         defer {
             if let previousStateDir {
-                setenv("OPENCLAW_STATE_DIR", previousStateDir, 1)
+                setenv("BOT_STATE_DIR", previousStateDir, 1)
             } else {
-                unsetenv("OPENCLAW_STATE_DIR")
+                unsetenv("BOT_STATE_DIR")
             }
             try? FileManager.default.removeItem(at: tempDir)
         }
@@ -1204,17 +1204,17 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        let previousStateDir = ProcessInfo.processInfo.environment["OPENCLAW_STATE_DIR"]
-        setenv("OPENCLAW_STATE_DIR", tempDir.path, 1)
+        let previousStateDir = ProcessInfo.processInfo.environment["BOT_STATE_DIR"]
+        setenv("BOT_STATE_DIR", tempDir.path, 1)
         let gatewayA = "manual|gateway-a-\(UUID().uuidString)|443"
         let gatewayB = "manual|gateway-b-\(UUID().uuidString)|443"
         defer {
             GatewayTLSStore.clearFingerprint(stableID: gatewayA)
             GatewayTLSStore.clearFingerprint(stableID: gatewayB)
             if let previousStateDir {
-                setenv("OPENCLAW_STATE_DIR", previousStateDir, 1)
+                setenv("BOT_STATE_DIR", previousStateDir, 1)
             } else {
-                unsetenv("OPENCLAW_STATE_DIR")
+                unsetenv("BOT_STATE_DIR")
             }
             try? FileManager.default.removeItem(at: tempDir)
         }
@@ -1643,7 +1643,7 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
         let stableID = "\u{0085}gateway-e\u{0301}"
         let endpoint: NWEndpoint = .service(
             name: "Exact Owner",
-            type: "_openclaw-gw._tcp",
+            type: "_bot-gw._tcp",
             domain: "local.",
             interface: nil)
         let gateway = GatewayDiscoveryModel.DiscoveredGateway(
@@ -1722,7 +1722,7 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
             caps: [],
             commands: [],
             permissions: [:],
-            clientId: "openclaw-ios",
+            clientId: "bot-ios",
             clientMode: "node",
             clientDisplayName: nil,
             deviceAuthGatewayID: stableID)
@@ -2738,9 +2738,9 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
         let prior = KeychainStore.loadString(service: service, account: account)
         let tempDir = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
-        let previousStateDir = ProcessInfo.processInfo.environment["OPENCLAW_STATE_DIR"]
+        let previousStateDir = ProcessInfo.processInfo.environment["BOT_STATE_DIR"]
         try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
-        setenv("OPENCLAW_STATE_DIR", tempDir.path, 1)
+        setenv("BOT_STATE_DIR", tempDir.path, 1)
         defer {
             if let prior {
                 _ = KeychainStore.saveString(prior, service: service, account: account)
@@ -2748,9 +2748,9 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
                 _ = KeychainStore.delete(service: service, account: account)
             }
             if let previousStateDir {
-                setenv("OPENCLAW_STATE_DIR", previousStateDir, 1)
+                setenv("BOT_STATE_DIR", previousStateDir, 1)
             } else {
-                unsetenv("OPENCLAW_STATE_DIR")
+                unsetenv("BOT_STATE_DIR")
             }
             try? FileManager.default.removeItem(at: tempDir)
         }
@@ -2767,7 +2767,7 @@ private func waitForActiveGateway(stableID: String, appModel: NodeAppModel) asyn
             useTLS: false,
             lastConnectedAtMs: nil))
         let appModel = NodeAppModel()
-        let session = OpenClawChatSessionEntry(
+        let session = BotChatSessionEntry(
             key: "agent:main:a",
             kind: nil,
             displayName: "Gateway A session",

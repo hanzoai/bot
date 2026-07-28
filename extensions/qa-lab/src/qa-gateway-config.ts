@@ -1,7 +1,7 @@
 // Qa Lab helper module supports qa gateway config behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { ModelProviderConfig } from "bot/plugin-sdk/provider-model-shared";
+import { uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   defaultQaModelForMode,
   normalizeQaProviderMode,
@@ -70,7 +70,7 @@ export function buildQaGatewayConfig(params: {
   fastMode?: boolean;
   thinkingDefault?: QaThinkingLevel;
   forcedRuntime?: RuntimeId;
-}): OpenClawConfig {
+}): BotConfig {
   const providerBaseUrl = params.providerBaseUrl ?? "http://127.0.0.1:44080/v1";
   const providerMode = normalizeQaProviderMode(params.providerMode ?? DEFAULT_QA_PROVIDER_MODE);
   const provider = getQaProvider(providerMode);
@@ -149,7 +149,7 @@ export function buildQaGatewayConfig(params: {
     ]),
   ];
   const resolveModelEntry = (modelRef: string) => {
-    // Codex owns its app-server transport. OpenClaw provider params would make
+    // Codex owns its app-server transport. Bot provider params would make
     // the forced parity cell an authored route that Codex correctly rejects.
     if (params.forcedRuntime === "codex") {
       return {};
@@ -216,7 +216,7 @@ export function buildQaGatewayConfig(params: {
           enabled: true,
           config: {
             pluginToolsMcpBridge: true,
-            openClawToolsMcpBridge: true,
+            botToolsMcpBridge: true,
           },
         },
         "memory-core": {
@@ -313,5 +313,5 @@ export function buildQaGatewayConfig(params: {
     },
     ...(params.transportConfig?.channels ? { channels: params.transportConfig.channels } : {}),
     ...(params.transportConfig?.messages ? { messages: params.transportConfig.messages } : {}),
-  } satisfies OpenClawConfig;
+  } satisfies BotConfig;
 }

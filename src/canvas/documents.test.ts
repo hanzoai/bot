@@ -16,7 +16,7 @@ afterEach(async () => {
   await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
 });
 
-async function createTempDir(label = "openclaw-canvas-documents-"): Promise<string> {
+async function createTempDir(label = "bot-canvas-documents-"): Promise<string> {
   const dir = await mkdtemp(path.join(tmpdir(), label));
   tempDirs.push(dir);
   return dir;
@@ -29,7 +29,7 @@ function resolveCanvasDocumentDir(stateDir: string, documentId: string): string 
 describe("canvas documents", () => {
   it("builds entry urls for materialized path documents under managed storage", async () => {
     const stateDir = await createTempDir();
-    const workspaceDir = await createTempDir("openclaw-canvas-documents-workspace-");
+    const workspaceDir = await createTempDir("bot-canvas-documents-workspace-");
     await mkdir(path.join(workspaceDir, "player"), { recursive: true });
     await writeFile(path.join(workspaceDir, "player/index.html"), "<div>ok</div>", "utf8");
 
@@ -41,7 +41,7 @@ describe("canvas documents", () => {
       { stateDir, workspaceDir },
     );
 
-    expect(document.entryUrl).toContain("/__openclaw__/canvas/documents/");
+    expect(document.entryUrl).toContain("/__bot__/canvas/documents/");
     expect(document.localEntrypoint).toBe("index.html");
     expect(resolveCanvasDocumentDir(stateDir, document.id)).toContain(stateDir);
   });
@@ -68,7 +68,7 @@ describe("canvas documents", () => {
     expect(indexHtml).toContain("<div class='demo'>Front</div>");
     expect(indexHtml).toContain("<style>.demo{color:red}</style>");
     expect(document.title).toBe("Preview");
-    expect(document.entryUrl).toBe(`/__openclaw__/canvas/documents/${document.id}/index.html`);
+    expect(document.entryUrl).toBe(`/__bot__/canvas/documents/${document.id}/index.html`);
     await expect(readCanvasDocumentHtmlSource(document.id, { stateDir })).resolves.toEqual({
       html: indexHtml,
     });
@@ -122,7 +122,7 @@ describe("canvas documents", () => {
 
   it("copies declared assets into managed storage", async () => {
     const stateDir = await createTempDir();
-    const workspaceDir = await createTempDir("openclaw-canvas-documents-workspace-");
+    const workspaceDir = await createTempDir("bot-canvas-documents-workspace-");
     await mkdir(path.join(workspaceDir, "collection.media"), { recursive: true });
     await writeFile(path.join(workspaceDir, "collection.media/audio.mp3"), "audio", "utf8");
 
@@ -154,7 +154,7 @@ describe("canvas documents", () => {
 
   it("wraps local and remote PDF documents in index viewer pages", async () => {
     const stateDir = await createTempDir();
-    const workspaceDir = await createTempDir("openclaw-canvas-documents-workspace-");
+    const workspaceDir = await createTempDir("bot-canvas-documents-workspace-");
     await writeFile(path.join(workspaceDir, "demo.pdf"), "%PDF-1.4", "utf8");
     const localDocument = await createCanvasDocument(
       { kind: "document", entrypoint: { type: "path", value: "demo.pdf" } },
@@ -184,7 +184,7 @@ describe("canvas documents", () => {
     const stateDir = await createTempDir();
     expect(
       resolveCanvasHttpPathToLocalPath(
-        "/__openclaw__/canvas/documents/../collection.media/index.html",
+        "/__bot__/canvas/documents/../collection.media/index.html",
         { stateDir },
       ),
     ).toBeNull();
@@ -194,13 +194,13 @@ describe("canvas documents", () => {
     await writeFile(path.join(documentDir, "%E0%A4%A.html"), "literal-percent-name", "utf8");
     expect(
       resolveCanvasHttpPathToLocalPath(
-        "/__openclaw__/canvas/documents/cv_malformed/%E0%A4%A.html",
+        "/__bot__/canvas/documents/cv_malformed/%E0%A4%A.html",
         { stateDir },
       ),
     ).toBeNull();
     expect(
       resolveCanvasHttpPathToLocalPath(
-        "/__openclaw__/canvas/documents/cv_malformed/%25E0%25A4%25A.html",
+        "/__bot__/canvas/documents/cv_malformed/%25E0%25A4%25A.html",
         { stateDir },
       ),
     ).toBe(path.join(documentDir, "%E0%A4%A.html"));

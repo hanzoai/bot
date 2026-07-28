@@ -1,14 +1,14 @@
 // Signal plugin module implements shared behavior.
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
+import { describeAccountSnapshot } from "bot/plugin-sdk/account-helpers";
 import {
   adaptScopedAccountAccessor,
   createScopedChannelConfigAdapter,
-} from "openclaw/plugin-sdk/channel-config-helpers";
-import { createRestrictSendersChannelSecurity } from "openclaw/plugin-sdk/channel-policy";
-import { createChannelPluginBase, getChatChannelMeta } from "openclaw/plugin-sdk/core";
-import type { ChannelPlugin } from "openclaw/plugin-sdk/core";
-import { normalizeStringifiedEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { normalizeE164 } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/channel-config-helpers";
+import { createRestrictSendersChannelSecurity } from "bot/plugin-sdk/channel-policy";
+import { createChannelPluginBase, getChatChannelMeta } from "bot/plugin-sdk/core";
+import type { ChannelPlugin } from "bot/plugin-sdk/core";
+import { normalizeStringifiedEntries } from "bot/plugin-sdk/string-coerce-runtime";
+import { normalizeE164 } from "bot/plugin-sdk/text-utility-runtime";
 import {
   listSignalAccountIds,
   resolveDefaultSignalAccountId,

@@ -5,7 +5,7 @@ import fs from "node:fs";
 import process from "node:process";
 import { pathToFileURL } from "node:url";
 
-const RUNTIME_IDS = ["openclaw", "codex"];
+const RUNTIME_IDS = ["bot", "codex"];
 const HARD_RUNTIME_ERROR_CLASSES = new Set([
   "missing-api-key",
   "failover",
@@ -109,21 +109,21 @@ function requireRuntimePairScenario(scenario, index) {
   if (!isRecord(parity) || !isRecord(parity.cells)) {
     throw new Error(`${label} is missing runtimeParity cells`);
   }
-  const openclaw = parity.cells.openclaw;
+  const bot = parity.cells.bot;
   const codex = parity.cells.codex;
-  if (!isRecord(openclaw) || !isRecord(codex)) {
+  if (!isRecord(bot) || !isRecord(codex)) {
     throw new Error(`${label} is missing a canonical runtime cell`);
   }
-  if (openclaw.runtime !== "openclaw" || codex.runtime !== "codex") {
+  if (bot.runtime !== "bot" || codex.runtime !== "codex") {
     throw new Error(`${label} has mismatched canonical runtime cells`);
   }
 
   if (scenario.status === "pass") {
     if (
       parity.drift === "failure-mode" ||
-      openclaw.status !== "pass" ||
+      bot.status !== "pass" ||
       codex.status !== "pass" ||
-      !isPassableCell(openclaw) ||
+      !isPassableCell(bot) ||
       !isPassableCell(codex)
     ) {
       throw new Error(`${label} reports pass without two passing, passable runtime cells`);
@@ -135,10 +135,10 @@ function requireRuntimePairScenario(scenario, index) {
   // before the trusted classifier learned to keep the paired result advisory.
   if (
     scenario.status === "skip" &&
-    openclaw.status === "pass" &&
+    bot.status === "pass" &&
     codex.status === "skip" &&
     isExplicitCodexGap(codex) &&
-    isPassableCell(openclaw) &&
+    isPassableCell(bot) &&
     isPassableCell(codex)
   ) {
     return true;
@@ -160,7 +160,7 @@ export function validateQaRuntimePairSummary(summary, options = {}) {
     throw new Error("runtime-pair summary is missing run or scenario evidence");
   }
   if (!requireCanonicalRuntimePair(summary.run.runtimePair)) {
-    throw new Error("runtime-pair summary must compare openclaw and codex in canonical order");
+    throw new Error("runtime-pair summary must compare bot and codex in canonical order");
   }
   if (summary.scenarios.length === 0) {
     throw new Error("runtime-pair summary contains no scenarios");
@@ -246,8 +246,8 @@ export function validateQaRuntimePairReport(summary, reportSummary, reportMarkdo
         scenario.status !== expectedStatus ||
         scenario.drift !== source.runtimeParity.drift ||
         scenario.driftDetails !== source.runtimeParity.driftDetails ||
-        scenario.openclawStatus !==
-          projectedReportCellStatus(source.runtimeParity.cells.openclaw) ||
+        scenario.botStatus !==
+          projectedReportCellStatus(source.runtimeParity.cells.bot) ||
         scenario.codexStatus !== projectedReportCellStatus(source.runtimeParity.cells.codex)
       );
     })
@@ -268,7 +268,7 @@ export function validateQaRuntimePairReport(summary, reportSummary, reportMarkdo
   }
   if (
     typeof reportMarkdown !== "string" ||
-    !reportMarkdown.startsWith("# OpenClaw Runtime Parity Report") ||
+    !reportMarkdown.startsWith("# Bot Runtime Parity Report") ||
     !reportMarkdown.includes(`- Verdict: ${counts.skipped === 0 ? "pass" : "fail"}`) ||
     summary.scenarios.some((scenario) => {
       const heading = `\n### ${scenario.name}\n`;
@@ -286,7 +286,7 @@ export function validateQaRuntimePairReport(summary, reportSummary, reportMarkdo
         !sectionLines.has(`- drift: ${scenario.runtimeParity.drift}`) ||
         ![...sectionLines].some((line) =>
           line.startsWith(
-            `- openclaw: ${projectedReportCellStatus(scenario.runtimeParity.cells.openclaw)} `,
+            `- bot: ${projectedReportCellStatus(scenario.runtimeParity.cells.bot)} `,
           ),
         ) ||
         ![...sectionLines].some((line) =>

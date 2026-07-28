@@ -4,9 +4,9 @@ import os from "node:os";
 import path from "node:path";
 import type { Event } from "nostr-tools";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeBotStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { migrateNostrLegacyRecentEventIds } from "./nostr-ingress-state.js";
 import { createNostrIngress } from "./nostr-ingress.js";
@@ -55,7 +55,7 @@ function startIngress(params: {
 }
 
 async function withQueue<T>(fn: (queue: NostrIngressQueue) => Promise<T>): Promise<T> {
-  const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-nostr-ingress-"));
+  const created = await fs.mkdtemp(path.join(os.tmpdir(), "bot-nostr-ingress-"));
   const stateDir = await fs.realpath(created);
   const queue = createChannelIngressQueueForTests<NostrIngressPayload>({
     channelId: "nostr",
@@ -65,13 +65,13 @@ async function withQueue<T>(fn: (queue: NostrIngressQueue) => Promise<T>): Promi
   try {
     return await fn(queue);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

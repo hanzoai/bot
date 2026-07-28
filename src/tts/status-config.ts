@@ -1,7 +1,7 @@
 // TTS status config helpers resolve status output paths for speech generation.
-import { isRecord as isObjectRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../config/types.js";
+import { isRecord as isObjectRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
+import type { BotConfig } from "../config/types.js";
 import type { TtsAutoMode, TtsConfig, TtsProvider } from "../config/types.tts.js";
 import { resolveTtsSettingsSnapshot } from "./tts-settings.js";
 
@@ -136,7 +136,7 @@ function resolveStatusProviderDetails(raw: TtsConfig, provider: TtsProvider) {
 }
 
 export function resolveStatusTtsSnapshot(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionAuto?: string;
   agentId?: string;
   channelId?: string;

@@ -13,7 +13,7 @@ import { isCoreCanvasHostEnabled } from "../canvas/config.js";
 import { isCanvasDocumentHttpPath } from "../canvas/constants.js";
 import { resolveBundledChannelGatewayAuthBypassPaths } from "../channels/plugins/gateway-auth-bypass.js";
 import { getRuntimeConfig } from "../config/io.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   createDiagnosticTraceContext,
   runWithDiagnosticTraceContext,
@@ -154,12 +154,12 @@ function isControlUiCatalogIconRequest(pathname: string, basePath: string): bool
 }
 
 const pluginGatewayAuthBypassPathsCache = new WeakMap<
-  OpenClawConfig,
+  BotConfig,
   Promise<ReadonlySet<string>>
 >();
 
 async function resolvePluginGatewayAuthBypassPaths(
-  configSnapshot: OpenClawConfig,
+  configSnapshot: BotConfig,
 ): Promise<Set<string>> {
   const paths = new Set<string>();
   const configuredChannels = configSnapshot.channels;
@@ -178,7 +178,7 @@ async function resolvePluginGatewayAuthBypassPaths(
 }
 
 function getCachedPluginGatewayAuthBypassPaths(
-  configSnapshot: OpenClawConfig,
+  configSnapshot: BotConfig,
 ): Promise<ReadonlySet<string>> {
   const cached = pluginGatewayAuthBypassPathsCache.get(configSnapshot);
   if (cached) {
@@ -197,11 +197,11 @@ function isOpenAiModelsPath(pathname: string): boolean {
 }
 
 function isMcpAppStandalonePath(pathname: string): boolean {
-  return pathname === "/__openclaw__/mcp-app" || pathname === "/__openclaw__/mcp-app/view";
+  return pathname === "/__bot__/mcp-app" || pathname === "/__bot__/mcp-app/view";
 }
 
 function isBoardWidgetPath(pathname: string): boolean {
-  return pathname.startsWith("/__openclaw__/board/");
+  return pathname.startsWith("/__bot__/board/");
 }
 
 function isEmbeddingsPath(pathname: string): boolean {
@@ -495,7 +495,7 @@ export function createGatewayHttpServer(opts: {
   /** Optional rate limiter for auth brute-force protection. */
   rateLimiter?: AuthRateLimiter;
   getReadiness?: ReadinessChecker;
-  getRuntimeConfig?: () => OpenClawConfig;
+  getRuntimeConfig?: () => BotConfig;
   isTerminalEnabled?: () => boolean;
   tlsOptions?: TlsOptions;
 }): HttpServer {
@@ -1104,17 +1104,17 @@ export function attachGatewayUpgradeHandler(opts: {
         wss.handleUpgrade(req, socket, head, (ws) => {
           (
             ws as unknown as import("ws").WebSocket & {
-              __openclawPreauthBudgetClaimed?: boolean;
-              __openclawPreauthBudgetKey?: string;
+              __botPreauthBudgetClaimed?: boolean;
+              __botPreauthBudgetKey?: string;
             }
-          )["__openclawPreauthBudgetKey"] = preauthBudgetKey;
+          )["__botPreauthBudgetKey"] = preauthBudgetKey;
           wss.emit("connection", ws, req);
           const budgetClaimed = Boolean(
             (
               ws as unknown as import("ws").WebSocket & {
-                __openclawPreauthBudgetClaimed?: boolean;
+                __botPreauthBudgetClaimed?: boolean;
               }
-            )["__openclawPreauthBudgetClaimed"],
+            )["__botPreauthBudgetClaimed"],
           );
           if (budgetClaimed) {
             budgetTransferred = true;
@@ -1173,9 +1173,9 @@ export function attachWorkerGatewayUpgradeHandler(params: {
         const workerSocket = ws as GatewayIngressWebSocket;
         workerSocket[GATEWAY_WS_CONNECTION_KIND_PROPERTY] = "worker";
         workerSocket[GATEWAY_WS_PREAUTH_BUDGET_PROPERTY] = params.preauthConnectionBudget;
-        workerSocket["__openclawPreauthBudgetKey"] = preauthBudgetKey;
+        workerSocket["__botPreauthBudgetKey"] = preauthBudgetKey;
         params.wss.emit("connection", ws, req);
-        if (workerSocket["__openclawPreauthBudgetClaimed"]) {
+        if (workerSocket["__botPreauthBudgetClaimed"]) {
           budgetTransferred = true;
           socket.off("close", releaseUpgradeBudget);
         }

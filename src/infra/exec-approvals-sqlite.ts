@@ -1,7 +1,7 @@
 // Canonical SQLite row helpers for exec approval policy state.
 import type { DatabaseSync } from "node:sqlite";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
-import type { OpenClawStateLeaseContext } from "../state/openclaw-state-lease.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
+import type { BotStateLeaseContext } from "../state/bot-state-lease.js";
 import { sha256Hex } from "./crypto-digest.js";
 import {
   normalizeExecApprovalsInternal,
@@ -19,12 +19,12 @@ export const EXEC_APPROVALS_MUTATION_LEASE_SCOPE = "exec-approvals";
 export const EXEC_APPROVALS_MUTATION_LEASE_KEY = "mutation";
 
 type ExecApprovalsDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  BotStateKyselyDatabase,
   "exec_approvals_config" | "state_leases"
 >;
 
 export type ExecApprovalsMutationLeaseOwner = Pick<
-  OpenClawStateLeaseContext,
+  BotStateLeaseContext,
   "assertOwnedInTransaction"
 >;
 

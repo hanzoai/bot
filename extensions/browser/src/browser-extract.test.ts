@@ -1,5 +1,5 @@
 // Browser tests cover scoped and structured extraction with injected dependencies.
-import { validateJsonSchemaValue } from "openclaw/plugin-sdk/json-schema-runtime";
+import { validateJsonSchemaValue } from "bot/plugin-sdk/json-schema-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { completeBrowserExtract, executeExtractAction } from "./browser-extract.js";
 

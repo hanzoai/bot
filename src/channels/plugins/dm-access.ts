@@ -3,7 +3,7 @@
  *
  * Reads, writes, migrates, and normalizes direct-message policy and allowFrom fields.
  */
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 
 /**
  * Selects whether canonical DM fields live at the top level or under `dm`.

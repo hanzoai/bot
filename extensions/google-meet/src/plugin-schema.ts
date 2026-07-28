@@ -1,4 +1,4 @@
-import { optionalPositiveIntegerSchema } from "openclaw/plugin-sdk/channel-actions";
+import { optionalPositiveIntegerSchema } from "bot/plugin-sdk/channel-actions";
 import { Type } from "typebox";
 import { resolveGoogleMeetConfig } from "./config.js";
 
@@ -22,7 +22,7 @@ export const googleMeetConfigSchema = {
     },
     defaultMode: {
       label: "Default Mode",
-      help: "Agent uses realtime transcription plus regular OpenClaw TTS. Bidi uses the realtime voice model directly. Transcribe observes only.",
+      help: "Agent uses realtime transcription plus regular Bot TTS. Bidi uses the realtime voice model directly. Transcribe observes only.",
     },
     "chrome.audioBackend": {
       label: "Chrome Audio Backend",
@@ -40,7 +40,7 @@ export const googleMeetConfigSchema = {
     },
     "chrome.autoJoin": {
       label: "Auto Join Guest Screen",
-      help: "Best-effort guest-name fill and Join Now click through OpenClaw browser automation.",
+      help: "Best-effort guest-name fill and Join Now click through Bot browser automation.",
     },
     "chrome.waitForInCallMs": {
       label: "Wait For In-Call (ms)",
@@ -135,7 +135,7 @@ export const googleMeetConfigSchema = {
     },
     "realtime.transcriptionProvider": {
       label: "Realtime Transcription Provider",
-      help: "Agent mode uses this provider to transcribe meeting audio before regular OpenClaw TTS answers.",
+      help: "Agent mode uses this provider to transcribe meeting audio before regular Bot TTS answers.",
     },
     "realtime.voiceProvider": {
       label: "Bidi Voice Provider",
@@ -143,7 +143,7 @@ export const googleMeetConfigSchema = {
     },
     "realtime.model": {
       label: "Bidi Realtime Model",
-      help: "Only used by mode=bidi. Agent mode answers with the configured OpenClaw agent and regular TTS.",
+      help: "Only used by mode=bidi. Agent mode answers with the configured Bot agent and regular TTS.",
       advanced: true,
     },
     "realtime.instructions": { label: "Realtime Instructions", advanced: true },
@@ -153,7 +153,7 @@ export const googleMeetConfigSchema = {
     },
     "realtime.agentId": {
       label: "Realtime Consult Agent",
-      help: 'OpenClaw agent id used by openclaw_agent_consult. Defaults to "main".',
+      help: 'Bot agent id used by bot_agent_consult. Defaults to "main".',
       advanced: true,
     },
     "realtime.toolPolicy": {
@@ -228,7 +228,7 @@ export const GoogleMeetToolSchema = Type.Object({
     Type.String({
       enum: ["agent", "bidi", "transcribe"],
       description:
-        "Join mode. agent uses realtime transcription, the configured OpenClaw agent, and regular TTS. bidi uses the realtime voice model directly. transcribe joins observe-only.",
+        "Join mode. agent uses realtime transcription, the configured Bot agent, and regular TTS. bidi uses the realtime voice model directly. transcribe joins observe-only.",
     }),
   ),
   dialInNumber: Type.Optional(

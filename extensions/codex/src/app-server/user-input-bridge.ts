@@ -10,7 +10,7 @@ import {
   type AgentHarnessUserInputOption,
   type AgentHarnessUserInputQuestion,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { formatCodexDisplayText } from "../command-formatters.js";
 import {
   isJsonObject,

@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import nodePath from "node:path";
-import { createNodeProxyAgent } from "openclaw/plugin-sdk/fetch-runtime";
+import { createNodeProxyAgent } from "bot/plugin-sdk/fetch-runtime";
 import { lowCardinalityAttr } from "./service-attributes.js";
 import {
   OTEL_EXPORTER_OTLP_CERTIFICATE_ENV,

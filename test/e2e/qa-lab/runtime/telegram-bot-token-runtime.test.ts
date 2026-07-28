@@ -14,11 +14,11 @@ describe("telegram bot token runtime evidence", () => {
   it("resolves only dedicated leased credentials", () => {
     expect(
       testing.resolveLeasedToken({
-        OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN: "leased-token",
+        BOT_QA_TELEGRAM_SUT_BOT_TOKEN: "leased-token",
         TELEGRAM_E2E_SUT_BOT_TOKEN: "secondary-leased-token",
         TELEGRAM_BOT_TOKEN: "generic-token",
       }),
-    ).toEqual({ key: "OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN", token: "leased-token" });
+    ).toEqual({ key: "BOT_QA_TELEGRAM_SUT_BOT_TOKEN", token: "leased-token" });
   });
 
   it("writes blocked evidence without a dedicated credential", async () => {

@@ -15,9 +15,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const proofDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
+const proofDir = process.env.BOT_UI_E2E_ARTIFACT_DIR?.trim();
 
 let browser: Browser;
 let server: ControlUiE2eServer;
@@ -181,7 +181,7 @@ describeControlUiE2e("Control UI usage proxy reconnect lifecycle", () => {
     try {
       const response = await page.goto(`${server.baseUrl}chat`);
       expect(response?.status()).toBe(200);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       await sidebar.locator(".sidebar-identity-card").click();
       await sidebar
         .locator('wa-dropdown.sidebar-identity-menu wa-dropdown-item[value="command:usage"]')
@@ -233,7 +233,7 @@ describeControlUiE2e("Control UI usage proxy reconnect lifecycle", () => {
       await gateway.deferNext("sessions.usage");
       await gateway.deferNext("usage.cost");
       await page
-        .locator("openclaw-usage-page")
+        .locator("bot-usage-page")
         .getByRole("button", { name: "Refresh", exact: true })
         .click();
       await waitForRequestCount(gateway, "sessions.usage", 3);

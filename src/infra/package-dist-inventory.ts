@@ -1,7 +1,7 @@
 // Collects and verifies package dist inventory metadata.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { sortUniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import pLimit, { type LimitFunction } from "p-limit";
 import { isLocalBuildMetadataDistPath } from "../../scripts/lib/local-build-metadata-paths.mjs";
 import { escapeRegExp } from "../shared/regexp.js";

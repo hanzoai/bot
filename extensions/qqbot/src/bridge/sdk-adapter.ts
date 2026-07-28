@@ -1,15 +1,15 @@
 // Qqbot plugin module implements sdk adapter behavior.
-import { parseAccessGroupAllowFromEntry } from "openclaw/plugin-sdk/access-groups";
+import { parseAccessGroupAllowFromEntry } from "bot/plugin-sdk/access-groups";
 import {
   createChannelIngressResolver,
   defineStableChannelIngressIdentity,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import { resolveInboundMentionDecision } from "openclaw/plugin-sdk/channel-mention-gating";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-ingress-runtime";
+import { resolveInboundMentionDecision } from "bot/plugin-sdk/channel-mention-gating";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   createChannelHistoryWindow,
   type HistoryEntry as SdkHistoryEntry,
-} from "openclaw/plugin-sdk/reply-history";
+} from "bot/plugin-sdk/reply-history";
 import { resolveQQBotEffectivePolicies } from "../engine/access/resolve-policy.js";
 import { normalizeQQBotAllowFrom, normalizeQQBotSenderId } from "../engine/access/sender-match.js";
 import type { HistoryPort, HistoryEntryLike } from "../engine/adapter/history.port.js";
@@ -91,7 +91,7 @@ export function createSdkAccessAdapter(): AccessPort {
         channelId: "qqbot",
         accountId: input.accountId,
         identity: qqbotIngressIdentity,
-        cfg: input.cfg as OpenClawConfig,
+        cfg: input.cfg as BotConfig,
       }).message({
         subject: { stableId: input.senderId },
         conversation: {
@@ -143,7 +143,7 @@ async function resolveQQBotSlashCommandAuthorized(params: {
     channelId: "qqbot",
     accountId: params.accountId,
     identity: qqbotIngressIdentity,
-    cfg: params.cfg as OpenClawConfig,
+    cfg: params.cfg as BotConfig,
   }).message({
     subject: { stableId: params.senderId },
     conversation: {

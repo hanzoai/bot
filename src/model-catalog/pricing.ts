@@ -1,9 +1,9 @@
 import { isIP } from "node:net";
-import type { RemoteModelCatalogPricing } from "@openclaw/model-catalog-core";
-import type { ModelCatalogCost } from "@openclaw/model-catalog-core/model-catalog-types";
+import type { RemoteModelCatalogPricing } from "@hanzo/bot-model-catalog-core";
+import type { ModelCatalogCost } from "@hanzo/bot-model-catalog-core/model-catalog-types";
 import { modelKey, normalizeModelRef } from "../agents/model-selection.js";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isInstalledPluginEnabled } from "../plugins/installed-plugin-index.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import {
@@ -27,8 +27,8 @@ type PricingContext = {
   fingerprint: string;
 };
 
-const EMPTY_CONFIG: OpenClawConfig = {};
-const pricingContextByConfig = new WeakMap<OpenClawConfig, PricingContext>();
+const EMPTY_CONFIG: BotConfig = {};
+const pricingContextByConfig = new WeakMap<BotConfig, PricingContext>();
 
 function normalizePolicy(
   policy: { external?: boolean } | undefined,
@@ -41,7 +41,7 @@ function normalizePolicy(
 
 function activeManifestRegistry(
   snapshot: PluginMetadataSnapshot,
-  config: OpenClawConfig,
+  config: BotConfig,
 ): PluginManifestRegistry {
   if (config.plugins?.enabled === false) {
     return { plugins: [], diagnostics: [] };
@@ -65,7 +65,7 @@ function normalizedHostedKey(key: string, manifestPlugins?: ManifestPlugins): st
   return modelKey(normalized.provider, normalized.model);
 }
 
-function buildPricingContext(config: OpenClawConfig): PricingContext {
+function buildPricingContext(config: BotConfig): PricingContext {
   let snapshot: PluginMetadataSnapshot | undefined;
   try {
     snapshot = resolvePluginMetadataSnapshot({
@@ -113,7 +113,7 @@ function buildPricingContext(config: OpenClawConfig): PricingContext {
   return { snapshot, catalog, hosted, normalizedHosted, policies, fingerprint };
 }
 
-function getPricingContext(config: OpenClawConfig): PricingContext {
+function getPricingContext(config: BotConfig): PricingContext {
   const existing = pricingContextByConfig.get(config);
   if (existing) {
     return existing;
@@ -184,7 +184,7 @@ function isPrivateOrLoopbackUrl(value: string | undefined): boolean {
 }
 
 function findConfiguredModel(
-  config: OpenClawConfig,
+  config: BotConfig,
   provider: string,
   model: string,
   manifestPlugins?: ManifestPlugins,
@@ -196,7 +196,7 @@ function findConfiguredModel(
 }
 
 function allowsHostedPricing(
-  config: OpenClawConfig,
+  config: BotConfig,
   provider: string,
   model: string,
   manifestPlugins?: ManifestPlugins,
@@ -210,7 +210,7 @@ function allowsHostedPricing(
 }
 
 export function resolveCatalogModelPricing(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   provider: string;
   model: string;
 }): PricingValue | undefined {
@@ -229,7 +229,7 @@ export function resolveCatalogModelPricing(params: {
 }
 
 export function resolveHostedModelPricing(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   provider: string;
   model: string;
 }): PricingValue | undefined {
@@ -251,7 +251,7 @@ export function resolveHostedModelPricing(params: {
   return pricing && hasKnownPricing(pricing) ? pricing : undefined;
 }
 
-export function modelCatalogPricingFingerprint(config?: OpenClawConfig): string {
+export function modelCatalogPricingFingerprint(config?: BotConfig): string {
   const resolvedConfig = config ?? EMPTY_CONFIG;
   const context = getPricingContext(resolvedConfig);
   const configuredEndpoints = Object.entries(resolvedConfig.models?.providers ?? {})

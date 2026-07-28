@@ -25,7 +25,7 @@
  */
 
 import os from "node:os";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { ApiClient } from "../api/api-client.js";
 import { ChunkedMediaApi as ChunkedMediaApiClass } from "../api/media-chunked.js";
 import { downloadDirectUploadUrl, MediaApi as MediaApiClass } from "../api/media.js";
@@ -57,11 +57,11 @@ export { UploadDailyLimitExceededError } from "../api/media-chunked.js";
 // ============ Plugin User-Agent ============
 
 let pluginVersion = "unknown";
-let openclawVersion = "unknown";
+let botVersion = "unknown";
 
 /** Build the User-Agent string from the current plugin and framework versions. */
 function buildUserAgent(): string {
-  return `QQBotPlugin/${pluginVersion} (Node/${process.versions.node}; ${os.platform()}; OpenClaw/${openclawVersion})`;
+  return `QQBotPlugin/${pluginVersion} (Node/${process.versions.node}; ${os.platform()}; Bot/${botVersion})`;
 }
 
 /** Return the current User-Agent string. */
@@ -73,19 +73,19 @@ export function getPluginUserAgent(): string {
  * Initialize sender with the plugin version.
  * Must be called once during startup before any API calls.
  */
-export function initSender(options: { pluginVersion?: string; openclawVersion?: string }): void {
+export function initSender(options: { pluginVersion?: string; botVersion?: string }): void {
   if (options.pluginVersion) {
     pluginVersion = options.pluginVersion;
   }
-  if (options.openclawVersion) {
-    openclawVersion = options.openclawVersion;
+  if (options.botVersion) {
+    botVersion = options.botVersion;
   }
 }
 
-/** Update the OpenClaw framework version in the User-Agent (called after runtime injection). */
-export function setOpenClawVersion(version: string): void {
+/** Update the Bot framework version in the User-Agent (called after runtime injection). */
+export function setBotVersion(version: string): void {
   if (version) {
-    openclawVersion = version;
+    botVersion = version;
   }
 }
 

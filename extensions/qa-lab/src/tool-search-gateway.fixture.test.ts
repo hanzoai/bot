@@ -47,18 +47,18 @@ describe("tool search gateway e2e fetch helper", () => {
   it("rejects loose numeric env limits instead of parsing prefixes", () => {
     expect(() =>
       readToolSearchGatewayFetchLimits({
-        OPENCLAW_TOOL_SEARCH_GATEWAY_E2E_FETCH_TIMEOUT_MS: "1e3",
+        BOT_TOOL_SEARCH_GATEWAY_E2E_FETCH_TIMEOUT_MS: "1e3",
       }),
-    ).toThrow("invalid OPENCLAW_TOOL_SEARCH_GATEWAY_E2E_FETCH_TIMEOUT_MS: 1e3");
+    ).toThrow("invalid BOT_TOOL_SEARCH_GATEWAY_E2E_FETCH_TIMEOUT_MS: 1e3");
     expect(() =>
       readToolSearchGatewayFetchLimits({
-        OPENCLAW_TOOL_SEARCH_GATEWAY_E2E_FETCH_BODY_MAX_BYTES: "1000ms",
+        BOT_TOOL_SEARCH_GATEWAY_E2E_FETCH_BODY_MAX_BYTES: "1000ms",
       }),
-    ).toThrow("invalid OPENCLAW_TOOL_SEARCH_GATEWAY_E2E_FETCH_BODY_MAX_BYTES: 1000ms");
+    ).toThrow("invalid BOT_TOOL_SEARCH_GATEWAY_E2E_FETCH_BODY_MAX_BYTES: 1000ms");
     expect(
       readToolSearchGatewayFetchLimits({
-        OPENCLAW_TOOL_SEARCH_GATEWAY_E2E_FETCH_BODY_MAX_BYTES: "4096",
-        OPENCLAW_TOOL_SEARCH_GATEWAY_E2E_FETCH_TIMEOUT_MS: "5000",
+        BOT_TOOL_SEARCH_GATEWAY_E2E_FETCH_BODY_MAX_BYTES: "4096",
+        BOT_TOOL_SEARCH_GATEWAY_E2E_FETCH_TIMEOUT_MS: "5000",
       }),
     ).toEqual({
       bodyMaxBytes: 4096,
@@ -126,7 +126,7 @@ describe("tool search gateway e2e fetch helper", () => {
 
 describe("tool search gateway e2e session log scanner", () => {
   it("does not count target mentions from user prompt records", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tool-search-log-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-tool-search-log-"));
     try {
       const sessionsDir = path.join(stateDir, "agents", "qa", "sessions");
       await fs.mkdir(sessionsDir, { recursive: true });
@@ -168,8 +168,8 @@ describe("tool search gateway e2e session log scanner", () => {
   });
 
   it("counts target mentions from SQLite transcript rows", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tool-search-sqlite-"));
-    const sqlitePath = path.join(stateDir, "agents", "qa", "agent", "openclaw-agent.sqlite");
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-tool-search-sqlite-"));
+    const sqlitePath = path.join(stateDir, "agents", "qa", "agent", "bot-agent.sqlite");
     await fs.mkdir(path.dirname(sqlitePath), { recursive: true });
     const db = new DatabaseSync(sqlitePath);
     try {
@@ -232,8 +232,8 @@ describe("tool search gateway e2e session log scanner", () => {
 
 describe("tool search gateway e2e lane result", () => {
   it("preserves surrogate pairs in provider request snippets", async () => {
-    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-tool-search-lane-"));
-    const configPath = path.join(tempRoot, "openclaw.json");
+    const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-tool-search-lane-"));
+    const configPath = path.join(tempRoot, "bot.json");
     const inputPrefix = "i".repeat(499);
     const toolOutputPrefix = "o".repeat(3_999);
     await fs.writeFile(configPath, "{}\n", "utf8");
@@ -271,7 +271,7 @@ describe("tool search gateway e2e lane result", () => {
             tempRoot,
           });
         },
-        runtimeEnv: { OPENCLAW_GATEWAY_TOKEN: "test-token" },
+        runtimeEnv: { BOT_GATEWAY_TOKEN: "test-token" },
         tempRoot,
         workspaceDir: tempRoot,
       },

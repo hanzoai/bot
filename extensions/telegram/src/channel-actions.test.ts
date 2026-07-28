@@ -1,5 +1,5 @@
 // Telegram tests cover channel actions plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { telegramMessageActions } from "./channel-actions.js";
 
@@ -52,7 +52,7 @@ describe("telegramMessageActions", () => {
         to: "-1001:topic:77",
         conversationReadOrigin: "direct-operator",
       },
-      cfg: { channels: { telegram: { botToken: "tok" } } } as OpenClawConfig,
+      cfg: { channels: { telegram: { botToken: "tok" } } } as BotConfig,
       accountId: "work",
       requesterAccountId: "work",
       conversationReadOrigin: "delegated",
@@ -126,7 +126,7 @@ describe("telegramMessageActions", () => {
     const cases = [
       {
         name: "configured telegram enables poll",
-        cfg: { channels: { telegram: { botToken: "tok" } } } as OpenClawConfig,
+        cfg: { channels: { telegram: { botToken: "tok" } } } as BotConfig,
         expectPoll: true,
         expectTopicEdit: true,
       },
@@ -139,7 +139,7 @@ describe("telegramMessageActions", () => {
               actions: { sendMessage: false },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         expectPoll: false,
         expectTopicEdit: true,
       },
@@ -152,7 +152,7 @@ describe("telegramMessageActions", () => {
               actions: { poll: false },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         expectPoll: false,
         expectTopicEdit: true,
       },
@@ -179,7 +179,7 @@ describe("telegramMessageActions", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         expectPoll: false,
         expectTopicEdit: true,
       },
@@ -207,7 +207,7 @@ describe("telegramMessageActions", () => {
     const cases = [
       {
         name: "default config",
-        cfg: { channels: { telegram: { botToken: "tok" } } } as OpenClawConfig,
+        cfg: { channels: { telegram: { botToken: "tok" } } } as BotConfig,
         expectSticker: false,
       },
       {
@@ -220,7 +220,7 @@ describe("telegramMessageActions", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         expectSticker: true,
       },
       {
@@ -234,7 +234,7 @@ describe("telegramMessageActions", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         expectSticker: false,
       },
     ] as const;
@@ -274,7 +274,7 @@ describe("telegramMessageActions", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const defaultActions =
       telegramMessageActions.describeMessageTool?.({
@@ -294,7 +294,7 @@ describe("telegramMessageActions", () => {
   });
 
   it("normalizes reaction message identifiers before dispatch", async () => {
-    const cfg = { channels: { telegram: { botToken: "tok" } } } as OpenClawConfig;
+    const cfg = { channels: { telegram: { botToken: "tok" } } } as BotConfig;
     const cases = [
       {
         name: "numeric channelId/messageId",
@@ -383,7 +383,7 @@ describe("telegramMessageActions", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const discovery = telegramMessageActions.describeMessageTool?.({ cfg });
 
@@ -407,7 +407,7 @@ describe("telegramMessageActions", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const discovery = telegramMessageActions.describeMessageTool?.({
       cfg,
@@ -427,7 +427,7 @@ describe("telegramMessageActions", () => {
           actions: { poll: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const discovery = telegramMessageActions.describeMessageTool?.({ cfg });
     const schema = Array.isArray(discovery?.schema) ? discovery.schema[0] : undefined;
@@ -453,7 +453,7 @@ describe("telegramMessageActions", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const discovery = telegramMessageActions.describeMessageTool?.({
       cfg,
@@ -475,7 +475,7 @@ describe("telegramMessageActions", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       telegramMessageActions.describeMessageTool?.({
@@ -507,7 +507,7 @@ describe("telegramMessageActions", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const discovery = telegramMessageActions.describeMessageTool?.({ cfg });
 

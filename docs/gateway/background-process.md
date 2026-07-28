@@ -6,7 +6,7 @@ read_when:
 title: "Background exec and process tool"
 ---
 
-OpenClaw runs shell commands through the `exec` tool and keeps long-running tasks in memory. The `process` tool manages those background sessions.
+Bot runs shell commands through the `exec` tool and keeps long-running tasks in memory. The `process` tool manages those background sessions.
 
 ## exec tool
 
@@ -32,7 +32,7 @@ Behavior:
 - Backgrounded and `yieldMs` runs inherit `tools.exec.timeoutSeconds` unless the call passes an explicit `timeout`.
 - Output stays in memory until the session is polled or cleared.
 - If the `process` tool is disallowed, `exec` runs synchronously and ignores `yieldMs`/`background`.
-- Spawned exec commands receive `OPENCLAW_SHELL=exec` for context-aware shell/profile rules.
+- Spawned exec commands receive `BOT_SHELL=exec` for context-aware shell/profile rules.
 - For long-running work that starts now: start it once and rely on automatic completion wake (when enabled) once the command emits output or fails.
 - If automatic completion wake is unavailable, or you need quiet-success confirmation for a command that exits cleanly with no output, poll with `process`.
 - Don't emulate reminders or delayed follow-ups with `sleep` loops or repeated polling — use cron for future work.
@@ -41,19 +41,19 @@ Behavior:
 
 | Variable                                 | Effect                                                                                                           |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `OPENCLAW_BASH_YIELD_MS`                 | Default yield before backgrounding (ms). Default 10000, clamped 10-120000.                                       |
-| `OPENCLAW_BASH_MAX_OUTPUT_CHARS`         | In-memory output cap (chars).                                                                                    |
-| `OPENCLAW_BASH_PENDING_MAX_OUTPUT_CHARS` | Pending stdout/stderr cap per stream (chars).                                                                    |
-| `OPENCLAW_BASH_JOB_TTL_MS`               | TTL for finished sessions (ms), bounded to 1m-3h.                                                                |
-| `OPENCLAW_PROCESS_INPUT_WAIT_IDLE_MS`    | Idle-output threshold before writable background sessions are marked as likely waiting for input. Default 15000. |
+| `BOT_BASH_YIELD_MS`                 | Default yield before backgrounding (ms). Default 10000, clamped 10-120000.                                       |
+| `BOT_BASH_MAX_OUTPUT_CHARS`         | In-memory output cap (chars).                                                                                    |
+| `BOT_BASH_PENDING_MAX_OUTPUT_CHARS` | Pending stdout/stderr cap per stream (chars).                                                                    |
+| `BOT_BASH_JOB_TTL_MS`               | TTL for finished sessions (ms), bounded to 1m-3h.                                                                |
+| `BOT_PROCESS_INPUT_WAIT_IDLE_MS`    | Idle-output threshold before writable background sessions are marked as likely waiting for input. Default 15000. |
 
 ### Config (preferred over env overrides)
 
 | Key                                   | Default | Effect                                                                          |
 | ------------------------------------- | ------- | ------------------------------------------------------------------------------- |
-| `tools.exec.backgroundMs`             | 10000   | Same as `OPENCLAW_BASH_YIELD_MS`.                                               |
+| `tools.exec.backgroundMs`             | 10000   | Same as `BOT_BASH_YIELD_MS`.                                               |
 | `tools.exec.timeoutSeconds`           | 1800    | Default per-call timeout.                                                       |
-| `tools.exec.cleanupMs`                | 1800000 | Same as `OPENCLAW_BASH_JOB_TTL_MS`.                                             |
+| `tools.exec.cleanupMs`                | 1800000 | Same as `BOT_BASH_JOB_TTL_MS`.                                             |
 | `tools.exec.notifyOnExit`             | true    | Enqueue a system event + request heartbeat when a backgrounded exec exits.      |
 | `tools.exec.notifyOnExitEmptySuccess` | false   | Also enqueue completion events for successful backgrounded runs with no output. |
 
@@ -89,7 +89,7 @@ Notes:
 - Use `log` before recovering an interactive CLI, so the current transcript, stdin state, and input-wait hint are visible together.
 - Use `write`/`send-keys`/`submit`/`paste`/`kill` when you need input or intervention.
 - `process list` includes a derived `name` (command verb + target) for quick scans.
-- `process list`, `poll`, and `log` report `waitingForInput` only when the session still has writable stdin and has been idle longer than the input-wait threshold (default 15000 ms, `OPENCLAW_PROCESS_INPUT_WAIT_IDLE_MS`).
+- `process list`, `poll`, and `log` report `waitingForInput` only when the session still has writable stdin and has been idle longer than the input-wait threshold (default 15000 ms, `BOT_PROCESS_INPUT_WAIT_IDLE_MS`).
 - `process log` uses line-based `offset`/`limit`. When both are omitted, it returns the last 200 lines with a paging hint. When `offset` is set and `limit` isn't, it returns from `offset` to the end (not capped to 200).
 - `poll`'s `timeout` waits up to that many milliseconds before returning; values above 30000 are clamped to 30000.
 - Polling is for on-demand status, not wait-loop scheduling. If the work should happen later, use cron.

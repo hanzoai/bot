@@ -3,17 +3,17 @@ import os from "node:os";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import type { SessionEvent } from "@github/copilot-sdk";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "bot/plugin-sdk/agent-harness-runtime";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/hook-runtime";
-import { createMockPluginRegistry } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/hook-runtime";
+import { createMockPluginRegistry } from "bot/plugin-sdk/plugin-test-runtime";
+import { upsertSessionEntry } from "bot/plugin-sdk/session-store-runtime";
 import {
   readSessionTranscriptEvents,
   type SessionTranscriptTargetParams,
-} from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "bot/plugin-sdk/session-transcript-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createAttemptTranscriptJournal } from "./attempt-transcript-journal.js";
 import type { AttemptParamsLike } from "./attempt-types.js";
@@ -60,7 +60,7 @@ function event(
 }
 
 async function createFixture(trigger?: string) {
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-copilot-journal-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-copilot-journal-"));
   tempDirs.push(tempDir);
   const target: SessionTranscriptTargetParams = {
     agentId: "main",
@@ -1072,7 +1072,7 @@ describe("Copilot attempt transcript journal", () => {
       role: "user",
       content: "continue",
       display: false,
-      __openclaw: {
+      __bot: {
         copilotSource: "future-source-kind",
         media: [{ path: "/tmp/notes.txt", contentType: "text/plain" }],
         copilotAttachments: [
@@ -1084,7 +1084,7 @@ describe("Copilot attempt transcript journal", () => {
     expect(rows[2]?.message).toMatchObject({ display: false });
     expect(rows[3]?.message).not.toHaveProperty("display", false);
     expect(rows[3]?.message).toMatchObject({
-      __openclaw: { copilotSource: "future-visible-source" },
+      __bot: { copilotSource: "future-visible-source" },
     });
     expect(journal.snapshot().replayInvalid).toBe(true);
   });

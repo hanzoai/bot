@@ -19,7 +19,7 @@ import {
 import type { ConfigWriteOptions, ReadConfigFileSnapshotForWriteResult } from "../config/io.js";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.js";
 import type { OptionalBootstrapFileName } from "../config/types.agent-defaults.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.js";
+import type { ConfigFileSnapshot, BotConfig } from "../config/types.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { defaultRuntime } from "../runtime.js";
 import { createLazyImportLoader } from "../shared/lazy-promise.js";
@@ -31,7 +31,7 @@ type ConfigIO = {
 };
 
 type ReplaceConfigFile = (params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   snapshot: ConfigFileSnapshot;
   afterWrite: { mode: "auto" };
   writeOptions: ConfigWriteOptions;
@@ -150,7 +150,7 @@ export async function setupCommand(
   if (snapshot.exists && !snapshot.valid) {
     const formatConfigPath = deps.formatConfigPath ?? formatDefaultConfigPath;
     runtime.error(
-      `Config invalid at ${await formatConfigPath(configPath)}. Run \`${formatCliCommand("openclaw doctor")}\` to repair it, then re-run setup.`,
+      `Config invalid at ${await formatConfigPath(configPath)}. Run \`${formatCliCommand("bot doctor")}\` to repair it, then re-run setup.`,
     );
     runtime.exit(1);
     return;
@@ -161,7 +161,7 @@ export async function setupCommand(
     !snapshot.exists ||
     (!hasResolvedRosterBeforeMigrations(snapshot) && !configIncludeOwnsAgentRoster(snapshot));
   const cfg = shouldPersistRoster
-    ? (migratePersistedImplicitMainRoster(snapshot.sourceConfig).config as OpenClawConfig)
+    ? (migratePersistedImplicitMainRoster(snapshot.sourceConfig).config as BotConfig)
     : snapshot.sourceConfig;
   const authoredDefaults = cfg.agents?.defaults ?? {};
   const resolvedDefaults = resolvedConfig.agents?.defaults ?? authoredDefaults;
@@ -184,7 +184,7 @@ export async function setupCommand(
 
   // Keep the candidate runtime-shaped. replaceConfigFile persists only its
   // diff against snapshot.parsed, never resolved include/env values wholesale.
-  let next: OpenClawConfig = snapshot.exists ? resolvedConfig : cfg;
+  let next: BotConfig = snapshot.exists ? resolvedConfig : cfg;
   if (shouldPersistRoster) {
     const { list: _legacyList, ...agents } = next.agents ?? {};
     next = {
@@ -287,9 +287,9 @@ export async function setupCommand(
   runtime.log(`Sessions OK: ${shortenHomePath(sessionsDir)}`);
   runtime.log("");
   runtime.log("Setup complete: config, workspace, and session directories are ready.");
-  runtime.log(`Next guided path: ${formatCliCommand("openclaw onboard")}.`);
+  runtime.log(`Next guided path: ${formatCliCommand("bot onboard")}.`);
   runtime.log(
-    `Next targeted changes: ${formatCliCommand("openclaw configure")} for models, channels, Gateway, plugins, skills, and health checks.`,
+    `Next targeted changes: ${formatCliCommand("bot configure")} for models, channels, Gateway, plugins, skills, and health checks.`,
   );
-  runtime.log(`Add a chat channel later: ${formatCliCommand("openclaw channels add")}.`);
+  runtime.log(`Add a chat channel later: ${formatCliCommand("bot channels add")}.`);
 }

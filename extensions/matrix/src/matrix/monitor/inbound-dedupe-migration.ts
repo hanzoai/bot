@@ -17,8 +17,8 @@ import path from "node:path";
 import {
   createPersistentDedupeImportEntry,
   type PersistentDedupeEntry,
-} from "openclaw/plugin-sdk/persistent-dedupe";
-import type { PluginDoctorStateMigrationContext } from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/persistent-dedupe";
+import type { PluginDoctorStateMigrationContext } from "bot/plugin-sdk/runtime-doctor";
 import { isRecord } from "../../record-shared.js";
 import { normalizeMatrixStorageMetadata } from "../client/storage.js";
 import {
@@ -66,8 +66,8 @@ export async function collectMatrixInboundDedupeSources(stateDir: string): Promi
     for (const entry of entries) {
       const entryPath = path.join(dir, entry.name);
       if (entry.isFile()) {
-        // Legacy per-root dedupe rows live in `<storageRoot>/state/openclaw.sqlite`.
-        if (entry.name === "openclaw.sqlite" && path.basename(dir) === "state") {
+        // Legacy per-root dedupe rows live in `<storageRoot>/state/bot.sqlite`.
+        if (entry.name === "bot.sqlite" && path.basename(dir) === "state") {
           sqliteRoots.add(path.dirname(dir));
         } else if (entry.name === MATRIX_LEGACY_INBOUND_DEDUPE_FILENAME) {
           jsonRoots.add(dir);
@@ -92,7 +92,7 @@ function openLegacySqliteStore(io: MatrixInboundDedupeMigrationIo, storageRootDi
   return io.context.openPluginStateKeyedStore<unknown>({
     namespace: LEGACY_SQLITE_NAMESPACE,
     maxEntries: LEGACY_SQLITE_MAX_ENTRIES,
-    env: { ...io.env, OPENCLAW_STATE_DIR: storageRootDir },
+    env: { ...io.env, BOT_STATE_DIR: storageRootDir },
   });
 }
 
@@ -100,7 +100,7 @@ function openLegacyMarkersStore(io: MatrixInboundDedupeMigrationIo, storageRootD
   return io.context.openPluginStateKeyedStore<unknown>({
     namespace: LEGACY_MARKERS_NAMESPACE,
     maxEntries: LEGACY_MARKERS_MAX_ENTRIES,
-    env: { ...io.env, OPENCLAW_STATE_DIR: storageRootDir },
+    env: { ...io.env, BOT_STATE_DIR: storageRootDir },
   });
 }
 

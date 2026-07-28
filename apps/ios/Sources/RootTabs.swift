@@ -1,5 +1,5 @@
-import OpenClawKit
-import OpenClawProtocol
+import BotKit
+import BotProtocol
 import SwiftUI
 import UIKit
 
@@ -80,7 +80,7 @@ struct RootTabs: View {
         if let requested = self.requestedInitialSidebarDestination(arguments: arguments) {
             return requested
         }
-        guard let flagIndex = arguments.firstIndex(of: "--openclaw-initial-tab") else { return .chat }
+        guard let flagIndex = arguments.firstIndex(of: "--bot-initial-tab") else { return .chat }
         let valueIndex = arguments.index(after: flagIndex)
         guard arguments.indices.contains(valueIndex) else { return .chat }
         return switch arguments[valueIndex].trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
@@ -93,19 +93,19 @@ struct RootTabs: View {
     }
 
     static func requestedInitialSettingsRoute(arguments: [String]) -> SettingsRoute? {
-        guard let flagIndex = arguments.firstIndex(of: "--openclaw-settings-route") else {
+        guard let flagIndex = arguments.firstIndex(of: "--bot-settings-route") else {
             return nil
         }
         let valueIndex = arguments.index(after: flagIndex)
         guard arguments.indices.contains(valueIndex) else { return nil }
         return switch arguments[valueIndex].trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
-        case "openclaw", "system-agent": .systemAgent
+        case "bot", "system-agent": .systemAgent
         default: nil
         }
     }
 
     static func requestedInitialSidebarDestination(arguments: [String]) -> SidebarDestination? {
-        guard let flagIndex = arguments.firstIndex(of: "--openclaw-initial-destination") else {
+        guard let flagIndex = arguments.firstIndex(of: "--bot-initial-destination") else {
             return nil
         }
         let valueIndex = arguments.index(after: flagIndex)
@@ -120,7 +120,7 @@ struct RootTabs: View {
 
     private static var initialChatSessionKey: String? {
         let arguments = ProcessInfo.processInfo.arguments
-        guard let flagIndex = arguments.firstIndex(of: "--openclaw-chat-session") else {
+        guard let flagIndex = arguments.firstIndex(of: "--bot-chat-session") else {
             return nil
         }
         let valueIndex = arguments.index(after: flagIndex)
@@ -144,7 +144,7 @@ struct RootTabs: View {
             self.rootLifecycle(
                 self.rootOverlays(
                     self.sidebarSplitContent
-                        .tint(OpenClawBrand.accent))))
+                        .tint(BotBrand.accent))))
             .overlay(alignment: .topLeading) {
                 self.uiTestReadinessMarker
             }
@@ -153,13 +153,13 @@ struct RootTabs: View {
     @ViewBuilder
     private var uiTestReadinessMarker: some View {
         #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("--openclaw-ui-test-readiness") {
+        if ProcessInfo.processInfo.arguments.contains("--bot-ui-test-readiness") {
             Color.clear
                 .frame(width: 1, height: 1)
                 .allowsHitTesting(false)
                 .accessibilityElement(children: .ignore)
                 .accessibilityIdentifier("RootTabs.Ready")
-                .accessibilityLabel(Text(verbatim: "OpenClaw test readiness"))
+                .accessibilityLabel(Text(verbatim: "Bot test readiness"))
                 .accessibilityValue(
                     "\(self.scenePhase == .active ? "ready" : "inactive"):\(self.selectedSidebarDestination.rawValue)")
         }
@@ -238,7 +238,7 @@ struct RootTabs: View {
             self.sidebarDetailNavigationShell
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .background(OpenClawProBackground())
+        .background(BotProBackground())
         .animation(self.sidebarAnimation, value: self.isSidebarVisible)
     }
 
@@ -293,12 +293,12 @@ struct RootTabs: View {
             .safeAreaPadding(.bottom, drawerSafeAreaInsets == nil ? 8 : 0)
             // Paints the wrapper's inset strips; RootSidebar's own background
             // stops at its bounds.
-            .background(OpenClawSidebarPalette.background)
+            .background(BotSidebarPalette.background)
     }
 
     private var sidebarVerticalSeparator: some View {
         Rectangle()
-            .fill(OpenClawSidebarPalette.hairline)
+            .fill(BotSidebarPalette.hairline)
             .frame(width: 1 / self.displayScale)
     }
 
@@ -389,7 +389,7 @@ struct RootTabs: View {
                 headerSidebarAction: self.sidebarHeaderAction,
                 gatewayAction: { self.selectSidebarDestination(.gateway) })
         case .docs:
-            OpenClawDocsScreen(
+            BotDocsScreen(
                 headerSidebarAction: self.sidebarHeaderAction,
                 gatewayAction: { self.selectSidebarDestination(.gateway) })
         case .settings:
@@ -461,7 +461,7 @@ struct RootTabs: View {
             layoutMode: self.isSidebarDrawerLayout ? .drawer : .split)
     }
 
-    private var sidebarHeaderAction: OpenClawSidebarHeaderAction? {
+    private var sidebarHeaderAction: BotSidebarHeaderAction? {
         guard Self.shouldShowSidebarRevealInDestinationHeader(
             isSidebarVisible: self.isSidebarVisible,
             layoutMode: self.isSidebarDrawerLayout ? .drawer : .split)
@@ -469,13 +469,13 @@ struct RootTabs: View {
             return nil
         }
         if self.isSidebarVisible {
-            return OpenClawSidebarHeaderAction(
+            return BotSidebarHeaderAction(
                 systemName: "line.3.horizontal",
                 accessibilityLabel: .localized("Hide Sidebar"),
                 accessibilityIdentifier: Self.sidebarHideButtonAccessibilityIdentifier,
                 action: { self.hideSidebar() })
         }
-        return OpenClawSidebarHeaderAction(
+        return BotSidebarHeaderAction(
             systemName: "line.3.horizontal",
             accessibilityLabel: .localized("Show Sidebar"),
             accessibilityIdentifier: Self.sidebarShowButtonAccessibilityIdentifier,
@@ -763,7 +763,7 @@ struct RootTabs: View {
                     })
                     .environment(self.appModel)
                     .environment(self.gatewayController)
-                    .openClawSheetChrome()
+                    .botSheetChrome()
                 }
             }
             .fullScreenCover(isPresented: self.$showOnboarding) {
@@ -849,7 +849,7 @@ extension RootTabs {
                 activeAgentCaption: "Routes chat and voice",
                 agentCount: agents.count,
                 agents: Array(agents.prefix(6)),
-                footer: "OpenClaw only runs phone-side capabilities while the app is connected and permitted.")
+                footer: "Bot only runs phone-side capabilities while the app is connected and permitted.")
         case .connecting:
             return RootTabsHomeCanvasPayload(
                 gatewayState: "connecting",
@@ -867,7 +867,7 @@ extension RootTabs {
         case .error, .disconnected:
             return RootTabsHomeCanvasPayload(
                 gatewayState: self.gatewayStatus == .error ? "error" : "offline",
-                eyebrow: self.gatewayStatus == .error ? "Gateway needs attention" : "OpenClaw iOS",
+                eyebrow: self.gatewayStatus == .error ? "Gateway needs attention" : "Bot iOS",
                 title: "Pair a gateway",
                 subtitle:
                 "Connect this phone as a local node for chat, realtime voice, share intake, and approved device tools.",
@@ -878,7 +878,7 @@ extension RootTabs {
                 agentCount: agents.count,
                 agents: Array(agents.prefix(4)),
                 footer:
-                "Use Settings to scan a pairing QR code or paste a setup code from your OpenClaw gateway.")
+                "Use Settings to scan a pairing QR code or paste a setup code from your Bot gateway.")
         }
     }
 

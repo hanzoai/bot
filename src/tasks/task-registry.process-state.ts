@@ -12,7 +12,7 @@ type TaskRegistryProcessState = {
   tasksWithPendingDelivery: Set<string>;
 };
 
-const TASK_REGISTRY_PROCESS_STATE_KEY = Symbol.for("openclaw.taskRegistry.state");
+const TASK_REGISTRY_PROCESS_STATE_KEY = Symbol.for("bot.taskRegistry.state");
 
 /** Returns the singleton in-process task registry state. */
 export function getTaskRegistryProcessState(): TaskRegistryProcessState {

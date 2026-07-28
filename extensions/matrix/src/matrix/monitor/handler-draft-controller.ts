@@ -9,8 +9,8 @@ import {
   mergeChannelProgressDraftLine,
   normalizeChannelProgressDraftLineIdentity,
   resolveChannelProgressDraftMaxLines,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { GetReplyOptions } from "openclaw/plugin-sdk/reply-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import type { GetReplyOptions } from "bot/plugin-sdk/reply-runtime";
 import type { CoreConfig, MatrixConfig, MatrixStreamingMode, ReplyToMode } from "../../types.js";
 import type { MatrixClient } from "../sdk.js";
 import { formatMatrixToolProgressMarkdownCode } from "./handler-helpers.js";

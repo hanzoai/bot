@@ -1,13 +1,13 @@
 import { isIP } from "node:net";
 // Litellm provider module implements model/runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   createOpenAiCompatibleImageGenerationProvider,
   type ImageGenerationProvider,
   type ImageGenerationSourceImage,
   toImageDataUrl,
-} from "openclaw/plugin-sdk/image-generation";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/image-generation";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { LITELLM_BASE_URL } from "./onboard.js";
 
 const DEFAULT_SIZE = "1024x1024";
@@ -28,16 +28,16 @@ const LITELLM_SUPPORTED_SIZES = [
 const LITELLM_MAX_INPUT_IMAGES = 5;
 
 type LitellmProviderConfig = NonNullable<
-  NonNullable<OpenClawConfig["models"]>["providers"]
+  NonNullable<BotConfig["models"]>["providers"]
 >[string];
 
 function resolveLitellmProviderConfig(
-  cfg: OpenClawConfig | undefined,
+  cfg: BotConfig | undefined,
 ): LitellmProviderConfig | undefined {
   return cfg?.models?.providers?.litellm;
 }
 
-function resolveConfiguredLitellmBaseUrl(cfg: OpenClawConfig | undefined): string {
+function resolveConfiguredLitellmBaseUrl(cfg: BotConfig | undefined): string {
   return normalizeOptionalString(resolveLitellmProviderConfig(cfg)?.baseUrl) ?? LITELLM_BASE_URL;
 }
 

@@ -1,5 +1,5 @@
 // Shared directive parsing helpers used by model and auth directive handlers.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { formatCliCommand } from "../../cli/command-format.js";
 import { SESSION_MODEL_OVERRIDE_TRANSACTION_FIELDS } from "../../config/sessions/session-snapshot-merge.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
@@ -174,7 +174,7 @@ export function formatElevatedUnavailableText(params: {
   }
   if (params.sessionKey) {
     lines.push(
-      `See: ${formatCliCommand(`openclaw sandbox explain --session ${params.sessionKey}`)}`,
+      `See: ${formatCliCommand(`bot sandbox explain --session ${params.sessionKey}`)}`,
     );
   }
   return lines.join("\n");

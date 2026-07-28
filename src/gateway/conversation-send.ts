@@ -7,7 +7,7 @@ import {
   resolveConversation,
   resolveConversationRegistryScope,
 } from "../config/sessions/conversation-registry.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   ConversationDeliveryRejectedError,
   defaultConversationDeliveryDeps,
@@ -69,7 +69,7 @@ function resultForCompletedOperation(
 /** Performs one durable conversation send inside the Gateway channel owner. */
 export async function runGatewayConversationSend(
   params: {
-    config: OpenClawConfig;
+    config: BotConfig;
     agentId: string;
     senderIsOwner: boolean;
     sourceSessionKey?: string;

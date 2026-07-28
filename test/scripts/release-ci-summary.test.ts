@@ -4,7 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   artifactDownloadArgs,
@@ -57,12 +57,12 @@ describe("runReleaseCiGh", () => {
     const execFileSyncImpl = vi.fn(() => "result");
 
     expect(
-      runReleaseCiGh(["api", "repos/openclaw/openclaw/actions/runs/1"], { execFileSyncImpl }),
+      runReleaseCiGh(["api", "repos/hanzoai/bot/actions/runs/1"], { execFileSyncImpl }),
     ).toBe("result");
     expect(execFileSyncImpl).toHaveBeenCalledOnce();
     expect(execFileSyncImpl).toHaveBeenCalledWith(
       expect.any(String),
-      ["api", "repos/openclaw/openclaw/actions/runs/1"],
+      ["api", "repos/hanzoai/bot/actions/runs/1"],
       expect.objectContaining({
         encoding: "utf8",
         killSignal: "SIGKILL",
@@ -302,10 +302,10 @@ function trustedMainPackageFixture({
     event: "workflow_dispatch",
     head_branch: workflowRef,
     head_sha: workflowSha,
-    html_url: `https://github.com/openclaw/openclaw/actions/runs/${runId}`,
+    html_url: `https://github.com/hanzoai/bot/actions/runs/${runId}`,
     id: Number(runId),
     path: parentPath,
-    repository: { full_name: "openclaw/openclaw" },
+    repository: { full_name: "hanzoai/bot" },
     run_attempt: 1,
     status: "completed",
   };
@@ -341,10 +341,10 @@ function trustedMainPackageFixture({
     event: "workflow_dispatch",
     head_branch: workflowRef,
     head_sha: workflowSha,
-    html_url: `https://github.com/openclaw/openclaw/actions/runs/${childRunId}`,
+    html_url: `https://github.com/hanzoai/bot/actions/runs/${childRunId}`,
     id: Number(childRunId),
-    path: ".github/workflows/openclaw-release-checks.yml",
-    repository: { full_name: "openclaw/openclaw" },
+    path: ".github/workflows/bot-release-checks.yml",
+    repository: { full_name: "hanzoai/bot" },
     run_attempt: 1,
     status: "completed",
     triggering_actor: { login: "github-actions[bot]" },
@@ -373,7 +373,7 @@ function trustedMainPackageFixture({
       expect(jobId).toBe(parentJob.id);
       return [
         `TARGET_SHA: ${targetSha}`,
-        `Dispatched openclaw-release-checks.yml: ${childRun.html_url}`,
+        `Dispatched bot-release-checks.yml: ${childRun.html_url}`,
       ].join("\n");
     },
     getParentJobs(requestedRunId: string) {
@@ -410,7 +410,7 @@ describe("release CI summary child correlation", () => {
         "--validate-run",
         "29071366025",
         "--repo",
-        "openclaw/openclaw",
+        "hanzoai/bot",
         "--manifest",
         "/tmp/manifest.json",
         "--json",
@@ -419,7 +419,7 @@ describe("release CI summary child correlation", () => {
       json: true,
       intervalMs: 30_000,
       manifestPath: "/tmp/manifest.json",
-      repository: "openclaw/openclaw",
+      repository: "hanzoai/bot",
       runId: "29071366025",
       trustedWorkflowRef: "main",
       validate: true,
@@ -428,7 +428,7 @@ describe("release CI summary child correlation", () => {
       watch: false,
     });
     expect(parseReleaseCiSummaryArgs(["29071366025"])).toMatchObject({
-      repository: "openclaw/openclaw",
+      repository: "hanzoai/bot",
       runId: "29071366025",
       trustedWorkflowRef: "main",
       validate: false,
@@ -648,7 +648,7 @@ describe("release CI summary child correlation", () => {
     expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "hanzoai/bot",
           runId: legacyV2.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -665,7 +665,7 @@ describe("release CI summary child correlation", () => {
     expect(() =>
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "hanzoai/bot",
           runId: legacyV3.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -683,7 +683,7 @@ describe("release CI summary child correlation", () => {
     const verifierSourceSha = "c".repeat(40);
     const evidence = validateReleaseRunEvidence(
       {
-        repository: "openclaw/openclaw",
+        repository: "hanzoai/bot",
         runId: fixture.runId,
         verifierSourceContent: readFileSync(SCRIPT),
         verifierSourceSha,
@@ -695,10 +695,10 @@ describe("release CI summary child correlation", () => {
       directRoot: true,
       evidenceReuse: null,
       releaseProfile: "full",
-      repository: "openclaw/openclaw",
+      repository: "hanzoai/bot",
       rerunGroup: "package",
       runReleaseSoak: true,
-      schema: "openclaw.release-validation-evidence/v3",
+      schema: "bot.release-validation-evidence/v3",
       producerOnTrustedMainLineage: true,
       trustedWorkflowFullRef: "refs/heads/main",
       trustedWorkflowRef: "main",
@@ -754,7 +754,7 @@ describe("release CI summary child correlation", () => {
     expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "hanzoai/bot",
           runId: fixture.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -775,7 +775,7 @@ describe("release CI summary child correlation", () => {
     });
     const evidence = validateReleaseRunEvidence(
       {
-        repository: "openclaw/openclaw",
+        repository: "hanzoai/bot",
         runId: fixture.runId,
         verifierSourceContent: readFileSync(SCRIPT),
         verifierSourceSha: "c".repeat(40),
@@ -801,7 +801,7 @@ describe("release CI summary child correlation", () => {
     });
     const evidence = validateReleaseRunEvidence(
       {
-        repository: "openclaw/openclaw",
+        repository: "hanzoai/bot",
         runId: fixture.runId,
         trustedWorkflowRef: workflowRef,
         verifierSourceContent: readFileSync(SCRIPT),
@@ -826,7 +826,7 @@ describe("release CI summary child correlation", () => {
     expect(() =>
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "hanzoai/bot",
           runId: fixture.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -845,7 +845,7 @@ describe("release CI summary child correlation", () => {
     expect(() =>
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "hanzoai/bot",
           runId: fixture.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -864,7 +864,7 @@ describe("release CI summary child correlation", () => {
     expect(() =>
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "hanzoai/bot",
           runId: fixture.runId,
           trustedWorkflowRef: "main",
           verifierSourceContent: readFileSync(SCRIPT),
@@ -890,7 +890,7 @@ describe("release CI summary child correlation", () => {
     expect(
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "hanzoai/bot",
           runId: fixture.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -917,7 +917,7 @@ describe("release CI summary child correlation", () => {
       expect(
         validateReleaseRunEvidence(
           {
-            repository: "openclaw/openclaw",
+            repository: "hanzoai/bot",
             runId: fixture.runId,
             verifierSourceContent: readFileSync(SCRIPT),
             verifierSourceSha: "c".repeat(40),
@@ -977,7 +977,7 @@ describe("release CI summary child correlation", () => {
     expect(() =>
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "hanzoai/bot",
           runId: fixture.runId,
           verifierSourceContent: readFileSync(SCRIPT),
           verifierSourceSha: "c".repeat(40),
@@ -992,7 +992,7 @@ describe("release CI summary child correlation", () => {
     expect(() =>
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "hanzoai/bot",
           runId: fixture.runId,
           verifierSourceContent: "different verifier bytes",
           verifierSourceSha: "c".repeat(40),
@@ -1003,7 +1003,7 @@ describe("release CI summary child correlation", () => {
     expect(() =>
       validateReleaseRunEvidence(
         {
-          repository: "openclaw/openclaw",
+          repository: "hanzoai/bot",
           runId: fixture.runId,
           verifierSourceSha: "f".repeat(40),
         },
@@ -1093,7 +1093,7 @@ describe("release CI summary child correlation", () => {
     expect(() =>
       validateParentRunBinding(
         parentView,
-        { ...parentRest, path: ".github/workflows/openclaw-release-checks.yml" },
+        { ...parentRest, path: ".github/workflows/bot-release-checks.yml" },
         "29090000000",
       ),
     ).toThrow("full release parent run binding mismatch");
@@ -1113,14 +1113,14 @@ describe("release CI summary child correlation", () => {
       },
       {
         displayTitle:
-          "OpenClaw Release Checks full-release-validation-29090000000-3-release-checks",
+          "Bot Release Checks full-release-validation-29090000000-3-release-checks",
         headBranch: "release/2026.7.1",
         manifestKey: "releaseChecks",
-        name: "OpenClaw Release Checks",
+        name: "Bot Release Checks",
         parentJobName: "Run release/live/Docker/QA validation",
         suffix: "-release-checks",
         trustedRef: "parent",
-        workflow: "openclaw-release-checks.yml",
+        workflow: "bot-release-checks.yml",
       },
       {
         displayTitle: "Plugin Prerelease full-release-validation-29090000000-3-plugin-prerelease",
@@ -1143,20 +1143,20 @@ describe("release CI summary child correlation", () => {
         workflow: "npm-telegram-beta-e2e.yml",
       },
       {
-        displayTitle: "OpenClaw Performance full-release-validation-29090000000-3",
+        displayTitle: "Bot Performance full-release-validation-29090000000-3",
         headBranch: "release/2026.7.1",
         manifestKey: "productPerformance",
-        name: "OpenClaw Performance",
+        name: "Bot Performance",
         parentJobName: "Run product performance evidence",
         suffix: "",
         trustedRef: "parent",
-        workflow: "openclaw-performance.yml",
+        workflow: "bot-performance.yml",
       },
     ]);
   });
 
   it("ignores same-SHA and nearby-name runs without the exact parent dispatch binding", () => {
-    const expected = "OpenClaw Performance full-release-validation-29090000000-3";
+    const expected = "Bot Performance full-release-validation-29090000000-3";
     const exact = {
       display_title: expected,
       event: "workflow_dispatch",
@@ -1168,7 +1168,7 @@ describe("release CI summary child correlation", () => {
       selectExactChildRun(
         [
           {
-            display_title: "OpenClaw Performance",
+            display_title: "Bot Performance",
             event: "workflow_dispatch",
             head_branch: "main",
             head_sha: exact.head_sha,
@@ -1213,7 +1213,7 @@ describe("release CI summary child correlation", () => {
   });
 
   it("returns one exact child after a full bounded pagination scan", () => {
-    const expected = "OpenClaw Performance full-release-validation-29090000000-3";
+    const expected = "Bot Performance full-release-validation-29090000000-3";
     const exact = {
       display_title: expected,
       event: "workflow_dispatch",
@@ -1612,7 +1612,7 @@ describe("release CI summary child correlation", () => {
     ];
     const parentLog = [
       `TARGET_SHA: ${parentManifest.targetSha}`,
-      "Dispatched ci.yml: https://github.com/openclaw/openclaw/actions/runs/101",
+      "Dispatched ci.yml: https://github.com/hanzoai/bot/actions/runs/101",
     ].join("\n");
     const run = {
       actor: { login: "github-actions[bot]" },
@@ -1663,10 +1663,10 @@ describe("release CI summary child correlation", () => {
         {
           originAttempt: 1,
           runId: 28717802171,
-          title: "OpenClaw Performance full-release-validation-28717729503-1",
+          title: "Bot Performance full-release-validation-28717729503-1",
         },
       ],
-      ["releaseChecks", { originAttempt: 1, runId: 28717802397, title: "OpenClaw Release Checks" }],
+      ["releaseChecks", { originAttempt: 1, runId: 28717802397, title: "Bot Release Checks" }],
     ]);
     const fingerprint = {
       completed_at: "2026-07-04T20:29:21Z",
@@ -1723,7 +1723,7 @@ describe("release CI summary child correlation", () => {
       const parentLog = [
         `TARGET_SHA: ${parentManifest.targetSha}`,
         ...(child.manifestKey === "productPerformance" ? ["-f publish_reports=false"] : []),
-        `Dispatched ${child.workflow}: https://github.com/openclaw/openclaw/actions/runs/${runId}`,
+        `Dispatched ${child.workflow}: https://github.com/hanzoai/bot/actions/runs/${runId}`,
       ].join("\n");
       expect(resolveManifestChildOriginAttempt(run, child, parentManifest, parentJobs)).toBe(
         originAttempt,
@@ -1766,7 +1766,7 @@ describe("release CI summary child correlation", () => {
     ];
     const ciLog = [
       `TARGET_SHA: ${parentManifest.targetSha}`,
-      "Dispatched ci.yml: https://github.com/openclaw/openclaw/actions/runs/101",
+      "Dispatched ci.yml: https://github.com/hanzoai/bot/actions/runs/101",
     ].join("\n");
     expect(() =>
       validateManifestChildRun(wrongParent, ci, "101", parentManifest, ciJobs, ciLog),

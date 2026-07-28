@@ -35,7 +35,7 @@ import {
   ensureSystemPromptCacheBoundary,
   SYSTEM_PROMPT_CACHE_BOUNDARY,
   splitSystemPromptCacheBoundary,
-} from "@openclaw/ai/internal/shared";
+} from "@hanzo/bot-ai/internal/shared";
 import {
   appendModelIdentitySystemPrompt,
   buildModelIdentityPromptLine,

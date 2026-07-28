@@ -11,7 +11,7 @@ import {
   deleteWorkspaceState,
   prepareWorkspaceStateDeletion,
 } from "../agents/workspace-state-store.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isPathInside } from "../infra/path-guards.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { resolveHomeDir, shortenHomeInString } from "../utils.js";
@@ -39,7 +39,7 @@ type StateRemovalOptions = {
   preservePaths?: readonly string[];
 };
 
-function collectWorkspaceDirs(cfg: OpenClawConfig | undefined): string[] {
+function collectWorkspaceDirs(cfg: BotConfig | undefined): string[] {
   const dirs = new Set<string>();
   if (!cfg) {
     dirs.add(resolveDefaultAgentWorkspaceDir());
@@ -53,7 +53,7 @@ function collectWorkspaceDirs(cfg: OpenClawConfig | undefined): string[] {
 
 /** Determine which config, credential, and workspace paths cleanup should consider. */
 export function buildCleanupPlan(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   stateDir: string;
   configPath: string;
   oauthDir: string;

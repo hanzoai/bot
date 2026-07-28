@@ -2,7 +2,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolveOptionalIntegerOption } from "@openclaw/normalization-core/number-coercion";
+import { resolveOptionalIntegerOption } from "@hanzo/bot-normalization-core/number-coercion";
 import { sha256File, sha256Hex } from "../infra/crypto-digest.js";
 import { ensureAbsoluteDirectory } from "../infra/fs-safe.js";
 import {
@@ -11,12 +11,12 @@ import {
   iterateSqliteQuerySync,
 } from "../infra/kysely-sync.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
-import { withOpenClawStateLease } from "../state/openclaw-state-lease.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+  type BotStateDatabase,
+  type BotStateDatabaseOptions,
+} from "../state/bot-state-db.js";
+import { withBotStateLease } from "../state/bot-state-lease.js";
 import type { TranscriptSessionDescriptor, TranscriptUtterance } from "./provider-types.js";
 import { ensureMeetingTranscriptsSchema } from "./sqlite-schema.js";
 import {
@@ -54,12 +54,12 @@ export { safeTranscriptPathSegment, transcriptSessionExportKey, transcriptSessio
 export class TranscriptsStore {
   constructor(
     private readonly exportRootDir: string,
-    private readonly databaseOptions: OpenClawStateDatabaseOptions = {},
+    private readonly databaseOptions: BotStateDatabaseOptions = {},
   ) {}
 
   private database() {
     ensureMeetingTranscriptsSchema(this.databaseOptions);
-    return openOpenClawStateDatabase(this.databaseOptions);
+    return openBotStateDatabase(this.databaseOptions);
   }
 
   sessionDir(session: TranscriptSessionDescriptor): string {
@@ -82,7 +82,7 @@ export class TranscriptsStore {
     };
   }
 
-  private readSummaryKeys(database: OpenClawStateDatabase): Set<string> {
+  private readSummaryKeys(database: BotStateDatabase): Set<string> {
     const rows = executeSqliteQuerySync(
       database.db,
       meetingTranscriptDb(database.db)
@@ -92,7 +92,7 @@ export class TranscriptsStore {
     return new Set(rows.map((row) => `${row.session_id}\0${row.session_started_at}`));
   }
 
-  private hasSummary(database: OpenClawStateDatabase, row: MeetingTranscriptSessionRow): boolean {
+  private hasSummary(database: BotStateDatabase, row: MeetingTranscriptSessionRow): boolean {
     return Boolean(
       executeSqliteQueryTakeFirstSync(
         database.db,
@@ -190,7 +190,7 @@ export class TranscriptsStore {
     exportedHashes: Readonly<Record<string, string>>,
     removedExports: ReadonlySet<string> = new Set(),
   ): void {
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db: database }) => {
         const db = meetingTranscriptDb(database);
         const stored = executeSqliteQueryTakeFirstSync(
@@ -229,7 +229,7 @@ export class TranscriptsStore {
   }
 
   private markPendingExports(session: TranscriptSessionDescriptor, fileNames: string[]): void {
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db: database }) => {
         const db = meetingTranscriptDb(database);
         const stored = executeSqliteQueryTakeFirstSync(
@@ -287,7 +287,7 @@ export class TranscriptsStore {
       const stat = await fs.lstat(filePath);
       if (stat.isSymbolicLink() || !stat.isFile()) {
         throw new Error(
-          `legacy transcript artifacts require migration before writing ${sessionDir}; run openclaw doctor --fix`,
+          `legacy transcript artifacts require migration before writing ${sessionDir}; run bot doctor --fix`,
         );
       }
       const actualHash = await sha256File(filePath);
@@ -300,7 +300,7 @@ export class TranscriptsStore {
       expectedHashes ??= await this.expectedExportHashes(session);
       if (expectedHashes[canonicalName] !== actualHash) {
         throw new Error(
-          `legacy transcript artifacts require migration before writing ${sessionDir}; run openclaw doctor --fix`,
+          `legacy transcript artifacts require migration before writing ${sessionDir}; run bot doctor --fix`,
         );
       }
       repairedHashes[canonicalName] = actualHash;
@@ -354,7 +354,7 @@ export class TranscriptsStore {
     const sourceJson = JSON.stringify(session.source);
     const metadataJson = session.metadata ? JSON.stringify(session.metadata) : null;
     const now = Date.now();
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db: database }) => {
         const db = meetingTranscriptDb(database);
         executeSqliteQuerySync(
@@ -465,7 +465,7 @@ export class TranscriptsStore {
     const metadataJson = utterance.metadata ? JSON.stringify(utterance.metadata) : null;
     const now = Date.now();
     ensureMeetingTranscriptsSchema(this.databaseOptions);
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db: database }) =>
         appendMeetingTranscriptUtterance({ database, metadataJson, now, session, utterance }),
       this.databaseOptions,
@@ -516,7 +516,7 @@ export class TranscriptsStore {
     const summaryJson = JSON.stringify(summary);
     const markdown = renderTranscriptsMarkdown(summary);
     ensureMeetingTranscriptsSchema(this.databaseOptions);
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db: database }) => {
         const db = meetingTranscriptDb(database);
         executeSqliteQuerySync(
@@ -582,7 +582,7 @@ export class TranscriptsStore {
         typeof sessionOrSelector === "string" ? sessionOrSelector : sessionOrSelector.sessionId;
       throw new Error(`transcripts session not found: ${selector}`);
     }
-    return await withOpenClawStateLease(
+    return await withBotStateLease(
       {
         scope: "meeting-transcript.export",
         key: transcriptSessionExportKey(session),

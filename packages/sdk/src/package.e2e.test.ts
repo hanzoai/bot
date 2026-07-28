@@ -1,4 +1,4 @@
-// OpenClaw SDK tests cover package behavior.
+// Bot SDK tests cover package behavior.
 import { spawn, spawnSync, type SpawnOptionsWithoutStdio } from "node:child_process";
 import { createReadStream } from "node:fs";
 import fs from "node:fs/promises";
@@ -32,7 +32,7 @@ type PackedPackage = {
 };
 
 function resolveWorkspacePackageRoot(repoRoot: string, packageName: string): string {
-  const prefix = "@openclaw/";
+  const prefix = "@hanzo/bot-";
   if (!packageName.startsWith(prefix)) {
     throw new Error(`unsupported workspace package name: ${packageName}`);
   }
@@ -193,7 +193,7 @@ function normalizeWorkspaceDependencies(
   const normalized: Record<string, string> = {};
   for (const [name, spec] of Object.entries(dependencies)) {
     normalized[name] =
-      name.startsWith("@openclaw/") && spec.startsWith("workspace:") ? "0.0.0-private" : spec;
+      name.startsWith("@hanzo/bot-") && spec.startsWith("workspace:") ? "0.0.0-private" : spec;
   }
   return normalized;
 }
@@ -275,7 +275,7 @@ function closeServer(server: Server): Promise<void> {
   });
 }
 
-async function startOpenClawRegistry(packages: PackedPackage[]): Promise<{
+async function startBotRegistry(packages: PackedPackage[]): Promise<{
   registryUrl: string;
   close: () => Promise<void>;
 }> {
@@ -341,7 +341,7 @@ async function startOpenClawRegistry(packages: PackedPackage[]): Promise<{
   };
 }
 
-describe("OpenClaw SDK package e2e", () => {
+describe("Bot SDK package e2e", () => {
   afterEach(async () => {
     await Promise.all(
       tempDirs.splice(0).map((dir) => fs.rm(dir, { recursive: true, force: true })),
@@ -387,7 +387,7 @@ describe("OpenClaw SDK package e2e", () => {
       repoRoot,
       entryRoot: path.join(repoRoot, "packages", "sdk"),
     });
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sdk-consumer-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-sdk-consumer-"));
     tempDirs.push(tempDir);
 
     for (const packageRoot of packageRoots) {
@@ -412,15 +412,15 @@ describe("OpenClaw SDK package e2e", () => {
       packedPackages.push({ manifest, tarball });
     }
     const sdkTarball =
-      packedPackages.find((pkg) => pkg.manifest.name === "@openclaw/sdk")?.tarball ?? "";
+      packedPackages.find((pkg) => pkg.manifest.name === "@hanzo/bot-sdk")?.tarball ?? "";
     expect(sdkTarball).not.toBe("");
-    const registry = await startOpenClawRegistry(packedPackages);
+    const registry = await startBotRegistry(packedPackages);
 
     await fs.writeFile(
       path.join(tempDir, "package.json"),
       JSON.stringify({ private: true, type: "module" }),
     );
-    await fs.writeFile(path.join(tempDir, ".npmrc"), `@openclaw:registry=${registry.registryUrl}`);
+    await fs.writeFile(path.join(tempDir, ".npmrc"), `@bot:registry=${registry.registryUrl}`);
     try {
       await runNpmCommand(["install", "--ignore-scripts", "--no-audit", "--no-fund", sdkTarball], {
         cwd: tempDir,
@@ -430,9 +430,9 @@ describe("OpenClaw SDK package e2e", () => {
     }
 
     const importScript = `
-      import { GatewayClientTransport, OpenClaw, normalizeGatewayEvent } from "@openclaw/sdk";
+      import { GatewayClientTransport, Bot, normalizeGatewayEvent } from "@hanzo/bot-sdk";
       if (typeof GatewayClientTransport !== "function") throw new Error("missing transport export");
-      if (typeof OpenClaw !== "function") throw new Error("missing client export");
+      if (typeof Bot !== "function") throw new Error("missing client export");
       const event = normalizeGatewayEvent({
         event: "agent",
         payload: { runId: "pack-smoke", stream: "lifecycle", data: { phase: "start" } }

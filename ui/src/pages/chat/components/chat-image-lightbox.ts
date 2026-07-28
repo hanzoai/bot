@@ -49,10 +49,10 @@ export function renderChatImageLightbox(
     return nothing;
   }
   return html`
-    <openclaw-image-lightbox
+    <bot-image-lightbox
       src=${item.src}
       title=${item.title}
       @image-lightbox-close=${onClose}
-    ></openclaw-image-lightbox>
+    ></bot-image-lightbox>
   `;
 }

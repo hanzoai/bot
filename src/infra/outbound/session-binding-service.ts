@@ -1,6 +1,6 @@
 // Session binding service multiplexes channel adapters and the generic current
 // conversation store behind one bind/list/resolve/touch/unbind API.
-import { uniqueValues } from "@openclaw/normalization-core/string-normalization";
+import { uniqueValues } from "@hanzo/bot-normalization-core/string-normalization";
 import { resolveGlobalMap } from "../../shared/global-singleton.js";
 import {
   testing as genericCurrentConversationBindingTesting,
@@ -122,7 +122,7 @@ function resolveAdapterCapabilities(
   };
 }
 
-const SESSION_BINDING_ADAPTERS_KEY = Symbol.for("openclaw.sessionBinding.adapters");
+const SESSION_BINDING_ADAPTERS_KEY = Symbol.for("bot.sessionBinding.adapters");
 
 type SessionBindingAdapterRegistration = {
   adapter: SessionBindingAdapter;

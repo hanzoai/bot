@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { validateExplicitMessageAccountSelection } from "./message-account-selection.js";
 
 describe("validateExplicitMessageAccountSelection", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as BotConfig;
   const plugin = {
     id: "feishu",
     config: {
       listAccountIds: () => ["default"],
       defaultAccountId: () => "ops",
-      resolveAccount: (_cfg: OpenClawConfig, accountId?: string | null) => ({
+      resolveAccount: (_cfg: BotConfig, accountId?: string | null) => ({
         accountId,
         enabled: true,
       }),

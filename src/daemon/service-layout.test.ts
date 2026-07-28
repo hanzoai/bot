@@ -8,10 +8,10 @@ describe("resolveGatewayServiceEntrypoint", () => {
       (
         await summarizeGatewayServiceLayout({
           programArguments: ["node", "dist/index.js", "gateway", "run"],
-          workingDirectory: "/repo/openclaw",
+          workingDirectory: "/repo/bot",
         })
       )?.entrypoint,
-    ).toBe(path.join("/repo/openclaw", "dist", "index.js"));
+    ).toBe(path.join("/repo/bot", "dist", "index.js"));
   });
 
   it("resolves Windows service entrypoints with Windows path semantics", async () => {
@@ -19,10 +19,10 @@ describe("resolveGatewayServiceEntrypoint", () => {
       (
         await summarizeGatewayServiceLayout({
           programArguments: ["node.exe", "dist\\index.js", "gateway", "run"],
-          workingDirectory: "C:\\openclaw",
+          workingDirectory: "C:\\bot",
         })
       )?.entrypoint,
-    ).toBe("C:\\openclaw\\dist\\index.js");
+    ).toBe("C:\\bot\\dist\\index.js");
   });
 
   it("rejects a relative entrypoint without an absolute service working directory", async () => {

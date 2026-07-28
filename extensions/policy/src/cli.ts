@@ -11,8 +11,8 @@ import {
   resolveDefaultAgentId,
   type HealthCheckContext,
   type HealthFinding,
-} from "openclaw/plugin-sdk/health";
-import { defaultRuntime as cliRuntime } from "openclaw/plugin-sdk/runtime";
+} from "bot/plugin-sdk/health";
+import { defaultRuntime as cliRuntime } from "bot/plugin-sdk/runtime";
 import { POLICY_FIX_METADATA_BY_CHECK_ID } from "./doctor/fix-metadata.js";
 import { POLICY_CHECK_IDS, evaluatePolicy } from "./doctor/register.js";
 import {

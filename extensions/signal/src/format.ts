@@ -1,12 +1,12 @@
-import type { MarkdownTableMode } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { MarkdownTableMode } from "bot/plugin-sdk/config-contracts";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   FormatCapabilityProfile,
   markdownToIR,
   type MarkdownIR,
   renderMarkdownWithAttributedRanges,
   renderMarkdownIRChunksWithinLimit,
-} from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/text-chunking";
 
 type SignalTextStyle = "BOLD" | "ITALIC" | "STRIKETHROUGH" | "MONOSPACE" | "SPOILER";
 

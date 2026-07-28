@@ -9,7 +9,7 @@ import type {
 import type { HeartbeatToolResponse } from "../auto-reply/heartbeat-tool-response.js";
 import type { ReplyPayload } from "../auto-reply/reply-payload.js";
 import type { ReasoningLevel, ThinkLevel, VerboseLevel } from "../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { HookRunner } from "../plugins/hooks.js";
 import type { BlockReplyPayload } from "./embedded-agent-payloads.js";
 import type { EmbeddedRunReplayState } from "./embedded-agent-runner/replay-state.js";
@@ -109,7 +109,7 @@ export type SubscribeEmbeddedAgentSessionParams = {
    * change final output.
    */
   suppressLiveStreamOutput?: boolean;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionKey?: string;
   /** Current transport channel resolved for this run. */
   currentChannelId?: string;
@@ -128,7 +128,7 @@ export type SubscribeEmbeddedAgentSessionParams = {
   /** Agent identity for hook context — resolved from session config in attempt.ts. */
   agentId?: string;
   /**
-   * Exact raw names of OpenClaw tools registered for this run.
+   * Exact raw names of Bot tools registered for this run.
    */
   builtinToolNames?: ReadonlySet<string>;
   /** Exact registered tool names whose concrete instances are safe to replay. */

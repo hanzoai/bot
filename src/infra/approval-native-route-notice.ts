@@ -1,5 +1,5 @@
 // Formats native-route approval notices shown when command approvals leave the current channel.
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { sortUniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { formatHumanList } from "../shared/human-list.js";
 import type { ChannelApprovalNativePlannedTarget } from "./approval-native-delivery.js";
 

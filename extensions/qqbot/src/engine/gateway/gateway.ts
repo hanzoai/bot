@@ -1,6 +1,6 @@
 // Qqbot plugin module implements gateway behavior.
 import path from "node:path";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import {
   classifyCoreCommandForGroup,
   PRIVATE_CHAT_ONLY_TEXT,

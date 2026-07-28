@@ -460,9 +460,9 @@ const normalizedProviderFixtures: Array<{
       results: [
         {
           title: "QA Lab fixture",
-          url: "https://docs.openclaw.ai/qa-lab/search-fixture/1",
+          url: "https://docs.bot.ai/qa-lab/search-fixture/1",
           description: "QA Lab snippet",
-          siteName: "docs.openclaw.ai",
+          siteName: "docs.bot.ai",
         },
       ],
     },
@@ -474,9 +474,9 @@ const normalizedProviderFixtures: Array<{
       results: [
         {
           title: "QA Lab fixture",
-          url: "https://docs.openclaw.ai/qa-lab/search-fixture/1",
+          url: "https://docs.bot.ai/qa-lab/search-fixture/1",
           snippet: "QA Lab snippet",
-          siteName: "docs.openclaw.ai",
+          siteName: "docs.bot.ai",
         },
       ],
       externalContent: externalContent("qa-lab-search"),
@@ -557,14 +557,14 @@ const normalizedProviderFixtures: Array<{
     query: "requested error query",
     result: {
       error: "missing_brave_api_key",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://docs.bot.ai/tools/web",
     },
     expected: {
       kind: "error",
       provider: "brave",
       error: "provider_error",
       message: "missing_brave_api_key",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://docs.bot.ai/tools/web",
     },
   },
   {
@@ -939,7 +939,7 @@ describe("web_search time filter parsing", () => {
       error: "conflicting_time_filters",
       message:
         "freshness and date_after/date_before cannot be used together. Use either freshness (day/week/month/year) or a date range (date_after/date_before), not both.",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://docs.bot.ai/tools/web",
     });
   });
 
@@ -957,7 +957,7 @@ describe("web_search time filter parsing", () => {
 
 describe("web_search unsupported filter response", () => {
   it("returns undefined when no unsupported filter is set", () => {
-    expect(buildUnsupportedSearchFilterResponse({ query: "openclaw" }, "gemini")).toBeUndefined();
+    expect(buildUnsupportedSearchFilterResponse({ query: "bot" }, "gemini")).toBeUndefined();
   });
 
   it("maps non-date filters to provider-specific unsupported errors", () => {
@@ -965,7 +965,7 @@ describe("web_search unsupported filter response", () => {
       error: "unsupported_country",
       message:
         "country filtering is not supported by the grok provider. Only Brave and Perplexity support country filtering.",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://docs.bot.ai/tools/web",
     });
   });
 
@@ -974,7 +974,7 @@ describe("web_search unsupported filter response", () => {
       error: "unsupported_date_filter",
       message:
         "date_after/date_before filtering is not supported by the kimi provider. Only Brave and Perplexity support date filtering.",
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://docs.bot.ai/tools/web",
     });
   });
 });

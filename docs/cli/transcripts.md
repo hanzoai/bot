@@ -1,5 +1,5 @@
 ---
-summary: "CLI reference for `openclaw transcripts` (list, show, and export stored transcripts)"
+summary: "CLI reference for `bot transcripts` (list, show, and export stored transcripts)"
 read_when:
   - You want to read stored transcript summaries from the terminal
   - You need the path to a transcripts markdown summary
@@ -7,44 +7,44 @@ read_when:
 title: "Transcripts CLI"
 ---
 
-# `openclaw transcripts`
+# `bot transcripts`
 
 Inspector and export command for durable meeting transcripts. Google Meet,
 Microsoft Teams, and Zoom browser participants capture notes automatically;
 the `transcripts` agent tool also supports provider capture and manual import.
 
 Canonical transcript state lives in the shared SQLite database at
-`$OPENCLAW_STATE_DIR/state/openclaw.sqlite`. `show` and `path` explicitly
+`$BOT_STATE_DIR/state/bot.sqlite`. `show` and `path` explicitly
 materialize user-facing artifacts under the state directory:
 
 ```text
-$OPENCLAW_STATE_DIR/transcripts/YYYY-MM-DD/<session>/
+$BOT_STATE_DIR/transcripts/YYYY-MM-DD/<session>/
   metadata.json
   transcript.jsonl
   summary.json
   summary.md
 ```
 
-These files are exports, not a second runtime store. OpenClaw does not read them
+These files are exports, not a second runtime store. Bot does not read them
 back during capture, summarization, or listing. Default state directory is
-`~/.openclaw`; override with `OPENCLAW_STATE_DIR`. The date directory comes
+`~/.bot`; override with `BOT_STATE_DIR`. The date directory comes
 from the session start time; the session directory is a filesystem-safe slug
 derived from the session id.
 
 ## Commands
 
 ```bash
-openclaw transcripts list
-openclaw transcripts show <session>
-openclaw transcripts show YYYY-MM-DD/<session>
-openclaw transcripts path <session>
-openclaw transcripts path YYYY-MM-DD/<session>
-openclaw transcripts path <session> --dir
-openclaw transcripts path <session> --metadata
-openclaw transcripts path <session> --transcript
-openclaw transcripts list --json
-openclaw transcripts show <session> --json
-openclaw transcripts path <session> --json
+bot transcripts list
+bot transcripts show <session>
+bot transcripts show YYYY-MM-DD/<session>
+bot transcripts path <session>
+bot transcripts path YYYY-MM-DD/<session>
+bot transcripts path <session> --dir
+bot transcripts path <session> --metadata
+bot transcripts path <session> --transcript
+bot transcripts list --json
+bot transcripts show <session> --json
+bot transcripts path <session> --json
 ```
 
 | Command                       | Description                                          |
@@ -59,7 +59,7 @@ openclaw transcripts path <session> --json
 
 `<session>` accepts either a bare session id or a date-qualified selector
 (`YYYY-MM-DD/<session>`). Use the qualified form when the same session id
-occurs on more than one day, for example `openclaw transcripts show
+occurs on more than one day, for example `bot transcripts show
 2026-05-22/standup`. Default session ids include a timestamp and random
 suffix; give a session a fixed id only when that id is unique within the day.
 
@@ -69,7 +69,7 @@ suffix; give a session a fixed id only when that id is unique within the day.
 summary path.
 
 ```text
-2026-05-22/standup  2026-05-22T09:00:00.000Z  Weekly standup  /Users/user/.openclaw/transcripts/2026-05-22/standup/summary.md
+2026-05-22/standup  2026-05-22T09:00:00.000Z  Weekly standup  /Users/user/.bot/transcripts/2026-05-22/standup/summary.md
 ```
 
 The selector is the safest value to pass back to `show` or `path`.
@@ -92,7 +92,7 @@ Sessions group by date, then by session id. Ten meetings on one day become
 ten sibling folders:
 
 ```text
-~/.openclaw/transcripts/2026-05-22/
+~/.bot/transcripts/2026-05-22/
   transcript-2026-05-22T09-00-00-000Z-a1b2c3d4/
   transcript-2026-05-22T10-30-00-000Z-b2c3d4e5/
   standup/
@@ -114,11 +114,11 @@ summary.
 
 ## Upgrading the legacy file store
 
-OpenClaw releases that predate the SQLite store wrote canonical runtime state
-directly beneath `$OPENCLAW_STATE_DIR/transcripts/`. Run:
+Bot releases that predate the SQLite store wrote canonical runtime state
+directly beneath `$BOT_STATE_DIR/transcripts/`. Run:
 
 ```bash
-openclaw doctor --fix
+bot doctor --fix
 ```
 
 Doctor imports the complete legacy tree into SQLite, verifies row counts and

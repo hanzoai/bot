@@ -1,4 +1,4 @@
-// Collects configured model references from OpenClaw config-shaped objects.
+// Collects configured model references from Bot config-shaped objects.
 
 /** Narrow unknown values to plain records. */
 function isRecord(value: unknown): value is Record<string, unknown> {

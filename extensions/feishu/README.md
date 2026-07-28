@@ -1,11 +1,11 @@
-# OpenClaw Feishu/Lark
+# Bot Feishu/Lark
 
-Official OpenClaw channel plugin for Feishu and Lark workplace chats. Community maintained by @m1heng.
+Official Bot channel plugin for Feishu and Lark workplace chats. Community maintained by @m1heng.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/feishu
+bot plugins install @hanzo/bot-feishu
 ```
 
-Configure the Feishu/Lark app credentials in OpenClaw, then connect the plugin to the chats where agents should receive and send messages.
+Configure the Feishu/Lark app credentials in Bot, then connect the plugin to the chats where agents should receive and send messages.

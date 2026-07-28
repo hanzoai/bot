@@ -1,4 +1,4 @@
-import { resolveMemoryDreamingWorkspaces } from "openclaw/plugin-sdk/memory-core-host-status";
+import { resolveMemoryDreamingWorkspaces } from "bot/plugin-sdk/memory-core-host-status";
 
 export function resolveConfiguredWorkspaces(config: unknown, env: NodeJS.ProcessEnv): string[] {
   return resolveMemoryDreamingWorkspaces(

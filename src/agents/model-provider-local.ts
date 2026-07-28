@@ -1,6 +1,6 @@
 /** Shared local model-provider URL classification. */
-import { isLoopbackIpAddress, isRfc1918Ipv4Address } from "@openclaw/net-policy/ip";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { isLoopbackIpAddress, isRfc1918Ipv4Address } from "@hanzo/bot-net-policy/ip";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 
 export function isLocalProviderBaseUrl(
   baseUrl: string,

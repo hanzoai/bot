@@ -1,4 +1,4 @@
-// Payload Validation module supports OpenClaw QA credential workflows.
+// Payload Validation module supports Bot QA credential workflows.
 class CredentialPayloadValidationError extends Error {
   code: string;
   httpStatus: number;

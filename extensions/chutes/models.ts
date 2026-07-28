@@ -1,21 +1,21 @@
 /**
  * Chutes model catalog, static model definitions, and dynamic model discovery.
  */
-import { withTrustedEnvProxyGuardedFetchMode } from "openclaw/plugin-sdk/fetch-runtime";
-import { buildLiveModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { buildManifestModelDefinition } from "openclaw/plugin-sdk/provider-catalog-shared";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
+import { withTrustedEnvProxyGuardedFetchMode } from "bot/plugin-sdk/fetch-runtime";
+import { buildLiveModelProviderConfig } from "bot/plugin-sdk/provider-catalog-live-runtime";
+import { buildManifestModelDefinition } from "bot/plugin-sdk/provider-catalog-shared";
+import type { ModelDefinitionConfig } from "bot/plugin-sdk/provider-model-shared";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromHttpBaseUrlAllowedHostname,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/ssrf-runtime";
 import {
   asPositiveSafeInteger,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { isChutesModelDiscoveryTestEnvironment } from "./model-discovery-env.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 
 const CHUTES_MANIFEST_CATALOG = manifest.modelCatalog.providers.chutes;
 

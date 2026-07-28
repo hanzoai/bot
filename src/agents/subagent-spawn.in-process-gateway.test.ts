@@ -34,7 +34,7 @@ import { spawnSubagentDirect } from "./subagent-spawn.js";
 import { testing as subagentSpawnTesting } from "./subagent-spawn.test-support.js";
 import { testing as swarmSchedulerTesting } from "./swarm-scheduler.test-support.js";
 
-const envSnapshot = captureEnv(["OPENCLAW_CONFIG_PATH", "OPENCLAW_STATE_DIR"]);
+const envSnapshot = captureEnv(["BOT_CONFIG_PATH", "BOT_STATE_DIR"]);
 let stateDir = "";
 
 function makeGatewayContext(): GatewayRequestContext {
@@ -109,11 +109,11 @@ describe("spawnSubagentDirect in-process Gateway collector launch", () => {
       ensureRuntimePluginsLoaded: () => {},
     });
 
-    stateDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-swarm-gateway-"));
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", path.join(stateDir, "openclaw.json"));
+    stateDir = await mkdtemp(path.join(os.tmpdir(), "bot-swarm-gateway-"));
+    setTestEnvValue("BOT_STATE_DIR", stateDir);
+    setTestEnvValue("BOT_CONFIG_PATH", path.join(stateDir, "bot.json"));
     await writeFile(
-      path.join(stateDir, "openclaw.json"),
+      path.join(stateDir, "bot.json"),
       `${JSON.stringify({
         session: { mainKey: "main", scope: "per-sender" },
         tools: { swarm: { enabled: true, maxConcurrent: 1 } },

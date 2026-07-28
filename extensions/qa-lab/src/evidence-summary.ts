@@ -11,7 +11,7 @@ import {
   type QaScorecardEvidenceMode,
 } from "./scorecard-taxonomy.js";
 
-export const QA_EVIDENCE_SUMMARY_KIND = "openclaw.qa.evidence-summary";
+export const QA_EVIDENCE_SUMMARY_KIND = "bot.qa.evidence-summary";
 export const QA_EVIDENCE_FILENAME = "qa-evidence.json";
 // v2 was introduced on this PR series and has no stable external readers yet.
 // Keep the version while the pre-release evidence shape settles.
@@ -310,8 +310,8 @@ export function resolveQaEvidenceProfile(params: {
   }
 
   const envProfiles = [
-    ["OPENCLAW_E2E_PROFILE", params.env?.OPENCLAW_E2E_PROFILE],
-    ["OPENCLAW_QA_PROFILE", params.env?.OPENCLAW_QA_PROFILE],
+    ["BOT_E2E_PROFILE", params.env?.BOT_E2E_PROFILE],
+    ["BOT_QA_PROFILE", params.env?.BOT_QA_PROFILE],
   ] as const;
   for (const [, value] of envProfiles) {
     const normalized = value?.trim();
@@ -325,21 +325,21 @@ export function resolveQaEvidenceProfile(params: {
 }
 
 function resolveQaEvidenceRunner(params: { env?: NodeJS.ProcessEnv; fallback?: string }) {
-  return params.env?.OPENCLAW_QA_RUNNER?.trim() || params.fallback || "host";
+  return params.env?.BOT_QA_RUNNER?.trim() || params.fallback || "host";
 }
 
 function resolveQaEvidenceChannelDriver(params: { env?: NodeJS.ProcessEnv; fallback?: string }) {
   const id =
     params.fallback?.trim() ||
-    params.env?.OPENCLAW_QA_CHANNEL_DRIVER?.trim() ||
-    params.env?.OPENCLAW_E2E_CHANNEL_DRIVER?.trim();
+    params.env?.BOT_QA_CHANNEL_DRIVER?.trim() ||
+    params.env?.BOT_E2E_CHANNEL_DRIVER?.trim();
   return id ? { id } : undefined;
 }
 
 function resolveQaEvidencePackageSource(env: NodeJS.ProcessEnv | undefined) {
-  const spec = env?.OPENCLAW_QA_PACKAGE_SOURCE?.trim() || undefined;
-  const sha = env?.OPENCLAW_QA_PACKAGE_SOURCE_SHA?.trim() || undefined;
-  const explicitKind = env?.OPENCLAW_QA_PACKAGE_SOURCE_KIND?.trim();
+  const spec = env?.BOT_QA_PACKAGE_SOURCE?.trim() || undefined;
+  const sha = env?.BOT_QA_PACKAGE_SOURCE_SHA?.trim() || undefined;
+  const explicitKind = env?.BOT_QA_PACKAGE_SOURCE_KIND?.trim();
   const kind =
     explicitKind ||
     (spec && spec.endsWith(".tgz") ? "packed-tarball" : spec ? "npm-package" : "source-checkout");

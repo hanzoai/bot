@@ -4,7 +4,7 @@ import { resolveNestedAgentLaneForSession } from "../agents/lanes.js";
 import { resolveReplyOperationRunState } from "../auto-reply/reply/reply-operation-run-state.js";
 import { createReplyOperation } from "../auto-reply/reply/reply-run-registry.js";
 import { testing as replyRunRegistryTesting } from "../auto-reply/reply/reply-run-registry.test-support.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { markCronJobActive, resetCronActiveJobs } from "../cron/active-jobs.js";
 import { getActivePluginRegistry, setActivePluginRegistry } from "../plugins/runtime.js";
 import type { CommandLaneSnapshot } from "../process/command-queue.js";
@@ -49,7 +49,7 @@ beforeEach(() => {
   replyRunRegistryTesting.resetReplyRunRegistry();
 });
 
-function createHeartbeatTelegramConfig(): OpenClawConfig {
+function createHeartbeatTelegramConfig(): BotConfig {
   return {
     agents: {
       defaults: {
@@ -64,10 +64,10 @@ function createHeartbeatTelegramConfig(): OpenClawConfig {
         allowFrom: ["123"],
       },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as BotConfig;
 }
 
-async function seedHeartbeatTelegramSession(storePath: string, cfg: OpenClawConfig) {
+async function seedHeartbeatTelegramSession(storePath: string, cfg: BotConfig) {
   return seedMainSessionStore(storePath, cfg, {
     lastChannel: "telegram",
     lastProvider: "telegram",

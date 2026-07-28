@@ -2,7 +2,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs/promises";
 import { gzipSync } from "node:zlib";
-import type { OpenClawPluginNodeInvokePolicyContext } from "openclaw/plugin-sdk/plugin-entry";
+import type { BotPluginNodeInvokePolicyContext } from "bot/plugin-sdk/plugin-entry";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { appendFileTransferAudit } from "./audit.js";
 import { createFileTransferNodeInvokePolicy } from "./node-invoke-policy.js";
@@ -87,12 +87,12 @@ function createCtx(overrides: {
   command?: string;
   params?: Record<string, unknown>;
   pluginConfig?: Record<string, unknown>;
-  approvals?: OpenClawPluginNodeInvokePolicyContext["approvals"];
+  approvals?: BotPluginNodeInvokePolicyContext["approvals"];
 }) {
-  const invokeNode = vi.fn<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>(
+  const invokeNode = vi.fn<BotPluginNodeInvokePolicyContext["invokeNode"]>(
     async ({
       params,
-    }: Parameters<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>[0] = {}) => ({
+    }: Parameters<BotPluginNodeInvokePolicyContext["invokeNode"]>[0] = {}) => ({
       ok: true,
       payload: {
         ok: true,
@@ -146,7 +146,7 @@ function expectResultFields(result: unknown, fields: Record<string, unknown>) {
 }
 
 function requireInvokeParams(
-  invokeNode: ReturnType<typeof vi.fn<OpenClawPluginNodeInvokePolicyContext["invokeNode"]>>,
+  invokeNode: ReturnType<typeof vi.fn<BotPluginNodeInvokePolicyContext["invokeNode"]>>,
   callIndex: number,
 ) {
   const call = (invokeNode.mock.calls as unknown[][])[callIndex]?.[0];
@@ -351,7 +351,7 @@ describe("file-transfer node invoke policy", () => {
     const policy = createFileTransferNodeInvokePolicy();
     const approvals = {
       request: vi.fn(async () => ({ id: "approval-1", decision })),
-    } as unknown as NonNullable<OpenClawPluginNodeInvokePolicyContext["approvals"]>;
+    } as unknown as NonNullable<BotPluginNodeInvokePolicyContext["approvals"]>;
     const { ctx, invokeNode } = createCtx({
       params: { path: "/tmp/new.txt" },
       pluginConfig: {

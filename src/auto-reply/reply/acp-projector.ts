@@ -1,14 +1,14 @@
-// Projects ACP runtime events into OpenClaw-visible session update records.
-import type { AcpRuntimeEvent, AcpSessionUpdateTag } from "@openclaw/acp-core/runtime/types";
+// Projects ACP runtime events into Bot-visible session update records.
+import type { AcpRuntimeEvent, AcpSessionUpdateTag } from "@hanzo/bot-acp-core/runtime/types";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { resolveAcpToolTerminalOutcome } from "../../acp/tool-status.js";
 import { EmbeddedBlockChunker } from "../../agents/embedded-agent-block-chunker.js";
 import { formatToolSummary, resolveToolDisplay } from "../../agents/tool-display.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { prefixSystemMessage } from "../../infra/system-message.js";
 import type { ReplyPayload } from "../types.js";
 import {
@@ -168,7 +168,7 @@ type AcpReplyProjector = {
 };
 
 export function createAcpReplyProjector(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   shouldSendToolSummaries: boolean;
   shouldSendToolSummariesNow?: () => boolean;
   deliver: (

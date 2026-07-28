@@ -17,7 +17,7 @@ describe("detectIMessageLegacyStateMigrations", () => {
   });
 
   function makeStateDir(): string {
-    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-imsg-migration-"));
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-imsg-migration-"));
     tempDirs.push(dir);
     return dir;
   }

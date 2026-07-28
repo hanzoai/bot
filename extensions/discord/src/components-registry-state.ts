@@ -1,4 +1,4 @@
-import { resolveGlobalMap } from "openclaw/plugin-sdk/global-singleton";
+import { resolveGlobalMap } from "bot/plugin-sdk/global-singleton";
 import type { DiscordComponentEntry, DiscordModalEntry } from "./components.js";
 
 type PersistedDiscordRegistryEntry<T extends { id: string }> = {
@@ -19,10 +19,10 @@ export type DiscordRegistryStore<T extends { id: string }> = DiscordPersistentSt
 
 export const discordComponentRegistryState = {
   componentEntries: resolveGlobalMap<string, DiscordComponentEntry>(
-    Symbol.for("openclaw.discord.componentEntries"),
+    Symbol.for("bot.discord.componentEntries"),
   ),
   modalEntries: resolveGlobalMap<string, DiscordModalEntry>(
-    Symbol.for("openclaw.discord.modalEntries"),
+    Symbol.for("bot.discord.modalEntries"),
   ),
   persistentComponentStore: undefined as DiscordRegistryStore<DiscordComponentEntry> | undefined,
   persistentModalStore: undefined as DiscordRegistryStore<DiscordModalEntry> | undefined,

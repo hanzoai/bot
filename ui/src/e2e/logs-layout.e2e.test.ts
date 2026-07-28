@@ -12,11 +12,11 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
-const artifactDir = process.env.OPENCLAW_UI_E2E_ARTIFACT_DIR?.trim();
-const proofLabel = process.env.OPENCLAW_UI_E2E_PROOF_LABEL?.trim() || "logs-layout";
+const artifactDir = process.env.BOT_UI_E2E_ARTIFACT_DIR?.trim();
+const proofLabel = process.env.BOT_UI_E2E_PROOF_LABEL?.trim() || "logs-layout";
 const viewport = { height: 584, width: 863 };
 
 let browser: Browser;
@@ -60,22 +60,22 @@ describeControlUiE2e("Control UI logs native app layout E2E", () => {
     const page = await context.newPage();
     await page.addInitScript(() => {
       localStorage.setItem(
-        "openclaw.control.settings.v1:ws://127.0.0.1:18789",
+        "bot.control.settings.v1:ws://127.0.0.1:18789",
         JSON.stringify({ textScale: 125, themeMode: "dark" }),
       );
       const nativeWindow = window as Window & {
-        __OPENCLAW_NATIVE_WEB_CHROME__?: boolean;
-        __OPENCLAW_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
+        __BOT_NATIVE_WEB_CHROME__?: boolean;
+        __BOT_NATIVE_HISTORY__?: { canGoBack: boolean; canGoForward: boolean };
       };
-      nativeWindow["__OPENCLAW_NATIVE_WEB_CHROME__"] = true;
-      nativeWindow["__OPENCLAW_NATIVE_HISTORY__"] = {
+      nativeWindow["__BOT_NATIVE_WEB_CHROME__"] = true;
+      nativeWindow["__BOT_NATIVE_HISTORY__"] = {
         canGoBack: false,
         canGoForward: false,
       };
       const stamp = () =>
         document.documentElement.classList.add(
-          "openclaw-native-macos",
-          "openclaw-native-web-chrome",
+          "bot-native-macos",
+          "bot-native-web-chrome",
         );
       if (document.documentElement) {
         stamp();
@@ -87,7 +87,7 @@ describeControlUiE2e("Control UI logs native app layout E2E", () => {
       methodResponses: {
         "logs.tail": {
           cursor: logLines.length,
-          file: "/tmp/openclaw/openclaw-2026-07-21.log",
+          file: "/tmp/hanzoai/bot-2026-07-21.log",
           lines: logLines,
           reset: true,
         },

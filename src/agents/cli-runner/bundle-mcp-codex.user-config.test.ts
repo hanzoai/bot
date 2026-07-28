@@ -1,6 +1,6 @@
-/** Tests projecting OpenClaw user MCP servers into Codex app-server config. */
+/** Tests projecting Bot user MCP servers into Codex app-server config. */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   buildCodexUserMcpServersThreadConfigPatch,
   buildCodexUserMcpServersThreadConfigPatchForRuntime,
@@ -33,12 +33,12 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
 
   it("returns undefined when cfg has no mcp.servers (regression: #80814)", () => {
     expect(buildCodexUserMcpServersThreadConfigPatch(undefined)).toBeUndefined();
-    expect(buildCodexUserMcpServersThreadConfigPatch({} as OpenClawConfig)).toBeUndefined();
+    expect(buildCodexUserMcpServersThreadConfigPatch({} as BotConfig)).toBeUndefined();
     expect(
-      buildCodexUserMcpServersThreadConfigPatch({ mcp: {} } as OpenClawConfig),
+      buildCodexUserMcpServersThreadConfigPatch({ mcp: {} } as BotConfig),
     ).toBeUndefined();
     expect(
-      buildCodexUserMcpServersThreadConfigPatch({ mcp: { servers: {} } } as OpenClawConfig),
+      buildCodexUserMcpServersThreadConfigPatch({ mcp: { servers: {} } } as BotConfig),
     ).toBeUndefined();
   });
 
@@ -54,7 +54,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
     expect(patch).toStrictEqual({
       mcp_servers: {
         outlook: {
@@ -80,7 +80,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
     expect(patch).toStrictEqual({
       mcp_servers: {
         notes: {
@@ -105,7 +105,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
     expect(patch).toStrictEqual({
       mcp_servers: {
         search: {
@@ -116,7 +116,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
     });
   });
 
-  it("projects exact OpenClaw MCP tool filters into Codex-native tool filters", () => {
+  it("projects exact Bot MCP tool filters into Codex-native tool filters", () => {
     const patch = buildCodexUserMcpServersThreadConfigPatch({
       mcp: {
         servers: {
@@ -130,7 +130,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
     expect(patch).toStrictEqual({
       mcp_servers: {
         docs: {
@@ -142,7 +142,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
     });
   });
 
-  it("rejects wildcard OpenClaw MCP tool filters that Codex cannot project exactly", () => {
+  it("rejects wildcard Bot MCP tool filters that Codex cannot project exactly", () => {
     expect(() =>
       buildCodexUserMcpServersThreadConfigPatch({
         mcp: {
@@ -156,7 +156,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig),
+      } as unknown as BotConfig),
     ).toThrow(
       'Cannot project mcp.servers.docs.toolFilter.include pattern "search_*" into Codex enabled_tools',
     );
@@ -175,15 +175,15 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
     expect(patch?.mcp_servers.search).toMatchObject({
       url: "https://mcp.example.com/mcp",
       default_tools_approval_mode: "prompt",
     });
   });
 
-  it("filters Codex-scoped user MCP servers by OpenClaw agent id", () => {
-    // Agent-scoped MCP servers should follow the active OpenClaw agent, while
+  it("filters Codex-scoped user MCP servers by Bot agent id", () => {
+    // Agent-scoped MCP servers should follow the active Bot agent, while
     // unscoped servers remain global.
     const cfg = {
       mcp: {
@@ -205,7 +205,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const atlasPatch = buildCodexUserMcpServersThreadConfigPatch(cfg, { agentId: "atlas" });
     expect(Object.keys(atlasPatch!.mcp_servers).toSorted()).toEqual(["atlas", "global"]);
@@ -232,7 +232,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       { agentId: "apolo" },
     );
     expect(patch).toBeUndefined();
@@ -254,7 +254,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(patch).toStrictEqual({
       mcp_servers: {
@@ -278,7 +278,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       { agentId: "ATLAS" },
     );
     expect(patch?.mcp_servers.atlas).toMatchObject({
@@ -312,7 +312,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     const patch = buildCodexUserMcpServersThreadConfigPatch(cfg, { agentId: "atlas" });
     expect(patch).toStrictEqual({
@@ -325,7 +325,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
     });
   });
 
-  it("omits scoped Codex MCP servers when no OpenClaw agent id is available", () => {
+  it("omits scoped Codex MCP servers when no Bot agent id is available", () => {
     const patch = buildCodexUserMcpServersThreadConfigPatch({
       mcp: {
         servers: {
@@ -336,7 +336,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
     expect(patch).toBeUndefined();
   });
 
@@ -348,7 +348,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           two: { transport: "stdio", command: "two" },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
     expect(patch?.mcp_servers).toBeDefined();
     expect(Object.keys(patch!.mcp_servers).toSorted()).toEqual(["one", "two"]);
     expect(patch!.mcp_servers.one).toMatchObject({ command: "one" });
@@ -397,7 +397,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(patch).toStrictEqual({
       mcp_servers: {
@@ -427,7 +427,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(patch).toStrictEqual({
       mcp_servers: {
@@ -460,7 +460,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       { onServerUnavailable },
     );
 
@@ -486,7 +486,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as BotConfig,
         { allowLiteralOAuthProjection: false, onServerUnavailable },
       ),
     ).resolves.toBeUndefined();
@@ -539,7 +539,7 @@ describe("buildCodexUserMcpServersThreadConfigPatch", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(patch).toStrictEqual({
       mcp_servers: {

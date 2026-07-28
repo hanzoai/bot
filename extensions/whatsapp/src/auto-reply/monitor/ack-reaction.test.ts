@@ -1,5 +1,5 @@
 // Whatsapp tests cover ack reaction plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestWebInboundMessage } from "../../inbound/test-message.test-helper.js";
 import type { AdmittedWebInboundMessage } from "../../inbound/types.js";
@@ -42,8 +42,8 @@ function createMessage(overrides: TestMsgOverrides = {}): AdmittedWebInboundMess
 
 function createConfig(
   reactionLevel: "off" | "ack" | "minimal" | "extensive",
-  extras?: Partial<NonNullable<OpenClawConfig["channels"]>["whatsapp"]>,
-): OpenClawConfig {
+  extras?: Partial<NonNullable<BotConfig["channels"]>["whatsapp"]>,
+): BotConfig {
   return {
     messages: { ackReaction: "👀", ackReactionScope: "all" },
     channels: {
@@ -52,7 +52,7 @@ function createConfig(
         ...extras,
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 type AckReactionParams = Parameters<typeof maybeSendAckReaction>[0];
@@ -69,7 +69,7 @@ const runAckReaction = (overrides: Partial<AckReactionParams> = {}) =>
     ...overrides,
   });
 
-const expectAckReactionSent = (accountId: string, cfg: OpenClawConfig = createConfig("ack")) => {
+const expectAckReactionSent = (accountId: string, cfg: BotConfig = createConfig("ack")) => {
   expect(hoisted.sendReactionWhatsApp).toHaveBeenCalledWith(
     "15551234567@s.whatsapp.net",
     "msg-1",
@@ -144,7 +144,7 @@ describe("maybeSendAckReaction", () => {
           reactionLevel: "ack",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const ackReaction = await runAckReaction({ cfg });
 

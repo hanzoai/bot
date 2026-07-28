@@ -56,7 +56,7 @@ vi.mock("../../daemon/runtime-hints.js", () => ({
     "Logs: node service log",
     "Restart attempts: node restart log",
   ],
-  buildPlatformServiceStartHints: () => ["openclaw node install", "openclaw node start"],
+  buildPlatformServiceStartHints: () => ["bot node install", "bot node start"],
 }));
 
 vi.mock("../../../packages/terminal-core/src/theme.js", async () => {
@@ -203,9 +203,9 @@ describe("runNodeDaemonStatus", () => {
     mocks.service.readCommand.mockResolvedValue({
       programArguments: ["node", "node-host"],
       environment: {
-        OPENCLAW_PROFILE: "work",
-        OPENCLAW_GATEWAY_TOKEN: "gateway-token",
-        OPENCLAW_GATEWAY_PASSWORD: "gateway-password",
+        BOT_PROFILE: "work",
+        BOT_GATEWAY_TOKEN: "gateway-token",
+        BOT_GATEWAY_PASSWORD: "gateway-password",
       },
     });
 
@@ -214,7 +214,7 @@ describe("runNodeDaemonStatus", () => {
     expect(mocks.runtime.writeJson).toHaveBeenCalledWith({
       service: expect.objectContaining({
         command: expect.objectContaining({
-          environment: { OPENCLAW_PROFILE: "work" },
+          environment: { BOT_PROFILE: "work" },
         }),
       }),
     });

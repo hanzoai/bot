@@ -2,11 +2,11 @@
 summary: "Cohere setup (auth + model selection)"
 title: "Cohere"
 read_when:
-  - You want to use Cohere with OpenClaw
+  - You want to use Cohere with Bot
   - You need the Cohere API key env var or CLI auth choice
 ---
 
-[Cohere](https://cohere.com) provides OpenAI-compatible inference through its Compatibility API. OpenClaw bundles the Cohere provider during its externalization transition and also publishes it as an official external plugin.
+[Cohere](https://cohere.com) provides OpenAI-compatible inference through its Compatibility API. Bot bundles the Cohere provider during its externalization transition and also publishes it as an official external plugin.
 
 | Property        | Value                                                |
 | --------------- | ---------------------------------------------------- |
@@ -30,22 +30,22 @@ read_when:
 | `cohere/command-a-vision-07-2025`    | hidden     | text, image | 128,000 | 8,000      | Previous generation; replaced by Command A+   |
 | `cohere/north-mini-code-1-0`         | visible    | text, image | 256,000 | 64,000     | Agentic coding; reasoning; free limits        |
 
-Reasoning-capable Cohere models support two Compatibility API reasoning modes. OpenClaw maps **off** to `none` and every enabled thinking level to `high`. Command A Vision does not support tool use, so OpenClaw keeps agent tools disabled for that model.
+Reasoning-capable Cohere models support two Compatibility API reasoning modes. Bot maps **off** to `none` and every enabled thinking level to `high`. Command A Vision does not support tool use, so Bot keeps agent tools disabled for that model.
 
 ## Get started
 
-1. Cohere ships with current OpenClaw packages. If it is missing, install the external package and restart the Gateway:
+1. Cohere ships with current Bot packages. If it is missing, install the external package and restart the Gateway:
 
 ```bash
-openclaw plugins install @openclaw/cohere-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-cohere-provider
+bot gateway restart
 ```
 
 2. Create a Cohere API key.
 3. Run onboarding:
 
 ```bash
-openclaw onboard --non-interactive \
+bot onboard --non-interactive \
   --auth-choice cohere-api-key \
   --cohere-api-key "$COHERE_API_KEY"
 ```
@@ -53,7 +53,7 @@ openclaw onboard --non-interactive \
 4. Confirm the catalog is available:
 
 ```bash
-openclaw models list --provider cohere
+bot models list --provider cohere
 ```
 
 Onboarding only sets Cohere as the primary model when no primary model is already configured.

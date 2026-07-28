@@ -1,8 +1,8 @@
 // Signal tests cover monitor.tool result.sends tool summaries responseprefix plugin behavior.
-import { expectPairingReplyText } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import { normalizeE164 } from "openclaw/plugin-sdk/text-utility-runtime";
+import { expectPairingReplyText } from "bot/plugin-sdk/channel-test-helpers";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { resolveAgentRoute } from "bot/plugin-sdk/routing";
+import { normalizeE164 } from "bot/plugin-sdk/text-utility-runtime";
 import { describe, expect, it, vi } from "vitest";
 import {
   createSignalToolResultConfig,
@@ -38,7 +38,7 @@ function waitForSignalDelivery(assertion: () => void) {
 
 async function runMonitorWithMocks(opts: MonitorSignalProviderOptions) {
   return monitorSignalProvider({
-    config: config as OpenClawConfig,
+    config: config as BotConfig,
     waitForTransportReady:
       waitForTransportReadyMock as MonitorSignalProviderOptions["waitForTransportReady"],
     ...opts,
@@ -80,7 +80,7 @@ async function receiveSignalPayloads(params: {
 
 function hasQueuedReactionEventFor(sender: string) {
   const route = resolveAgentRoute({
-    cfg: config as OpenClawConfig,
+    cfg: config as BotConfig,
     channel: "signal",
     accountId: "default",
     peer: { kind: "direct", id: normalizeE164(sender) },

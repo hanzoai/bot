@@ -2,18 +2,18 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { closeOpenClawStateDatabaseForTest } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import { closeBotStateDatabaseForTest } from "bot/plugin-sdk/plugin-state-test-runtime";
 import {
   createTestRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import {
   getSessionBindingService,
   testing as sessionBindingTesting,
-} from "openclaw/plugin-sdk/session-binding-runtime";
+} from "bot/plugin-sdk/session-binding-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { slackPlugin } from "./channel.js";
-import type { OpenClawConfig } from "./runtime-api.js";
+import type { BotConfig } from "./runtime-api.js";
 import { setSlackRuntime } from "./runtime.js";
 
 const CONVERSATION = {
@@ -23,14 +23,14 @@ const CONVERSATION = {
 };
 
 describe("Slack Enterprise Grid runtime conversation bindings", () => {
-  let cfg: OpenClawConfig;
+  let cfg: BotConfig;
   let previousStateDir: string | undefined;
   let testStateDir = "";
 
   beforeEach(async () => {
-    previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    testStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-slack-bindings-"));
-    process.env.OPENCLAW_STATE_DIR = testStateDir;
+    previousStateDir = process.env.BOT_STATE_DIR;
+    testStateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-slack-bindings-"));
+    process.env.BOT_STATE_DIR = testStateDir;
     cfg = { channels: { slack: {} } };
     setSlackRuntime({ config: { current: () => cfg } } as never);
     setActivePluginRegistry(
@@ -41,12 +41,12 @@ describe("Slack Enterprise Grid runtime conversation bindings", () => {
 
   afterEach(async () => {
     sessionBindingTesting.resetSessionBindingAdaptersForTests();
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     setSlackRuntime(null as never);
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.BOT_STATE_DIR = previousStateDir;
     }
     await fs.rm(testStateDir, { recursive: true, force: true });
   });

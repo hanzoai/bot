@@ -6,11 +6,11 @@ import path from "node:path";
 import JSON5 from "json5";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { executeSqliteQueryTakeFirstSync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import { listConfigAuditRecordsForTests } from "./io.audit.test-support.js";
 import { createConfigIO } from "./io.js";
 import {
@@ -22,7 +22,7 @@ import {
 import type { ConfigFileSnapshot } from "./types.js";
 
 const CONFIG_CLOBBER_SNAPSHOT_LIMIT = 32;
-type ConfigHealthDatabase = Pick<OpenClawStateKyselyDatabase, "config_health_entries">;
+type ConfigHealthDatabase = Pick<BotStateKyselyDatabase, "config_health_entries">;
 type ObserveRecoveryDeps = Parameters<typeof maybeRecoverSuspiciousConfigRead>[0]["deps"];
 
 function resolveLastKnownGoodConfigPath(configPath: string): string {
@@ -48,20 +48,20 @@ describe("config observe recovery", () => {
   }
 
   beforeAll(async () => {
-    fixtureRoot = await fsp.mkdtemp(path.join(os.tmpdir(), "openclaw-config-observe-recovery-"));
+    fixtureRoot = await fsp.mkdtemp(path.join(os.tmpdir(), "bot-config-observe-recovery-"));
   });
 
   afterAll(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fsp.rm(fixtureRoot, { recursive: true, force: true });
   });
 
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
   });
 
   function readConfigHealthRow(home: string, configPath: string) {
-    const { db } = openOpenClawStateDatabase({ env: { HOME: home } as NodeJS.ProcessEnv });
+    const { db } = openBotStateDatabase({ env: { HOME: home } as NodeJS.ProcessEnv });
     const healthDb = getNodeSqliteKysely<ConfigHealthDatabase>(db);
     return executeSqliteQueryTakeFirstSync(
       db,
@@ -104,7 +104,7 @@ describe("config observe recovery", () => {
   async function readObserveEvents(auditPath: string): Promise<Record<string, unknown>[]> {
     const stateDir = path.dirname(path.dirname(auditPath));
     return listConfigAuditRecordsForTests({
-      env: { OPENCLAW_STATE_DIR: stateDir },
+      env: { BOT_STATE_DIR: stateDir },
       homedir: () => stateDir,
     }).filter((event) => event.event === "config.observe");
   }
@@ -170,7 +170,7 @@ describe("config observe recovery", () => {
     warn = vi.fn(),
     options: { env?: NodeJS.ProcessEnv; observe?: boolean } = {},
   ) {
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
+    const configPath = path.join(home, ".bot", "bot.json");
     const error = vi.fn();
     return {
       configPath,
@@ -255,7 +255,7 @@ describe("config observe recovery", () => {
     auditPath: string;
     warn: ReturnType<typeof vi.fn>;
   } {
-    const configPath = path.join(home, ".openclaw", "openclaw.json");
+    const configPath = path.join(home, ".bot", "bot.json");
     return {
       deps: {
         fs,
@@ -265,7 +265,7 @@ describe("config observe recovery", () => {
         logger: { warn },
       },
       configPath,
-      auditPath: path.join(home, ".openclaw", "logs", "config-audit.jsonl"),
+      auditPath: path.join(home, ".bot", "logs", "config-audit.jsonl"),
       warn,
     };
   }
@@ -447,7 +447,7 @@ describe("config observe recovery", () => {
   it("read snapshots auto-restore tiny valid clobbers before recording them observed", async () => {
     await withSuiteHome(async (home) => {
       const { io, configPath, warn } = createTestConfigIO(home);
-      const auditPath = path.join(home, ".openclaw", "logs", "config-audit.jsonl");
+      const auditPath = path.join(home, ".bot", "logs", "config-audit.jsonl");
       await seedConfigBackup(configPath, {
         ...recoverableTelegramConfig,
         channels: {
@@ -510,13 +510,13 @@ describe("config observe recovery", () => {
       await seedConfigBackup(configPath, recoverableTelegramConfig);
       await writeConfigRaw(configPath, {
         meta: { lastTouchedVersion: "2026.5.28" },
-        env: { vars: { OPENCLAW_CLOBBER_ONLY: "bad" } },
+        env: { vars: { BOT_CLOBBER_ONLY: "bad" } },
       });
 
       const config = io.loadConfig();
 
       expect(config.gateway?.mode).toBe("local");
-      expect(env.OPENCLAW_CLOBBER_ONLY).toBeUndefined();
+      expect(env.BOT_CLOBBER_ONLY).toBeUndefined();
     });
   });
 
@@ -527,20 +527,20 @@ describe("config observe recovery", () => {
       await seedConfigBackup(configPath, recoverableTelegramConfig);
       await writeConfigRaw(configPath, {
         meta: { lastTouchedVersion: "2026.5.28" },
-        env: { vars: { OPENCLAW_CLOBBER_ONLY: "bad" } },
+        env: { vars: { BOT_CLOBBER_ONLY: "bad" } },
       });
 
       const snapshot = await io.readConfigFileSnapshot({ recoverSuspicious: true });
 
       expect(snapshot.config.gateway?.mode).toBe("local");
-      expect(env.OPENCLAW_CLOBBER_ONLY).toBeUndefined();
+      expect(env.BOT_CLOBBER_ONLY).toBeUndefined();
     });
   });
 
   it("does not auto-restore read snapshots when observation is disabled", async () => {
     await withSuiteHome(async (home) => {
       const { io, configPath } = createTestConfigIO(home, vi.fn(), { observe: false });
-      const auditPath = path.join(home, ".openclaw", "logs", "config-audit.jsonl");
+      const auditPath = path.join(home, ".bot", "logs", "config-audit.jsonl");
       await seedConfigBackup(configPath, recoverableTelegramConfig);
       const clobbered = await writeConfigRaw(configPath, {
         meta: { lastTouchedVersion: "2026.5.28" },
@@ -558,7 +558,7 @@ describe("config observe recovery", () => {
   it("does not auto-restore include-authored roots from stale full-file backups", async () => {
     await withSuiteHome(async (home) => {
       const { io, configPath } = createTestConfigIO(home);
-      const auditPath = path.join(home, ".openclaw", "logs", "config-audit.jsonl");
+      const auditPath = path.join(home, ".bot", "logs", "config-audit.jsonl");
       const includedConfig = {
         ...recoverableTelegramConfig,
         channels: {
@@ -696,7 +696,7 @@ describe("config observe recovery", () => {
       const { io, configPath } = createTestConfigIO(home, vi.fn(), { env });
       await seedConfigBackup(configPath, {
         gateway: { mode: "local" },
-        env: { vars: { OPENCLAW_BACKUP_ONLY: "stale" } },
+        env: { vars: { BOT_BACKUP_ONLY: "stale" } },
         agents: { defaults: { model: 123 } },
       });
       await writeConfigRaw(configPath, {
@@ -705,7 +705,7 @@ describe("config observe recovery", () => {
 
       await io.readConfigFileSnapshot({ recoverSuspicious: true });
 
-      expect(env.OPENCLAW_BACKUP_ONLY).toBeUndefined();
+      expect(env.BOT_BACKUP_ONLY).toBeUndefined();
     });
   });
 
@@ -948,7 +948,7 @@ describe("config observe recovery", () => {
         promoteConfigSnapshotToLastKnownGood({ deps, snapshot, logger: deps.logger }),
       ).resolves.toBe(true);
 
-      await expectPathMissing(path.join(home, ".openclaw", "logs", "config-health.json"));
+      await expectPathMissing(path.join(home, ".bot", "logs", "config-health.json"));
       const row = readConfigHealthRow(home, configPath);
       expect(row).toMatchObject({
         config_path: configPath,
@@ -968,7 +968,7 @@ describe("config observe recovery", () => {
 
       recoverClobberedUpdateChannelSync({ deps, configPath });
 
-      await expectPathMissing(path.join(home, ".openclaw", "logs", "config-health.json"));
+      await expectPathMissing(path.join(home, ".bot", "logs", "config-health.json"));
       const row = readConfigHealthRow(home, configPath);
       expect(row).toMatchObject({
         config_path: configPath,
@@ -1121,7 +1121,7 @@ describe("config observe recovery", () => {
       issue: {
         path: "plugins.entries.feishu",
         message:
-          "plugin feishu: plugin requires OpenClaw >=2026.4.23, but this host is 2026.4.22; skipping load",
+          "plugin feishu: plugin requires Bot >=2026.4.23, but this host is 2026.4.22; skipping load",
       },
     },
   ])("$name", async ({ staleConfig, activeConfig, issue }) => {

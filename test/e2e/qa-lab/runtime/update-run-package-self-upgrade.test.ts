@@ -12,10 +12,10 @@ describe("update.run package self-upgrade producer", () => {
     expect(resolveUpdateRunSelfUpgradePermission({})).toEqual({
       allowed: false,
       reason:
-        "blocked destructive package self-upgrade; set OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF=1 to run",
+        "blocked destructive package self-upgrade; set BOT_QA_ALLOW_UPDATE_RUN_SELF=1 to run",
     });
     expect(
-      resolveUpdateRunSelfUpgradePermission({ OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF: "1" }),
+      resolveUpdateRunSelfUpgradePermission({ BOT_QA_ALLOW_UPDATE_RUN_SELF: "1" }),
     ).toEqual({ allowed: true });
   });
 
@@ -36,14 +36,14 @@ describe("update.run package self-upgrade producer", () => {
     );
 
     expect(script).toContain("source scripts/e2e/lib/upgrade-survivor/update-restart-auth.sh");
-    expect(script).toContain("-u OPENCLAW_SKIP_PROVIDERS");
-    expect(script).toContain("systemctl --user start openclaw-gateway.service");
-    expect(script).toContain("OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service");
+    expect(script).toContain("-u BOT_SKIP_PROVIDERS");
+    expect(script).toContain("systemctl --user start bot-gateway.service");
+    expect(script).toContain("BOT_SYSTEMD_UNIT=bot-gateway.service");
     expect(script).toContain("restart mode: update process respawn (supervisor restart)");
     expect(script).toContain("service-owned target environment unexpectedly suppresses providers");
     expect(script).not.toContain("target_gateway_pid");
-    expect(script).not.toContain("openclaw_e2e_stop_process");
-    expect(script).toContain("systemctl --user stop openclaw-gateway.service");
+    expect(script).not.toContain("bot_e2e_stop_process");
+    expect(script).toContain("systemctl --user stop bot-gateway.service");
     expect(script).toContain(': >"$SYSTEMCTL_SHIM_LOG"');
     const runCleanup = script.slice(
       script.indexOf("rm -f \\"),
@@ -51,8 +51,8 @@ describe("update.run package self-upgrade producer", () => {
     );
     expect(runCleanup).toContain('"$UPDATE_STATUS_JSON"');
     expect(runCleanup).toContain('"$ARTIFACT_DIR/update-status.candidate.json"');
-    expect(script.indexOf("openclaw gateway install --force --json")).toBeLessThan(
-      script.indexOf("OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service"),
+    expect(script.indexOf("bot gateway install --force --json")).toBeLessThan(
+      script.indexOf("BOT_SYSTEMD_UNIT=bot-gateway.service"),
     );
   });
 

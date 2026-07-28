@@ -1,13 +1,13 @@
 // Private runtime barrel for the bundled Signal extension.
 // Prefer narrower SDK subpaths plus local extension seams over the legacy signal barrel.
 
-export type { ChannelMessageActionAdapter } from "openclaw/plugin-sdk/channel-contract";
+export type { ChannelMessageActionAdapter } from "bot/plugin-sdk/channel-contract";
 export { buildChannelConfigSchema, SignalConfigSchema } from "../config-api.js";
-export { PAIRING_APPROVED_MESSAGE } from "openclaw/plugin-sdk/channel-status";
-import type { OpenClawConfig as RuntimeOpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-export type { RuntimeOpenClawConfig as OpenClawConfig };
-export type { OpenClawPluginApi, PluginRuntime } from "openclaw/plugin-sdk/core";
-export type { ChannelPlugin } from "openclaw/plugin-sdk/core";
+export { PAIRING_APPROVED_MESSAGE } from "bot/plugin-sdk/channel-status";
+import type { BotConfig as RuntimeBotConfig } from "bot/plugin-sdk/config-contracts";
+export type { RuntimeBotConfig as BotConfig };
+export type { BotPluginApi, PluginRuntime } from "bot/plugin-sdk/core";
+export type { ChannelPlugin } from "bot/plugin-sdk/core";
 export {
   DEFAULT_ACCOUNT_ID,
   applyAccountNameToChannelSection,
@@ -18,22 +18,22 @@ export {
   migrateBaseNameToDefaultAccount,
   normalizeAccountId,
   setAccountEnabledInConfigSection,
-} from "openclaw/plugin-sdk/core";
-export { resolveChannelMediaMaxBytes } from "openclaw/plugin-sdk/media-runtime";
-export { formatCliCommand, formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
-export { chunkText } from "openclaw/plugin-sdk/reply-runtime";
-export { detectBinary } from "openclaw/plugin-sdk/setup-tools";
+} from "bot/plugin-sdk/core";
+export { resolveChannelMediaMaxBytes } from "bot/plugin-sdk/media-runtime";
+export { formatCliCommand, formatDocsLink } from "bot/plugin-sdk/setup-tools";
+export { chunkText } from "bot/plugin-sdk/reply-runtime";
+export { detectBinary } from "bot/plugin-sdk/setup-tools";
 export {
   resolveAllowlistProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,
-} from "openclaw/plugin-sdk/runtime-group-policy";
+} from "bot/plugin-sdk/runtime-group-policy";
 export {
   buildBaseAccountStatusSnapshot,
   buildBaseChannelStatusSummary,
   collectStatusIssuesFromLastError,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
-export { normalizeE164 } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/status-helpers";
+export { normalizeE164 } from "bot/plugin-sdk/text-utility-runtime";
 export { looksLikeSignalTargetId, normalizeSignalMessagingTarget } from "./normalize.js";
 export {
   listEnabledSignalAccounts,

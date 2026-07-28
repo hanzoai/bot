@@ -9,8 +9,8 @@ import {
   resolveLegacyInteractiveTextFallback,
   type MessagePresentation,
   type MessagePresentationInteractiveBlock,
-} from "openclaw/plugin-sdk/interactive-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "bot/plugin-sdk/interactive-runtime";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
 import { buildTelegramPresentationButtons, resolveTelegramInlineButtons } from "./button-types.js";
 import { buildInlineKeyboard } from "./inline-keyboard.js";
 

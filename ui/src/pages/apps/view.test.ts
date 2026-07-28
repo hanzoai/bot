@@ -6,22 +6,22 @@ import { i18n } from "../../i18n/index.ts";
 import { renderApps } from "./view.ts";
 
 const EXPECTED_EXTERNAL_HREFS = [
-  "https://apps.apple.com/app/openclaw-ai-that-does-things/id6780396132",
-  "https://docs.openclaw.ai/platforms/ios",
-  "https://play.google.com/store/apps/details?id=ai.openclaw.app",
-  "https://docs.openclaw.ai/platforms/android",
-  "https://docs.openclaw.ai/platforms/ios",
-  "https://docs.openclaw.ai/platforms/android",
-  "https://github.com/openclaw/openclaw/releases",
-  "https://docs.openclaw.ai/platforms/macos",
-  "https://github.com/openclaw/openclaw-windows-node/releases/latest",
-  "https://docs.openclaw.ai/platforms/windows",
-  "https://github.com/openclaw/openclaw/releases",
-  "https://docs.openclaw.ai/platforms/linux",
-  "https://docs.openclaw.ai/tools/chrome-extension",
+  "https://apps.apple.com/app/bot-ai-that-does-things/id6780396132",
+  "https://docs.bot.ai/platforms/ios",
+  "https://play.google.com/store/apps/details?id=ai.bot.app",
+  "https://docs.bot.ai/platforms/android",
+  "https://docs.bot.ai/platforms/ios",
+  "https://docs.bot.ai/platforms/android",
+  "https://github.com/hanzoai/bot/releases",
+  "https://docs.bot.ai/platforms/macos",
+  "https://github.com/hanzoai/bot-windows-node/releases/latest",
+  "https://docs.bot.ai/platforms/windows",
+  "https://github.com/hanzoai/bot/releases",
+  "https://docs.bot.ai/platforms/linux",
+  "https://docs.bot.ai/tools/chrome-extension",
   "https://clawhub.ai",
   "https://discord.gg/clawd",
-  "https://docs.openclaw.ai",
+  "https://docs.bot.ai",
 ];
 
 describe("renderApps", () => {
@@ -39,7 +39,7 @@ describe("renderApps", () => {
   it("renders the hero and one heading per section", () => {
     const container = renderIntoContainer();
     expect(container.querySelector(".apps-hero__title")?.textContent).toBe(
-      "Take OpenClaw everywhere",
+      "Take Bot everywhere",
     );
     expect(container.querySelector(".apps-hero__tagline")?.textContent).toContain(
       "Companion apps for your phone",

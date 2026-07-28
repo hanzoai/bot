@@ -2,7 +2,7 @@ import { consume } from "@lit/context";
 import { property } from "lit/decorators.js";
 import type { GatewayBrowserClient } from "../../../api/gateway.ts";
 import { applicationContext, type ApplicationContext } from "../../../app/context.ts";
-import { OpenClawLightDomElement } from "../../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../../lit/subscriptions-controller.ts";
 import { moveWorkboardCard } from "../../workboard/mutations.ts";
 import { normalizeCardsPayload } from "../../workboard/normalization.ts";
@@ -14,7 +14,7 @@ import {
 } from "../../workboard/types.ts";
 import type { BoardViewWidget } from "../view-types.ts";
 
-export abstract class WorkboardWidgetElement extends OpenClawLightDomElement {
+export abstract class WorkboardWidgetElement extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   protected context?: ApplicationContext;
 

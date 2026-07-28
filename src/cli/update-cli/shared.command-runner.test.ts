@@ -38,14 +38,14 @@ describe("createGlobalCommandRunner", () => {
 
     const result = await runCommand(["npm", "root", "-g"], {
       timeoutMs: 1200,
-      cwd: "/tmp/openclaw",
-      env: { OPENCLAW_TEST: "1" },
+      cwd: "/tmp/bot",
+      env: { BOT_TEST: "1" },
     });
 
     expect(runCommandWithTimeout).toHaveBeenCalledWith(["npm", "root", "-g"], {
       timeoutMs: 1200,
-      cwd: "/tmp/openclaw",
-      env: { OPENCLAW_TEST: "1" },
+      cwd: "/tmp/bot",
+      env: { BOT_TEST: "1" },
     });
     expect(result).toEqual({
       stdout: "out",
@@ -98,20 +98,20 @@ describe("createGlobalCommandRunner", () => {
   it.runIf(process.platform !== "win32")(
     "resolves update ownership from the lexical invocation path",
     async () => {
-      await withTempDir({ prefix: "openclaw-update-root-" }, async (base) => {
-        const storeRoot = path.join(base, "store", "openclaw");
-        const packageRoot = path.join(base, "global", "v11", "install", "node_modules", "openclaw");
+      await withTempDir({ prefix: "bot-update-root-" }, async (base) => {
+        const storeRoot = path.join(base, "store", "bot");
+        const packageRoot = path.join(base, "global", "v11", "install", "node_modules", "bot");
         await fs.mkdir(path.dirname(packageRoot), { recursive: true });
         await fs.mkdir(storeRoot, { recursive: true });
         await fs.writeFile(
           path.join(storeRoot, "package.json"),
-          JSON.stringify({ name: "openclaw", version: "1.0.0" }),
+          JSON.stringify({ name: "bot", version: "1.0.0" }),
           "utf8",
         );
         await fs.symlink(storeRoot, packageRoot, "dir");
 
         const previousArgv = [...process.argv];
-        process.argv[1] = path.join(packageRoot, "openclaw.mjs");
+        process.argv[1] = path.join(packageRoot, "bot.mjs");
         try {
           await expect(resolveUpdateRoot()).resolves.toBe(packageRoot);
         } finally {

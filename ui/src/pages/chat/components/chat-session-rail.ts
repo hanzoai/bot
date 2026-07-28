@@ -10,7 +10,7 @@ import "../../../components/tooltip.ts";
 import { t } from "../../../i18n/index.ts";
 import { formatDurationCompact, formatTimeAgo, formatTimeMs } from "../../../lib/format.ts";
 import { detectTextDirection } from "../../../lib/text-direction.ts";
-import { OpenClawLightDomElement } from "../../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../../lit/bot-element.ts";
 import {
   type ChatObserverDisplayPreference,
   loadChatObserverDisplayPreference,
@@ -159,7 +159,7 @@ function companionHasActivity(thread: ChatSessionCompanionThread): boolean {
   );
 }
 
-export class ChatSessionRailElement extends OpenClawLightDomElement {
+export class ChatSessionRailElement extends BotLightDomElement {
   @property({ attribute: false }) sessionKey = "";
   @property({ attribute: false }) digest: SessionObserverDigest | null = null;
   @property({ attribute: false }) running = false;
@@ -521,7 +521,7 @@ export class ChatSessionRailElement extends OpenClawLightDomElement {
               : html`<span class="chat-session-rail__subtitle">${t("chat.rail.subtitle")}</span>`}
           </div>
           <div class="chat-session-rail__actions">
-            <openclaw-tooltip .content=${t("chat.rail.clear")}>
+            <bot-tooltip .content=${t("chat.rail.clear")}>
               <button
                 class="btn btn--ghost btn--icon chat-icon-btn"
                 type="button"
@@ -531,7 +531,7 @@ export class ChatSessionRailElement extends OpenClawLightDomElement {
               >
                 ${icons.trash}
               </button>
-            </openclaw-tooltip>
+            </bot-tooltip>
             <button
               class="btn btn--ghost btn--icon chat-icon-btn chat-session-rail__hide"
               type="button"
@@ -592,6 +592,6 @@ export class ChatSessionRailElement extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-chat-session-rail")) {
-  customElements.define("openclaw-chat-session-rail", ChatSessionRailElement);
+if (!customElements.get("bot-chat-session-rail")) {
+  customElements.define("bot-chat-session-rail", ChatSessionRailElement);
 }

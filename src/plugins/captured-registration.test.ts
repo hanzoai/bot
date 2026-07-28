@@ -1,7 +1,7 @@
 // Covers captured plugin registration behavior in test registries.
 import { describe, expect, it } from "vitest";
 import { capturePluginRegistration } from "./captured-registration.js";
-import type { AnyAgentTool, OpenClawPluginApi } from "./types.js";
+import type { AnyAgentTool, BotPluginApi } from "./types.js";
 
 describe("captured plugin registration", () => {
   it("preserves root machine-output metadata", () => {
@@ -25,7 +25,7 @@ describe("captured plugin registration", () => {
     expect(descriptor?.machineOutput).toBe(machineOutput);
     expect(
       descriptor?.machineOutput?.({
-        argv: ["node", "openclaw", "captured-machine"],
+        argv: ["node", "bot", "captured-machine"],
         stdoutIsTTY: false,
       }),
     ).toBe(true);
@@ -158,8 +158,8 @@ describe("captured plugin registration", () => {
   });
 
   it("returns synthetic scheduled-turn ids independent of human-readable names", async () => {
-    let scheduleSessionTurn: OpenClawPluginApi["scheduleSessionTurn"] | undefined;
-    let registerSessionSchedulerJob: OpenClawPluginApi["registerSessionSchedulerJob"] | undefined;
+    let scheduleSessionTurn: BotPluginApi["scheduleSessionTurn"] | undefined;
+    let registerSessionSchedulerJob: BotPluginApi["registerSessionSchedulerJob"] | undefined;
     const captured = capturePluginRegistration({
       id: "captured-custom-plugin",
       name: "Captured Custom Plugin",

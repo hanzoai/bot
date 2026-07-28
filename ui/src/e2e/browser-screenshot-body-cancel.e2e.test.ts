@@ -12,9 +12,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProofEnabled = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const proofDir = path.resolve(
   process.cwd(),
   ".artifacts/control-ui-e2e/browser-screenshot-body-cancel",
@@ -45,13 +45,13 @@ describeControlUiE2e("Control UI browser screenshot failed-body E2E", () => {
     });
     const page = await context.newPage();
     await page.addInitScript(() => {
-      localStorage.removeItem("openclaw.browser.panel.v1");
+      localStorage.removeItem("bot.browser.panel.v1");
       const originalFetch = window.fetch.bind(window);
       window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
         const response = await originalFetch(input, init);
         const url =
           typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-        if (!url.includes("/__openclaw__/assistant-media")) {
+        if (!url.includes("/__bot__/assistant-media")) {
           return response;
         }
         const source = response.body;
@@ -64,8 +64,8 @@ describeControlUiE2e("Control UI browser screenshot failed-body E2E", () => {
           fetchCount: number;
           statuses: number[];
         };
-        const proofWindow = window as Window & { openclawScreenshotProof?: ScreenshotProof };
-        const proof = (proofWindow.openclawScreenshotProof ??= {
+        const proofWindow = window as Window & { botScreenshotProof?: ScreenshotProof };
+        const proof = (proofWindow.botScreenshotProof ??= {
           cancelCount: 0,
           cancelResolvedCount: 0,
           fetchCount: 0,
@@ -83,7 +83,7 @@ describeControlUiE2e("Control UI browser screenshot failed-body E2E", () => {
       };
     });
     let mediaRequest: { authorization: string; source: string | null } | null = null;
-    await page.route("**/__openclaw__/assistant-media**", (route) => {
+    await page.route("**/__bot__/assistant-media**", (route) => {
       const request = route.request();
       mediaRequest = {
         authorization: request.headers().authorization ?? "",
@@ -148,14 +148,14 @@ describeControlUiE2e("Control UI browser screenshot failed-body E2E", () => {
             () =>
               (
                 window as Window & {
-                  openclawScreenshotProof?: {
+                  botScreenshotProof?: {
                     cancelCount?: number;
                     cancelResolvedCount?: number;
                     fetchCount?: number;
                     statuses?: number[];
                   };
                 }
-              ).openclawScreenshotProof,
+              ).botScreenshotProof,
           ),
         )
         .toEqual({
@@ -186,7 +186,7 @@ describeControlUiE2e("Control UI browser screenshot failed-body E2E", () => {
           path: path.join(proofDir, "failed-screenshot.png"),
         });
         const stream = await page.evaluate(
-          () => (window as Window & { openclawScreenshotProof?: unknown }).openclawScreenshotProof,
+          () => (window as Window & { botScreenshotProof?: unknown }).botScreenshotProof,
         );
         await writeFile(
           path.join(proofDir, "proof.json"),

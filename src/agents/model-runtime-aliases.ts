@@ -1,10 +1,10 @@
 /**
  * Resolves CLI runtime aliases to provider/model auth labels and execution ids.
  */
-import { parseModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { parseModelCatalogRef } from "@hanzo/bot-model-catalog-core/model-catalog-refs";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   isCliRuntimeModelBackendForProvider,
   listCliRuntimeModelBackendBindings,
@@ -24,7 +24,7 @@ export function isRetiredModelPickerProvider(provider: string): boolean {
 
 /** Creates a provider visibility predicate for model picker rendering. */
 export function createModelPickerVisibleProviderPredicate(
-  params: { config?: OpenClawConfig; env?: NodeJS.ProcessEnv; includeSetupRegistry?: boolean } = {},
+  params: { config?: BotConfig; env?: NodeJS.ProcessEnv; includeSetupRegistry?: boolean } = {},
 ): (provider: string) => boolean {
   const cliRuntimeProviders = new Set(
     listCliRuntimeProviderIds({
@@ -42,7 +42,7 @@ export function createModelPickerVisibleProviderPredicate(
 /** True for CLI runtime provider ids such as `claude-cli` and `google-gemini-cli`. */
 export function isCliRuntimeProvider(
   provider: string,
-  params: { config?: OpenClawConfig; env?: NodeJS.ProcessEnv; includeSetupRegistry?: boolean } = {},
+  params: { config?: BotConfig; env?: NodeJS.ProcessEnv; includeSetupRegistry?: boolean } = {},
 ): boolean {
   const normalized = normalizeProviderId(provider);
   return listCliRuntimeProviderIds({
@@ -63,7 +63,7 @@ export function isCliRuntimeAlias(runtime: string | undefined): boolean {
 export function isCliRuntimeAliasForProvider(params: {
   runtime: string | undefined;
   provider: string | undefined;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): boolean {
   return isCliRuntimeModelBackendForProvider({
     provider: params.provider,
@@ -73,7 +73,7 @@ export function isCliRuntimeAliasForProvider(params: {
 }
 
 type RuntimeAliasComparisonOptions = {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
   includeSetupRegistry?: boolean;
 };
@@ -152,7 +152,7 @@ export function shouldPreferActiveRuntimeAliasAuthLabel(params: {
 }
 
 function resolveConfiguredRuntime(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   agentId?: string;
   modelId?: string;
@@ -170,7 +170,7 @@ function resolveConfiguredRuntime(params: {
 }
 
 function resolveProfileRuntimeAlias(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   profileId: string;
 }): string | undefined {
@@ -199,7 +199,7 @@ function resolveProfileRuntimeAlias(params: {
 }
 
 function resolveCliRuntimeFromAuthProfile(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   authProfileId?: string;
 }): string | undefined {
@@ -251,14 +251,14 @@ function resolveCliRuntimeFromAuthProfile(params: {
 
 export function resolveCliRuntimeExecutionProvider(params: {
   provider: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentId?: string;
   modelId?: string;
   authProfileId?: string;
 }): string | undefined {
   const provider = normalizeProviderId(params.provider);
   const { runtime, matchedProvider } = resolveConfiguredRuntime({ ...params, provider });
-  if (runtime === "openclaw") {
+  if (runtime === "bot") {
     return undefined;
   }
   if (!runtime || runtime === "auto") {

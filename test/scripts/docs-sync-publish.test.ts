@@ -11,21 +11,21 @@ describe("docs-sync-publish", () => {
         "--target",
         "generated-docs",
         "--source-repo",
-        "openclaw/openclaw",
+        "hanzoai/bot",
         "--source-sha",
         "abc123",
         "--clawhub-repo",
         "../clawhub",
         "--clawhub-source-repo",
-        "openclaw/clawhub",
+        "bot/clawhub",
         "--clawhub-source-sha",
         "def456",
       ]),
     ).toMatchObject({
       clawhubRepo: "../clawhub",
-      clawhubSourceRepo: "openclaw/clawhub",
+      clawhubSourceRepo: "bot/clawhub",
       clawhubSourceSha: "def456",
-      sourceRepo: "openclaw/openclaw",
+      sourceRepo: "hanzoai/bot",
       sourceSha: "abc123",
       target: "generated-docs",
     });
@@ -49,7 +49,7 @@ describe("docs-sync-publish", () => {
   });
 
   it("defers orphan locale deletion to translation finalization", () => {
-    const docsDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-docs-sync-"));
+    const docsDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-docs-sync-"));
     const mirroredEnglish = path.join(docsDir, "clawhub", "api.md");
     const localizedMirror = path.join(docsDir, "de", "clawhub", "api.md");
     const orphan = path.join(docsDir, "de", "removed.md");

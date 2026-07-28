@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Generate Plugin Sdk Api Baseline script supports OpenClaw repository automation.
+// Generate Plugin Sdk Api Baseline script supports Bot repository automation.
 import path from "node:path";
 import { writePluginSdkApiBaselineArtifacts } from "../src/plugin-sdk/api-baseline.ts";
 

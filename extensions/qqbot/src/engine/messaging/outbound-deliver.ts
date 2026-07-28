@@ -9,8 +9,8 @@
 import {
   sendPayloadMediaSequence,
   sendPayloadTextChunkSequence,
-} from "openclaw/plugin-sdk/reply-payload";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/reply-payload";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { GatewayAccount } from "../types.js";
 import { formatErrorMessage } from "../utils/format.js";
 import { getImageSize, formatQQBotMarkdownImage, hasQQBotImageSize } from "../utils/image-size.js";

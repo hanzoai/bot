@@ -1,8 +1,8 @@
 // Usage gateway methods aggregate provider and session cost/token metrics from
 // caches, logs, session stores, and discovered transcript files.
 import fs from "node:fs";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ErrorCodes,
   errorShape,
@@ -14,7 +14,7 @@ import {
   resolveSessionFilePathOptions,
 } from "../../config/sessions/paths.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   createTimeZoneDayKeyFormatter,
   resolveTimezone,
@@ -140,9 +140,9 @@ function setCostUsageCache(cacheKey: string, entry: CostUsageCacheEntry): void {
 function resolveSessionUsageFileOrRespond(
   key: string,
   respond: RespondFn,
-  config: OpenClawConfig,
+  config: BotConfig,
 ): {
-  config: OpenClawConfig;
+  config: BotConfig;
   entry: SessionEntry | undefined;
   agentId: string;
   sessionId: string;
@@ -570,7 +570,7 @@ function buildStoreBySessionId(
 }
 
 function filterSessionStoreByAgent(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   store: Record<string, SessionEntry>;
   agentId: string;
 }): Record<string, SessionEntry> {
@@ -589,7 +589,7 @@ function filterSessionStoreByAgent(params: {
 }
 
 async function discoverAllSessionsForUsage(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   agentId?: string;
   startMs: number;
   endMs: number;
@@ -902,7 +902,7 @@ async function loadCostUsageSummaryCached(params: {
   startMs: number;
   endMs: number;
   dayBucket?: UsageDailyBucket;
-  config: OpenClawConfig;
+  config: BotConfig;
   agentId?: string;
   agentScope?: "all";
 }): Promise<CostUsageSummary> {
@@ -985,7 +985,7 @@ async function loadAllAgentCostUsageSummary(params: {
   startMs: number;
   endMs: number;
   dayBucket?: UsageDailyBucket;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): Promise<CostUsageSummary> {
   const agentIds = listAgentIds(params.config).map((agentId) => normalizeAgentId(agentId));
   const summaries = await runUsageAgentTasks(

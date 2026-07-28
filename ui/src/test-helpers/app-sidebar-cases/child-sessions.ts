@@ -91,12 +91,12 @@ describe("AppSidebar agent chip", () => {
     expect(childRows.every((row) => row.querySelector(".session-row-actions") === null)).toBe(true);
     expect(sidebar.querySelector('[aria-label="Done"]')).not.toBeNull();
     const runtimeStartMs = (
-      sidebar.querySelector('[data-session-key="agent:main:child-one"] openclaw-elapsed-time') as
+      sidebar.querySelector('[data-session-key="agent:main:child-one"] bot-elapsed-time') as
         | (HTMLElement & { startMs: number })
         | null
     )?.startMs;
     const childTrail = childRows[0]?.querySelector<HTMLElement>(".session-row-trail");
-    expect(childTrail?.querySelector("openclaw-elapsed-time")).not.toBeNull();
+    expect(childTrail?.querySelector("bot-elapsed-time")).not.toBeNull();
     expect(childRows[0]?.querySelector("a")?.getAttribute("aria-describedby")).toBe(childTrail?.id);
     expect(runtimeStartMs).toBeGreaterThan(Date.now() - 31_000);
     expect(runtimeStartMs).toBeLessThan(Date.now() - 29_000);
@@ -179,7 +179,7 @@ describe("AppSidebar agent chip", () => {
             stateChangedAtMs: 2,
             workspaceResultConflict: {
               paths: ["src/local.ts", "src/other.ts"],
-              stagedResultRef: "refs/openclaw/worker-results/claim-child",
+              stagedResultRef: "refs/bot/worker-results/claim-child",
             },
           },
         },
@@ -222,7 +222,7 @@ describe("AppSidebar agent chip", () => {
     expect(parentBadge?.dataset.placementState).toBeUndefined();
     expect(parentBadge?.hasAttribute("title")).toBe(false);
     expect(
-      (parentBadge?.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)
+      (parentBadge?.closest("bot-tooltip") as (HTMLElement & { content?: string }) | null)
         ?.content,
     ).toBe("Cloud worker children: 2 workspace conflicts");
   });

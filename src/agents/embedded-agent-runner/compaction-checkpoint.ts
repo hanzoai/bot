@@ -1,5 +1,5 @@
 /** Owns the shared checkpoint lifecycle around both compaction entry points. */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   createFileBackedCompactionCheckpointStore,
   readSessionLeafStateFromTranscriptAsync,
@@ -13,7 +13,7 @@ import { log } from "./logger.js";
 export const compactionCheckpointStore = createFileBackedCompactionCheckpointStore();
 
 export async function persistCompactionCheckpoint(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   sessionKey?: string;
   sessionId: string;
   trigger?: "budget" | "overflow" | "manual";

@@ -21,7 +21,7 @@ function readOutputDirValue(argv, index) {
 export function parseArgs(argv) {
   const args = {
     mode: "",
-    outputDir: process.env.OPENCLAW_VITEST_PROFILE_DIR?.trim() || "",
+    outputDir: process.env.BOT_VITEST_PROFILE_DIR?.trim() || "",
     vitestArgs: [],
   };
 
@@ -64,7 +64,7 @@ export function resolveVitestProfileDir({ mode, outputDir }) {
     return path.resolve(outputDir);
   }
 
-  return fs.mkdtempSync(path.join(os.tmpdir(), `openclaw-vitest-${mode}-profile-`));
+  return fs.mkdtempSync(path.join(os.tmpdir(), `bot-vitest-${mode}-profile-`));
 }
 
 /**

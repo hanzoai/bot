@@ -1,9 +1,9 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
+import type { PluginRuntime } from "bot/plugin-sdk/core";
 import type {
   PluginHookBeforeToolCallEvent,
   PluginHookBeforeToolCallResult,
   PluginHookToolContext,
-} from "openclaw/plugin-sdk/types";
+} from "bot/plugin-sdk/types";
 import type { CoreConfig } from "../types.js";
 import {
   bindingMatchesActiveSessionIncarnation,

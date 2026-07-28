@@ -18,7 +18,7 @@ export type SidebarAttentionDismissals = Partial<Record<SidebarAttentionKind, st
 // component's item type so the two files cannot form an import cycle.
 type DismissableChip = { kind: SidebarAttentionKind; signature: string };
 
-const DISMISSED_STORE_PREFIX = "openclaw.control.sidebarAttention.v1:";
+const DISMISSED_STORE_PREFIX = "bot.control.sidebarAttention.v1:";
 
 export function dismissalStoreKey(gatewayUrl: string): string {
   return `${DISMISSED_STORE_PREFIX}${normalizeGatewayTokenScope(gatewayUrl)}`;

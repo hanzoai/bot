@@ -1,4 +1,4 @@
-import type { EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { EmbeddedRunAttemptParams } from "bot/plugin-sdk/agent-harness-runtime";
 
 const CODEX_REASONING_EFFORTS = [
   "minimal",

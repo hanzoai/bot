@@ -5,7 +5,7 @@ import { isSubagentAnnounceCompletionHandoff } from "./subagent-announce-handoff
 
 const announceProvenance = {
   kind: "inter_session",
-  sourceSessionKey: "agent:openclaw:subagent:child",
+  sourceSessionKey: "agent:bot:subagent:child",
   sourceChannel: "internal",
   sourceTool: "subagent_announce",
 } as const;
@@ -13,7 +13,7 @@ const announceProvenance = {
 const subagentCompletionEvent: AgentInternalEvent = {
   type: AGENT_INTERNAL_EVENT_TYPE_TASK_COMPLETION,
   source: "subagent",
-  childSessionKey: "agent:openclaw:subagent:child",
+  childSessionKey: "agent:bot:subagent:child",
   announceType: "subagent task",
   taskLabel: "review",
   status: "ok",

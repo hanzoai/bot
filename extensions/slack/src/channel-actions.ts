@@ -1,10 +1,10 @@
 // Slack plugin module implements channel actions behavior.
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
+import type { AgentToolResult } from "bot/plugin-sdk/agent-core";
 import type {
   ChannelMessageActionAdapter,
   ChannelMessageActionContext,
-} from "openclaw/plugin-sdk/channel-contract";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+} from "bot/plugin-sdk/channel-contract";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import type { SlackActionContext } from "./action-runtime.js";
 import { handleSlackMessageAction } from "./message-action-dispatch.js";
 import { extractSlackToolSend } from "./message-actions.js";

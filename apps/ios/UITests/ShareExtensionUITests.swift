@@ -1,6 +1,6 @@
 import XCTest
 
-/// Drives the real share-sheet path: Photos -> share -> OpenClaw compose card.
+/// Drives the real share-sheet path: Photos -> share -> Bot compose card.
 /// Runs against the booted simulator's bundled sample photos and asserts the
 /// compose card's control states without needing a paired gateway (send is
 /// expected to surface the not-connected failure inline).
@@ -39,12 +39,12 @@ final class ShareExtensionUITests: XCTestCase {
         shareButton.tap()
 
         // Target the share-sheet app cell explicitly; label-only matching can hit
-        // other OpenClaw builds installed on the same simulator.
-        let openClawOption = photos.cells.matching(identifier: "shareCell")
-            .matching(NSPredicate(format: "label BEGINSWITH 'OpenClaw'"))
+        // other Bot builds installed on the same simulator.
+        let botOption = photos.cells.matching(identifier: "shareCell")
+            .matching(NSPredicate(format: "label BEGINSWITH 'Bot'"))
             .firstMatch
-        XCTAssertTrue(openClawOption.waitForExistence(timeout: 10), "OpenClaw missing from share sheet")
-        openClawOption.tap()
+        XCTAssertTrue(botOption.waitForExistence(timeout: 10), "Bot missing from share sheet")
+        botOption.tap()
 
         let draft = photos.textViews["share-compose.draft"]
         let send = photos.buttons["share-compose.send"]

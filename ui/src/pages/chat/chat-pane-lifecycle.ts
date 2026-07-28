@@ -409,7 +409,7 @@ export abstract class ChatPaneLifecycle extends ChatPaneReset {
     if (
       board.hasBoard &&
       board.face === "dashboard" &&
-      !customElements.get("openclaw-board-view")
+      !customElements.get("bot-board-view")
     ) {
       void ensureBoardViewElement().then((loaded) => {
         if (loaded) {

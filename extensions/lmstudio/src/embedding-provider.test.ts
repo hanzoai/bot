@@ -1,5 +1,5 @@
 // LM Studio embedding provider tests cover preload context-length precedence.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/plugin-entry";
+import type { BotConfig } from "bot/plugin-sdk/plugin-entry";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { lmstudioMemoryEmbeddingProviderAdapter } from "../memory-embedding-adapter.js";
 import { createLmstudioEmbeddingProvider } from "./embedding-provider.js";
@@ -24,9 +24,9 @@ const createRemoteEmbeddingProviderMock = vi.hoisted(() =>
   })),
 );
 
-vi.mock("openclaw/plugin-sdk/memory-core-host-engine-embeddings", async (importOriginal) => {
+vi.mock("bot/plugin-sdk/memory-core-host-engine-embeddings", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/memory-core-host-engine-embeddings")>();
+    await importOriginal<typeof import("bot/plugin-sdk/memory-core-host-engine-embeddings")>();
   return {
     ...actual,
     createRemoteEmbeddingProvider: createRemoteEmbeddingProviderMock,
@@ -56,7 +56,7 @@ const EMBEDDING_MODEL = "text-embedding-nomic-embed-text-v1.5";
 function buildConfig(params: {
   model?: Record<string, unknown>;
   provider?: Record<string, unknown>;
-}): OpenClawConfig {
+}): BotConfig {
   return {
     models: {
       providers: {
@@ -67,10 +67,10 @@ function buildConfig(params: {
         },
       },
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as BotConfig;
 }
 
-async function readRequestedContextLength(config: OpenClawConfig): Promise<unknown> {
+async function readRequestedContextLength(config: BotConfig): Promise<unknown> {
   await createLmstudioEmbeddingProvider({
     config,
     provider: "lmstudio",
@@ -154,7 +154,7 @@ describe("createLmstudioEmbeddingProvider preload context length", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "lmstudio-spark",
       model: `lmstudio-spark/${EMBEDDING_MODEL}`,
       fallback: "none",
@@ -209,7 +209,7 @@ describe("createLmstudioEmbeddingProvider preload context length", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "lmstudio-spark",
       model: `lmstudio-spark/${EMBEDDING_MODEL}`,
       fallback: "none",
@@ -235,7 +235,7 @@ describe("createLmstudioEmbeddingProvider preload context length", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "lmstudio-spark",
       model: `lmstudio-spark/${EMBEDDING_MODEL}`,
       fallback: "none",
@@ -266,7 +266,7 @@ describe("createLmstudioEmbeddingProvider preload context length", () => {
             },
           },
         },
-      } as unknown as OpenClawConfig,
+      } as unknown as BotConfig,
       provider: "lmstudio-spark",
       model: `lmstudio-spark/${EMBEDDING_MODEL}`,
       fallback: "none",

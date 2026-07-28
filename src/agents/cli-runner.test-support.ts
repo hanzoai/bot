@@ -38,7 +38,7 @@ const hoisted = vi.hoisted(
 setCliRunnerPrepareTestDeps({
   makeBootstrapWarn: () => () => {},
   resolveBootstrapContextForRun: hoisted.resolveBootstrapContextForRunMock,
-  resolveOpenClawReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
+  resolveBotReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
 });
 
 /** Queue one successful CLI supervisor run. */
@@ -62,7 +62,7 @@ export function restoreCliRunnerPrepareTestDeps() {
   setCliRunnerPrepareTestDeps({
     makeBootstrapWarn: () => () => {},
     resolveBootstrapContextForRun: hoisted.resolveBootstrapContextForRunMock,
-    resolveOpenClawReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
+    resolveBotReferencePaths: async () => ({ docsPath: null, sourcePath: null }),
     getClaudeLiveSessionGenerationForOwner,
   });
 }

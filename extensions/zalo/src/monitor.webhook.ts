@@ -1,7 +1,7 @@
 // Zalo plugin module implements monitor.webhook behavior.
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
-import { readWebhookBodyOrReject } from "openclaw/plugin-sdk/webhook-request-guards";
+import { safeEqualSecret } from "bot/plugin-sdk/security-runtime";
+import { readWebhookBodyOrReject } from "bot/plugin-sdk/webhook-request-guards";
 import type { ResolvedZaloAccount } from "./accounts.js";
 import type { ZaloRuntimeEnv } from "./monitor.types.js";
 import {
@@ -17,13 +17,13 @@ import {
   WEBHOOK_ANOMALY_COUNTER_DEFAULTS,
   WEBHOOK_RATE_LIMIT_DEFAULTS,
   resolveClientIp,
-  type OpenClawConfig,
+  type BotConfig,
 } from "./runtime-api.js";
 import { ZaloWebhookPayloadError } from "./webhook-spool.js";
 
 type ZaloWebhookTarget = {
   account: ResolvedZaloAccount;
-  config: OpenClawConfig;
+  config: BotConfig;
   runtime: ZaloRuntimeEnv;
   secret: string;
   path: string;

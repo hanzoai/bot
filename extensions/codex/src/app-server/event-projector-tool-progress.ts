@@ -3,8 +3,8 @@ import {
   TOOL_PROGRESS_OUTPUT_MAX_CHARS,
   type EmbeddedRunAttemptParams,
   type ToolProgressDetailMode,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { EmbeddedRunAttemptResult } from "./attempt-terminal.js";
 import {
   isMutatingNativeToolItem,

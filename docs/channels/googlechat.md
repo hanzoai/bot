@@ -5,18 +5,18 @@ read_when:
 title: "Google Chat"
 ---
 
-Google Chat runs as the official `@openclaw/googlechat` plugin: DMs and spaces through Google Chat API webhooks (HTTP endpoint only, no Pub/Sub).
+Google Chat runs as the official `@hanzo/bot-googlechat` plugin: DMs and spaces through Google Chat API webhooks (HTTP endpoint only, no Pub/Sub).
 
 ## Install
 
 ```bash
-openclaw plugins install @openclaw/googlechat
+bot plugins install @hanzo/bot-googlechat
 ```
 
 Local checkout (when running from a git repo):
 
 ```bash
-openclaw plugins install ./path/to/local/googlechat-plugin
+bot plugins install ./path/to/local/googlechat-plugin
 ```
 
 ## Quick setup (beginner)
@@ -26,11 +26,11 @@ openclaw plugins install ./path/to/local/googlechat-plugin
    - Enable the API if it is not already enabled.
 2. Create a **Service Account**:
    - Press **Create Credentials** > **Service Account**.
-   - Name it whatever you want (e.g., `openclaw-chat`).
+   - Name it whatever you want (e.g., `bot-chat`).
    - Leave permissions and principals blank (**Continue**, then **Done**).
 3. Create and download the **JSON key**:
    - Click the new service account > **Keys** tab > **Add Key** > **Create new key** > **JSON** > **Create**.
-4. Store the downloaded JSON file on your gateway host (e.g., `~/.openclaw/googlechat-service-account.json`).
+4. Store the downloaded JSON file on your gateway host (e.g., `~/.bot/googlechat-service-account.json`).
 5. Create a Google Chat app in the [Google Cloud Console Chat Configuration](https://console.cloud.google.com/apis/api/chat.googleapis.com/hangouts-chat):
    - Fill in **Application info** (app name, avatar URL, description).
    - Enable **Interactive features**.
@@ -40,9 +40,9 @@ openclaw plugins install ./path/to/local/googlechat-plugin
    - Under **Visibility**, check **Make this Chat app available to specific people and groups in `<Your Domain>`** and enter your email address.
    - Click **Save**.
 6. Enable the app status: refresh the page, find **App status**, set it to **Live - available to users**, and **Save** again.
-7. Configure OpenClaw with the service account and the webhook audience (must match the Chat app config):
+7. Configure Bot with the service account and the webhook audience (must match the Chat app config):
    - Env: `GOOGLE_CHAT_SERVICE_ACCOUNT_FILE=/path/to/service-account.json` (default account only), or
-   - Config: see [Config highlights](#config-highlights). `openclaw channels add --channel googlechat` also accepts `--audience-type`, `--audience`, `--webhook-path`, and `--webhook-url`.
+   - Config: see [Config highlights](#config-highlights). `bot channels add --channel googlechat` also accepts `--audience-type`, `--audience`, `--webhook-path`, and `--webhook-url`.
 8. Start the gateway. Google Chat will POST to your webhook path (default `/googlechat`).
 
 ## Add to Google Chat
@@ -57,7 +57,7 @@ Once the gateway is running and your email is on the visibility list:
 
 ## Public URL (Webhook-only)
 
-Google Chat webhooks require a public HTTPS endpoint. For security, expose **only the `/googlechat` path** to the internet and keep the OpenClaw dashboard and other endpoints private.
+Google Chat webhooks require a public HTTPS endpoint. For security, expose **only the `/googlechat` path** to the internet and keep the Bot dashboard and other endpoints private.
 
 ### Option A: Tailscale Funnel (Recommended)
 
@@ -114,7 +114,7 @@ your-domain.com {
 }
 ```
 
-Requests to `your-domain.com/` are ignored or 404, while `your-domain.com/googlechat` routes to OpenClaw.
+Requests to `your-domain.com/` are ignored or 404, while `your-domain.com/googlechat` routes to Bot.
 
 ### Option C: Cloudflare Tunnel
 
@@ -126,7 +126,7 @@ Configure the tunnel ingress rules to route only the webhook path:
 ## How it works
 
 1. Google Chat POSTs JSON to the gateway webhook path (POST only, JSON content type required, per-IP rate limited).
-2. OpenClaw authenticates every request before dispatch:
+2. Bot authenticates every request before dispatch:
    - Chat app events carry `Authorization: Bearer <token>`; the token is verified before the full body is parsed.
    - Google Workspace Add-on events carry the token in the body (`authorizationEventObject.systemIdToken`) and are read under a stricter pre-auth budget (16 KB, 3 s) before verification.
 3. The token is checked against `audienceType` + `audience`:
@@ -137,13 +137,13 @@ Configure the tunnel ingress rules to route only the webhook path:
    - Spaces get per-space sessions `agent:<agentId>:googlechat:group:<spaceId>`; replies go to the message thread.
    - DMs collapse into the agent's main session by default; set `session.dmScope` for per-peer DM sessions (see [Session](/concepts/session)).
 5. DM access is pairing by default. Unknown senders receive a pairing code; approve with:
-   - `openclaw pairing approve googlechat <code>`
+   - `bot pairing approve googlechat <code>`
 6. Group spaces require @-mention by default. Mentions are detected from Chat `USER_MENTION` annotations targeting the app; set `botUser` (e.g., `users/1234567890`) if detection needs the app's user resource name.
-7. When an exec or plugin approval starts from Google Chat and a stable `users/<id>` approver is configured, OpenClaw posts a native approval card (`cardsV2`) in the originating space or thread. Card buttons carry opaque callback tokens; the manual `/approve <id> <decision>` prompt appears only when native delivery is unavailable.
+7. When an exec or plugin approval starts from Google Chat and a stable `users/<id>` approver is configured, Bot posts a native approval card (`cardsV2`) in the originating space or thread. Card buttons carry opaque callback tokens; the manual `/approve <id> <decision>` prompt appears only when native delivery is unavailable.
 
 ### Inbound durability
 
-After request authentication, OpenClaw removes the add-on authorization object from storage and durably queues Google Chat `MESSAGE` events before returning `200`. A persistence failure returns `503`, allowing Google Chat to retry instead of acknowledging an event that could be lost.
+After request authentication, Bot removes the add-on authorization object from storage and durably queues Google Chat `MESSAGE` events before returning `200`. A persistence failure returns `503`, allowing Google Chat to retry instead of acknowledging an event that could be lost.
 
 Pending or retryable messages survive a Gateway restart, remain serialized per space, and use the Google Chat message resource name to suppress duplicate queue entries while the active or retained completion record exists. Non-message actions keep their existing detached webhook path and do not receive this durable-queue guarantee. Delivery remains at least once across the queue-to-agent boundary, so a crash during handoff can replay a turn.
 
@@ -220,7 +220,7 @@ The webhook handler is not registered. Common causes:
 1. **Channel not configured**: the `channels.googlechat` section is missing. Verify with:
 
    ```bash
-   openclaw config get channels.googlechat
+   bot config get channels.googlechat
    ```
 
    If it returns "Config path not found", add the configuration (see [Config highlights](#config-highlights)).
@@ -228,7 +228,7 @@ The webhook handler is not registered. Common causes:
 2. **Plugin not enabled**: check plugin status:
 
    ```bash
-   openclaw plugins list | grep googlechat
+   bot plugins list | grep googlechat
    ```
 
    If it shows "disabled", add `plugins.entries.googlechat.enabled: true` to your config.
@@ -236,22 +236,22 @@ The webhook handler is not registered. Common causes:
 3. **Gateway not restarted** after config changes:
 
    ```bash
-   openclaw gateway restart
+   bot gateway restart
    ```
 
 Verify the channel is running:
 
 ```bash
-openclaw channels status
+bot channels status
 # Should show: Google Chat default: enabled, configured, ...
 ```
 
 ### Other issues
 
-- `openclaw channels status --probe` surfaces auth errors and missing audience config (`audience` and `audienceType` are both required).
+- `bot channels status --probe` surfaces auth errors and missing audience config (`audience` and `audienceType` are both required).
 - If no messages arrive, confirm the Chat app's webhook URL and trigger configuration.
 - If mention gating blocks replies, set `botUser` to the app's user resource name and check `requireMention`.
-- `openclaw logs --follow` while sending a test message shows whether requests reach the gateway.
+- `bot logs --follow` while sending a test message shows whether requests reach the gateway.
 
 ## Related
 

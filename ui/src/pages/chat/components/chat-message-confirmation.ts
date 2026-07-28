@@ -3,8 +3,8 @@ import { icons } from "../../../components/icons.ts";
 import { t } from "../../../i18n/index.ts";
 import { getSafeLocalStorage } from "../../../local-storage.ts";
 
-const SKIP_DELETE_CONFIRM_PREFERENCE = "openclaw:skipDeleteConfirm";
-const SKIP_REWIND_CONFIRM_PREFERENCE = "openclaw:skip-rewind-confirm";
+const SKIP_DELETE_CONFIRM_PREFERENCE = "bot:skipDeleteConfirm";
+const SKIP_REWIND_CONFIRM_PREFERENCE = "bot:skip-rewind-confirm";
 const DELETE_CONFIRM_VIEWPORT_MARGIN_PX = 8;
 const DELETE_CONFIRM_TRIGGER_GAP_PX = 6;
 
@@ -289,7 +289,7 @@ function openConfirmedActionPopover(
 function renderConfirmedActionButton(params: ConfirmedActionParams) {
   return html`
     <span class="chat-delete-wrap ${params.wrapClass ?? ""}">
-      <openclaw-tooltip .content=${params.tooltip}>
+      <bot-tooltip .content=${params.tooltip}>
         <button
           class=${params.buttonClass ?? ""}
           aria-label=${params.ariaLabel}
@@ -299,7 +299,7 @@ function renderConfirmedActionButton(params: ConfirmedActionParams) {
         >
           ${params.icon}
         </button>
-      </openclaw-tooltip>
+      </bot-tooltip>
     </span>
   `;
 }

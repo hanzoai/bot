@@ -93,13 +93,13 @@ describe("Apple app i18n catalogs", () => {
         "Browse ClawHub",
         "Done in %@",
         "Enable debug tools",
-        "Everyday OpenClaw app behavior.",
+        "Everyday Bot app behavior.",
         "General",
         "Shelling",
         "Voice Wake requires macOS 26 or newer",
       ]),
     );
-    expect(keys).not.toContain("OpenClaw");
+    expect(keys).not.toContain("Bot");
     expect(keys.some((key) => key.includes("\\("))).toBe(false);
   });
 
@@ -113,7 +113,7 @@ describe("Apple app i18n catalogs", () => {
             id: "native.apple.settings",
             kind: "ui-call",
             line: 1,
-            path: "apps/macos/Sources/OpenClaw/Settings.swift",
+            path: "apps/macos/Sources/Bot/Settings.swift",
             source: "Settings",
             surface: "apple",
           },
@@ -127,19 +127,19 @@ describe("Apple app i18n catalogs", () => {
         `${JSON.stringify({ sourceLanguage: "en", strings: {}, version: "1.0" }, null, 2)}\n`,
         build,
       ),
-    ).toThrow("Apple catalog apps/macos/Sources/OpenClaw/Resources/Localizable.xcstrings is stale");
+    ).toThrow("Apple catalog apps/macos/Sources/Bot/Resources/Localizable.xcstrings is stale");
   });
 
   it("keeps macOS settings literals localized and runtime values verbatim", async () => {
     const [components, channels, clawHub, gateways, general, approvals, voiceWake] =
       await Promise.all([
-        readFile("apps/macos/Sources/OpenClaw/SettingsComponents.swift", "utf8"),
-        readFile("apps/macos/Sources/OpenClaw/ChannelConfigForm.swift", "utf8"),
-        readFile("apps/macos/Sources/OpenClaw/ClawHubSkillsBrowser.swift", "utf8"),
-        readFile("apps/macos/Sources/OpenClaw/GatewaySettings.swift", "utf8"),
-        readFile("apps/macos/Sources/OpenClaw/GeneralSettings.swift", "utf8"),
-        readFile("apps/macos/Sources/OpenClaw/SystemRunSettingsView.swift", "utf8"),
-        readFile("apps/macos/Sources/OpenClaw/VoiceWakeSettings.swift", "utf8"),
+        readFile("apps/macos/Sources/Bot/SettingsComponents.swift", "utf8"),
+        readFile("apps/macos/Sources/Bot/ChannelConfigForm.swift", "utf8"),
+        readFile("apps/macos/Sources/Bot/ClawHubSkillsBrowser.swift", "utf8"),
+        readFile("apps/macos/Sources/Bot/GatewaySettings.swift", "utf8"),
+        readFile("apps/macos/Sources/Bot/GeneralSettings.swift", "utf8"),
+        readFile("apps/macos/Sources/Bot/SystemRunSettingsView.swift", "utf8"),
+        readFile("apps/macos/Sources/Bot/VoiceWakeSettings.swift", "utf8"),
       ]);
 
     expect(components).toContain("enum SettingsTextValue: ExpressibleByStringLiteral");
@@ -376,7 +376,7 @@ describe("Apple app i18n catalogs", () => {
   });
 
   it("keeps custom component text on explicit localized or verbatim paths", async () => {
-    const design = await readFile("apps/ios/Sources/Design/OpenClawProComponents.swift", "utf8");
+    const design = await readFile("apps/ios/Sources/Design/BotProComponents.swift", "utf8");
     const agentOverview = await readFile(
       "apps/ios/Sources/Design/AgentProTab+Overview.swift",
       "utf8",
@@ -408,7 +408,7 @@ describe("Apple app i18n catalogs", () => {
     const watchDirect = await readFile("apps/ios/WatchApp/Sources/WatchDirectNode.swift", "utf8");
 
     expect(design).toContain(
-      "struct ProStatusRow: View {\n    let icon: String\n    let title: OpenClawTextValue\n    let detail: OpenClawTextValue",
+      "struct ProStatusRow: View {\n    let icon: String\n    let title: BotTextValue\n    let detail: BotTextValue",
     );
     expect(design).not.toContain(
       "struct ProStatusRow: View {\n    let icon: String\n    let title: String",
@@ -421,35 +421,35 @@ describe("Apple app i18n catalogs", () => {
     expect(watch).toContain("accessory: .verbatim(self.store.talkSummaryText)");
     expect(watch).toContain("title: .verbatim(record.approval.commandPreview");
     expect(settings).toContain(
-      "let title: OpenClawTextValue\n    let detail: OpenClawTextValue\n    let priority: OpenClawTextValue",
+      "let title: BotTextValue\n    let detail: BotTextValue\n    let priority: BotTextValue",
     );
     expect(settings).toContain(
-      "struct SettingsDetailRow: View {\n    let label: LocalizedStringKey\n    let value: OpenClawTextValue",
+      "struct SettingsDetailRow: View {\n    let label: LocalizedStringKey\n    let value: BotTextValue",
     );
     expect(settings).toContain("self.value.text");
     expect(settings).not.toContain("Text(self.item.title)");
     expect(agentOverview).toContain(
-      "func metricTile(\n        icon: String,\n        title: OpenClawTextValue,\n        value: String,\n        detail: OpenClawTextValue",
+      "func metricTile(\n        icon: String,\n        title: BotTextValue,\n        value: String,\n        detail: BotTextValue",
     );
     expect(agentDetailComponents).toContain(
-      "func detailMetric(label: OpenClawTextValue, value: String)",
+      "func detailMetric(label: BotTextValue, value: String)",
     );
     expect(agentDetailComponents).toContain("Text(verbatim: value)");
     expect(agentDetailComponents).toContain(
-      "func emptyDetailRow(\n        icon: String,\n        title: OpenClawTextValue,\n        detail: OpenClawTextValue)",
+      "func emptyDetailRow(\n        icon: String,\n        title: BotTextValue,\n        detail: BotTextValue)",
     );
     expect(agentDetailComponents).toContain("title.text");
     expect(agentDetailComponents).toContain("detail.text");
     expect(agentDetailComponents).not.toContain("func detailMetric(label: String");
     expect(agentDetailComponents).not.toContain("func emptyDetailRow(icon: String, title: String");
     expect(agentDreaming).toContain(
-      "private func detailMetric(label: OpenClawTextValue, value: String)",
+      "private func detailMetric(label: BotTextValue, value: String)",
     );
     expect(agentDreaming).toContain("label.text");
     expect(agentDreaming).toContain("Text(verbatim: value)");
     expect(agentDreaming).not.toContain("private func detailMetric(label: String");
     expect(settingsActions).toContain(
-      "func diagnosticCheckRow(\n        icon: String,\n        title: OpenClawTextValue,\n        detail: OpenClawTextValue,\n        value: OpenClawTextValue",
+      "func diagnosticCheckRow(\n        icon: String,\n        title: BotTextValue,\n        detail: BotTextValue,\n        value: BotTextValue",
     );
     expect(settingsSections).toContain("func settingsToggle(\n        _ title: LocalizedStringKey");
     expect(settingsSections).toContain(
@@ -544,11 +544,11 @@ describe("Apple app i18n catalogs", () => {
       ),
     ).toBe("Utilisez l’appareil photo pour scanner les codes de configuration.");
     expect(
-      selectInfoPlistTranslation("OpenClaw Share", [], {
-        source: "OpenClaw Share",
-        value: "OpenClaw Partager",
+      selectInfoPlistTranslation("Bot Share", [], {
+        source: "Bot Share",
+        value: "Bot Partager",
       }),
-    ).toBe("OpenClaw Partager");
+    ).toBe("Bot Partager");
     expect(
       selectInfoPlistTranslation(
         "Use the camera to scan setup codes.",
@@ -592,7 +592,7 @@ describe("Apple app i18n catalogs", () => {
   });
 
   it("compiles macOS catalogs into app-bundle localization directories", async () => {
-    const outputDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-apple-i18n-"));
+    const outputDir = await mkdtemp(path.join(os.tmpdir(), "bot-apple-i18n-"));
     try {
       await compileMacosLocalizations(outputDir);
       const swedish = await readFile(

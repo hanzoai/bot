@@ -1,4 +1,4 @@
-import type { FastMode } from "@openclaw/normalization-core/string-coerce";
+import type { FastMode } from "@hanzo/bot-normalization-core/string-coerce";
 /** Public option types for reply generation callbacks, streaming, and delivery policy. */
 import type { AgentPlanStep } from "../channels/streaming.js";
 import type { ImageContent } from "../llm/types.js";
@@ -147,7 +147,7 @@ export type GetReplyOptions = {
   suppressToolErrorWarnings?: boolean;
   /** Dynamic form used when verbose progress visibility can change mid-run. */
   shouldSuppressToolErrorWarnings?: () => boolean | undefined;
-  /** If true, run the model without OpenClaw tools for this turn. */
+  /** If true, run the model without Bot tools for this turn. */
   disableTools?: boolean;
   /** Runtime tool allow-list for this turn. Empty means no tools. */
   toolsAllow?: string[];

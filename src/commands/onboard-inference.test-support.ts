@@ -15,7 +15,7 @@ type TestApi = {
 
 function getTestApi(): TestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.onboardInferenceTestApi")
+    Symbol.for("bot.onboardInferenceTestApi")
   ] as TestApi;
 }
 

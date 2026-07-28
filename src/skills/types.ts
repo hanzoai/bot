@@ -17,7 +17,7 @@ export type SkillInstallSpec = {
   targetDir?: string;
 };
 
-export type OpenClawSkillMetadata = {
+export type BotSkillMetadata = {
   always?: boolean;
   skillKey?: string;
   primaryEnv?: string;
@@ -94,7 +94,7 @@ type SkillExposure = {
 export type SkillEntry = {
   skill: Skill;
   frontmatter: ParsedSkillFrontmatter;
-  metadata?: OpenClawSkillMetadata;
+  metadata?: BotSkillMetadata;
   invocation?: SkillInvocationPolicy;
   exposure?: SkillExposure;
   syncSourceDir?: string;

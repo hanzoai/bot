@@ -1,6 +1,6 @@
 import type { PluginInstallRecord } from "../config/types.plugins.js";
 import {
-  discoverOpenClawPlugins,
+  discoverBotPlugins,
   type PluginCandidate,
   type PluginDiscoveryResult,
 } from "./discovery.js";
@@ -51,7 +51,7 @@ export function resolvePluginLoadDiscovery(params: {
         diagnostics: [] as PluginDiagnostic[],
       }
     : (options.discovery ??
-      discoverOpenClawPlugins({
+      discoverBotPlugins({
         workspaceDir: options.workspaceDir,
         extraPaths: context.normalized.loadPaths,
         env: context.env,

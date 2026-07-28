@@ -1,6 +1,6 @@
 // Whatsapp tests cover action runtime plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/routing";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { DEFAULT_ACCOUNT_ID } from "bot/plugin-sdk/routing";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleWhatsAppAction, whatsAppActionRuntime } from "./action-runtime.js";
 
@@ -9,13 +9,13 @@ const sendReactionWhatsApp = vi.fn(async () => undefined);
 
 const enabledConfig = {
   channels: { whatsapp: { actions: { reactions: true } } },
-} as OpenClawConfig;
+} as BotConfig;
 
 describe("handleWhatsAppAction", () => {
-  function reactionConfig(reactionLevel: "minimal" | "extensive" | "off" | "ack"): OpenClawConfig {
+  function reactionConfig(reactionLevel: "minimal" | "extensive" | "off" | "ack"): BotConfig {
     return {
       channels: { whatsapp: { actions: { reactions: true }, reactionLevel } },
-    } as OpenClawConfig;
+    } as BotConfig;
   }
 
   function expectLastReactionSend(expected: {
@@ -190,7 +190,7 @@ describe("handleWhatsAppAction", () => {
   it("respects reaction gating", async () => {
     const cfg = {
       channels: { whatsapp: { actions: { reactions: false } } },
-    } as OpenClawConfig;
+    } as BotConfig;
     await expect(
       handleWhatsAppAction(
         {
@@ -213,7 +213,7 @@ describe("handleWhatsAppAction", () => {
           messageId: "msg1",
           emoji: "✅",
         },
-        {} as OpenClawConfig,
+        {} as BotConfig,
       ),
     ).rejects.toThrow(/WhatsApp reactions are disabled/);
   });
@@ -221,7 +221,7 @@ describe("handleWhatsAppAction", () => {
   it("prefers the action gate error when both actions.reactions and reactionLevel disable reactions", async () => {
     const cfg = {
       channels: { whatsapp: { actions: { reactions: false }, reactionLevel: "ack" } },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await expect(
       handleWhatsAppAction(
@@ -270,7 +270,7 @@ describe("handleWhatsAppAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     try {
       await handleWhatsAppAction(
@@ -301,7 +301,7 @@ describe("handleWhatsAppAction", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await handleWhatsAppAction(
       {

@@ -1,15 +1,15 @@
 import { lstatSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { LEGACY_IMPLICIT_AGENT_ID, normalizeAgentId } from "../../routing/session-key.js";
-import type { OpenClawRegisteredAgentDatabase } from "../../state/openclaw-agent-db-contract.js";
+import type { BotRegisteredAgentDatabase } from "../../state/bot-agent-db-contract.js";
 import {
-  isSameOpenClawAgentDatabasePath,
-  listOpenClawRegisteredAgentDatabases,
-} from "../../state/openclaw-agent-db-registry.js";
+  isSameBotAgentDatabasePath,
+  listBotRegisteredAgentDatabases,
+} from "../../state/bot-agent-db-registry.js";
 import {
-  inspectOpenClawAgentDatabaseOwner,
-  isIncognitoOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
+  inspectBotAgentDatabaseOwner,
+  isIncognitoBotAgentSqlitePath,
+} from "../../state/bot-agent-db.js";
 
 /** SQLite database target resolved from a legacy session store path. */
 type ResolvedSqliteStoreTarget = {
@@ -30,17 +30,17 @@ type ResolveSqliteStoreTargetOptions = {
   agentId?: string;
   defaultAgentId?: string;
   env?: NodeJS.ProcessEnv;
-  registeredDatabases?: readonly Pick<OpenClawRegisteredAgentDatabase, "agentId" | "path">[];
+  registeredDatabases?: readonly Pick<BotRegisteredAgentDatabase, "agentId" | "path">[];
 };
 
 function resolveRegisteredOwners(
   pathname: string,
-  registeredDatabases: readonly Pick<OpenClawRegisteredAgentDatabase, "agentId" | "path">[],
+  registeredDatabases: readonly Pick<BotRegisteredAgentDatabase, "agentId" | "path">[],
 ): string[] {
   return [
     ...new Set(
       registeredDatabases
-        .filter((entry) => isSameOpenClawAgentDatabasePath(entry.path, pathname))
+        .filter((entry) => isSameBotAgentDatabasePath(entry.path, pathname))
         .map((entry) => normalizeAgentId(entry.agentId)),
     ),
   ];
@@ -50,7 +50,7 @@ function resolveDatabaseOwner(pathname: string): string | undefined {
   if (!hasFilesystemEntry(pathname)) {
     return undefined;
   }
-  const owner = inspectOpenClawAgentDatabaseOwner(pathname);
+  const owner = inspectBotAgentDatabaseOwner(pathname);
   return owner.status === "owned" ? normalizeAgentId(owner.agentId) : undefined;
 }
 
@@ -77,7 +77,7 @@ function resolveCustomStoreSqlitePath(params: {
   const agentId = normalizeAgentId(params.options.agentId ?? defaultAgentId);
   const registeredDatabases =
     params.options.registeredDatabases ??
-    listOpenClawRegisteredAgentDatabases(params.options.env ? { env: params.options.env } : {});
+    listBotRegisteredAgentDatabases(params.options.env ? { env: params.options.env } : {});
   const resolvePersistedOwner = (candidatePath: string) => {
     const registeredOwners = resolveRegisteredOwners(candidatePath, registeredDatabases);
     const databaseOwner = resolveDatabaseOwner(candidatePath);
@@ -121,7 +121,7 @@ function resolveCustomStoreSqlitePath(params: {
     };
     const occupiedIndexes = new Set<number>();
     for (const registered of registeredDatabases) {
-      if (!isSameOpenClawAgentDatabasePath(path.dirname(registered.path), sessionsDir)) {
+      if (!isSameBotAgentDatabasePath(path.dirname(registered.path), sessionsDir)) {
         continue;
       }
       const index = parseIndex(path.basename(registered.path));
@@ -214,25 +214,25 @@ export function resolveUnsuffixedSqliteTargetFromSessionStorePath(
   storePath: string,
 ): ResolvedSqliteStoreTarget {
   const resolved = path.resolve(storePath);
-  if (path.basename(resolved) === "openclaw-agent.sqlite" || resolved.endsWith(".sqlite")) {
+  if (path.basename(resolved) === "bot-agent.sqlite" || resolved.endsWith(".sqlite")) {
     const agentId = resolveAgentIdFromSqliteDatabasePath(resolved);
     return { path: resolved, ...(agentId ? { agentId } : {}) };
   }
   const sessionsDir = path.dirname(resolved);
   if (path.basename(resolved) !== "sessions.json") {
-    const sqliteBaseName = path.basename(resolved, path.extname(resolved)) || "openclaw-agent";
+    const sqliteBaseName = path.basename(resolved, path.extname(resolved)) || "bot-agent";
     return { path: path.join(sessionsDir, `${sqliteBaseName}.sqlite`) };
   }
   if (path.basename(sessionsDir) !== "sessions") {
-    return { path: path.join(sessionsDir, "openclaw-agent.sqlite") };
+    return { path: path.join(sessionsDir, "bot-agent.sqlite") };
   }
   const agentDir = path.dirname(sessionsDir);
   if (path.basename(path.dirname(agentDir)) !== "agents") {
-    return { path: path.join(sessionsDir, "openclaw-agent.sqlite") };
+    return { path: path.join(sessionsDir, "bot-agent.sqlite") };
   }
   return {
     agentId: normalizeAgentId(path.basename(agentDir)),
-    path: path.join(agentDir, "agent", "openclaw-agent.sqlite"),
+    path: path.join(agentDir, "agent", "bot-agent.sqlite"),
   };
 }
 
@@ -245,7 +245,7 @@ export function resolveSqliteTargetFromSessionStorePath(
   const requestedAgentId = options.agentId ? normalizeAgentId(options.agentId) : undefined;
   if (
     requestedAgentId &&
-    isIncognitoOpenClawAgentSqlitePath(unsuffixedTarget.path, {
+    isIncognitoBotAgentSqlitePath(unsuffixedTarget.path, {
       agentId: requestedAgentId,
       env: options.env,
     })
@@ -258,7 +258,7 @@ export function resolveSqliteTargetFromSessionStorePath(
   if (path.resolve(storePath).endsWith(".sqlite")) {
     const registeredDatabases =
       options.registeredDatabases ??
-      listOpenClawRegisteredAgentDatabases(options.env ? { env: options.env } : {});
+      listBotRegisteredAgentDatabases(options.env ? { env: options.env } : {});
     const registeredOwners = resolveRegisteredOwners(unsuffixedTarget.path, registeredDatabases);
     const databaseOwner = resolveDatabaseOwner(unsuffixedTarget.path);
     const configuredDefaultAgentId = normalizeAgentId(
@@ -330,7 +330,7 @@ export function listDurableSqliteTargetPathsForSessionStorePath(storePath: strin
 
 /** Extracts the agent id from the canonical per-agent SQLite database path. */
 function resolveAgentIdFromSqliteDatabasePath(databasePath: string): string | undefined {
-  if (path.basename(databasePath) !== "openclaw-agent.sqlite") {
+  if (path.basename(databasePath) !== "bot-agent.sqlite") {
     return undefined;
   }
   const agentDbDir = path.dirname(databasePath);

@@ -1,13 +1,13 @@
-# Tavily OpenClaw plugin
+# Tavily Bot plugin
 
-Official OpenClaw plugin for Tavily.
+Official Bot plugin for Tavily.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/tavily-plugin
+bot plugins install @hanzo/bot-tavily-plugin
 ```
 
 ## Docs
 
-See `docs/tools/tavily.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/tools/tavily`.
+See `docs/tools/tavily.md` in the Bot repository, or the published docs at `https://docs.bot.ai/tools/tavily`.

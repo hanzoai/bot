@@ -8,8 +8,8 @@ import { writeImportedSourcePage } from "./source-page-shared.js";
 
 const { fsRootMock } = vi.hoisted(() => ({ fsRootMock: vi.fn() }));
 
-vi.mock("openclaw/plugin-sdk/security-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/security-runtime")>();
+vi.mock("bot/plugin-sdk/security-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/security-runtime")>();
   return {
     ...actual,
     root: (...args: Parameters<typeof actual.root>) => {
@@ -36,8 +36,8 @@ function buildSourcePage(raw: string, updatedAt: string): string {
       renderMarkdownFence(raw, "text"),
       "",
       "## Notes",
-      "<!-- openclaw:human:start -->",
-      "<!-- openclaw:human:end -->",
+      "<!-- bot:human:start -->",
+      "<!-- bot:human:end -->",
       "",
     ].join("\n"),
   });
@@ -195,8 +195,8 @@ describe("writeImportedSourcePage", () => {
     const absPage = path.join(suiteRoot, pagePath);
     const userNote = "IMPORTED PAGE NOTE";
     const edited = (await fs.readFile(absPage, "utf8")).replace(
-      "<!-- openclaw:human:start -->\n<!-- openclaw:human:end -->",
-      `<!-- openclaw:human:start -->\n${userNote}\n<!-- openclaw:human:end -->`,
+      "<!-- bot:human:start -->\n<!-- bot:human:end -->",
+      `<!-- bot:human:start -->\n${userNote}\n<!-- bot:human:end -->`,
     );
     await fs.writeFile(absPage, edited, "utf8");
 
@@ -230,9 +230,9 @@ describe("writeImportedSourcePage", () => {
 
     const sourceWithMarkers = [
       "first imported body",
-      "<!-- openclaw:human:start -->",
+      "<!-- bot:human:start -->",
       "OLD IMPORTED SOURCE MARKER PAYLOAD",
-      "<!-- openclaw:human:end -->",
+      "<!-- bot:human:end -->",
       "",
     ].join("\n");
     await fs.writeFile(sourcePath, sourceWithMarkers, "utf8");
@@ -252,8 +252,8 @@ describe("writeImportedSourcePage", () => {
     const absPage = path.join(suiteRoot, pagePath);
     const userNote = "CRLF IMPORTED PAGE NOTE";
     const edited = (await fs.readFile(absPage, "utf8")).replace(
-      "<!-- openclaw:human:start -->\n<!-- openclaw:human:end -->",
-      `<!-- openclaw:human:start -->\n${userNote}\n<!-- openclaw:human:end -->`,
+      "<!-- bot:human:start -->\n<!-- bot:human:end -->",
+      `<!-- bot:human:start -->\n${userNote}\n<!-- bot:human:end -->`,
     );
     await fs.writeFile(absPage, edited.replace(/\n/g, "\r\n"), "utf8");
 

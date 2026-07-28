@@ -35,7 +35,7 @@ declare module "*scripts/ui.js" {
   ): boolean;
 }
 
-declare module "*openclaw-changelog-update/scripts/verify-release-notes.mjs" {
+declare module "*bot-changelog-update/scripts/verify-release-notes.mjs" {
   type ContributionRecord = {
     externalReferences?: string[];
     references: number[];
@@ -177,7 +177,7 @@ declare module "*openclaw-changelog-update/scripts/verify-release-notes.mjs" {
   export function ledgerChecks(...args: unknown[]): string[];
 }
 
-declare module "*openclaw-live-updater/scripts/update-main.mjs" {
+declare module "*bot-live-updater/scripts/update-main.mjs" {
   type GatewayDeployment = Record<string, unknown> & {
     entrypoint: string;
     workingDirectory?: string | null;

@@ -8,18 +8,18 @@ import {
   type HealthCheckContext,
   type HealthFinding,
   type HealthRepairContext,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/health";
-import { clearHealthChecksForTest } from "openclaw/plugin-sdk/plugin-test-runtime";
+  type BotConfig,
+} from "bot/plugin-sdk/health";
+import { clearHealthChecksForTest } from "bot/plugin-sdk/plugin-test-runtime";
 import { registerPolicyDoctorChecks } from "./register.js";
 
 export let workspaceDir: string;
 
-let originalOpenClawHome: string | undefined;
+let originalBotHome: string | undefined;
 
-let originalOpenClawStateDir: string | undefined;
+let originalBotStateDir: string | undefined;
 
-export function cfgWithPolicy(settings: Record<string, unknown> = {}): OpenClawConfig {
+export function cfgWithPolicy(settings: Record<string, unknown> = {}): BotConfig {
   return {
     plugins: {
       entries: {
@@ -32,7 +32,7 @@ export function cfgWithPolicy(settings: Record<string, unknown> = {}): OpenClawC
   };
 }
 
-export function ctx(configPath: string, cfg: OpenClawConfig = {}): HealthCheckContext {
+export function ctx(configPath: string, cfg: BotConfig = {}): HealthCheckContext {
   return {
     mode: "lint",
     runtime: {
@@ -46,7 +46,7 @@ export function ctx(configPath: string, cfg: OpenClawConfig = {}): HealthCheckCo
   };
 }
 
-export function repairCtx(configPath: string, cfg: OpenClawConfig = {}): HealthRepairContext {
+export function repairCtx(configPath: string, cfg: BotConfig = {}): HealthRepairContext {
   return {
     ...ctx(configPath, cfg),
     mode: "fix",
@@ -105,36 +105,36 @@ export async function runPolicyRepairCheck(checkId: string, repairCheckCtx: Heal
 
 export const describe0BeforeEach0 = async () => {
   clearHealthChecksForTest();
-  originalOpenClawHome = process.env.OPENCLAW_HOME;
-  originalOpenClawStateDir = process.env.OPENCLAW_STATE_DIR;
+  originalBotHome = process.env.BOT_HOME;
+  originalBotStateDir = process.env.BOT_STATE_DIR;
   workspaceDir = await fs.mkdtemp(join(tmpdir(), "policy-doctor-"));
-  process.env.OPENCLAW_HOME = workspaceDir;
-  delete process.env.OPENCLAW_STATE_DIR;
-  await fs.mkdir(join(workspaceDir, ".openclaw"), { recursive: true });
+  process.env.BOT_HOME = workspaceDir;
+  delete process.env.BOT_STATE_DIR;
+  await fs.mkdir(join(workspaceDir, ".bot"), { recursive: true });
   try {
     await fs.symlink(
       "../exec-approvals.json",
-      join(workspaceDir, ".openclaw", "exec-approvals.json"),
+      join(workspaceDir, ".bot", "exec-approvals.json"),
     );
   } catch (err) {
     if (typeof err !== "object" || err === null || !("code" in err) || err.code !== "EPERM") {
       throw err;
     }
-    await fs.rm(join(workspaceDir, ".openclaw"), { recursive: true, force: true });
-    await fs.symlink(workspaceDir, join(workspaceDir, ".openclaw"), "junction");
+    await fs.rm(join(workspaceDir, ".bot"), { recursive: true, force: true });
+    await fs.symlink(workspaceDir, join(workspaceDir, ".bot"), "junction");
   }
 };
 
 export const describe0AfterEach1 = async () => {
-  if (originalOpenClawHome === undefined) {
-    delete process.env.OPENCLAW_HOME;
+  if (originalBotHome === undefined) {
+    delete process.env.BOT_HOME;
   } else {
-    process.env.OPENCLAW_HOME = originalOpenClawHome;
+    process.env.BOT_HOME = originalBotHome;
   }
-  if (originalOpenClawStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+  if (originalBotStateDir === undefined) {
+    delete process.env.BOT_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = originalOpenClawStateDir;
+    process.env.BOT_STATE_DIR = originalBotStateDir;
   }
   await fs.rm(workspaceDir, { recursive: true, force: true });
   clearHealthChecksForTest();

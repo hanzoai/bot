@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createResolverContext } from "openclaw/plugin-sdk/secret-ref-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createResolverContext } from "bot/plugin-sdk/secret-ref-runtime";
 import { describe, expect, it } from "vitest";
 import { collectRuntimeConfigAssignments, secretTargetRegistryEntries } from "./secret-contract.js";
 
@@ -21,7 +21,7 @@ describe("Buzz secret contract", () => {
           authTag: { source: "exec", provider: "vault", id: "buzz-auth-tag" },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const context = createResolverContext({ sourceConfig, env: {} });
 
     collectRuntimeConfigAssignments({

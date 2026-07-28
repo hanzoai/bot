@@ -17,16 +17,16 @@ import {
   resolveRetainedManagedNpmInstallPackageInfo,
 } from "../plugins/managed-npm-retention.js";
 import { writeManagedNpmPlugin } from "../plugins/test-helpers/managed-npm-plugin.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { maybeRepairStaleManagedNpmInstallGenerations } from "./doctor-plugin-generations.js";
 import { maybeRepairPluginRegistryState } from "./doctor-plugin-registry.js";
 
-const PACKAGE_NAME = "@proof/openclaw-generation";
+const PACKAGE_NAME = "@proof/bot-generation";
 const PLUGIN_ID = "generation-proof";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function makeStateDir(): string {
-  return tempDirs.make("openclaw-doctor-plugin-generation-");
+  return tempDirs.make("bot-doctor-plugin-generation-");
 }
 
 function writeManagedFlat(stateDir: string, version: string): string {
@@ -65,7 +65,7 @@ function setInstallTimestamp(packageDir: string, timestamp: Date): void {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   clearLoadInstalledPluginIndexInstallRecordsCache();
 });
 
@@ -92,7 +92,7 @@ describe("doctor managed npm generation repair", () => {
 
     await expect(
       maybeRepairStaleManagedNpmInstallGenerations({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+        env: { ...process.env, BOT_STATE_DIR: stateDir },
         prompter: { shouldRepair: true },
         stateDir,
       }),
@@ -128,7 +128,7 @@ describe("doctor managed npm generation repair", () => {
           entries: { [PLUGIN_ID]: { enabled: true } },
         },
       },
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, BOT_STATE_DIR: stateDir },
       prompter: { shouldRepair: true },
       stateDir,
     });

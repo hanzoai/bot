@@ -2,10 +2,10 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { Command as CommanderCommand, Option as CommanderOption } from "commander";
 import { resolveStateDir } from "../config/paths.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, BotConfig } from "../config/types.bot.js";
 import { isLoopbackAddress, isSecureWebSocketUrl } from "../gateway/net.js";
 import {
   consumeRootOptionToken,
@@ -14,7 +14,7 @@ import {
 } from "../infra/cli-root-options.js";
 import { isTruthyEnvValue, normalizeEnv } from "../infra/env.js";
 import type { ProxyHandle } from "../infra/net/proxy/proxy-lifecycle.js";
-import { ensureOpenClawCliOnPath } from "../infra/path-env.js";
+import { ensureBotCliOnPath } from "../infra/path-env.js";
 import { assertSupportedRuntime } from "../infra/runtime-guard.js";
 import { tryProcessCwd } from "../infra/safe-cwd.js";
 import type { PluginManifestCommandAliasRegistry } from "../plugins/manifest-command-aliases.js";
@@ -192,7 +192,7 @@ async function tryRunGatewayRunFastPath(
     emitCliBanner(VERSION, { argv });
   }
   const program = new Command();
-  program.name("openclaw");
+  program.name("bot");
   program.enablePositionalOptions();
   program.option("--no-color", "Disable ANSI colors", false);
   program.exitOverride((err) => {
@@ -313,7 +313,7 @@ type BareRootLaunchTarget =
   | {
       kind: "remote-gateway-inference";
       target: {
-        config: OpenClawConfig;
+        config: BotConfig;
         gatewayUrl: string;
         token?: string;
         password?: string;
@@ -346,7 +346,7 @@ async function resolveBareRootLaunchTarget(argv: string[]): Promise<BareRootLaun
 }
 
 async function resolveConfiguredTuiLaunchTarget(
-  config: OpenClawConfig,
+  config: BotConfig,
   options: { hasConfiguredGateway: boolean },
 ): Promise<BareRootLaunchTarget> {
   const gatewayResolution = await resolveReachableGateway(config, options);
@@ -437,7 +437,7 @@ function toReachableGateway(target: GatewayProbeTarget, auth: GatewayProbeAuth):
 }
 
 async function resolveReachableGateway(
-  config: OpenClawConfig,
+  config: BotConfig,
   options: { hasConfiguredGateway: boolean },
 ): Promise<GatewayResolution> {
   const targets = await resolveGatewayProbeTargets(config);
@@ -503,7 +503,7 @@ async function resolveReachableGateway(
 }
 
 async function resolveGatewayProbeAuth(
-  config: OpenClawConfig,
+  config: BotConfig,
   auth: "local" | "remote",
 ): Promise<GatewayProbeAuth> {
   const { resolveGatewayProbeSurfaceAuth } = await import("../gateway/auth-surface-resolution.js");
@@ -524,7 +524,7 @@ async function resolveGatewayProbeAuth(
   return resolved;
 }
 
-async function resolveGatewayProbeTargets(config: OpenClawConfig): Promise<GatewayProbeTarget[]> {
+async function resolveGatewayProbeTargets(config: BotConfig): Promise<GatewayProbeTarget[]> {
   const remoteUrl = normalizeOptionalString(config.gateway?.remote?.url);
   if (normalizeOptionalString(config.gateway?.mode) === "remote" && remoteUrl) {
     const url = await resolveValidatedRemoteGatewayUrl(config);
@@ -548,7 +548,7 @@ function isSafeGatewayProbeTarget(target: GatewayProbeTarget): boolean {
     return isSafeRemoteGatewayProbeUrl(target.url);
   }
   return isSecureWebSocketUrl(target.url, {
-    allowPrivateWs: process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS === "1",
+    allowPrivateWs: process.env.BOT_ALLOW_INSECURE_PRIVATE_WS === "1",
   });
 }
 
@@ -571,7 +571,7 @@ function isSafeRemoteGatewayProbeUrl(url: string): boolean {
     return true;
   }
   return (
-    process.env.OPENCLAW_ALLOW_INSECURE_PRIVATE_WS === "1" &&
+    process.env.BOT_ALLOW_INSECURE_PRIVATE_WS === "1" &&
     isSecureWebSocketUrl(url, { allowPrivateWs: true })
   );
 }
@@ -586,7 +586,7 @@ function isLoopbackGatewayHost(hostname: string): boolean {
   return isLoopbackAddress(hostForIpCheck);
 }
 
-async function resolveValidatedRemoteGatewayUrl(config: OpenClawConfig): Promise<string | null> {
+async function resolveValidatedRemoteGatewayUrl(config: BotConfig): Promise<string | null> {
   try {
     const { buildGatewayConnectionDetailsWithResolvers } =
       await import("../gateway/connection-details.js");
@@ -600,7 +600,7 @@ async function resolveValidatedRemoteGatewayUrl(config: OpenClawConfig): Promise
 }
 
 async function resolveLocalGatewayProbeTargets(
-  config: OpenClawConfig,
+  config: BotConfig,
 ): Promise<GatewayProbeTarget[]> {
   const [
     { resolveGatewayPort },
@@ -615,7 +615,7 @@ async function resolveLocalGatewayProbeTargets(
   ]);
   const gateway = config.gateway;
   const configuredPort = resolveGatewayPort(config);
-  const hasExplicitPort = Boolean(normalizeOptionalString(process.env.OPENCLAW_GATEWAY_PORT));
+  const hasExplicitPort = Boolean(normalizeOptionalString(process.env.BOT_GATEWAY_PORT));
   const activePort = hasExplicitPort ? undefined : await readActiveGatewayLockPort();
   const port = activePort ?? configuredPort;
   // Supplying the selected local port keeps inherited remote URL overrides out
@@ -676,7 +676,7 @@ function pauseNonTtyStdinForCliExit(): void {
 
 export function resolveMissingPluginCommandMessage(
   pluginId: string,
-  config?: OpenClawConfig,
+  config?: BotConfig,
   options?: { registry?: PluginManifestCommandAliasRegistry },
 ): string | null {
   return resolveMissingPluginCommandMessageFromPolicy(
@@ -832,8 +832,8 @@ async function ensureCliEnvProxyDispatcher(): Promise<void> {
 
 function shouldBootstrapCliProxyBeforeFastPath(env: NodeJS.ProcessEnv = process.env): boolean {
   if (
-    isTruthyEnvValue(env.OPENCLAW_DEBUG_PROXY_ENABLED) ||
-    isTruthyEnvValue(env.OPENCLAW_DEBUG_PROXY_REQUIRE)
+    isTruthyEnvValue(env.BOT_DEBUG_PROXY_ENABLED) ||
+    isTruthyEnvValue(env.BOT_DEBUG_PROXY_REQUIRE)
   ) {
     return true;
   }
@@ -872,7 +872,7 @@ function resolveBuiltInMachineOutput(argv: string[]): boolean {
 
 async function resolvePluginMachineOutput(params: {
   argv: string[];
-  config: OpenClawConfig;
+  config: BotConfig;
 }): Promise<boolean> {
   const { primary } = resolveCliArgvInvocation(params.argv);
   if (!primary || isKnownBuiltInCommandRoot(primary)) {
@@ -890,7 +890,7 @@ async function resolvePluginMachineOutput(params: {
 
 async function isPluginCliRoot(params: {
   primary: string;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): Promise<boolean | null> {
   try {
     const { resolvePluginCliRootOwnerIds } = await loadCliRegistryLoaderModule();
@@ -905,7 +905,7 @@ async function isPluginCliRoot(params: {
   }
 }
 
-function createAllowlistAgnosticCliLookupConfig(config: OpenClawConfig): OpenClawConfig {
+function createAllowlistAgnosticCliLookupConfig(config: BotConfig): BotConfig {
   if (!Array.isArray(config.plugins?.allow) || config.plugins.allow.length === 0) {
     return config;
   }
@@ -920,7 +920,7 @@ function createAllowlistAgnosticCliLookupConfig(config: OpenClawConfig): OpenCla
 
 async function resolveCliCommandSurfaceOwner(params: {
   primary: string;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): Promise<string | undefined> {
   const { resolveManifestCliCommandSurfaceOwner } = await loadManifestCommandAliasesRuntimeModule();
   const manifestOwner = resolveManifestCliCommandSurfaceOwner({
@@ -961,7 +961,7 @@ function resolveUnownedCliPrimaryCandidate(argv: string[]): string | null {
 
 async function resolveUnownedCliPrimary(params: {
   argv: string[];
-  config: OpenClawConfig;
+  config: BotConfig;
 }): Promise<string | null> {
   const primary = resolveUnownedCliPrimaryCandidate(params.argv);
   if (!primary) {
@@ -976,7 +976,7 @@ async function resolveUnownedCliPrimary(params: {
 
 async function resolveUnownedCliPrimaryMessage(params: {
   primary: string;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): Promise<string> {
   const { resolveManifestCommandAliasOwner, resolveManifestToolOwner } =
     await loadManifestCommandAliasesRuntimeModule();
@@ -995,7 +995,7 @@ async function resolveUnownedCliPrimaryMessage(params: {
   }
   const suggestion = formatCliCommandSuggestions(params.primary);
   return [
-    `Unknown command: openclaw ${params.primary}. No built-in command or plugin CLI metadata owns "${params.primary}".`,
+    `Unknown command: bot ${params.primary}. No built-in command or plugin CLI metadata owns "${params.primary}".`,
     suggestion,
   ]
     .filter(Boolean)
@@ -1073,7 +1073,7 @@ async function runCliWithPreparedOutputMode(
   }
   const parsedProfile = parseCliProfileArgs(parsedContainer.argv);
   const containerTargetName =
-    parsedContainer.container ?? normalizeOptionalString(process.env.OPENCLAW_CONTAINER) ?? null;
+    parsedContainer.container ?? normalizeOptionalString(process.env.BOT_CONTAINER) ?? null;
   const hasPreHelpValidationError =
     !parsedProfile.ok || (containerTargetName !== null && parsedProfile.profile !== null);
   // Console formatting is a process-wide invariant. Install capture before
@@ -1148,7 +1148,7 @@ async function runCliWithPreparedOutputMode(
   }
   normalizeEnv();
   if (shouldEnsureCliPath(normalizedArgv)) {
-    ensureOpenClawCliOnPath();
+    ensureBotCliOnPath();
   }
 
   // Activate operator-managed proxy routing for network-capable commands.
@@ -1159,9 +1159,9 @@ async function runCliWithPreparedOutputMode(
   let onSigint: (() => void) | null = null;
   let onExit: (() => void) | null = null;
   let unregisterProxySignalExitBarrier: (() => void) | null = null;
-  let bestEffortConfigPromise: Promise<OpenClawConfig> | null = null;
+  let bestEffortConfigPromise: Promise<BotConfig> | null = null;
   const isolateProxyConfigEnv = isGatewayRunInvocation;
-  const readBestEffortCliConfig = async (): Promise<OpenClawConfig> => {
+  const readBestEffortCliConfig = async (): Promise<BotConfig> => {
     if (!bestEffortConfigPromise) {
       bestEffortConfigPromise = import("../config/io.js").then(({ readBestEffortConfig }) =>
         readBestEffortConfig(
@@ -1233,7 +1233,7 @@ async function runCliWithPreparedOutputMode(
     process.once("SIGINT", onSigint);
     process.once("exit", onExit);
   };
-  const replaceStartedProxy = async (config: OpenClawConfig["proxy"]) => {
+  const replaceStartedProxy = async (config: BotConfig["proxy"]) => {
     await stopStartedProxy();
     const { startProxy } = await loadProxyLifecycleModule();
     proxyHandle = await startProxy(config);
@@ -1292,8 +1292,8 @@ async function runCliWithPreparedOutputMode(
     await installConsoleCapture();
 
     // Reject unowned command roots before help/version routing, so that
-    // `openclaw <typo> --help` surfaces the same Unknown command error as
-    // `openclaw <typo>` instead of silently showing generic top-level help.
+    // `bot <typo> --help` surfaces the same Unknown command error as
+    // `bot <typo>` instead of silently showing generic top-level help.
     // Runs after legitimate precomputed help fast paths so known help commands
     // still dispatch normally. See #81077.
     {
@@ -1321,7 +1321,7 @@ async function runCliWithPreparedOutputMode(
       if (bareRootLaunchTarget.kind === "remote-gateway-inference") {
         if (!process.stdin.isTTY || !process.stdout.isTTY) {
           console.error(
-            "Remote Gateway inference setup needs an interactive TTY. Re-run `openclaw` in a terminal connected to this Gateway.",
+            "Remote Gateway inference setup needs an interactive TTY. Re-run `bot` in a terminal connected to this Gateway.",
           );
           process.exitCode = 1;
           return;
@@ -1335,8 +1335,8 @@ async function runCliWithPreparedOutputMode(
         if (!process.stdin.isTTY || !process.stdout.isTTY) {
           console.error(
             bareRootLaunchTarget.classic
-              ? "OpenClaw config is invalid. Run `openclaw doctor --fix` before onboarding."
-              : "Onboarding needs an interactive TTY. Use `openclaw onboard --non-interactive --accept-risk ...` for automation.",
+              ? "Bot config is invalid. Run `bot doctor --fix` before onboarding."
+              : "Onboarding needs an interactive TTY. Use `bot onboard --non-interactive --accept-risk ...` for automation.",
           );
           process.exitCode = 1;
           return;
@@ -1348,7 +1348,7 @@ async function runCliWithPreparedOutputMode(
       if (bareRootLaunchTarget.kind === "tui") {
         if (!process.stdin.isTTY || !process.stdout.isTTY) {
           console.error(
-            "OpenClaw TUI needs an interactive TTY. Use `openclaw agent --local ...` for automation.",
+            "Bot TUI needs an interactive TTY. Use `bot agent --local ...` for automation.",
           );
           process.exitCode = 1;
           return;
@@ -1412,7 +1412,7 @@ async function runCliWithPreparedOutputMode(
     const suppressStartupProgress = hasJsonOutputFlag(parseArgv);
     const { createCliProgress } = await loadProgressModule();
     const startupProgress = createCliProgress({
-      label: "Loading OpenClaw CLI…",
+      label: "Loading Bot CLI…",
       indeterminate: true,
       delayMs: 0,
       ...(suppressStartupProgress ? { enabled: false } : {}),
@@ -1460,20 +1460,20 @@ async function runCliWithPreparedOutputMode(
         }
         if (isBenignUncaughtExceptionError(error)) {
           console.warn(
-            "[openclaw] Non-fatal uncaught exception (continuing):",
+            "[bot] Non-fatal uncaught exception (continuing):",
             formatUncaughtError(error),
           );
           return;
         }
         for (const line of formatCliFailureLines({
-          title: "OpenClaw hit an unexpected runtime error.",
+          title: "Bot hit an unexpected runtime error.",
           error,
           argv: normalizedArgv,
         })) {
           console.error(line);
         }
         for (const message of runFatalErrorHooks({ reason: "uncaught_exception", error })) {
-          console.error("[openclaw]", message);
+          console.error("[bot]", message);
         }
         restoreTerminalState("uncaught exception", { resumeStdinIfPaused: false });
         process.exit(1);

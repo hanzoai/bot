@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { mutateConfigFileWithRetry } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
-import { createOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import type { BotConfig } from "../config/types.bot.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
+import { createBotTestState } from "../test-utils/bot-test-state.js";
 import { createAgent } from "./agent-create.js";
 import {
   DEFAULT_IDENTITY_FILENAME,
@@ -13,7 +13,7 @@ import {
 } from "./workspace.js";
 
 it("keeps a fresh named workspace pending through the first run setup", async () => {
-  const state = await createOpenClawTestState({
+  const state = await createBotTestState({
     layout: "state-only",
     scenario: "minimal",
     label: "named-agent-hatch",
@@ -36,14 +36,14 @@ it("keeps a fresh named workspace pending through the first run setup", async ()
       await fs.readFile(path.join(workspace, DEFAULT_IDENTITY_FILENAME), "utf8"),
     ).not.toContain("Researcher");
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await state.cleanup();
   }
 });
 
 describe("agent roster persistence", () => {
-  async function addWorkerToConfig(config: unknown): Promise<OpenClawConfig> {
-    const state = await createOpenClawTestState({
+  async function addWorkerToConfig(config: unknown): Promise<BotConfig> {
+    const state = await createBotTestState({
       layout: "state-only",
       scenario: "empty",
       label: "agent-roster-write",
@@ -52,9 +52,9 @@ describe("agent roster persistence", () => {
       await state.writeConfig(config);
       const result = await createAgent({ name: "Worker", workspace: state.path("worker") });
       expect(result).toMatchObject({ status: "created", agentId: "worker" });
-      return JSON.parse(await fs.readFile(state.configPath, "utf8")) as OpenClawConfig;
+      return JSON.parse(await fs.readFile(state.configPath, "utf8")) as BotConfig;
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
       await state.cleanup();
     }
   }
@@ -90,7 +90,7 @@ describe("agent roster persistence", () => {
   });
 
   it("preserves a legacy list byte-for-byte during a non-roster mutation", async () => {
-    const state = await createOpenClawTestState({
+    const state = await createBotTestState({
       layout: "state-only",
       scenario: "empty",
       label: "legacy-roster-non-roster-write",
@@ -107,12 +107,12 @@ describe("agent roster persistence", () => {
         },
       });
 
-      const persisted = JSON.parse(await fs.readFile(state.configPath, "utf8")) as OpenClawConfig;
+      const persisted = JSON.parse(await fs.readFile(state.configPath, "utf8")) as BotConfig;
       expect(JSON.stringify(persisted.agents?.list)).toBe(JSON.stringify(list));
       expect(persisted.agents).not.toHaveProperty("entries");
       expect(persisted.gateway?.port).toBe(19001);
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
       await state.cleanup();
     }
   });

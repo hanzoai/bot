@@ -1,17 +1,17 @@
 import type {
-  OpenClawConfig,
+  BotConfig,
   ResolvedTtsPersona,
   TtsProvider,
-} from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { redactSensitiveText } from "openclaw/plugin-sdk/logging-core";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { redactSensitiveText } from "bot/plugin-sdk/logging-core";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import {
   canonicalizeSpeechProviderId,
   getSpeechProvider,
   type SpeechProviderConfig,
   type SpeechProviderOverrides,
-} from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/speech-core";
 import type { VoiceModelRef, VoiceProviderCandidate } from "../voice-models.js";
 import {
   getResolvedSpeechProviderConfigForVoiceModel,
@@ -83,7 +83,7 @@ type TtsProviderReadyResolution =
 
 function resolveReadySpeechProvider(params: {
   provider: TtsProvider;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   config: ResolvedTtsConfig;
   persona?: ResolvedTtsPersona;
   voiceModel?: VoiceModelRef;
@@ -155,7 +155,7 @@ function resolveReadySpeechProvider(params: {
 async function prepareSpeechSynthesis(params: {
   provider: NonNullable<ReturnType<typeof getSpeechProvider>>;
   text: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   providerConfig: SpeechProviderConfig;
   providerOverrides?: SpeechProviderOverrides;
   persona?: ResolvedTtsPersona;
@@ -197,7 +197,7 @@ async function prepareSpeechSynthesis(params: {
 
 export function resolveTtsRequestSetup(params: {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prefsPath?: string;
   providerOverride?: TtsProvider;
   disableFallback?: boolean;
@@ -206,7 +206,7 @@ export function resolveTtsRequestSetup(params: {
   accountId?: string;
 }):
   | {
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       config: ResolvedTtsConfig;
       persona?: ResolvedTtsPersona;
       providers: VoiceProviderCandidate[];
@@ -246,7 +246,7 @@ type TtsProviderOperation<TSynthesis> =
       kind: "ready";
       synthesize: (params: {
         prepared: PreparedSpeechSynthesis;
-        cfg: OpenClawConfig;
+        cfg: BotConfig;
         target: "audio-file" | "voice-note" | "telephony";
         timeoutMs: number;
       }) => Promise<TSynthesis>;
@@ -269,7 +269,7 @@ type TtsProviderSuccess<TSynthesis> = {
 };
 
 export async function executeTtsProviderAttempts<TSynthesis, TResult>(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   config: ResolvedTtsConfig;
   persona?: ResolvedTtsPersona;
   providers: VoiceProviderCandidate[];

@@ -5,7 +5,7 @@ import {
   errorShape,
 } from "../../../packages/gateway-protocol/src/index.js";
 import { listAgentIds, resolveAgentDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 
 type ModelAuthAgentScopeResult =
@@ -14,7 +14,7 @@ type ModelAuthAgentScopeResult =
 
 /** Resolves model-auth RPC scope without letting explicit garbage reach the default store. */
 export function resolveModelAuthAgentScope(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   requestedAgentId: unknown,
 ): ModelAuthAgentScopeResult {
   const defaultAgentId = resolveDefaultAgentId(cfg);

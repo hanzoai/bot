@@ -7,13 +7,13 @@ import { VERSION } from "../version.js";
 import { createConfigIO } from "./io.js";
 import { normalizeExecSafeBinProfilesInConfig } from "./normalize-exec-safe-bin.js";
 import { withTempHome } from "./test-helpers.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { BotConfig } from "./types.bot.js";
 
 async function writeConfig(
   home: string,
-  dirname: ".openclaw",
+  dirname: ".bot",
   port: number,
-  filename = "openclaw.json",
+  filename = "bot.json",
 ) {
   const dir = path.join(home, dirname);
   await fs.mkdir(dir, { recursive: true });
@@ -49,46 +49,46 @@ describe("config io paths", () => {
           },
         },
       },
-    } as OpenClawConfig);
+    } as BotConfig);
     whatsappSharedAccessDefaults = migrated.config.channels?.whatsapp?.accounts?.default;
   });
 
-  it("uses ~/.openclaw/openclaw.json when config exists", async () => {
+  it("uses ~/.hanzoai/bot.json when config exists", async () => {
     await withTempHome(async (home) => {
-      const configPath = await writeConfig(home, ".openclaw", 19001);
+      const configPath = await writeConfig(home, ".bot", 19001);
       const io = createIoForHome(home);
       expect(io.configPath).toBe(configPath);
     });
   });
 
-  it("defaults to ~/.openclaw/openclaw.json when config is missing", async () => {
+  it("defaults to ~/.hanzoai/bot.json when config is missing", async () => {
     await withTempHome(async (home) => {
       const io = createIoForHome(home);
-      expect(io.configPath).toBe(path.join(home, ".openclaw", "openclaw.json"));
+      expect(io.configPath).toBe(path.join(home, ".bot", "bot.json"));
     });
   });
 
-  it("uses OPENCLAW_HOME for default config path", async () => {
+  it("uses BOT_HOME for default config path", async () => {
     await withTempHome(async (home) => {
       const io = createConfigIO({
-        env: { OPENCLAW_HOME: path.join(home, "svc-home") } as NodeJS.ProcessEnv,
+        env: { BOT_HOME: path.join(home, "svc-home") } as NodeJS.ProcessEnv,
         homedir: () => path.join(home, "ignored-home"),
       });
-      expect(io.configPath).toBe(path.join(home, "svc-home", ".openclaw", "openclaw.json"));
+      expect(io.configPath).toBe(path.join(home, "svc-home", ".bot", "bot.json"));
     });
   });
 
-  it("honors explicit OPENCLAW_CONFIG_PATH override", async () => {
+  it("honors explicit BOT_CONFIG_PATH override", async () => {
     await withTempHome(async (home) => {
-      const customPath = await writeConfig(home, ".openclaw", 20002, "custom.json");
-      const io = createIoForHome(home, { OPENCLAW_CONFIG_PATH: customPath } as NodeJS.ProcessEnv);
+      const customPath = await writeConfig(home, ".bot", 20002, "custom.json");
+      const io = createIoForHome(home, { BOT_CONFIG_PATH: customPath } as NodeJS.ProcessEnv);
       expect(io.configPath).toBe(customPath);
     });
   });
 
   it("logs validation warnings with real line breaks", async () => {
     await withTempHome(async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".bot", "bot.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(
         configPath,
@@ -129,7 +129,7 @@ describe("config io paths", () => {
 
   it("logs each warning payload once until warnings clear", async () => {
     await withTempHome(async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".bot", "bot.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       const logger = {
         error: vi.fn(),
@@ -194,9 +194,9 @@ describe("config io paths", () => {
     });
   });
 
-  it("explains what to check when config was written by a newer OpenClaw", async () => {
+  it("explains what to check when config was written by a newer Bot", async () => {
     await withTempHome(async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".bot", "bot.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(
         configPath,
@@ -224,9 +224,9 @@ describe("config io paths", () => {
 
       expect(logger.warn).toHaveBeenCalledWith(
         [
-          `Your OpenClaw config was written by version 9999.1.1, but this command is running ${VERSION}.`,
-          "Check: `openclaw --version`, `which openclaw`, and `openclaw gateway status --deep`.",
-          "If unexpected, update PATH so `openclaw` points to the version you want, or reinstall the Gateway service from that same OpenClaw install.",
+          `Your Bot config was written by version 9999.1.1, but this command is running ${VERSION}.`,
+          "Check: `bot --version`, `which bot`, and `bot gateway status --deep`.",
+          "If unexpected, update PATH so `bot` points to the version you want, or reinstall the Gateway service from that same Bot install.",
         ].join("\n"),
       );
     });
@@ -234,7 +234,7 @@ describe("config io paths", () => {
 
   it("does not warn about newer config during internal update handoff reads", async () => {
     await withTempHome(async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".bot", "bot.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(
         configPath,
@@ -254,7 +254,7 @@ describe("config io paths", () => {
 
       const io = createConfigIO({
         configPath,
-        env: { HOME: home, OPENCLAW_UPDATE_POST_CORE: "1" } as NodeJS.ProcessEnv,
+        env: { HOME: home, BOT_UPDATE_POST_CORE: "1" } as NodeJS.ProcessEnv,
         homedir: () => home,
         logger,
       });

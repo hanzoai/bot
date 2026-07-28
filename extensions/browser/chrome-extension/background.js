@@ -5,15 +5,15 @@ import {
   waitForCondition,
 } from "./modules/page-share-core.js";
 import { createPageShareRelay } from "./modules/page-share-relay.js";
-// OpenClaw extension service worker.
+// Bot extension service worker.
 //
-// Thin transport between the OpenClaw extension relay (loopback WebSocket) and
+// Thin transport between the Bot extension relay (loopback WebSocket) and
 // chrome.debugger. All CDP target synthesis lives server-side in the relay
 // bridge; this worker only attaches tabs, forwards frames, and keeps the
-// OpenClaw tab group in sync. Membership in that group is the user-visible
-// consent boundary: only grouped tabs are reported to (and driven by) OpenClaw.
+// Bot tab group in sync. Membership in that group is the user-visible
+// consent boundary: only grouped tabs are reported to (and driven by) Bot.
 import {
-  OPENCLAW_TAB_GROUP_TITLE,
+  BOT_TAB_GROUP_TITLE,
   buildRelayWsProtocols,
   nearestGroupColor,
   parsePairingString,
@@ -33,8 +33,8 @@ const COPILOT_RELAY_LABEL = {
   on: "Browser relay connected",
   error: "Browser relay reconnecting",
 };
-const RELAY_WATCHDOG_ALARM = "openclaw-relay-watchdog";
-const RELAY_OPENING_DEADLINE_ALARM = "openclaw-relay-opening-deadline";
+const RELAY_WATCHDOG_ALARM = "bot-relay-watchdog";
+const RELAY_OPENING_DEADLINE_ALARM = "bot-relay-opening-deadline";
 const RELAY_OPENING_TIMEOUT_MS = 30_000;
 
 /** @type {WebSocket|null} */
@@ -118,16 +118,16 @@ async function getCopilotConfig() {
 // Tab group management (the consent boundary)
 // ---------------------------------------------------------------------------
 
-async function findOpenClawGroups() {
+async function findBotGroups() {
   try {
-    return await chrome.tabGroups.query({ title: OPENCLAW_TAB_GROUP_TITLE });
+    return await chrome.tabGroups.query({ title: BOT_TAB_GROUP_TITLE });
   } catch {
     return [];
   }
 }
 
 async function listSharedTabs() {
-  const groups = await findOpenClawGroups();
+  const groups = await findBotGroups();
   const tabs = [];
   for (const group of groups) {
     const groupTabs = await chrome.tabs.query({ groupId: group.id });
@@ -136,9 +136,9 @@ async function listSharedTabs() {
   return tabs.filter((tab) => typeof tab.id === "number");
 }
 
-async function addTabToOpenClawGroup(tabId) {
+async function addTabToBotGroup(tabId) {
   const tab = await chrome.tabs.get(tabId);
-  const groups = await findOpenClawGroups();
+  const groups = await findBotGroups();
   const sameWindowGroup = groups.find((group) => group.windowId === tab.windowId);
   if (sameWindowGroup) {
     await chrome.tabs.group({ tabIds: [tabId], groupId: sameWindowGroup.id });
@@ -147,7 +147,7 @@ async function addTabToOpenClawGroup(tabId) {
   const { groupColor } = await getConfig();
   const groupId = await chrome.tabs.group({ tabIds: [tabId] });
   await chrome.tabGroups.update(groupId, {
-    title: OPENCLAW_TAB_GROUP_TITLE,
+    title: BOT_TAB_GROUP_TITLE,
     color: groupColor,
   });
 }
@@ -158,7 +158,7 @@ async function focusWindowForTab(tab) {
   }
 }
 
-async function removeTabFromOpenClawGroup(tabId) {
+async function removeTabFromBotGroup(tabId) {
   try {
     await chrome.tabs.ungroup([tabId]);
   } catch {
@@ -171,13 +171,13 @@ async function isTabShared(tabId) {
   return shared.some((tab) => tab.id === tabId);
 }
 
-async function isOpenClawGroupId(groupId) {
+async function isBotGroupId(groupId) {
   if (!Number.isInteger(groupId) || groupId < 0) {
     return false;
   }
   try {
     const group = await chrome.tabGroups.get(groupId);
-    return group.title === OPENCLAW_TAB_GROUP_TITLE;
+    return group.title === BOT_TAB_GROUP_TITLE;
   } catch {
     return false;
   }
@@ -235,7 +235,7 @@ async function attachDebugger(tabId) {
   const attach = (async () => {
     assertAccess();
     if (!(await isTabShared(tabId))) {
-      throw new Error(`tab ${tabId} is not in the ${OPENCLAW_TAB_GROUP_TITLE} tab group`);
+      throw new Error(`tab ${tabId} is not in the ${BOT_TAB_GROUP_TITLE} tab group`);
     }
     assertAccess();
     if (!attachedTabs.has(tabId)) {
@@ -335,7 +335,7 @@ chrome.debugger.onDetach.addListener((source, reason) => {
     // The user hit "Cancel" on Chrome's debugging infobar: treat it as a
     // revocation and pull the tab out of the shared group so the agent does
     // not immediately re-attach.
-    void removeTabFromOpenClawGroup(source.tabId).then(scheduleTabsSync);
+    void removeTabFromBotGroup(source.tabId).then(scheduleTabsSync);
   }
 });
 
@@ -386,7 +386,7 @@ async function handleRelayCommand(msg) {
       }
       case "createTab": {
         const tab = await chrome.tabs.create({ url: msg.url, active: msg.background !== true });
-        await addTabToOpenClawGroup(tab.id);
+        await addTabToBotGroup(tab.id);
         if (msg.focus === true) {
           await focusWindowForTab(tab);
         }
@@ -511,7 +511,7 @@ async function ensureRelayReady() {
   }
 }
 
-async function sendPageToOpenClaw(tabId, note) {
+async function sendPageToBot(tabId, note) {
   await ensureRelayReady();
   const tab = await chrome.tabs.get(tabId);
   const capture = await capturePageShare(tab);
@@ -545,14 +545,14 @@ function withShareBadge(promise) {
 }
 
 function sendPageFromChromeEntry(tabId) {
-  return withShareBadge(sendPageToOpenClaw(tabId, ""));
+  return withShareBadge(sendPageToBot(tabId, ""));
 }
 
 async function installPageShareContextMenu() {
   await chrome.contextMenus.removeAll();
   chrome.contextMenus.create({
-    id: "openclaw-send-page",
-    title: "Send page to OpenClaw",
+    id: "bot-send-page",
+    title: "Send page to Bot",
     contexts: ["page", "selection"],
   });
 }
@@ -560,7 +560,7 @@ async function installPageShareContextMenu() {
 copilot = createCopilotController({
   getConfig: getCopilotConfig,
   isTabShared,
-  addTabToOpenClawGroup,
+  addTabToBotGroup,
   attachDebugger,
   detachDebugger,
   revokeDebugger: revokeCopilotDebugger,
@@ -674,11 +674,11 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         }
         if (await isTabShared(tabId)) {
           await detachDebugger(tabId);
-          await removeTabFromOpenClawGroup(tabId);
+          await removeTabFromBotGroup(tabId);
           scheduleTabsSync();
           sendResponse({ ok: true, shared: false });
         } else {
-          await addTabToOpenClawGroup(tabId);
+          await addTabToBotGroup(tabId);
           scheduleTabsSync();
           sendResponse({ ok: true, shared: true });
         }
@@ -689,13 +689,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         sendResponse({ shared: await isTabShared(msg.tabId) });
         return;
       }
-      case "sendPageToOpenClaw": {
+      case "sendPageToBot": {
         if (typeof msg.tabId !== "number") {
           sendResponse({ ok: false, error: "No tab." });
           return;
         }
         try {
-          await sendPageToOpenClaw(msg.tabId, msg.note);
+          await sendPageToBot(msg.tabId, msg.note);
           sendResponse({ ok: true });
         } catch (error) {
           sendErrorResponse(sendResponse, error);
@@ -733,7 +733,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   }
   // changeInfo.groupId is the event-time membership snapshot. Preserve a
   // revocation even if a later event re-shares the tab before async cleanup.
-  void isOpenClawGroupId(changeInfo.groupId).then((shared) =>
+  void isBotGroupId(changeInfo.groupId).then((shared) =>
     copilot.onConsentChanged(tabId, { revoked: !shared }),
   );
 });
@@ -755,7 +755,7 @@ chrome.commands.onCommand.addListener((command) => {
     .then(([tab]) => (typeof tab?.id === "number" ? sendPageFromChromeEntry(tab.id) : undefined));
 });
 chrome.contextMenus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId !== "openclaw-send-page" || typeof tab?.id !== "number") {
+  if (info.menuItemId !== "bot-send-page" || typeof tab?.id !== "number") {
     return;
   }
   const selection = info.selectionText?.trim() ?? "";

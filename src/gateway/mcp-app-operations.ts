@@ -22,7 +22,7 @@ import {
   getMcpAppViewLeaseForSession,
   type McpAppViewLease,
 } from "../agents/mcp-ui-resource.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { logWarn } from "../logger.js";
 import { restoreMcpAppView } from "./mcp-app-reconstruction.js";
@@ -112,7 +112,7 @@ async function requireCallableTool(
 export async function resolveMcpAppActiveView(params: {
   sessionKey: string;
   viewId: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): Promise<McpAppActiveView> {
   if (params.cfg && params.cfg.mcp?.apps?.enabled !== true) {
     throw new Error("MCP App runtime is unavailable");

@@ -1,6 +1,6 @@
 // Discord message processing coverage split by cohesive behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import { DEFAULT_EMOJIS, DEFAULT_TIMING } from "openclaw/plugin-sdk/channel-feedback";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { DEFAULT_EMOJIS, DEFAULT_TIMING } from "bot/plugin-sdk/channel-feedback";
 import { describe, expect, it, vi } from "vitest";
 import {
   BASE_CHANNEL_ROUTE,
@@ -229,7 +229,7 @@ describe("processDiscordMessage ack reactions", () => {
         effectiveWasMentioned: false,
         cfg: {
           messages: { groupChat: { visibleReplies: "message_tool" } },
-          session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+          session: { store: "/tmp/bot-discord-process-test-sessions.json" },
         },
         route: BASE_CHANNEL_ROUTE,
       });
@@ -390,7 +390,7 @@ describe("processDiscordMessage ack reactions", () => {
             timing: { debounceMs: 0 },
           },
         },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/bot-discord-process-test-sessions.json" },
       },
     });
 
@@ -421,7 +421,7 @@ describe("processDiscordMessage ack reactions", () => {
             timing: { debounceMs: 0 },
           },
         },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/bot-discord-process-test-sessions.json" },
       },
     });
 
@@ -444,7 +444,7 @@ describe("processDiscordMessage ack reactions", () => {
             enabled: false,
           },
         },
-        session: { store: "/tmp/openclaw-discord-process-test-sessions.json" },
+        session: { store: "/tmp/bot-discord-process-test-sessions.json" },
       },
     });
 

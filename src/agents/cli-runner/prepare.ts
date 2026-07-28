@@ -1,11 +1,11 @@
-import { ensureSystemPromptCacheBoundary } from "@openclaw/ai/internal/shared";
+import { ensureSystemPromptCacheBoundary } from "@hanzo/bot-ai/internal/shared";
 /**
  * Prepares CLI backend run context: backend config, prompts, bootstrap context,
  * MCP, auth epoch, and reusable session metadata.
  */
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   assertContextEngineHostSupport,
   buildGenericCliContextEngineHostSupport,
@@ -27,7 +27,7 @@ import {
   resolveMcpLoopbackPolicyTools,
   resolveMcpLoopbackScopedTools,
 } from "../../gateway/mcp-http.runtime.js";
-import { buildSystemAgentToolsMcpServerConfig } from "../../mcp/openclaw-tools-serve-config.js";
+import { buildSystemAgentToolsMcpServerConfig } from "../../mcp/bot-tools-serve-config.js";
 import type { CliBackendConfig } from "../../plugins/cli-backend.types.js";
 import type {
   CliBackendAuthEpochMode,
@@ -139,7 +139,7 @@ function resolveClaudeCliContextModelId(modelId: string): string {
   return CLAUDE_CLI_CONTEXT_MODEL_ALIASES[lower] ?? trimmed;
 }
 type RunCliAgentPrepareParams = RunCliAgentParams & {
-  /** Ring-zero tool transport supplied only by the OpenClaw orchestrator. */
+  /** Ring-zero tool transport supplied only by the Bot orchestrator. */
   systemAgentTool?: import("../tools/system-agent-tool.js").SystemAgentToolOptions;
 };
 
@@ -156,9 +156,9 @@ const prepareDeps = {
   revokeMcpLoopbackClientGrant,
   resolveMcpLoopbackPolicyTools,
   resolveMcpLoopbackScopedTools,
-  resolveOpenClawReferencePaths: async (
-    params: Parameters<typeof import("../docs-path.js").resolveOpenClawReferencePaths>[0],
-  ) => (await import("../docs-path.js")).resolveOpenClawReferencePaths(params),
+  resolveBotReferencePaths: async (
+    params: Parameters<typeof import("../docs-path.js").resolveBotReferencePaths>[0],
+  ) => (await import("../docs-path.js")).resolveBotReferencePaths(params),
   prepareClaudeCliSkillsPlugin,
   claudeCliSessionTranscriptHasContent,
   claudeCliSessionTranscriptHasOrphanedToolUse,
@@ -195,7 +195,7 @@ function buildCliSessionDriftUserContext(
   if (reusableCliSession.mode !== "reuse-with-drift") {
     return undefined;
   }
-  return `OpenClaw resumed this CLI session after prompt content changed. Follow the current turn's instructions; changed=${reusableCliSession.drift.reasons.join(",")}.`;
+  return `Bot resumed this CLI session after prompt content changed. Follow the current turn's instructions; changed=${reusableCliSession.drift.reasons.join(",")}.`;
 }
 
 function prependCliSessionDriftUserContext(
@@ -306,7 +306,7 @@ function shouldSkipLocalCliCredentialEpoch(params: {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.cliRunnerPrepareTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.cliRunnerPrepareTestApi")] = {
     setCliRunnerPrepareTestDeps: (overrides: Record<string, unknown>) => {
       setCliRunnerPrepareTestDeps(overrides as Partial<typeof prepareDeps>);
     },
@@ -349,7 +349,7 @@ export async function prepareCliRunContext(
           ...runConfig.agents,
           entries: { [selectedOwner]: { default: true } },
         },
-      } satisfies OpenClawConfig);
+      } satisfies BotConfig);
   const started = Date.now();
   const executionMode = params.executionMode ?? "agent";
   const isSideQuestion = executionMode === "side-question";
@@ -389,16 +389,16 @@ export async function prepareCliRunContext(
       params = { ...params, toolsAllow: undefined };
     } else {
       runtimeToolsAllowPolicy = [...params.toolsAllow];
-      const fallbackOpenClawTools = uniqueStrings(
+      const fallbackBotTools = uniqueStrings(
         expandToolGroups(params.toolsAllow)
           .map((toolName) => normalizeToolName(toolName))
           .filter(Boolean),
       );
       if (
-        fallbackOpenClawTools.includes("write") &&
-        !fallbackOpenClawTools.includes("apply_patch")
+        fallbackBotTools.includes("write") &&
+        !fallbackBotTools.includes("apply_patch")
       ) {
-        fallbackOpenClawTools.push("apply_patch");
+        fallbackBotTools.push("apply_patch");
       }
       params = {
         ...params,
@@ -407,7 +407,7 @@ export async function prepareCliRunContext(
           native: [],
           // Preserve the prior normalized fallback for modes without a catalog;
           // catalog-backed paths replace it with exact names below.
-          openClaw: fallbackOpenClawTools,
+          bot: fallbackBotTools,
         },
       };
     }
@@ -425,7 +425,7 @@ export async function prepareCliRunContext(
       ...params,
       cliToolAvailability: {
         native: params.cliToolAvailability.native,
-        openClaw: [],
+        bot: [],
       },
     };
   }
@@ -441,7 +441,7 @@ export async function prepareCliRunContext(
     // Cron persists this verbatim and failure alerts truncate at 200 characters,
     // so keep the upgrade recovery and fail-closed outcome compact.
     throw new Error(
-      `CLI backend "${backendResolved.id}" cannot enforce this run's tool cap. Upgrade its plugin and retry; if current, ask its maintainer to add exact-cap support. OpenClaw did not start the run.`,
+      `CLI backend "${backendResolved.id}" cannot enforce this run's tool cap. Upgrade its plugin and retry; if current, ask its maintainer to add exact-cap support. Bot did not start the run.`,
     );
   }
   const sideQuestionDisablesNativeTools =
@@ -649,7 +649,7 @@ export async function prepareCliRunContext(
         }),
       });
   // Mirror the embedded runner's bootstrap routing for backends that transport
-  // OpenClaw's system prompt. Only a declared native-tool backend can complete
+  // Bot's system prompt. Only a declared native-tool backend can complete
   // the file-based ritual; other backends receive limited guidance.
   const canonicalWorkspace = resolveUserPath(
     resolveAgentWorkspaceDir(params.config ?? {}, workspaceResolution.agentId),
@@ -702,9 +702,9 @@ export async function prepareCliRunContext(
     seenSignatures: params.bootstrapPromptWarningSignaturesSeen,
     previousSignature: params.bootstrapPromptWarningSignature,
   });
-  // Ring-zero OpenClaw runs replace the bundle MCP surface entirely: no
+  // Ring-zero Bot runs replace the bundle MCP surface entirely: no
   // loopback server, no plugin/user servers. A selectable backend also removes
-  // its native tools, leaving only this openclaw stdio server.
+  // its native tools, leaving only this bot stdio server.
   const systemAgentMcpConfig = internalParams.systemAgentTool
     ? buildSystemAgentToolsMcpServerConfig(internalParams.systemAgentTool)
     : undefined;
@@ -720,7 +720,7 @@ export async function prepareCliRunContext(
       await prepareDeps.ensureMcpLoopbackServer();
     } catch (error) {
       throw new Error(
-        `Bundled MCP is enabled, but the OpenClaw MCP loopback server failed to start: ${String(error)}`,
+        `Bundled MCP is enabled, but the Bot MCP loopback server failed to start: ${String(error)}`,
         { cause: error },
       );
     }
@@ -728,7 +728,7 @@ export async function prepareCliRunContext(
   }
   if (bundleMcpEnabled && !mcpLoopbackRuntime) {
     throw new Error(
-      "Bundled MCP is enabled, but the OpenClaw MCP loopback server did not publish a runtime after startup.",
+      "Bundled MCP is enabled, but the Bot MCP loopback server did not publish a runtime after startup.",
     );
   }
   const mcpDeliveryCaptureEnabled = bundleMcpEnabled && Boolean(mcpLoopbackRuntime);
@@ -751,7 +751,7 @@ export async function prepareCliRunContext(
         })
       : undefined;
   const requestedLoopbackToolsAllow =
-    runtimeToolsAllowPolicy ?? params.cliToolAvailability?.openClaw;
+    runtimeToolsAllowPolicy ?? params.cliToolAvailability?.bot;
   const mcpProjectionContext =
     mcpContextBase && requestedLoopbackToolsAllow !== undefined
       ? { ...mcpContextBase, toolsAllow: [...requestedLoopbackToolsAllow] }
@@ -769,7 +769,7 @@ export async function prepareCliRunContext(
       ...params,
       cliToolAvailability: {
         native: [],
-        openClaw: projectedTools.map((tool) => tool.name),
+        bot: projectedTools.map((tool) => tool.name),
       },
     };
   }
@@ -779,7 +779,7 @@ export async function prepareCliRunContext(
   // user/plugin MCP servers must not be merged into the run's config at all.
   // The loopback server (scoped by the grant allowlist) becomes the complete
   // tool universe for the run.
-  const restrictedLoopbackToolsAllow = params.cliToolAvailability?.openClaw;
+  const restrictedLoopbackToolsAllow = params.cliToolAvailability?.bot;
   const mcpGrantContext =
     mcpContextBase && restrictedLoopbackToolsAllow !== undefined
       ? { ...mcpContextBase, toolsAllow: [...restrictedLoopbackToolsAllow] }
@@ -789,7 +789,7 @@ export async function prepareCliRunContext(
         JSON.stringify([
           baseExtraSystemPromptHash ?? null,
           params.cliToolAvailability.native.toSorted(),
-          params.cliToolAvailability.openClaw.toSorted(),
+          params.cliToolAvailability.bot.toSorted(),
         ]),
       )
     : baseExtraSystemPromptHash;
@@ -863,8 +863,8 @@ export async function prepareCliRunContext(
       env:
         mcpLoopbackRuntime && mcpClientGrant
           ? {
-              OPENCLAW_MCP_TOKEN: mcpClientGrant.token,
-              OPENCLAW_MCP_CLI_CAPTURE_KEY: "",
+              BOT_MCP_TOKEN: mcpClientGrant.token,
+              BOT_MCP_CLI_CAPTURE_KEY: "",
             }
           : undefined,
       warn: (message) => cliBackendLog.warn(message),
@@ -1096,16 +1096,16 @@ export async function prepareCliRunContext(
         `cli session reset: provider=${params.provider} reason=${invalidatedReason}`,
       );
     }
-    let openClawHistoryMessages: unknown[] | undefined;
-    const loadOpenClawHistoryMessages = async () => {
-      openClawHistoryMessages ??= await loadCliSessionHistoryMessages({
+    let botHistoryMessages: unknown[] | undefined;
+    const loadBotHistoryMessages = async () => {
+      botHistoryMessages ??= await loadCliSessionHistoryMessages({
         sessionId: params.sessionId,
         sessionFile: params.sessionFile,
         sessionKey: params.sessionKey,
         agentId: params.agentId,
         config: params.config,
       });
-      return openClawHistoryMessages;
+      return botHistoryMessages;
     };
     const heartbeatPrompt =
       isSideQuestion || params.bootstrapContextRunKind === "commitment-only"
@@ -1115,9 +1115,9 @@ export async function prepareCliRunContext(
             agentId: sessionAgentId,
             defaultAgentId,
           });
-    const openClawReferences = isSideQuestion
+    const botReferences = isSideQuestion
       ? { docsPath: null, sourcePath: null }
-      : await prepareDeps.resolveOpenClawReferencePaths({
+      : await prepareDeps.resolveBotReferencePaths({
           workspaceDir,
           argv1: process.argv[1],
           cwd,
@@ -1159,8 +1159,8 @@ export async function prepareCliRunContext(
           runtimeCapabilities,
           ownerNumbers: params.ownerNumbers,
           heartbeatPrompt,
-          docsPath: openClawReferences.docsPath ?? undefined,
-          sourcePath: openClawReferences.sourcePath ?? undefined,
+          docsPath: botReferences.docsPath ?? undefined,
+          sourcePath: botReferences.sourcePath ?? undefined,
           skillsPrompt: systemPromptSkillsPrompt,
           tools: promptTools,
           contextFiles,
@@ -1189,7 +1189,7 @@ export async function prepareCliRunContext(
         const hookResult = await resolvePromptBuildHookResult({
           config: params.config ?? getRuntimeConfig(),
           prompt: params.prompt,
-          messages: await loadOpenClawHistoryMessages(),
+          messages: await loadBotHistoryMessages(),
           hookCtx: {
             runId: params.runId,
             agentId: sessionAgentId,
@@ -1263,11 +1263,11 @@ export async function prepareCliRunContext(
       backendResolved.config.reseedFromRawTranscriptWhenUncompacted === true;
     const rawTranscriptReseedReason = reusableCliSessionId ? "session-expired" : invalidatedReason;
     // Node placement keeps this: the history prompt is built from the
-    // gateway-side OpenClaw transcript, so a fresh remote CLI session still
+    // gateway-side Bot transcript, so a fresh remote CLI session still
     // receives prior conversation context via stdin.
-    const shouldPrepareOpenClawHistoryPrompt =
+    const shouldPrepareBotHistoryPrompt =
       !isSideQuestion && (!reusableCliSessionId || allowRawTranscriptReseed);
-    const openClawHistoryPrompt = shouldPrepareOpenClawHistoryPrompt
+    const botHistoryPrompt = shouldPrepareBotHistoryPrompt
       ? buildCliSessionHistoryPrompt({
           messages: await loadCliSessionReseedMessages({
             sessionId: params.sessionId,
@@ -1430,7 +1430,7 @@ export async function prepareCliRunContext(
       systemPromptReport,
       claudeSkillsPluginArgs: claudeSkillsPlugin.args,
       bootstrapPromptWarningLines: bootstrapPromptWarning.lines,
-      ...(openClawHistoryPrompt ? { openClawHistoryPrompt } : {}),
+      ...(botHistoryPrompt ? { botHistoryPrompt } : {}),
       heartbeatPrompt,
       authEpoch,
       authBindingFingerprint,

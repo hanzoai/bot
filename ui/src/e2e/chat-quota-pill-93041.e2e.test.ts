@@ -207,7 +207,7 @@ describeE2e("Control UI #93041 desktop chat quota popover (mocked Gateway E2E)",
     try {
       await page.locator(".agent-chat__composer-controls").first().waitFor({ state: "visible" });
       await page.waitForFunction(() => {
-        const pane = document.querySelector("openclaw-chat-pane") as
+        const pane = document.querySelector("bot-chat-pane") as
           | (HTMLElement & {
               state?: { modelAuthStatusResult?: { providers?: unknown[] } | null };
             })

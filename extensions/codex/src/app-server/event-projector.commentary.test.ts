@@ -166,18 +166,18 @@ describe("CodexAppServerEventProjector commentary projection", () => {
     expect(result.assistantTexts).toEqual(["final answer"]);
     const commentary = result.messagesSnapshot.find(
       (message) =>
-        (message as { openclawStreamFallback?: { itemId?: unknown } }).openclawStreamFallback
+        (message as { botStreamFallback?: { itemId?: unknown } }).botStreamFallback
           ?.itemId === "msg-commentary",
     );
     expect(commentary).toMatchObject({
       role: "assistant",
       content: [{ type: "text", text: "Checking the app-server stream" }],
-      openclawStreamFallback: {
+      botStreamFallback: {
         replacementText: "Checking the app-server stream",
         source: "segment",
         itemId: "msg-commentary",
       },
-      __openclaw: { mirrorIdentity: `${TURN_ID}:commentary:msg-commentary` },
+      __bot: { mirrorIdentity: `${TURN_ID}:commentary:msg-commentary` },
     });
     expect((commentary as { phase?: unknown } | undefined)?.phase).toBeUndefined();
   });
@@ -204,7 +204,7 @@ describe("CodexAppServerEventProjector commentary projection", () => {
     expect(
       result.messagesSnapshot.some(
         (message) =>
-          (message as { openclawStreamFallback?: { itemId?: unknown } }).openclawStreamFallback
+          (message as { botStreamFallback?: { itemId?: unknown } }).botStreamFallback
             ?.itemId === "msg-commentary",
       ),
     ).toBe(false);
@@ -255,7 +255,7 @@ describe("CodexAppServerEventProjector commentary projection", () => {
 
     const result = projector.buildResult(buildEmptyToolTelemetry());
     const identities = result.messagesSnapshot.flatMap((message) => {
-      const identity = (message as { __openclaw?: { mirrorIdentity?: unknown } })["__openclaw"]
+      const identity = (message as { __bot?: { mirrorIdentity?: unknown } })["__bot"]
         ?.mirrorIdentity;
       return typeof identity === "string" &&
         (identity.includes(":commentary:") || identity.includes(":tool:"))

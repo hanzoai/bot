@@ -1,6 +1,6 @@
 // Duplicate block reply tests cover repeated text_end and message_end events
 // from providers that replay assistant snapshots.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import {
   createStubSessionHarness,

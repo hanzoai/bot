@@ -1,5 +1,5 @@
 // Nostr plugin module owns durable ingress identity and legacy-state migration.
-import type { ChannelIngressQueue } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelIngressQueue } from "bot/plugin-sdk/channel-outbound";
 
 export const NOSTR_INGRESS_PAYLOAD_VERSION = 1;
 

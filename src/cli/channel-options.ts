@@ -1,5 +1,5 @@
 // CLI channel option formatter backed by generated startup metadata when available.
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { readCliStartupMetadata } from "./startup-metadata.js";
 
 let precomputedChannelOptions: string[] | null | undefined;
@@ -42,6 +42,6 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.cliChannelOptionsTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.cliChannelOptionsTestApi")] =
     testing;
 }

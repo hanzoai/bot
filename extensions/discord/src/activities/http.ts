@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { logError } from "openclaw/plugin-sdk/logging-core";
-import { resolveRequestClientIp } from "openclaw/plugin-sdk/webhook-ingress";
+import { logError } from "bot/plugin-sdk/logging-core";
+import { resolveRequestClientIp } from "bot/plugin-sdk/webhook-ingress";
 import {
   readJsonBodyWithLimit,
   WEBHOOK_BODY_READ_DEFAULTS,
-} from "openclaw/plugin-sdk/webhook-request-guards";
+} from "bot/plugin-sdk/webhook-request-guards";
 import { parseDiscordActivityCustomId } from "../component-custom-id.js";
 import {
   DISCORD_TOKEN_URL,

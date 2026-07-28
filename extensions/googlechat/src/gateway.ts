@@ -1,14 +1,14 @@
 // Googlechat plugin module implements gateway behavior.
-import { CHANNEL_APPROVAL_NATIVE_RUNTIME_CONTEXT_CAPABILITY } from "openclaw/plugin-sdk/approval-handler-adapter-runtime";
-import type { ChannelRuntimeSurface } from "openclaw/plugin-sdk/channel-contract";
+import { CHANNEL_APPROVAL_NATIVE_RUNTIME_CONTEXT_CAPABILITY } from "bot/plugin-sdk/approval-handler-adapter-runtime";
+import type { ChannelRuntimeSurface } from "bot/plugin-sdk/channel-contract";
 import {
   createAccountStatusSink,
   runPassiveAccountLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { registerChannelRuntimeContext } from "openclaw/plugin-sdk/channel-runtime-context";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeNamedExport } from "openclaw/plugin-sdk/lazy-runtime";
-import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/status-helpers";
+} from "bot/plugin-sdk/channel-outbound";
+import { registerChannelRuntimeContext } from "bot/plugin-sdk/channel-runtime-context";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createLazyRuntimeNamedExport } from "bot/plugin-sdk/lazy-runtime";
+import type { ChannelAccountSnapshot } from "bot/plugin-sdk/status-helpers";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
 import { isGoogleChatNativeApprovalClientEnabled } from "./approval-native.js";
 import type { GoogleChatRuntimeEnv } from "./monitor-types.js";
@@ -20,7 +20,7 @@ const loadGoogleChatChannelRuntime = createLazyRuntimeNamedExport(
 
 export async function startGoogleChatGatewayAccount(ctx: {
   account: ResolvedGoogleChatAccount;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime: GoogleChatRuntimeEnv;
   abortSignal: AbortSignal;
   channelRuntime?: ChannelRuntimeSurface;

@@ -14,7 +14,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
 import { NATIVE_I18N_LOCALES } from "../../scripts/native-app-i18n.ts";
@@ -38,7 +38,7 @@ const PUBLISH_GENERATED_PR_ACTION = ".github/actions/publish-generated-pr/action
 const SETUP_ANDROID_TOOLCHAIN_ACTION = ".github/actions/setup-android-toolchain/action.yml";
 const MATURITY_SCORECARD_WORKFLOW = ".github/workflows/maturity-scorecard.yml";
 const MATURITY_SCORECARD_WORKFLOW_REF =
-  "openclaw/openclaw/.github/workflows/maturity-scorecard.yml@refs/heads/main";
+  "hanzoai/bot/.github/workflows/maturity-scorecard.yml@refs/heads/main";
 const OIDC_BOUND_MAIN_REUSABLE_WORKFLOWS = new Set<string>();
 const MATURITY_GENERATED_PR_PATHS = [
   "qa/maturity-scores.yaml",
@@ -84,7 +84,7 @@ function runCiManifestFixture(options: {
   iosBuildCapability?: boolean;
   androidCiCapabilities?: boolean;
   nativeI18nCapabilities?: boolean;
-  openClawKitTests?: boolean;
+  botKitTests?: boolean;
   protocolCoverage?: boolean;
   qaSmokePlan?: boolean;
   formatCheck?: boolean;
@@ -94,7 +94,7 @@ function runCiManifestFixture(options: {
   nodeFastCiRouting?: boolean;
   runNode?: boolean;
 }) {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-ci-manifest-"));
+  const root = mkdtempSync(path.join(tmpdir(), "bot-ci-manifest-"));
   try {
     const scriptsDir = path.join(root, "scripts", "lib");
     mkdirSync(scriptsDir, { recursive: true });
@@ -206,8 +206,8 @@ function runCiManifestFixture(options: {
         ...((options.androidCiCapabilities ?? options.bundledPlanner)
           ? ["android-ci-contract-v2"]
           : []),
-        ...((options.openClawKitTests ?? options.bundledPlanner)
-          ? ["openclawkit-tests-contract-v1"]
+        ...((options.botKitTests ?? options.bundledPlanner)
+          ? ["botkit-tests-contract-v1"]
           : []),
       ].join("\n"),
     );
@@ -222,33 +222,33 @@ function runCiManifestFixture(options: {
       env: {
         ...process.env,
         GITHUB_OUTPUT: outputPath,
-        OPENCLAW_CI_CHANGED_PATHS_JSON: JSON.stringify(options.changedPaths ?? null),
-        OPENCLAW_CI_CHECKOUT_REVISION: "a".repeat(40),
-        OPENCLAW_CI_DOCS_CHANGED: "true",
-        OPENCLAW_CI_DOCS_ONLY: "false",
-        OPENCLAW_CI_EVENT_NAME: options.eventName ?? "workflow_dispatch",
-        OPENCLAW_CI_HISTORICAL_TARGET:
+        BOT_CI_CHANGED_PATHS_JSON: JSON.stringify(options.changedPaths ?? null),
+        BOT_CI_CHECKOUT_REVISION: "a".repeat(40),
+        BOT_CI_DOCS_CHANGED: "true",
+        BOT_CI_DOCS_ONLY: "false",
+        BOT_CI_EVENT_NAME: options.eventName ?? "workflow_dispatch",
+        BOT_CI_HISTORICAL_TARGET:
           (options.historicalCompatibility ?? true) &&
           (options.eventName ?? "workflow_dispatch") === "workflow_dispatch"
             ? "true"
             : "false",
-        OPENCLAW_CI_RELEASE_CANDIDATE_TARGET:
+        BOT_CI_RELEASE_CANDIDATE_TARGET:
           options.releaseCandidateCompatibility === true ? "true" : "false",
-        OPENCLAW_CI_REPOSITORY: "openclaw/openclaw",
-        OPENCLAW_CI_RUN_ANDROID: "true",
-        OPENCLAW_CI_RUN_CONTROL_UI_I18N: "true",
-        OPENCLAW_CI_RUN_IOS_BUILD: "true",
-        OPENCLAW_CI_RUN_MACOS: "true",
-        OPENCLAW_CI_RUN_NATIVE_I18N: "true",
-        OPENCLAW_CI_RUN_NODE: String(options.runNode ?? true),
-        OPENCLAW_CI_RUN_NODE_FAST_CI_ROUTING: String(options.nodeFastCiRouting ?? false),
-        OPENCLAW_CI_RUN_NODE_FAST_ONLY: String(options.nodeFastOnly ?? false),
-        OPENCLAW_CI_RUN_NODE_FAST_PLUGIN_CONTRACTS: String(
+        BOT_CI_REPOSITORY: "hanzoai/bot",
+        BOT_CI_RUN_ANDROID: "true",
+        BOT_CI_RUN_CONTROL_UI_I18N: "true",
+        BOT_CI_RUN_IOS_BUILD: "true",
+        BOT_CI_RUN_MACOS: "true",
+        BOT_CI_RUN_NATIVE_I18N: "true",
+        BOT_CI_RUN_NODE: String(options.runNode ?? true),
+        BOT_CI_RUN_NODE_FAST_CI_ROUTING: String(options.nodeFastCiRouting ?? false),
+        BOT_CI_RUN_NODE_FAST_ONLY: String(options.nodeFastOnly ?? false),
+        BOT_CI_RUN_NODE_FAST_PLUGIN_CONTRACTS: String(
           options.nodeFastPluginContracts ?? false,
         ),
-        OPENCLAW_CI_RUN_SKILLS_PYTHON: "true",
-        OPENCLAW_CI_RUN_WINDOWS: "true",
-        OPENCLAW_CI_WORKFLOW_REVISION: "b".repeat(40),
+        BOT_CI_RUN_SKILLS_PYTHON: "true",
+        BOT_CI_RUN_WINDOWS: "true",
+        BOT_CI_WORKFLOW_REVISION: "b".repeat(40),
       },
     });
     const outputs = Object.fromEntries(
@@ -311,7 +311,7 @@ function runMaturityInvocationScenario(options: {
       CALLER_WORKFLOW_REF: options.callerWorkflowRef,
       JOB_WORKFLOW_FILE_PATH: MATURITY_SCORECARD_WORKFLOW,
       JOB_WORKFLOW_REF: options.jobWorkflowRef ?? MATURITY_SCORECARD_WORKFLOW_REF,
-      JOB_WORKFLOW_REPOSITORY: "openclaw/openclaw",
+      JOB_WORKFLOW_REPOSITORY: "hanzoai/bot",
       PATH: process.env.PATH ?? "",
       PUBLISH_PULL_REQUEST: String(options.publishPullRequest),
     },
@@ -329,7 +329,7 @@ function runMaturityArtifactCopyScenario(
   const copyStep = workflow.jobs.publish_generated_pr.steps.find(
     (step: { name?: string }) => step.name === "Validate and copy generated PR files",
   );
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-maturity-copy-"));
+  const root = mkdtempSync(path.join(tmpdir(), "bot-maturity-copy-"));
   const staging = path.join(root, "staging");
   try {
     for (const generatedPath of MATURITY_GENERATED_PR_PATHS) {
@@ -382,7 +382,7 @@ function readQaProfileEvidenceWorkflow() {
 }
 
 function readReleaseChecksWorkflow() {
-  return parse(readFileSync(".github/workflows/openclaw-release-checks.yml", "utf8"));
+  return parse(readFileSync(".github/workflows/bot-release-checks.yml", "utf8"));
 }
 
 function readCriticalQualityWorkflow() {
@@ -466,7 +466,7 @@ function runDependencyCheckFixture(options: { historicalTarget: boolean; scripts
   output: string;
   status: number | null;
 } {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-ci-deadcode-"));
+  const root = mkdtempSync(path.join(tmpdir(), "bot-ci-deadcode-"));
   try {
     const fakeBin = path.join(root, "bin");
     const callsPath = path.join(root, "pnpm-calls.txt");
@@ -526,7 +526,7 @@ function runGeneratedPublisherScenario(
     updateSource?: boolean;
   } = {},
 ) {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-generated-pr-"));
+  const root = mkdtempSync(path.join(tmpdir(), "bot-generated-pr-"));
   try {
     const origin = path.join(root, "origin.git");
     const updater = path.join(root, "updater");
@@ -638,12 +638,12 @@ function runGeneratedPublisherScenario(
       "      else",
       '        head="$(git --git-dir="$FAKE_ORIGIN" rev-parse refs/heads/automation/locale)"',
       "      fi",
-      '      printf "https://github.com/openclaw/openclaw/pull/1\\t%s\\n" "$head"',
+      '      printf "https://github.com/hanzoai/bot/pull/1\\t%s\\n" "$head"',
       "    fi",
       "    ;;",
       "  pr:create)",
       '    : > "$FAKE_PR_STATE"',
-      '    printf "%s\\n" "https://github.com/openclaw/openclaw/pull/1"',
+      '    printf "%s\\n" "https://github.com/hanzoai/bot/pull/1"',
       "    ;;",
       "  pr:edit) exit 0 ;;",
       "  pr:view)",
@@ -688,8 +688,8 @@ function runGeneratedPublisherScenario(
         OVERLAP_POLICY: options.overlapPolicy ?? "defer",
         CONTENTS_TOKEN: "contents-token",
         GH_TOKEN: "test-token",
-        GITHUB_REPOSITORY: "openclaw/openclaw",
-        GITHUB_REPOSITORY_OWNER: "openclaw",
+        GITHUB_REPOSITORY: "hanzoai/bot",
+        GITHUB_REPOSITORY_OWNER: "bot",
         GITHUB_STEP_SUMMARY: summary,
         HEAD_BRANCH: "automation/locale",
         PATH: `${fakeBin}:${process.env.PATH ?? ""}`,
@@ -924,7 +924,7 @@ describe("ci workflow guards", () => {
     expect(changedScopeStep.if).toContain(
       "github.event_name == 'workflow_dispatch' && inputs.release_gate",
     );
-    expect(changedScopeStep.env?.OPENCLAW_ALLOW_RELEASE_GENERATED_MIX).toContain(
+    expect(changedScopeStep.env?.BOT_ALLOW_RELEASE_GENERATED_MIX).toContain(
       "github.event_name == 'workflow_dispatch'",
     );
     expect(changedScopeStep.run).toContain('elif [ "${{ github.event_name }}" = "pull_request" ]');
@@ -934,7 +934,7 @@ describe("ci workflow guards", () => {
     );
     expect(workflow.jobs.preflight.permissions).toEqual({ contents: "read" });
     expect(readFileSync(".github/workflows/ci.yml", "utf8")).toContain(
-      "OPENCLAW_CI_RUN_ANDROID: ${{ github.event_name == 'workflow_dispatch' && (inputs.release_gate || inputs.include_android) && 'true' || steps.changed_scope.outputs.run_android || 'false' }}",
+      "BOT_CI_RUN_ANDROID: ${{ github.event_name == 'workflow_dispatch' && (inputs.release_gate || inputs.include_android) && 'true' || steps.changed_scope.outputs.run_android || 'false' }}",
     );
 
     for (const [jobName, job] of Object.entries(workflow.jobs)) {
@@ -1047,12 +1047,12 @@ describe("ci workflow guards", () => {
     expect(nativeResolveBase.if).not.toContain("chore(i18n): refresh native locales");
     const controlResolveCondition = controlUiResolveBase.if.replace(/\s+/gu, " ");
     expect(controlResolveCondition).toBe(
-      "github.repository == 'openclaw/openclaw' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')",
+      "github.repository == 'hanzoai/bot' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')",
     );
     expect(controlResolveCondition).not.toContain("inputs.token_preflight_only");
     expect(controlResolveCondition).not.toContain("github.ref_type");
     expect(nativeResolveBase.if).toBe(
-      "github.repository == 'openclaw/openclaw' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')",
+      "github.repository == 'hanzoai/bot' && (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')",
     );
     expect(controlUiWorkflow.on.workflow_dispatch.inputs.token_preflight_only).toEqual({
       description: "Verify generated PR App permissions without running locale generation.",
@@ -1073,8 +1073,8 @@ describe("ci workflow guards", () => {
     expect(refreshStep.run).toContain("retrying with OpenAI");
     expect(refreshStep.run).toContain("run_openai_refresh");
     expect(refreshStep.run).toContain("repository OpenAI key");
-    expect(refreshStep.env.OPENCLAW_DOCS_I18N_OPENAI_API_KEY).toBe(
-      "${{ secrets.OPENCLAW_DOCS_I18N_OPENAI_API_KEY }}",
+    expect(refreshStep.env.BOT_DOCS_I18N_OPENAI_API_KEY).toBe(
+      "${{ secrets.BOT_DOCS_I18N_OPENAI_API_KEY }}",
     );
     expect(refreshStep.env.OPENAI_API_KEY).toBe("${{ secrets.OPENAI_API_KEY }}");
     expect(nativeArtifactStep.run).toContain("git add -A apps/.i18n/native");
@@ -1092,13 +1092,13 @@ describe("ci workflow guards", () => {
     expect(nativePublishStep.with["generated-paths"].trim().split("\n")).toEqual([
       "apps/.i18n/native",
       "apps/.i18n/apple-translation-contradictions.json",
-      "apps/android/app/src/main/java/ai/openclaw/app/i18n/NativeStringResources.kt",
+      "apps/android/app/src/main/java/ai/bot/app/i18n/NativeStringResources.kt",
       "apps/android/app/src/main/res/values*/assistant.xml",
       "apps/android/app/src/main/res/values*/strings.xml",
       "apps/android/app/src/thirdParty/res/values*/accessibility_strings.xml",
       "apps/android/wear/src/main/res/values*/strings.xml",
       "apps/ios/Resources/Localizable.xcstrings",
-      "apps/macos/Sources/OpenClaw/Resources/Localizable.xcstrings",
+      "apps/macos/Sources/Bot/Resources/Localizable.xcstrings",
       "apps/ios/Sources/*.lproj/InfoPlist.strings",
       "apps/ios/WatchApp/*.lproj/InfoPlist.strings",
       "apps/ios/ShareExtension/*.lproj/InfoPlist.strings",
@@ -1116,11 +1116,11 @@ describe("ci workflow guards", () => {
     expect(controlUiRefreshStep.run).toContain("retrying with OpenAI");
     expect(controlUiRefreshStep.run).toContain("run_openai_refresh");
     expect(controlUiRefreshStep.run).toContain("repository OpenAI key");
-    expect(controlUiRefreshStep.env.OPENCLAW_DOCS_I18N_OPENAI_API_KEY).toBe(
-      "${{ secrets.OPENCLAW_DOCS_I18N_OPENAI_API_KEY }}",
+    expect(controlUiRefreshStep.env.BOT_DOCS_I18N_OPENAI_API_KEY).toBe(
+      "${{ secrets.BOT_DOCS_I18N_OPENAI_API_KEY }}",
     );
     expect(controlUiRefreshStep.env.OPENAI_API_KEY).toBe("${{ secrets.OPENAI_API_KEY }}");
-    expect(controlUiRefreshStep.env.OPENCLAW_CONTROL_UI_I18N_AUTH_OPTIONAL).toBe("0");
+    expect(controlUiRefreshStep.env.BOT_CONTROL_UI_I18N_AUTH_OPTIONAL).toBe("0");
     const controlUiArtifactStep = controlUiWorkflow.jobs.refresh.steps.find(
       (step: { name?: string }) => step.name === "Prepare locale artifact",
     );
@@ -1402,7 +1402,7 @@ describe("ci workflow guards", () => {
     );
     expect(actionPublishStep.run).not.toContain('HEAD:"${BASE_BRANCH}"');
     expect(readFileSync(".github/workflows/ci.yml", "utf8")).toContain(
-      "OPENCLAW_ALLOW_RELEASE_GENERATED_MIX",
+      "BOT_ALLOW_RELEASE_GENERATED_MIX",
     );
 
     for (const [
@@ -1498,7 +1498,7 @@ describe("ci workflow guards", () => {
       const result = runGeneratedPublisherScenario(null, { autoMerge: true });
 
       expect(result.branchExists).toBe(true);
-      expect(result.mergeCalls).toContain("pr merge https://github.com/openclaw/openclaw/pull/1");
+      expect(result.mergeCalls).toContain("pr merge https://github.com/hanzoai/bot/pull/1");
       expect(result.mergeCalls).toContain("--auto --squash --match-head-commit");
       expect(result.summary).toContain("Enabled squash auto-merge for exact generated head");
     },
@@ -1654,7 +1654,7 @@ describe("ci workflow guards", () => {
 
       expect(result.branchExists).toBe(true);
       expect(result.generatedA).toBe("desired-a");
-      expect(result.summary).toContain("https://github.com/openclaw/openclaw/pull/1");
+      expect(result.summary).toContain("https://github.com/hanzoai/bot/pull/1");
     },
   );
 
@@ -1979,7 +1979,7 @@ describe("ci workflow guards", () => {
     expect(workflow.jobs["runner-admission"]).toBeUndefined();
     const preflight = workflow.jobs.preflight;
     expect(preflight.needs).toBeUndefined();
-    expect(preflight.env?.OPENCLAW_MAIN_CI_DEBOUNCE_SECONDS).toBeUndefined();
+    expect(preflight.env?.BOT_MAIN_CI_DEBOUNCE_SECONDS).toBeUndefined();
     const steps = preflight.steps as Array<{ if?: string; name?: string; run?: string }>;
     expect(steps.some((step) => step.name === "Record debounce epoch")).toBe(false);
     expect(steps.some((step) => step.name === "Debounce canonical main fan-out")).toBe(false);
@@ -2080,11 +2080,11 @@ describe("ci workflow guards", () => {
       const cacheCondition = stepWith["use-actions-cache"];
       expect(stickyCondition, jobName).toContain("github.event_name != 'workflow_dispatch'");
       expect(stickyCondition, jobName).toContain(
-        "github.event.pull_request.head.repo.full_name == 'openclaw/openclaw'",
+        "github.event.pull_request.head.repo.full_name == 'hanzoai/bot'",
       );
       expect(cacheCondition, jobName).toContain("github.event_name != 'workflow_dispatch'");
       expect(cacheCondition, jobName).toContain(
-        "github.event.pull_request.head.repo.full_name == 'openclaw/openclaw'",
+        "github.event.pull_request.head.repo.full_name == 'hanzoai/bot'",
       );
       expect(cacheCondition, jobName).toContain("&& 'false' || 'true'");
     }
@@ -2106,18 +2106,18 @@ describe("ci workflow guards", () => {
       (step: WorkflowStep) => step.name === "Maintain sticky dependency store budget",
     )!;
     expect(refreshStep.if).toContain("github.event_name == 'push'");
-    expect(refreshStep.if).toContain("github.repository == 'openclaw/openclaw'");
+    expect(refreshStep.if).toContain("github.repository == 'hanzoai/bot'");
     expect(refreshStep.if).toContain("github.ref == 'refs/heads/main'");
     expect(refreshStep.if).toContain("steps.manifest.outputs.run_node == 'true'");
     expect(maintainStep.if).toBe(refreshStep.if);
     expect(preflightSteps.indexOf(refreshStep)).toBeLessThan(preflightSteps.indexOf(maintainStep));
-    expect(maintainStep.env?.OPENCLAW_PNPM_STORE_MAX_KIB).toBe("8388608");
+    expect(maintainStep.env?.BOT_PNPM_STORE_MAX_KIB).toBe("8388608");
     expect(maintainStep.run).toContain('store_dir="${PNPM_CONFIG_STORE_DIR:?}"');
     expect(maintainStep.run).toContain('PNPM_CONFIG_STORE_DIR="$store_dir" pnpm store prune');
     expect(maintainStep.run).toContain('>> "$GITHUB_STEP_SUMMARY"');
     expect(workflow.jobs["pnpm-store-warmup"].if).toContain("github.ref == 'refs/heads/main'");
     expect(workflow.jobs["pnpm-store-warmup"].if).toContain(
-      "github.repository == 'openclaw/openclaw'",
+      "github.repository == 'hanzoai/bot'",
     );
     // Current sticky consumers all use the single supported Node line. A
     // planner-provided version would silently create a writerless disk.
@@ -2170,7 +2170,7 @@ describe("ci workflow guards", () => {
         (job as { "runs-on": string })["runs-on"],
         `${jobName} must route fork pull requests to GitHub-hosted runners`,
       ).toContain(
-        "github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == 'openclaw/openclaw'",
+        "github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == 'hanzoai/bot'",
       );
     }
     expect(action.inputs["sticky-disk"].default).toBe("false");
@@ -2193,7 +2193,7 @@ describe("ci workflow guards", () => {
       if: "inputs.sticky-disk == 'true'",
       uses: "useblacksmith/stickydisk@6d373c96a74cbde0c99fedc5ea5d3a7ba66ba494",
       with: {
-        path: "/var/tmp/openclaw-node-deps",
+        path: "/var/tmp/bot-node-deps",
       },
     });
     // Bounded disks: Blacksmith caps sticky disks per installation, and the old
@@ -2218,11 +2218,11 @@ describe("ci workflow guards", () => {
     );
     expect(bindStep.run).toContain('sudo mount --bind "$sticky_modules" "$workspace_modules"');
     expect(bindStep.run).toContain('echo "PNPM_CONFIG_STORE_DIR=$sticky_store"');
-    expect(bindStep.run).toContain('echo "OPENCLAW_BUILD_ALL_NO_PNPM=1"');
+    expect(bindStep.run).toContain('echo "BOT_BUILD_ALL_NO_PNPM=1"');
     expect(bindStep.run).toContain(
       'deps_fingerprint="os-${RUNNER_OS:?}-arch-${RUNNER_ARCH:?}-node-$(node --version)-${deps_input_fingerprint:?}"',
     );
-    expect(bindStep.run).toContain('echo "OPENCLAW_STICKY_DEPS_FINGERPRINT=$deps_fingerprint"');
+    expect(bindStep.run).toContain('echo "BOT_STICKY_DEPS_FINGERPRINT=$deps_fingerprint"');
     expect(bindStep.run).not.toContain("PNPM_CONFIG_MODULES_DIR");
     expect(bindStep.run).not.toContain("PNPM_CONFIG_VIRTUAL_STORE_DIR");
     // Compute from the checkout before the bind mount adds snapshot-internal
@@ -2235,13 +2235,13 @@ describe("ci workflow guards", () => {
     );
     expect(installStep.env).toMatchObject({
       STICKY_DISK: "${{ inputs.sticky-disk }}",
-      STICKY_ROOT: "/var/tmp/openclaw-node-deps",
+      STICKY_ROOT: "/var/tmp/bot-node-deps",
       STICKY_WRITER:
         "${{ inputs.save-sticky-disk == 'true' && github.event_name != 'pull_request' && 'true' || 'false' }}",
     });
-    expect(installStep.run).toContain('sticky_marker="$STICKY_ROOT/.openclaw-deps-fingerprint"');
+    expect(installStep.run).toContain('sticky_marker="$STICKY_ROOT/.bot-deps-fingerprint"');
     expect(installStep.run).toContain(
-      '[ "$sticky_fingerprint" = "${OPENCLAW_STICKY_DEPS_FINGERPRINT:?}" ]',
+      '[ "$sticky_fingerprint" = "${BOT_STICKY_DEPS_FINGERPRINT:?}" ]',
     );
     expect(installStep.run).toContain('sticky_fingerprint_matches="true"');
     expect(installStep.run).toContain(
@@ -2249,7 +2249,7 @@ describe("ci workflow guards", () => {
     );
     expect(installStep.run).toContain('[ "$STICKY_WRITER" != "true" ]');
     expect(installStep.run).toContain('sudo umount "$GITHUB_WORKSPACE/node_modules"');
-    expect(installStep.run).toContain('ephemeral_store="${RUNNER_TEMP:?}/openclaw-pnpm-store"');
+    expect(installStep.run).toContain('ephemeral_store="${RUNNER_TEMP:?}/bot-pnpm-store"');
     expect(installStep.run).toContain(
       "Sticky dependency snapshot is unusable; using runner-local storage for this read-only run",
     );
@@ -2291,7 +2291,7 @@ describe("ci workflow guards", () => {
     expect(installStep.run).toContain('[ "$STICKY_WRITER" = "true" ]');
     expect(installStep.run.indexOf('pnpm "${install_args[@]}"')).toBeLessThan(
       installStep.run.indexOf(
-        'bash "$GITHUB_ACTION_PATH/sticky-importers.sh" capture "$STICKY_ROOT" "$GITHUB_WORKSPACE" "$OPENCLAW_STICKY_DEPS_FINGERPRINT"',
+        'bash "$GITHUB_ACTION_PATH/sticky-importers.sh" capture "$STICKY_ROOT" "$GITHUB_WORKSPACE" "$BOT_STICKY_DEPS_FINGERPRINT"',
       ),
     );
     // The content-validated snapshot or successful install already owns
@@ -2394,7 +2394,7 @@ describe("ci workflow guards", () => {
       },
     });
     expect(uploadStep).toMatchObject({
-      if: "success() && github.repository == 'openclaw/openclaw' && github.ref == 'refs/heads/main'",
+      if: "success() && github.repository == 'hanzoai/bot' && github.ref == 'refs/heads/main'",
       uses: UPLOAD_ARTIFACT_V7,
       with: {
         "if-no-files-found": "error",
@@ -2407,7 +2407,7 @@ describe("ci workflow guards", () => {
   });
 
   it("restores importer-local node_modules from sticky snapshots", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-sticky-importers-"));
+    const root = mkdtempSync(path.join(tmpdir(), "bot-sticky-importers-"));
     try {
       const workspace = path.join(root, "workspace");
       const stickyRoot = path.join(root, "sticky");
@@ -2495,7 +2495,7 @@ describe("ci workflow guards", () => {
         JSON.parse(readFileSync(path.join(importerDependency, "package.json"), "utf8")),
       ).toMatchObject({ version: "2.4.0" });
       expect(readFileSync(path.join(rootModules, "root-sentinel"), "utf8")).toBe("after");
-      expect(readFileSync(path.join(stickyRoot, ".openclaw-deps-fingerprint"), "utf8")).toBe(
+      expect(readFileSync(path.join(stickyRoot, ".bot-deps-fingerprint"), "utf8")).toBe(
         "fingerprint-a\n",
       );
 
@@ -2509,7 +2509,7 @@ describe("ci workflow guards", () => {
       const archiveChecksum = createHash("sha256").update(readFileSync(archive)).digest("hex");
       const manifestChecksum = createHash("sha256").update(readFileSync(manifest)).digest("hex");
       writeFileSync(
-        path.join(stickyRoot, ".openclaw-importer-archive.sha256"),
+        path.join(stickyRoot, ".bot-importer-archive.sha256"),
         `${archiveChecksum}\n${manifestChecksum}\n`,
         "utf8",
       );
@@ -2537,7 +2537,7 @@ describe("ci workflow guards", () => {
   });
 
   it("fingerprints dependency install inputs without ordinary script churn", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-dependency-fingerprint-"));
+    const root = mkdtempSync(path.join(tmpdir(), "bot-dependency-fingerprint-"));
     try {
       const helper = path.resolve(".github/actions/setup-node-env/dependency-fingerprint.mjs");
       const writeManifest = (manifest: Record<string, unknown>) => {
@@ -2728,13 +2728,13 @@ describe("ci workflow guards", () => {
     expect(readerStep.with["restore-keys"]).toBe(writerStep.with["restore-keys"]);
     expect(readerStep.with.key).toContain("!**/node_modules/**");
     expect(configureStep.env.CACHE_GENERATION).toContain("!**/node_modules/**");
-    expect(configureStep.run).toContain("OPENCLAW_VITEST_FS_MODULE_CACHE_PATH=$cache_root");
-    expect(configureStep.run).toContain(".openclaw-transform-generation");
+    expect(configureStep.run).toContain("BOT_VITEST_FS_MODULE_CACHE_PATH=$cache_root");
+    expect(configureStep.run).toContain(".bot-transform-generation");
     expect(configureStep.run).not.toContain("protected Vitest transform seed");
     expect(configureStep.env.CACHE_WRITER).toBe(
       "${{ inputs.save-vitest-fs-cache == 'true' && '1' || '0' }}",
     );
-    expect(configureStep.run).toContain("OPENCLAW_VITEST_FS_MODULE_CACHE_WRITER=");
+    expect(configureStep.run).toContain("BOT_VITEST_FS_MODULE_CACHE_WRITER=");
     expect(compileEpochStep.run).toContain('if [ "$CACHE_SCOPE" = "build" ]');
     expect(compileEpochStep.run).toContain("date -u +%Y%m%d");
     expect(compileEpochStep.run).toContain("GITHUB_RUN_ID");
@@ -2793,7 +2793,7 @@ describe("ci workflow guards", () => {
     expect(warmer.concurrency.group).toBe("vitest-cache-warm");
     expect(warmer.on.workflow_dispatch).toBeUndefined();
     expect(warmer.on.repository_dispatch.types).toEqual(["vitest-cache-warm"]);
-    expect(warmer.jobs.warm.if).toContain("github.repository == 'openclaw/openclaw'");
+    expect(warmer.jobs.warm.if).toContain("github.repository == 'hanzoai/bot'");
     expect(warmer.on).not.toHaveProperty("workflow_run");
     expect(checkoutStep.with).toBeUndefined();
     expect(warmerSource).toContain('cron: "17 8 * * *"');
@@ -2815,9 +2815,9 @@ describe("ci workflow guards", () => {
     expect(seedStep.if).toBeUndefined();
     expect(warmStep.if).toBeUndefined();
     expect(maintainStoreStep).toBeUndefined();
-    expect(maintainStickyStoreStep.env.OPENCLAW_PNPM_STORE_MAX_KIB).toBe("8388608");
+    expect(maintainStickyStoreStep.env.BOT_PNPM_STORE_MAX_KIB).toBe("8388608");
 
-    const maintenanceRoot = mkdtempSync(path.join(tmpdir(), "openclaw-pnpm-maintenance-"));
+    const maintenanceRoot = mkdtempSync(path.join(tmpdir(), "bot-pnpm-maintenance-"));
     try {
       const storeDir = path.join(maintenanceRoot, "store");
       const summaryPath = path.join(maintenanceRoot, "summary.md");
@@ -2827,7 +2827,7 @@ describe("ci workflow guards", () => {
         env: {
           ...process.env,
           GITHUB_STEP_SUMMARY: summaryPath,
-          OPENCLAW_PNPM_STORE_MAX_KIB: "-1",
+          BOT_PNPM_STORE_MAX_KIB: "-1",
           PNPM_CONFIG_STORE_DIR: storeDir,
         },
       });
@@ -2893,7 +2893,7 @@ describe("ci workflow guards", () => {
     const runStep = additionalJob.steps.find(
       (step: WorkflowStep) => step.name === "Run additional check shard",
     );
-    expect(runStep.env.OPENCLAW_EXTENSION_BOUNDARY_CONCURRENCY).toBe(16);
+    expect(runStep.env.BOT_EXTENSION_BOUNDARY_CONCURRENCY).toBe(16);
 
     // O(1) disks: Blacksmith caps sticky disks per installation, and the old
     // per-PR/per-config keys minted new disks until every mount 429-failed
@@ -2969,7 +2969,7 @@ describe("ci workflow guards", () => {
     expect(pointEnv.GRADLE_DEPS_FINGERPRINT).toContain("hashFiles(");
     expect(pointEnv.GRADLE_DEPS_FINGERPRINT).toContain("apps/android/gradle/libs.versions.toml");
     expect(pointEnv.STICKY_WRITER).toContain("github.event_name != 'pull_request'");
-    expect(pointStep.run).toContain(".openclaw-gradle-deps-fingerprint");
+    expect(pointStep.run).toContain(".bot-gradle-deps-fingerprint");
     expect(pointStep.run).toContain('rm -rf "$sticky_root/gradle-user-home"');
   });
 
@@ -3069,7 +3069,7 @@ describe("ci workflow guards", () => {
         BLACKSMITH_ENV: "production-amd64",
         BLACKSMITH_REGION: "us-test-1",
         RETIRED_ARCHITECTURE: "amd64",
-        RETIRED_KEY: "openclaw/openclaw-not-retired",
+        RETIRED_KEY: "hanzoai/bot-not-retired",
         RETIRED_REGION: "us-test-1",
       },
     });
@@ -3082,7 +3082,7 @@ describe("ci workflow guards", () => {
         BLACKSMITH_ENV: "production-amd64",
         BLACKSMITH_REGION: "us-test-1",
         RETIRED_ARCHITECTURE: "amd64",
-        RETIRED_KEY: " openclaw/openclaw-active-key ",
+        RETIRED_KEY: " hanzoai/bot-active-key ",
         RETIRED_REGION: "us-test-1",
       },
     });
@@ -3567,7 +3567,7 @@ describe("ci workflow guards", () => {
     )?.[0];
     expect(discoveryBlock).toBeTruthy();
 
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-mantis-runner-ip-"));
+    const root = mkdtempSync(path.join(tmpdir(), "bot-mantis-runner-ip-"));
     try {
       const fakeBin = path.join(root, "bin");
       const callCount = path.join(root, "curl-calls");
@@ -3947,7 +3947,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(legacy.outputs.historical_target).toBe("true");
     expect(legacy.outputs.run_ios_build).toBe("false");
     expect(legacy.outputs.run_native_i18n).toBe("false");
-    expect(legacy.outputs.run_openclawkit_tests).toBe("false");
+    expect(legacy.outputs.run_botkit_tests).toBe("false");
     expect(legacy.outputs.run_qa_smoke_ci).toBe("false");
     expect(legacy.outputs.run_channel_contracts_shards).toBe("false");
     expect(legacy.outputs.run_protocol_event_coverage).toBe("false");
@@ -3977,7 +3977,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(current.status, current.output).toBe(0);
     expect(current.outputs.run_ios_build).toBe("true");
     expect(current.outputs.run_native_i18n).toBe("true");
-    expect(current.outputs.run_openclawkit_tests).toBe("true");
+    expect(current.outputs.run_botkit_tests).toBe("true");
     expect(current.outputs.run_qa_smoke_ci).toBe("true");
     expect(current.outputs.run_channel_contracts_shards).toBe("true");
     expect(current.outputs.run_protocol_event_coverage).toBe("true");
@@ -4215,8 +4215,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     const swiftLint = workflow.jobs["macos-swift"].steps.find(
       (step: { name?: string }) => step.name === "Swift lint",
     );
-    const openClawKitTests = workflow.jobs["macos-swift"].steps.find(
-      (step: { name?: string }) => step.name === "OpenClawKit tests",
+    const botKitTests = workflow.jobs["macos-swift"].steps.find(
+      (step: { name?: string }) => step.name === "BotKit tests",
     );
     expect(swiftInstall.run).toContain("brew install xcodegen swiftlint");
     expect(swiftInstall.run).not.toContain("brew install xcodegen swiftlint swiftformat");
@@ -4245,7 +4245,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(swiftInstall.run).toContain('elif [[ "$HISTORICAL_TARGET" == "true" ]]');
     expect(swiftLint.run).toContain("swiftlint lint --config config/swiftlint.yml");
     expect(swiftLint.run).toContain('elif [[ "$HISTORICAL_TARGET" == "true" ]]');
-    expect(openClawKitTests.if).toBe("needs.preflight.outputs.run_openclawkit_tests == 'true'");
+    expect(botKitTests.if).toBe("needs.preflight.outputs.run_botkit_tests == 'true'");
 
     const checkShard = workflow.jobs["check-shard"].steps.find(
       (step: { name?: string }) => step.name === "Run check shard",
@@ -4287,7 +4287,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(uiInstall.run).toContain('if [[ "$COMPATIBILITY_TARGET" == "true" ]]');
     expect(uiInstall.run).toContain("pnpm --dir ui exec playwright install chromium");
     expect(uiInstall.run).toContain("node scripts/ensure-playwright-chromium.mjs");
-    expect(uiInstall.run).not.toContain("OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM");
+    expect(uiInstall.run).not.toContain("BOT_UI_E2E_ALLOW_MISSING_CHROMIUM");
     expect(uiTest.run).toContain('if [[ "$COMPATIBILITY_TARGET" == "true" ]]');
     expect(uiTest.run).toContain("pnpm --dir ui test --testTimeout=30000 --isolate");
     expect(uiTest.run).not.toContain("--retry");
@@ -4331,7 +4331,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       "Control UI E2E suite",
     );
     expect(scenario.run).toBe("pnpm test:ui:e2e");
-    expect(JSON.stringify(uiE2e)).not.toContain("OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM");
+    expect(JSON.stringify(uiE2e)).not.toContain("BOT_UI_E2E_ALLOW_MISSING_CHROMIUM");
   });
 
   it("does not rebuild Control UI after build:ci-artifacts", () => {
@@ -4411,7 +4411,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       (step: WorkflowStep) => step.name === "Check CLI startup memory",
     );
 
-    expect(startupMemoryStep.env.OPENCLAW_STARTUP_MEMORY_PLUGINS_LIST_MB).toBe(
+    expect(startupMemoryStep.env.BOT_STARTUP_MEMORY_PLUGINS_LIST_MB).toBe(
       "${{ runner.environment == 'github-hosted' && '425' || '400' }}",
     );
   });
@@ -4548,11 +4548,11 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       'shard.groups?.some((group) => group.shard_name.startsWith("core-tooling"))',
     );
     expect(nodeTestJob["timeout-minutes"]).toBe("${{ matrix.timeout_minutes || 60 }}");
-    expect(runStep.env.OPENCLAW_VITEST_NO_OUTPUT_TIMEOUT_MS).toBe("300000");
-    expect(runStep.env.OPENCLAW_VITEST_NO_OUTPUT_RETRY).toBe("1");
-    expect(runStep.env.OPENCLAW_NODE_TEST_ENV_JSON).toBe("${{ toJson(matrix.env) }}");
-    expect(runStep.env.OPENCLAW_NODE_TEST_TARGETS_JSON).toBe("${{ toJson(matrix.targets) }}");
-    expect(runStep.env.OPENCLAW_NODE_TEST_VITEST_ARGS_JSON).toBe(
+    expect(runStep.env.BOT_VITEST_NO_OUTPUT_TIMEOUT_MS).toBe("300000");
+    expect(runStep.env.BOT_VITEST_NO_OUTPUT_RETRY).toBe("1");
+    expect(runStep.env.BOT_NODE_TEST_ENV_JSON).toBe("${{ toJson(matrix.env) }}");
+    expect(runStep.env.BOT_NODE_TEST_TARGETS_JSON).toBe("${{ toJson(matrix.targets) }}");
+    expect(runStep.env.BOT_NODE_TEST_VITEST_ARGS_JSON).toBe(
       "${{ needs.preflight.outputs.compatibility_target == 'true' && '[\"--hookTimeout=300000\"]' || '[]' }}",
     );
     expect(runStep.env.JOB_CONTEXT_JSON).toBe("${{ toJSON(job) }}");
@@ -4601,7 +4601,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     ];
 
     expect(workflow.on.pull_request).not.toHaveProperty("paths-ignore");
-    expect(gate.name).toBe("openclaw/ci-gate");
+    expect(gate.name).toBe("bot/ci-gate");
     expect(gate.needs).toEqual([...requiredJobs, ...selectedJobs]);
     expect(gate.needs.toSorted()).toEqual(
       Object.keys(workflow.jobs)
@@ -4701,7 +4701,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
         type: "string",
       },
       ref: {
-        description: "OpenClaw branch, tag, or SHA containing the maturity score source",
+        description: "Bot branch, tag, or SHA containing the maturity score source",
         required: true,
         type: "string",
       },
@@ -4721,22 +4721,22 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(maturityWorkflow.on.workflow_call.inputs).not.toHaveProperty("publish_pull_request");
     expect(maturityWorkflow.on.workflow_call.secrets.OPENAI_API_KEY.required).toBe(true);
     expect(
-      maturityWorkflow.on.workflow_call.secrets.OPENCLAW_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY
+      maturityWorkflow.on.workflow_call.secrets.BOT_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY
         .required,
     ).toBe(false);
     expect(Object.keys(maturityWorkflow.on.workflow_call.secrets).toSorted()).toEqual([
       "CLAWSWEEPER_APP_PRIVATE_KEY",
       "MANTIS_GITHUB_APP_PRIVATE_KEY",
       "OPENAI_API_KEY",
-      "OPENCLAW_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY",
-      "OPENCLAW_QA_CONVEX_SECRET_CI",
-      "OPENCLAW_QA_CONVEX_SITE_URL",
+      "BOT_MATURITY_SCORECARD_AGENT_OPENAI_API_KEY",
+      "BOT_QA_CONVEX_SECRET_CI",
+      "BOT_QA_CONVEX_SITE_URL",
     ]);
     for (const secret of [
       "CLAWSWEEPER_APP_PRIVATE_KEY",
       "MANTIS_GITHUB_APP_PRIVATE_KEY",
-      "OPENCLAW_QA_CONVEX_SECRET_CI",
-      "OPENCLAW_QA_CONVEX_SITE_URL",
+      "BOT_QA_CONVEX_SECRET_CI",
+      "BOT_QA_CONVEX_SITE_URL",
     ]) {
       expect(maturityWorkflow.on.workflow_call.secrets[secret].required).toBe(false);
     }
@@ -4760,7 +4760,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     const runProfileStep = qaRunJob.steps.find(
       (step: WorkflowStep) => step.name === "Run QA profile",
     );
-    expect(runProfileStep.env?.OPENCLAW_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS).toBe("120000");
+    expect(runProfileStep.env?.BOT_QA_CREDENTIAL_ACQUIRE_TIMEOUT_MS).toBe("120000");
     expect(runProfileStep.run).toContain("--concurrency 3");
     expect(runProfileStep.run).toContain("--fast");
     const failProfileStep = qaRunJob.steps.find(
@@ -4781,8 +4781,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(generateJob.with).not.toHaveProperty("fail_on_qa_failure");
     expect(generateJob.secrets).toMatchObject({
       OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}",
-      OPENCLAW_QA_CONVEX_SECRET_CI: "${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}",
-      OPENCLAW_QA_CONVEX_SITE_URL: "${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}",
+      BOT_QA_CONVEX_SECRET_CI: "${{ secrets.BOT_QA_CONVEX_SECRET_CI }}",
+      BOT_QA_CONVEX_SITE_URL: "${{ secrets.BOT_QA_CONVEX_SITE_URL }}",
     });
 
     const workflowStep = maturityWorkflow.jobs.validate_selected_ref.steps.find(
@@ -4853,7 +4853,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       `github.workflow_ref == '${MATURITY_SCORECARD_WORKFLOW_REF}' &&`,
       `needs.validate_selected_ref.outputs.workflow_file_path == '${MATURITY_SCORECARD_WORKFLOW}' &&`,
       `needs.validate_selected_ref.outputs.workflow_ref == '${MATURITY_SCORECARD_WORKFLOW_REF}' &&`,
-      "needs.validate_selected_ref.outputs.workflow_repository == 'openclaw/openclaw' }}",
+      "needs.validate_selected_ref.outputs.workflow_repository == 'hanzoai/bot' }}",
     ].join(" ");
     expect(publisherPreflight.needs).toBe("validate_selected_ref");
     expect(publisherPreflight.if).toBe("${{ inputs.publish_pull_request }}");
@@ -5058,7 +5058,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     "keeps a reusable maturity call artifact-only even when its caller was dispatched",
     () => {
       const callerWorkflowRef =
-        "openclaw/openclaw/.github/workflows/openclaw-release-checks.yml@refs/heads/main";
+        "hanzoai/bot/.github/workflows/bot-release-checks.yml@refs/heads/main";
       const artifactOnly = runMaturityInvocationScenario({
         callerEventName: "workflow_dispatch",
         callerWorkflowRef,
@@ -5155,8 +5155,8 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(job.with).not.toHaveProperty("publish_pull_request");
     expect(job.secrets).toMatchObject({
       OPENAI_API_KEY: "${{ secrets.OPENAI_API_KEY }}",
-      OPENCLAW_QA_CONVEX_SECRET_CI: "${{ secrets.OPENCLAW_QA_CONVEX_SECRET_CI }}",
-      OPENCLAW_QA_CONVEX_SITE_URL: "${{ secrets.OPENCLAW_QA_CONVEX_SITE_URL }}",
+      BOT_QA_CONVEX_SECRET_CI: "${{ secrets.BOT_QA_CONVEX_SECRET_CI }}",
+      BOT_QA_CONVEX_SITE_URL: "${{ secrets.BOT_QA_CONVEX_SITE_URL }}",
     });
     expect(summaryJob.needs).toContain("maturity_scorecard_release_checks");
     expect(verifyStep.env.MATURITY_SCORECARD_RELEASE_CHECKS_RESULT).toBe(
@@ -5213,12 +5213,12 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(smokeProfileJob.name).toBe("QA Smoke CI (${{ matrix.name }})");
     expect(smokeBuildStep.run).toContain("node scripts/build-all.mjs qaRuntime");
     expect(smokeBuildStep.run).toContain("pnpm ui:build");
-    expect(smokeBuildStep.env.OPENCLAW_BUILD_PRIVATE_QA).toBe("1");
+    expect(smokeBuildStep.env.BOT_BUILD_PRIVATE_QA).toBe("1");
     expect(smokeBuildStep.run).not.toContain("--skip-build");
     expect(smokeBuildStep.run).toContain("--allow-unreleased-changelog");
     expect(smokeBuildStep.run).toContain("grep -Fq");
     expect(smokeBuildStep.run).toContain('"${package_args[@]}"');
-    expect(smokeBuildStep.run.indexOf("node scripts/package-openclaw-for-docker.mjs")).toBeLessThan(
+    expect(smokeBuildStep.run.indexOf("node scripts/package-bot-for-docker.mjs")).toBeLessThan(
       smokeBuildStep.run.indexOf("node scripts/build-all.mjs qaRuntime"),
     );
     expect(workflow.jobs["qa-smoke-ci-artifacts"]).toBeUndefined();
@@ -5245,9 +5245,9 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     );
     expect(smokeDockerCacheStep.if).toContain("matrix.docker_cache == true");
     expect(smokeDockerCacheStep.if).toContain("github.event_name != 'workflow_dispatch'");
-    expect(smokeDockerCacheStep.if).toContain("github.repository == 'openclaw/openclaw'");
+    expect(smokeDockerCacheStep.if).toContain("github.repository == 'hanzoai/bot'");
     expect(smokeDockerCacheStep.if).toContain(
-      "github.event.pull_request.head.repo.full_name == 'openclaw/openclaw'",
+      "github.event.pull_request.head.repo.full_name == 'hanzoai/bot'",
     );
     expect(smokeDockerCacheStep.with["max-cache-size-mb"]).toBe(800000);
     expect(smokeRunStep.run).toContain("createQaSmokeCiPart");
@@ -5271,21 +5271,21 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       "console.log(`[skip] ${partId} is not declared by this checkout's smoke plan`)",
     );
     expect(smokeRunStep.run).toContain("No QA smoke runs assigned");
-    expect(smokeRunStep.run).toContain("node openclaw.mjs qa run");
-    expect(smokeRunStep.run).not.toContain("pnpm openclaw qa run");
+    expect(smokeRunStep.run).toContain("node bot.mjs qa run");
+    expect(smokeRunStep.run).not.toContain("pnpm bot qa run");
     expect(smokeRunStep.run).toContain(
-      "timeout --signal=TERM --kill-after=15s 10m node openclaw.mjs qa run",
+      "timeout --signal=TERM --kill-after=15s 10m node bot.mjs qa run",
     );
     expect(smokeRunStep.run).toContain("--qa-profile smoke-ci");
     expect(smokeRunStep.run).toContain("--concurrency 10");
-    expect(smokeRunStep.env.OPENCLAW_QA_SUITE_WORKER_START_STAGGER_MS).toContain(
+    expect(smokeRunStep.env.BOT_QA_SUITE_WORKER_START_STAGGER_MS).toContain(
       "github.event_name != 'workflow_dispatch'",
     );
-    expect(smokeRunStep.env.OPENCLAW_QA_SUITE_WORKER_START_STAGGER_MS).toContain(
-      "github.repository == 'openclaw/openclaw'",
+    expect(smokeRunStep.env.BOT_QA_SUITE_WORKER_START_STAGGER_MS).toContain(
+      "github.repository == 'hanzoai/bot'",
     );
-    expect(smokeRunStep.env.OPENCLAW_QA_SUITE_WORKER_START_STAGGER_MS).toContain("'0'");
-    expect(smokeRunStep.env.OPENCLAW_QA_SUITE_WORKER_START_STAGGER_MS).toContain("'1500'");
+    expect(smokeRunStep.env.BOT_QA_SUITE_WORKER_START_STAGGER_MS).toContain("'0'");
+    expect(smokeRunStep.env.BOT_QA_SUITE_WORKER_START_STAGGER_MS).toContain("'1500'");
     expect(smokeRunStep.run).toContain('scenario_args+=(--scenario "$scenario_id")');
     expect(smokeRunStep.run).toContain('done <<< "$PROFILE_RUNS_TSV"');
     expect(smokeRunStep.run).not.toContain('pids+=("$!")');
@@ -5294,7 +5294,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     expect(smokeRunStep.run).not.toContain("--allow-failures");
     expect(smokeRunStep.run).toContain("qa_exit_code=0");
     expect(smokeRunStep.run).toContain('exit "$qa_exit_code"');
-    expect(smokeRunStep.run).toContain("OPENCLAW_CURRENT_PACKAGE_TGZ");
+    expect(smokeRunStep.run).toContain("BOT_CURRENT_PACKAGE_TGZ");
     expect(smokeRunStep.run).toContain("--max-old-space-size=16384");
     expect(smokeRunStep.run).not.toContain("scripts/build-all.mjs qaRuntime");
     expect(smokeRunStep.run).not.toContain("OPENAI_API_KEY");
@@ -5312,10 +5312,10 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
   it("keeps push docs validation ClawHub-backed", () => {
     const workflow = readFileSync(".github/workflows/docs.yml", "utf8");
 
-    expect(workflow).toContain("repository: openclaw/clawhub");
+    expect(workflow).toContain("repository: bot/clawhub");
     expect(workflow).toContain("path: clawhub-source");
     expect(workflow).toContain(
-      "OPENCLAW_DOCS_SYNC_CLAWHUB_REPO: ${{ github.workspace }}/clawhub-source",
+      "BOT_DOCS_SYNC_CLAWHUB_REPO: ${{ github.workspace }}/clawhub-source",
     );
   });
 
@@ -5338,7 +5338,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       "utf8",
     );
     const rawSocketQuery = readFileSync(
-      ".github/codeql/openclaw-boundary/queries/raw-socket-callsite-classification.ql",
+      ".github/codeql/bot-boundary/queries/raw-socket-callsite-classification.ql",
       "utf8",
     );
     const networkSelector = workflow.slice(
@@ -5372,7 +5372,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
       'codex_transport="extensions/codex/src/app-server/transport-websocket.ts"',
     );
     expect(workflow).toContain(
-      "network_codeql_contract_pattern='^\\.github/codeql/(codeql-network-runtime-boundary-critical-quality\\.yml|openclaw-boundary/queries/(raw-socket-callsite-classification|managed-proxy-runtime-mutation)\\.ql)$'",
+      "network_codeql_contract_pattern='^\\.github/codeql/(codeql-network-runtime-boundary-critical-quality\\.yml|bot-boundary/queries/(raw-socket-callsite-classification|managed-proxy-runtime-mutation)\\.ql)$'",
     );
     expect(workflow).toContain(
       'if grep -Eq "$network_codeql_contract_pattern" "$changed_files" ||',
@@ -5385,7 +5385,7 @@ printf '%s\n' "\${CURL_SUCCESS_IP:-203.0.113.7}"
     // contain the transport path as data without disappearing from the scan.
     expect(workflow).toContain("packages/net-policy/src/");
     expect(workflow).toContain(
-      "grep -En 'HTTP_PROXY|HTTPS_PROXY|NO_PROXY|GLOBAL_AGENT_|OPENCLAW_PROXY_' \"$added_lines\"",
+      "grep -En 'HTTP_PROXY|HTTPS_PROXY|NO_PROXY|GLOBAL_AGENT_|BOT_PROXY_' \"$added_lines\"",
     );
     expect(workflow).toContain('echo "full_codeql=true" >> "$GITHUB_OUTPUT"');
     expect(workflow).toContain(

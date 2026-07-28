@@ -1,7 +1,7 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 // Fetches Gemini provider usage windows.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   buildUsageHttpErrorSnapshot,
   discardUsageResponseBody,

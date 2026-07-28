@@ -63,7 +63,7 @@ describeTelegramDispatch("dispatchTelegramMessage delivery-transcript", () => {
           id: 999,
           is_bot: true,
           first_name: "Telegram Bot Name",
-          username: "openclaw_bot",
+          username: "bot_bot",
         },
       } as TelegramMessageContext["primaryCtx"],
     });
@@ -96,7 +96,7 @@ describeTelegramDispatch("dispatchTelegramMessage delivery-transcript", () => {
           id: 999,
           is_bot: true,
           first_name: "Telegram Bot Name",
-          username: "openclaw_bot",
+          username: "bot_bot",
         },
       },
       chatId: "123",
@@ -190,7 +190,7 @@ describeTelegramDispatch("dispatchTelegramMessage delivery-transcript", () => {
   });
 
   it("records streamed final replies into the prompt context cache", async () => {
-    const storePath = `/tmp/openclaw-telegram-stream-context-${process.pid}-${Date.now()}.json`;
+    const storePath = `/tmp/bot-telegram-stream-context-${process.pid}-${Date.now()}.json`;
     const transcriptTimestamp = Date.now() + 1_000;
     const context = createContext({
       primaryCtx: {
@@ -198,7 +198,7 @@ describeTelegramDispatch("dispatchTelegramMessage delivery-transcript", () => {
           id: 999,
           is_bot: true,
           first_name: "Telegram Bot Name",
-          username: "openclaw_bot",
+          username: "bot_bot",
         },
       } as TelegramMessageContext["primaryCtx"],
     });

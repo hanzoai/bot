@@ -11,7 +11,7 @@ import {
   setPluginEnabled,
   type PluginCatalogItem,
 } from "../../lib/plugins/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import "./memory-dreaming-page.ts";
 import {
@@ -97,7 +97,7 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-class MemorySettingsPage extends OpenClawLightDomElement {
+class MemorySettingsPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -273,23 +273,23 @@ class MemorySettingsPage extends OpenClawLightDomElement {
       pluginsHref: this.pluginsHref,
       memoryImportHref: this.memoryImportHref,
       editor: this.buildEditor(memorySchemaKeysForTab(activeTab, backend)),
-      dreaming: html`<openclaw-memory-dreaming></openclaw-memory-dreaming>`,
+      dreaming: html`<bot-memory-dreaming></bot-memory-dreaming>`,
     });
   }
 }
 
-if (!customElements.get("openclaw-memory-settings")) {
-  customElements.define("openclaw-memory-settings", MemorySettingsPage);
+if (!customElements.get("bot-memory-settings")) {
+  customElements.define("bot-memory-settings", MemorySettingsPage);
 }
 
 export function renderMemoryPage(props: MemoryPageProps) {
   return html`
-    <openclaw-memory-settings
+    <bot-memory-settings
       .configObject=${props.configObject}
       .pluginsHref=${props.pluginsHref}
       .memoryImportHref=${props.memoryImportHref}
       .tab=${props.tab}
       .buildEditor=${props.buildEditor}
-    ></openclaw-memory-settings>
+    ></bot-memory-settings>
   `;
 }

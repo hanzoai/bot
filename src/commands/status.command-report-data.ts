@@ -1,7 +1,7 @@
-// Builds the data model for the standard `openclaw status` text report.
+// Builds the data model for the standard `bot status` text report.
 // It converts scan/runtime state into table rows and section lines before rendering.
 
-import { timestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
+import { timestampMsToIsoString } from "@hanzo/bot-normalization-core/number-coercion";
 import type { ConnectPairingRequiredReason } from "../../packages/gateway-protocol/src/connect-error-details.js";
 import type { RenderTableOptions, TableColumn } from "../../packages/terminal-core/src/table.js";
 import type { HeartbeatEventPayload } from "../infra/heartbeat-events.js";
@@ -140,9 +140,9 @@ export async function buildStatusCommandReportData(
       })
     : [
         params.theme.muted(
-          `Skipped in fast status. Full report: ${params.formatCliCommand("openclaw security audit")}`,
+          `Skipped in fast status. Full report: ${params.formatCliCommand("bot security audit")}`,
         ),
-        params.theme.muted(`Deep probe: ${params.formatCliCommand("openclaw status --deep")}`),
+        params.theme.muted(`Deep probe: ${params.formatCliCommand("bot status --deep")}`),
       ];
   const retainedLost = params.summary.taskAuditRetainedLost;
   // Lost task retention is operational noise unless the user requested deep/verbose status.
@@ -160,7 +160,7 @@ export async function buildStatusCommandReportData(
     width: params.tableWidth,
     overviewRows,
     showTaskMaintenanceHint: params.summary.taskAudit.errors > 0,
-    taskMaintenanceHint: `Task maintenance: ${params.formatCliCommand("openclaw tasks maintenance --apply")}`,
+    taskMaintenanceHint: `Task maintenance: ${params.formatCliCommand("bot tasks maintenance --apply")}`,
     retainedLostTaskLine: retainedLostLine,
     pluginCompatibilityLines: buildStatusPluginCompatibilityLines({
       notices: params.pluginCompatibility,

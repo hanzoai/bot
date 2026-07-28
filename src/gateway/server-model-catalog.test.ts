@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { ModelCatalogSnapshot } from "../agents/model-catalog.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   loadGatewayModelCatalog,
   loadGatewayModelCatalogSnapshot,
@@ -12,7 +12,7 @@ const snapshot: ModelCatalogSnapshot = {
   routeVariants: [],
 };
 
-function ownerConfig(agentId = "main", extra: OpenClawConfig = {}): OpenClawConfig {
+function ownerConfig(agentId = "main", extra: BotConfig = {}): BotConfig {
   return {
     ...extra,
     agents: {
@@ -30,7 +30,7 @@ function ownerConfig(agentId = "main", extra: OpenClawConfig = {}): OpenClawConf
 }
 
 function ownerSnapshot(
-  config: OpenClawConfig,
+  config: BotConfig,
   modelCatalog: ModelCatalogSnapshot = snapshot,
   agentId?: string,
 ) {
@@ -107,7 +107,7 @@ describe("gateway prepared model catalog", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const loadPublishedPreparedModelCatalogOwnerSnapshot = vi.fn(async () => ownerSnapshot(config));
 
     await expect(

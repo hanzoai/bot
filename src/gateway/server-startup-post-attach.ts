@@ -5,14 +5,14 @@ import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
 import type { CliDeps } from "../cli/deps.types.js";
 import { resolveStateDir } from "../config/paths.js";
 import type { GatewayTailscaleMode } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { hasConfiguredInternalHooks } from "../hooks/configured.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { hasRestartSentinel } from "../infra/restart-sentinel.js";
 import type { scheduleGatewayUpdateCheck } from "../infra/update-startup.js";
 import type { getGlobalHookRunner } from "../plugins/hook-runner-global.js";
 import type { PluginHookGatewayCronService } from "../plugins/hook-types.js";
-import type { loadOpenClawPlugins } from "../plugins/loader.js";
+import type { loadBotPlugins } from "../plugins/loader.js";
 import { getPluginModuleLoaderStats } from "../plugins/plugin-module-loader-cache.js";
 import type { PluginRegistry } from "../plugins/registry.js";
 import type { PluginServicesHandle } from "../plugins/services.js";
@@ -45,7 +45,7 @@ const PROVIDER_AUTH_REWARM_DELAY_MS = 1_000;
 const AGENT_RUNTIME_PLUGIN_PREWARM_START_DELAY_MS = 0;
 const DEFERRED_SIDECAR_START_DELAY_MS = 100;
 const SESSION_LOCK_CLEANUP_CONCURRENCY = 4;
-const SKIP_STARTUP_MODEL_PREWARM_ENV = "OPENCLAW_SKIP_STARTUP_MODEL_PREWARM";
+const SKIP_STARTUP_MODEL_PREWARM_ENV = "BOT_SKIP_STARTUP_MODEL_PREWARM";
 type Awaitable<T> = T | Promise<T>;
 
 type GatewayMemoryStartupPolicy =
@@ -119,13 +119,13 @@ function shouldSkipStartupModelPrewarm(env: NodeJS.ProcessEnv = process.env): bo
   return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
 }
 
-function resolveGatewayMemoryStartupPolicy(cfg: OpenClawConfig): GatewayMemoryStartupPolicy {
+function resolveGatewayMemoryStartupPolicy(cfg: BotConfig): GatewayMemoryStartupPolicy {
   void cfg;
   return { mode: "off" };
 }
 
 function scheduleGatewayMemoryBackend(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   log: { warn: (msg: string) => void };
   policy: GatewayMemoryStartupPolicy;
 }): void {
@@ -168,7 +168,7 @@ function schedulePostAttachUpdateSentinelRefresh(params: {
 }
 
 function scheduleProviderAuthStatePrewarm(params: {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => BotConfig;
   log: {
     info: (msg: string) => void;
     warn: (msg: string) => void;
@@ -295,7 +295,7 @@ function scheduleProviderAuthStatePrewarm(params: {
 }
 
 function scheduleAgentRuntimePluginPrewarm(params: {
-  getConfig: () => OpenClawConfig;
+  getConfig: () => BotConfig;
   workspaceDir: string;
   startupTrace?: GatewayStartupTrace;
   log: {
@@ -405,7 +405,7 @@ type MarkRestartAbortedMainSessionsFromLocks =
 
 async function cleanupStaleSessionLocks(params: {
   sessionDirs: readonly string[];
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   log: { warn: (msg: string) => void };
   isStopped: () => boolean;
   cleanStaleLockFiles: CleanStaleLockFiles;
@@ -452,7 +452,7 @@ async function cleanupStaleSessionLocks(params: {
 }
 
 function scheduleTranscriptsAutoStartSidecar(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   startupTrace?: GatewayStartupTrace;
   log: { warn: (msg: string) => void };
 }): GatewayPostReadySidecarHandle {
@@ -494,7 +494,7 @@ async function refreshLatestUpdateRestartSentinelIfPresent(): Promise<Awaited<
   return await (await loadGatewayRestartSentinelModule()).refreshLatestUpdateRestartSentinel();
 }
 
-function hasGatewayStartHooks(pluginRegistry: ReturnType<typeof loadOpenClawPlugins>): boolean {
+function hasGatewayStartHooks(pluginRegistry: ReturnType<typeof loadBotPlugins>): boolean {
   return pluginRegistry.typedHooks.some((hook) => hook.hookName === "gateway_start");
 }
 
@@ -531,7 +531,7 @@ async function waitForAcpRuntimeBackendReady(params: {
 }
 
 async function prewarmConfiguredPrimaryModel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   workspaceDir?: string;
   log: { warn: (msg: string) => void };
 }): Promise<void> {
@@ -539,7 +539,7 @@ async function prewarmConfiguredPrimaryModel(params: {
 }
 
 async function publishConfiguredModelRuntimeSnapshots(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   workspaceDir?: string;
   log: { warn: (msg: string) => void };
 }): Promise<void> {
@@ -554,7 +554,7 @@ async function publishConfiguredModelRuntimeSnapshots(params: {
 
 async function publishStartupModelRuntime(
   params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     workspaceDir?: string;
     log: { warn: (msg: string) => void };
   },
@@ -568,8 +568,8 @@ async function publishStartupModelRuntime(
 
 /** Start post-ready sidecars such as channels, hooks, plugin services, and cleanup tasks. */
 export async function startGatewaySidecars(params: {
-  cfg: OpenClawConfig;
-  pluginRegistry: ReturnType<typeof loadOpenClawPlugins>;
+  cfg: BotConfig;
+  pluginRegistry: ReturnType<typeof loadBotPlugins>;
   defaultWorkspaceDir: string;
   deps: CliDeps;
   startChannels: () => Promise<void>;
@@ -624,8 +624,8 @@ export async function startGatewaySidecars(params: {
   });
 
   const skipChannels =
-    isTruthyEnvValue(process.env.OPENCLAW_SKIP_CHANNELS) ||
-    isTruthyEnvValue(process.env.OPENCLAW_SKIP_PROVIDERS);
+    isTruthyEnvValue(process.env.BOT_SKIP_CHANNELS) ||
+    isTruthyEnvValue(process.env.BOT_SKIP_PROVIDERS);
   // Agent RPC remains available when transports are disabled. Publish configured/static facts before
   // accepting work; live provider catalogs stay advisory and never enter the Gateway lifecycle.
   await measureStartup(params.startupTrace, "sidecars.model-runtime", () =>
@@ -661,7 +661,7 @@ export async function startGatewaySidecars(params: {
     } else {
       await measureStartup(params.startupTrace, "sidecars.channel-skip", () =>
         params.logChannels.info(
-          "skipping channel start (OPENCLAW_SKIP_CHANNELS=1 or OPENCLAW_SKIP_PROVIDERS=1)",
+          "skipping channel start (BOT_SKIP_CHANNELS=1 or BOT_SKIP_PROVIDERS=1)",
         ),
       );
     }
@@ -731,7 +731,7 @@ export async function startGatewaySidecars(params: {
         const [{ getAcpSessionManager }, { ACP_SESSION_IDENTITY_RENDERER_VERSION }] =
           await Promise.all([
             import("../acp/control-plane/manager.js"),
-            import("@openclaw/acp-core/runtime/session-identifiers"),
+            import("@hanzo/bot-acp-core/runtime/session-identifiers"),
           ]);
         const result = await getAcpSessionManager().reconcilePendingSessionIdentities({
           cfg: params.cfg,
@@ -908,7 +908,7 @@ const defaultGatewayPostAttachRuntimeDeps: GatewayPostAttachRuntimeDeps = {
 function createDeferredGatewayUpdateCheck(params: {
   startupTrace?: GatewayStartupTrace;
   runtimeDeps: GatewayPostAttachRuntimeDeps;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   log: {
     info: (msg: string) => void;
     warn: (msg: string) => void;
@@ -974,7 +974,7 @@ function createDeferredGatewayUpdateCheck(params: {
 export async function startGatewayPostAttachRuntime(
   params: {
     minimalTestGateway: boolean;
-    cfgAtStart: OpenClawConfig;
+    cfgAtStart: BotConfig;
     bindHost: string;
     bindHosts: string[];
     port: number;
@@ -998,10 +998,10 @@ export async function startGatewayPostAttachRuntime(
       error: (msg: string) => void;
       debug?: (msg: string) => void;
     };
-    gatewayPluginConfigAtStart: OpenClawConfig;
-    activationSourceConfig: OpenClawConfig;
+    gatewayPluginConfigAtStart: BotConfig;
+    activationSourceConfig: BotConfig;
     ambientEnvTriggers?: AmbientEnvTriggerPolicy;
-    pluginRegistry: ReturnType<typeof loadOpenClawPlugins>;
+    pluginRegistry: ReturnType<typeof loadBotPlugins>;
     defaultWorkspaceDir: string;
     deps: CliDeps;
     startChannels: () => Promise<void>;
@@ -1035,12 +1035,12 @@ export async function startGatewayPostAttachRuntime(
     providerAuthPrewarm?: {
       enabled?: boolean;
       delayMs?: number;
-      getConfig?: () => OpenClawConfig;
+      getConfig?: () => BotConfig;
     };
     agentRuntimePluginPrewarm?: {
       enabled?: boolean;
       delayMs?: number;
-      getConfig?: () => OpenClawConfig;
+      getConfig?: () => BotConfig;
     };
   },
   runtimeDeps: GatewayPostAttachRuntimeDeps = defaultGatewayPostAttachRuntimeDeps,

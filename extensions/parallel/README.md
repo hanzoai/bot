@@ -1,12 +1,12 @@
-# OpenClaw Parallel Plugin
+# Bot Parallel Plugin
 
-Official OpenClaw plugin for Parallel.
+Official Bot plugin for Parallel.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/parallel-plugin
-openclaw gateway restart
+bot plugins install @hanzo/bot-parallel-plugin
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/tools/parallel-search> for setup and configuration.
+See <https://docs.bot.ai/tools/parallel-search> for setup and configuration.

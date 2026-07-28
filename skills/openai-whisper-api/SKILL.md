@@ -4,7 +4,7 @@ description: "OpenAI Audio Transcriptions API via curl; gpt-4o-transcribe, mini,
 homepage: https://platform.openai.com/docs/guides/speech-to-text
 metadata:
   {
-    "openclaw":
+    "bot":
       {
         "emoji": "🌐",
         "requires": { "bins": ["curl", "node"], "env": ["OPENAI_API_KEY"] },
@@ -58,7 +58,7 @@ Notes:
 
 ## API key
 
-Set `OPENAI_API_KEY`, or configure it in the active OpenClaw config file (`$OPENCLAW_CONFIG_PATH`, default `~/.openclaw/openclaw.json`). Optionally set `OPENAI_BASE_URL`:
+Set `OPENAI_API_KEY`, or configure it in the active Bot config file (`$BOT_CONFIG_PATH`, default `~/.hanzoai/bot.json`). Optionally set `OPENAI_BASE_URL`:
 
 ```json5
 {

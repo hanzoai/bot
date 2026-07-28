@@ -20,7 +20,7 @@ function createAccount(params: {
     dmPolicy: "allowlist",
     allowedUserIds: [],
     rateLimitPerMinute: 30,
-    botName: "OpenClaw",
+    botName: "Bot",
     allowInsecureSsl: false,
   };
 }

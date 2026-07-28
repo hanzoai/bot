@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it } from "vitest";
 const tempDirs: string[] = [];
 
 function makeTempDir(): string {
-  const dir = mkdtempSync(path.join(tmpdir(), "openclaw-docker-e2e-observability-"));
+  const dir = mkdtempSync(path.join(tmpdir(), "bot-docker-e2e-observability-"));
   tempDirs.push(dir);
   return dir;
 }

@@ -1,5 +1,5 @@
 // Defines channel-native approval runtime contracts.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { ExecApprovalRequest, ExecApprovalResolved } from "./exec-approvals.js";
 import type { PluginApprovalRequest, PluginApprovalResolved } from "./plugin-approvals.js";
 
@@ -17,7 +17,7 @@ export type ExecApprovalChannelRuntimeAdapter<
 > = {
   label: string;
   clientDisplayName: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   gatewayUrl?: string;
   /** Defaults to exec-only; include plugin when the adapter can handle plugin approvals. */
   eventKinds?: readonly ExecApprovalChannelRuntimeEventKind[];

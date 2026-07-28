@@ -1,6 +1,6 @@
 /** Tests secret target registry matching and docs coverage. */
 import { beforeAll, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import {
   buildTalkTestProviderConfig,
   TALK_TEST_PROVIDER_API_KEY_PATH,
@@ -26,7 +26,7 @@ describe("secret target registry", () => {
           token: { source: "env" as const, provider: "default", id: "REMOTE_TOKEN" },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const targets = discoverConfigSecretTargetsByIds(config, new Set(["talk.providers.*.apiKey"]));
 
@@ -63,7 +63,7 @@ describe("secret target registry", () => {
 
   it("resolves plan targets by owning config document", () => {
     const configTarget = resolveSecretPlanTargetByPath({
-      configFile: "openclaw.json",
+      configFile: "bot.json",
       pathSegments: ["models", "providers", "openai", "apiKey"],
     });
     const authProfileTarget = resolveSecretPlanTargetByPath({

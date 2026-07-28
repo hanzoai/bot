@@ -52,8 +52,8 @@ async function main() {
   const ok = await probeHttpStatus({
     url,
     expectedRaw,
-    timeoutMs: readPositiveIntEnv("OPENCLAW_HTTP_PROBE_TIMEOUT_MS", 30_000),
-    bearer: process.env.OPENCLAW_HTTP_PROBE_BEARER,
+    timeoutMs: readPositiveIntEnv("BOT_HTTP_PROBE_TIMEOUT_MS", 30_000),
+    bearer: process.env.BOT_HTTP_PROBE_BEARER,
   });
   process.exit(ok ? 0 : 1);
 }

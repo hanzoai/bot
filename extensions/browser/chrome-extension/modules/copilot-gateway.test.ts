@@ -109,7 +109,7 @@ describe("browser copilot Gateway custody", () => {
     expect(identityB.deviceId).not.toBe(identityA.deviceId);
 
     const tokenParams = {
-      clientId: "openclaw-browser-copilot",
+      clientId: "bot-browser-copilot",
       deviceId: identityA.deviceId,
       role: "operator",
     };
@@ -143,7 +143,7 @@ describe("browser copilot Gateway custody", () => {
     });
 
     const tokenParams = (deviceId: string) => ({
-      clientId: "openclaw-browser-copilot",
+      clientId: "bot-browser-copilot",
       deviceId,
       role: "operator",
     });
@@ -239,7 +239,7 @@ describe("browser copilot Gateway custody", () => {
     const identity = await loadOrCreateCopilotIdentity(storage, gatewayScope);
     const tokenStore = createCopilotTokenStore(storage, gatewayScope);
     const tokenParams = {
-      clientId: "openclaw-browser-copilot",
+      clientId: "bot-browser-copilot",
       deviceId: identity.deviceId,
       role: "operator",
     };

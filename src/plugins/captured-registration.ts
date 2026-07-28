@@ -1,6 +1,6 @@
 // Captures plugin registrations for controlled registry assembly.
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
+import type { BotConfig } from "../config/types.bot.js";
 import type {
   AgentToolResultMiddleware,
   AgentToolResultMiddlewareOptions,
@@ -27,14 +27,14 @@ import type {
   AnyAgentTool,
   AgentHarness,
   CliBackendPlugin,
-  OpenClawPluginApi,
+  BotPluginApi,
   ImageGenerationProviderPlugin,
   MediaUnderstandingProviderPlugin,
   TranscriptSourceProvider,
   MigrationProviderPlugin,
   MusicGenerationProviderPlugin,
-  OpenClawPluginCliRootCommandDescriptor,
-  OpenClawPluginCliRegistrar,
+  BotPluginCliRootCommandDescriptor,
+  BotPluginCliRegistrar,
   PluginTextTransformRegistration,
   ProviderPlugin,
   RealtimeTranscriptionProviderPlugin,
@@ -48,14 +48,14 @@ import type {
 } from "./types.js";
 
 type CapturedPluginCliRegistration = {
-  register: OpenClawPluginCliRegistrar;
+  register: BotPluginCliRegistrar;
   parentPath: string[];
   commands: string[];
-  descriptors: OpenClawPluginCliRootCommandDescriptor[];
+  descriptors: BotPluginCliRootCommandDescriptor[];
 };
 
 export type CapturedPluginRegistration = {
-  api: OpenClawPluginApi;
+  api: BotPluginApi;
   providers: ProviderPlugin[];
   agentHarnesses: AgentHarness[];
   cliRegistrars: CapturedPluginCliRegistration[];
@@ -91,10 +91,10 @@ export type CapturedPluginRegistration = {
 };
 
 export function createCapturedPluginRegistration(params?: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   id?: string;
   name?: string;
-  registrationMode?: OpenClawPluginApi["registrationMode"];
+  registrationMode?: BotPluginApi["registrationMode"];
   source?: string;
 }): CapturedPluginRegistration {
   const providers: ProviderPlugin[] = [];
@@ -178,7 +178,7 @@ export function createCapturedPluginRegistration(params?: {
       name: pluginName,
       source: pluginSource,
       registrationMode: params?.registrationMode ?? "full",
-      config: params?.config ?? ({} as OpenClawConfig),
+      config: params?.config ?? ({} as BotConfig),
       runtime: {} as PluginRuntime,
       logger: noopLogger,
       resolvePath: (input) => input,
@@ -189,9 +189,9 @@ export function createCapturedPluginRegistration(params?: {
           const descriptors = (opts?.descriptors ?? [])
             .map((descriptor) => {
               const machineOutput = rootRegistration
-                ? (descriptor as OpenClawPluginCliRootCommandDescriptor).machineOutput
+                ? (descriptor as BotPluginCliRootCommandDescriptor).machineOutput
                 : undefined;
-              const normalized: OpenClawPluginCliRootCommandDescriptor = {
+              const normalized: BotPluginCliRootCommandDescriptor = {
                 name: descriptor.name.trim(),
                 description: descriptor.description.trim(),
                 hasSubcommands: descriptor.hasSubcommands,
@@ -347,7 +347,7 @@ export function createCapturedPluginRegistration(params?: {
 
 export function capturePluginRegistration(
   params: NonNullable<Parameters<typeof createCapturedPluginRegistration>[0]> & {
-    register(api: OpenClawPluginApi): void;
+    register(api: BotPluginApi): void;
   },
 ): CapturedPluginRegistration {
   const captured = createCapturedPluginRegistration(params);

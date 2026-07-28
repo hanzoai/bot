@@ -11,44 +11,44 @@ export type {
   ChannelOutboundAdapter,
   ChannelPlugin,
   HistoryEntry,
-  OpenClawConfig,
-  OpenClawPluginApi,
+  BotConfig,
+  BotPluginApi,
   OutboundIdentity,
   PluginRuntime,
   ReplyPayload,
-} from "openclaw/plugin-sdk/core";
-export type { OpenClawConfig as ClawdbotConfig } from "openclaw/plugin-sdk/core";
+} from "bot/plugin-sdk/core";
+export type { BotConfig as ClawdbotConfig } from "bot/plugin-sdk/core";
 export type RuntimeEnv = {
   log: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
   exit: (code: number) => void;
 };
-export type { GroupToolPolicyConfig } from "openclaw/plugin-sdk/config-contracts";
+export type { GroupToolPolicyConfig } from "bot/plugin-sdk/config-contracts";
 export {
   DEFAULT_ACCOUNT_ID,
   buildChannelConfigSchema,
   createActionGate,
   createDedupeCache,
-} from "openclaw/plugin-sdk/core";
+} from "bot/plugin-sdk/core";
 export {
   PAIRING_APPROVED_MESSAGE,
   buildProbeChannelStatusSummary,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/channel-status";
-export { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
-export { createReplyPrefixContext } from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-status";
+export { createChannelPairingController } from "bot/plugin-sdk/channel-pairing";
+export { createReplyPrefixContext } from "bot/plugin-sdk/channel-outbound";
 export {
   evaluateSupplementalContextVisibility,
   filterSupplementalContextItems,
   resolveChannelContextVisibilityMode,
-} from "openclaw/plugin-sdk/context-visibility-runtime";
-export { getSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
-export { readJsonFileWithFallback } from "openclaw/plugin-sdk/json-store";
-export { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-export { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/context-visibility-runtime";
+export { getSessionEntry } from "bot/plugin-sdk/session-store-runtime";
+export { readJsonFileWithFallback } from "bot/plugin-sdk/json-store";
+export { normalizeAgentId } from "bot/plugin-sdk/routing";
+export { chunkTextForOutbound } from "bot/plugin-sdk/text-chunking";
 export {
   isRequestBodyLimitError,
   readRequestBodyWithLimit,
   requestBodyErrorToText,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "bot/plugin-sdk/webhook-ingress";
 export { setFeishuRuntime } from "./src/runtime.js";

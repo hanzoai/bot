@@ -7,7 +7,7 @@ import {
   resolveModelRefFromString,
 } from "../../agents/model-selection.js";
 import { resolveProviderIdForAuth } from "../../agents/provider-auth-aliases.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { resolveProfileOverride } from "./directive-handling.auth-profile.js";
 import type { InlineDirectives } from "./directive-handling.parse.js";
 import { type ModelDirectiveSelection, resolveModelDirectiveSelection } from "./model-selection.js";
@@ -48,7 +48,7 @@ function resolveStoredNumericProfileModelDirective(params: { raw: string; agentD
 /** Resolves the requested model/profile override from parsed inline directives. */
 export function resolveModelSelectionFromDirective(params: {
   directives: InlineDirectives;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentDir: string;
   defaultProvider: string;
   defaultModel: string;

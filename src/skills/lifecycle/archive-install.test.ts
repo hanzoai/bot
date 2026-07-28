@@ -55,7 +55,7 @@ async function expectFlatRootMarkerRejected(params: {
 
   const result = await withExtractedArchiveRoot({
     archivePath,
-    tempDirPrefix: "openclaw-skill-clawhub-test-",
+    tempDirPrefix: "bot-skill-clawhub-test-",
     timeoutMs: 120_000,
     rootMarkers: ["SKILL.md"],
     onExtracted: async () => ({ ok: true as const }),
@@ -80,7 +80,7 @@ describe("skill archive install", () => {
   it.each(["skill.md", "skills.md", "SKILL.MD"])(
     "installs a single-root ClawHub archive with legacy marker %s",
     async (marker) => {
-      const root = await tempDirs.make("openclaw-skill-archive-install-");
+      const root = await tempDirs.make("bot-skill-archive-install-");
       const archivePath = path.join(root, "legacy.zip");
       const workspaceDir = path.join(root, "workspace");
       await writeZipArchive({
@@ -92,7 +92,7 @@ describe("skill archive install", () => {
 
       const result = await withExtractedArchiveRoot({
         archivePath,
-        tempDirPrefix: "openclaw-skill-clawhub-test-",
+        tempDirPrefix: "bot-skill-clawhub-test-",
         timeoutMs: 120_000,
         rootMarkers: CLAWHUB_SKILL_ARCHIVE_ROOT_MARKERS,
         onExtracted: async (extractedRoot) =>
@@ -116,12 +116,12 @@ describe("skill archive install", () => {
   );
 
   it("keeps flat-root non-SKILL.md legacy markers rejected by strict packed-root resolution", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("bot-skill-archive-install-");
     await expectFlatRootMarkerRejected({ marker: "skills.md", root });
   });
 
   it("keeps flat-root lowercase skill.md rejected by strict packed-root resolution on case-sensitive filesystems", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("bot-skill-archive-install-");
     const caseSensitive = await isCaseSensitiveFileSystem(root);
     if (!caseSensitive) {
       expect(caseSensitive).toBe(false);
@@ -131,7 +131,7 @@ describe("skill archive install", () => {
   });
 
   it("keeps skill archive policy installs independent from built-in scanner blocks", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("bot-skill-archive-install-");
     const workspaceDir = path.join(root, "workspace");
     const extractedRoot = path.join(root, "extracted");
     await fs.mkdir(extractedRoot, { recursive: true });
@@ -149,7 +149,7 @@ describe("skill archive install", () => {
         config: {},
         installId: "clawhub",
         origin: { type: "clawhub", slug: "clawhub-policy-only", version: "1.0.0" },
-        source: { kind: "clawhub", authority: "openclaw", mutable: false, network: true },
+        source: { kind: "clawhub", authority: "bot", mutable: false, network: true },
         requestedSpecifier: "clawhub:clawhub-policy-only@1.0.0",
       },
       rootMarkers: CLAWHUB_SKILL_ARCHIVE_ROOT_MARKERS,
@@ -168,7 +168,7 @@ describe("skill archive install", () => {
   });
 
   it("keeps legacy skill-upload origin for before_install hooks", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("bot-skill-archive-install-");
     const workspaceDir = path.join(root, "workspace");
     const extractedRoot = path.join(root, "extracted");
     await fs.mkdir(extractedRoot, { recursive: true });
@@ -199,7 +199,7 @@ describe("skill archive install", () => {
   });
 
   it("reports forced installs of missing skills as install mode to policy", async () => {
-    const root = await tempDirs.make("openclaw-skill-archive-install-");
+    const root = await tempDirs.make("bot-skill-archive-install-");
     const workspaceDir = path.join(root, "workspace");
     const extractedRoot = path.join(root, "extracted");
     await fs.mkdir(extractedRoot, { recursive: true });

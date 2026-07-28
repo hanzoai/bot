@@ -4,7 +4,7 @@ import EventKit
 import Photos
 import Testing
 import UserNotifications
-@testable import OpenClaw
+@testable import Bot
 
 struct DevicePermissionsTests {
     @Test func `contacts statuses map to shared grants`() {

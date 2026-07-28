@@ -2,7 +2,7 @@
  * Reads Codex plugin marketplace state and app inventory to decide which
  * plugin-owned apps can be exposed to a native Codex thread.
  */
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog } from "bot/plugin-sdk/agent-harness-runtime";
 import type {
   CodexAppInventoryCache,
   CodexAppInventoryCacheRead,
@@ -308,7 +308,7 @@ async function listCodexPluginMetadata(
   queryKind: CodexPluginMetadataQueryKind,
   requestParams: v2.PluginListParams,
 ): Promise<v2.PluginListResponse> {
-  // Workspace-directory plugins are activated OUTSIDE OpenClaw, so a cached
+  // Workspace-directory plugins are activated OUTSIDE Bot, so a cached
   // miss has no invalidation signal; keep those queries live so external
   // activation is visible on the next turn (bounded by the build deadline).
   if (!params.metadataCache || !params.appCacheKey || queryKind === "workspace-directory") {

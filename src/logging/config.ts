@@ -1,15 +1,15 @@
 // Logging config helpers read and normalize logger configuration.
 import fs from "node:fs";
-import { isRecord as isObjectRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord as isObjectRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { getCommandPathWithRootOptions } from "../cli/argv.js";
 import { resolveConfigEnvVars } from "../config/env-substitution.js";
 import { resolveConfigIncludes, resolveConfigIncludesForTopLevelKey } from "../config/includes.js";
 import { resolveConfigPath, resolveIncludeRoots } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { parseJsonWithJson5Fallback } from "../utils/parse-json-compat.js";
 
 // Lightweight logging-config reader used before the full config runtime is safe to load.
-type LoggingConfig = NonNullable<OpenClawConfig["logging"]>;
+type LoggingConfig = NonNullable<BotConfig["logging"]>;
 
 let cachedLoggingConfig:
   | {

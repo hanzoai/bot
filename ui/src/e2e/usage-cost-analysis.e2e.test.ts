@@ -12,7 +12,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let browser: Browser;
@@ -298,7 +298,7 @@ describeControlUiE2e("Control UI usage cost analysis mocked Gateway E2E", () => 
     try {
       await page.goto(`${server.baseUrl}usage`);
       await page.locator(".daily-chart-compact").waitFor({ state: "visible", timeout: 10_000 });
-      const agentScope = page.locator(".agent-scope-control openclaw-agent-select");
+      const agentScope = page.locator(".agent-scope-control bot-agent-select");
       await agentScope.locator(".agent-select__trigger").click();
       await agentScope
         .locator("wa-dropdown-item[data-agent-option]")
@@ -378,7 +378,7 @@ describeControlUiE2e("Control UI usage cost analysis mocked Gateway E2E", () => 
       await expect.poll(() => topProviders.textContent()).toContain("No provider data");
       await expect.poll(() => topProviders.textContent()).not.toContain("openai");
 
-      if (process.env.OPENCLAW_CAPTURE_UI_PROOF === "1") {
+      if (process.env.BOT_CAPTURE_UI_PROOF === "1") {
         const artifactDir = path.join(
           process.cwd(),
           ".artifacts",

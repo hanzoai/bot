@@ -1,7 +1,7 @@
 // image_generate tool tests cover provider/model selection, edit inputs,
 // background task handling, media saving, and duplicate-generation guards.
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
 const taskRuntimeInternalMocks = vi.hoisted(() => {
   const mocks = {
@@ -796,7 +796,7 @@ describe("createImageGenerateTool", () => {
       size: 7,
       contentType: "image/png",
     });
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       agents: {
         defaults: {
           mediaModels: {
@@ -1989,7 +1989,7 @@ describe("createImageGenerateTool", () => {
       ],
     });
     vi.spyOn(mediaStore, "saveMediaBuffer").mockResolvedValueOnce({
-      path: "/home/openclaw/.openclaw/media/tool-image-generation/kodo_sawaki_zazen---3337a0ed-898a-4572-8950-0d288719f4f8.jpg",
+      path: "/home/bot/.bot/media/tool-image-generation/kodo_sawaki_zazen---3337a0ed-898a-4572-8950-0d288719f4f8.jpg",
       id: "kodo_sawaki_zazen---3337a0ed-898a-4572-8950-0d288719f4f8.jpg",
       size: 8,
       contentType: "image/jpeg",
@@ -2011,12 +2011,12 @@ describe("createImageGenerateTool", () => {
     const text = resultText(result);
 
     expect(text).toContain(
-      'path="/home/openclaw/.openclaw/media/tool-image-generation/kodo_sawaki_zazen---3337a0ed-898a-4572-8950-0d288719f4f8.jpg"',
+      'path="/home/bot/.bot/media/tool-image-generation/kodo_sawaki_zazen---3337a0ed-898a-4572-8950-0d288719f4f8.jpg"',
     );
     const details = resultDetails(result);
     const media = requireRecord(details.media, "media details");
     expect(media.mediaUrls).toEqual([
-      "/home/openclaw/.openclaw/media/tool-image-generation/kodo_sawaki_zazen---3337a0ed-898a-4572-8950-0d288719f4f8.jpg",
+      "/home/bot/.bot/media/tool-image-generation/kodo_sawaki_zazen---3337a0ed-898a-4572-8950-0d288719f4f8.jpg",
     ]);
   });
 

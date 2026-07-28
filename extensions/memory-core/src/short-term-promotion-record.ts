@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import { formatMemoryDreamingDay } from "openclaw/plugin-sdk/memory-core-host-status";
-import { appendMemoryHostEvent } from "openclaw/plugin-sdk/memory-host-events";
+import type { MemorySearchResult } from "bot/plugin-sdk/memory-core-host-runtime-files";
+import { formatMemoryDreamingDay } from "bot/plugin-sdk/memory-core-host-status";
+import { appendMemoryHostEvent } from "bot/plugin-sdk/memory-host-events";
 import pLimit from "p-limit";
 import { deriveConceptTags } from "./concept-vocabulary.js";
 import { readStore, withShortTermLock, writeStore } from "./short-term-promotion-store.js";

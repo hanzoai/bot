@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeAll, describe, expect, it } from "vitest";
 import "../test-support/browser-security.mock.js";
 import { DEFAULT_DOWNLOAD_DIR, DEFAULT_TRACE_DIR, DEFAULT_UPLOAD_DIR } from "./paths.js";
@@ -161,7 +161,7 @@ async function withSymlinkPathEscape<T>(params: {
   rootDir: string;
   run: (relativePath: string) => Promise<T>;
 }): Promise<T> {
-  const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-route-escape-"));
+  const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-route-escape-"));
   const linkName = `escape-link-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   const linkPath = path.join(params.rootDir, linkName);
   await fs.mkdir(params.rootDir, { recursive: true });

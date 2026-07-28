@@ -1,5 +1,5 @@
 // Runtime bridge for plugin-provided migration hooks.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { getLoadedRuntimePluginRegistry } from "./active-runtime-registry.js";
 import {
   withBundledPluginEnablementCompat,
@@ -23,9 +23,9 @@ function findMigrationProviderById(
 }
 
 function resolveMigrationProviderConfig(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   bundledCompatPluginIds: readonly string[];
-}): OpenClawConfig | undefined {
+}): BotConfig | undefined {
   const enablementCompat = withBundledPluginEnablementCompat({
     config: params.cfg,
     pluginIds: [...params.bundledCompatPluginIds],
@@ -44,7 +44,7 @@ function resolveMigrationProviderRegistry(params: { pluginIds: string[] }) {
 }
 
 function resolveMigrationProviderPluginResolution(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   providerId?: string;
 }): MigrationProviderPluginResolution {
   const resolution = resolveManifestContractRuntimePluginResolution({
@@ -92,7 +92,7 @@ function mergeMigrationProviders(
 
 export function ensureStandaloneMigrationProviderRegistryLoaded(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
     providerId?: string;
   } = {},
 ): void {
@@ -117,7 +117,7 @@ export function ensureStandaloneMigrationProviderRegistryLoaded(
 
 export function resolvePluginMigrationProvider(params: {
   providerId: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): MigrationProviderPlugin | undefined {
   const activeRegistry = getLoadedRuntimePluginRegistry();
   const activeProvider = findMigrationProviderById(
@@ -144,7 +144,7 @@ export function resolvePluginMigrationProvider(params: {
 
 export function resolvePluginMigrationProviders(
   params: {
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
   } = {},
 ): MigrationProviderPlugin[] {
   const activeRegistry = getLoadedRuntimePluginRegistry();

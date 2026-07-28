@@ -24,8 +24,8 @@ function readJsonFile(filePath) {
 /** Return whether a plugin package publishes through an artifact release workflow. */
 function isPublishablePluginPackage(packageJson) {
   return (
-    packageJson.openclaw?.release?.publishToNpm === true ||
-    packageJson.openclaw?.release?.publishToClawHub === true
+    packageJson.bot?.release?.publishToNpm === true ||
+    packageJson.bot?.release?.publishToClawHub === true
   );
 }
 
@@ -38,7 +38,7 @@ function isTypeScriptEntry(entry) {
 }
 
 function resolveRuntimeBuildFormat(packageJson) {
-  return packageJson.openclaw?.build?.runtimeFormat === "cjs" ? "cjs" : "esm";
+  return packageJson.bot?.build?.runtimeFormat === "cjs" ? "cjs" : "esm";
 }
 
 function runtimeBuildExtension(runtimeFormat) {
@@ -78,7 +78,7 @@ function getRecord(value) {
 function createNeverBundleDependencyMatcher(packageJson) {
   const externalDependencies = collectExternalDependencyNames(packageJson);
   return (id) => {
-    if (id === "openclaw" || id.startsWith("openclaw/")) {
+    if (id === "bot" || id.startsWith("bot/")) {
       return true;
     }
     for (const dependency of externalDependencies) {
@@ -91,7 +91,7 @@ function createNeverBundleDependencyMatcher(packageJson) {
 }
 
 const HOST_PLUGIN_SDK_IMPORT_RE =
-  /(?:\bfrom\s+|\bimport\s*(?:\(\s*)?|\b(?:require|_+require\d*)\(\s*)["'](openclaw\/plugin-sdk\/[^"']+)["']/gu;
+  /(?:\bfrom\s+|\bimport\s*(?:\(\s*)?|\b(?:require|_+require\d*)\(\s*)["'](bot\/plugin-sdk\/[^"']+)["']/gu;
 
 function listRuntimeJavaScriptFiles(rootDir) {
   if (!fs.existsSync(rootDir)) {
@@ -131,7 +131,7 @@ export function listMissingPluginNpmRuntimeHostExports(plan) {
   const hostPackageJson = readJsonFile(path.join(plan.repoRoot, "package.json"));
   const hostExports = new Set(Object.keys(hostPackageJson.exports ?? {}));
   return [...hostImports]
-    .filter((specifier) => !hostExports.has(specifier.replace(/^openclaw/u, ".")))
+    .filter((specifier) => !hostExports.has(specifier.replace(/^bot/u, ".")))
     .toSorted((left, right) => left.localeCompare(right));
 }
 
@@ -214,8 +214,8 @@ function resolvePluginNpmRuntimePackageFiles(plan) {
       : [],
   );
   merged.add("dist/**");
-  if (packageRelativePathExists(plan.packageDir, "openclaw.plugin.json")) {
-    merged.add("openclaw.plugin.json");
+  if (packageRelativePathExists(plan.packageDir, "bot.plugin.json")) {
+    merged.add("bot.plugin.json");
   }
   if (packageRelativePathExists(plan.packageDir, "README.md")) {
     merged.add("README.md");
@@ -229,7 +229,7 @@ function resolvePluginNpmRuntimePackageFiles(plan) {
   return [...merged];
 }
 
-function normalizeOpenClawPeerRange(value) {
+function normalizeBotPeerRange(value) {
   const normalized = normalizePackageEntry(value);
   if (!normalized) {
     return "";
@@ -239,36 +239,36 @@ function normalizeOpenClawPeerRange(value) {
     : `>=${normalized}`;
 }
 
-function resolveOpenClawPeerRange(packageJson, rootPackageJson) {
+function resolveBotPeerRange(packageJson, rootPackageJson) {
   return (
-    normalizeOpenClawPeerRange(packageJson.openclaw?.compat?.pluginApi) ||
-    normalizeOpenClawPeerRange(packageJson.peerDependencies?.openclaw) ||
-    normalizeOpenClawPeerRange(packageJson.openclaw?.build?.openclawVersion) ||
-    normalizeOpenClawPeerRange(rootPackageJson?.version) ||
-    normalizeOpenClawPeerRange(packageJson.version)
+    normalizeBotPeerRange(packageJson.bot?.compat?.pluginApi) ||
+    normalizeBotPeerRange(packageJson.peerDependencies?.bot) ||
+    normalizeBotPeerRange(packageJson.bot?.build?.botVersion) ||
+    normalizeBotPeerRange(rootPackageJson?.version) ||
+    normalizeBotPeerRange(packageJson.version)
   );
 }
 
-/** Resolve package peer dependency metadata for the OpenClaw plugin API. */
+/** Resolve package peer dependency metadata for the Bot plugin API. */
 function resolvePluginNpmRuntimePackagePeerMetadata(plan) {
-  const openclawPeerRange = resolveOpenClawPeerRange(plan.packageJson, plan.rootPackageJson);
-  if (!openclawPeerRange) {
+  const botPeerRange = resolveBotPeerRange(plan.packageJson, plan.rootPackageJson);
+  if (!botPeerRange) {
     throw new Error(
-      `cannot infer openclaw peerDependency range for ${plan.pluginDir}; set openclaw.compat.pluginApi or package version`,
+      `cannot infer bot peerDependency range for ${plan.pluginDir}; set bot.compat.pluginApi or package version`,
     );
   }
   const existingPeerDependencies = getStringRecord(plan.packageJson.peerDependencies);
   const existingPeerDependenciesMeta = getRecord(plan.packageJson.peerDependenciesMeta);
-  const existingOpenClawMeta = getRecord(existingPeerDependenciesMeta.openclaw);
+  const existingBotMeta = getRecord(existingPeerDependenciesMeta.bot);
   return {
     peerDependencies: {
       ...existingPeerDependencies,
-      openclaw: openclawPeerRange,
+      bot: botPeerRange,
     },
     peerDependenciesMeta: {
       ...existingPeerDependenciesMeta,
-      openclaw: {
-        ...existingOpenClawMeta,
+      bot: {
+        ...existingBotMeta,
         optional: true,
       },
     },
@@ -323,15 +323,15 @@ export function resolvePluginNpmRuntimeBuildPlan(params) {
     entry,
     outDir: path.join(packageDir, "dist"),
     runtimeFormat,
-    runtimeExtensions: (Array.isArray(packageJson.openclaw?.extensions)
-      ? packageJson.openclaw.extensions
+    runtimeExtensions: (Array.isArray(packageJson.bot?.extensions)
+      ? packageJson.bot.extensions
       : []
     )
       .map(normalizePackageEntry)
       .filter(Boolean)
       .map((runtimeEntry) => toPackageRuntimeEntry(runtimeEntry, runtimeFormat)),
-    runtimeSetupEntry: normalizePackageEntry(packageJson.openclaw?.setupEntry)
-      ? toPackageRuntimeEntry(packageJson.openclaw.setupEntry, runtimeFormat)
+    runtimeSetupEntry: normalizePackageEntry(packageJson.bot?.setupEntry)
+      ? toPackageRuntimeEntry(packageJson.bot.setupEntry, runtimeFormat)
       : undefined,
   };
   return {
@@ -371,7 +371,7 @@ export async function buildPluginNpmRuntime(params) {
   const missingHostExports = listMissingPluginNpmRuntimeHostExports(plan);
   if (missingHostExports.length > 0) {
     throw new Error(
-      `${plan.pluginDir} runtime imports missing OpenClaw host exports: ${missingHostExports.join(", ")}`,
+      `${plan.pluginDir} runtime imports missing Bot host exports: ${missingHostExports.join(", ")}`,
     );
   }
   rewriteCommonJsRuntimeSpecifiers(plan);

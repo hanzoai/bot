@@ -1,11 +1,11 @@
-# OpenClaw Anthropic Vertex Provider
+# Bot Anthropic Vertex Provider
 
-Official OpenClaw provider plugin for Claude models hosted through Google Vertex AI.
+Official Bot provider plugin for Claude models hosted through Google Vertex AI.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/anthropic-vertex-provider
+bot plugins install @hanzo/bot-anthropic-vertex-provider
 ```
 
-Configure Google Cloud credentials and the target Vertex project/region in OpenClaw, then select Claude models with the Anthropic Vertex provider.
+Configure Google Cloud credentials and the target Vertex project/region in Bot, then select Claude models with the Anthropic Vertex provider.

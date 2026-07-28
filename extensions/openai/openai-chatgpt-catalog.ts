@@ -1,5 +1,5 @@
 // Openai plugin module implements openai chatgpt catalog behavior.
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
+import type { ModelProviderConfig } from "bot/plugin-sdk/provider-model-shared";
 import { OPENAI_CODEX_RESPONSES_BASE_URL } from "./base-url.js";
 
 const OPENAI_CODEX_BASE_URL = OPENAI_CODEX_RESPONSES_BASE_URL;

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelGatewayContext } from "../runtime-api.js";
 import type { BuzzBus } from "./buzz-bus.js";
@@ -90,7 +90,7 @@ describe("Buzz gateway lifecycle", () => {
           groups: { [CHANNEL_ID]: {} },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const account = resolveBuzzAccount({ cfg });
     const setStatus = vi.fn();
     const ctx = {
@@ -133,7 +133,7 @@ describe("Buzz gateway lifecycle", () => {
           groups: { [CHANNEL_ID]: {} },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = await buzzOutboundAdapter.sendText({
       cfg,
@@ -171,7 +171,7 @@ describe("Buzz gateway lifecycle", () => {
           groups: { [CHANNEL_ID]: {} },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const account = resolveBuzzAccount({ cfg });
     const ctx = {
       cfg,
@@ -218,7 +218,7 @@ describe("Buzz gateway lifecycle", () => {
           groups: { [CHANNEL_ID]: {} },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const account = resolveBuzzAccount({ cfg });
     const ctx = {
       cfg,
@@ -253,7 +253,7 @@ describe("Buzz gateway lifecycle", () => {
           groups: { [CHANNEL_ID]: {} },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const account = resolveBuzzAccount({ cfg });
     const setStatus = vi.fn();
     const logError = vi.fn();
@@ -293,7 +293,7 @@ describe("Buzz gateway lifecycle", () => {
           groups: { [CHANNEL_ID]: {} },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const account = resolveBuzzAccount({ cfg });
     const ctx = {
       cfg,

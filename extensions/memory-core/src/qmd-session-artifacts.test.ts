@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { requireNodeSqlite } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import { requireNodeSqlite } from "bot/plugin-sdk/memory-core-host-engine-storage";
 import { describe, expect, it, vi } from "vitest";
 import {
   refreshQmdSessionArtifactDocIds,
@@ -10,7 +10,7 @@ import {
 
 describe("QMD session artifact mappings", () => {
   it("rechecks lease ownership before every doc-id publication and commit", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-qmd-artifact-lease-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-qmd-artifact-lease-"));
     const indexPath = path.join(tempDir, "index.sqlite");
     try {
       replaceQmdSessionArtifactMappings({
@@ -61,7 +61,7 @@ describe("QMD session artifact mappings", () => {
       const verifyRollback = new DatabaseSync(indexPath, { readOnly: true });
       expect(
         verifyRollback
-          .prepare("SELECT docid FROM openclaw_qmd_session_artifacts WHERE artifact_path = ?")
+          .prepare("SELECT docid FROM bot_qmd_session_artifacts WHERE artifact_path = ?")
           .get("session-1.md"),
       ).toEqual({ docid: null });
       verifyRollback.close();
@@ -76,7 +76,7 @@ describe("QMD session artifact mappings", () => {
       const verifyCommit = new DatabaseSync(indexPath, { readOnly: true });
       expect(
         verifyCommit
-          .prepare("SELECT docid FROM openclaw_qmd_session_artifacts WHERE artifact_path = ?")
+          .prepare("SELECT docid FROM bot_qmd_session_artifacts WHERE artifact_path = ?")
           .get("session-1.md"),
       ).toEqual({ docid: "doc-1" });
       verifyCommit.close();

@@ -1,20 +1,20 @@
 import fs from "node:fs";
 import type { DatabaseSync } from "node:sqlite";
 import { resolveAllAgentSessionStoreCandidateTargetsSync } from "../config/sessions/targets.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../infra/kysely-sync.js";
 import { isIncognitoSessionKey, parseAgentSessionKey } from "../routing/session-key.js";
-import { withOpenClawAgentDatabaseReadOnly } from "../state/openclaw-agent-db-readonly.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+import { withBotAgentDatabaseReadOnly } from "../state/bot-agent-db-readonly.js";
+import type { DB as BotAgentKyselyDatabase } from "../state/bot-agent-db.generated.js";
 import {
-  closeOpenClawAgentDatabaseByPath,
-  isOpenClawAgentDatabaseOpen,
-  runOpenClawAgentWriteTransaction,
-} from "../state/openclaw-agent-db.js";
+  closeBotAgentDatabaseByPath,
+  isBotAgentDatabaseOpen,
+  runBotAgentWriteTransaction,
+} from "../state/bot-agent-db.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import {
   collectSharedStateSessionKeys,
   deleteRepairJournal,
@@ -33,12 +33,12 @@ export type ReservedIncognitoKeyRepairReport = {
 
 export function repairReservedIncognitoSessionKeys(params: {
   apply: boolean;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
 }): ReservedIncognitoKeyRepairReport {
   const targets = listExistingAgentDatabaseTargets(params.cfg, params.env);
   const reservedKeys = new Set<string>();
-  const sharedDatabase = params.apply ? openOpenClawStateDatabase({ env: params.env }) : undefined;
+  const sharedDatabase = params.apply ? openBotStateDatabase({ env: params.env }) : undefined;
   const journalRenames = sharedDatabase
     ? readRepairJournal(sharedDatabase.db)
     : readRepairJournalReadOnly(params.env);
@@ -46,7 +46,7 @@ export function repairReservedIncognitoSessionKeys(params: {
     ? collectSharedStateSessionKeys(sharedDatabase.db)
     : new Set<string>();
   for (const target of targets) {
-    const inspected = withOpenClawAgentDatabaseReadOnly(
+    const inspected = withBotAgentDatabaseReadOnly(
       (database) => ({
         occupied: params.apply ? collectOccupiedSessionKeys(database.db) : new Set<string>(),
         reserved: listReservedIncognitoKeys(database.db),
@@ -84,32 +84,32 @@ export function repairReservedIncognitoSessionKeys(params: {
   );
   const renames = [...journalRenames, ...newRenames];
   const renameMap = new Map(renames.map((item) => [item.from, item.to]));
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     (database) => writeRepairJournal(database.db, renames),
     { env: params.env },
     { operationLabel: "doctor.journal-reserved-incognito-session-keys" },
   );
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     (database) => rewriteSharedStateSessionKeys(database.db, renameMap),
     { env: params.env },
     { operationLabel: "doctor.rename-reserved-incognito-shared-state-keys" },
   );
   for (const target of targets) {
-    const wasOpen = isOpenClawAgentDatabaseOpen(target.sqlitePath);
+    const wasOpen = isBotAgentDatabaseOpen(target.sqlitePath);
     const options = { agentId: target.agentId, env: params.env, path: target.sqlitePath };
     try {
-      runOpenClawAgentWriteTransaction(
+      runBotAgentWriteTransaction(
         (database) => applyReservedIncognitoKeyRenames(database.db, renames),
         options,
         { operationLabel: "doctor.rename-reserved-incognito-session-keys" },
       );
     } finally {
       if (!wasOpen) {
-        closeOpenClawAgentDatabaseByPath(target.sqlitePath);
+        closeBotAgentDatabaseByPath(target.sqlitePath);
       }
     }
   }
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     (database) => deleteRepairJournal(database.db),
     { env: params.env },
     { operationLabel: "doctor.complete-reserved-incognito-session-keys" },
@@ -118,7 +118,7 @@ export function repairReservedIncognitoSessionKeys(params: {
 }
 
 function listExistingAgentDatabaseTargets(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv,
 ): Array<{ agentId: string; sqlitePath: string }> {
   const seenPaths = new Set<string>();
@@ -179,7 +179,7 @@ function legacyIncognitoSessionKey(sessionKey: string): string {
 }
 
 function listReservedIncognitoKeys(database: DatabaseSync): string[] {
-  const db = getNodeSqliteKysely<OpenClawAgentKyselyDatabase>(database);
+  const db = getNodeSqliteKysely<BotAgentKyselyDatabase>(database);
   const keys = new Set<string>();
   for (const row of executeSqliteQuerySync(
     database,
@@ -197,7 +197,7 @@ function listReservedIncognitoKeys(database: DatabaseSync): string[] {
 }
 
 function collectOccupiedSessionKeys(database: DatabaseSync): Set<string> {
-  const db = getNodeSqliteKysely<OpenClawAgentKyselyDatabase>(database);
+  const db = getNodeSqliteKysely<BotAgentKyselyDatabase>(database);
   const keys = new Set<string>();
   const collect = (values: Array<string | null>) => {
     for (const value of values) {
@@ -261,7 +261,7 @@ function collectOccupiedSessionKeys(database: DatabaseSync): Set<string> {
 }
 
 function updateSessionKeyColumns(database: DatabaseSync, rename: ReservedKeyRename): void {
-  const db = getNodeSqliteKysely<OpenClawAgentKyselyDatabase>(database);
+  const db = getNodeSqliteKysely<BotAgentKyselyDatabase>(database);
   const update = (query: Parameters<typeof executeSqliteQuerySync>[1]) =>
     executeSqliteQuerySync(database, query);
   update(
@@ -348,7 +348,7 @@ function rewriteSessionEntryJsonReferences(
   database: DatabaseSync,
   renames: ReadonlyMap<string, string>,
 ): void {
-  const db = getNodeSqliteKysely<OpenClawAgentKyselyDatabase>(database);
+  const db = getNodeSqliteKysely<BotAgentKyselyDatabase>(database);
   const rows = executeSqliteQuerySync(
     database,
     db.selectFrom("session_nodes").select(["session_key", "entry_json"]),

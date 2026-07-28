@@ -1,7 +1,7 @@
 import {
   MEMORY_INDEX_CHUNKS_TABLE,
   MEMORY_INDEX_FTS_TABLE,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
 
 export const LEGACY_MEMORY_FTS_MATCH_TABLE = "memory_core_legacy_fts_matches";
 

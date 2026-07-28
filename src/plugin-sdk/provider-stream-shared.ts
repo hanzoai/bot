@@ -1,6 +1,6 @@
 // Provider stream shared helpers implement reusable stream wrappers and payload policies.
-import { resolveOpenAIReasoningEffortForModel } from "@openclaw/ai/internal/openai";
-import { resolveOpenAIReasoningEffortMap } from "@openclaw/ai/transports";
+import { resolveOpenAIReasoningEffortForModel } from "@hanzo/bot-ai/internal/openai";
+import { resolveOpenAIReasoningEffortMap } from "@hanzo/bot-ai/transports";
 import {
   createPromotedPlainTextToolCallBlock,
   createPromotedPlainTextToolCallEvents,
@@ -21,9 +21,9 @@ import { mapThinkingLevelToReasoningEffort } from "../llm/providers/stream-wrapp
 import { streamWithPayloadPatch } from "../llm/providers/stream-wrappers/stream-payload-utils.js";
 import { streamSimple } from "../llm/stream.js";
 import { createAssistantMessageEventStream } from "../llm/utils/event-stream.js";
-export { applyAnthropicRefusal } from "@openclaw/ai/internal/anthropic";
-export { createDeferredEventBuffer } from "@openclaw/ai/internal/runtime";
-export { notifyLlmRequestActivity, onLlmRequestActivity } from "@openclaw/ai/internal/runtime";
+export { applyAnthropicRefusal } from "@hanzo/bot-ai/internal/anthropic";
+export { createDeferredEventBuffer } from "@hanzo/bot-ai/internal/runtime";
+export { notifyLlmRequestActivity, onLlmRequestActivity } from "@hanzo/bot-ai/internal/runtime";
 
 type ProviderWrapStreamFnContext = import("../plugins/types.js").ProviderWrapStreamFnContext;
 
@@ -695,7 +695,7 @@ export function createGoogleThinkingStreamWrapper(
 export {
   applyAnthropicPayloadPolicyToParams,
   resolveAnthropicPayloadPolicy,
-} from "@openclaw/ai/transports";
+} from "@hanzo/bot-ai/transports";
 export { applyAnthropicEphemeralCacheControlMarkers } from "../llm/providers/stream-wrappers/anthropic-cache-control-payload.js";
 export {
   createMoonshotThinkingWrapper,

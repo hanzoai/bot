@@ -1,7 +1,7 @@
 // Microsoft Teams tests cover durable claim ownership through inbound debounce.
-import { createInboundDebouncer } from "openclaw/plugin-sdk/channel-inbound-debounce";
+import { createInboundDebouncer } from "bot/plugin-sdk/channel-inbound-debounce";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../runtime-api.js";
+import type { BotConfig } from "../../runtime-api.js";
 import type { MSTeamsIngressLifecycle } from "../msteams-ingress.js";
 import type { MSTeamsTurnContext } from "../sdk-types.js";
 import "./message-handler-mock-support.test-support.js";
@@ -54,7 +54,7 @@ function directActivity(id: string, text: string): MSTeamsTurnContext["activity"
   } as MSTeamsTurnContext["activity"];
 }
 
-function createHandler(cfg: OpenClawConfig) {
+function createHandler(cfg: BotConfig) {
   const { deps } = createMessageHandlerDeps(cfg, {
     createInboundDebouncer,
     resolveInboundDebounceMs: vi.fn(() => 40),
@@ -70,7 +70,7 @@ describe("Microsoft Teams drain claim ownership", () => {
   it("defers a claimed activity and binds completion to reply adoption", async () => {
     const handler = createHandler({
       channels: { msteams: { dmPolicy: "open", allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as BotConfig);
     const lifecycle = createLifecycle();
 
     const result = await handler(context(directActivity("activity-one", "hello")), lifecycle);
@@ -99,7 +99,7 @@ describe("Microsoft Teams drain claim ownership", () => {
     const handler = createHandler({
       messages: { inbound: { debounceMs: 40 } },
       channels: { msteams: { dmPolicy: "open", allowFrom: ["*"] } },
-    } as OpenClawConfig);
+    } as BotConfig);
     const first = createLifecycle();
     const second = createLifecycle();
 
@@ -135,7 +135,7 @@ describe("Microsoft Teams drain claim ownership", () => {
             requireMention: true,
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       {
         createInboundDebouncer,
         resolveInboundDebounceMs: vi.fn(() => 20),

@@ -11,7 +11,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let browser: Browser;
@@ -51,7 +51,7 @@ describeControlUiE2e("Control UI file-drop guard", () => {
       await composer.waitFor({ state: "visible", timeout: 10_000 });
       await composer.fill("draft survives stray drop");
 
-      const stray = await page.locator("openclaw-app-shell").evaluate((element) => {
+      const stray = await page.locator("bot-app-shell").evaluate((element) => {
         const transfer = new DataTransfer();
         transfer.items.add(new File(["stray"], "stray-proof.txt", { type: "text/plain" }));
         const beforeUrl = location.href;

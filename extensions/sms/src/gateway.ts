@@ -1,6 +1,6 @@
 // Sms plugin module implements gateway behavior.
-import { waitUntilAbort } from "openclaw/plugin-sdk/channel-outbound";
-import { registerPluginHttpRoute } from "openclaw/plugin-sdk/webhook-ingress";
+import { waitUntilAbort } from "bot/plugin-sdk/channel-outbound";
+import { registerPluginHttpRoute } from "bot/plugin-sdk/webhook-ingress";
 import { createSmsIngressSpool, type SmsIngressLog } from "./ingress-spool.js";
 import type { ResolvedSmsAccount } from "./types.js";
 import { createSmsWebhookHandler, type SmsWebhookHandlerParams } from "./webhook.js";

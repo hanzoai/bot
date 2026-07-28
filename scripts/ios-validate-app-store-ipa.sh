@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
   cat <<'EOF'
 Usage:
-  scripts/ios-validate-app-store-ipa.sh --ipa apps/ios/build/app-store/OpenClaw-<version>.ipa \
+  scripts/ios-validate-app-store-ipa.sh --ipa apps/ios/build/app-store/Bot-<version>.ipa \
     [--expected-commit <full-sha>] [--expected-build-timestamp <utc-iso>]
 
 Validates the exported iOS App Store IPA before App Store Connect upload.
@@ -15,9 +15,9 @@ IPA_PATH=""
 EXPECTED_GIT_COMMIT=""
 EXPECTED_BUILD_TIMESTAMP=""
 EXPECTED_TEAM_ID="FWJYW4S8P8"
-EXPECTED_BUNDLE_ID="ai.openclawfoundation.app"
-EXPECTED_PROFILE_NAME="OpenClaw App Store ai.openclawfoundation.app"
-EXPECTED_APP_GROUP="group.ai.openclawfoundation.app.shared"
+EXPECTED_BUNDLE_ID="ai.botfoundation.app"
+EXPECTED_PROFILE_NAME="Bot App Store ai.botfoundation.app"
+EXPECTED_APP_GROUP="group.ai.botfoundation.app.shared"
 EXPECTED_PUSH_MODE="appStore"
 
 PLIST_BUDDY_BIN="${IOS_VALIDATE_PLIST_BUDDY_BIN:-/usr/libexec/PlistBuddy}"
@@ -77,7 +77,7 @@ if [[ ! -f "${IPA_PATH}" ]]; then
   exit 1
 fi
 
-tmp_dir="$(mktemp -d -t openclaw-ios-ipa.XXXXXX)"
+tmp_dir="$(mktemp -d -t bot-ios-ipa.XXXXXX)"
 trap 'rm -rf "${tmp_dir}"' EXIT
 
 "${UNZIP_BIN}" -q "${IPA_PATH}" -d "${tmp_dir}"
@@ -199,14 +199,14 @@ assert_plist_empty_or_absent() {
 assert_build_provenance() {
   local commit
   local timestamp
-  commit="$(plist_value "${info_plist}" "OpenClawGitCommit")"
-  timestamp="$(plist_value "${info_plist}" "OpenClawBuildTimestamp")"
+  commit="$(plist_value "${info_plist}" "BotGitCommit")"
+  timestamp="$(plist_value "${info_plist}" "BotBuildTimestamp")"
   if [[ ! "${commit}" =~ ^[0-9a-f]{40}$ ]]; then
-    echo "Invalid IPA: OpenClawGitCommit must be a full lowercase commit SHA; got ${commit:-missing}." >&2
+    echo "Invalid IPA: BotGitCommit must be a full lowercase commit SHA; got ${commit:-missing}." >&2
     exit 1
   fi
   if [[ ! "${timestamp}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\.[0-9]{3})?Z$ ]]; then
-    echo "Invalid IPA: OpenClawBuildTimestamp must be a canonical UTC timestamp; got ${timestamp:-missing}." >&2
+    echo "Invalid IPA: BotBuildTimestamp must be a canonical UTC timestamp; got ${timestamp:-missing}." >&2
     exit 1
   fi
   if [[ -n "${EXPECTED_GIT_COMMIT}" && "${commit}" != "${EXPECTED_GIT_COMMIT}" ]]; then
@@ -235,18 +235,18 @@ assert_localized_plists_resolve_build_settings() {
 }
 
 assert_plist_string "${info_plist}" "CFBundleIdentifier" "${EXPECTED_BUNDLE_ID}" "bundle identifier mismatch"
-assert_plist_string "${info_plist}" "CFBundleDisplayName" "OpenClaw" "display name mismatch"
-assert_plist_string "${info_plist}" "OpenClawPushMode" "${EXPECTED_PUSH_MODE}" "push mode mismatch"
+assert_plist_string "${info_plist}" "CFBundleDisplayName" "Bot" "display name mismatch"
+assert_plist_string "${info_plist}" "BotPushMode" "${EXPECTED_PUSH_MODE}" "push mode mismatch"
 assert_plist_nonempty_string "${info_plist}" "NSHealthShareUsageDescription" "Health share usage description"
 assert_plist_nonempty_string "${info_plist}" "NSHealthUpdateUsageDescription" "Health update usage description"
 assert_build_provenance
 assert_localized_plists_resolve_build_settings
-assert_plist_empty_or_absent "${info_plist}" "OpenClawPushRelayBaseURL" "push relay URL override"
-assert_plist_key_absent "${info_plist}" "OpenClawPushTransport" "legacy push transport"
-assert_plist_key_absent "${info_plist}" "OpenClawPushDistribution" "legacy push distribution"
-assert_plist_key_absent "${info_plist}" "OpenClawPushAPNsEnvironment" "legacy APNs environment"
-assert_plist_key_absent "${info_plist}" "OpenClawPushRelayProfile" "legacy relay profile"
-assert_plist_key_absent "${info_plist}" "OpenClawPushProofPolicy" "legacy proof policy"
+assert_plist_empty_or_absent "${info_plist}" "BotPushRelayBaseURL" "push relay URL override"
+assert_plist_key_absent "${info_plist}" "BotPushTransport" "legacy push transport"
+assert_plist_key_absent "${info_plist}" "BotPushDistribution" "legacy push distribution"
+assert_plist_key_absent "${info_plist}" "BotPushAPNsEnvironment" "legacy APNs environment"
+assert_plist_key_absent "${info_plist}" "BotPushRelayProfile" "legacy relay profile"
+assert_plist_key_absent "${info_plist}" "BotPushProofPolicy" "legacy proof policy"
 
 if ! "${CODESIGN_BIN}" -d --entitlements :- "${app_path}" >"${entitlements_plist}" 2>"${tmp_dir}/codesign.err"; then
   detail="$(<"${tmp_dir}/codesign.err")"

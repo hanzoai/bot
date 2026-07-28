@@ -1,6 +1,6 @@
 import type { cleanupBrowserSessionsForLifecycleEnd } from "../browser-lifecycle-cleanup.js";
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { ResolveContextEngineOptions } from "../context-engine/registry.js";
 import type { ContextEngine } from "../context-engine/types.js";
 import { callGateway } from "../gateway/call.js";
@@ -54,7 +54,7 @@ export type SubagentRegistryDeps = {
     params: Parameters<typeof ensureRuntimePluginsLoadedFn>[0],
   ) => void | Promise<void>;
   resolveContextEngine?: (
-    cfg?: OpenClawConfig,
+    cfg?: BotConfig,
     options?: ResolveContextEngineOptions,
   ) => Promise<ContextEngine>;
 };
@@ -110,7 +110,7 @@ type ContextEngineInitModule = Pick<
 type ContextEngineRegistryModule = Pick<
   {
     resolveContextEngine: (
-      cfg?: OpenClawConfig,
+      cfg?: BotConfig,
       options?: ResolveContextEngineOptions,
     ) => Promise<ContextEngine>;
   },
@@ -148,7 +148,7 @@ function loadRuntimePluginsModule(): Promise<RuntimePluginsModule> {
 }
 
 export async function ensureSubagentRegistryPluginRuntimeLoaded(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   workspaceDir?: string;
   allowGatewaySubagentBinding?: boolean;
 }) {
@@ -161,7 +161,7 @@ export async function ensureSubagentRegistryPluginRuntimeLoaded(params: {
 }
 
 export async function resolveSubagentRegistryContextEngine(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   options?: ResolveContextEngineOptions,
 ) {
   const initModule = await loadContextEngineInitModule();

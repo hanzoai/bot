@@ -8,7 +8,7 @@ import type { SessionEntry } from "../config/sessions/types.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { getPluginRegistryState } from "../plugins/runtime-state.js";
 import type { SessionCatalogProvider, SessionUpstreamProbe } from "../plugins/session-catalog.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { BotStateDatabaseOptions } from "../state/bot-state-db.js";
 import {
   recordSessionHumanDirectMessage,
   recordSessionStateEvent,
@@ -27,7 +27,7 @@ const SESSION_UPSTREAM_MISSING_THRESHOLD = 3;
 
 const log = createSubsystemLogger("sessions/upstream-monitor");
 
-type SessionUpstreamMonitorOptions = OpenClawStateDatabaseOptions & {
+type SessionUpstreamMonitorOptions = BotStateDatabaseOptions & {
   providers?: readonly SessionCatalogProvider[];
   now?: () => number;
   loadEntry?: typeof loadSessionEntryReadOnly;
@@ -51,7 +51,7 @@ function currentProviders(): SessionCatalogProvider[] {
   );
 }
 
-function databaseOptions(options: SessionUpstreamMonitorOptions): OpenClawStateDatabaseOptions {
+function databaseOptions(options: SessionUpstreamMonitorOptions): BotStateDatabaseOptions {
   return {
     ...(options.env ? { env: options.env } : {}),
     ...(options.path ? { path: options.path } : {}),
@@ -377,6 +377,6 @@ export function startSessionUpstreamMonitor(
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.sessionUpstreamMonitorTestApi")
+    Symbol.for("bot.sessionUpstreamMonitorTestApi")
   ] = { runSessionUpstreamMonitorTick };
 }

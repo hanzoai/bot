@@ -2,12 +2,12 @@
 import type {
   ChannelBotLoopProtectionConfig,
   MentionPatternsPolicyConfig,
-} from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/config-contracts";
 import type {
   ContextVisibilityMode,
   DmPolicy,
   GroupPolicy,
-  OpenClawConfig,
+  BotConfig,
   SecretInput,
 } from "./runtime-api.js";
 
@@ -97,8 +97,8 @@ export type MatrixStreamingConfig = {
   /** Chunking mode: "length" (default) splits by size; "newline" splits on every newline. */
   chunkMode?: "length" | "newline";
   /** Block streaming delivery controls (separate from the preview mode). Default: disabled. */
-  block?: import("openclaw/plugin-sdk/channel-outbound").ChannelStreamingBlockConfig;
-  progress?: import("openclaw/plugin-sdk/channel-outbound").ChannelStreamingProgressConfig;
+  block?: import("bot/plugin-sdk/channel-outbound").ChannelStreamingBlockConfig;
+  progress?: import("bot/plugin-sdk/channel-outbound").ChannelStreamingProgressConfig;
   preview?: {
     /** Show tool/progress activity in the live draft preview. Default: true. */
     toolProgress?: boolean;
@@ -223,7 +223,7 @@ export type MatrixConfig = {
    *   lines in progress mode. `streaming.preview.toolProgress: false` keeps
    *   legacy answer preview edits but hides interim tool/progress lines.
    * Legacy scalar/boolean spellings and the flat `blockStreaming`/`chunkMode`
-   * keys migrate via `openclaw doctor --fix`.
+   * keys migrate via `bot doctor --fix`.
    * Default: `mode: "off"`.
    */
   streaming?: MatrixStreamingConfig;
@@ -238,15 +238,15 @@ export type CoreConfig = {
       botLoopProtection?: ChannelBotLoopProtectionConfig;
     };
   };
-  commands?: OpenClawConfig["commands"];
+  commands?: BotConfig["commands"];
   session?: {
     store?: string;
-    dmScope?: NonNullable<OpenClawConfig["session"]>["dmScope"];
+    dmScope?: NonNullable<BotConfig["session"]>["dmScope"];
   };
   messages?: {
     ackReaction?: string;
     ackReactionScope?: "group-mentions" | "group-all" | "direct" | "all" | "none" | "off";
   };
-  secrets?: OpenClawConfig["secrets"];
+  secrets?: BotConfig["secrets"];
   [key: string]: unknown;
 };

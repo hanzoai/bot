@@ -3,13 +3,13 @@ import {
   decodeNodePtyResumeParams,
   resolveNodeHostExecutable,
   runNodePtyCommand,
-} from "openclaw/plugin-sdk/node-host";
+} from "bot/plugin-sdk/node-host";
 import type {
-  OpenClawPluginApi,
-  OpenClawPluginNodeHostCommand,
-} from "openclaw/plugin-sdk/plugin-entry";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import type { SessionCatalogTerminalPlan } from "openclaw/plugin-sdk/session-catalog";
+  BotPluginApi,
+  BotPluginNodeHostCommand,
+} from "bot/plugin-sdk/plugin-entry";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
+import type { SessionCatalogTerminalPlan } from "bot/plugin-sdk/session-catalog";
 import {
   CatalogParamsError,
   CODEX_APP_SERVER_THREADS_CAPABILITY,
@@ -87,7 +87,7 @@ export async function requireCatalogEligibleThread(
 
 export function createCodexTerminalNodeHostCommand(
   control: CodexSessionCatalogControl,
-): OpenClawPluginNodeHostCommand {
+): BotPluginNodeHostCommand {
   return {
     command: CODEX_TERMINAL_RESUME_COMMAND,
     cap: CODEX_APP_SERVER_THREADS_CAPABILITY,
@@ -177,7 +177,7 @@ async function resolveNodeCatalogEligibleThread(params: {
 }
 
 export async function openCodexCatalogTerminal(params: {
-  api: OpenClawPluginApi;
+  api: BotPluginApi;
   control: CodexSessionCatalogControl;
   hostId: string;
   threadId: string;

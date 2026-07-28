@@ -1,9 +1,9 @@
 /** Runs image generation, persistence, and detached completion. */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import { Type } from "typebox";
 import { findCapabilityProviderById } from "../../../packages/media-generation-core/src/capability-model-ref.js";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { resolveImageGenerationMaxInputImages } from "../../image-generation/capabilities.js";
 import { parseImageGenerationModelRef } from "../../image-generation/model-ref.js";
 import {
@@ -243,7 +243,7 @@ const ImageGenerateToolSchema = Type.Object({
 });
 
 function resolveImageGenerationModelConfigForTool(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   workspaceDir?: string;
   agentDir?: string;
   authStore?: AuthProfileStore;
@@ -259,12 +259,12 @@ function resolveImageGenerationModelConfigForTool(params: {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.imageGenerateToolTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.imageGenerateToolTestApi")] = {
     resolveImageGenerationModelConfigForTool,
   };
 }
 
-function hasExplicitImageGenerationModelConfig(cfg?: OpenClawConfig): boolean {
+function hasExplicitImageGenerationModelConfig(cfg?: BotConfig): boolean {
   return hasToolModelConfig(coerceToolModelConfig(cfg?.agents?.defaults?.mediaModels?.image));
 }
 
@@ -717,7 +717,7 @@ const defaultScheduleImageGenerateBackgroundWork = createDefaultMediaGenerateBac
 });
 
 async function executeImageGenerationJob(params: {
-  effectiveCfg: OpenClawConfig;
+  effectiveCfg: BotConfig;
   prompt: string;
   agentDir?: string;
   model?: string;
@@ -881,7 +881,7 @@ async function executeImageGenerationJob(params: {
 }
 
 export function createImageGenerateTool(options?: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   agentDir?: string;
   authProfileStore?: AuthProfileStore;
   agentSessionKey?: string;

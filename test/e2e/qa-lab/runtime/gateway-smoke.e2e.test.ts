@@ -265,7 +265,7 @@ describe("gateway-smoke", () => {
     expect(loopback.requests.map((request) => request.method)).toEqual(["connect", "health"]);
     expect(loopback.requests[0]?.params).toMatchObject({
       auth: { token: "secret-token" },
-      client: { id: "openclaw-ios" },
+      client: { id: "bot-ios" },
       role: "operator",
       scopes: ["operator.read", "operator.write", "operator.admin"],
     });

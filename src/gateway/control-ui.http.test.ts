@@ -11,13 +11,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { normalizeAssistantIdentity } from "../../ui/src/lib/assistant-identity.ts";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   approveDevicePairing,
   ensureDeviceToken,
   requestDevicePairing,
 } from "../infra/device-pairing.js";
-import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
+import { resolvePreferredBotTmpDir } from "../infra/tmp-bot-dir.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
 import { AVATAR_MAX_DATA_URL_CHARS } from "../shared/avatar-limits.js";
@@ -57,7 +57,7 @@ afterEach(() => {
 });
 
 describe("handleControlUiHttpRequest", () => {
-  function createAvatarConfig(workspace: string, avatar: string): OpenClawConfig {
+  function createAvatarConfig(workspace: string, avatar: string): BotConfig {
     return {
       agents: {
         defaults: { workspace },
@@ -79,7 +79,7 @@ describe("handleControlUiHttpRequest", () => {
     indexHtml?: string;
     fn: (tmp: string) => Promise<T>;
   }) {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ui-"));
     try {
       await fs.writeFile(path.join(tmp, "index.html"), params.indexHtml ?? "<html></html>\n");
       return await params.fn(tmp);
@@ -153,7 +153,7 @@ describe("handleControlUiHttpRequest", () => {
     basePath?: string;
     auth?: ResolvedGatewayAuth;
     headers?: IncomingMessage["headers"];
-    config?: OpenClawConfig;
+    config?: BotConfig;
   }) {
     const { res, end, setHeader } = makeMockHttpResponse();
     const url = params.basePath
@@ -180,7 +180,7 @@ describe("handleControlUiHttpRequest", () => {
   async function runAvatarRequest(params: {
     url: string;
     method: "GET" | "HEAD" | "POST";
-    config: OpenClawConfig;
+    config: BotConfig;
     basePath?: string;
     auth?: ResolvedGatewayAuth;
     headers?: IncomingMessage["headers"];
@@ -260,7 +260,7 @@ describe("handleControlUiHttpRequest", () => {
     headers?: IncomingMessage["headers"];
   }) {
     return await runAssistantMediaRequest({
-      url: `/__openclaw__/assistant-media?${params.meta ? "meta=1&" : ""}source=${encodeURIComponent(params.filePath)}`,
+      url: `/__bot__/assistant-media?${params.meta ? "meta=1&" : ""}source=${encodeURIComponent(params.filePath)}`,
       method: "GET",
       auth: createTrustedProxyAuth(),
       trustedProxies: ["10.0.0.1"],
@@ -273,7 +273,7 @@ describe("handleControlUiHttpRequest", () => {
     agentId?: string;
     meta?: boolean;
     headers?: IncomingMessage["headers"];
-    config?: OpenClawConfig;
+    config?: BotConfig;
   }) {
     return await runAvatarRequest({
       url: `/avatar/${params.agentId ?? "main"}${params.meta ? "?meta=1" : ""}`,
@@ -326,7 +326,7 @@ describe("handleControlUiHttpRequest", () => {
     prefix: string;
     fn: (tmpRoot: string) => Promise<T>;
   }) {
-    const tmpRoot = await fs.mkdtemp(path.join(resolvePreferredOpenClawTmpDir(), params.prefix));
+    const tmpRoot = await fs.mkdtemp(path.join(resolvePreferredBotTmpDir(), params.prefix));
     try {
       return await params.fn(tmpRoot);
     } finally {
@@ -338,7 +338,7 @@ describe("handleControlUiHttpRequest", () => {
     siblingDir: string;
     fn: (paths: { root: string; sibling: string }) => Promise<T>;
   }) {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-root-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ui-root-"));
     try {
       const root = path.join(tmp, "ui");
       const sibling = path.join(tmp, params.siblingDir);
@@ -356,9 +356,9 @@ describe("handleControlUiHttpRequest", () => {
     browserMetadata?: boolean;
     fn: (token: string) => Promise<T>;
   }) {
-    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-device-token-"));
+    const tempHome = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ui-device-token-"));
     try {
-      return await withEnvAsync({ OPENCLAW_HOME: tempHome }, async () => {
+      return await withEnvAsync({ BOT_HOME: tempHome }, async () => {
         const deviceId = "control-ui-device";
         const requested = await requestDevicePairing({
           deviceId,
@@ -367,7 +367,7 @@ describe("handleControlUiHttpRequest", () => {
           scopes: ["operator.read"],
           ...(params.browserMetadata
             ? {
-                clientId: "openclaw-control-ui",
+                clientId: "bot-control-ui",
                 clientMode: "webchat",
               }
             : {}),
@@ -402,8 +402,8 @@ describe("handleControlUiHttpRequest", () => {
     scopes: string[];
     fn: (bearer: string) => Promise<T>;
   }) {
-    const tempHome = testTempDirs.make("openclaw-ui-scoped-device-");
-    return await withEnvAsync({ OPENCLAW_HOME: tempHome }, async () => {
+    const tempHome = testTempDirs.make("bot-ui-scoped-device-");
+    return await withEnvAsync({ BOT_HOME: tempHome }, async () => {
       const deviceId = `control-ui-device-${randomUUID()}`;
       const requested = await requestDevicePairing({
         deviceId,
@@ -451,7 +451,7 @@ describe("handleControlUiHttpRequest", () => {
           "Permissions-Policy",
           "camera=(self), microphone=*, geolocation=*, clipboard-write=*",
         );
-        expect(responseBody(end)).toContain('data-openclaw-terminal-enabled="true"');
+        expect(responseBody(end)).toContain('data-bot-terminal-enabled="true"');
       },
     });
   });
@@ -473,7 +473,7 @@ describe("handleControlUiHttpRequest", () => {
           (call) => call[0] === "Content-Security-Policy",
         )?.[1];
         expect(String(csp)).toContain("script-src 'self' 'wasm-unsafe-eval'");
-        expect(responseBody(end)).toContain('data-openclaw-terminal-enabled="true"');
+        expect(responseBody(end)).toContain('data-bot-terminal-enabled="true"');
       },
     });
   });
@@ -491,7 +491,7 @@ describe("handleControlUiHttpRequest", () => {
           (call) => call[0] === "Content-Security-Policy",
         )?.[1];
         expect(String(csp)).not.toContain("'wasm-unsafe-eval'");
-        expect(responseBody(end)).toContain('data-openclaw-terminal-enabled="false"');
+        expect(responseBody(end)).toContain('data-bot-terminal-enabled="false"');
 
         const bootstrap = makeMockHttpResponse();
         await handleControlUiHttpRequest(
@@ -515,7 +515,7 @@ describe("handleControlUiHttpRequest", () => {
         const filePath = path.join(tmpRoot, "photo.png");
         await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
         const { res, handled } = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}&token=test-token`,
+          url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}&token=test-token`,
           method: "GET",
           auth: { mode: "token", token: "test-token", allowTailscale: false },
         });
@@ -545,7 +545,7 @@ describe("handleControlUiHttpRequest", () => {
         const filePath = path.join(tmpRoot, filename);
         await fs.writeFile(filePath, Buffer.from("fixture"));
         const { res, handled } = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}&token=test-token`,
+          url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}&token=test-token`,
           method: "GET",
           auth: { mode: "token", token: "test-token", allowTailscale: false },
         });
@@ -567,7 +567,7 @@ describe("handleControlUiHttpRequest", () => {
         const filePath = path.join(tmpRoot, filename);
         await fs.writeFile(filePath, Buffer.from("fixture"));
         const { res, handled } = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}&token=test-token`,
+          url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}&token=test-token`,
           method: "GET",
           auth: { mode: "token", token: "test-token", allowTailscale: false },
         });
@@ -595,7 +595,7 @@ describe("handleControlUiHttpRequest", () => {
         const filePath = path.join(tmpRoot, filename);
         await fs.writeFile(filePath, Buffer.from("fixture"));
         const { res, handled } = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}&token=t`,
+          url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}&token=t`,
           method: "GET",
           auth: { mode: "token", token: "t", allowTailscale: false },
         });
@@ -619,7 +619,7 @@ describe("handleControlUiHttpRequest", () => {
         const filePath = path.join(tmpRoot, filename);
         await fs.writeFile(filePath, Buffer.from("fixture"));
         const { res, handled } = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}&token=t`,
+          url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}&token=t`,
           method: "GET",
           auth: { mode: "token", token: "t", allowTailscale: false },
         });
@@ -651,7 +651,7 @@ describe("handleControlUiHttpRequest", () => {
 
     try {
       const { res, handled } = await runAssistantMediaRequest({
-        url: `/__openclaw__/assistant-media?source=${encodeURIComponent(`media://inbound/${id}`)}&token=test-token`,
+        url: `/__bot__/assistant-media?source=${encodeURIComponent(`media://inbound/${id}`)}&token=test-token`,
         method: "GET",
         auth: { mode: "token", token: "test-token", allowTailscale: false },
       });
@@ -675,7 +675,7 @@ describe("handleControlUiHttpRequest", () => {
 
     try {
       const { res, handled, end } = await runAssistantMediaRequest({
-        url: `/__openclaw__/assistant-media?meta=1&source=${encodeURIComponent(`media://inbound/${id}`)}&token=test-token`,
+        url: `/__bot__/assistant-media?meta=1&source=${encodeURIComponent(`media://inbound/${id}`)}&token=test-token`,
         method: "GET",
         auth: { mode: "token", token: "test-token", allowTailscale: false },
       });
@@ -695,12 +695,12 @@ describe("handleControlUiHttpRequest", () => {
   });
 
   it("rejects assistant local media outside allowed preview roots", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-media-blocked-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ui-media-blocked-"));
     try {
       const filePath = path.join(tmp, "photo.png");
       await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
       const { res, handled, end } = await runAssistantMediaRequest({
-        url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}&token=test-token`,
+        url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}&token=test-token`,
         method: "GET",
         auth: { mode: "token", token: "test-token", allowTailscale: false },
       });
@@ -717,7 +717,7 @@ describe("handleControlUiHttpRequest", () => {
         const filePath = path.join(tmpRoot, "photo.png");
         await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
         const { res, handled, end } = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?meta=1&source=${encodeURIComponent(filePath)}&token=test-token`,
+          url: `/__bot__/assistant-media?meta=1&source=${encodeURIComponent(filePath)}&token=test-token`,
           method: "GET",
           auth: { mode: "token", token: "test-token", allowTailscale: false },
         });
@@ -744,7 +744,7 @@ describe("handleControlUiHttpRequest", () => {
           const filePath = path.join(tmpRoot, "photo.png");
           await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
           const { res, handled, end } = await runAssistantMediaRequest({
-            url: `/__openclaw__/assistant-media?meta=1&source=${encodeURIComponent(filePath)}&token=test-token`,
+            url: `/__bot__/assistant-media?meta=1&source=${encodeURIComponent(filePath)}&token=test-token`,
             method: "GET",
             auth: { mode: "token", token: "test-token", allowTailscale: false },
           });
@@ -772,7 +772,7 @@ describe("handleControlUiHttpRequest", () => {
         const filePath = path.join(tmpRoot, "photo.png");
         await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
         const meta = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?meta=1&source=${encodeURIComponent(filePath)}`,
+          url: `/__bot__/assistant-media?meta=1&source=${encodeURIComponent(filePath)}`,
           method: "GET",
           auth: { mode: "token", token: "test-token", allowTailscale: false },
           headers: {
@@ -787,7 +787,7 @@ describe("handleControlUiHttpRequest", () => {
         expect(payload.mediaTicket).toMatch(/^v1\./);
 
         const media = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}&mediaTicket=${encodeURIComponent(payload.mediaTicket ?? "")}`,
+          url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}&mediaTicket=${encodeURIComponent(payload.mediaTicket ?? "")}`,
           method: "GET",
           auth: { mode: "token", token: "test-token", allowTailscale: false },
         });
@@ -796,7 +796,7 @@ describe("handleControlUiHttpRequest", () => {
 
         const shortenedTicket = payload.mediaTicket?.slice(0, -1) ?? "";
         const rejected = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}&mediaTicket=${encodeURIComponent(shortenedTicket)}`,
+          url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}&mediaTicket=${encodeURIComponent(shortenedTicket)}`,
           method: "GET",
           auth: { mode: "token", token: "test-auth-token", allowTailscale: false },
         });
@@ -813,7 +813,7 @@ describe("handleControlUiHttpRequest", () => {
         const filePath = path.join(tmpRoot, "photo.png");
         await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
         const meta = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?meta=1&source=${encodeURIComponent(filePath)}`,
+          url: `/__bot__/assistant-media?meta=1&source=${encodeURIComponent(filePath)}`,
           method: "GET",
           auth: { mode: "token", token: "test-token", allowTailscale: false },
           headers: {
@@ -825,7 +825,7 @@ describe("handleControlUiHttpRequest", () => {
         };
 
         const refresh = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?meta=1&source=${encodeURIComponent(filePath)}&mediaTicket=${encodeURIComponent(payload.mediaTicket ?? "")}`,
+          url: `/__bot__/assistant-media?meta=1&source=${encodeURIComponent(filePath)}&mediaTicket=${encodeURIComponent(payload.mediaTicket ?? "")}`,
           method: "GET",
           auth: { mode: "token", token: "test-token", allowTailscale: false },
         });
@@ -843,7 +843,7 @@ describe("handleControlUiHttpRequest", () => {
         const filePath = path.join(tmpRoot, "photo.png");
         await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
         const { res, handled, end } = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}&mediaTicket=v1.invalid.invalid`,
+          url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}&mediaTicket=v1.invalid.invalid`,
           method: "GET",
           auth: { mode: "token", token: "test-token", allowTailscale: false },
         });
@@ -856,7 +856,7 @@ describe("handleControlUiHttpRequest", () => {
 
   it("reports assistant local media availability failures with a reason", async () => {
     const { res, handled, end } = await runAssistantMediaRequest({
-      url: `/__openclaw__/assistant-media?meta=1&source=${encodeURIComponent("/Users/test/Documents/private.pdf")}&token=test-token`,
+      url: `/__bot__/assistant-media?meta=1&source=${encodeURIComponent("/Users/test/Documents/private.pdf")}&token=test-token`,
       method: "GET",
       auth: { mode: "token", token: "test-token", allowTailscale: false },
     });
@@ -876,7 +876,7 @@ describe("handleControlUiHttpRequest", () => {
         const filePath = path.join(tmpRoot, "photo.png");
         await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
         const { res, handled, end } = await runAssistantMediaRequest({
-          url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}`,
+          url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}`,
           method: "GET",
           auth: { mode: "token", token: "test-token", allowTailscale: false },
         });
@@ -896,7 +896,7 @@ describe("handleControlUiHttpRequest", () => {
             const filePath = path.join(tmpRoot, "photo.png");
             await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
             const { res, handled } = await runAssistantMediaRequest({
-              url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}`,
+              url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}`,
               method: "GET",
               auth: { mode: "token", token: "shared-token", allowTailscale: false },
               headers: {
@@ -929,7 +929,7 @@ describe("handleControlUiHttpRequest", () => {
             const filePath = path.join(tmpRoot, "photo.png");
             await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
             const { res, handled } = await runAssistantMediaRequest({
-              url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}`,
+              url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}`,
               method: "GET",
               auth,
               headers: {
@@ -953,7 +953,7 @@ describe("handleControlUiHttpRequest", () => {
             const filePath = path.join(tmpRoot, "photo.png");
             await fs.writeFile(filePath, Buffer.from("not-a-real-png"));
             const { res, handled } = await runAssistantMediaRequest({
-              url: `/__openclaw__/assistant-media?source=${encodeURIComponent(filePath)}&token=${encodeURIComponent(operatorToken)}`,
+              url: `/__bot__/assistant-media?source=${encodeURIComponent(filePath)}&token=${encodeURIComponent(operatorToken)}`,
               method: "GET",
               auth: { mode: "token", token: "shared-token", allowTailscale: false },
             });
@@ -993,7 +993,7 @@ describe("handleControlUiHttpRequest", () => {
         const { res, handled, end } = await runTrustedProxyAssistantMediaRequest({
           filePath,
           headers: {
-            "x-openclaw-scopes": "operator.approvals",
+            "x-bot-scopes": "operator.approvals",
           },
         });
         expectMissingOperatorReadResponse({ handled, res, end });
@@ -1011,7 +1011,7 @@ describe("handleControlUiHttpRequest", () => {
           filePath,
           meta: true,
           headers: {
-            "x-openclaw-scopes": "",
+            "x-bot-scopes": "",
           },
         });
         expectMissingOperatorReadResponse({ handled, res, end });
@@ -1059,7 +1059,7 @@ describe("handleControlUiHttpRequest", () => {
         );
         expect(handled).toBe(true);
         expect(end).toHaveBeenCalledWith(
-          html.replace("<html", '<html data-openclaw-terminal-enabled="true"'),
+          html.replace("<html", '<html data-bot-terminal-enabled="true"'),
         );
       },
     });
@@ -1073,18 +1073,18 @@ describe("handleControlUiHttpRequest", () => {
       fn: async (tmp) => {
         const { res, end } = makeMockHttpResponse();
         const handled = await handleControlUiHttpRequest(
-          { url: "/openclaw/chat", method: "GET" } as IncomingMessage,
+          { url: "/bot/chat", method: "GET" } as IncomingMessage,
           res,
           {
-            basePath: "/openclaw",
+            basePath: "/bot",
             root: { kind: "resolved", path: tmp },
           },
         );
         expect(handled).toBe(true);
         const body = String(end.mock.calls[0]?.[0] ?? "");
-        expect(body).toContain('data-openclaw-control-ui-base-path="/openclaw"');
-        expect(body).toContain('href="/openclaw/manifest.webmanifest"');
-        expect(body).toContain('href="/openclaw/favicon.svg"');
+        expect(body).toContain('data-bot-control-ui-base-path="/bot"');
+        expect(body).toContain('href="/bot/manifest.webmanifest"');
+        expect(body).toContain('href="/bot/favicon.svg"');
         expect(body).not.toContain('href="/manifest.webmanifest"');
       },
     });
@@ -1099,9 +1099,9 @@ describe("handleControlUiHttpRequest", () => {
     },
     {
       name: "base-mounted nested routes",
-      requestPath: "/openclaw/settings/approvals",
-      basePath: "/openclaw",
-      expectedPrefix: "/openclaw",
+      requestPath: "/bot/settings/approvals",
+      basePath: "/bot",
+      expectedPrefix: "/bot",
     },
   ])(
     "anchors Vite-relative public asset hrefs for $name",
@@ -1556,7 +1556,7 @@ describe("handleControlUiHttpRequest", () => {
         expect(new Set(cookieNames).size).toBe(2);
         expect(
           cookieNames.every((name) =>
-            /^__openclaw_plugin_tab_auth_[0-9a-f]{16}_[0-9a-f]{64}$/.test(name),
+            /^__bot_plugin_tab_auth_[0-9a-f]{16}_[0-9a-f]{64}$/.test(name),
           ),
         ).toBe(true);
         expect(cookies.map(String)).toEqual([
@@ -1746,10 +1746,10 @@ describe("handleControlUiHttpRequest", () => {
       fn: async (tmp) => {
         const { res, end } = makeMockHttpResponse();
         const handled = await handleControlUiHttpRequest(
-          { url: `/openclaw${CONTROL_UI_BOOTSTRAP_CONFIG_PATH}`, method: "GET" } as IncomingMessage,
+          { url: `/bot${CONTROL_UI_BOOTSTRAP_CONFIG_PATH}`, method: "GET" } as IncomingMessage,
           res,
           {
-            basePath: "/openclaw",
+            basePath: "/bot",
             root: { kind: "resolved", path: tmp },
             config: {
               agents: { defaults: { workspace: tmp } },
@@ -1759,7 +1759,7 @@ describe("handleControlUiHttpRequest", () => {
         );
         expect(handled).toBe(true);
         const parsed = parseBootstrapPayload(end);
-        expect(parsed.basePath).toBe("/openclaw");
+        expect(parsed.basePath).toBe("/bot");
         expect(parsed.assistantName).toBe("Ops");
         expect(parsed.assistantAvatar).toBe("A");
         expect(parsed.assistantAvatarStatus).toBe("none");
@@ -1770,18 +1770,18 @@ describe("handleControlUiHttpRequest", () => {
     });
   });
 
-  it("serves bootstrap config under the configured /__openclaw__ basePath (#66946)", async () => {
+  it("serves bootstrap config under the configured /__bot__ basePath (#66946)", async () => {
     await withControlUiRoot({
       fn: async (tmp) => {
         const { res, end } = makeMockHttpResponse();
         const handled = await handleControlUiHttpRequest(
           {
-            url: "/__openclaw__/control-ui-config.json",
+            url: "/__bot__/control-ui-config.json",
             method: "GET",
           } as IncomingMessage,
           res,
           {
-            basePath: "/__openclaw__",
+            basePath: "/__bot__",
             root: { kind: "resolved", path: tmp },
             config: {
               agents: { defaults: { workspace: tmp } },
@@ -1792,25 +1792,25 @@ describe("handleControlUiHttpRequest", () => {
         expect(handled).toBe(true);
         expect(res.statusCode).not.toBe(404);
         const parsed = parseBootstrapPayload(end);
-        expect(parsed.basePath).toBe("/__openclaw__");
+        expect(parsed.basePath).toBe("/__bot__");
         expect(parsed.assistantAgentId).toBe("main");
       },
     });
   });
 
   // Real reported scenario: the gateway has NO configured `gateway.controlUi.basePath`,
-  // so the SPA is served at the default `/__openclaw__/` namespace. The browser opens
-  // the default entry, `inferBasePathFromPathname("/__openclaw__/")` yields `/__openclaw__`,
-  // and the loader fetches `/__openclaw__/control-ui-config.json`. Before this fix the
+  // so the SPA is served at the default `/__bot__/` namespace. The browser opens
+  // the default entry, `inferBasePathFromPathname("/__bot__/")` yields `/__bot__`,
+  // and the loader fetches `/__bot__/control-ui-config.json`. Before this fix the
   // gateway only matched the bare `/control-ui-config.json` for an empty base path, so the
   // default-entry request 404ed (issue #66946). This case fails without the namespace alias.
-  it("serves bootstrap config at the default /__openclaw__ entry with no configured basePath (#66946)", async () => {
+  it("serves bootstrap config at the default /__bot__ entry with no configured basePath (#66946)", async () => {
     await withControlUiRoot({
       fn: async (tmp) => {
         const { res, end } = makeMockHttpResponse();
         const handled = await handleControlUiHttpRequest(
           {
-            url: "/__openclaw__/control-ui-config.json",
+            url: "/__bot__/control-ui-config.json",
             method: "GET",
           } as IncomingMessage,
           res,
@@ -1848,18 +1848,18 @@ describe("handleControlUiHttpRequest", () => {
   });
 
   // Compatibility regression: current main and v2026.6.1 serve and document the
-  // single-underscore `/__openclaw/control-ui-config.json` endpoint under an empty
+  // single-underscore `/__bot/control-ui-config.json` endpoint under an empty
   // base path. #66946 makes the config path base-path-relative; this case proves
   // the old documented endpoint still returns config (no upgrade 404 break).
   // Without the LEGACY_BOOTSTRAP_CONFIG_PATH alias this request 404s, so it is not
   // vacuous.
-  it("still serves bootstrap config at the legacy /__openclaw/control-ui-config.json with no configured basePath (#66946)", async () => {
+  it("still serves bootstrap config at the legacy /__bot/control-ui-config.json with no configured basePath (#66946)", async () => {
     await withControlUiRoot({
       fn: async (tmp) => {
         const { res, end } = makeMockHttpResponse();
         const handled = await handleControlUiHttpRequest(
           {
-            url: "/__openclaw/control-ui-config.json",
+            url: "/__bot/control-ui-config.json",
             method: "GET",
           } as IncomingMessage,
           res,
@@ -1883,25 +1883,25 @@ describe("handleControlUiHttpRequest", () => {
   });
 
   // Compatibility regression for configured-base-path deployments: when a
-  // `gateway.controlUi.basePath` is set (e.g. `/openclaw`), current main and
-  // v2026.6.1 serve the bootstrap config at `${basePath}/__openclaw/control-ui-config.json`
+  // `gateway.controlUi.basePath` is set (e.g. `/bot`), current main and
+  // v2026.6.1 serve the bootstrap config at `${basePath}/__bot/control-ui-config.json`
   // (single underscore). #66946 moves the canonical path to
   // `${basePath}/control-ui-config.json`; this case proves the old configured-base-path
   // endpoint still returns config so older bundles and proxies that still request it
   // do not 404 after upgrade. Without the configured-base-path legacy alias this
   // request 404s, so the assertion is not vacuous.
-  it("still serves bootstrap config at the legacy ${basePath}/__openclaw/control-ui-config.json under a configured basePath (#66946)", async () => {
+  it("still serves bootstrap config at the legacy ${basePath}/__bot/control-ui-config.json under a configured basePath (#66946)", async () => {
     await withControlUiRoot({
       fn: async (tmp) => {
         const { res, end } = makeMockHttpResponse();
         const handled = await handleControlUiHttpRequest(
           {
-            url: "/openclaw/__openclaw/control-ui-config.json",
+            url: "/bot/__bot/control-ui-config.json",
             method: "GET",
           } as IncomingMessage,
           res,
           {
-            basePath: "/openclaw",
+            basePath: "/bot",
             root: { kind: "resolved", path: tmp },
             config: {
               agents: { defaults: { workspace: tmp } },
@@ -1914,17 +1914,17 @@ describe("handleControlUiHttpRequest", () => {
         const parsed = parseBootstrapPayload(end);
         // The configured base path is reported back so the loader resolves
         // base-path-relative URLs against it.
-        expect(parsed.basePath).toBe("/openclaw");
+        expect(parsed.basePath).toBe("/bot");
         expect(parsed.assistantAgentId).toBe("main");
       },
     });
   });
 
-  it("does not serve bootstrap config from the doubled /__openclaw__/__openclaw path (#66946)", async () => {
+  it("does not serve bootstrap config from the doubled /__bot__/__bot path (#66946)", async () => {
     await withControlUiRoot({
       fn: async (tmp) => {
         const { res, end, handled } = await runControlUiRequest({
-          url: "/__openclaw__/__openclaw/control-ui-config.json",
+          url: "/__bot__/__bot/control-ui-config.json",
           method: "GET",
           rootPath: tmp,
         });
@@ -1934,7 +1934,7 @@ describe("handleControlUiHttpRequest", () => {
   });
 
   it("serves local avatar bytes through hardened avatar handler", async () => {
-    const tmp = testTempDirs.make("openclaw-avatar-http-");
+    const tmp = testTempDirs.make("bot-avatar-http-");
     try {
       const avatarPath = path.join(tmp, "main.png");
       await fs.writeFile(avatarPath, "avatar-bytes\n");
@@ -1959,7 +1959,7 @@ describe("handleControlUiHttpRequest", () => {
   ] as const)(
     "validates %s avatar requests without reading bytes and closes the descriptor",
     async (_name, url, method) => {
-      const tmp = testTempDirs.make("openclaw-avatar-no-read-");
+      const tmp = testTempDirs.make("bot-avatar-no-read-");
       const read = vi.spyOn(fsSync, "read");
       const closeSync = vi.spyOn(fsSync, "closeSync");
       try {
@@ -1983,7 +1983,7 @@ describe("handleControlUiHttpRequest", () => {
   );
 
   it("rejects hardlinked avatar bytes and reports matching metadata", async () => {
-    const tmp = testTempDirs.make("openclaw-avatar-http-hardlink-");
+    const tmp = testTempDirs.make("bot-avatar-http-hardlink-");
     try {
       await fs.writeFile(path.join(tmp, "original.png"), REAL_PNG);
       await fs.link(path.join(tmp, "original.png"), path.join(tmp, "avatar.png"));
@@ -2011,7 +2011,7 @@ describe("handleControlUiHttpRequest", () => {
   });
 
   it("bounds an avatar route file that grows after its descriptor is pinned", async () => {
-    const tmp = testTempDirs.make("openclaw-avatar-http-growth-");
+    const tmp = testTempDirs.make("bot-avatar-http-growth-");
     const avatarPath = path.join(tmp, "avatar.png");
     try {
       await fs.writeFile(avatarPath, REAL_PNG);
@@ -2033,8 +2033,8 @@ describe("handleControlUiHttpRequest", () => {
   });
 
   it("rejects avatar symlink paths from resolver", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-avatar-http-link-"));
-    const outside = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-avatar-http-outside-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-avatar-http-link-"));
+    const outside = await fs.mkdtemp(path.join(os.tmpdir(), "bot-avatar-http-outside-"));
     try {
       const outsideFile = path.join(outside, "secret.txt");
       await fs.writeFile(outsideFile, "outside-secret\n");
@@ -2055,7 +2055,7 @@ describe("handleControlUiHttpRequest", () => {
   });
 
   it("serves local avatar bytes when auth is enabled and the token is valid", async () => {
-    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-avatar-auth-"));
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-avatar-auth-"));
     try {
       const avatarPath = path.join(tmp, "main.png");
       await fs.writeFile(avatarPath, "avatar-bytes\n");
@@ -2080,7 +2080,7 @@ describe("handleControlUiHttpRequest", () => {
   it("serves local avatar bytes when paired device-token auth is valid", async () => {
     await withPairedOperatorDeviceToken({
       fn: async (operatorToken) => {
-        const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-avatar-device-token-"));
+        const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "bot-avatar-device-token-"));
         try {
           const avatarPath = path.join(tmp, "main.png");
           await fs.writeFile(avatarPath, "avatar-bytes\n");
@@ -2160,7 +2160,7 @@ describe("handleControlUiHttpRequest", () => {
     const { res, handled, end } = await runTrustedProxyAvatarRequest({
       meta: true,
       headers: {
-        "x-openclaw-scopes": "",
+        "x-bot-scopes": "",
       },
     });
 
@@ -2171,7 +2171,7 @@ describe("handleControlUiHttpRequest", () => {
     await withControlUiRoot({
       fn: async (tmp) => {
         const assetsDir = path.join(tmp, "assets");
-        const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-outside-"));
+        const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ui-outside-"));
         try {
           const outsideFile = path.join(outsideDir, "secret.txt");
           await fs.mkdir(assetsDir, { recursive: true });
@@ -2531,7 +2531,7 @@ describe("handleControlUiHttpRequest", () => {
           expect(setHeader).toHaveBeenCalledWith("Cache-Control", "no-cache");
           expect(setHeader).toHaveBeenCalledWith("Content-Encoding", "gzip");
           expect(gunzipSync(end.mock.calls[0]?.[0] as Buffer).toString()).toContain(
-            '<html data-openclaw-terminal-enabled="true">',
+            '<html data-bot-terminal-enabled="true">',
           );
           expect(closeSync.mock.invocationCallOrder.at(-1)).toBeLessThan(
             end.mock.invocationCallOrder[0] ?? Number.POSITIVE_INFINITY,
@@ -2589,8 +2589,8 @@ describe("handleControlUiHttpRequest", () => {
     },
     {
       name: "configured-base-path",
-      basePath: "/openclaw",
-      url: "/openclaw/approve/Approval%3AMobile%2F%E6%9D%B1%E4%BA%AC%20100%25%20%F0%9F%A6%9E",
+      basePath: "/bot",
+      url: "/bot/approve/Approval%3AMobile%2F%E6%9D%B1%E4%BA%AC%20100%25%20%F0%9F%A6%9E",
     },
     {
       name: "asset-like-id",
@@ -2599,8 +2599,8 @@ describe("handleControlUiHttpRequest", () => {
     },
     {
       name: "configured-base-asset-like-id",
-      basePath: "/openclaw",
-      url: "/openclaw/approve/plugin%3Arequest.js",
+      basePath: "/bot",
+      url: "/bot/approve/plugin%3Arequest.js",
     },
   ])("serves $name approval deep links through the SPA fallback", async ({ basePath, url }) => {
     await withControlUiRoot({
@@ -2621,7 +2621,7 @@ describe("handleControlUiHttpRequest", () => {
           } else {
             expect(responseBody(end)).toContain("approval-spa");
             if (basePath) {
-              expect(responseBody(end)).toContain('data-openclaw-control-ui-base-path="/openclaw"');
+              expect(responseBody(end)).toContain('data-bot-control-ui-base-path="/bot"');
             }
           }
         }
@@ -2637,8 +2637,8 @@ describe("handleControlUiHttpRequest", () => {
     },
     {
       name: "configured-base-path",
-      basePath: "/openclaw",
-      url: "/openclaw/approve/Approval%3AMobile%2F%E6%9D%B1%E4%BA%AC%20100%25%20%F0%9F%A6%9E",
+      basePath: "/bot",
+      url: "/bot/approve/Approval%3AMobile%2F%E6%9D%B1%E4%BA%AC%20100%25%20%F0%9F%A6%9E",
     },
     {
       name: "asset-like-id",
@@ -2667,7 +2667,7 @@ describe("handleControlUiHttpRequest", () => {
   it("rejects symlinked SPA fallback index.html outside control-ui root", async () => {
     await withControlUiRoot({
       fn: async (tmp) => {
-        const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-index-outside-"));
+        const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ui-index-outside-"));
         try {
           const outsideIndex = path.join(outsideDir, "index.html");
           await fs.writeFile(outsideIndex, "<html>outside</html>\n");
@@ -2690,7 +2690,7 @@ describe("handleControlUiHttpRequest", () => {
   it("rejects hardlinked index.html for non-package control-ui roots", async () => {
     await withControlUiRoot({
       fn: async (tmp) => {
-        const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ui-index-hardlink-"));
+        const outsideDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ui-index-hardlink-"));
         try {
           const outsideIndex = path.join(outsideDir, "index.html");
           await fs.writeFile(outsideIndex, "<html>outside-hardlink</html>\n");
@@ -2756,10 +2756,10 @@ describe("handleControlUiHttpRequest", () => {
         await fs.writeFile(path.join(tmp, "sw.js"), "self.addEventListener('push', () => {});");
 
         for (const [url, expectedType] of [
-          ["/__openclaw__/favicon.svg", "image/svg+xml"],
-          ["/__openclaw__/manifest.webmanifest", "application/manifest+json; charset=utf-8"],
-          ["/__openclaw__/apple-touch-icon.png", "image/png"],
-          ["/__openclaw__/sw.js", "application/javascript; charset=utf-8"],
+          ["/__bot__/favicon.svg", "image/svg+xml"],
+          ["/__bot__/manifest.webmanifest", "application/manifest+json; charset=utf-8"],
+          ["/__bot__/apple-touch-icon.png", "image/png"],
+          ["/__bot__/sw.js", "application/javascript; charset=utf-8"],
         ] as const) {
           const { res, end, handled } = await runControlUiRequest({
             url,
@@ -2801,7 +2801,7 @@ describe("handleControlUiHttpRequest", () => {
         const handled = await handleControlUiHttpRequest(
           { url: "/imessage-webhook", method: "POST" } as IncomingMessage,
           res,
-          { basePath: "/openclaw", root: { kind: "resolved", path: tmp } },
+          { basePath: "/bot", root: { kind: "resolved", path: tmp } },
         );
         expect(handled).toBe(false);
       },
@@ -2855,12 +2855,12 @@ describe("handleControlUiHttpRequest", () => {
   it("falls through POST requests under configured basePath (plugin webhook passthrough)", async () => {
     await withControlUiRoot({
       fn: async (tmp) => {
-        for (const route of ["/openclaw", "/openclaw/", "/openclaw/some-page"]) {
+        for (const route of ["/bot", "/bot/", "/bot/some-page"]) {
           const { handled, end } = await runControlUiRequest({
             url: route,
             method: "POST",
             rootPath: tmp,
-            basePath: "/openclaw",
+            basePath: "/bot",
           });
           expect(handled, `POST to ${route} should pass through to plugin handlers`).toBe(false);
           expect(end, `POST to ${route} should not write a response`).not.toHaveBeenCalled();
@@ -2879,10 +2879,10 @@ describe("handleControlUiHttpRequest", () => {
         const secretPathUrl = secretPath.split(path.sep).join("/");
         const absolutePathUrl = secretPathUrl.startsWith("/") ? secretPathUrl : `/${secretPathUrl}`;
         const { res, end, handled } = await runControlUiRequest({
-          url: `/openclaw/${absolutePathUrl}`,
+          url: `/bot/${absolutePathUrl}`,
           method: "GET",
           rootPath: root,
-          basePath: "/openclaw",
+          basePath: "/bot",
         });
         expectNotFoundResponse({ handled, res, end });
       },
@@ -2908,10 +2908,10 @@ describe("handleControlUiHttpRequest", () => {
         }
 
         const { res, end, handled } = await runControlUiRequest({
-          url: "/openclaw/assets/leak.txt",
+          url: "/bot/assets/leak.txt",
           method: "GET",
           rootPath: root,
-          basePath: "/openclaw",
+          basePath: "/bot",
         });
         expectNotFoundResponse({ handled, res, end });
       },

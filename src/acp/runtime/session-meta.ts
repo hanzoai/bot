@@ -1,8 +1,8 @@
 /** SQLite-backed ACP session metadata storage keyed through session-store entries. */
 import type { DatabaseSync } from "node:sqlite";
-import { safeParseJson } from "@openclaw/normalization-core";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { safeParseJson } from "@hanzo/bot-normalization-core";
+import { asOptionalRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import type { Insertable, Selectable } from "kysely";
 import { getRuntimeConfig } from "../../config/config.js";
 import { patchSessionEntryWithKey } from "../../config/sessions/session-accessor.js";
@@ -13,18 +13,18 @@ import {
   type SessionAcpMeta,
   type SessionEntry,
 } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-  runOpenClawStateWriteTransaction,
-} from "../../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  type BotStateDatabaseOptions,
+  runBotStateWriteTransaction,
+} from "../../state/bot-state-db.js";
 import {
   readSessionEntryFromStore,
   resolveSessionStorePathForAcp,
@@ -35,7 +35,7 @@ import {
 export { resolveSessionStorePathForAcp } from "./session-meta-store.js";
 
 export type AcpSessionStoreEntry = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   storePath: string;
   sessionKey: string;
@@ -46,8 +46,8 @@ export type AcpSessionStoreEntry = {
 };
 
 // ACP metadata lives in SQLite but is keyed through the legacy JSON session store.
-type AcpSessionsTable = OpenClawStateKyselyDatabase["acp_sessions"];
-type AcpSessionMetaDatabase = Pick<OpenClawStateKyselyDatabase, "acp_sessions">;
+type AcpSessionsTable = BotStateKyselyDatabase["acp_sessions"];
+type AcpSessionMetaDatabase = Pick<BotStateKyselyDatabase, "acp_sessions">;
 type AcpSessionRow = Selectable<AcpSessionsTable>;
 type AcpSessionEntryBinding = Pick<SessionEntry, "lifecycleRevision"> &
   Partial<Pick<SessionEntry, "sessionId" | "sessionStartedAt">>;
@@ -148,7 +148,7 @@ function resolveReadableAcpSessionRow(params: {
   ) {
     return row;
   }
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     (database) => {
       const current = selectAcpSessionRow(database.db, row.session_key);
       if (!current || current.session_id === lifecycleRevision || current.session_id == null) {
@@ -173,7 +173,7 @@ function resolveReadableAcpSessionRow(params: {
 
 export function readAcpSessionMeta(params: {
   sessionKey: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   env?: NodeJS.ProcessEnv;
   databasePath?: string;
 }): SessionAcpMeta | undefined {
@@ -187,7 +187,7 @@ export function readAcpSessionMeta(params: {
     env: params.env,
     clone: false,
   });
-  const database = openOpenClawStateDatabase({
+  const database = openBotStateDatabase({
     env: params.env,
     path: params.databasePath,
   });
@@ -213,7 +213,7 @@ export function readAcpSessionMetaForEntry(params: {
   if (!sessionKey) {
     return undefined;
   }
-  const database = openOpenClawStateDatabase({
+  const database = openBotStateDatabase({
     env: params.env,
     path: params.databasePath,
   });
@@ -256,7 +256,7 @@ export function readAcpSessionMetaBatch(params: {
     return result;
   }
 
-  const database = openOpenClawStateDatabase({
+  const database = openBotStateDatabase({
     env: params.env,
     path: params.databasePath,
   });
@@ -290,8 +290,8 @@ export function readAcpSessionMetaBatch(params: {
   return result;
 }
 
-function selectAcpSessionRows(options: OpenClawStateDatabaseOptions = {}): AcpSessionRow[] {
-  const database = openOpenClawStateDatabase(options);
+function selectAcpSessionRows(options: BotStateDatabaseOptions = {}): AcpSessionRow[] {
+  const database = openBotStateDatabase(options);
   return executeSqliteQuerySync(
     database.db,
     getAcpSessionKysely(database.db)
@@ -322,7 +322,7 @@ export function writeAcpSessionMetaForMigration(params: {
     meta: params.meta,
     updatedAt: params.now?.() ?? Date.now(),
   });
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     (database) => {
       upsertAcpSessionMetaRow(database.db, row);
     },
@@ -344,7 +344,7 @@ export function repairAcpSessionMetaKeyForMigration(params: {
   }
 
   let repaired = false;
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     (database) => {
       const currentRow = selectAcpSessionRow(database.db, sessionKey);
       if (currentRow && acpSessionRowMatchesEntry(currentRow, params.entry)) {
@@ -434,7 +434,7 @@ function upsertAcpSessionMetaRow(db: DatabaseSync, row: Insertable<AcpSessionsTa
 
 export function readAcpSessionEntry(params: {
   sessionKey: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   clone?: boolean;
   env?: NodeJS.ProcessEnv;
   databasePath?: string;
@@ -444,7 +444,7 @@ export function readAcpSessionEntry(params: {
     return null;
   }
   const storeEntry = readSessionEntryFromStore(params);
-  const database = openOpenClawStateDatabase({
+  const database = openBotStateDatabase({
     env: params.env,
     path: params.databasePath,
   });
@@ -468,7 +468,7 @@ export function readAcpSessionEntry(params: {
 }
 
 export async function listAcpSessionEntries(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   env?: NodeJS.ProcessEnv;
   clone?: boolean;
   databasePath?: string;
@@ -574,7 +574,7 @@ async function clearLegacyEmbeddedAcpMetadata(params: {
 
 export async function upsertAcpSessionMeta(params: {
   sessionKey: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   env?: NodeJS.ProcessEnv;
   databasePath?: string;
   now?: () => number;
@@ -601,7 +601,7 @@ export async function upsertAcpSessionMeta(params: {
   let nextMeta: SessionAcpMeta | null | undefined;
   let preparedEntry: SessionEntry | undefined;
   const updatedAt = params.now?.() ?? Date.now();
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     (database) => {
       const currentRow = selectAcpSessionRow(database.db, storageSessionKey);
       current =
@@ -639,7 +639,7 @@ export async function upsertAcpSessionMeta(params: {
           },
         )
       : null;
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       (database) => {
         const sessionKeysToDelete = new Set([storageSessionKey]);
         if (patched?.sessionKey) {
@@ -688,7 +688,7 @@ export async function upsertAcpSessionMeta(params: {
     storePath: storeEntry.storePath,
     sessionKeys: [storageSessionKey, persisted.sessionKey],
   });
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     (database) => {
       upsertAcpSessionMetaRow(
         database.db,

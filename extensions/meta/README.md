@@ -1,6 +1,6 @@
 # Meta provider
 
-Bundled OpenClaw provider plugin for the **Meta API** — an OpenAI-compatible
+Bundled Bot provider plugin for the **Meta API** — an OpenAI-compatible
 **Responses API** endpoint (`POST /v1/responses`).
 
 - **Base URL:** `https://api.meta.ai/v1`
@@ -22,7 +22,7 @@ export MODEL_API_KEY=<key>
 ```
 
 ```json5
-// ~/.openclaw/openclaw.json
+// ~/.hanzoai/bot.json
 {
   agents: {
     defaults: {

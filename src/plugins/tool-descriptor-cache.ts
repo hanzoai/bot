@@ -5,7 +5,7 @@ import type { JsonObject, ToolDescriptor } from "../tools/types.js";
 import type { PluginLoadOptions } from "./loader.js";
 import { registerPluginMetadataProcessMemoLifecycleClear } from "./plugin-metadata-lifecycle.js";
 import type { PluginRegistry } from "./registry-types.js";
-import type { OpenClawPluginToolContext } from "./types.js";
+import type { BotPluginToolContext } from "./types.js";
 
 const PLUGIN_TOOL_DESCRIPTOR_CACHE_VERSION = 3;
 const PLUGIN_TOOL_DESCRIPTOR_CACHE_LIMIT = 256;
@@ -90,7 +90,7 @@ function getDescriptorConfigCacheKey(
 }
 
 function buildDescriptorContextCacheKey(params: {
-  ctx: OpenClawPluginToolContext;
+  ctx: BotPluginToolContext;
   currentRuntimeConfig?: PluginLoadOptions["config"] | null;
   configCacheKeyMemo?: PluginToolDescriptorConfigCacheKeyMemo;
 }): string {
@@ -123,7 +123,7 @@ export function buildPluginToolDescriptorCacheKey(params: {
   source: string;
   rootDir?: string;
   contractToolNames: readonly string[];
-  ctx: OpenClawPluginToolContext;
+  ctx: BotPluginToolContext;
   currentRuntimeConfig?: PluginLoadOptions["config"] | null;
   configCacheKeyMemo?: PluginToolDescriptorConfigCacheKeyMemo;
   clientCaps?: readonly string[];

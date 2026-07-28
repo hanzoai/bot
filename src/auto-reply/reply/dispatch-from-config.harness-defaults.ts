@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveSessionAgentId } from "../../agents/agent-scope.js";
 import { selectAgentHarness } from "../../agents/harness/selection.js";
 import {
@@ -10,7 +10,7 @@ import {
 import { resolveSessionRuntimeOverrideForProvider } from "../../agents/session-runtime-compat.js";
 import { resolveChannelModelOverride } from "../../channels/model-overrides.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { logVerbose } from "../../globals.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import {
@@ -105,7 +105,7 @@ export function resolveTurnModelOverride(
 
 function resolveChannelModelCandidate(params: {
   aliasIndex: ModelAliasIndex;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   ctx: FinalizedMsgContext;
   defaultProvider: string;
   entry?: SessionEntry;
@@ -148,7 +148,7 @@ function resolveChannelModelCandidate(params: {
 }
 
 function resolveStoredModelCandidate(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   defaultProvider: string;
   entry?: SessionEntry;
   parentSessionKey?: string;
@@ -203,7 +203,7 @@ function resolveModelOverrideCandidate(params: {
 }
 
 export function resolveHarnessSourceVisibleRepliesDefault(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   ctx: FinalizedMsgContext;
   entry?: SessionEntry;
   sessionAgentId: string;

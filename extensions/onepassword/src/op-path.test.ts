@@ -7,7 +7,7 @@ import { createTrustedNodeFixture } from "./trusted-node.test-support.js";
 
 describe("1Password CLI owner trust", () => {
   it("copies the Node fixture without mutating the installed runtime", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-op-path-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-op-path-"));
     const before = await fs.stat(process.execPath);
     try {
       const fixture = createTrustedNodeFixture(tempDir);
@@ -31,7 +31,7 @@ describe("1Password CLI owner trust", () => {
   it.runIf(process.platform !== "win32")(
     "canonicalizes an intentional executable symlink before trust validation",
     async () => {
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-op-path-"));
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-op-path-"));
       const executable = path.join(tempDir, "op-real");
       const symlink = path.join(tempDir, "op");
       try {
@@ -50,7 +50,7 @@ describe("1Password CLI owner trust", () => {
   );
 
   it.runIf(process.platform !== "win32")("rejects env-indirected script interpreters", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-op-path-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-op-path-"));
     const executable = path.join(tempDir, "op");
     try {
       await fs.writeFile(executable, "#!/usr/bin/env node\nprocess.exit(0);\n", { mode: 0o700 });
@@ -63,7 +63,7 @@ describe("1Password CLI owner trust", () => {
   it.runIf(process.platform !== "win32")(
     "rejects non-canonical script interpreter aliases",
     async () => {
-      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-op-path-"));
+      const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-op-path-"));
       const executable = path.join(tempDir, "op");
       try {
         const canonicalInterpreter = createTrustedNodeFixture(tempDir);

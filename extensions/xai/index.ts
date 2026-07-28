@@ -1,10 +1,10 @@
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-// Xai plugin entrypoint registers its OpenClaw integration.
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { buildProviderReplayFamilyHooks } from "openclaw/plugin-sdk/provider-model-shared";
-import { defaultToolStreamExtraParams } from "openclaw/plugin-sdk/provider-stream-shared";
-import { jsonResult } from "openclaw/plugin-sdk/provider-web-search";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+// Xai plugin entrypoint registers its Bot integration.
+import type { BotPluginToolContext } from "bot/plugin-sdk/plugin-entry";
+import { defineSingleProviderPluginEntry } from "bot/plugin-sdk/provider-entry";
+import { buildProviderReplayFamilyHooks } from "bot/plugin-sdk/provider-model-shared";
+import { defaultToolStreamExtraParams } from "bot/plugin-sdk/provider-stream-shared";
+import { jsonResult } from "bot/plugin-sdk/provider-web-search";
 import {
   applyXaiRuntimeModelCompat,
   buildXaiImageGenerationProvider,
@@ -108,7 +108,7 @@ function shouldExposeXaiBilledTool(params: {
   return isXaiProviderId(activeProvider) || params.enabled === true;
 }
 
-function createLazyCodeExecutionTool(ctx: OpenClawPluginToolContext) {
+function createLazyCodeExecutionTool(ctx: BotPluginToolContext) {
   const effectiveConfig = ctx.runtimeConfig ?? ctx.config;
   const codeExecutionConfig = readPluginCodeExecutionConfig(effectiveConfig);
   if (
@@ -139,7 +139,7 @@ function createLazyCodeExecutionTool(ctx: OpenClawPluginToolContext) {
   );
 }
 
-function createLazyXSearchTool(ctx: OpenClawPluginToolContext) {
+function createLazyXSearchTool(ctx: BotPluginToolContext) {
   const effectiveConfig = ctx.runtimeConfig ?? ctx.config;
   const xSearchConfig = resolveEffectiveXSearchConfig(effectiveConfig);
   if (
@@ -199,7 +199,7 @@ export default defineSingleProviderPluginEntry({
         const auth = ctx.resolveProviderAuth(PROVIDER_ID);
         try {
           const { resolveApiKeyForProvider } =
-            await import("openclaw/plugin-sdk/provider-auth-runtime");
+            await import("bot/plugin-sdk/provider-auth-runtime");
           const runtimeAuth = await resolveApiKeyForProvider({
             provider: PROVIDER_ID,
             cfg: ctx.config,

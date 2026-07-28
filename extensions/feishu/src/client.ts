@@ -5,14 +5,14 @@ import * as Lark from "@larksuiteoapi/node-sdk";
 import {
   readPluginPackageVersion,
   resolveAmbientNodeProxyAgent,
-} from "openclaw/plugin-sdk/extension-shared";
+} from "bot/plugin-sdk/extension-shared";
 import { resolveConfiguredHttpTimeoutMs } from "./client-timeout.js";
 import type { FeishuConfig, FeishuDomain, ResolvedFeishuAccount } from "./types.js";
 
 const require = createRequire(import.meta.url);
 const pluginVersion = readPluginPackageVersion({ require });
 
-const FEISHU_USER_AGENT = `openclaw-feishu-builtin/${pluginVersion}/${process.platform}`;
+const FEISHU_USER_AGENT = `bot-feishu-builtin/${pluginVersion}/${process.platform}`;
 
 const FEISHU_WS_CONFIG = {
   pingTimeout: 3,
@@ -194,7 +194,7 @@ function normalizeMultipartUploadData<D>(
 }
 
 function isManagedProxyActive() {
-  return process.env["OPENCLAW_PROXY_ACTIVE"] === "1";
+  return process.env["BOT_PROXY_ACTIVE"] === "1";
 }
 
 let cachedFeishuProxyAgent: Agent | undefined;

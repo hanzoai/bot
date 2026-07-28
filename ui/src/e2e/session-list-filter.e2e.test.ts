@@ -11,7 +11,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 // Browser contexts preserve test isolation; keep one process warm for this file.
@@ -169,7 +169,7 @@ describeControlUiE2e("Control UI session-list event scope", () => {
     expect(sidebarParams).not.toHaveProperty("activeMinutes");
 
     await currentPage.goto(`${server?.baseUrl ?? ""}sessions`);
-    const sessionsPage = currentPage.locator("openclaw-sessions-page");
+    const sessionsPage = currentPage.locator("bot-sessions-page");
     await sessionsPage.getByText(sessionLabel, { exact: true }).waitFor({ timeout: 10_000 });
     const initialPageRequests = await gateway.getRequests("sessions.list");
     const initialPageParams = initialPageRequests.find(

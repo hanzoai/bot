@@ -1,9 +1,9 @@
 import type { Command } from "commander";
-import { callGatewayFromCli } from "openclaw/plugin-sdk/gateway-runtime";
+import { callGatewayFromCli } from "bot/plugin-sdk/gateway-runtime";
 import {
   addTimerTimeoutGraceMs,
   parseStrictNonNegativeInteger,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 import type { ZoomMeetingsConfig, ZoomMeetingsMode, ZoomMeetingsTransport } from "./config.js";
 import { resolveZoomMeetingsGatewayOperationTimeoutMs } from "./config.js";
 import { resolveZoomMeetingsProbeTimeoutMs } from "./probe-timeout.js";

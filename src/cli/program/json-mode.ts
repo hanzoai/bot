@@ -6,7 +6,7 @@ import {
   type MachineOutputResolverParams,
 } from "../machine-output-argv.js";
 
-const jsonModeSymbol = Symbol("openclaw.cli.jsonMode");
+const jsonModeSymbol = Symbol("bot.cli.jsonMode");
 
 type CommandJsonMode = "output" | "parse-only";
 type CommandJsonModeResolver = (

@@ -3,12 +3,12 @@ import { createHash } from "node:crypto";
 import { lstat } from "node:fs/promises";
 import { stableStringify } from "../agents/stable-stringify.js";
 import { normalizeConfiguredMcpServers } from "../config/mcp-config-normalize.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { root as fsSafeRoot } from "../infra/fs-safe.js";
 import {
-  openExistingOpenClawStateDatabaseReadOnly,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openExistingBotStateDatabaseReadOnly,
+  type BotStateDatabaseOptions,
+} from "../state/bot-state-db.js";
 import { readClawStatus } from "./lifecycle-state.js";
 import { buildClawAddPlan } from "./lifecycle.js";
 import { digestClawMcpServer, readClawMcpServerRefsByName } from "./mcp.js";
@@ -19,7 +19,7 @@ import {
   CLAW_OUTPUT_STABILITY,
   type ClawDiagnostic,
   type ClawManifest,
-  type ClawOpenClawProfile,
+  type ClawBotProfile,
   type ClawPackage,
   type ClawSourceIdentity,
 } from "./types.js";
@@ -60,11 +60,11 @@ export async function buildClawUpdatePlan(params: {
   agentId: string;
   targetManifest: ClawManifest;
   targetClawMarkdownBody?: Buffer;
-  targetOpenClawProfile?: ClawOpenClawProfile;
+  targetBotProfile?: ClawBotProfile;
   targetSource: ClawSourceIdentity;
-  config: OpenClawConfig;
+  config: BotConfig;
   sourceMcpServers: Record<string, Record<string, unknown>>;
-  stateOptions?: OpenClawStateDatabaseOptions & { packageDeps?: PackageRemovalDeps };
+  stateOptions?: BotStateDatabaseOptions & { packageDeps?: PackageRemovalDeps };
   packagePreflight?: (
     pkg: ClawPackage,
     workspaceDir: string,
@@ -83,7 +83,7 @@ export async function buildClawUpdatePlan(params: {
   const ownsDatabase = !params.stateOptions?.database;
   const database =
     params.stateOptions?.database ??
-    (await openExistingOpenClawStateDatabaseReadOnly(params.stateOptions));
+    (await openExistingBotStateDatabaseReadOnly(params.stateOptions));
   if (!database) {
     return makeEmptyClawUpdatePlan({
       agentId: params.agentId,
@@ -121,7 +121,7 @@ export async function buildClawUpdatePlan(params: {
       digest,
     });
   }
-  const readOnlyStateOptions: OpenClawStateDatabaseOptions & {
+  const readOnlyStateOptions: BotStateDatabaseOptions & {
     packageDeps?: PackageRemovalDeps;
   } = {
     ...params.stateOptions,
@@ -206,7 +206,7 @@ export async function buildClawUpdatePlan(params: {
     const targetPlan = await buildClawAddPlan({
       manifest: params.targetManifest,
       clawMarkdownBody: params.targetClawMarkdownBody,
-      openClawProfile: params.targetOpenClawProfile,
+      botProfile: params.targetBotProfile,
       source: params.targetSource,
       diagnostics: params.diagnostics,
       context: {

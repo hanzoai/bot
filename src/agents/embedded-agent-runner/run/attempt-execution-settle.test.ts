@@ -113,7 +113,7 @@ function createFixture() {
       role: "user",
       content: "hello",
       timestamp: 100,
-      __openclaw: { senderName: "Alice" },
+      __bot: { senderName: "Alice" },
     },
     sessionManager,
     sessionPromptState,
@@ -278,7 +278,7 @@ describe("runEmbeddedAttemptSettledPhase", () => {
           preparedUserTurnMessage: expect.objectContaining({
             content: "hello",
             timestamp: 100,
-            __openclaw: { senderName: "Alice" },
+            __bot: { senderName: "Alice" },
           }),
         }),
       }),

@@ -1,5 +1,5 @@
 // Copilot tests cover doctor contract api plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import {
   legacyConfigRules,

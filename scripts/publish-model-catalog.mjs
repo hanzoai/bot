@@ -57,7 +57,7 @@ export function readModelCatalogManifests(options = {}) {
     .filter((entry) => entry.isDirectory())
     .map((entry) => ({
       pluginId: entry.name,
-      manifestPath: path.join(extensionsDir, entry.name, "openclaw.plugin.json"),
+      manifestPath: path.join(extensionsDir, entry.name, "bot.plugin.json"),
     }))
     .filter((entry) => fs.existsSync(entry.manifestPath))
     .map((entry) => ({

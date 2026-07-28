@@ -4,15 +4,15 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 source "$ROOT_DIR/scripts/lib/docker-e2e-image.sh"
 
-IMAGE_NAME="$(docker_e2e_resolve_image "openclaw-kitchen-sink-rpc-e2e" OPENCLAW_KITCHEN_SINK_RPC_E2E_IMAGE)"
-MAX_MEMORY_MIB="$(docker_e2e_read_nonnegative_decimal_env OPENCLAW_KITCHEN_SINK_MAX_MEMORY_MIB 2048)"
-MAX_CPU_PERCENT="$(docker_e2e_read_nonnegative_decimal_env OPENCLAW_KITCHEN_SINK_MAX_CPU_PERCENT 1200)"
+IMAGE_NAME="$(docker_e2e_resolve_image "bot-kitchen-sink-rpc-e2e" BOT_KITCHEN_SINK_RPC_E2E_IMAGE)"
+MAX_MEMORY_MIB="$(docker_e2e_read_nonnegative_decimal_env BOT_KITCHEN_SINK_MAX_MEMORY_MIB 2048)"
+MAX_CPU_PERCENT="$(docker_e2e_read_nonnegative_decimal_env BOT_KITCHEN_SINK_MAX_CPU_PERCENT 1200)"
 # Keep the outer Docker watchdog above the walker's install, enable, inspect,
 # readiness, and first-RPC retry budgets so inner failures stay diagnostic.
-DOCKER_RUN_TIMEOUT="${OPENCLAW_KITCHEN_SINK_RPC_DOCKER_RUN_TIMEOUT:-1500s}"
-CONTAINER_NAME="openclaw-kitchen-sink-rpc-e2e-$$"
-RUN_LOG="$(mktemp "${TMPDIR:-/tmp}/openclaw-kitchen-sink-rpc.XXXXXX")"
-STATS_LOG="$(mktemp "${TMPDIR:-/tmp}/openclaw-kitchen-sink-rpc-stats.XXXXXX")"
+DOCKER_RUN_TIMEOUT="${BOT_KITCHEN_SINK_RPC_DOCKER_RUN_TIMEOUT:-1500s}"
+CONTAINER_NAME="bot-kitchen-sink-rpc-e2e-$$"
+RUN_LOG="$(mktemp "${TMPDIR:-/tmp}/bot-kitchen-sink-rpc.XXXXXX")"
+STATS_LOG="$(mktemp "${TMPDIR:-/tmp}/bot-kitchen-sink-rpc-stats.XXXXXX")"
 
 cleanup() {
   docker_e2e_docker_cmd rm -f "$CONTAINER_NAME" >/dev/null 2>&1 || true
@@ -24,24 +24,24 @@ docker_e2e_build_or_reuse "$IMAGE_NAME" kitchen-sink-rpc
 
 DOCKER_ENV_ARGS=(
   -e COREPACK_ENABLE_DOWNLOAD_PROMPT=0
-  -e OPENCLAW_ENTRY=/app/openclaw.mjs
+  -e BOT_ENTRY=/app/bot.mjs
 )
 
 for env_name in \
-  OPENCLAW_KITCHEN_SINK_NPM_SPEC \
-  OPENCLAW_KITCHEN_SINK_PLUGIN_ID \
-  OPENCLAW_KITCHEN_SINK_PERSONALITY \
-  OPENCLAW_KITCHEN_SINK_RPC_READY_MS \
-  OPENCLAW_KITCHEN_SINK_RPC_COMMAND_MS \
-  OPENCLAW_KITCHEN_SINK_RPC_INSTALL_MS \
-  OPENCLAW_KITCHEN_SINK_RPC_CALL_MS \
-  OPENCLAW_KITCHEN_SINK_RPC_PORT \
-  OPENCLAW_KITCHEN_SINK_RPC_FETCH_MS \
-  OPENCLAW_KITCHEN_SINK_RPC_FETCH_BODY_BYTES \
-  OPENCLAW_KITCHEN_SINK_OUTPUT_CAPTURE_CHARS \
-  OPENCLAW_KITCHEN_SINK_KEEP_TMP \
-  OPENCLAW_KITCHEN_SINK_MAX_RSS_MIB \
-  OPENCLAW_KITCHEN_SINK_COMMAND_MAX_RSS_MIB; do
+  BOT_KITCHEN_SINK_NPM_SPEC \
+  BOT_KITCHEN_SINK_PLUGIN_ID \
+  BOT_KITCHEN_SINK_PERSONALITY \
+  BOT_KITCHEN_SINK_RPC_READY_MS \
+  BOT_KITCHEN_SINK_RPC_COMMAND_MS \
+  BOT_KITCHEN_SINK_RPC_INSTALL_MS \
+  BOT_KITCHEN_SINK_RPC_CALL_MS \
+  BOT_KITCHEN_SINK_RPC_PORT \
+  BOT_KITCHEN_SINK_RPC_FETCH_MS \
+  BOT_KITCHEN_SINK_RPC_FETCH_BODY_BYTES \
+  BOT_KITCHEN_SINK_OUTPUT_CAPTURE_CHARS \
+  BOT_KITCHEN_SINK_KEEP_TMP \
+  BOT_KITCHEN_SINK_MAX_RSS_MIB \
+  BOT_KITCHEN_SINK_COMMAND_MAX_RSS_MIB; do
   env_value="${!env_name:-}"
   if [[ -n "$env_value" && "$env_value" != "undefined" && "$env_value" != "null" ]]; then
     DOCKER_ENV_ARGS+=(-e "$env_name")
@@ -61,7 +61,7 @@ docker_e2e_sample_stats_until_exit \
   "$STATS_LOG" \
   "$RUN_LOG" \
   "Kitchen-sink RPC Docker E2E" \
-  "${OPENCLAW_DOCKER_E2E_STATS_HEARTBEAT_SECONDS:-30}"
+  "${BOT_DOCKER_E2E_STATS_HEARTBEAT_SECONDS:-30}"
 
 set +e
 wait "$docker_pid"

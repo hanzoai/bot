@@ -8,21 +8,21 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import { configureNodeHost, loadNodeHostConfig, type NodeHostConfig } from "./config.js";
 
 const fixtureDigest = ["fixture", "digest"].join("-");
 
 function readStoredToken(env: NodeJS.ProcessEnv): string | null | undefined {
-  const database = openOpenClawStateDatabase({ env });
+  const database = openBotStateDatabase({ env });
   return executeSqliteQueryTakeFirstSync(
     database.db,
-    getNodeSqliteKysely<Pick<OpenClawStateKyselyDatabase, "node_host_config">>(database.db)
+    getNodeSqliteKysely<Pick<BotStateKyselyDatabase, "node_host_config">>(database.db)
       .selectFrom("node_host_config")
       .select("token")
       .where("config_key", "=", "current"),
@@ -36,21 +36,21 @@ async function runConcurrentImplicitConfigures(
   const moduleUrl = new URL("./config.ts", import.meta.url).href;
   const workerSource = `
     import fs from "node:fs";
-    const { configureNodeHost } = await import(process.env.OPENCLAW_NODE_HOST_CONFIG_MODULE);
-    fs.writeFileSync(process.env.OPENCLAW_NODE_HOST_READY_PATH, "ready");
+    const { configureNodeHost } = await import(process.env.BOT_NODE_HOST_CONFIG_MODULE);
+    fs.writeFileSync(process.env.BOT_NODE_HOST_READY_PATH, "ready");
     const deadline = Date.now() + 15_000;
-    while (!fs.existsSync(process.env.OPENCLAW_NODE_HOST_START_PATH)) {
+    while (!fs.existsSync(process.env.BOT_NODE_HOST_START_PATH)) {
       if (Date.now() >= deadline) {
         throw new Error("timed out waiting for concurrent node-host configure start");
       }
       await new Promise((resolve) => setTimeout(resolve, 2));
     }
     const config = await configureNodeHost({
-      candidateNodeId: process.env.OPENCLAW_NODE_HOST_CANDIDATE,
+      candidateNodeId: process.env.BOT_NODE_HOST_CANDIDATE,
       fallbackDisplayName: "node",
       gateway: {},
-      env: { ...process.env, OPENCLAW_STATE_DIR: process.env.OPENCLAW_NODE_HOST_STATE_DIR },
-      nowMs: Number(process.env.OPENCLAW_NODE_HOST_NOW_MS),
+      env: { ...process.env, BOT_STATE_DIR: process.env.BOT_NODE_HOST_STATE_DIR },
+      nowMs: Number(process.env.BOT_NODE_HOST_NOW_MS),
     });
     console.log(JSON.stringify(config));
   `;
@@ -62,12 +62,12 @@ async function runConcurrentImplicitConfigures(
       {
         env: {
           ...process.env,
-          OPENCLAW_NODE_HOST_CANDIDATE: candidate,
-          OPENCLAW_NODE_HOST_CONFIG_MODULE: moduleUrl,
-          OPENCLAW_NODE_HOST_NOW_MS: String(index + 1),
-          OPENCLAW_NODE_HOST_READY_PATH: readyPath,
-          OPENCLAW_NODE_HOST_START_PATH: startPath,
-          OPENCLAW_NODE_HOST_STATE_DIR: stateDir,
+          BOT_NODE_HOST_CANDIDATE: candidate,
+          BOT_NODE_HOST_CONFIG_MODULE: moduleUrl,
+          BOT_NODE_HOST_NOW_MS: String(index + 1),
+          BOT_NODE_HOST_READY_PATH: readyPath,
+          BOT_NODE_HOST_START_PATH: startPath,
+          BOT_NODE_HOST_STATE_DIR: stateDir,
         },
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -138,14 +138,14 @@ async function runConcurrentImplicitConfigures(
 describe("node-host SQLite config", () => {
   const tempDirs = useAutoCleanupTempDirTracker((cleanup) => {
     afterEach(() => {
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
       cleanup();
     });
   });
 
   function makeTestEnv(): { env: NodeJS.ProcessEnv; stateDir: string } {
-    const stateDir = tempDirs.make("openclaw-node-host-config-");
-    return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir }, stateDir };
+    const stateDir = tempDirs.make("bot-node-host-config-");
+    return { env: { ...process.env, BOT_STATE_DIR: stateDir }, stateDir };
   }
 
   it("round-trips the complete gateway snapshot across database reopen", async () => {
@@ -159,7 +159,7 @@ describe("node-host SQLite config", () => {
         port: 18443,
         tls: false,
         tlsFingerprint: fixtureDigest,
-        contextPath: "/openclaw-gw",
+        contextPath: "/bot-gw",
       },
       env,
       nowMs: 1_234,
@@ -175,10 +175,10 @@ describe("node-host SQLite config", () => {
         port: 18443,
         tls: false,
         tlsFingerprint: fixtureDigest,
-        contextPath: "/openclaw-gw",
+        contextPath: "/bot-gw",
       },
     });
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await expect(loadNodeHostConfig(env)).resolves.toEqual(configured);
     await expect(fs.stat(path.join(stateDir, "node.json"))).rejects.toMatchObject({
       code: "ENOENT",
@@ -203,19 +203,19 @@ describe("node-host SQLite config", () => {
       nowMs: 2,
     });
     expect(enabled.installedAppsSharing).toBe(true);
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await expect(loadNodeHostConfig(env)).resolves.toMatchObject({ installedAppsSharing: true });
   });
 
   it("adds the gateway context-path column to an existing state database", async () => {
     const { env } = makeTestEnv();
-    const database = openOpenClawStateDatabase({ env });
+    const database = openBotStateDatabase({ env });
     database.db.exec(`
       ALTER TABLE node_host_config DROP COLUMN gateway_context_path;
       PRAGMA user_version = 5;
       UPDATE schema_meta SET schema_version = 5 WHERE meta_key = 'primary';
     `);
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
 
     const configured = await configureNodeHost({
       fallbackDisplayName: "node",
@@ -226,7 +226,7 @@ describe("node-host SQLite config", () => {
     });
 
     expect(configured.gateway?.contextPath).toBe("/upgraded");
-    const columns = openOpenClawStateDatabase({ env })
+    const columns = openBotStateDatabase({ env })
       .db.prepare("PRAGMA table_info(node_host_config)")
       .all() as Array<{ name?: unknown }>;
     expect(columns).toContainEqual(expect.objectContaining({ name: "gateway_context_path" }));
@@ -277,11 +277,11 @@ describe("node-host SQLite config", () => {
 
   it("rejects corrupt canonical rows instead of rotating identity", async () => {
     const { env } = makeTestEnv();
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db }) => {
         executeSqliteQuerySync(
           db,
-          getNodeSqliteKysely<Pick<OpenClawStateKyselyDatabase, "node_host_config">>(db)
+          getNodeSqliteKysely<Pick<BotStateKyselyDatabase, "node_host_config">>(db)
             .insertInto("node_host_config")
             .values({
               config_key: "current",
@@ -309,11 +309,11 @@ describe("node-host SQLite config", () => {
 
   it("never reads legacy token material and nulls it on every configure", async () => {
     const { env } = makeTestEnv();
-    runOpenClawStateWriteTransaction(
+    runBotStateWriteTransaction(
       ({ db }) => {
         executeSqliteQuerySync(
           db,
-          getNodeSqliteKysely<Pick<OpenClawStateKyselyDatabase, "node_host_config">>(db)
+          getNodeSqliteKysely<Pick<BotStateKyselyDatabase, "node_host_config">>(db)
             .insertInto("node_host_config")
             .values({
               config_key: "current",
@@ -353,10 +353,10 @@ describe("node-host SQLite config", () => {
         await fs.symlink(path.join(stateDir, "missing-node.json"), sourcePath);
       }
 
-      await expect(loadNodeHostConfig(env)).rejects.toThrow("openclaw doctor --fix");
+      await expect(loadNodeHostConfig(env)).rejects.toThrow("bot doctor --fix");
       await expect(
         configureNodeHost({ fallbackDisplayName: "node", gateway: {}, env }),
-      ).rejects.toThrow("openclaw doctor --fix");
+      ).rejects.toThrow("bot doctor --fix");
     },
   );
 });

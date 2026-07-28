@@ -12,7 +12,7 @@ import { cleanupTempDirs, makeTempDir } from "../helpers/temp-dir.js";
 const tempRoots: string[] = [];
 
 function makeTempRoot() {
-  return makeTempDir(tempRoots, "openclaw-e2e-text-file-utils-");
+  return makeTempDir(tempRoots, "bot-e2e-text-file-utils-");
 }
 
 afterEach(() => {

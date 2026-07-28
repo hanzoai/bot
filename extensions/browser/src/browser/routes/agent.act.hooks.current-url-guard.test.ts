@@ -41,7 +41,7 @@ function createProfileContext() {
     profile: {
       cdpIsLoopback: true,
       cdpUrl: "http://127.0.0.1:9222",
-      driver: "openclaw" as const,
+      driver: "bot" as const,
       name: "default",
     },
     ensureTabAvailable: vi.fn(async () => ({

@@ -379,7 +379,7 @@ describe("executeAgentTurn: CLI session routing", () => {
       payloads: [{ text: "handled" }],
       meta: {
         agentMeta: {
-          sessionId: "openclaw-session",
+          sessionId: "bot-session",
           provider: "codex-cli",
           model: "gpt-5.4",
         },

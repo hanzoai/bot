@@ -2,7 +2,7 @@
  * Tests follow-up session send status transitions and broadcasts.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SessionTranscriptProjectionUnavailableError } from "../../config/sessions/session-accessor.js";
 import { expectSubagentFollowupReactivation } from "./subagent-followup.test-helpers.js";

@@ -1,12 +1,12 @@
 // Search setup flow configures web search providers and defaults.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveDefaultAgentDir } from "../agents/agent-scope-config.js";
 import { resolveAgentHarnessPolicy } from "../agents/harness/policy.js";
 import { resolveDefaultModelForAgent } from "../agents/model-selection.js";
 import { hasAuthProfileForProvider } from "../agents/tools/model-config.helpers.js";
 import type { SecretInputMode } from "../commands/onboard-types.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   DEFAULT_SECRET_PROVIDER_ALIAS,
   type SecretInput,
@@ -31,9 +31,9 @@ import type { FlowContribution, FlowOption } from "./types.js";
 import { sortFlowContributionsByLabel } from "./types.js";
 
 type SearchProvider = NonNullable<
-  NonNullable<NonNullable<NonNullable<OpenClawConfig["tools"]>["web"]>["search"]>["provider"]
+  NonNullable<NonNullable<NonNullable<BotConfig["tools"]>["web"]>["search"]>["provider"]
 >;
-type SearchConfig = NonNullable<NonNullable<NonNullable<OpenClawConfig["tools"]>["web"]>["search"]>;
+type SearchConfig = NonNullable<NonNullable<NonNullable<BotConfig["tools"]>["web"]>["search"]>;
 type MutableSearchConfig = SearchConfig & Record<string, unknown>;
 
 type SearchProviderSetupOption = FlowOption & {
@@ -49,7 +49,7 @@ type SearchProviderSetupContribution = FlowContribution & {
 };
 
 const SEARCH_INSTALL_CATALOG_ENTRY = Symbol("search-install-catalog-entry");
-const WEB_SEARCH_DOCS_URL = "https://docs.openclaw.ai/tools/web";
+const WEB_SEARCH_DOCS_URL = "https://docs.bot.ai/tools/web";
 const CODEX_HOSTED_SEARCH_PROVIDER_ID = "codex";
 
 type SearchProviderEntryWithInstall = PluginWebSearchProviderEntry & {
@@ -66,7 +66,7 @@ function resolveSearchProviderCredentialLabel(
 }
 
 export function listSearchProviderOptions(
-  config?: OpenClawConfig,
+  config?: BotConfig,
 ): readonly PluginWebSearchProviderEntry[] {
   return resolveSearchProviderOptions(config);
 }
@@ -78,7 +78,7 @@ function showsSearchProviderInSetup(
 }
 
 export function resolveSearchProviderOptions(
-  config?: OpenClawConfig,
+  config?: BotConfig,
 ): readonly PluginWebSearchProviderEntry[] {
   return resolveSearchProviderSetupContributions(config).map(
     (contribution) => contribution.provider,
@@ -105,7 +105,7 @@ function buildSearchProviderSetupContribution(params: {
 }
 
 function resolveSearchProviderSetupContributions(
-  config?: OpenClawConfig,
+  config?: BotConfig,
 ): SearchProviderSetupContribution[] {
   const runtimeProviders = sortWebSearchProviders(
     resolvePluginWebSearchProviders({
@@ -145,7 +145,7 @@ function resolveSearchProviderSetupContributions(
   );
 }
 
-function defaultModelUsesCodexRuntime(config: OpenClawConfig): boolean {
+function defaultModelUsesCodexRuntime(config: BotConfig): boolean {
   const configuredPrimary = resolveAgentModelPrimaryValue(config.agents?.defaults?.model);
   if (!configuredPrimary) {
     return false;
@@ -178,7 +178,7 @@ function prioritizeSearchProvider(
 }
 
 function resolveSearchProviderEntry(
-  config: OpenClawConfig,
+  config: BotConfig,
   provider: SearchProvider,
 ): PluginWebSearchProviderEntry | undefined {
   return resolveSearchProviderOptions(config).find((entry) => entry.id === provider);
@@ -199,7 +199,7 @@ function formatAuthProviderLabel(providerId: string): string {
 }
 
 function providerIsReady(
-  config: OpenClawConfig,
+  config: BotConfig,
   entry: Pick<
     PluginWebSearchProviderEntry,
     "id" | "authProviderId" | "envVars" | "requiresCredential"
@@ -225,23 +225,23 @@ function formatSearchProviderOptionLabel(label: string, note: string): string {
   return normalizedNote ? `${label} (${normalizedNote})` : label;
 }
 
-function rawKeyValue(config: OpenClawConfig, provider: SearchProvider): unknown {
+function rawKeyValue(config: BotConfig, provider: SearchProvider): unknown {
   const entry = resolveSearchProviderEntry(config, provider);
   return entry?.getConfiguredCredentialValue?.(config);
 }
 
 export function resolveExistingKey(
-  config: OpenClawConfig,
+  config: BotConfig,
   provider: SearchProvider,
 ): string | undefined {
   return normalizeSecretInputString(rawKeyValue(config, provider));
 }
 
-export function hasExistingKey(config: OpenClawConfig, provider: SearchProvider): boolean {
+export function hasExistingKey(config: BotConfig, provider: SearchProvider): boolean {
   return hasConfiguredSecretInput(rawKeyValue(config, provider));
 }
 
-function buildSearchEnvRef(config: OpenClawConfig, provider: SearchProvider): SecretRef {
+function buildSearchEnvRef(config: BotConfig, provider: SearchProvider): SecretRef {
   const entry =
     resolveSearchProviderEntry(config, provider) ??
     listSearchProviderOptions(config).find((candidate) => candidate.id === provider) ??
@@ -258,7 +258,7 @@ function buildSearchEnvRef(config: OpenClawConfig, provider: SearchProvider): Se
 }
 
 function resolveSearchSecretInput(
-  config: OpenClawConfig,
+  config: BotConfig,
   provider: SearchProvider,
   key: string,
   secretInputMode?: SecretInputMode,
@@ -271,16 +271,16 @@ function resolveSearchSecretInput(
 }
 
 export function applySearchKey(
-  config: OpenClawConfig,
+  config: BotConfig,
   provider: SearchProvider,
   key: SecretInput,
-): OpenClawConfig {
+): BotConfig {
   const providerEntry = resolveSearchProviderEntry(config, provider);
   if (!providerEntry) {
     return config;
   }
   const search: MutableSearchConfig = { ...config.tools?.web?.search, provider, enabled: true };
-  const nextBase: OpenClawConfig = {
+  const nextBase: BotConfig = {
     ...config,
     tools: {
       ...config.tools,
@@ -293,9 +293,9 @@ export function applySearchKey(
 }
 
 function applySearchProviderSelectionConfig(
-  config: OpenClawConfig,
+  config: BotConfig,
   providerEntry: Pick<PluginWebSearchProviderEntry, "pluginId" | "applySelectionConfig">,
-): OpenClawConfig {
+): BotConfig {
   if (providerEntry.applySelectionConfig) {
     return providerEntry.applySelectionConfig(config);
   }
@@ -306,9 +306,9 @@ function applySearchProviderSelectionConfig(
 }
 
 export function applySearchProviderSelection(
-  config: OpenClawConfig,
+  config: BotConfig,
   provider: SearchProvider,
-): OpenClawConfig {
+): BotConfig {
   const providerEntry = resolveSearchProviderEntry(config, provider);
   if (!providerEntry) {
     return config;
@@ -318,7 +318,7 @@ export function applySearchProviderSelection(
     provider,
     enabled: true,
   };
-  const nextBase: OpenClawConfig = {
+  const nextBase: BotConfig = {
     ...config,
     tools: {
       ...config.tools,
@@ -331,12 +331,12 @@ export function applySearchProviderSelection(
   return applySearchProviderSelectionConfig(nextBase, providerEntry);
 }
 
-function preserveDisabledState(original: OpenClawConfig, result: OpenClawConfig): OpenClawConfig {
+function preserveDisabledState(original: BotConfig, result: BotConfig): BotConfig {
   if (original.tools?.web?.search?.enabled !== false) {
     return result;
   }
 
-  const next: OpenClawConfig = {
+  const next: BotConfig = {
     ...result,
     tools: {
       ...result.tools,
@@ -385,7 +385,7 @@ function preserveDisabledState(original: OpenClawConfig, result: OpenClawConfig)
 
   return {
     ...next,
-    plugins: nextPlugins as OpenClawConfig["plugins"],
+    plugins: nextPlugins as BotConfig["plugins"],
   };
 }
 
@@ -396,13 +396,13 @@ type SetupSearchOptions = {
 };
 
 async function finalizeSearchProviderSetup(params: {
-  originalConfig: OpenClawConfig;
-  nextConfig: OpenClawConfig;
+  originalConfig: BotConfig;
+  nextConfig: BotConfig;
   entry: SearchProviderEntryWithInstall;
   runtime: RuntimeEnv;
   prompter: WizardPrompter;
   opts?: SetupSearchOptions;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   let next = params.nextConfig;
   const installEntry = params.entry[SEARCH_INSTALL_CATALOG_ENTRY];
   if (installEntry && next.tools?.web?.search?.enabled !== false) {
@@ -446,11 +446,11 @@ async function finalizeSearchProviderSetup(params: {
 }
 
 export async function runSearchSetupFlow(
-  config: OpenClawConfig,
+  config: BotConfig,
   runtime: RuntimeEnv,
   prompter: WizardPrompter,
   opts?: SetupSearchOptions,
-): Promise<OpenClawConfig> {
+): Promise<BotConfig> {
   const availableProviderOptions = resolveSearchProviderOptions(config);
   const codexRecommended =
     defaultModelUsesCodexRuntime(config) &&
@@ -560,7 +560,7 @@ export async function runSearchSetupFlow(
   if (!entry) {
     return config;
   }
-  const finalizeSelection = (nextConfig: OpenClawConfig) =>
+  const finalizeSelection = (nextConfig: BotConfig) =>
     finalizeSearchProviderSetup({
       originalConfig: config,
       nextConfig,
@@ -599,8 +599,8 @@ export async function runSearchSetupFlow(
     await prompter.note(
       [
         `${entry.label} works without an API key.`,
-        "OpenClaw will enable the plugin and use it as your web_search provider.",
-        `Docs: ${entry.docsUrl ?? "https://docs.openclaw.ai/tools/web"}`,
+        "Bot will enable the plugin and use it as your web_search provider.",
+        `Docs: ${entry.docsUrl ?? "https://docs.bot.ai/tools/web"}`,
       ].join("\n"),
       "Web search",
     );
@@ -645,10 +645,10 @@ export async function runSearchSetupFlow(
     const ref = buildSearchEnvRef(config, choice);
     await prompter.note(
       [
-        "Secret references enabled — OpenClaw will store a reference instead of the API key.",
+        "Secret references enabled — Bot will store a reference instead of the API key.",
         `Env var: ${ref.id}${envAvailable ? " (detected)" : ""}.`,
         ...(envAvailable ? [] : [`Set ${ref.id} in the Gateway environment.`]),
-        "Docs: https://docs.openclaw.ai/tools/web",
+        "Docs: https://docs.bot.ai/tools/web",
       ].join("\n"),
       "Web search",
     );
@@ -683,7 +683,7 @@ export async function runSearchSetupFlow(
     [
       `No ${credentialLabel} stored — web_search won't work until a key is available.`,
       `Get your key at: ${entry.signupUrl}`,
-      "Docs: https://docs.openclaw.ai/tools/web",
+      "Docs: https://docs.bot.ai/tools/web",
     ].join("\n"),
     "Web search",
   );

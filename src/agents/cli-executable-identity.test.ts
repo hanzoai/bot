@@ -8,7 +8,7 @@ import { resolveCliExecutableIdentity } from "./cli-executable-identity.js";
 const tempDirs: string[] = [];
 
 function makePackage(): { root: string; entrypoint: string; implementation: string } {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-artifact-"));
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-cli-artifact-"));
   tempDirs.push(root);
   const entrypoint = path.join(root, "bin", "cli.js");
   const implementation = path.join(root, "dist", "main.js");
@@ -124,7 +124,7 @@ describe("CLI executable implementation identity", () => {
   });
 
   it("requires a positive native executable name under a backend package policy", async () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-cli-native-policy-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-cli-native-policy-"));
     tempDirs.push(root);
     const executable = path.join(root, "claude");
     fs.copyFileSync(process.execPath, executable);

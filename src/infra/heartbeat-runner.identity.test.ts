@@ -1,7 +1,7 @@
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { resolveStorePath } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { runHeartbeatOnce } from "./heartbeat-runner.js";
 import { installHeartbeatRunnerTestRuntime } from "./heartbeat-runner.test-harness.js";
 import {
@@ -22,7 +22,7 @@ describe("runHeartbeatOnce identity", () => {
     async ({ isolatedSession, expectedSessionKey }) => {
       await withTempHeartbeatSandbox(async ({ tmpDir, replySpy }) => {
         const storeTemplate = path.join(tmpDir, "agents", "{agentId}", "sessions.json");
-        const cfg: OpenClawConfig = {
+        const cfg: BotConfig = {
           agents: {
             defaults: {
               workspace: tmpDir,
@@ -81,7 +81,7 @@ describe("runHeartbeatOnce identity", () => {
     { name: "heartbeat ok", replyText: "HEARTBEAT_OK", showOk: true },
   ])("forwards agent identity on $name delivery", async ({ replyText, showOk }) => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath, replySpy }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,

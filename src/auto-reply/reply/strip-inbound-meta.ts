@@ -1,5 +1,5 @@
 /**
- * Strips OpenClaw-injected inbound metadata blocks from a user-role message
+ * Strips Bot-injected inbound metadata blocks from a user-role message
  * text before it is displayed in any UI surface (TUI, webchat, macOS app) or
  * replayed as historical context to the model.
  *
@@ -13,8 +13,8 @@
  * Also strips the timestamp prefix injected by `injectTimestamp` so UI surfaces
  * do not show AI-facing envelope metadata as user text.
  *
- * Detection: every OpenClaw-injected context header is stamped with a fixed
- * provenance marker `⟦openclaw:ctx⟧`. Strippers key on this marker rather than
+ * Detection: every Bot-injected context header is stamped with a fixed
+ * provenance marker `⟦bot:ctx⟧`. Strippers key on this marker rather than
  * on label text, making detection label-agnostic (arbitrary structured labels
  * are supported) and collision-free (user text never carries the marker). This
  * fixes both label collision risks (e.g., `Sender:` in natural prose) and the
@@ -234,7 +234,7 @@ export function stripInboundMetadata(text: string): string {
     if (line === undefined) {
       break;
     }
-    // Channel context is appended by OpenClaw as a terminal metadata suffix.
+    // Channel context is appended by Bot as a terminal metadata suffix.
     // When this structured header appears, drop it and everything that follows.
     if (!inMetaBlock && shouldStripTrailingContextBlock(strippedLeadingPrefixLines, i)) {
       break;

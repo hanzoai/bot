@@ -1,6 +1,6 @@
 // Covers silent-pairing approval provenance and superseded-record pruning.
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { createSuiteTempRootTracker } from "../test-helpers/temp-dir.js";
 import {
   approveBootstrapDevicePairing,
@@ -12,7 +12,7 @@ import {
   withPairedDeviceRecords,
 } from "./device-pairing.js";
 
-const suiteRootTracker = createSuiteTempRootTracker({ prefix: "openclaw-device-pairing-prune-" });
+const suiteRootTracker = createSuiteTempRootTracker({ prefix: "bot-device-pairing-prune-" });
 type PairedDeviceApprovalKind = NonNullable<
   Parameters<typeof approveDevicePairing>[1]["approvedVia"]
 >;
@@ -78,7 +78,7 @@ describe("device pairing approval provenance", () => {
   });
 
   afterAll(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await suiteRootTracker.cleanup();
   });
 
@@ -141,7 +141,7 @@ describe("pruneSupersededSilentPairedDevices", () => {
   });
 
   afterAll(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await suiteRootTracker.cleanup();
   });
 

@@ -1,21 +1,21 @@
 {
-  "name": "@myorg/openclaw-my-plugin",
+  "name": "@myorg/bot-my-plugin",
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
     "typebox": "1.1.39"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.3.24-beta.2"
+    "bot": ">=2026.3.24-beta.2"
   },
-  "openclaw": {
+  "bot": {
     "extensions": ["./index.ts"],
     "compat": {
       "pluginApi": ">=2026.3.24-beta.2",
       "minGatewayVersion": "2026.3.24-beta.2"
     },
     "build": {
-      "openclawVersion": "2026.3.24-beta.2",
+      "botVersion": "2026.3.24-beta.2",
       "pluginSdkVersion": "2026.3.24-beta.2"
     }
   }

@@ -2,10 +2,10 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { bundledDistPluginFile } from "openclaw/plugin-sdk/test-fixtures";
+import { bundledDistPluginFile } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PluginInstallRecord } from "../config/types.plugins.js";
-import { discoverOpenClawPlugins } from "./discovery.js";
+import { discoverBotPlugins } from "./discovery.js";
 import * as pluginHardlinkPolicy from "./hardlink-policy.js";
 import { listBuiltRuntimeEntryCandidates } from "./package-entrypoints.js";
 import { clearPluginMetadataLifecycleCaches } from "./plugin-metadata-lifecycle.js";
@@ -20,14 +20,14 @@ vi.mock("./bundled-dir.js", async (importOriginal) => {
   return {
     ...actual,
     resolveBundledPluginsDir: (env: NodeJS.ProcessEnv = process.env) =>
-      env.OPENCLAW_BUNDLED_PLUGINS_DIR ?? actual.resolveBundledPluginsDir(env),
+      env.BOT_BUNDLED_PLUGINS_DIR ?? actual.resolveBundledPluginsDir(env),
   };
 });
 
 const tempDirs: string[] = [];
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-plugins", tempDirs);
+  return makeTrackedTempDir("bot-plugins", tempDirs);
 }
 
 const mkdirSafe = mkdirSafeDir;
@@ -42,11 +42,11 @@ function countMatching<T>(items: readonly T[], predicate: (item: T) => boolean):
   return count;
 }
 
-function withOpenClawPackageArgv<T>(packageRoot: string, fn: () => T): T {
+function withBotPackageArgv<T>(packageRoot: string, fn: () => T): T {
   mkdirSafe(path.join(packageRoot, "bin"));
-  fs.writeFileSync(path.join(packageRoot, "package.json"), '{"name":"openclaw"}\n', "utf-8");
+  fs.writeFileSync(path.join(packageRoot, "package.json"), '{"name":"bot"}\n', "utf-8");
   const originalArgv = process.argv;
-  process.argv = [originalArgv[0] ?? "node", path.join(packageRoot, "bin", "openclaw")];
+  process.argv = [originalArgv[0] ?? "node", path.join(packageRoot, "bin", "bot")];
   try {
     return fn();
   } finally {
@@ -59,7 +59,7 @@ function symlinkDirectory(target: string, linkPath: string): void {
 }
 
 const canCreateDirectorySymlinks = (() => {
-  const probeDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-symlink-probe-"));
+  const probeDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-symlink-probe-"));
   const targetDir = path.join(probeDir, "target");
   const linkDir = path.join(probeDir, "link");
   try {
@@ -94,10 +94,10 @@ function buildDiscoveryEnv(stateDir: string): NodeJS.ProcessEnv {
   const bundledPluginsDir = path.join(stateDir, "empty-bundled-plugins");
   mkdirSafe(bundledPluginsDir);
   return {
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_HOME: undefined,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
-    OPENCLAW_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
+    BOT_STATE_DIR: stateDir,
+    BOT_HOME: undefined,
+    BOT_DISABLE_BUNDLED_PLUGINS: "1",
+    BOT_BUNDLED_PLUGINS_DIR: bundledPluginsDir,
   };
 }
 
@@ -106,11 +106,11 @@ function buildDiscoveryEnvWithOverrides(
   overrides: Partial<NodeJS.ProcessEnv> = {},
 ): NodeJS.ProcessEnv {
   const enablesBundledOverride =
-    Object.hasOwn(overrides, "OPENCLAW_BUNDLED_PLUGINS_DIR") &&
-    overrides.OPENCLAW_BUNDLED_PLUGINS_DIR !== undefined;
+    Object.hasOwn(overrides, "BOT_BUNDLED_PLUGINS_DIR") &&
+    overrides.BOT_BUNDLED_PLUGINS_DIR !== undefined;
   return {
     ...buildDiscoveryEnv(stateDir),
-    ...(enablesBundledOverride ? { OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined } : {}),
+    ...(enablesBundledOverride ? { BOT_DISABLE_BUNDLED_PLUGINS: undefined } : {}),
     ...overrides,
   };
 }
@@ -118,20 +118,20 @@ function buildDiscoveryEnvWithOverrides(
 function buildBundledDiscoveryEnv(stateDir: string): NodeJS.ProcessEnv {
   return {
     ...buildDiscoveryEnv(stateDir),
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-    OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
+    BOT_DISABLE_BUNDLED_PLUGINS: undefined,
+    BOT_BUNDLED_PLUGINS_DIR: undefined,
   };
 }
 
 async function discoverWithStateDir(
   stateDir: string,
-  params: Parameters<typeof discoverOpenClawPlugins>[0],
+  params: Parameters<typeof discoverBotPlugins>[0],
 ) {
-  return discoverOpenClawPlugins({ ...params, env: buildDiscoveryEnv(stateDir) });
+  return discoverBotPlugins({ ...params, env: buildDiscoveryEnv(stateDir) });
 }
 
-function discoverWithEnv(params: Parameters<typeof discoverOpenClawPlugins>[0]) {
-  return discoverOpenClawPlugins(params);
+function discoverWithEnv(params: Parameters<typeof discoverBotPlugins>[0]) {
+  return discoverBotPlugins(params);
 }
 
 function writePluginPackageManifest(params: {
@@ -147,7 +147,7 @@ function writePluginPackageManifest(params: {
     path.join(params.packageDir, "package.json"),
     JSON.stringify({
       name: params.packageName,
-      openclaw: {
+      bot: {
         extensions: params.extensions,
         ...(params.runtimeExtensions ? { runtimeExtensions: params.runtimeExtensions } : {}),
         ...(params.setupEntry ? { setupEntry: params.setupEntry } : {}),
@@ -165,7 +165,7 @@ function writePluginManifest(params: {
   requiresPlugins?: string[];
 }) {
   fs.writeFileSync(
-    path.join(params.pluginDir, "openclaw.plugin.json"),
+    path.join(params.pluginDir, "bot.plugin.json"),
     JSON.stringify({
       id: params.id,
       ...(params.requiresPlugins ? { requiresPlugins: params.requiresPlugins } : {}),
@@ -370,7 +370,7 @@ function expectCandidateFields(
 }
 
 function expectCandidatePresence(
-  result: Awaited<ReturnType<typeof discoverOpenClawPlugins>>,
+  result: Awaited<ReturnType<typeof discoverBotPlugins>>,
   params: { present?: readonly string[]; absent?: readonly string[] },
 ) {
   const ids = result.candidates.map((candidate) => candidate.idHint);
@@ -469,19 +469,19 @@ afterEach(() => {
   cleanupTrackedTempDirs(tempDirs);
 });
 
-describe("discoverOpenClawPlugins", () => {
+describe("discoverBotPlugins", () => {
   it("discovers global and workspace extensions", async () => {
     const stateDir = makeTempDir();
     const workspaceDir = path.join(stateDir, "workspace");
 
     createPackagePluginWithEntry({
       packageDir: path.join(stateDir, "extensions", "alpha"),
-      packageName: "@openclaw/alpha",
+      packageName: "@hanzo/bot-alpha",
       pluginId: "alpha",
     });
     createPackagePluginWithEntry({
-      packageDir: path.join(workspaceDir, ".openclaw", "extensions", "beta"),
-      packageName: "@openclaw/beta",
+      packageDir: path.join(workspaceDir, ".bot", "extensions", "beta"),
+      packageName: "@hanzo/bot-beta",
       pluginId: "beta",
     });
 
@@ -493,7 +493,7 @@ describe("discoverOpenClawPlugins", () => {
     const stateDir = makeTempDir();
     const workspaceDir = path.join(stateDir, "workspace");
     const globalExt = path.join(stateDir, "extensions");
-    const workspaceExt = path.join(workspaceDir, ".openclaw", "extensions");
+    const workspaceExt = path.join(workspaceDir, ".bot", "extensions");
     mkdirSafe(globalExt);
     mkdirSafe(workspaceExt);
     fs.writeFileSync(path.join(globalExt, "my-helper.mjs"), "export default {}", "utf-8");
@@ -510,7 +510,7 @@ describe("discoverOpenClawPlugins", () => {
     const pluginDir = path.join(stateDir, "extensions", "diffs-language-pack");
     createPackagePluginWithEntry({
       packageDir: pluginDir,
-      packageName: "@openclaw/diffs-language-pack",
+      packageName: "@hanzo/bot-diffs-language-pack",
       pluginId: "diffs-language-pack",
     });
     writePluginManifest({
@@ -536,7 +536,7 @@ describe("discoverOpenClawPlugins", () => {
     const languagePackDir = path.join(extensionsDir, "diffs-language-pack");
     createPackagePluginWithEntry({
       packageDir: languagePackDir,
-      packageName: "@openclaw/diffs-language-pack",
+      packageName: "@hanzo/bot-diffs-language-pack",
       pluginId: "diffs-language-pack",
     });
     writePluginManifest({
@@ -546,7 +546,7 @@ describe("discoverOpenClawPlugins", () => {
     });
     createPackagePluginWithEntry({
       packageDir: path.join(extensionsDir, "diffs"),
-      packageName: "@openclaw/diffs",
+      packageName: "@hanzo/bot-diffs",
       pluginId: "diffs",
     });
 
@@ -603,7 +603,7 @@ describe("discoverOpenClawPlugins", () => {
       const linkedPluginDir = path.join(stateDir, "linked-plugin-src");
       createPackagePluginWithEntry({
         packageDir: linkedPluginDir,
-        packageName: "@openclaw/linked-plugin",
+        packageName: "@hanzo/bot-linked-plugin",
         pluginId: "linked-plugin",
       });
 
@@ -623,13 +623,13 @@ describe("discoverOpenClawPlugins", () => {
     async () => {
       const stateDir = makeTempDir();
       const workspaceDir = path.join(stateDir, "workspace");
-      const workspaceExt = path.join(workspaceDir, ".openclaw", "extensions");
+      const workspaceExt = path.join(workspaceDir, ".bot", "extensions");
       mkdirSafe(workspaceExt);
 
       const linkedPluginDir = path.join(stateDir, "workspace-linked-plugin-src");
       createPackagePluginWithEntry({
         packageDir: linkedPluginDir,
-        packageName: "@openclaw/workspace-linked-plugin",
+        packageName: "@hanzo/bot-workspace-linked-plugin",
         pluginId: "workspace-linked-plugin",
       });
 
@@ -662,22 +662,22 @@ describe("discoverOpenClawPlugins", () => {
   it("does not recurse arbitrary workspace directories for plugin auto-discovery", () => {
     const stateDir = makeTempDir();
     const workspaceDir = path.join(stateDir, "workspace");
-    const workspaceExt = path.join(workspaceDir, ".openclaw", "extensions");
+    const workspaceExt = path.join(workspaceDir, ".bot", "extensions");
 
     const expectedWorkspacePluginDir = path.join(workspaceExt, "workspace-plugin");
     createPackagePluginWithEntry({
       packageDir: expectedWorkspacePluginDir,
-      packageName: "@openclaw/workspace-plugin",
+      packageName: "@hanzo/bot-workspace-plugin",
       pluginId: "workspace-plugin",
     });
 
     const unrelatedWorkspaceDir = path.join(workspaceDir, "lobster-integrations", "bin");
     createPackagePluginWithEntry({
       packageDir: unrelatedWorkspaceDir,
-      packageName: "@openclaw/stray-workspace-plugin",
+      packageName: "@hanzo/bot-stray-workspace-plugin",
     });
 
-    const result = discoverOpenClawPlugins({
+    const result = discoverBotPlugins({
       workspaceDir,
       env: buildDiscoveryEnv(stateDir),
     });
@@ -694,12 +694,12 @@ describe("discoverOpenClawPlugins", () => {
     const homeDir = makeTempDir();
     const workspaceRoot = path.join(homeDir, "workspace");
     createPackagePluginWithEntry({
-      packageDir: path.join(workspaceRoot, ".openclaw", "extensions", "tilde-workspace"),
-      packageName: "@openclaw/tilde-workspace",
+      packageDir: path.join(workspaceRoot, ".bot", "extensions", "tilde-workspace"),
+      packageName: "@hanzo/bot-tilde-workspace",
       pluginId: "tilde-workspace",
     });
 
-    const result = discoverOpenClawPlugins({
+    const result = discoverBotPlugins({
       workspaceDir: "~/workspace",
       env: {
         ...buildDiscoveryEnv(stateDir),
@@ -752,13 +752,13 @@ describe("discoverOpenClawPlugins", () => {
     );
     fs.writeFileSync(
       path.join(extensionDir, "package.json"),
-      '{"name":"@openclaw/twitch"}\n',
+      '{"name":"@hanzo/bot-twitch"}\n',
       "utf-8",
     );
-    fs.writeFileSync(path.join(extensionDir, "openclaw.plugin.json"), '{"id":"twitch"}\n', "utf-8");
+    fs.writeFileSync(path.join(extensionDir, "bot.plugin.json"), '{"id":"twitch"}\n', "utf-8");
 
-    const result = withOpenClawPackageArgv(packageRoot, () =>
-      discoverOpenClawPlugins({ env: buildDiscoveryEnv(stateDir) }),
+    const result = withBotPackageArgv(packageRoot, () =>
+      discoverBotPlugins({ env: buildDiscoveryEnv(stateDir) }),
     );
 
     expect(result.diagnostics.map((entry) => entry.message).join("\n")).not.toContain(
@@ -768,7 +768,7 @@ describe("discoverOpenClawPlugins", () => {
 
   it("does not treat repo-level live or test files as plugin entrypoints", () => {
     const stateDir = makeTempDir();
-    const packageRoot = path.join(stateDir, "node_modules", "openclaw");
+    const packageRoot = path.join(stateDir, "node_modules", "bot");
     const bundledDir = path.join(packageRoot, "dist", "extensions");
     mkdirSafe(bundledDir);
 
@@ -782,16 +782,16 @@ describe("discoverOpenClawPlugins", () => {
     );
     createPackagePluginWithEntry({
       packageDir: path.join(bundledDir, "real-plugin"),
-      packageName: "@openclaw/real-plugin",
+      packageName: "@hanzo/bot-real-plugin",
       pluginId: "real-plugin",
     });
 
-    const { candidates, diagnostics } = withOpenClawPackageArgv(packageRoot, () =>
-      discoverOpenClawPlugins({
+    const { candidates, diagnostics } = withBotPackageArgv(packageRoot, () =>
+      discoverBotPlugins({
         env: {
           ...buildDiscoveryEnv(stateDir),
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+          BOT_DISABLE_BUNDLED_PLUGINS: undefined,
+          BOT_BUNDLED_PLUGINS_DIR: bundledDir,
         },
       }),
     );
@@ -802,31 +802,31 @@ describe("discoverOpenClawPlugins", () => {
 
   it("discovers bind-mounted bundled source overlays before packaged dist bundles", () => {
     const stateDir = makeTempDir();
-    const packageRoot = path.join(stateDir, "node_modules", "openclaw");
+    const packageRoot = path.join(stateDir, "node_modules", "bot");
     const bundledRoot = path.join(packageRoot, "dist", "extensions");
     const bundledPluginDir = path.join(bundledRoot, "synology-chat");
     const sourcePluginDir = path.join(packageRoot, "extensions", "synology-chat");
     createPackagePluginWithEntry({
       packageDir: bundledPluginDir,
-      packageName: "@openclaw/synology-chat",
+      packageName: "@hanzo/bot-synology-chat",
       pluginId: "synology-chat",
       entryPath: "index.js",
     });
     createPackagePluginWithEntry({
       packageDir: sourcePluginDir,
-      packageName: "@openclaw/synology-chat",
+      packageName: "@hanzo/bot-synology-chat",
       pluginId: "synology-chat",
     });
     mockLinuxMountInfo([sourcePluginDir]);
     const sourceEntryPath = path.join(sourcePluginDir, "src", "index.ts");
     const bundledEntryPath = path.join(bundledPluginDir, "index.js");
 
-    const { candidates, diagnostics } = withOpenClawPackageArgv(packageRoot, () =>
-      discoverOpenClawPlugins({
+    const { candidates, diagnostics } = withBotPackageArgv(packageRoot, () =>
+      discoverBotPlugins({
         env: {
           ...buildDiscoveryEnv(stateDir),
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
+          BOT_DISABLE_BUNDLED_PLUGINS: undefined,
+          BOT_BUNDLED_PLUGINS_DIR: bundledRoot,
         },
       }),
     );
@@ -856,30 +856,30 @@ describe("discoverOpenClawPlugins", () => {
 
   it("keeps copied source plugin dirs inert when they are not mounted overlays", () => {
     const stateDir = makeTempDir();
-    const packageRoot = path.join(stateDir, "node_modules", "openclaw");
+    const packageRoot = path.join(stateDir, "node_modules", "bot");
     const bundledRoot = path.join(packageRoot, "dist", "extensions");
     const bundledPluginDir = path.join(bundledRoot, "synology-chat");
     const sourcePluginDir = path.join(packageRoot, "extensions", "synology-chat");
     createPackagePluginWithEntry({
       packageDir: bundledPluginDir,
-      packageName: "@openclaw/synology-chat",
+      packageName: "@hanzo/bot-synology-chat",
       pluginId: "synology-chat",
       entryPath: "index.js",
     });
     createPackagePluginWithEntry({
       packageDir: sourcePluginDir,
-      packageName: "@openclaw/synology-chat",
+      packageName: "@hanzo/bot-synology-chat",
       pluginId: "synology-chat",
     });
     mockLinuxMountInfo([]);
     const bundledEntryPath = path.join(bundledPluginDir, "index.js");
 
-    const { candidates, diagnostics } = withOpenClawPackageArgv(packageRoot, () =>
-      discoverOpenClawPlugins({
+    const { candidates, diagnostics } = withBotPackageArgv(packageRoot, () =>
+      discoverBotPlugins({
         env: {
           ...buildDiscoveryEnv(stateDir),
-          OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-          OPENCLAW_BUNDLED_PLUGINS_DIR: bundledRoot,
+          BOT_DISABLE_BUNDLED_PLUGINS: undefined,
+          BOT_BUNDLED_PLUGINS_DIR: bundledRoot,
         },
       }),
     );
@@ -920,7 +920,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/local-source-pack",
+      packageName: "@hanzo/bot-local-source-pack",
       extensions: ["./index.ts"],
     });
     writePluginManifest({ pluginDir, id: "local-source-pack" });
@@ -947,7 +947,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/linked-source-pack",
+      packageName: "@hanzo/bot-linked-source-pack",
       extensions: ["./src/index.ts"],
       setupEntry: "./src/setup-entry.ts",
     });
@@ -986,7 +986,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/source-only-pack",
+      packageName: "@hanzo/bot-source-only-pack",
       extensions: ["./src/index.ts"],
     });
     writePluginEntry(path.join(pluginDir, "src", "index.ts"));
@@ -1014,7 +1014,7 @@ describe("discoverOpenClawPlugins", () => {
     expect(
       result.diagnostics.some(
         (entry) =>
-          entry.pluginId === "source-only-pack" && entry.message.includes("openclaw doctor --fix"),
+          entry.pluginId === "source-only-pack" && entry.message.includes("bot doctor --fix"),
       ),
     ).toBe(false);
     expect(result.diagnostics).toHaveLength(1);
@@ -1029,7 +1029,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: sourceDir,
-      packageName: "@openclaw/source-path-pack",
+      packageName: "@hanzo/bot-source-path-pack",
       extensions: ["./src/index.ts"],
     });
     writePluginEntry(path.join(sourceDir, "src", "index.ts"));
@@ -1068,7 +1068,7 @@ describe("discoverOpenClawPlugins", () => {
 
       writePluginPackageManifest({
         packageDir: actualSourceDir,
-        packageName: "@openclaw/source-path-symlink-pack",
+        packageName: "@hanzo/bot-source-path-symlink-pack",
         extensions: ["./src/index.ts"],
       });
       writePluginEntry(path.join(actualSourceDir, "src", "index.ts"));
@@ -1101,7 +1101,7 @@ describe("discoverOpenClawPlugins", () => {
     mkdirSafe(pluginDir);
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
-      JSON.stringify({ name: "@openclaw/metadata-only-pack", version: "0.0.1" }),
+      JSON.stringify({ name: "@hanzo/bot-metadata-only-pack", version: "0.0.1" }),
       "utf-8",
     );
     writePluginManifest({ pluginDir, id: "metadata-only-pack" });
@@ -1121,7 +1121,7 @@ describe("discoverOpenClawPlugins", () => {
     const pluginDir = path.join(stateDir, "extensions", "guardrail-bridge");
     mkdirSafe(pluginDir);
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.extension.json"),
+      path.join(pluginDir, "bot.extension.json"),
       JSON.stringify({
         name: "guardrail-bridge",
         type: "npm",
@@ -1137,8 +1137,8 @@ describe("discoverOpenClawPlugins", () => {
       diagnostics: result.diagnostics,
       level: "warn",
       pluginId: "guardrail-bridge",
-      source: path.join(pluginDir, "openclaw.extension.json"),
-      messageIncludes: 'run "openclaw doctor --fix"',
+      source: path.join(pluginDir, "bot.extension.json"),
+      messageIncludes: 'run "bot doctor --fix"',
     });
   });
 
@@ -1149,7 +1149,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/missing-runtime-pack",
+      packageName: "@hanzo/bot-missing-runtime-pack",
       extensions: ["./index.ts"],
       runtimeExtensions: ["./dist/index.js"],
     });
@@ -1177,7 +1177,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: bundledPluginDir,
-      packageName: "@openclaw/discord",
+      packageName: "@hanzo/bot-discord",
       extensions: ["./index.js"],
     });
     writePluginManifest({ pluginDir: bundledPluginDir, id: "discord" });
@@ -1185,15 +1185,15 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: installedPluginDir,
-      packageName: "@openclaw/discord",
+      packageName: "@hanzo/bot-discord",
       extensions: ["./src/index.ts"],
     });
     writePluginManifest({ pluginDir: installedPluginDir, id: "discord" });
     writePluginEntry(path.join(installedPluginDir, "src", "index.ts"));
 
-    const result = discoverOpenClawPlugins({
+    const result = discoverBotPlugins({
       env: buildDiscoveryEnvWithOverrides(stateDir, {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+        BOT_BUNDLED_PLUGINS_DIR: bundledDir,
       }),
       installRecords: {
         discord: {
@@ -1237,7 +1237,7 @@ describe("discoverOpenClawPlugins", () => {
     writePluginEntry(path.join(packageDir, "dist", "two.js"));
 
     const realpathSync = vi.spyOn(fs, "realpathSync");
-    const { candidates } = discoverOpenClawPlugins({
+    const { candidates } = discoverBotPlugins({
       env: buildDiscoveryEnv(stateDir),
     });
 
@@ -1268,7 +1268,7 @@ describe("discoverOpenClawPlugins", () => {
       const canonicalPackageDir = fs.realpathSync(realPackageDir);
 
       const realpathSync = vi.spyOn(fs, "realpathSync");
-      const { candidates } = discoverOpenClawPlugins({
+      const { candidates } = discoverBotPlugins({
         extraPaths: [linkedPackageDir, canonicalPackageDir],
         env: buildDiscoveryEnv(stateDir),
       });
@@ -1294,7 +1294,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/runtime-pack",
+      packageName: "@hanzo/bot-runtime-pack",
       extensions: ["./src/index.ts"],
       runtimeExtensions: ["./dist/index.js"],
       setupEntry: "./src/setup-entry.ts",
@@ -1323,7 +1323,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/missing-runtime-setup-pack",
+      packageName: "@hanzo/bot-missing-runtime-setup-pack",
       extensions: ["./dist/index.js"],
       setupEntry: "./src/setup-entry.ts",
       runtimeSetupEntry: "./dist/setup-entry.js",
@@ -1352,7 +1352,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/missing-setup-pack",
+      packageName: "@hanzo/bot-missing-setup-pack",
       extensions: ["./dist/index.js"],
       setupEntry: "./src/setup-entry.ts",
     });
@@ -1378,7 +1378,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/runtime-mismatch-pack",
+      packageName: "@hanzo/bot-runtime-mismatch-pack",
       extensions: ["./src/one.ts", "./src/two.ts"],
       runtimeExtensions: ["./dist/one.js"],
     });
@@ -1407,7 +1407,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/runtime-blank-pack",
+      packageName: "@hanzo/bot-runtime-blank-pack",
       extensions: ["./src/index.ts"],
       runtimeExtensions: [" "],
     });
@@ -1421,7 +1421,7 @@ describe("discoverOpenClawPlugins", () => {
       result.diagnostics.some(
         (entry) =>
           entry.level === "error" &&
-          entry.message.includes("openclaw.runtimeExtensions[0]") &&
+          entry.message.includes("bot.runtimeExtensions[0]") &&
           entry.message.includes("non-empty string"),
       ),
     ).toBe(true);
@@ -1434,7 +1434,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/extension-blank-pack",
+      packageName: "@hanzo/bot-extension-blank-pack",
       extensions: ["./dist/index.js", " "],
     });
     writePluginEntry(path.join(pluginDir, "dist", "index.js"));
@@ -1446,7 +1446,7 @@ describe("discoverOpenClawPlugins", () => {
       result.diagnostics.some(
         (entry) =>
           entry.level === "error" &&
-          entry.message.includes("openclaw.extensions[1]") &&
+          entry.message.includes("bot.extensions[1]") &&
           entry.message.includes("non-empty string"),
       ),
     ).toBe(true);
@@ -1460,7 +1460,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/built-peer-pack",
+      packageName: "@hanzo/bot-built-peer-pack",
       extensions: ["src/index.ts"],
       setupEntry: "src/setup-entry.ts",
     });
@@ -1489,7 +1489,7 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/nested-pack",
+      packageName: "@hanzo/bot-nested-pack",
       extensions: ["./plugin/index.ts"],
     });
     writePluginEntry(path.join(pluginDir, "plugin", "index.ts"));
@@ -1505,19 +1505,19 @@ describe("discoverOpenClawPlugins", () => {
   it("keeps workspace package TypeScript entries unless runtime entries are explicit", () => {
     const stateDir = makeTempDir();
     const workspaceDir = path.join(stateDir, "workspace");
-    const pluginDir = path.join(workspaceDir, ".openclaw", "extensions", "workspace-pack");
+    const pluginDir = path.join(workspaceDir, ".bot", "extensions", "workspace-pack");
     mkdirSafe(path.join(pluginDir, "src"));
     mkdirSafe(path.join(pluginDir, "dist"));
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/workspace-pack",
+      packageName: "@hanzo/bot-workspace-pack",
       extensions: ["./src/index.ts"],
     });
     writePluginEntry(path.join(pluginDir, "src", "index.ts"));
     writePluginEntry(path.join(pluginDir, "dist", "index.js"));
 
-    const { candidates } = discoverOpenClawPlugins({
+    const { candidates } = discoverBotPlugins({
       workspaceDir,
       env: buildDiscoveryEnv(stateDir),
     });
@@ -1532,14 +1532,14 @@ describe("discoverOpenClawPlugins", () => {
     const pluginDir = path.join(globalExt, "future-channel");
     createPackagePluginWithEntry({
       packageDir: pluginDir,
-      packageName: "@openclaw/future-channel",
+      packageName: "@hanzo/bot-future-channel",
       pluginId: "future-channel",
       compatPluginApi: ">=2026.5.27-beta.2",
     });
 
-    const { candidates, diagnostics } = discoverOpenClawPlugins({
+    const { candidates, diagnostics } = discoverBotPlugins({
       env: buildDiscoveryEnvWithOverrides(stateDir, {
-        OPENCLAW_COMPATIBILITY_HOST_VERSION: "2026.5.27-beta.1",
+        BOT_COMPATIBILITY_HOST_VERSION: "2026.5.27-beta.1",
       }),
     });
 
@@ -1550,7 +1550,7 @@ describe("discoverOpenClawPlugins", () => {
       pluginId: "future-channel",
       source: path.join(pluginDir, "package.json"),
       messageIncludes:
-        'plugin requires plugin API >=2026.5.27-beta.2, but this host is 2026.5.27-beta.1; skipping discovery (check "openclaw --version", OPENCLAW_COMPATIBILITY_HOST_VERSION, or run "openclaw doctor")',
+        'plugin requires plugin API >=2026.5.27-beta.2, but this host is 2026.5.27-beta.1; skipping discovery (check "bot --version", BOT_COMPATIBILITY_HOST_VERSION, or run "bot doctor")',
     });
   });
 
@@ -1562,8 +1562,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/malformed-channel",
-        openclaw: {
+        name: "@hanzo/bot-malformed-channel",
+        bot: {
           extensions: ["./index.js"],
           plugin: { id: "malformed-channel" },
           compat: { pluginApi: 20260527 },
@@ -1573,9 +1573,9 @@ describe("discoverOpenClawPlugins", () => {
     );
     writePluginEntry(path.join(pluginDir, "index.js"));
 
-    const { candidates, diagnostics } = discoverOpenClawPlugins({
+    const { candidates, diagnostics } = discoverBotPlugins({
       env: buildDiscoveryEnvWithOverrides(stateDir, {
-        OPENCLAW_COMPATIBILITY_HOST_VERSION: "2026.5.27",
+        BOT_COMPATIBILITY_HOST_VERSION: "2026.5.27",
       }),
     });
 
@@ -1586,7 +1586,7 @@ describe("discoverOpenClawPlugins", () => {
       pluginId: "malformed-channel",
       source: path.join(pluginDir, "package.json"),
       messageIncludes:
-        "invalid package plugin API metadata: package.json openclaw.compat.pluginApi must be a string; skipping discovery (check package.json openclaw.compat.pluginApi)",
+        "invalid package plugin API metadata: package.json bot.compat.pluginApi must be a string; skipping discovery (check package.json bot.compat.pluginApi)",
     });
   });
 
@@ -1598,8 +1598,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/future-shape",
-        openclaw: {
+        name: "@hanzo/bot-future-shape",
+        bot: {
           extensions: { runtime: "./src/index.ts" },
           compat: { pluginApi: ">=2026.5.27-beta.2" },
         },
@@ -1607,9 +1607,9 @@ describe("discoverOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const { candidates, diagnostics } = discoverOpenClawPlugins({
+    const { candidates, diagnostics } = discoverBotPlugins({
       env: buildDiscoveryEnvWithOverrides(stateDir, {
-        OPENCLAW_COMPATIBILITY_HOST_VERSION: "2026.5.27-beta.1",
+        BOT_COMPATIBILITY_HOST_VERSION: "2026.5.27-beta.1",
       }),
     });
 
@@ -1622,7 +1622,7 @@ describe("discoverOpenClawPlugins", () => {
       messageIncludes:
         "plugin requires plugin API >=2026.5.27-beta.2, but this host is 2026.5.27-beta.1; skipping discovery",
     });
-    expectNoDiagnostic({ diagnostics, messageIncludes: "openclaw.extensions" });
+    expectNoDiagnostic({ diagnostics, messageIncludes: "bot.extensions" });
   });
 
   it("discovers same-floor beta non-bundled package plugin API candidates", () => {
@@ -1630,14 +1630,14 @@ describe("discoverOpenClawPlugins", () => {
     const globalExt = path.join(stateDir, "extensions");
     createPackagePluginWithEntry({
       packageDir: path.join(globalExt, "current-channel"),
-      packageName: "@openclaw/current-channel",
+      packageName: "@hanzo/bot-current-channel",
       pluginId: "current-channel",
       compatPluginApi: ">=2026.5.27-beta.1",
     });
 
-    const { candidates, diagnostics } = discoverOpenClawPlugins({
+    const { candidates, diagnostics } = discoverBotPlugins({
       env: buildDiscoveryEnvWithOverrides(stateDir, {
-        OPENCLAW_COMPATIBILITY_HOST_VERSION: "2026.5.27-beta.1",
+        BOT_COMPATIBILITY_HOST_VERSION: "2026.5.27-beta.1",
       }),
     });
 
@@ -1653,8 +1653,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/downloadable",
-        openclaw: {
+        name: "@hanzo/bot-downloadable",
+        bot: {
           extensions: ["./index.ts"],
           compat: { pluginApi: ">=2099.1.1" },
         },
@@ -1664,9 +1664,9 @@ describe("discoverOpenClawPlugins", () => {
     writePluginManifest({ pluginDir, id: "downloadable" });
     writePluginEntry(path.join(pluginDir, "index.ts"));
 
-    const { candidates } = discoverOpenClawPlugins({
+    const { candidates } = discoverBotPlugins({
       env: buildDiscoveryEnvWithOverrides(stateDir, {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+        BOT_BUNDLED_PLUGINS_DIR: bundledDir,
       }),
     });
 
@@ -1681,8 +1681,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/downloadable",
-        openclaw: {
+        name: "@hanzo/bot-downloadable",
+        bot: {
           extensions: ["./index.ts"],
         },
       }),
@@ -1691,9 +1691,9 @@ describe("discoverOpenClawPlugins", () => {
     writePluginManifest({ pluginDir, id: "downloadable" });
     writePluginEntry(path.join(pluginDir, "index.js"));
 
-    const { candidates, diagnostics } = discoverOpenClawPlugins({
+    const { candidates, diagnostics } = discoverBotPlugins({
       env: buildDiscoveryEnvWithOverrides(stateDir, {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+        BOT_BUNDLED_PLUGINS_DIR: bundledDir,
       }),
     });
 
@@ -1707,7 +1707,7 @@ describe("discoverOpenClawPlugins", () => {
 
   it("discovers source-checkout-only bundled plugins alongside built bundled plugins", () => {
     const stateDir = makeTempDir();
-    const packageRoot = path.join(stateDir, "openclaw");
+    const packageRoot = path.join(stateDir, "bot");
     const bundledDir = path.join(packageRoot, "dist", "extensions");
     const sourceDir = path.join(packageRoot, "extensions");
     const builtPluginDir = path.join(bundledDir, "shipped");
@@ -1722,14 +1722,14 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: builtPluginDir,
-      packageName: "@openclaw/shipped",
+      packageName: "@hanzo/bot-shipped",
       extensions: ["./index.js"],
     });
     writePluginManifest({ pluginDir: builtPluginDir, id: "shipped" });
     writePluginEntry(path.join(builtPluginDir, "index.js"));
     writePluginPackageManifest({
       packageDir: sourceBuiltPluginDir,
-      packageName: "@openclaw/shipped",
+      packageName: "@hanzo/bot-shipped",
       extensions: ["./index.ts"],
     });
     writePluginManifest({ pluginDir: sourceBuiltPluginDir, id: "shipped" });
@@ -1737,8 +1737,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       path.join(sourceOnlyPluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/downloadable",
-        openclaw: {
+        name: "@hanzo/bot-downloadable",
+        bot: {
           extensions: ["./index.ts"],
         },
       }),
@@ -1747,9 +1747,9 @@ describe("discoverOpenClawPlugins", () => {
     writePluginManifest({ pluginDir: sourceOnlyPluginDir, id: "downloadable" });
     writePluginEntry(path.join(sourceOnlyPluginDir, "index.ts"));
 
-    const { candidates } = discoverOpenClawPlugins({
+    const { candidates } = discoverBotPlugins({
       env: buildDiscoveryEnvWithOverrides(stateDir, {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+        BOT_BUNDLED_PLUGINS_DIR: bundledDir,
       }),
     });
 
@@ -1764,11 +1764,11 @@ describe("discoverOpenClawPlugins", () => {
 
   it("does not discover nested node_modules copies under installed plugins", async () => {
     const stateDir = makeTempDir();
-    const pluginDir = path.join(stateDir, "extensions", "opik-openclaw");
+    const pluginDir = path.join(stateDir, "extensions", "opik-bot");
     const nestedDiffsDir = path.join(
       pluginDir,
       "node_modules",
-      "openclaw",
+      "bot",
       "dist",
       "extensions",
       "diffs",
@@ -1779,10 +1779,10 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@opik/opik-openclaw",
+      packageName: "@opik/opik-bot",
       extensions: ["./src/index.ts"],
     });
-    writePluginManifest({ pluginDir, id: "opik-openclaw" });
+    writePluginManifest({ pluginDir, id: "opik-bot" });
     fs.writeFileSync(
       path.join(pluginDir, "src", "index.ts"),
       "export default function () {}",
@@ -1795,8 +1795,8 @@ describe("discoverOpenClawPlugins", () => {
     );
 
     writePluginPackageManifest({
-      packageDir: path.join(pluginDir, "node_modules", "openclaw"),
-      packageName: "openclaw",
+      packageDir: path.join(pluginDir, "node_modules", "bot"),
+      packageName: "bot",
       extensions: [`./${bundledDistPluginFile("diffs", "index.js")}`],
     });
     writePluginManifest({ pluginDir: nestedDiffsDir, id: "diffs" });
@@ -1807,15 +1807,15 @@ describe("discoverOpenClawPlugins", () => {
     );
 
     const { candidates } = await discoverWithStateDir(stateDir, {});
-    expectCandidateOrder(candidates, ["opik-openclaw"]);
+    expectCandidateOrder(candidates, ["opik-bot"]);
   });
 
   it("skips dependency and build directories while scanning workspace roots", () => {
     const stateDir = makeTempDir();
     const workspaceDir = path.join(stateDir, "workspace");
-    const workspaceRoot = path.join(workspaceDir, ".openclaw", "extensions");
+    const workspaceRoot = path.join(workspaceDir, ".bot", "extensions");
     const workspacePluginDir = path.join(workspaceRoot, "workspace-plugin");
-    const nestedNodeModulesDir = path.join(workspaceRoot, "node_modules", "openclaw");
+    const nestedNodeModulesDir = path.join(workspaceRoot, "node_modules", "bot");
     const nestedDistDir = path.join(workspaceRoot, "dist", "extensions", "diffs");
     mkdirSafe(path.join(workspacePluginDir, "src"));
     mkdirSafe(path.join(nestedNodeModulesDir, "src"));
@@ -1823,13 +1823,13 @@ describe("discoverOpenClawPlugins", () => {
 
     createPackagePluginWithEntry({
       packageDir: workspacePluginDir,
-      packageName: "@openclaw/workspace-plugin",
+      packageName: "@hanzo/bot-workspace-plugin",
       pluginId: "workspace-plugin",
     });
 
     createPackagePluginWithEntry({
       packageDir: nestedNodeModulesDir,
-      packageName: "openclaw",
+      packageName: "bot",
       pluginId: "node-modules-copy",
     });
 
@@ -1840,7 +1840,7 @@ describe("discoverOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const { candidates } = discoverOpenClawPlugins({
+    const { candidates } = discoverBotPlugins({
       workspaceDir,
       env: buildDiscoveryEnv(stateDir),
     });
@@ -1855,7 +1855,7 @@ describe("discoverOpenClawPlugins", () => {
         const packageDir = path.join(stateDir, "extensions", "voice-call-pack");
         createPackagePluginWithEntry({
           packageDir,
-          packageName: "@openclaw/voice-call",
+          packageName: "@hanzo/bot-voice-call",
           entryPath: "src/index.ts",
         });
         return {};
@@ -1881,8 +1881,8 @@ describe("discoverOpenClawPlugins", () => {
       name: "normalizes bundled speech package ids to canonical plugin ids",
       setup: (stateDir: string) => {
         for (const [dirName, packageName, pluginId] of [
-          ["elevenlabs-speech-pack", "@openclaw/elevenlabs-speech", "elevenlabs"],
-          ["microsoft-speech-pack", "@openclaw/microsoft-speech", "microsoft"],
+          ["elevenlabs-speech-pack", "@hanzo/bot-elevenlabs-speech", "elevenlabs"],
+          ["microsoft-speech-pack", "@hanzo/bot-microsoft-speech", "microsoft"],
         ] as const) {
           const packageDir = path.join(stateDir, "extensions", dirName);
           createPackagePluginWithEntry({
@@ -1903,7 +1903,7 @@ describe("discoverOpenClawPlugins", () => {
         const packageDir = path.join(stateDir, "packs", "demo-plugin-dir");
         createPackagePluginWithEntry({
           packageDir,
-          packageName: "@openclaw/demo-plugin-dir",
+          packageName: "@hanzo/bot-demo-plugin-dir",
           entryPath: "index.js",
         });
         return { extraPaths: [packageDir] };
@@ -2003,7 +2003,7 @@ describe("discoverOpenClawPlugins", () => {
     const result = await discoverWithStateDir(stateDir, setup(stateDir));
     const legacy = findCandidateById(result.candidates, "legacy-with-bad-bundle");
 
-    expect(legacy?.format).toBe("openclaw");
+    expect(legacy?.format).toBe("bot");
     expect(hasDiagnosticSourceSuffix(result.diagnostics, bundleMarker)).toBe(true);
   });
 
@@ -2017,7 +2017,7 @@ describe("discoverOpenClawPlugins", () => {
         mkdirSafe(globalExt);
         writePluginPackageManifest({
           packageDir: globalExt,
-          packageName: "@openclaw/escape-pack",
+          packageName: "@hanzo/bot-escape-pack",
           extensions: ["../../outside.js"],
         });
         fs.writeFileSync(outside, "export default function () {}", "utf-8");
@@ -2031,7 +2031,7 @@ describe("discoverOpenClawPlugins", () => {
         mkdirSafe(path.join(globalExt, "src"));
         writePluginPackageManifest({
           packageDir: globalExt,
-          packageName: "@openclaw/escape-pack",
+          packageName: "@hanzo/bot-escape-pack",
           extensions: ["../src/index.ts"],
         });
         fs.writeFileSync(path.join(globalExt, "src", "index.js"), "export default {}", "utf-8");
@@ -2045,7 +2045,7 @@ describe("discoverOpenClawPlugins", () => {
         mkdirSafe(path.join(globalExt, "dist"));
         writePluginPackageManifest({
           packageDir: globalExt,
-          packageName: "@openclaw/escape-pack",
+          packageName: "@hanzo/bot-escape-pack",
           extensions: ["../src/index.ts"],
           runtimeExtensions: ["./dist/index.js"],
         });
@@ -2060,7 +2060,7 @@ describe("discoverOpenClawPlugins", () => {
         mkdirSafe(globalExt);
         writePluginPackageManifest({
           packageDir: globalExt,
-          packageName: "@openclaw/missing-entry-pack",
+          packageName: "@hanzo/bot-missing-entry-pack",
           extensions: ["./missing.ts"],
         });
         return true;
@@ -2084,7 +2084,7 @@ describe("discoverOpenClawPlugins", () => {
         }
         writePluginPackageManifest({
           packageDir: globalExt,
-          packageName: "@openclaw/pack",
+          packageName: "@hanzo/bot-pack",
           extensions: ["./linked/escape.ts"],
         });
         return true;
@@ -2116,7 +2116,7 @@ describe("discoverOpenClawPlugins", () => {
         }
         writePluginPackageManifest({
           packageDir: globalExt,
-          packageName: "@openclaw/pack",
+          packageName: "@hanzo/bot-pack",
           extensions: ["./escape.ts"],
         });
         return true;
@@ -2148,7 +2148,7 @@ describe("discoverOpenClawPlugins", () => {
         }
         writePluginPackageManifest({
           packageDir: globalExt,
-          packageName: "@openclaw/pack",
+          packageName: "@hanzo/bot-pack",
           extensions: ["./escape.ts"],
         });
         return true;
@@ -2181,7 +2181,7 @@ describe("discoverOpenClawPlugins", () => {
         }
         writePluginPackageManifest({
           packageDir: globalExt,
-          packageName: "@openclaw/pack",
+          packageName: "@hanzo/bot-pack",
           extensions: ["./src/index.ts"],
         });
         return true;
@@ -2203,7 +2203,7 @@ describe("discoverOpenClawPlugins", () => {
     mkdirSafe(path.join(globalExt, "dist"));
     writePluginPackageManifest({
       packageDir: globalExt,
-      packageName: "@openclaw/escape-pack",
+      packageName: "@hanzo/bot-escape-pack",
       extensions: ["./dist/index.js"],
       setupEntry: "../src/setup-entry.ts",
       runtimeSetupEntry: "./dist/setup-entry.js",
@@ -2233,8 +2233,8 @@ describe("discoverOpenClawPlugins", () => {
     fs.writeFileSync(
       outsideManifest,
       JSON.stringify({
-        name: "@openclaw/pack",
-        openclaw: { extensions: ["./entry.ts"] },
+        name: "@hanzo/bot-pack",
+        bot: { extensions: ["./entry.ts"] },
       }),
       "utf-8",
     );
@@ -2257,7 +2257,7 @@ describe("discoverOpenClawPlugins", () => {
     const pluginDir = path.join(stateDir, "extensions", "world-open");
     createPackagePluginWithEntry({
       packageDir: pluginDir,
-      packageName: "@openclaw/world-open",
+      packageName: "@hanzo/bot-world-open",
       pluginId: "world-open",
     });
     fs.chmodSync(pluginDir, 0o777);
@@ -2275,15 +2275,15 @@ describe("discoverOpenClawPlugins", () => {
     "repairs world-writable bundled plugin dirs before loading them",
     async () => {
       const stateDir = makeTempDir();
-      const packageRoot = path.join(stateDir, "node_modules", "openclaw");
+      const packageRoot = path.join(stateDir, "node_modules", "bot");
       const bundledDir = path.join(packageRoot, "dist", "extensions");
       const packDir = path.join(bundledDir, "demo-pack");
       mkdirSafe(packDir);
       fs.writeFileSync(path.join(packDir, "index.ts"), "export default function () {}", "utf-8");
       fs.chmodSync(packDir, 0o777);
 
-      const result = withOpenClawPackageArgv(packageRoot, () =>
-        discoverOpenClawPlugins({
+      const result = withBotPackageArgv(packageRoot, () =>
+        discoverBotPlugins({
           env: { ...process.env, ...buildBundledDiscoveryEnv(stateDir) },
         }),
       );
@@ -2304,7 +2304,7 @@ describe("discoverOpenClawPlugins", () => {
       const stateDir = makeTempDir();
       createPackagePluginWithEntry({
         packageDir: path.join(stateDir, "extensions", "owner-mismatch"),
-        packageName: "@openclaw/owner-mismatch",
+        packageName: "@hanzo/bot-owner-mismatch",
         pluginId: "owner-mismatch",
       });
 
@@ -2336,10 +2336,10 @@ describe("discoverOpenClawPlugins", () => {
     fs.chmodSync(blockedDir, 0o777);
 
     try {
-      const result = discoverOpenClawPlugins({
+      const result = discoverBotPlugins({
         env: {
           ...buildDiscoveryEnv(stateDir),
-          OPENCLAW_PLUGINS_PATHS: blockedDir,
+          BOT_PLUGINS_PATHS: blockedDir,
         },
       });
       const blockedDiagnostics = result.diagnostics.filter(
@@ -2364,7 +2364,7 @@ describe("discoverOpenClawPlugins", () => {
       fs.chmodSync(pluginDir, 0o777);
 
       try {
-        const result = discoverOpenClawPlugins({
+        const result = discoverBotPlugins({
           extraPaths: [pluginDir],
           env: {
             ...buildDiscoveryEnv(stateDir),
@@ -2392,12 +2392,12 @@ describe("discoverOpenClawPlugins", () => {
     const pluginDir = path.join(bundledDir, "cached-bundle");
     createPackagePluginWithEntry({
       packageDir: pluginDir,
-      packageName: "@openclaw/cached-bundle",
+      packageName: "@hanzo/bot-cached-bundle",
       pluginId: "cached-bundle",
       entryPath: "index.js",
     });
     const env = buildDiscoveryEnvWithOverrides(stateDir, {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+      BOT_BUNDLED_PLUGINS_DIR: bundledDir,
     });
     const packageManifestPath = path.resolve(pluginDir, "package.json");
 
@@ -2426,12 +2426,12 @@ describe("discoverOpenClawPlugins", () => {
     const pluginDir = path.join(bundledDir, "cached-bundle");
     createPackagePluginWithEntry({
       packageDir: pluginDir,
-      packageName: "@openclaw/cache-one",
+      packageName: "@hanzo/bot-cache-one",
       pluginId: "cached-bundle",
       entryPath: "index.js",
     });
     const env = buildDiscoveryEnvWithOverrides(stateDir, {
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+      BOT_BUNDLED_PLUGINS_DIR: bundledDir,
     });
     const packageManifestPath = path.join(pluginDir, "package.json");
     const unchangedTimestamp = new Date("2025-01-01T00:00:00.000Z");
@@ -2439,12 +2439,12 @@ describe("discoverOpenClawPlugins", () => {
 
     const first = discoverWithEnv({ env });
     expect(requireCandidateById(first.candidates, "cached-bundle").packageName).toBe(
-      "@openclaw/cache-one",
+      "@hanzo/bot-cache-one",
     );
     const originalStat = fs.statSync(packageManifestPath);
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/cache-two",
+      packageName: "@hanzo/bot-cache-two",
       extensions: ["./index.js"],
     });
     fs.utimesSync(packageManifestPath, unchangedTimestamp, unchangedTimestamp);
@@ -2454,14 +2454,14 @@ describe("discoverOpenClawPlugins", () => {
 
     const beforeReload = discoverWithEnv({ env });
     expect(requireCandidateById(beforeReload.candidates, "cached-bundle").packageName).toBe(
-      "@openclaw/cache-one",
+      "@hanzo/bot-cache-one",
     );
 
     clearPluginMetadataLifecycleCaches();
 
     const afterReload = discoverWithEnv({ env });
     expect(requireCandidateById(afterReload.candidates, "cached-bundle").packageName).toBe(
-      "@openclaw/cache-two",
+      "@hanzo/bot-cache-two",
     );
   });
 
@@ -2470,7 +2470,7 @@ describe("discoverOpenClawPlugins", () => {
     const pluginDir = path.join(stateDir, "extensions", "fresh-package");
     createPackagePluginWithEntry({
       packageDir: pluginDir,
-      packageName: "@openclaw/cache-one",
+      packageName: "@hanzo/bot-cache-one",
       pluginId: "fresh-package",
       entryPath: "index.js",
     });
@@ -2481,12 +2481,12 @@ describe("discoverOpenClawPlugins", () => {
 
     const first = discoverWithEnv({ env });
     expect(requireCandidateById(first.candidates, "fresh-package").packageName).toBe(
-      "@openclaw/cache-one",
+      "@hanzo/bot-cache-one",
     );
     const originalStat = fs.statSync(packageManifestPath);
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/cache-two",
+      packageName: "@hanzo/bot-cache-two",
       extensions: ["./index.js"],
     });
     fs.utimesSync(packageManifestPath, unchangedTimestamp, unchangedTimestamp);
@@ -2496,7 +2496,7 @@ describe("discoverOpenClawPlugins", () => {
 
     const second = discoverWithEnv({ env });
     expect(requireCandidateById(second.candidates, "fresh-package").packageName).toBe(
-      "@openclaw/cache-two",
+      "@hanzo/bot-cache-two",
     );
   });
 
@@ -2514,13 +2514,13 @@ describe("discoverOpenClawPlugins", () => {
 
     writePluginPackageManifest({
       packageDir: pluginDir,
-      packageName: "@openclaw/fresh-package",
+      packageName: "@hanzo/bot-fresh-package",
       extensions: ["./index.js"],
     });
 
     const second = discoverWithEnv({ env });
     expect(requireCandidateById(second.candidates, "fresh-package").packageName).toBe(
-      "@openclaw/fresh-package",
+      "@hanzo/bot-fresh-package",
     );
   });
 
@@ -2529,7 +2529,7 @@ describe("discoverOpenClawPlugins", () => {
     const pluginDir = path.join(stateDir, "extensions", "fresh");
     createPackagePluginWithEntry({
       packageDir: pluginDir,
-      packageName: "@openclaw/fresh",
+      packageName: "@hanzo/bot-fresh",
       pluginId: "fresh",
     });
 
@@ -2545,7 +2545,7 @@ describe("discoverOpenClawPlugins", () => {
 
   it("discovers bundled and global plugins for each workspace-specific scan", () => {
     const stateDir = makeTempDir();
-    const packageRoot = path.join(stateDir, "node_modules", "openclaw");
+    const packageRoot = path.join(stateDir, "node_modules", "bot");
     const bundledDir = path.join(packageRoot, "dist", "extensions");
     const globalExt = path.join(stateDir, "extensions");
     const workspaceA = path.join(stateDir, "workspace-a");
@@ -2553,31 +2553,31 @@ describe("discoverOpenClawPlugins", () => {
 
     createPackagePluginWithEntry({
       packageDir: path.join(bundledDir, "bundled-plugin"),
-      packageName: "@openclaw/bundled-plugin",
+      packageName: "@hanzo/bot-bundled-plugin",
       pluginId: "bundled-plugin",
     });
     createPackagePluginWithEntry({
       packageDir: path.join(globalExt, "global-plugin"),
-      packageName: "@openclaw/global-plugin",
+      packageName: "@hanzo/bot-global-plugin",
       pluginId: "global-plugin",
     });
     createPackagePluginWithEntry({
-      packageDir: path.join(workspaceA, ".openclaw", "extensions", "workspace-a-plugin"),
-      packageName: "@openclaw/workspace-a-plugin",
+      packageDir: path.join(workspaceA, ".bot", "extensions", "workspace-a-plugin"),
+      packageName: "@hanzo/bot-workspace-a-plugin",
       pluginId: "workspace-a-plugin",
     });
     createPackagePluginWithEntry({
-      packageDir: path.join(workspaceB, ".openclaw", "extensions", "workspace-b-plugin"),
-      packageName: "@openclaw/workspace-b-plugin",
+      packageDir: path.join(workspaceB, ".bot", "extensions", "workspace-b-plugin"),
+      packageName: "@hanzo/bot-workspace-b-plugin",
       pluginId: "workspace-b-plugin",
     });
 
     const env = {
       ...buildDiscoveryEnv(stateDir),
-      OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-      OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+      BOT_DISABLE_BUNDLED_PLUGINS: undefined,
+      BOT_BUNDLED_PLUGINS_DIR: bundledDir,
     };
-    const first = withOpenClawPackageArgv(packageRoot, () =>
+    const first = withBotPackageArgv(packageRoot, () =>
       discoverWithEnv({ workspaceDir: workspaceA, env }),
     );
     expectCandidatePresence(first, {
@@ -2585,7 +2585,7 @@ describe("discoverOpenClawPlugins", () => {
       absent: ["workspace-b-plugin"],
     });
 
-    const second = withOpenClawPackageArgv(packageRoot, () =>
+    const second = withBotPackageArgv(packageRoot, () =>
       discoverWithEnv({ workspaceDir: workspaceB, env }),
     );
     expectCandidatePresence(second, {
@@ -2602,12 +2602,12 @@ describe("discoverOpenClawPlugins", () => {
         const stateDirB = makeTempDir();
         createPackagePluginWithEntry({
           packageDir: path.join(stateDirA, "extensions", "alpha"),
-          packageName: "@openclaw/alpha",
+          packageName: "@hanzo/bot-alpha",
           pluginId: "alpha",
         });
         createPackagePluginWithEntry({
           packageDir: path.join(stateDirB, "extensions", "beta"),
-          packageName: "@openclaw/beta",
+          packageName: "@hanzo/bot-beta",
           pluginId: "beta",
         });
         return {

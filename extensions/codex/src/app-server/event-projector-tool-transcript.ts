@@ -3,9 +3,9 @@ import {
   runAgentHarnessAfterToolCallHook,
   type AgentMessage,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { Usage } from "openclaw/plugin-sdk/llm";
-import { asDateTimestampMs } from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import type { Usage } from "bot/plugin-sdk/llm";
+import { asDateTimestampMs } from "bot/plugin-sdk/number-runtime";
 import {
   isMutatingNativeToolItem,
   isNonSuccessItemStatus,
@@ -55,7 +55,7 @@ const ZERO_USAGE: Usage = {
 };
 
 const MISSING_TOOL_RESULT_ERROR =
-  "OpenClaw recorded a native Codex tool.call without a matching tool.result before the turn completed.";
+  "Bot recorded a native Codex tool.call without a matching tool.result before the turn completed.";
 
 export class CodexToolTranscriptProjection {
   private readonly messages: AgentMessage[] = [];

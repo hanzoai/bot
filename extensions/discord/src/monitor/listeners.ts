@@ -1,10 +1,10 @@
 // Discord plugin module implements listeners behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { requestHeartbeat } from "openclaw/plugin-sdk/heartbeat-runtime";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { resolveAgentRoute } from "openclaw/plugin-sdk/routing";
-import { danger } from "openclaw/plugin-sdk/runtime-env";
-import { enqueueSystemEvent } from "openclaw/plugin-sdk/system-event-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { requestHeartbeat } from "bot/plugin-sdk/heartbeat-runtime";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
+import { resolveAgentRoute } from "bot/plugin-sdk/routing";
+import { danger } from "bot/plugin-sdk/runtime-env";
+import { enqueueSystemEvent } from "bot/plugin-sdk/system-event-runtime";
 import {
   type Client,
   type DiscordMessageDispatchData,
@@ -36,7 +36,7 @@ import { DiscordPresenceBaselineCache } from "./presence-transition-cache.js";
 import { isThreadArchived } from "./thread-bindings.discord-api.js";
 import { closeDiscordThreadSessions } from "./thread-session-close.js";
 
-type Logger = ReturnType<typeof import("openclaw/plugin-sdk/runtime-env").createSubsystemLogger>;
+type Logger = ReturnType<typeof import("bot/plugin-sdk/runtime-env").createSubsystemLogger>;
 
 type DiscordRawMessageEvent = Parameters<MessageCreateListener["handle"]>[0];
 export type DiscordMessageEvent = DiscordMessageDispatchData;
@@ -114,7 +114,7 @@ export class DiscordPresenceListener extends PresenceUpdateListener {
 
   constructor(
     private readonly params: {
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       logger?: Logger;
       accountId: string;
       botUserId?: string;
@@ -473,7 +473,7 @@ type ThreadUpdateEvent = Parameters<ThreadUpdateListener["handle"]>[0];
 
 export class DiscordThreadUpdateListener extends ThreadUpdateListener {
   constructor(
-    private cfg: OpenClawConfig,
+    private cfg: BotConfig,
     private accountId: string,
     private logger?: Logger,
   ) {

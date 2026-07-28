@@ -8,17 +8,17 @@ export type PluginNpmRuntimeBuildPlan = {
   packageFiles: string[];
   packagePeerMetadata: {
     peerDependencies: {
-      openclaw: string;
+      bot: string;
     };
     peerDependenciesMeta: {
-      openclaw: { optional: boolean };
+      bot: { optional: boolean };
     };
   };
   repoRoot: string;
   packageDir: string;
   pluginDir: string;
   packageJson: {
-    openclaw: { compat: { pluginApi: string } };
+    bot: { compat: { pluginApi: string } };
     [key: string]: unknown;
   };
   rootPackageJson: Record<string, unknown>;
@@ -33,7 +33,7 @@ export type PluginNpmRuntimeBuildPlan = {
 };
 /** Resolve the package-local runtime build plan for one publishable plugin package. */
 export function resolvePluginNpmRuntimeBuildPlan(params: unknown): PluginNpmRuntimeBuildPlan | null;
-/** List built host SDK imports that are absent from the OpenClaw package exports. */
+/** List built host SDK imports that are absent from the Bot package exports. */
 export function listMissingPluginNpmRuntimeHostExports(plan: PluginNpmRuntimeBuildPlan): string[];
 /** Build package-local runtime files and static assets for one plugin package. */
 export function buildPluginNpmRuntime(params: unknown): Promise<

@@ -2,7 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { sliceUtf16Safe, truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe, truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { extractSections } from "../../auto-reply/reply/post-compaction-context.js";
 import { isAbortError } from "../../infra/abort-signal.js";
 import { openRootFile } from "../../infra/boundary-file-read.js";
@@ -1555,7 +1555,7 @@ const testing = {
 } as const;
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.compactionSafeguardTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.compactionSafeguardTestApi")] =
     testing;
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

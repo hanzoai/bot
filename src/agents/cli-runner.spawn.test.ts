@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createReplyOperation, replyRunRegistry } from "../auto-reply/reply/reply-run-registry.js";
 import { testing as replyRunTesting } from "../auto-reply/reply/reply-run-registry.test-support.js";
@@ -52,7 +52,7 @@ import {
   requireRecord,
   requireRegexMatch,
   withTempExecApprovalsState,
-  withTempOpenClawHome,
+  withTempBotHome,
   type PreparedCliRunContextOverrides,
 } from "./cli-runner.test-helpers.js";
 import {
@@ -241,7 +241,7 @@ describe("runCliAgent spawn path", () => {
       runId: "run-node-claude",
       prompt: "current turn",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "bot-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -258,7 +258,7 @@ describe("runCliAgent spawn path", () => {
           "--mcp-config",
           "/tmp/gateway-mcp.json",
           "--allowedTools",
-          "mcp__openclaw__*",
+          "mcp__bot__*",
         ],
         resumeArgs: [
           "-p",
@@ -270,7 +270,7 @@ describe("runCliAgent spawn path", () => {
           "--mcp-config",
           "/tmp/gateway-mcp.json",
           "--allowedTools",
-          "mcp__openclaw__*",
+          "mcp__bot__*",
           "--resume",
           "{sessionId}",
         ],
@@ -284,14 +284,14 @@ describe("runCliAgent spawn path", () => {
         toolAvailability = execution.toolAvailability;
         return [...execution.baseArgs];
       },
-      cliToolAvailability: { native: [], openClaw: ["message"] },
+      cliToolAvailability: { native: [], bot: ["message"] },
     });
     context.preparedBackend.secretInput = {
       fd: 3,
       fingerprint: "selected-node-token-fingerprint",
       createData: () => Buffer.from("selected-node-token"),
     };
-    context.openClawHistoryPrompt = "gateway transcript reseed";
+    context.botHistoryPrompt = "gateway transcript reseed";
     context.claudeSkillsPluginArgs = ["--plugin-dir", "/tmp/gateway-skills"];
     context.params.forkCliSessionOnResume = true;
     context.params.claimCliSessionFork = vi.fn(async () => true);
@@ -301,8 +301,8 @@ describe("runCliAgent spawn path", () => {
 
     expect(output).toMatchObject({ text: "node answer", sessionId: "forked-node-session" });
     // Node runs keep the gateway's native tool policy; loopback MCP tools do
-    // not exist on the node so the OpenClaw list is projected empty.
-    expect(toolAvailability).toEqual({ native: [], openClaw: [], mcp: [] });
+    // not exist on the node so the Bot list is projected empty.
+    expect(toolAvailability).toEqual({ native: [], bot: [], mcp: [] });
     expect(writeSystemPrompt).not.toHaveBeenCalled();
     expect(supervisorSpawnMock).not.toHaveBeenCalled();
     expect(invokeNode).toHaveBeenCalledWith(
@@ -351,7 +351,7 @@ describe("runCliAgent spawn path", () => {
       model: "claude-opus-4-8",
       prompt: "current turn",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "bot-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -393,7 +393,7 @@ describe("runCliAgent spawn path", () => {
       model: "claude-opus-4-8",
       runId: "run-node-abort",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "bot-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -470,7 +470,7 @@ describe("runCliAgent spawn path", () => {
       sessionKey: plan.sessionKey,
       agentId: "main",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "bot-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -533,7 +533,7 @@ describe("runCliAgent spawn path", () => {
       model: "claude-opus-4-8",
       timeoutMs: 25,
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "bot-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -571,7 +571,7 @@ describe("runCliAgent spawn path", () => {
       model: "claude-opus-4-8",
       timeoutMs: 25,
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "bot-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -591,7 +591,7 @@ describe("runCliAgent spawn path", () => {
     const context = buildPreparedCliRunContext({
       model: "claude-opus-4-8",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "bot-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -636,7 +636,7 @@ describe("runCliAgent spawn path", () => {
       runId: "run-node-text-only-media-facts",
       prompt: "already described",
       sessionEntry: {
-        sessionId: "openclaw-session",
+        sessionId: "bot-session",
         updatedAt: 1,
         execHost: "node",
         execNode: "node-a",
@@ -718,7 +718,7 @@ describe("runCliAgent spawn path", () => {
     expect(allArgs).toContain("You are a helpful assistant.");
   });
 
-  it("includes the OpenClaw skills prompt in CLI system prompts", () => {
+  it("includes the Bot skills prompt in CLI system prompts", () => {
     const systemPrompt = buildCliAgentSystemPrompt({
       workspaceDir: "/tmp",
       modelDisplay: "claude-cli/sonnet",
@@ -1056,7 +1056,7 @@ describe("runCliAgent spawn path", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = (args[0] ?? {}) as { argv?: string[] };
       systemPromptPath = requireArgAfter(input.argv, "--append-system-prompt-file");
-      expect(systemPromptPath).toContain("openclaw-cli-system-prompt-");
+      expect(systemPromptPath).toContain("bot-cli-system-prompt-");
       await expect(fs.readFile(systemPromptPath, "utf-8")).resolves.toBe(
         "You are a helpful assistant.",
       );
@@ -1080,7 +1080,7 @@ describe("runCliAgent spawn path", () => {
 
   it("resends system prompts through a file for soft-resumed prompt-tool drift", async () => {
     const writeSoftResumeSystemPromptFile = vi.fn(async () => ({
-      filePath: "/tmp/openclaw-soft-resume-system-prompt.md",
+      filePath: "/tmp/bot-soft-resume-system-prompt.md",
       cleanup: async () => {},
     }));
     setCliRunnerExecuteTestDeps({
@@ -1090,7 +1090,7 @@ describe("runCliAgent spawn path", () => {
       const input = (args[0] ?? {}) as { argv?: string[] };
       expect(input.argv).toContain("resume");
       expect(input.argv).toContain("soft-cli-session");
-      expect(input.argv?.join(" ")).toContain("/tmp/openclaw-soft-resume-system-prompt.md");
+      expect(input.argv?.join(" ")).toContain("/tmp/bot-soft-resume-system-prompt.md");
       return createManagedRun({
         reason: "exit",
         exitCode: 0,
@@ -1184,7 +1184,7 @@ describe("runCliAgent spawn path", () => {
     mockSuccessfulCliRun(CLAUDE_OK_JSONL);
     const toolAvailability: NonNullable<PreparedCliRunContext["params"]["cliToolAvailability"]> = {
       native: [],
-      openClaw: ["openclaw"],
+      bot: ["bot"],
     };
     const resolveExecutionArgs = vi.fn(({ baseArgs }) => baseArgs);
 
@@ -1200,7 +1200,7 @@ describe("runCliAgent spawn path", () => {
       expect.objectContaining({
         toolAvailability: {
           ...toolAvailability,
-          mcp: ["mcp__openclaw__openclaw"],
+          mcp: ["mcp__bot__bot"],
         },
       }),
     );
@@ -1214,7 +1214,7 @@ describe("runCliAgent spawn path", () => {
         buildPreparedCliRunContext({
           cliToolAvailability: {
             native: [],
-            openClaw: ["openclaw"],
+            bot: ["bot"],
           },
           resolveExecutionArgs,
         }),
@@ -1230,7 +1230,7 @@ describe("runCliAgent spawn path", () => {
       buildPreparedCliRunContext({
         provider: "google-gemini-cli",
         model: "gemini-3.1-pro-preview",
-        cliToolAvailability: { native: [], openClaw: ["openclaw"] },
+        cliToolAvailability: { native: [], bot: ["bot"] },
         toolAvailabilityEnforcement: "prepare-execution",
       }),
     );
@@ -1267,22 +1267,22 @@ describe("runCliAgent spawn path", () => {
           },
         },
         preparedEnv: {
-          GEMINI_CLI_HOME: "/tmp/openclaw-gemini-profile-home",
-          GEMINI_CLI_SYSTEM_SETTINGS_PATH: "/tmp/openclaw-gemini-system-settings.json",
+          GEMINI_CLI_HOME: "/tmp/bot-gemini-profile-home",
+          GEMINI_CLI_SYSTEM_SETTINGS_PATH: "/tmp/bot-gemini-system-settings.json",
         },
       }),
     );
 
     const input = mockCallArg(supervisorSpawnMock) as { env?: Record<string, string> };
     expect(input.env?.STATIC_BACKEND_FLAG).toBe("set");
-    expect(input.env?.GEMINI_CLI_HOME).toBe("/tmp/openclaw-gemini-profile-home");
+    expect(input.env?.GEMINI_CLI_HOME).toBe("/tmp/bot-gemini-profile-home");
     expect(input.env?.GEMINI_CLI_SYSTEM_SETTINGS_PATH).toBe(
-      "/tmp/openclaw-gemini-system-settings.json",
+      "/tmp/bot-gemini-system-settings.json",
     );
   });
 
   it("captures a runtime artifact for a strict CLI credential", async () => {
-    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cli-strict-artifact-"));
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-cli-strict-artifact-"));
     const executable = path.join(dir, "claude-fixture");
     try {
       await fs.copyFile(process.execPath, executable);
@@ -1311,8 +1311,8 @@ describe("runCliAgent spawn path", () => {
     }
   });
 
-  it("passes OpenClaw skills to Claude as a session plugin", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-cli-skills-"));
+  it("passes Bot skills to Claude as a session plugin", async () => {
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-cli-skills-"));
     const skillDir = path.join(workspaceDir, "skills", "weather");
     await fs.mkdir(skillDir, { recursive: true });
     await fs.writeFile(
@@ -1335,7 +1335,7 @@ describe("runCliAgent spawn path", () => {
       const manifest = JSON.parse(
         await fs.readFile(path.join(pluginDir, ".claude-plugin", "plugin.json"), "utf-8"),
       ) as { name?: string; skills?: string };
-      expect(manifest.name).toBe("openclaw-skills");
+      expect(manifest.name).toBe("bot-skills");
       expect(manifest.skills).toBe("./skills");
       await expect(
         fs.readFile(path.join(pluginDir, "skills", "weather", "SKILL.md"), "utf-8"),
@@ -2117,13 +2117,13 @@ describe("runCliAgent spawn path", () => {
       reason: "session_expired",
       code: "cli_live_session_changed",
     });
-    missingContext.openClawHistoryPrompt = "bounded OpenClaw history\n\nsecond";
+    missingContext.botHistoryPrompt = "bounded Bot history\n\nsecond";
     expect((await executePreparedCliRun(missingContext)).text).toBe("one");
     expect(supervisorSpawnMock).toHaveBeenCalledTimes(3);
     expect(
       (JSON.parse(liveRuns[2]?.writes.at(-1) ?? "") as { message: { content: string } }).message
         .content,
-    ).toBe("bounded OpenClaw history\n\nsecond");
+    ).toBe("bounded Bot history\n\nsecond");
   });
 
   it("keeps pre-tool commentary out of an empty-result Claude live reply", async () => {
@@ -2301,7 +2301,7 @@ describe("runCliAgent spawn path", () => {
 
   it("keeps captured live prepared backend cleanup with the whole-run owner", async () => {
     const mcpConfigDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-cli-captured-mcp-config-"),
+      path.join(os.tmpdir(), "bot-cli-captured-mcp-config-"),
     );
     const mcpConfigPath = path.join(mcpConfigDir, "mcp.json");
     await fs.writeFile(
@@ -2309,7 +2309,7 @@ describe("runCliAgent spawn path", () => {
       `${JSON.stringify(
         {
           mcpServers: {
-            openclaw: {
+            bot: {
               type: "http",
               url: "http://127.0.0.1:23119/mcp",
               headers: {},
@@ -2368,7 +2368,7 @@ describe("runCliAgent spawn path", () => {
     supervisorSpawnMock.mockImplementationOnce(async (...args: unknown[]) => {
       const input = args[0] as Parameters<ReturnType<typeof getProcessSupervisor>["spawn"]>[0];
       const captureHandle = markMcpLoopbackToolCallStarted({
-        captureKey: input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "",
+        captureKey: input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "",
         toolName: "message",
         args: { action: "send", target: "chat123", message: "done" },
       });
@@ -2791,7 +2791,7 @@ describe("runCliAgent spawn path", () => {
         "--resume",
         "claude-session",
         "--session-id",
-        "openclaw-session",
+        "bot-session",
         "--append-system-prompt",
         "old prompt",
         "--append-system-prompt-file",
@@ -2805,7 +2805,7 @@ describe("runCliAgent spawn path", () => {
     expect(args).toContain("--resume");
     expect(args).toContain("claude-session");
     expect(args).not.toContain("--session-id");
-    expect(args).not.toContain("openclaw-session");
+    expect(args).not.toContain("bot-session");
     expect(args).not.toContain("--append-system-prompt-file");
     expect(args).not.toContain("/tmp/system-prompt.md");
     expect(args).not.toContain("--append-system-prompt");
@@ -2969,7 +2969,7 @@ describe("runCliAgent spawn path", () => {
     expectClaudeControlDecision(live, {
       behavior: "deny",
       requestId: "req-approval-unavailable",
-      messageIncludes: "OpenClaw approval was not granted",
+      messageIncludes: "Bot approval was not granted",
     });
   });
 
@@ -3213,7 +3213,7 @@ describe("runCliAgent spawn path", () => {
                   {
                     type: "mcp_tool_use",
                     id: "tool-live-blocked",
-                    name: "mcp__openclaw__message",
+                    name: "mcp__bot__message",
                     input: { action: "react" },
                   },
                 ],
@@ -3248,7 +3248,7 @@ describe("runCliAgent spawn path", () => {
         onStdout?: (chunk: string) => void;
       };
       stdoutListener = input.onStdout;
-      captureKey = input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "";
+      captureKey = input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "";
       return {
         pid: 3061,
         startedAtMs: Date.now(),
@@ -3310,13 +3310,13 @@ describe("runCliAgent spawn path", () => {
                   {
                     type: "mcp_tool_use",
                     id: "tool-live-identical-a",
-                    name: "mcp__openclaw__message",
+                    name: "mcp__bot__message",
                     input: toolArgs,
                   },
                   {
                     type: "mcp_tool_use",
                     id: "tool-live-identical-b",
-                    name: "mcp__openclaw__message",
+                    name: "mcp__bot__message",
                     input: toolArgs,
                   },
                 ],
@@ -3366,7 +3366,7 @@ describe("runCliAgent spawn path", () => {
         onStdout?: (chunk: string) => void;
       };
       stdoutListener = input.onStdout;
-      captureKey = input.env?.OPENCLAW_MCP_CLI_CAPTURE_KEY ?? "";
+      captureKey = input.env?.BOT_MCP_CLI_CAPTURE_KEY ?? "";
       return {
         pid: 3062,
         startedAtMs: Date.now(),
@@ -3615,7 +3615,7 @@ describe("runCliAgent spawn path", () => {
     expectClaudeControlDecision(live, {
       behavior: "deny",
       requestId: "req-deny",
-      messageIncludes: "OpenClaw user denied Claude native tool use (Bash).",
+      messageIncludes: "Bot user denied Claude native tool use (Bash).",
     });
     expect(diagnosticEvents).toMatchObject([
       {
@@ -3780,8 +3780,8 @@ describe("runCliAgent spawn path", () => {
   });
 
   it("does not create exec approvals file while resolving Claude live policy", async () => {
-    await withTempOpenClawHome(async (home) => {
-      const approvalsPath = path.join(home, ".openclaw", "exec-approvals.json");
+    await withTempBotHome(async (home) => {
+      const approvalsPath = path.join(home, ".bot", "exec-approvals.json");
       const live = mockClaudeLiveRun(supervisorSpawnMock, {
         events: [
           { type: "system", subtype: "init", session_id: "live-no-approvals-file" },
@@ -3818,7 +3818,7 @@ describe("runCliAgent spawn path", () => {
       requestId: "req-approval-default-deny",
       toolUseId: "tool-approval-default-deny-1",
       input: { command: "ls" },
-      expected: { behavior: "deny", messageIncludes: "OpenClaw user denied" },
+      expected: { behavior: "deny", messageIncludes: "Bot user denied" },
       approvals: {
         version: 1,
         defaults: { security: "allowlist", ask: "on-miss" },
@@ -3837,7 +3837,7 @@ describe("runCliAgent spawn path", () => {
       requestId: "req-session-ask-deny",
       toolUseId: "tool-session-ask-deny-1",
       input: { command: "ls" },
-      expected: { behavior: "deny", messageIncludes: "OpenClaw user denied" },
+      expected: { behavior: "deny", messageIncludes: "Bot user denied" },
       context: {
         backend: {
           liveSession: "claude-stdio",
@@ -3883,7 +3883,7 @@ describe("runCliAgent spawn path", () => {
       expectedPermissionMode: "default",
     },
     {
-      name: "allows tools when OpenClaw exec is YOLO despite raw --permission-mode default",
+      name: "allows tools when Bot exec is YOLO despite raw --permission-mode default",
       requestId: "req-permmode-allow",
       toolUseId: "tool-permmode-allow-1",
       input: { command: "ls" },
@@ -4158,7 +4158,7 @@ describe("runCliAgent spawn path", () => {
         name: "FailoverError",
         message:
           "Claude CLI stopped after reaching the maximum number of turns (limit: 1). " +
-          "OpenClaw run: run-live-max-turns. OpenClaw session: s1. " +
+          "Bot run: run-live-max-turns. Bot session: s1. " +
           "Claude session: live-max-turns. Tool actions may already have run; verify their effects before retrying. " +
           "Retry with a higher --max-turns value or a narrower task.",
         sessionId: "s1",
@@ -4395,7 +4395,7 @@ describe("runCliAgent spawn path", () => {
   });
 
   it("restarts Claude live sessions when selected skills change", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-skills-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-live-skills-"));
     const weatherDir = path.join(workspaceDir, "skills", "weather");
     const gitDir = path.join(workspaceDir, "skills", "git");
     await fs.mkdir(weatherDir, { recursive: true });
@@ -4710,7 +4710,7 @@ describe("runCliAgent spawn path", () => {
   ])("$name", async (testCase) => {
     Object.assign(process.env, testCase.baseEnv);
     if (testCase.preserve) {
-      process.env.OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV = JSON.stringify(testCase.preserve);
+      process.env.BOT_LIVE_CLI_BACKEND_PRESERVE_ENV = JSON.stringify(testCase.preserve);
     }
     try {
       mockSuccessfulCliRun();
@@ -4730,7 +4730,7 @@ describe("runCliAgent spawn path", () => {
         expect(input.env?.[key]).toBe(value);
       }
     } finally {
-      delete process.env.OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV;
+      delete process.env.BOT_LIVE_CLI_BACKEND_PRESERVE_ENV;
       for (const key of Object.keys(testCase.baseEnv)) {
         delete process.env[key];
       }
@@ -4738,7 +4738,7 @@ describe("runCliAgent spawn path", () => {
   });
 
   it("keeps selected Claude auth authoritative over ambient and configured credentials", async () => {
-    vi.stubEnv("OPENCLAW_LIVE_CLI_BACKEND_PRESERVE_ENV", '["ANTHROPIC_API_KEY"]');
+    vi.stubEnv("BOT_LIVE_CLI_BACKEND_PRESERVE_ENV", '["ANTHROPIC_API_KEY"]');
     vi.stubEnv("ANTHROPIC_API_KEY", "ambient-api-key");
     mockSuccessfulCliRun(CLAUDE_OK_JSONL);
 
@@ -4905,7 +4905,7 @@ describe("runCliAgent spawn path", () => {
 
   it("loads workspace bootstrap files into the Claude CLI system prompt", async () => {
     const workspaceDir = await fs.mkdtemp(
-      path.join(os.tmpdir(), "openclaw-cli-bootstrap-context-"),
+      path.join(os.tmpdir(), "bot-cli-bootstrap-context-"),
     );
 
     await fs.writeFile(

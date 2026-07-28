@@ -1,8 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
 import { gcm } from "@noble/ciphers/aes.js";
 import { concatBytes, randomBytes } from "@noble/hashes/utils.js";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginRuntime } from "bot/plugin-sdk/core";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   base64,
   base64url,
@@ -106,7 +106,7 @@ function assertReefIdentityMigrationComplete(runtime: PluginRuntime): void {
   });
   if (durableMigration.lookup(REEF_DURABLE_MIGRATION_KEY)) {
     throw new Error(
-      "Reef durable state migration is incomplete; repair the legacy state files and rerun openclaw doctor --fix",
+      "Reef durable state migration is incomplete; repair the legacy state files and rerun bot doctor --fix",
     );
   }
   const migration = runtime.state.openSyncKeyedStore<ReefIdentityMigrationRecord>({
@@ -116,7 +116,7 @@ function assertReefIdentityMigrationComplete(runtime: PluginRuntime): void {
   });
   if (migration.lookup(REEF_KEYS_MIGRATION_KEY)) {
     throw new Error(
-      "Reef identity migration is incomplete; repair the legacy identity files and rerun openclaw doctor --fix",
+      "Reef identity migration is incomplete; repair the legacy identity files and rerun bot doctor --fix",
     );
   }
 }

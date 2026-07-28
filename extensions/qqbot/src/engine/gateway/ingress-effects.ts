@@ -1,5 +1,5 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createIngressEffectOnce } from "openclaw/plugin-sdk/ingress-effect-once";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { createIngressEffectOnce } from "bot/plugin-sdk/ingress-effect-once";
 import { QQBOT_INGRESS_COMPLETED_MAX_ENTRIES, QQBOT_INGRESS_COMPLETED_TTL_MS } from "./ingress.js";
 import type { EngineLogger } from "./types.js";
 

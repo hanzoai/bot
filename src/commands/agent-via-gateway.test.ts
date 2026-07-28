@@ -3,9 +3,9 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { loggingState } from "../logging/state.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { AGENT_HARNESS_SESSION_KEY_RESERVED_MESSAGE } from "../sessions/agent-harness-session-key.js";
@@ -53,7 +53,7 @@ const jsonRuntime = {
   exit: vi.fn(),
 };
 
-function mockConfig(storePath: string, overrides?: Partial<OpenClawConfig>) {
+function mockConfig(storePath: string, overrides?: Partial<BotConfig>) {
   const config = {
     agents: {
       defaults: {
@@ -76,9 +76,9 @@ function mockConfig(storePath: string, overrides?: Partial<OpenClawConfig>) {
 
 async function withTempStore(
   fn: (ctx: { dir: string; store: string }) => Promise<void>,
-  overrides?: Partial<OpenClawConfig>,
+  overrides?: Partial<BotConfig>,
 ) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-agent-cli-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-agent-cli-"));
   const store = path.join(dir, "sessions.json");
   mockConfig(store, overrides);
   try {
@@ -238,7 +238,7 @@ let zeroTimeoutGatewayRequestMs: number | undefined;
 
 function resetAgentCliCommandMocksForTest() {
   vi.clearAllMocks();
-  vi.stubEnv("OPENCLAW_GATEWAY_URL", "");
+  vi.stubEnv("BOT_GATEWAY_URL", "");
   agentViaGatewayTesting.resetLazyImportsForTests();
   agentViaGatewayTesting.setGatewayAbortRetryDelaysMsForTests([0, 0, 0, 0]);
   loadAgentSessionModuleMock.mockImplementation(async () => await import("./agent/session.js"));
@@ -330,7 +330,7 @@ describe("agentCliCommand", () => {
     },
   ])("keeps ordinary $label runs least-privilege", async ({ gatewayUrl, overrides }) => {
     if (gatewayUrl) {
-      vi.stubEnv("OPENCLAW_GATEWAY_URL", gatewayUrl);
+      vi.stubEnv("BOT_GATEWAY_URL", gatewayUrl);
     }
     await withTempStore(async () => {
       mockGatewaySuccessReply();
@@ -584,7 +584,7 @@ describe("agentCliCommand", () => {
 
   it("uses an agent-scoped --to value as the gateway session selector", async () => {
     await withTempStore(async () => {
-      const sessionKey = "agent:main:openclaw-weixin:direct:o9cq802hhmfc@im.wechat";
+      const sessionKey = "agent:main:bot-weixin:direct:o9cq802hhmfc@im.wechat";
       mockGatewaySuccessReply();
 
       await agentCliCommand({ message: "hi", to: sessionKey }, runtime);
@@ -1941,7 +1941,7 @@ describe("agentCliCommand", () => {
       expect(agentCommand).not.toHaveBeenCalled();
       expect(runtime.exit).toHaveBeenCalledWith(1);
       const errorMessages = mockMessages(runtime.error);
-      expect(errorMessages.some((m) => m.includes("openclaw sessions compact"))).toBe(true);
+      expect(errorMessages.some((m) => m.includes("bot sessions compact"))).toBe(true);
     });
   }
 
@@ -1961,7 +1961,7 @@ describe("agentCliCommand", () => {
     expect(agentCommand).not.toHaveBeenCalled();
     expect(runtime.exit).toHaveBeenCalledWith(1);
     const errorMessages = mockMessages(runtime.error);
-    expect(errorMessages.some((m) => m.includes("openclaw sessions compact"))).toBe(true);
+    expect(errorMessages.some((m) => m.includes("bot sessions compact"))).toBe(true);
   });
 
   it("does not mistake a /compacting-prefixed message for the /compact control command", async () => {

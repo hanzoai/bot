@@ -1,6 +1,6 @@
-// Dev Tooling Safety script supports OpenClaw repository automation.
+// Dev Tooling Safety script supports Bot repository automation.
 import path from "node:path";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { redactSensitiveText } from "../../src/logging/redact.js";
 
 const REDACT_OPTIONS = { mode: "tools" } as const;

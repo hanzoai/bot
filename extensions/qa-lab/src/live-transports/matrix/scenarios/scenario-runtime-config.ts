@@ -1,8 +1,8 @@
 // QA Lab Matrix helper module supports scenario runtime config behavior.
 import { readFile } from "node:fs/promises";
 import { isDeepStrictEqual } from "node:util";
-import { replaceFileAtomic } from "openclaw/plugin-sdk/security-runtime";
-import { isRecord as isMatrixQaPlainRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { replaceFileAtomic } from "bot/plugin-sdk/security-runtime";
+import { isRecord as isMatrixQaPlainRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   buildMatrixQaToken,
   buildMentionPrompt,
@@ -118,7 +118,7 @@ function requireMatrixQaAccountReload(context: MatrixQaScenarioContext) {
 export async function runMatrixQaAllowlistHotReloadScenario(
   context: MatrixQaScenarioContext,
 ): Promise<MatrixQaScenarioExecution> {
-  const configPath = context.gatewayRuntimeEnv?.OPENCLAW_CONFIG_PATH;
+  const configPath = context.gatewayRuntimeEnv?.BOT_CONFIG_PATH;
   const accountId = context.sutAccountId;
   if (!configPath || !accountId) {
     throw new Error("Matrix QA allowlist reload requires the gateway config path and account id");

@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type EndpointCall = {
@@ -16,8 +16,8 @@ function requireEndpointCall(index: number): EndpointCall {
   return expectDefined(endpointMockState.calls[index], `Parallel endpoint call ${index}`);
 }
 
-vi.mock("openclaw/plugin-sdk/provider-web-search", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/provider-web-search")>();
+vi.mock("bot/plugin-sdk/provider-web-search", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/provider-web-search")>();
   const runEndpoint = async (
     params: EndpointCall,
     run: (response: Response) => Promise<unknown>,

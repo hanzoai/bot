@@ -1,4 +1,4 @@
-import type { Model } from "openclaw/plugin-sdk/llm";
+import type { Model } from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { buildOpenAICompletionsParams } from "./openai-transport-stream.js";
 import {

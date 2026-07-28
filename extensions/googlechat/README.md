@@ -1,11 +1,11 @@
-# OpenClaw Google Chat
+# Bot Google Chat
 
-Official OpenClaw channel plugin for Google Chat spaces and direct messages.
+Official Bot channel plugin for Google Chat spaces and direct messages.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/googlechat
+bot plugins install @hanzo/bot-googlechat
 ```
 
-Configure the Google Chat app credentials and allowed spaces in OpenClaw. The plugin lets agents receive Google Chat events and reply through the configured app.
+Configure the Google Chat app credentials and allowed spaces in Bot. The plugin lets agents receive Google Chat events and reply through the configured app.

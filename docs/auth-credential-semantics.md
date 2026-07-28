@@ -10,8 +10,8 @@ These semantics keep selection-time and runtime auth behavior aligned. They are 
 
 - `resolveAuthProfileOrder` (profile ordering)
 - `resolveApiKeyForProfile` (runtime credential resolution)
-- `openclaw models status --probe`
-- `openclaw doctor` auth checks (`doctor-auth`)
+- `bot models status --probe`
+- `bot doctor` auth checks (`doctor-auth`)
 
 ## Stable probe reason codes
 
@@ -49,9 +49,9 @@ Token credentials (`type: "token"`) support inline `token` and/or `tokenRef`.
 
 ## Agent copy portability
 
-Agent auth inheritance is read-through. When an agent has no local profile, it resolves profiles from the default/main agent store at runtime without copying secret material into its own credential store (`agents/<agentId>/agent/openclaw-agent.sqlite`).
+Agent auth inheritance is read-through. When an agent has no local profile, it resolves profiles from the default/main agent store at runtime without copying secret material into its own credential store (`agents/<agentId>/agent/bot-agent.sqlite`).
 
-Explicit copy flows, such as `openclaw agents add`, use this portability policy:
+Explicit copy flows, such as `bot agents add`, use this portability policy:
 
 - `api_key` and `token` profiles are portable unless `copyToAgents: false`.
 - `oauth` profiles are not portable by default because refresh tokens can be single-use or rotation-sensitive.
@@ -63,7 +63,7 @@ Non-portable profiles remain available through read-through inheritance unless t
 
 `auth.profiles` entries with `mode: "aws-sdk"` are routing metadata, not stored credentials. They are valid when the target provider uses `models.providers.<id>.auth: "aws-sdk"`, the route the plugin-owned Amazon Bedrock setup writes. These profile ids may appear in `auth.order` and session overrides even when no matching entry exists in the credential store.
 
-Do not write `type: "aws-sdk"` into the credential store; stored credentials are only `api_key`, `token`, or `oauth`. If a legacy `auth-profiles.json` has such a marker, `openclaw doctor --fix` moves it to `auth.profiles` and removes the marker from the store.
+Do not write `type: "aws-sdk"` into the credential store; stored credentials are only `api_key`, `token`, or `oauth`. If a legacy `auth-profiles.json` has such a marker, `bot doctor --fix` moves it to `auth.profiles` and removes the marker from the store.
 
 ## Explicit auth order filtering
 
@@ -73,7 +73,7 @@ Do not write `type: "aws-sdk"` into the credential store; stored credentials are
 ## Probe target resolution
 
 - Probe targets can come from auth profiles, environment credentials, or `models.json` (result `source`: `profile`, `env`, `models.json`).
-- If a provider has credentials but OpenClaw cannot resolve a probeable model candidate for it, `models status --probe` reports `status: no_model` with `reasonCode: no_model`.
+- If a provider has credentials but Bot cannot resolve a probeable model candidate for it, `models status --probe` reports `status: no_model` with `reasonCode: no_model`.
 
 ## External CLI credential discovery
 

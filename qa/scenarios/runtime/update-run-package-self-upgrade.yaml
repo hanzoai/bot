@@ -8,13 +8,13 @@ scenario:
       - cli.update-status-and-rpc
     secondary:
       - cli.managed-gateway-restart
-  objective: Verify an installed OpenClaw 2026.4.26 package upgrades to the resolved latest package through the authenticated Gateway update.run RPC and returns healthy after restart.
+  objective: Verify an installed Bot 2026.4.26 package upgrades to the resolved latest package through the authenticated Gateway update.run RPC and returns healthy after restart.
   successCriteria:
-    - The package-backed Docker lane installs and verifies openclaw@2026.4.26 before invoking the authenticated Gateway update.run RPC directly.
-    - The lane resolves openclaw@latest before the RPC and rejects a no-op or any installed version that differs from the resolved target.
+    - The package-backed Docker lane installs and verifies bot@2026.4.26 before invoking the authenticated Gateway update.run RPC directly.
+    - The lane resolves bot@latest before the RPC and rejects a no-op or any installed version that differs from the resolved target.
     - The update RPC succeeds with source and target versions and writes the exact requested restart note into the update sentinel.
     - The restarted Gateway reports the resolved target version, passes health, readiness, and RPC status probes, and reports the QA channel account running.
-    - Missing OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF=1 produces blocked evidence without starting the destructive lane.
+    - Missing BOT_QA_ALLOW_UPDATE_RUN_SELF=1 produces blocked evidence without starting the destructive lane.
   docsRefs:
     - docs/cli/update.md
     - docs/install/updating.md

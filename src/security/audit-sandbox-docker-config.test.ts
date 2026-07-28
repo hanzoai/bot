@@ -2,7 +2,7 @@
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
   collectSandboxDangerousConfigFindings,
@@ -44,7 +44,7 @@ describe("security audit sandbox docker config", () => {
   });
 
   it("evaluates sandbox docker config findings", async () => {
-    const isolatedHome = path.join(os.tmpdir(), "openclaw-security-audit-home");
+    const isolatedHome = path.join(os.tmpdir(), "bot-security-audit-home");
     vi.spyOn(os, "homedir").mockReturnValue(isolatedHome);
     await withEnvAsync({ HOME: isolatedHome, USERPROFILE: isolatedHome }, async () => {
       const cases = [
@@ -59,7 +59,7 @@ describe("security audit sandbox docker config", () => {
                 },
               },
             },
-          } as OpenClawConfig,
+          } as BotConfig,
           expectedFindings: [{ checkId: "sandbox.docker_config_mode_off" }],
         },
         {
@@ -74,7 +74,7 @@ describe("security audit sandbox docker config", () => {
               },
               entries: { ops: { sandbox: { mode: "all" } } },
             },
-          } as OpenClawConfig,
+          } as BotConfig,
           expectedFindings: [],
           expectedAbsent: ["sandbox.docker_config_mode_off"],
         },
@@ -94,7 +94,7 @@ describe("security audit sandbox docker config", () => {
                 },
               },
             },
-          } as OpenClawConfig,
+          } as BotConfig,
           expectedFindings: [
             { checkId: "sandbox.dangerous_bind_mount", severity: "critical" },
             { checkId: "sandbox.dangerous_network_mode", severity: "critical" },
@@ -115,7 +115,7 @@ describe("security audit sandbox docker config", () => {
                 },
               },
             },
-          } as OpenClawConfig,
+          } as BotConfig,
           expectedFindings: [
             {
               checkId: "sandbox.dangerous_bind_mount",
@@ -132,12 +132,12 @@ describe("security audit sandbox docker config", () => {
                 sandbox: {
                   mode: "all",
                   docker: {
-                    binds: ["D:/data/openclaw/src:/src:ro"],
+                    binds: ["D:/data/bot/src:/src:ro"],
                   },
                 },
               },
             },
-          } as OpenClawConfig,
+          } as BotConfig,
           expectedFindings: [],
           expectedAbsent: ["sandbox.bind_mount_non_absolute"],
         },
@@ -154,7 +154,7 @@ describe("security audit sandbox docker config", () => {
                 },
               },
             },
-          } as OpenClawConfig,
+          } as BotConfig,
           expectedFindings: [
             {
               checkId: "sandbox.dangerous_network_mode",
@@ -206,7 +206,7 @@ describe("security audit sandbox docker config", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const noOpFinding = collectSandboxDockerNoopFindings(config).find(
       (entry) => entry.checkId === "sandbox.docker_config_mode_off",

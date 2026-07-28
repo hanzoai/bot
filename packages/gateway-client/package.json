@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/gateway-client",
+  "name": "@hanzo/bot-gateway-client",
   "version": "2026.7.2",
-  "description": "Reference WebSocket client for the OpenClaw Gateway protocol",
+  "description": "Reference WebSocket client for the Bot Gateway protocol",
   "keywords": [
     "client",
     "gateway",
-    "openclaw",
+    "bot",
     "websocket"
   ],
-  "homepage": "https://github.com/openclaw/openclaw#readme",
+  "homepage": "https://github.com/hanzoai/bot#readme",
   "bugs": {
-    "url": "https://github.com/openclaw/openclaw/issues"
+    "url": "https://github.com/hanzoai/bot/issues"
   },
   "license": "MIT",
-  "author": "OpenClaw Foundation (https://openclaw.org)",
+  "author": "Bot Foundation (https://bot.org)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/openclaw/openclaw.git",
+    "url": "git+https://github.com/hanzoai/bot.git",
     "directory": "packages/gateway-client"
   },
   "files": [
@@ -55,7 +55,7 @@
     "build": "tsdown src/index.ts src/browser.ts src/readiness.ts src/timeouts.ts --no-config --platform node --format esm --dts --out-dir dist --clean"
   },
   "dependencies": {
-    "@openclaw/gateway-protocol": "workspace:*",
+    "@hanzo/bot-gateway-protocol": "workspace:*",
     "ipaddr.js": "2.4.0",
     "ws": "8.21.1"
   },
@@ -65,7 +65,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "openclaw": {
+  "bot": {
     "release": {
       "publishToNpm": true
     }

@@ -12,7 +12,7 @@ import {
 } from "../../app/context.ts";
 import { renderSettingsWorkspace } from "../../components/settings-workspace.ts";
 import { loadGatewayDiagnostics } from "../../lib/gateway-diagnostics.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { PollController } from "../../lit/poll-controller.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { renderDebug } from "./view.ts";
@@ -25,7 +25,7 @@ type DebugRequestScope = {
   generation: number;
 };
 
-class DebugPage extends OpenClawLightDomElement {
+class DebugPage extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -231,6 +231,6 @@ class DebugPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-debug-page")) {
-  customElements.define("openclaw-debug-page", DebugPage);
+if (!customElements.get("bot-debug-page")) {
+  customElements.define("bot-debug-page", DebugPage);
 }

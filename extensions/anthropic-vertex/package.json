@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/anthropic-vertex-provider",
+  "name": "@hanzo/bot-anthropic-vertex-provider",
   "version": "2026.7.2",
-  "description": "OpenClaw Anthropic Vertex provider plugin for Claude models on Google Vertex AI.",
+  "description": "Bot Anthropic Vertex provider plugin for Claude models on Google Vertex AI.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
@@ -13,14 +13,14 @@
     "undici": "8.6.0"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "npmSpec": "@openclaw/anthropic-vertex-provider",
+      "npmSpec": "@hanzo/bot-anthropic-vertex-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.5.12-beta.1"
     },
@@ -28,7 +28,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {

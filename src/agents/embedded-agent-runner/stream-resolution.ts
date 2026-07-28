@@ -1,9 +1,9 @@
 /**
  * Resolves provider stream functions and API keys for embedded agents.
  */
-import type { LlmRuntime } from "@openclaw/ai";
-import { stripSystemPromptCacheBoundary } from "@openclaw/ai/internal/shared";
-import { createBoundaryAwareStreamFnForModel } from "@openclaw/ai/transports";
+import type { LlmRuntime } from "@hanzo/bot-ai";
+import { stripSystemPromptCacheBoundary } from "@hanzo/bot-ai/internal/shared";
+import { createBoundaryAwareStreamFnForModel } from "@hanzo/bot-ai/transports";
 import { getStreamLlmRuntime } from "../../llm/model-runtime-binding.js";
 import "../ai-transport-runtime-host.js";
 import { createAnthropicVertexStreamFnForModel } from "../anthropic-vertex-stream.js";
@@ -53,7 +53,7 @@ function resolveEmbeddedStreamRuntime(owner: EmbeddedStreamRuntimeOwner): LlmRun
   return runtime;
 }
 
-function isDefaultOpenClawStreamFnForModel(
+function isDefaultBotStreamFnForModel(
   model: EmbeddedRunAttemptParams["model"],
   streamFn: StreamFn | undefined,
   llmRuntime: LlmRuntime,
@@ -77,7 +77,7 @@ function isOpenAICodexResponsesModel(model: EmbeddedRunAttemptParams["model"]): 
   return model.provider === "openai" && model.api === "openai-chatgpt-responses";
 }
 
-function resolveOpenClawNativeCodexResponsesStreamFn(params: {
+function resolveBotNativeCodexResponsesStreamFn(params: {
   model: EmbeddedRunAttemptParams["model"];
   currentStreamFn: StreamFn | undefined;
   llmRuntime: LlmRuntime;
@@ -85,7 +85,7 @@ function resolveOpenClawNativeCodexResponsesStreamFn(params: {
   if (!isOpenAICodexResponsesModel(params.model)) {
     return undefined;
   }
-  if (!isDefaultOpenClawStreamFnForModel(params.model, params.currentStreamFn, params.llmRuntime)) {
+  if (!isDefaultBotStreamFnForModel(params.model, params.currentStreamFn, params.llmRuntime)) {
     return undefined;
   }
   return params.currentStreamFn ?? params.llmRuntime.streamSimple;
@@ -106,15 +106,15 @@ export function describeEmbeddedAgentStreamStrategy(
     return "anthropic-vertex";
   }
   if (
-    resolveOpenClawNativeCodexResponsesStreamFn({
+    resolveBotNativeCodexResponsesStreamFn({
       model: params.model,
       currentStreamFn: params.currentStreamFn,
       llmRuntime,
     })
   ) {
-    return "openclaw-native-codex-responses";
+    return "bot-native-codex-responses";
   }
-  if (isDefaultOpenClawStreamFnForModel(params.model, params.currentStreamFn, llmRuntime)) {
+  if (isDefaultBotStreamFnForModel(params.model, params.currentStreamFn, llmRuntime)) {
     return createBoundaryAwareStreamFnForModel(params.model)
       ? `boundary-aware:${params.model.api}`
       : "stream-simple";
@@ -177,13 +177,13 @@ export function resolveEmbeddedAgentStreamFn(
     return createAnthropicVertexStreamFnForModel(params.model);
   }
 
-  const openClawNativeCodexResponsesStreamFn = resolveOpenClawNativeCodexResponsesStreamFn({
+  const botNativeCodexResponsesStreamFn = resolveBotNativeCodexResponsesStreamFn({
     model: params.model,
     currentStreamFn: params.currentStreamFn,
     llmRuntime,
   });
-  if (openClawNativeCodexResponsesStreamFn) {
-    return wrapEmbeddedAgentStreamFn(openClawNativeCodexResponsesStreamFn, {
+  if (botNativeCodexResponsesStreamFn) {
+    return wrapEmbeddedAgentStreamFn(botNativeCodexResponsesStreamFn, {
       runSignal: params.signal,
       resolvedApiKey: params.resolvedApiKey,
       authProfileId: params.authProfileId,
@@ -202,7 +202,7 @@ export function resolveEmbeddedAgentStreamFn(
   }
 
   if (
-    isDefaultOpenClawStreamFnForModel(params.model, params.currentStreamFn, llmRuntime) ||
+    isDefaultBotStreamFnForModel(params.model, params.currentStreamFn, llmRuntime) ||
     hasResolvedRuntimeApiKey(params.resolvedApiKey) ||
     params.transportAuthAvailable ||
     // Proxied anthropic-messages providers (provider !== "anthropic", e.g. pioneer)
@@ -217,9 +217,9 @@ export function resolveEmbeddedAgentStreamFn(
   ) {
     const boundaryAwareStreamFn = createBoundaryAwareStreamFnForModel(params.model);
     if (boundaryAwareStreamFn) {
-      // Some OpenClaw session factories return a provider-specific stream wrapper
+      // Some Bot session factories return a provider-specific stream wrapper
       // once runtime auth is resolved. Keep transport-supported APIs on
-      // OpenClaw's HTTP transport so provider-specific auth/header semantics
+      // Bot's HTTP transport so provider-specific auth/header semantics
       // are not lost behind that wrapper.
       // Boundary-aware transports read credentials from options.apiKey just
       // like provider-owned streams, but the embedded run layer never gets to

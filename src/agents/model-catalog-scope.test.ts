@@ -1,6 +1,6 @@
 // Verifies model catalog lookup scope for custom and manifest-owned models.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveModelCatalogScope } from "./model-discovery-context.js";
 
 describe("resolveModelCatalogScope", () => {
@@ -27,7 +27,7 @@ describe("resolveModelCatalogScope", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelCatalogScope({

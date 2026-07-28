@@ -16,18 +16,18 @@ import {
   canonicalizePersistedUserMessageMedia,
   hasMeaningfulRetiredMediaCarrier,
 } from "../media/media-facts.js";
-import { assertOpenClawAgentDatabaseOwner } from "../state/openclaw-agent-db-maintenance.js";
-import { listOpenClawRegisteredAgentDatabases } from "../state/openclaw-agent-db-registry.js";
-import { registerOpenClawAgentDatabase } from "../state/openclaw-agent-db-registry.js";
-import { assertOpenClawAgentSchemaContains } from "../state/openclaw-agent-db-schema-helpers.js";
-import { migrateOpenClawAgentDatabaseToMediaPrerequisiteSchema } from "../state/openclaw-agent-db-schema.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../state/openclaw-agent-db.generated.js";
+import { assertBotAgentDatabaseOwner } from "../state/bot-agent-db-maintenance.js";
+import { listBotRegisteredAgentDatabases } from "../state/bot-agent-db-registry.js";
+import { registerBotAgentDatabase } from "../state/bot-agent-db-registry.js";
+import { assertBotAgentSchemaContains } from "../state/bot-agent-db-schema-helpers.js";
+import { migrateBotAgentDatabaseToMediaPrerequisiteSchema } from "../state/bot-agent-db-schema.js";
+import type { DB as BotAgentKyselyDatabase } from "../state/bot-agent-db.generated.js";
 import {
-  OPENCLAW_AGENT_SCHEMA_VERSION,
-  type OpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { OPENCLAW_AGENT_SCHEMA_SQL } from "../state/openclaw-agent-schema.generated.js";
-import { OPENCLAW_SQLITE_BUSY_TIMEOUT_MS } from "../state/openclaw-state-db.js";
+  BOT_AGENT_SCHEMA_VERSION,
+  type BotAgentDatabase,
+} from "../state/bot-agent-db.js";
+import { BOT_AGENT_SCHEMA_SQL } from "../state/bot-agent-schema.generated.js";
+import { BOT_SQLITE_BUSY_TIMEOUT_MS } from "../state/bot-state-db.js";
 import { VERSION } from "../version.js";
 import {
   executeSqliteQuerySync,
@@ -41,11 +41,11 @@ import { runSqliteImmediateTransactionSync } from "./sqlite-transaction.js";
 import { readSqliteUserVersion } from "./sqlite-user-version.js";
 import type { MigrationMessages } from "./state-migrations.types.js";
 
-const PREVIOUS_MEDIA_SCHEMA_VERSION = OPENCLAW_AGENT_SCHEMA_VERSION - 1;
+const PREVIOUS_MEDIA_SCHEMA_VERSION = BOT_AGENT_SCHEMA_VERSION - 1;
 const ARCHIVE_TEMP_MARKER = ".media-retirement";
 
 type MediaMigrationDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  BotAgentKyselyDatabase,
   "schema_meta" | "session_windows" | "trajectory_runtime_events" | "transcript_events"
 >;
 
@@ -294,7 +294,7 @@ function createMigrationDatabaseHandle(
   database: DatabaseSync,
   agentId: string,
   pathname: string,
-): OpenClawAgentDatabase {
+): BotAgentDatabase {
   return {
     agentId,
     db: database,
@@ -310,18 +310,18 @@ function migrateRegisteredDatabase(params: {
 }): { rewrittenSessions: number; rewrittenTrajectoryRows: number; versionAdvanced: boolean } {
   const database = openNodeSqliteDatabase(params.pathname);
   try {
-    database.exec(`PRAGMA busy_timeout = ${OPENCLAW_SQLITE_BUSY_TIMEOUT_MS};`);
-    let metadata = assertOpenClawAgentDatabaseOwner(database, {
+    database.exec(`PRAGMA busy_timeout = ${BOT_SQLITE_BUSY_TIMEOUT_MS};`);
+    let metadata = assertBotAgentDatabaseOwner(database, {
       agentId: params.agentId,
       pathname: params.pathname,
     });
     let userVersion = readSqliteUserVersion(database);
     if (userVersion < PREVIOUS_MEDIA_SCHEMA_VERSION) {
-      migrateOpenClawAgentDatabaseToMediaPrerequisiteSchema(database, {
+      migrateBotAgentDatabaseToMediaPrerequisiteSchema(database, {
         agentId: params.agentId,
         path: params.pathname,
       });
-      metadata = assertOpenClawAgentDatabaseOwner(database, {
+      metadata = assertBotAgentDatabaseOwner(database, {
         agentId: params.agentId,
         pathname: params.pathname,
       });
@@ -329,10 +329,10 @@ function migrateRegisteredDatabase(params: {
     }
     if (
       userVersion !== PREVIOUS_MEDIA_SCHEMA_VERSION &&
-      userVersion !== OPENCLAW_AGENT_SCHEMA_VERSION
+      userVersion !== BOT_AGENT_SCHEMA_VERSION
     ) {
       throw new Error(
-        `${params.pathname} uses schema version ${userVersion}; expected ${PREVIOUS_MEDIA_SCHEMA_VERSION} or ${OPENCLAW_AGENT_SCHEMA_VERSION}`,
+        `${params.pathname} uses schema version ${userVersion}; expected ${PREVIOUS_MEDIA_SCHEMA_VERSION} or ${BOT_AGENT_SCHEMA_VERSION}`,
       );
     }
     if (metadata.schemaVersion !== userVersion) {
@@ -342,12 +342,12 @@ function migrateRegisteredDatabase(params: {
     }
     // Remove after 2026-10-12: drop the v15-to-v16 media cutover once schema 16 is the support floor.
     if (userVersion === PREVIOUS_MEDIA_SCHEMA_VERSION) {
-      repairCanonicalSqliteIndexes(database, params.pathname, OPENCLAW_AGENT_SCHEMA_SQL, {
+      repairCanonicalSqliteIndexes(database, params.pathname, BOT_AGENT_SCHEMA_SQL, {
         validateAfterRepair: () =>
-          assertOpenClawAgentSchemaContains(database, params.pathname, OPENCLAW_AGENT_SCHEMA_SQL),
+          assertBotAgentSchemaContains(database, params.pathname, BOT_AGENT_SCHEMA_SQL),
       });
     }
-    assertOpenClawAgentSchemaContains(database, params.pathname, OPENCLAW_AGENT_SCHEMA_SQL);
+    assertBotAgentSchemaContains(database, params.pathname, BOT_AGENT_SCHEMA_SQL);
     const planned = planTranscriptRows(database, params.pathname);
     const db = getNodeSqliteKysely<MediaMigrationDatabase>(database);
     const plannedTrajectoryRows = executeSqliteQuerySync(
@@ -411,14 +411,14 @@ function migrateRegisteredDatabase(params: {
           );
         }
         if (versionAdvanced) {
-          database.exec(`PRAGMA user_version = ${OPENCLAW_AGENT_SCHEMA_VERSION};`);
+          database.exec(`PRAGMA user_version = ${BOT_AGENT_SCHEMA_VERSION};`);
           executeSqliteQuerySync(
             database,
             db
               .updateTable("schema_meta")
               .set({
                 app_version: VERSION,
-                schema_version: OPENCLAW_AGENT_SCHEMA_VERSION,
+                schema_version: BOT_AGENT_SCHEMA_VERSION,
                 updated_at: Date.now(),
               })
               .where("meta_key", "=", "primary"),
@@ -426,7 +426,7 @@ function migrateRegisteredDatabase(params: {
         }
       },
       {
-        busyTimeoutMs: OPENCLAW_SQLITE_BUSY_TIMEOUT_MS,
+        busyTimeoutMs: BOT_SQLITE_BUSY_TIMEOUT_MS,
         databaseLabel: params.pathname,
         operationLabel: "media-persistence-retirement",
       },
@@ -578,9 +578,9 @@ export function migrateLegacyMediaPersistence(
   const env = params.env ?? process.env;
   const changes: string[] = [];
   const warnings: string[] = [];
-  let registered: ReturnType<typeof listOpenClawRegisteredAgentDatabases>;
+  let registered: ReturnType<typeof listBotRegisteredAgentDatabases>;
   try {
-    registered = listOpenClawRegisteredAgentDatabases({ env });
+    registered = listBotRegisteredAgentDatabases({ env });
   } catch (error) {
     return {
       changes,
@@ -613,7 +613,7 @@ export function migrateLegacyMediaPersistence(
         pathname,
       });
       if (result.versionAdvanced) {
-        registerOpenClawAgentDatabase({ agentId: entry.agentId, env, path: pathname });
+        registerBotAgentDatabase({ agentId: entry.agentId, env, path: pathname });
       }
       if (
         result.versionAdvanced ||
@@ -621,7 +621,7 @@ export function migrateLegacyMediaPersistence(
         result.rewrittenTrajectoryRows > 0
       ) {
         changes.push(
-          `Migrated media persistence in ${pathname}: ${result.rewrittenSessions} transcript session(s), ${result.rewrittenTrajectoryRows} trajectory row(s), schema v${OPENCLAW_AGENT_SCHEMA_VERSION}.`,
+          `Migrated media persistence in ${pathname}: ${result.rewrittenSessions} transcript session(s), ${result.rewrittenTrajectoryRows} trajectory row(s), schema v${BOT_AGENT_SCHEMA_VERSION}.`,
         );
       }
     } catch (error) {

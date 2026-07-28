@@ -114,11 +114,11 @@ async function getMissingProviderError(provider: string): Promise<string> {
 describe("media-understanding missing provider errors", () => {
   it("includes the catalog repair hint for a media provider contract", async () => {
     const message = await getMissingProviderError("groq");
-    expect(message).toMatch(/^Media provider not available: groq .*openclaw plugins install/);
-    expect(message).toContain("@openclaw/groq-provider");
-    expect(message).toContain("openclaw plugins registry --refresh");
+    expect(message).toMatch(/^Media provider not available: groq .*bot plugins install/);
+    expect(message).toContain("@hanzo/bot-groq-provider");
+    expect(message).toContain("bot plugins registry --refresh");
     expect(message).toContain("stop and start the gateway service");
-    expect(message).toContain("openclaw doctor --fix");
+    expect(message).toContain("bot doctor --fix");
   });
 
   it.each(["amazon-bedrock", "mystery-provider", "feishu"])(

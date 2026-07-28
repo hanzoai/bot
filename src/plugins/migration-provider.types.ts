@@ -1,10 +1,10 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginLogger } from "./logger-types.js";
 import type { PluginRuntime } from "./runtime/types.js";
 
-export type PluginConfigMigration = (config: OpenClawConfig) =>
+export type PluginConfigMigration = (config: BotConfig) =>
   | {
-      config: OpenClawConfig;
+      config: BotConfig;
       changes: string[];
     }
   | null
@@ -102,7 +102,7 @@ export type MigrationConfigRuntime = Pick<
 >;
 
 export type MigrationProviderContext = {
-  config: OpenClawConfig;
+  config: BotConfig;
   runtime?: PluginRuntime;
   /** Host-owned config mutation target for isolated embedded migration flows. */
   configRuntime?: MigrationConfigRuntime;
@@ -121,7 +121,7 @@ export type MigrationProviderContext = {
   signal?: AbortSignal;
 };
 
-/** Migration source implemented by a plugin and orchestrated by `openclaw migrate`. */
+/** Migration source implemented by a plugin and orchestrated by `bot migrate`. */
 export type MigrationProviderPlugin = {
   id: string;
   label: string;
@@ -142,7 +142,7 @@ export type MigrationProviderPlugin = {
 };
 
 type PluginSetupAutoEnableContext = {
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
 };
 

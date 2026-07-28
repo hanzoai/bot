@@ -1,6 +1,6 @@
 /** Delivery planning, prompt policy, and delivery trace construction for cron runs. */
 import { expandToolGroups, normalizeToolName } from "../../agents/tool-policy.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type {
   SourceDeliveryOutcome,
   SourceDeliveryPlan,
@@ -173,7 +173,7 @@ export function canPromptForMessageTool(params: {
 }
 
 export async function createCronToolsAllowPreflightDiagnostics(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   jobId: string;
   provider: string;
   model: string;
@@ -233,7 +233,7 @@ export async function createCronToolsAllowPreflightDiagnostics(params: {
 
 /** Resolves the delivery plan and concrete target for one isolated cron run. */
 export async function resolveCronDeliveryContext(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   job: CronJob;
   agentId: string;
 }) {

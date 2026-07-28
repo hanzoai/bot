@@ -1,6 +1,6 @@
 // Legacy X search migration tests cover doctor repair of old X search config.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { BotConfig } from "../../../config/config.js";
 import { migrateLegacyXSearchConfig } from "./legacy-x-search-migrate.js";
 
 describe("legacy x_search config migration", () => {
@@ -15,7 +15,7 @@ describe("legacy x_search config migration", () => {
           },
         } as Record<string, unknown>,
       },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     expect((res.config.tools?.web as Record<string, unknown> | undefined)?.x_search).toEqual({
       enabled: true,
@@ -61,7 +61,7 @@ describe("legacy x_search config migration", () => {
           },
         },
       },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     expect((res.config.tools?.web as Record<string, unknown> | undefined)?.x_search).toEqual({
       enabled: true,
@@ -92,7 +92,7 @@ describe("legacy x_search config migration", () => {
           },
         } as Record<string, unknown>,
       },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     expect((res.config.tools?.web as Record<string, unknown> | undefined)?.x_search).toEqual({
       enabled: true,
@@ -124,7 +124,7 @@ describe("legacy x_search config migration", () => {
           },
         } as Record<string, unknown>,
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const res = migrateLegacyXSearchConfig(config);
 
@@ -144,10 +144,10 @@ describe("legacy x_search config migration", () => {
   it("repairs retired Grok code aliases and preserves current aliases", () => {
     const retired = migrateLegacyXSearchConfig({
       tools: { web: { x_search: { model: "grok-code-fast-1" } } },
-    } as OpenClawConfig);
+    } as BotConfig);
     const current = migrateLegacyXSearchConfig({
       tools: { web: { x_search: { model: "grok-latest" } } },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     expect((retired.config.tools?.web as Record<string, unknown> | undefined)?.x_search).toEqual({
       model: "grok-build-0.1",

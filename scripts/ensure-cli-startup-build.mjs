@@ -16,7 +16,7 @@ const DEFAULT_BUILD_TIMEOUT_MS = 10 * 60 * 1000;
  * Resolves the CLI startup build timeout from environment.
  */
 export function resolveCliStartupBuildTimeoutMs(env = process.env) {
-  return readPositiveEnvInt("OPENCLAW_CLI_STARTUP_BUILD_TIMEOUT_MS", env, DEFAULT_BUILD_TIMEOUT_MS);
+  return readPositiveEnvInt("BOT_CLI_STARTUP_BUILD_TIMEOUT_MS", env, DEFAULT_BUILD_TIMEOUT_MS);
 }
 
 /**

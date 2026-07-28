@@ -3,16 +3,16 @@
  *
  * Resolves default accounts, pairing hints, delimited entries, and DM security policy views.
  */
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { formatCliCommand } from "../../cli/command-format.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { DEFAULT_ACCOUNT_ID } from "../../routing/session-key.js";
 import type { ChannelSecurityDmPolicy } from "./types.core.js";
 import type { ChannelPlugin } from "./types.plugin.js";
 
 export function resolveChannelDefaultAccountId<ResolvedAccount>(params: {
   plugin: ChannelPlugin<ResolvedAccount>;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountIds?: string[];
 }): string {
   const accountIds = params.accountIds ?? params.plugin.config.listAccountIds(params.cfg);
@@ -20,8 +20,8 @@ export function resolveChannelDefaultAccountId<ResolvedAccount>(params: {
 }
 
 export function formatPairingApproveHint(channelId: string): string {
-  const listCmd = formatCliCommand(`openclaw pairing list ${channelId}`);
-  const approveCmd = formatCliCommand(`openclaw pairing approve ${channelId} <code>`);
+  const listCmd = formatCliCommand(`bot pairing list ${channelId}`);
+  const approveCmd = formatCliCommand(`bot pairing approve ${channelId} <code>`);
   return `Approve via: ${listCmd} / ${approveCmd}`;
 }
 
@@ -34,7 +34,7 @@ export function parseOptionalDelimitedEntries(value?: string): string[] | undefi
 }
 
 export function buildAccountScopedDmSecurityPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelKey: string;
   accountId?: string | null;
   fallbackAccountId?: string | null;

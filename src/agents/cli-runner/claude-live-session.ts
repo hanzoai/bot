@@ -2,7 +2,7 @@
  * Manages reusable Claude CLI stdio sessions for CLI-backed agent turns.
  */
 import crypto from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { ReplyBackendHandle } from "../../auto-reply/reply/reply-run-registry.js";
 import { createAbortError as createNamedAbortError } from "../../infra/abort-signal.js";
 import {
@@ -339,7 +339,7 @@ function buildClaudeLiveArgs(params: {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.claudeLiveSessionTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.claudeLiveSessionTestApi")] = {
     buildClaudeLiveArgs,
     readConfiguredExecPolicy,
     resetClaudeLiveSessionsForTest,
@@ -1159,7 +1159,7 @@ function handleClaudeLiveControlRequest(
       toolInput,
       decision: {
         behavior: "deny",
-        message: `OpenClaw exec policy denied Claude native tool use (security=${turn.execPermission.security}, ask=${turn.execPermission.ask}).`,
+        message: `Bot exec policy denied Claude native tool use (security=${turn.execPermission.security}, ask=${turn.execPermission.ask}).`,
       },
     });
     return;
@@ -1198,10 +1198,10 @@ function handleClaudeLiveControlRequest(
               behavior: "deny",
               message:
                 outcome.kind === "deny" && outcome.reason === "policy-oversized"
-                  ? "OpenClaw denied Claude native tool use (Bash): the command is too large to display for out-of-band approval. Split it into smaller commands and retry."
+                  ? "Bot denied Claude native tool use (Bash): the command is too large to display for out-of-band approval. Split it into smaller commands and retry."
                   : outcome.kind === "deny" && outcome.reason === "user" && !runAborted
-                    ? `OpenClaw user denied Claude native tool use (${toolName}).`
-                    : `OpenClaw approval was not granted for Claude native tool use (${toolName}).`,
+                    ? `Bot user denied Claude native tool use (${toolName}).`
+                    : `Bot approval was not granted for Claude native tool use (${toolName}).`,
             },
       });
     } catch {

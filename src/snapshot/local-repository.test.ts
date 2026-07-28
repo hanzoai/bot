@@ -7,10 +7,10 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import { createPrivateSqliteDirectory } from "../infra/sqlite-private-directory.js";
 import { runExec } from "../process/exec.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db.js";
-import { OPENCLAW_AGENT_SCHEMA_SQL } from "../state/openclaw-agent-schema.generated.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../state/openclaw-state-schema.generated.js";
+import { BOT_AGENT_SCHEMA_VERSION } from "../state/bot-agent-db.js";
+import { BOT_AGENT_SCHEMA_SQL } from "../state/bot-agent-schema.generated.js";
+import { BOT_STATE_SCHEMA_VERSION } from "../state/bot-state-db.js";
+import { BOT_STATE_SCHEMA_SQL } from "../state/bot-state-schema.generated.js";
 import { hashSnapshotArtifact, readSnapshotManifest } from "./manifest.js";
 import {
   SNAPSHOT_MANIFEST_FILENAME,
@@ -72,7 +72,7 @@ afterEach(() => {
 });
 
 async function createTempDir(): Promise<string> {
-  const tempDir = tempDirs.make("openclaw-snapshot-repository-");
+  const tempDir = tempDirs.make("bot-snapshot-repository-");
   if (process.platform === "win32") {
     const privateTempDir = path.join(tempDir, "private");
     await createPrivateSqliteDirectory(privateTempDir);
@@ -110,8 +110,8 @@ function createGlobalDatabase(databasePath: string): void {
   const database = new sqlite.DatabaseSync(databasePath);
   try {
     database.exec(`
-      ${OPENCLAW_STATE_SCHEMA_SQL}
-      PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION};
+      ${BOT_STATE_SCHEMA_SQL}
+      PRAGMA user_version = ${BOT_STATE_SCHEMA_VERSION};
     `);
     database
       .prepare(
@@ -127,7 +127,7 @@ function createGlobalDatabase(databasePath: string): void {
           ) VALUES ('primary', 'global', ?, NULL, NULL, 1, 1)
         `,
       )
-      .run(OPENCLAW_STATE_SCHEMA_VERSION);
+      .run(BOT_STATE_SCHEMA_VERSION);
     database
       .prepare(
         `
@@ -186,8 +186,8 @@ function createAgentDatabase(databasePath: string, agentId: string): void {
   const database = new sqlite.DatabaseSync(databasePath);
   try {
     database.exec(`
-      ${OPENCLAW_AGENT_SCHEMA_SQL}
-      PRAGMA user_version = ${OPENCLAW_AGENT_SCHEMA_VERSION};
+      ${BOT_AGENT_SCHEMA_SQL}
+      PRAGMA user_version = ${BOT_AGENT_SCHEMA_VERSION};
     `);
     database
       .prepare(
@@ -203,7 +203,7 @@ function createAgentDatabase(databasePath: string, agentId: string): void {
           ) VALUES ('primary', 'agent', ?, ?, NULL, 1, 1)
         `,
       )
-      .run(OPENCLAW_AGENT_SCHEMA_VERSION, agentId);
+      .run(BOT_AGENT_SCHEMA_VERSION, agentId);
   } finally {
     database.close();
   }
@@ -1581,7 +1581,7 @@ describe("local SQLite snapshot repository", () => {
 
   it("sanitizes transient global rows and enforces the global owner", async () => {
     const tempDir = await createTempDir();
-    const sourcePath = path.join(tempDir, "openclaw.sqlite");
+    const sourcePath = path.join(tempDir, "bot.sqlite");
     const repositoryPath = path.join(tempDir, "snapshots");
     createGlobalDatabase(sourcePath);
     seedGlobalPluginBlobSnapshotFixtures(sourcePath);
@@ -1642,7 +1642,7 @@ describe("local SQLite snapshot repository", () => {
     const wrongRolePath = path.join(tempDir, "wrong-role.sqlite");
     createAgentDatabase(wrongRolePath, "main");
     const wrongRole = new sqlite.DatabaseSync(wrongRolePath);
-    wrongRole.exec(`PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION};`);
+    wrongRole.exec(`PRAGMA user_version = ${BOT_STATE_SCHEMA_VERSION};`);
     wrongRole.close();
     await expect(
       provider.create({ path: wrongRolePath, identity: { role: "global" } }),
@@ -1651,7 +1651,7 @@ describe("local SQLite snapshot repository", () => {
 
   it("sanitizes transient leases from agent snapshots without touching the source", async () => {
     const tempDir = await createTempDir();
-    const sourcePath = path.join(tempDir, "openclaw-agent.sqlite");
+    const sourcePath = path.join(tempDir, "bot-agent.sqlite");
     const repositoryPath = path.join(tempDir, "snapshots");
     createAgentDatabase(sourcePath, "worker-1");
     seedStateLease(sourcePath);
@@ -1682,7 +1682,7 @@ describe("local SQLite snapshot repository", () => {
 
   it("enforces the exact agent owner and canonical agent id", async () => {
     const tempDir = await createTempDir();
-    const sourcePath = path.join(tempDir, "openclaw-agent.sqlite");
+    const sourcePath = path.join(tempDir, "bot-agent.sqlite");
     const repositoryPath = path.join(tempDir, "snapshots");
     createAgentDatabase(sourcePath, "worker-1");
     const provider = createLocalSqliteSnapshotProvider({ repositoryPath });
@@ -1709,7 +1709,7 @@ describe("local SQLite snapshot repository", () => {
         database: {
           role: "agent",
           agentId: "worker-1",
-          userVersion: OPENCLAW_AGENT_SCHEMA_VERSION,
+          userVersion: BOT_AGENT_SCHEMA_VERSION,
         },
       },
     });
@@ -2208,8 +2208,8 @@ describe("snapshot manifest parser", () => {
     database: {
       role: "agent",
       agentId: "worker-1",
-      basename: "openclaw-agent.sqlite",
-      userVersion: OPENCLAW_AGENT_SCHEMA_VERSION,
+      basename: "bot-agent.sqlite",
+      userVersion: BOT_AGENT_SCHEMA_VERSION,
     },
     artifact: {
       path: SNAPSHOT_SQLITE_FILENAME,

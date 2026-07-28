@@ -1,10 +1,10 @@
 import type {
-  OpenClawConfig,
+  BotConfig,
   ResolvedTtsPersona,
   TtsConfig,
   TtsProvider,
-} from "openclaw/plugin-sdk/config-contracts";
-import { clampTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/config-contracts";
+import { clampTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
 import {
   canonicalizeSpeechProviderId,
   getSpeechProvider,
@@ -12,11 +12,11 @@ import {
   normalizeSpeechProviderId,
   type SpeechProviderConfig,
   type SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/speech-core";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { withSpeakerSelectionCompat } from "../speaker.js";
 import {
   resolvePrimaryVoiceProviderCandidate,
@@ -60,7 +60,7 @@ export function resolveSpeechProviderTimeoutMs(params: {
   return resolvePositiveTimeoutMs(params.provider.defaultTimeoutMs) ?? params.config.timeoutMs;
 }
 
-function sortSpeechProvidersForAutoSelection(cfg?: OpenClawConfig) {
+function sortSpeechProvidersForAutoSelection(cfg?: BotConfig) {
   return listSpeechProviders(cfg).toSorted((left, right) => {
     const leftOrder = left.autoSelectOrder ?? Number.MAX_SAFE_INTEGER;
     const rightOrder = right.autoSelectOrder ?? Number.MAX_SAFE_INTEGER;
@@ -71,7 +71,7 @@ function sortSpeechProvidersForAutoSelection(cfg?: OpenClawConfig) {
   });
 }
 
-function resolveConfiguredSpeechVoiceModelRefs(cfg: OpenClawConfig | undefined): VoiceModelRef[] {
+function resolveConfiguredSpeechVoiceModelRefs(cfg: BotConfig | undefined): VoiceModelRef[] {
   const effectiveCfg = cfg ? resolveTtsRuntimeConfig(cfg) : undefined;
   return resolveSupportedVoiceModelRefs({
     config: effectiveCfg?.agents?.defaults?.voiceModel,
@@ -80,7 +80,7 @@ function resolveConfiguredSpeechVoiceModelRefs(cfg: OpenClawConfig | undefined):
 }
 
 function resolveConfiguredSpeechVoiceModelForProvider(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   providerId: string;
   provider?: VoiceModelProvider;
   voiceModel?: VoiceModelRef;
@@ -99,7 +99,7 @@ function resolveConfiguredSpeechVoiceModelForProvider(params: {
 }
 
 function applyVoiceModelToSpeechProviderConfig(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   providerId: string;
   providerConfig: SpeechProviderConfig;
   provider?: VoiceModelProvider;
@@ -185,7 +185,7 @@ function resolveRawProviderConfig(
 function resolveLazyProviderConfig(
   config: ResolvedTtsConfig,
   providerId: string,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
   voiceModel?: VoiceModelRef,
 ): SpeechProviderConfig {
   const canonical =
@@ -264,7 +264,7 @@ function resolveLazyProviderConfig(
 export function getResolvedSpeechProviderConfig(
   config: ResolvedTtsConfig,
   providerId: string,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): SpeechProviderConfig {
   const effectiveCfg = cfg ? resolveTtsRuntimeConfig(cfg) : config.sourceConfig;
   const canonical =
@@ -277,7 +277,7 @@ export function getResolvedSpeechProviderConfig(
 export function getResolvedSpeechProviderConfigForVoiceModel(params: {
   config: ResolvedTtsConfig;
   providerId: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   voiceModel?: VoiceModelRef;
 }): SpeechProviderConfig {
   if (!params.voiceModel) {
@@ -324,7 +324,7 @@ export function resolveTtsProvider(config: ResolvedTtsConfig, prefsPath: string)
   return config.provider;
 }
 
-export function resolveTtsProviderOrder(primary: TtsProvider, cfg?: OpenClawConfig): TtsProvider[] {
+export function resolveTtsProviderOrder(primary: TtsProvider, cfg?: BotConfig): TtsProvider[] {
   const effectiveCfg = cfg ? resolveTtsRuntimeConfig(cfg) : undefined;
   const normalizedPrimary = canonicalizeSpeechProviderId(primary, effectiveCfg) ?? primary;
   const ordered = new Set<TtsProvider>([normalizedPrimary]);
@@ -345,7 +345,7 @@ export function resolveTtsProviderOrder(primary: TtsProvider, cfg?: OpenClawConf
 
 export function resolveTtsProviderCandidates(
   primary: TtsProvider,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): VoiceProviderCandidate[] {
   const effectiveCfg = cfg ? resolveTtsRuntimeConfig(cfg) : undefined;
   const normalizedPrimary = canonicalizeSpeechProviderId(primary, effectiveCfg) ?? primary;
@@ -358,7 +358,7 @@ export function resolveTtsProviderCandidates(
 
 export function resolvePrimaryTtsProviderCandidate(
   primary: TtsProvider,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): VoiceProviderCandidate {
   const effectiveCfg = cfg ? resolveTtsRuntimeConfig(cfg) : undefined;
   return resolvePrimaryVoiceProviderCandidate({
@@ -371,7 +371,7 @@ export function resolvePrimaryTtsProviderCandidate(
 export function isTtsProviderConfigured(
   config: ResolvedTtsConfig,
   provider: TtsProvider,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): boolean {
   try {
     const effectiveCfg = cfg ? resolveTtsRuntimeConfig(cfg) : config.sourceConfig;

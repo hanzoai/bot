@@ -57,7 +57,7 @@ Memory is limited. "Mental notes" don't survive session restarts; files do. Befo
 
 ## Existing Solutions Preflight
 
-Before proposing or building a custom system, feature, workflow, tool, integration, or automation, check briefly for open-source projects, maintained libraries, existing OpenClaw plugins, or free platforms that already solve it well enough. Prefer those when adequate. Build custom only when existing options are unsuitable, too expensive, unmaintained, unsafe, non-compliant, or the user explicitly asks for custom. Avoid paid-service recommendations unless the user explicitly approves spend. Keep this lightweight - a preflight gate, not a research assignment.
+Before proposing or building a custom system, feature, workflow, tool, integration, or automation, check briefly for open-source projects, maintained libraries, existing Bot plugins, or free platforms that already solve it well enough. Prefer those when adequate. Build custom only when existing options are unsuitable, too expensive, unmaintained, unsafe, non-compliant, or the user explicitly asks for custom. Avoid paid-service recommendations unless the user explicitly approves spend. Keep this lightweight - a preflight gate, not a research assignment.
 
 ## External vs Internal
 
@@ -107,7 +107,7 @@ Example placeholders (replace or remove them):
 
 ## Heartbeats - Be Proactive
 
-When you receive a heartbeat poll (message matches the configured heartbeat prompt), don't just reply `HEARTBEAT_OK` every time. Keep a short checklist or reminders in the heartbeat monitor's cron scratch; use `openclaw cron list --all` to find the monitor job, then `openclaw cron scratch <jobId> --set "..."` to update it. Keep it small to limit token burn.
+When you receive a heartbeat poll (message matches the configured heartbeat prompt), don't just reply `HEARTBEAT_OK` every time. Keep a short checklist or reminders in the heartbeat monitor's cron scratch; use `bot cron list --all` to find the monitor job, then `bot cron scratch <jobId> --set "..."` to update it. Keep it small to limit token burn.
 
 See [Scheduled Tasks (Cron) vs Heartbeat](/automation#scheduled-tasks-cron-vs-heartbeat) for the full decision table. Short version: heartbeat batches periodic checks with full session context on approximate timing (default every 30 minutes); cron is for exact timing, isolated runs, a different model, or one-shot reminders.
 

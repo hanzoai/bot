@@ -4,7 +4,7 @@ import {
   loadAuthProfileStoreWithoutExternalProfiles,
   saveAuthProfileStore,
   type AuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "bot/plugin-sdk/agent-runtime";
 
 type QaAuthProfileCredential =
   | {
@@ -43,7 +43,7 @@ type QaSecretRef = {
 };
 
 type QaLegacyOAuthRef = {
-  source: "openclaw-credentials";
+  source: "bot-credentials";
   provider: "openai";
   id: string;
 };

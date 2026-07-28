@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Duplex } from "node:stream";
 import type { Command } from "commander";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type {
   DiagnosticEventPrivateData,
   DiagnosticEventInput,
@@ -29,28 +29,28 @@ export type PluginInteractiveRegistration<
 
 export type PluginInteractiveHandlerRegistration = PluginInteractiveRegistration;
 
-export type OpenClawPluginHttpRouteAuth = "gateway" | "plugin";
-export type OpenClawPluginHttpRouteMatch = "exact" | "prefix";
-export type OpenClawPluginGatewayRuntimeScopeSurface = "write-default" | "trusted-operator";
+export type BotPluginHttpRouteAuth = "gateway" | "plugin";
+export type BotPluginHttpRouteMatch = "exact" | "prefix";
+export type BotPluginGatewayRuntimeScopeSurface = "write-default" | "trusted-operator";
 
-export type OpenClawPluginHttpRouteHandler = (
+export type BotPluginHttpRouteHandler = (
   req: IncomingMessage,
   res: ServerResponse,
 ) => Promise<boolean | void> | boolean | void;
 
-export type OpenClawPluginHttpRouteUpgradeHandler = (
+export type BotPluginHttpRouteUpgradeHandler = (
   req: IncomingMessage,
   socket: Duplex,
   head: Buffer,
 ) => Promise<boolean | void> | boolean | void;
 
-export type OpenClawPluginHttpRouteParams = {
+export type BotPluginHttpRouteParams = {
   path: string;
-  handler: OpenClawPluginHttpRouteHandler;
-  handleUpgrade?: OpenClawPluginHttpRouteUpgradeHandler;
-  auth: OpenClawPluginHttpRouteAuth;
-  match?: OpenClawPluginHttpRouteMatch;
-  gatewayRuntimeScopeSurface?: OpenClawPluginGatewayRuntimeScopeSurface;
+  handler: BotPluginHttpRouteHandler;
+  handleUpgrade?: BotPluginHttpRouteUpgradeHandler;
+  auth: BotPluginHttpRouteAuth;
+  match?: BotPluginHttpRouteMatch;
+  gatewayRuntimeScopeSurface?: BotPluginGatewayRuntimeScopeSurface;
   nodeCapability?: {
     surface: string;
     ttlMs?: number;
@@ -58,88 +58,88 @@ export type OpenClawPluginHttpRouteParams = {
   replaceExisting?: boolean;
 };
 
-export type OpenClawPluginHostedMediaResolver = (
+export type BotPluginHostedMediaResolver = (
   mediaUrl: string,
 ) => string | null | undefined | Promise<string | null | undefined>;
 
-export type OpenClawPluginCliContext = {
+export type BotPluginCliContext = {
   /**
    * Command object where this plugin should register its commands.
    *
-   * For root CLI registrations this is the root `openclaw` program. For nested
+   * For root CLI registrations this is the root `bot` program. For nested
    * registrations it is the resolved parent command from `parentPath`.
    */
   program: Command;
   parentPath: readonly string[];
-  config: OpenClawConfig;
+  config: BotConfig;
   workspaceDir?: string;
   logger: PluginLogger;
 };
 
-export type OpenClawPluginCliRegistrar = (ctx: OpenClawPluginCliContext) => void | Promise<void>;
+export type BotPluginCliRegistrar = (ctx: BotPluginCliContext) => void | Promise<void>;
 
 /**
  * Top-level CLI metadata for plugin-owned commands.
  *
  * Descriptors are the parse-time contract for lazy plugin CLI registration.
- * If you want OpenClaw to keep a plugin command lazy-loaded while still
+ * If you want Bot to keep a plugin command lazy-loaded while still
  * advertising it at the root CLI level, provide descriptors that cover every
  * top-level command root registered by that plugin CLI surface.
  */
-type OpenClawPluginCliCommandDescriptor = {
+type BotPluginCliCommandDescriptor = {
   name: string;
   description: string;
   hasSubcommands: boolean;
 };
 
 /** Root-command metadata that is available before a plugin registrar is activated. */
-export type OpenClawPluginCliRootCommandDescriptor = OpenClawPluginCliCommandDescriptor & {
+export type BotPluginCliRootCommandDescriptor = BotPluginCliCommandDescriptor & {
   machineOutput?: (params: { argv: readonly string[]; stdoutIsTTY: boolean }) => boolean;
 };
 
-type OpenClawPluginRootCliRegistrationOptions = {
+type BotPluginRootCliRegistrationOptions = {
   /** Omit or pass an empty path for root commands. */
   parentPath?: readonly [];
   commands?: readonly string[];
-  descriptors?: readonly OpenClawPluginCliRootCommandDescriptor[];
+  descriptors?: readonly BotPluginCliRootCommandDescriptor[];
 };
 
 /** Backward-compatible registration shape for dynamic root or nested paths. */
-type OpenClawPluginLegacyCliRegistrationOptions = {
+type BotPluginLegacyCliRegistrationOptions = {
   parentPath?: readonly string[];
   commands?: readonly string[];
-  descriptors?: readonly OpenClawPluginCliCommandDescriptor[];
+  descriptors?: readonly BotPluginCliCommandDescriptor[];
 };
 
-export type OpenClawPluginCliRegistrationOptions =
-  | OpenClawPluginRootCliRegistrationOptions
-  | OpenClawPluginLegacyCliRegistrationOptions;
+export type BotPluginCliRegistrationOptions =
+  | BotPluginRootCliRegistrationOptions
+  | BotPluginLegacyCliRegistrationOptions;
 
-export type OpenClawPluginNodeCliFeatureOptions = {
-  /** Explicit node feature command names owned under `openclaw nodes`. */
+export type BotPluginNodeCliFeatureOptions = {
+  /** Explicit node feature command names owned under `bot nodes`. */
   commands?: string[];
   /**
    * Parse-time command descriptors for lazy node feature CLI registration.
    *
-   * Descriptors are registered under `openclaw nodes`, so a descriptor named
-   * `"camera"` exposes `openclaw nodes camera`.
+   * Descriptors are registered under `bot nodes`, so a descriptor named
+   * `"camera"` exposes `bot nodes camera`.
    */
-  descriptors?: OpenClawPluginCliCommandDescriptor[];
+  descriptors?: BotPluginCliCommandDescriptor[];
 };
 
-export type OpenClawPluginReloadRegistration = {
+export type BotPluginReloadRegistration = {
   restartPrefixes?: string[];
   hotPrefixes?: string[];
   noopPrefixes?: string[];
 };
 
 export type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeHostCommandAvailabilityContext,
-  OpenClawPluginNodeHostCommandIo,
+  BotPluginNodeHostCommand,
+  BotPluginNodeHostCommandAvailabilityContext,
+  BotPluginNodeHostCommandIo,
 } from "./types.node-host.js";
 
-export type OpenClawPluginNodeInvokeTransportResult =
+export type BotPluginNodeInvokeTransportResult =
   | {
       ok: true;
       payload?: unknown;
@@ -152,9 +152,9 @@ export type OpenClawPluginNodeInvokeTransportResult =
       details?: Record<string, unknown>;
     };
 
-type OpenClawPluginNodeInvokeApprovalDecision = "allow-once" | "allow-always" | "deny";
+type BotPluginNodeInvokeApprovalDecision = "allow-once" | "allow-always" | "deny";
 
-type OpenClawPluginNodeInvokePolicyApprovalRuntime = {
+type BotPluginNodeInvokePolicyApprovalRuntime = {
   request: (input: {
     title: string;
     description: string;
@@ -166,17 +166,17 @@ type OpenClawPluginNodeInvokePolicyApprovalRuntime = {
     timeoutMs?: number;
   }) => Promise<{
     id?: string;
-    decision?: OpenClawPluginNodeInvokeApprovalDecision | null;
+    decision?: BotPluginNodeInvokeApprovalDecision | null;
   }>;
 };
 
-export type OpenClawPluginNodeInvokePolicyContext = {
+export type BotPluginNodeInvokePolicyContext = {
   nodeId: string;
   command: string;
   params: unknown;
   timeoutMs?: number;
   idempotencyKey?: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginConfig?: Record<string, unknown>;
   node?: {
     nodeId: string;
@@ -189,15 +189,15 @@ export type OpenClawPluginNodeInvokePolicyContext = {
     connId?: string;
     scopes?: string[];
   } | null;
-  approvals?: OpenClawPluginNodeInvokePolicyApprovalRuntime;
+  approvals?: BotPluginNodeInvokePolicyApprovalRuntime;
   invokeNode: (input?: {
     params?: unknown;
     timeoutMs?: number;
     idempotencyKey?: string;
-  }) => Promise<OpenClawPluginNodeInvokeTransportResult>;
+  }) => Promise<BotPluginNodeInvokeTransportResult>;
 };
 
-export type OpenClawPluginNodeInvokePolicyResult =
+export type BotPluginNodeInvokePolicyResult =
   | {
       ok: true;
       payload?: unknown;
@@ -211,7 +211,7 @@ export type OpenClawPluginNodeInvokePolicyResult =
       unavailable?: boolean;
     };
 
-export type OpenClawPluginNodeInvokePolicy = {
+export type BotPluginNodeInvokePolicy = {
   commands: string[];
   /**
    * Platforms where these node-handled commands should be allowlisted by default.
@@ -229,23 +229,23 @@ export type OpenClawPluginNodeInvokePolicy = {
    */
   foregroundRestrictedOnIos?: boolean;
   handle: (
-    ctx: OpenClawPluginNodeInvokePolicyContext,
-  ) => Promise<OpenClawPluginNodeInvokePolicyResult> | OpenClawPluginNodeInvokePolicyResult;
+    ctx: BotPluginNodeInvokePolicyContext,
+  ) => Promise<BotPluginNodeInvokePolicyResult> | BotPluginNodeInvokePolicyResult;
 };
 
-export type OpenClawPluginSecurityAuditContext = {
-  config: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+export type BotPluginSecurityAuditContext = {
+  config: BotConfig;
+  sourceConfig: BotConfig;
   env: NodeJS.ProcessEnv;
   stateDir: string;
   configPath: string;
 };
 
-export type OpenClawPluginSecurityAuditCollector = (
-  ctx: OpenClawPluginSecurityAuditContext,
+export type BotPluginSecurityAuditCollector = (
+  ctx: BotPluginSecurityAuditContext,
 ) => SecurityAuditFinding[] | Promise<SecurityAuditFinding[]>;
 
-export type OpenClawGatewayDiscoveryAdvertiseContext = {
+export type BotGatewayDiscoveryAdvertiseContext = {
   machineDisplayName: string;
   gatewayPort: number;
   gatewayTlsEnabled: boolean;
@@ -258,20 +258,20 @@ export type OpenClawGatewayDiscoveryAdvertiseContext = {
   minimal: boolean;
 };
 
-export type OpenClawGatewayDiscoveryService = {
+export type BotGatewayDiscoveryService = {
   id: string;
   advertise: (
-    ctx: OpenClawGatewayDiscoveryAdvertiseContext,
+    ctx: BotGatewayDiscoveryAdvertiseContext,
   ) => void | Promise<void | { stop?: () => void | Promise<void> }>;
 };
 
 /** Context passed to long-lived plugin services. */
-export type OpenClawPluginServiceContext = {
-  config: OpenClawConfig;
+export type BotPluginServiceContext = {
+  config: BotConfig;
   workspaceDir?: string;
   stateDir: string;
   logger: PluginLogger;
-  gatewayEvents?: import("./gateway-events.js").OpenClawPluginGatewayEvents;
+  gatewayEvents?: import("./gateway-events.js").BotPluginGatewayEvents;
   startupTrace?: {
     detail?: (name: string, metrics: ReadonlyArray<readonly [string, number | string]>) => void;
     measure: <T>(name: string, run: () => T | Promise<T>) => Promise<T>;
@@ -289,13 +289,13 @@ export type OpenClawPluginServiceContext = {
 };
 
 /** Background service registered by a plugin during `register(api)`. */
-export type OpenClawPluginService = {
+export type BotPluginService = {
   id: string;
-  start: (ctx: OpenClawPluginServiceContext) => void | Promise<void>;
-  stop?: (ctx: OpenClawPluginServiceContext) => void | Promise<void>;
+  start: (ctx: BotPluginServiceContext) => void | Promise<void>;
+  stop?: (ctx: BotPluginServiceContext) => void | Promise<void>;
 };
 
-export type OpenClawPluginChannelRegistration = {
+export type BotPluginChannelRegistration = {
   plugin: ChannelPlugin;
 };
 

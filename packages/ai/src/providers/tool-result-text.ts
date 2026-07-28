@@ -1,5 +1,5 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { getAiTransportHost } from "../host.js";
 import { sanitizeSurrogates } from "../utils/sanitize-unicode.js";
 

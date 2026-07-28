@@ -64,22 +64,22 @@ describe("setupOfficialPluginInstalls", () => {
         {
           value: "acpx",
           label: "ACPX Runtime",
-          hint: "OpenClaw ACP runtime backend",
+          hint: "Bot ACP runtime backend",
         },
         {
           value: "diagnostics-otel",
           label: "Diagnostics OpenTelemetry",
-          hint: "OpenClaw diagnostics OpenTelemetry exporter",
+          hint: "Bot diagnostics OpenTelemetry exporter",
         },
         {
           value: "diagnostics-prometheus",
           label: "Diagnostics Prometheus",
-          hint: "OpenClaw diagnostics Prometheus exporter",
+          hint: "Bot diagnostics Prometheus exporter",
         },
         {
           value: "tokenjuice",
           label: "Tokenjuice",
-          hint: "OpenClaw tokenjuice exec output compaction plugin",
+          hint: "Bot tokenjuice exec output compaction plugin",
         },
       ]),
     );
@@ -88,10 +88,10 @@ describe("setupOfficialPluginInstalls", () => {
       entry: {
         pluginId: "diagnostics-otel",
         label: "Diagnostics OpenTelemetry",
-        description: "OpenClaw diagnostics OpenTelemetry exporter",
+        description: "Bot diagnostics OpenTelemetry exporter",
         install: {
-          clawhubSpec: "clawhub:@openclaw/diagnostics-otel",
-          npmSpec: "@openclaw/diagnostics-otel",
+          clawhubSpec: "clawhub:@hanzo/bot-diagnostics-otel",
+          npmSpec: "@hanzo/bot-diagnostics-otel",
           defaultChoice: "npm",
           minHostVersion: ">=2026.4.25",
         },
@@ -119,7 +119,7 @@ describe("setupOfficialPluginInstalls", () => {
           installs: {
             "diagnostics-otel": {
               source: "npm",
-              spec: "@openclaw/diagnostics-otel",
+              spec: "@hanzo/bot-diagnostics-otel",
               installPath: "/tmp/diagnostics-otel",
             },
           },

@@ -3,7 +3,7 @@
  *
  * Stores target-family consumers that compile and materialize configured binding rules.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type {
   CompiledConfiguredBinding,
   ConfiguredBindingRecordResolution,
@@ -27,7 +27,7 @@ export type ConfiguredBindingConsumer = {
   id: string;
   supports: (binding: ConfiguredBindingRuleConfig) => boolean;
   buildTargetFactory: (params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     binding: ConfiguredBindingRuleConfig;
     channel: string;
     agentId: string;

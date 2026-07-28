@@ -1,6 +1,6 @@
 // Discord tests cover monitor plugin behavior.
-import { danger } from "openclaw/plugin-sdk/runtime-env";
-import { typedCases } from "openclaw/plugin-sdk/test-fixtures";
+import { danger } from "bot/plugin-sdk/runtime-env";
+import { typedCases } from "bot/plugin-sdk/test-fixtures";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChannelType, type Guild } from "./internal/discord.js";
 import {
@@ -27,9 +27,9 @@ type DiscordReactionClient = Parameters<
 
 const readAllowFromStoreMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/conversation-runtime")>(
-    "openclaw/plugin-sdk/conversation-runtime",
+vi.mock("bot/plugin-sdk/conversation-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/conversation-runtime")>(
+    "bot/plugin-sdk/conversation-runtime",
   );
   return {
     ...actual,
@@ -188,7 +188,7 @@ describe("DiscordMessageListener", () => {
       warn: vi.fn(),
       error: vi.fn(),
     } as unknown as ReturnType<
-      typeof import("openclaw/plugin-sdk/logging-core").createSubsystemLogger
+      typeof import("bot/plugin-sdk/logging-core").createSubsystemLogger
     >;
     const handler = vi.fn(async () => {
       throw new Error("boom");
@@ -212,7 +212,7 @@ describe("DiscordMessageListener", () => {
       warn: vi.fn(),
       error: vi.fn(),
     } as unknown as ReturnType<
-      typeof import("openclaw/plugin-sdk/logging-core").createSubsystemLogger
+      typeof import("bot/plugin-sdk/logging-core").createSubsystemLogger
     >;
     const listener = new DiscordMessageListener(handler, logger);
 
@@ -232,24 +232,24 @@ describe("DiscordMessageListener", () => {
 
 describe("discord allowlist helpers", () => {
   it("normalizes slugs", () => {
-    expect(normalizeDiscordSlug("Friends of OpenClaw")).toBe("friends-of-openclaw");
+    expect(normalizeDiscordSlug("Friends of Bot")).toBe("friends-of-bot");
     expect(normalizeDiscordSlug("#General")).toBe("general");
     expect(normalizeDiscordSlug("Dev__Chat")).toBe("dev-chat");
   });
 
   it("matches ids by default and names only when enabled", () => {
     const allow = expectNormalizedAllowList(
-      ["123", "steipete", "Friends of OpenClaw"],
+      ["123", "steipete", "Friends of Bot"],
       ["discord:", "user:", "guild:", "channel:"],
     );
     expect(allowListMatches(allow, { id: "123" }, { allowNameMatching: false })).toBe(true);
     expect(allowListMatches(allow, { name: "steipete" }, { allowNameMatching: false })).toBe(false);
     expect(
-      allowListMatches(allow, { name: "friends-of-openclaw" }, { allowNameMatching: false }),
+      allowListMatches(allow, { name: "friends-of-bot" }, { allowNameMatching: false }),
     ).toBe(false);
     expect(allowListMatches(allow, { name: "steipete" }, { allowNameMatching: true })).toBe(true);
     expect(
-      allowListMatches(allow, { name: "friends-of-openclaw" }, { allowNameMatching: true }),
+      allowListMatches(allow, { name: "friends-of-bot" }, { allowNameMatching: true }),
     ).toBe(true);
     expect(allowListMatches(allow, { name: "other" }, { allowNameMatching: false })).toBe(false);
   });
@@ -284,38 +284,38 @@ describe("discord allowlist helpers", () => {
 describe("discord guild/channel resolution", () => {
   it("resolves guild entry by id", () => {
     const guildEntries = makeEntries({
-      "123": { slug: "friends-of-openclaw" },
+      "123": { slug: "friends-of-bot" },
     });
     const resolved = resolveDiscordGuildEntry({
-      guild: fakeGuild("123", "Friends of OpenClaw"),
+      guild: fakeGuild("123", "Friends of Bot"),
       guildEntries,
     });
     expect(resolved?.id).toBe("123");
-    expect(resolved?.slug).toBe("friends-of-openclaw");
+    expect(resolved?.slug).toBe("friends-of-bot");
   });
 
   it("resolves guild entry by raw guild id when guild object is missing", () => {
     const guildEntries = makeEntries({
-      "123": { slug: "friends-of-openclaw" },
+      "123": { slug: "friends-of-bot" },
     });
     const resolved = resolveDiscordGuildEntry({
       guildId: "123",
       guildEntries,
     });
     expect(resolved?.id).toBe("123");
-    expect(resolved?.slug).toBe("friends-of-openclaw");
+    expect(resolved?.slug).toBe("friends-of-bot");
   });
 
   it("resolves guild entry by slug key", () => {
     const guildEntries = makeEntries({
-      "friends-of-openclaw": { slug: "friends-of-openclaw" },
+      "friends-of-bot": { slug: "friends-of-bot" },
     });
     const resolved = resolveDiscordGuildEntry({
-      guild: fakeGuild("123", "Friends of OpenClaw"),
+      guild: fakeGuild("123", "Friends of Bot"),
       guildEntries,
     });
     expect(resolved?.id).toBe("123");
-    expect(resolved?.slug).toBe("friends-of-openclaw");
+    expect(resolved?.slug).toBe("friends-of-bot");
   });
 
   it("falls back to wildcard guild entry", () => {
@@ -323,7 +323,7 @@ describe("discord guild/channel resolution", () => {
       "*": { requireMention: false },
     });
     const resolved = resolveDiscordGuildEntry({
-      guild: fakeGuild("123", "Friends of OpenClaw"),
+      guild: fakeGuild("123", "Friends of Bot"),
       guildEntries,
     });
     expect(resolved?.id).toBe("123");
@@ -670,15 +670,15 @@ describe("discord group DM gating", () => {
   it("matches group DM allowlist", () => {
     expect(
       resolveGroupDmAllow({
-        channels: ["openclaw-dm"],
+        channels: ["bot-dm"],
         channelId: "1",
-        channelName: "OpenClaw DM",
-        channelSlug: "openclaw-dm",
+        channelName: "Bot DM",
+        channelSlug: "bot-dm",
       }),
     ).toBe(true);
     expect(
       resolveGroupDmAllow({
-        channels: ["openclaw-dm"],
+        channels: ["bot-dm"],
         channelId: "1",
         channelName: "Other",
         channelSlug: "other",
@@ -922,10 +922,10 @@ const { enqueueSystemEventSpy, resolveAgentRouteMock } = vi.hoisted(() => ({
   })),
 }));
 
-const channelRuntimeModule = await import("openclaw/plugin-sdk/system-event-runtime");
+const channelRuntimeModule = await import("bot/plugin-sdk/system-event-runtime");
 vi.spyOn(channelRuntimeModule, "enqueueSystemEvent").mockImplementation(enqueueSystemEventSpy);
 
-const routingModule = await import("openclaw/plugin-sdk/routing");
+const routingModule = await import("bot/plugin-sdk/routing");
 vi.spyOn(routingModule, "resolveAgentRoute").mockImplementation(resolveAgentRouteMock);
 
 const { DiscordMessageListener, DiscordReactionListener, registerDiscordListener } =
@@ -1033,9 +1033,9 @@ function makeReactionListenerParams(overrides?: {
   guildEntries?: Record<string, DiscordGuildEntryResolved>;
 }) {
   return {
-    cfg: {} as import("openclaw/plugin-sdk/config-contracts").OpenClawConfig,
+    cfg: {} as import("bot/plugin-sdk/config-contracts").BotConfig,
     accountId: "acc-1",
-    runtime: {} as import("openclaw/plugin-sdk/runtime-env").RuntimeEnv,
+    runtime: {} as import("bot/plugin-sdk/runtime-env").RuntimeEnv,
     botUserId: overrides?.botUserId ?? "bot-1",
     dmEnabled: overrides?.dmEnabled ?? true,
     groupDmEnabled: overrides?.groupDmEnabled ?? true,
@@ -1051,7 +1051,7 @@ function makeReactionListenerParams(overrides?: {
       error: vi.fn(),
       debug: vi.fn(),
     } as unknown as ReturnType<
-      typeof import("openclaw/plugin-sdk/logging-core").createSubsystemLogger
+      typeof import("bot/plugin-sdk/logging-core").createSubsystemLogger
     >,
   };
 }

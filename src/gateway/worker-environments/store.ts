@@ -1,5 +1,5 @@
 import type { DatabaseSync } from "node:sqlite";
-import { normalizeSortedUniqueTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeSortedUniqueTrimmedStringList } from "@hanzo/bot-normalization-core/string-normalization";
 import type { Insertable, Selectable, Updateable } from "kysely";
 import {
   type WorkerAdmissionHandshake,
@@ -18,12 +18,12 @@ import type {
   DB as StateDatabase,
   WorkerEnvironmentCredentials,
   WorkerEnvironments,
-} from "../../state/openclaw-state-db.generated.js";
+} from "../../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+  type BotStateDatabase,
+} from "../../state/bot-state-db.js";
 import type { WorkerCredentialRecord } from "./credential.js";
 import {
   canTransitionWorkerEnvironment,
@@ -142,7 +142,7 @@ function teardownTerminalStateFrom(
 }
 function normalizeBootstrapReceipt(value: {
   bundleHash: unknown;
-  openclawVersion: unknown;
+  botVersion: unknown;
   protocolFeatures: unknown;
 }): WorkerEnvironmentBootstrapReceipt {
   const bundleHash = required(value.bundleHash, "bootstrap bundle hash");
@@ -163,7 +163,7 @@ function normalizeBootstrapReceipt(value: {
   }
   return {
     bundleHash,
-    openclawVersion: required(value.openclawVersion, "bootstrap OpenClaw version"),
+    botVersion: required(value.botVersion, "bootstrap Bot version"),
     protocolFeatures: normalizeSortedUniqueTrimmedStringList(value.protocolFeatures),
   };
 }
@@ -247,18 +247,18 @@ function endpointFrom(row: Row): Ssh | null {
 function bootstrapReceiptFrom(row: Row): WorkerEnvironmentBootstrapReceipt | null {
   const {
     bootstrap_bundle_hash: bundleHash,
-    bootstrap_openclaw_version: openclawVersion,
+    bootstrap_bot_version: botVersion,
     bootstrap_protocol_features_json: encodedFeatures,
   } = row;
-  if (bundleHash === null && openclawVersion === null && encodedFeatures === null) {
+  if (bundleHash === null && botVersion === null && encodedFeatures === null) {
     return null;
   }
-  if (bundleHash === null || openclawVersion === null || encodedFeatures === null) {
+  if (bundleHash === null || botVersion === null || encodedFeatures === null) {
     throw new Error("Worker environment bootstrap receipt is incomplete");
   }
   return normalizeBootstrapReceipt({
     bundleHash,
-    openclawVersion,
+    botVersion,
     protocolFeatures: JSON.parse(encodedFeatures) as unknown,
   });
 }
@@ -526,13 +526,13 @@ function reconcileAttachedSessionOwners(db: DatabaseSync, nowMs: number): void {
 }
 
 export function createWorkerEnvironmentStore(
-  options: { database?: OpenClawStateDatabase; now?: () => number } = {},
+  options: { database?: BotStateDatabase; now?: () => number } = {},
 ) {
-  const path = (options.database ?? openOpenClawStateDatabase()).path;
+  const path = (options.database ?? openBotStateDatabase()).path;
   const now = options.now ?? Date.now;
-  const read = () => openOpenClawStateDatabase({ path }).db;
+  const read = () => openBotStateDatabase({ path }).db;
   const write = <T>(operation: (db: DatabaseSync) => T): T =>
-    runOpenClawStateWriteTransaction(({ db }) => operation(db), { path });
+    runBotStateWriteTransaction(({ db }) => operation(db), { path });
   write((db) => reconcileAttachedSessionOwners(db, now()));
   const writeCredential = (
     input: CredentialInput & {
@@ -606,7 +606,7 @@ export function createWorkerEnvironmentStore(
               ssh_host_key: null,
               ssh_key_ref_json: null,
               bootstrap_bundle_hash: null,
-              bootstrap_openclaw_version: null,
+              bootstrap_bot_version: null,
               bootstrap_protocol_features_json: null,
               owner_epoch: 0,
               teardown_terminal_state: null,
@@ -793,7 +793,7 @@ export function createWorkerEnvironmentStore(
           ssh_host_key: sshEndpoint?.hostKey ?? null,
           ssh_key_ref_json: sshEndpoint ? json(sshEndpoint.keyRef) : null,
           bootstrap_bundle_hash: bootstrapReceipt?.bundleHash ?? null,
-          bootstrap_openclaw_version: bootstrapReceipt?.openclawVersion ?? null,
+          bootstrap_bot_version: bootstrapReceipt?.botVersion ?? null,
           bootstrap_protocol_features_json: bootstrapReceipt
             ? json(bootstrapReceipt.protocolFeatures)
             : null,

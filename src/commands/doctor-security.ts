@@ -1,11 +1,11 @@
 /** Security warnings for gateway exposure, exec policy drift, channel DMs, and plaintext secrets. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { resolveDmAllowAuditState } from "../channels/message-access/dm-allow-state.js";
 import { listReadOnlyChannelPluginsForConfig } from "../channels/plugins/read-only.js";
 import type { ChannelId } from "../channels/plugins/types.public.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig, GatewayBindMode } from "../config/config.js";
+import type { BotConfig, GatewayBindMode } from "../config/config.js";
 import type { AgentConfig } from "../config/types.agents.js";
 import { hasConfiguredSecretInput, resolveSecretInputRef } from "../config/types.secrets.js";
 import { resolveGatewayAuthTokenSourceConflict } from "../gateway/auth-token-source-conflict.js";
@@ -25,7 +25,7 @@ import { discoverConfigSecretTargets } from "../secrets/target-registry.js";
 import { collectExecFilesystemPolicyDriftHits } from "../security/exec-filesystem-policy.js";
 import { resolveDefaultChannelAccountContext } from "./channel-account-context.js";
 
-function collectImplicitHeartbeatDirectPolicyWarnings(cfg: OpenClawConfig): string[] {
+function collectImplicitHeartbeatDirectPolicyWarnings(cfg: BotConfig): string[] {
   const warnings: string[] = [];
 
   const maybeWarn = (params: {
@@ -88,11 +88,11 @@ function execAskRank(value: ExecAsk): number {
   throw new Error("Unsupported exec ask value");
 }
 
-function collectExecPolicyConflictWarnings(cfg: OpenClawConfig): string[] {
+function collectExecPolicyConflictWarnings(cfg: BotConfig): string[] {
   const warnings: string[] = [];
   const approvals = loadExecApprovals();
-  const defaultRequestedSecuritySource = "OpenClaw default (full)";
-  const defaultRequestedAskSource = "OpenClaw default (off)";
+  const defaultRequestedSecuritySource = "Bot default (full)";
+  const defaultRequestedAskSource = "Bot default (off)";
 
   const maybeWarn = (params: {
     scopeLabel: string;
@@ -164,7 +164,7 @@ function collectExecPolicyConflictWarnings(cfg: OpenClawConfig): string[] {
         `  Host: ${hostParts.join(", ")}`,
         `  Effective host exec stays security="${snapshot.security.effective}" ask="${snapshot.ask.effective}" because the stricter side wins.`,
         "  Headless runs like isolated cron cannot answer approval prompts; align both files or enable Web UI, terminal UI, or chat exec approvals.",
-        `  Inspect with: ${formatCliCommand("openclaw approvals get --gateway")}`,
+        `  Inspect with: ${formatCliCommand("bot approvals get --gateway")}`,
       ].join("\n"),
     );
   };
@@ -187,12 +187,12 @@ function collectExecPolicyConflictWarnings(cfg: OpenClawConfig): string[] {
   return warnings;
 }
 
-function collectDurableExecApprovalWarnings(cfg: OpenClawConfig): string[] {
+function collectDurableExecApprovalWarnings(cfg: BotConfig): string[] {
   void cfg;
   return [];
 }
 
-function collectExecFilesystemPolicyWarnings(cfg: OpenClawConfig): string[] {
+function collectExecFilesystemPolicyWarnings(cfg: BotConfig): string[] {
   return collectExecFilesystemPolicyDriftHits(cfg).map((hit) =>
     [
       `- ${hit.scopeLabel}: filesystem write tools are disabled, but exec is still available.`,
@@ -204,7 +204,7 @@ function collectExecFilesystemPolicyWarnings(cfg: OpenClawConfig): string[] {
   );
 }
 
-function collectPlaintextConfigSecretWarnings(cfg: OpenClawConfig): string[] {
+function collectPlaintextConfigSecretWarnings(cfg: BotConfig): string[] {
   const plaintextPaths: string[] = [];
   const defaults = cfg.secrets?.defaults;
 
@@ -242,16 +242,16 @@ function collectPlaintextConfigSecretWarnings(cfg: OpenClawConfig): string[] {
     extraCount > 0 ? `${samplePaths.join(", ")} (+${extraCount} more)` : samplePaths.join(", ");
 
   return [
-    "- WARNING: openclaw.json contains plaintext secret-bearing config fields.",
+    "- WARNING: bot.json contains plaintext secret-bearing config fields.",
     `  Paths: ${pathLine}`,
     "  Agents or workspace tools that can read config files may see these API keys/tokens.",
-    `  Migrate them to SecretRefs with ${formatCliCommand("openclaw secrets configure")} or ${formatCliCommand("openclaw secrets apply")}, then verify with ${formatCliCommand("openclaw secrets audit --check")}.`,
+    `  Migrate them to SecretRefs with ${formatCliCommand("bot secrets configure")} or ${formatCliCommand("bot secrets apply")}, then verify with ${formatCliCommand("bot secrets audit --check")}.`,
   ];
 }
 
 /** Collects doctor security warnings without emitting terminal notes. */
 export async function collectSecurityWarnings(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<string[]> {
   const warnings: string[] = [];
@@ -260,7 +260,7 @@ export async function collectSecurityWarnings(
     warnings.push(
       "- Note: approvals.exec.enabled=false disables approval forwarding only.",
       `  Host exec gating still comes from ${resolveExecApprovalsDisplayPath()}.`,
-      `  Check local policy with: ${formatCliCommand("openclaw approvals get --gateway")}`,
+      `  Check local policy with: ${formatCliCommand("bot approvals get --gateway")}`,
     );
   }
 
@@ -303,7 +303,7 @@ export async function collectSecurityWarnings(
   const saferRemoteAccessLines = [
     "  Safer remote access: keep bind loopback and use Tailscale Serve/Funnel or an SSH tunnel.",
     "  Example tunnel: ssh -N -L 18789:127.0.0.1:18789 user@gateway-host",
-    "  Docs: https://docs.openclaw.ai/gateway/remote",
+    "  Docs: https://docs.bot.ai/gateway/remote",
   ];
 
   if (isExposed) {
@@ -311,19 +311,19 @@ export async function collectSecurityWarnings(
       const authFixLines =
         resolvedAuth.mode === "password"
           ? [
-              `  Fix: ${formatCliCommand("openclaw configure")} to set a password`,
-              `  Or switch to token: ${formatCliCommand("openclaw config set gateway.auth.mode token")}`,
+              `  Fix: ${formatCliCommand("bot configure")} to set a password`,
+              `  Or switch to token: ${formatCliCommand("bot config set gateway.auth.mode token")}`,
             ]
           : [
-              `  Fix: ${formatCliCommand("openclaw doctor --fix")} to generate a token`,
+              `  Fix: ${formatCliCommand("bot doctor --fix")} to generate a token`,
               `  Or set token directly: ${formatCliCommand(
-                "openclaw config set gateway.auth.mode token",
+                "bot config set gateway.auth.mode token",
               )}`,
             ];
       warnings.push(
         `- CRITICAL: Gateway bound to ${bindDescriptor} without authentication.`,
         `  Anyone on your network (or internet if port-forwarded) can fully control your agent.`,
-        `  Fix: ${formatCliCommand("openclaw config set gateway.bind loopback")}`,
+        `  Fix: ${formatCliCommand("bot config set gateway.bind loopback")}`,
         ...saferRemoteAccessLines,
         ...authFixLines,
       );
@@ -389,7 +389,7 @@ export async function collectSecurityWarnings(
     if (dmScope === "main" && isMultiUserDm) {
       warnings.push(
         `- ${params.label} DMs: multiple senders share the main session; run: ` +
-          formatCliCommand('openclaw config set session.dmScope "per-channel-peer"') +
+          formatCliCommand('bot config set session.dmScope "per-channel-peer"') +
           ' (or "per-account-channel-peer" for multi-account channels) to isolate sessions.',
       );
     }
@@ -449,10 +449,10 @@ export async function collectSecurityWarnings(
 }
 
 /** Emits security warnings plus the deep audit follow-up command. */
-export async function noteSecurityWarnings(cfg: OpenClawConfig) {
+export async function noteSecurityWarnings(cfg: BotConfig) {
   const warnings = await collectSecurityWarnings(cfg);
   if (warnings.length > 0) {
-    warnings.push(`- Run: ${formatCliCommand("openclaw security audit --deep")}`);
+    warnings.push(`- Run: ${formatCliCommand("bot security audit --deep")}`);
     note(warnings.join("\n"), "Security");
   }
 }

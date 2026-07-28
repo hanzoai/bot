@@ -1,5 +1,5 @@
 // Discord tests cover portable subagent progress presentation.
-import type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginStateKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   handleDiscordSubagentProgress,

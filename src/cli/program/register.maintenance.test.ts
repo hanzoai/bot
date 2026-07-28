@@ -111,7 +111,7 @@ describe("registerMaintenanceCommands doctor action", () => {
       "--session-sqlite",
       "import",
       "--session-sqlite-store",
-      "/tmp/openclaw/sessions.json",
+      "/tmp/bot/sessions.json",
       "--json",
     ]);
 
@@ -119,7 +119,7 @@ describe("registerMaintenanceCommands doctor action", () => {
     const [runtimeArg, options] = commandCall(doctorCommand);
     expect(runtimeArg).toBe(runtime);
     expect(options.sessionSqlite).toBe("import");
-    expect(options.sessionSqliteStore).toBe("/tmp/openclaw/sessions.json");
+    expect(options.sessionSqliteStore).toBe("/tmp/bot/sessions.json");
     expect(options.json).toBe(true);
     expect(runtime.exit).toHaveBeenCalledWith(0);
   });
@@ -217,7 +217,7 @@ describe("registerMaintenanceCommands doctor action", () => {
 
     expect(doctorCommand).not.toHaveBeenCalled();
     expect(runtime.error).toHaveBeenCalledWith(
-      "doctor session SQLite options require --session-sqlite. Use `openclaw doctor --session-sqlite dry-run ...`.",
+      "doctor session SQLite options require --session-sqlite. Use `bot doctor --session-sqlite dry-run ...`.",
     );
     expect(runtime.exit).toHaveBeenCalledWith(2);
   });
@@ -257,7 +257,7 @@ describe("registerMaintenanceCommands doctor action", () => {
 
     expect(doctorCommand).not.toHaveBeenCalled();
     expect(runtime.error).toHaveBeenCalledWith(
-      "doctor lint options require --lint. Use `openclaw doctor --lint ...`.",
+      "doctor lint options require --lint. Use `bot doctor --lint ...`.",
     );
     expect(runtime.exit).toHaveBeenCalledWith(2);
   });
@@ -268,7 +268,7 @@ describe("registerMaintenanceCommands doctor action", () => {
     expect(doctorCommand).not.toHaveBeenCalled();
     expect(runDoctorLintCli).not.toHaveBeenCalled();
     expect(runtime.error).toHaveBeenCalledWith(
-      "doctor lint options require --lint. Use `openclaw doctor --lint ...`.",
+      "doctor lint options require --lint. Use `bot doctor --lint ...`.",
     );
     expect(runtime.exit).toHaveBeenCalledWith(2);
   });
@@ -288,7 +288,7 @@ describe("registerMaintenanceCommands doctor action", () => {
     expect(doctorCommand).not.toHaveBeenCalled();
     expect(runDoctorLintCli).not.toHaveBeenCalled();
     expect(runtime.error).toHaveBeenCalledWith(
-      "doctor lint options require --lint. Use `openclaw doctor --lint ...`.",
+      "doctor lint options require --lint. Use `bot doctor --lint ...`.",
     );
     expect(runtime.exit).toHaveBeenCalledWith(2);
   });

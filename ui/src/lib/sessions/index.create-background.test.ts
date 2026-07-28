@@ -54,7 +54,7 @@ it("carries submitted work placement and model through background list reconcili
         key,
         kind: "direct",
         updatedAt: 2,
-        worktree: { id: "wt-1", branch: "openclaw/task", repoRoot: "/repo" },
+        worktree: { id: "wt-1", branch: "bot/task", repoRoot: "/repo" },
       },
     ],
   });

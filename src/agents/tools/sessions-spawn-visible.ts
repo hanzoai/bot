@@ -4,7 +4,7 @@ import {
   DEFAULT_SUBAGENT_MAX_SPAWN_DEPTH,
 } from "../../config/agent-limits.js";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { isPathInside } from "../../infra/path-guards.js";
 import {
   isValidAgentId,
@@ -60,7 +60,7 @@ type VisibleSessionsSpawnOptions = VisibleSessionsSpawnDeps & {
   currentChannelId?: string;
   currentThreadTs?: string;
   sandboxed?: boolean;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   requesterAgentIdOverride?: string;
   inheritedToolAllowlist?: string[];
   inheritedToolDenylist?: string[];

@@ -59,7 +59,7 @@ function createSnapshot(params?: SnapshotParams) {
     ...(params?.tlsEnabled === undefined ? {} : { tls: { enabled: params.tlsEnabled } }),
   };
   return {
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     exists: true,
     raw: "{}",
     parsed: {},
@@ -103,8 +103,8 @@ function mockAliasOwnership(host: string, loopbackPid = 4242) {
     port: 18789,
     status: "busy",
     listeners: [
-      { pid: 4242, commandLine: "openclaw-gateway", address: `${host}:18789` },
-      { pid: loopbackPid, commandLine: "openclaw-gateway", address: "127.0.0.1:18789" },
+      { pid: 4242, commandLine: "bot-gateway", address: `${host}:18789` },
+      { pid: loopbackPid, commandLine: "bot-gateway", address: "127.0.0.1:18789" },
     ],
     hints: [],
   });

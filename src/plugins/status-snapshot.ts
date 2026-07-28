@@ -1,6 +1,6 @@
 /** Builds plugin status reports from persisted metadata without importing full plugin runtimes. */
 import { getRuntimeConfig } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { loadPluginMetadataSnapshot } from "./plugin-metadata-snapshot.js";
 import {
   loadPluginRegistrySnapshotWithMetadata,
@@ -11,7 +11,7 @@ import { createEmptyPluginRegistry, type PluginRecord, type PluginRegistry } fro
 import { buildPluginDependencyStatus } from "./status-dependencies-core.js";
 import type { PluginLogger } from "./types.js";
 
-/** Control-plane plugin status shape used by `openclaw plugins status` style surfaces. */
+/** Control-plane plugin status shape used by `bot plugins status` style surfaces. */
 export type PluginRegistryStatusReport = PluginRegistry & {
   workspaceDir?: string;
   registrySource: PluginRegistrySnapshotSource;
@@ -19,7 +19,7 @@ export type PluginRegistryStatusReport = PluginRegistry & {
 };
 
 type PluginRegistrySnapshotReportParams = {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir?: string;
   /** Use an explicit env when plugin roots should resolve independently from process.env. */
   env?: NodeJS.ProcessEnv;
@@ -29,7 +29,7 @@ type PluginRegistrySnapshotReportParams = {
 type TraceDetails = Record<string, boolean | number | string | undefined>;
 
 function isPluginLifecycleTraceEnabled(): boolean {
-  const raw = process.env.OPENCLAW_PLUGIN_LIFECYCLE_TRACE?.trim().toLowerCase();
+  const raw = process.env.BOT_PLUGIN_LIFECYCLE_TRACE?.trim().toLowerCase();
   return raw === "1" || raw === "true" || raw === "yes";
 }
 
@@ -70,7 +70,7 @@ function buildPluginRecordFromInstalledIndex(
   plugin: import("./installed-plugin-index.js").InstalledPluginIndexRecord,
   manifest?: import("./manifest-registry.js").PluginManifestRecord,
 ): PluginRecord {
-  const format = plugin.format ?? manifest?.format ?? "openclaw";
+  const format = plugin.format ?? manifest?.format ?? "bot";
   const bundleFormat = plugin.bundleFormat ?? manifest?.bundleFormat;
   return {
     id: plugin.pluginId,

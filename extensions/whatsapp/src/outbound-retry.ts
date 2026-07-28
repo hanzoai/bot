@@ -1,5 +1,5 @@
 // WhatsApp plugin module implements outbound retry behavior.
-import { createChannelApiRetryRunner } from "openclaw/plugin-sdk/retry-runtime";
+import { createChannelApiRetryRunner } from "bot/plugin-sdk/retry-runtime";
 import { formatError } from "./session-errors.js";
 import { isWhatsAppSocketOperationTimeoutError } from "./socket-timing.js";
 

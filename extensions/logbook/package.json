@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/logbook",
+  "name": "@hanzo/bot-logbook",
   "version": "2026.7.2",
   "private": true,
-  "description": "OpenClaw automatic work journal plugin",
+  "description": "Bot automatic work journal plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

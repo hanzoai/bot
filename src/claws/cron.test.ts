@@ -2,17 +2,17 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { validateCronAddParams } from "../../packages/gateway-protocol/src/index.js";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { installClawCronJobs, readClawCronRefs } from "./cron.js";
 import { buildClawAddPlan } from "./lifecycle.js";
 import { parseClawManifest } from "./schema.js";
 import type { ClawSourceIdentity } from "./types.js";
 
-afterEach(() => closeOpenClawStateDatabaseForTest());
+afterEach(() => closeBotStateDatabaseForTest());
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 async function fixture() {
-  const root = tempDirs.make("openclaw-claw-cron-");
+  const root = tempDirs.make("bot-claw-cron-");
   const parsed = parseClawManifest({
     schemaVersion: 1,
     agent: { id: "worker" },
@@ -35,7 +35,7 @@ async function fixture() {
     name: "@acme/worker",
     version: "1.0.0",
     packageRoot: root,
-    manifestPath: join(root, "openclaw.claw.json"),
+    manifestPath: join(root, "bot.claw.json"),
     integrityKind: "artifact",
     integrity: "sha256:manifest",
     byteLength: 100,
@@ -45,7 +45,7 @@ async function fixture() {
     source,
     context: { workspace: join(root, "workspace"), agentId: "worker-two" },
   });
-  return { root, plan, env: { OPENCLAW_STATE_DIR: join(root, "state") } };
+  return { root, plan, env: { BOT_STATE_DIR: join(root, "state") } };
 }
 
 describe("installClawCronJobs", () => {
@@ -84,7 +84,7 @@ describe("installClawCronJobs", () => {
     expect(validateCronAddParams(add.mock.calls[0]?.[0])).toBe(true);
     expect(refs).toMatchObject([
       {
-        schemaVersion: "openclaw.clawCronRef.v1",
+        schemaVersion: "bot.clawCronRef.v1",
         agentId: "worker-two",
         manifestId: "daily-report",
         schedulerJobId: "scheduler-123",

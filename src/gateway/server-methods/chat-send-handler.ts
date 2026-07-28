@@ -588,7 +588,7 @@ export const handleChatSend: GatewayRequestHandlers["chat.send"] = async ({
             }
             let broadcastedSourceReplyFinal = false;
             // WebChat persistence has two owners. Agent runs persist model-visible turns
-            // through OpenClaw runtime's SessionManager; this dispatcher only owns live delivery payloads.
+            // through Bot runtime's SessionManager; this dispatcher only owns live delivery payloads.
             // Do not blindly mirror agent-run final payloads into JSONL or chat.history can
             // duplicate normal embedded-agent assistant turns. The non-agent branch below has no
             // runtime-owned assistant turn, so it appends a gateway-injected assistant entry before

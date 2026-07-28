@@ -10,13 +10,13 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const expectUploadSurface = process.env.OPENCLAW_TERMINAL_UPLOAD_EXPECT_PRESENT !== "0";
-const screenshotPath = process.env.OPENCLAW_TERMINAL_UPLOAD_SCREENSHOT?.trim();
-const progressScreenshotPath = process.env.OPENCLAW_TERMINAL_UPLOAD_PROGRESS_SCREENSHOT?.trim();
-const errorScreenshotPath = process.env.OPENCLAW_TERMINAL_UPLOAD_ERROR_SCREENSHOT?.trim();
-const videoDir = process.env.OPENCLAW_TERMINAL_UPLOAD_VIDEO_DIR?.trim();
+const expectUploadSurface = process.env.BOT_TERMINAL_UPLOAD_EXPECT_PRESENT !== "0";
+const screenshotPath = process.env.BOT_TERMINAL_UPLOAD_SCREENSHOT?.trim();
+const progressScreenshotPath = process.env.BOT_TERMINAL_UPLOAD_PROGRESS_SCREENSHOT?.trim();
+const errorScreenshotPath = process.env.BOT_TERMINAL_UPLOAD_ERROR_SCREENSHOT?.trim();
+const videoDir = process.env.BOT_TERMINAL_UPLOAD_VIDEO_DIR?.trim();
 
 let browser: Browser;
 let server: ControlUiE2eServer;
@@ -47,16 +47,16 @@ describeControlUiE2e("Control UI terminal file upload", () => {
     await page.addInitScript(() => {
       (
         window as Window & {
-          ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
+          ["__BOT_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
         }
-      )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+      )["__BOT_NATIVE_CONTROL_AUTH__"] = {
         gatewayUrl: "ws://gateway.example.test",
         token: "test",
       };
     });
-    const stagedPath = "/tmp/openclaw-terminal-upload/sample file.pdf";
-    const stagedNotesPath = "/tmp/openclaw-terminal-upload/notes.txt";
-    const stagedDropPath = "/tmp/openclaw-terminal-upload/dropped.png";
+    const stagedPath = "/tmp/bot-terminal-upload/sample file.pdf";
+    const stagedNotesPath = "/tmp/bot-terminal-upload/notes.txt";
+    const stagedDropPath = "/tmp/bot-terminal-upload/dropped.png";
     const gateway = await installMockGateway(page, {
       deferredMethods: ["connect"],
       featureMethods: ["terminal.open", "terminal.upload"],
@@ -167,8 +167,8 @@ describeControlUiE2e("Control UI terminal file upload", () => {
       const pickedInput = (await gateway.getRequests("terminal.input"))[0]?.params as {
         data?: string;
       };
-      expect(pickedInput.data).toContain("'/tmp/openclaw-terminal-upload/sample file.pdf'");
-      expect(pickedInput.data).toContain("/tmp/openclaw-terminal-upload/notes.txt");
+      expect(pickedInput.data).toContain("'/tmp/bot-terminal-upload/sample file.pdf'");
+      expect(pickedInput.data).toContain("/tmp/bot-terminal-upload/notes.txt");
       expect(pickedInput.data).not.toMatch(/[\r\n]/);
 
       await gateway.setMethodResponse("terminal.upload", { path: stagedDropPath, size: 3 });
@@ -201,7 +201,7 @@ describeControlUiE2e("Control UI terminal file upload", () => {
       const droppedInput = (await gateway.getRequests("terminal.input")).at(-1)?.params as {
         data?: string;
       };
-      expect(droppedInput.data).toContain("/tmp/openclaw-terminal-upload/dropped.png");
+      expect(droppedInput.data).toContain("/tmp/bot-terminal-upload/dropped.png");
       expect(droppedInput.data).not.toMatch(/[\r\n]/);
 
       await gateway.deferNext("terminal.upload");
@@ -219,7 +219,7 @@ describeControlUiE2e("Control UI terminal file upload", () => {
       await page.getByRole("button", { name: "Cancel" }).click();
       await expect.poll(async () => await page.locator(".tp-upload-card").count()).toBe(0);
       await gateway.resolveDeferred("terminal.upload", {
-        path: "/tmp/openclaw-terminal-upload/cancelled.zip",
+        path: "/tmp/bot-terminal-upload/cancelled.zip",
         size: 3,
       });
       await page.waitForTimeout(100);

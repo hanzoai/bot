@@ -2,9 +2,9 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import {
   bindIngressLifecycleToReplyOptions,
   createChannelIngressDrain,
@@ -40,11 +40,11 @@ function createTestIngressQueue(
 }
 
 async function withTempState<T>(fn: (stateDir: string) => Promise<T>): Promise<T> {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-ingress-drain-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-ingress-drain-"));
   try {
     return await fn(stateDir);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
@@ -56,7 +56,7 @@ describe("channel ingress drain", () => {
 
   afterEach(() => {
     vi.useRealTimers();
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
   });
 
   it("crash-window: lost claim is recovered and dispatched exactly once", async () => {

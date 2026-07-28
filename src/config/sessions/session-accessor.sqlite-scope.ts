@@ -8,12 +8,12 @@ import {
   resolveAgentIdFromSessionKey,
 } from "../../routing/session-key.js";
 import { runQueuedStoreWrite, type StoreWriterQueue } from "../../shared/store-writer-queue.js";
-import type { DB as OpenClawAgentKyselyDatabase } from "../../state/openclaw-agent-db.generated.js";
+import type { DB as BotAgentKyselyDatabase } from "../../state/bot-agent-db.generated.js";
 import {
-  resolveIncognitoOpenClawAgentSqlitePath,
-  resolveOpenClawAgentSqlitePath,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  resolveIncognitoBotAgentSqlitePath,
+  resolveBotAgentSqlitePath,
+  type BotAgentDatabaseOptions,
+} from "../../state/bot-agent-db.js";
 import type {
   SessionAccessScope,
   SessionTranscriptReadScope,
@@ -25,7 +25,7 @@ import { normalizeStoreSessionKey } from "./store-entry.js";
 import type { SessionEntry } from "./types.js";
 
 type SessionSqliteDatabase = Pick<
-  OpenClawAgentKyselyDatabase,
+  BotAgentKyselyDatabase,
   | "board_tabs"
   | "board_widgets"
   | "conversation_deliveries"
@@ -80,7 +80,7 @@ export async function runExclusiveSqliteSessionWrite<T>(
   fn: () => Promise<T>,
 ): Promise<T> {
   const databaseOptions = toDatabaseOptions(scope);
-  const storePath = resolveOpenClawAgentSqlitePath(databaseOptions);
+  const storePath = resolveBotAgentSqlitePath(databaseOptions);
   const startedAt = Date.now();
   try {
     const result = await runQueuedStoreWrite({
@@ -121,7 +121,7 @@ export function resolveSqliteScope(
     ? resolveAgentIdFromSessionKey(scope.sessionKey)
     : undefined;
   const effectiveStorePath = incognitoAgentId
-    ? resolveIncognitoOpenClawAgentSqlitePath({ agentId: incognitoAgentId, env: scope.env })
+    ? resolveIncognitoBotAgentSqlitePath({ agentId: incognitoAgentId, env: scope.env })
     : scope.storePath;
   const effectiveAgentId = incognitoAgentId ?? scopedAgentId;
   const storeTarget = effectiveStorePath
@@ -162,7 +162,7 @@ export function resolveSqliteReadScope(
     ? resolveAgentIdFromSessionKey(sessionKey)
     : undefined;
   const effectiveStorePath = incognitoAgentId
-    ? resolveIncognitoOpenClawAgentSqlitePath({ agentId: incognitoAgentId, env: scope.env })
+    ? resolveIncognitoBotAgentSqlitePath({ agentId: incognitoAgentId, env: scope.env })
     : scope.storePath;
   const effectiveAgentId = incognitoAgentId ?? scopedAgentId;
   const storeTarget = effectiveStorePath
@@ -227,7 +227,7 @@ function resolveSqliteAgentId(params: {
 export function resolveSqliteTranscriptArchiveDirectory(
   scope: Pick<ResolvedSqliteReadScope, "agentId" | "env" | "path">,
 ): string {
-  const databasePath = resolveOpenClawAgentSqlitePath(toDatabaseOptions(scope));
+  const databasePath = resolveBotAgentSqlitePath(toDatabaseOptions(scope));
   const databaseDir = path.dirname(databasePath);
   if (path.basename(databaseDir) !== "agent") {
     return databaseDir;
@@ -271,7 +271,7 @@ export function resolveSqliteTranscriptReadScope(
 
 export function toDatabaseOptions(
   scope: Pick<ResolvedSqliteReadScope, "agentId" | "databaseAgentId" | "env" | "path">,
-): OpenClawAgentDatabaseOptions {
+): BotAgentDatabaseOptions {
   return {
     agentId: scope.databaseAgentId ?? scope.agentId,
     ...(scope.env ? { env: scope.env } : {}),
@@ -291,6 +291,6 @@ export function formatSqliteSessionMarkerForScope(scope: ResolvedTranscriptScope
   return formatSqliteSessionFileMarker({
     agentId: scope.agentId,
     sessionId: scope.sessionId,
-    storePath: scope.path ?? resolveOpenClawAgentSqlitePath(toDatabaseOptions(scope)),
+    storePath: scope.path ?? resolveBotAgentSqlitePath(toDatabaseOptions(scope)),
   });
 }

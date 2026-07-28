@@ -43,15 +43,15 @@ struct RootTabsSidebarRegressionTests {
     }
 
     @Test func `sidebar controls keep glass inside their hit target`() throws {
-        let source = try String(contentsOf: Self.openClawProComponentsSourceURL(), encoding: .utf8)
+        let source = try String(contentsOf: Self.botProComponentsSourceURL(), encoding: .utf8)
         let revealButton = try Self.extract(
             source,
-            from: "struct OpenClawSidebarControlButton: View",
-            to: "struct OpenClawSidebarHeaderLeadingSlot: View")
+            from: "struct BotSidebarControlButton: View",
+            to: "struct BotSidebarHeaderLeadingSlot: View")
         let toolbarItem = try Self.extract(
             source,
-            from: "struct OpenClawSidebarToolbarItem: ToolbarContent",
-            to: "struct OpenClawGlassControlGroup")
+            from: "struct BotSidebarToolbarItem: ToolbarContent",
+            to: "struct BotGlassControlGroup")
 
         let button = try Self.extract(
             revealButton,
@@ -67,7 +67,7 @@ struct RootTabsSidebarRegressionTests {
         #expect(button.contains(".contentShape(Rectangle())"))
         #expect(icon.contains(".regular.interactive()"))
         #expect(icon.contains("in: Circle()"))
-        #expect(icon.contains("width: OpenClawProMetric.compactControlSize"))
+        #expect(icon.contains("width: BotProMetric.compactControlSize"))
         #expect(toolbarItem.contains(".sharedBackgroundVisibility(.hidden)"))
     }
 
@@ -106,12 +106,12 @@ struct RootTabsSidebarRegressionTests {
         #expect(drawerSource.contains(".accessibilityHidden(!self.isPresented)"))
         #expect(drawerSource.contains(".accessibilityHidden(self.isPresented)"))
         #expect(drawerSource.contains(".onTapGesture(perform: self.onHide)"))
-        #expect(drawerSource.contains(".background(OpenClawSidebarPalette.background)"))
+        #expect(drawerSource.contains(".background(BotSidebarPalette.background)"))
         #expect(drawerSource.contains(".ignoresSafeArea(.container, edges: .vertical)"))
         #expect(!drawerSource.contains("Color.black.opacity(0.35)"))
         #expect(!drawerSource.contains("UIScreenEdgePanGestureRecognizer"))
 
-        #expect(contentCard.contains(".background(OpenClawProBackground())"))
+        #expect(contentCard.contains(".background(BotProBackground())"))
         #expect(contentCard.contains(".ignoresSafeArea(.container, edges: .vertical)"))
         #expect(contentCard.contains(".allowsHitTesting(!self.isPresented)"))
         #expect(contentCard.contains(".clipShape(shape)"))
@@ -141,7 +141,7 @@ struct RootTabsSidebarRegressionTests {
         #expect(!sidebarSource.contains("let showsDismissButton: Bool"))
         #expect(!sidebarSource.contains("let selectSettingsRoute:"))
         #expect(source.contains("isDismissButtonEnabled: self.isSidebarVisible"))
-        #expect(sidebarSource.contains("OpenClawSidebarControlButton(action: self.dismissAction)"))
+        #expect(sidebarSource.contains("BotSidebarControlButton(action: self.dismissAction)"))
         #expect(sidebarSource.contains(".allowsHitTesting(self.isDismissButtonEnabled)"))
         #expect(sidebarSource.contains(".accessibilityHidden(!self.isDismissButtonEnabled)"))
         #expect(sidebarSource.contains("accessibilityIdentifier: self.isDismissButtonEnabled"))
@@ -231,11 +231,11 @@ struct RootTabsSidebarRegressionTests {
             .appendingPathComponent("Sources/Design/CommandCenterTab.swift")
     }
 
-    private static func openClawProComponentsSourceURL() -> URL {
+    private static func botProComponentsSourceURL() -> URL {
         URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent()
             .deletingLastPathComponent()
-            .appendingPathComponent("Sources/Design/OpenClawProComponents.swift")
+            .appendingPathComponent("Sources/Design/BotProComponents.swift")
     }
 
     private static func extract(_ source: String, from start: String, to end: String) throws -> String {

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createGatewayAvatarDataUrlCache } from "./assistant-avatar-cache.js";
 import { openGatewayAssistantAvatar, resolveGatewayAssistantAvatar } from "./assistant-avatar.js";
 import { resolveAssistantIdentity } from "./assistant-identity.js";
@@ -16,8 +16,8 @@ const REAL_PNG_DATA_URL = `data:image/png;base64,${REAL_PNG.toString("base64")}`
 const tempRoots = useAutoCleanupTempDirTracker(afterEach);
 type GatewayAssistantAvatarProjection = ReturnType<typeof resolveGatewayAssistantAvatar>;
 
-function createWorkspace(): { workspace: string; cfg: OpenClawConfig } {
-  const root = tempRoots.make("openclaw-gateway-avatar-");
+function createWorkspace(): { workspace: string; cfg: BotConfig } {
+  const root = tempRoots.make("bot-gateway-avatar-");
   const workspace = path.join(root, "workspace");
   fs.mkdirSync(workspace);
   return {
@@ -26,7 +26,7 @@ function createWorkspace(): { workspace: string; cfg: OpenClawConfig } {
   };
 }
 
-function projectAvatar(cfg: OpenClawConfig): GatewayAssistantAvatarProjection {
+function projectAvatar(cfg: BotConfig): GatewayAssistantAvatarProjection {
   const identity = resolveAssistantIdentity({ cfg, agentId: "main" });
   return resolveGatewayAssistantAvatar({ cfg, identity });
 }
@@ -174,19 +174,19 @@ describe("resolveGatewayAssistantAvatar", () => {
 
   it("preserves same-origin avatar routes and applies the configured base path", () => {
     const { cfg } = createWorkspace();
-    cfg.gateway = { controlUi: { basePath: "/openclaw" } };
+    cfg.gateway = { controlUi: { basePath: "/bot" } };
 
     expect(
       resolveGatewayAssistantAvatar({
         cfg,
         identity: { agentId: "main", avatar: "/avatar/main" },
       }),
-    ).toEqual({ avatar: "/openclaw/avatar/main", resolution: null });
+    ).toEqual({ avatar: "/bot/avatar/main", resolution: null });
     expect(
       resolveGatewayAssistantAvatar({
         cfg,
-        identity: { agentId: "main", avatar: "/openclaw/avatar/main" },
+        identity: { agentId: "main", avatar: "/bot/avatar/main" },
       }),
-    ).toEqual({ avatar: "/openclaw/avatar/main", resolution: null });
+    ).toEqual({ avatar: "/bot/avatar/main", resolution: null });
   });
 });

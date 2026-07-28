@@ -3,7 +3,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { SessionManager } from "openclaw/plugin-sdk/agent-sessions";
+import { SessionManager } from "bot/plugin-sdk/agent-sessions";
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import { withEnv, withEnvAsync } from "../test-utils/env.js";
 import { estimateStringChars, estimateTokensFromChars } from "../utils/cjk-chars.js";
@@ -151,7 +151,7 @@ function appendBlockedUserMessage(
     content: [{ type: "text", text: params.redactedText }],
     timestamp: Date.now(),
     ...(params.idempotencyKey ? { idempotencyKey: params.idempotencyKey } : {}),
-    __openclaw: {
+    __bot: {
       beforeAgentRunBlocked: {
         blockedBy: params.pluginId,
         blockedAt: Date.now(),
@@ -187,7 +187,7 @@ function requireRecord(value: unknown, label: string): Record<string, unknown> {
 
 function expectMessageFields(
   message: unknown,
-  fields: { role?: string; content?: unknown; openclaw?: Record<string, unknown> },
+  fields: { role?: string; content?: unknown; bot?: Record<string, unknown> },
 ) {
   const record = requireRecord(message, "message");
   if ("role" in fields) {
@@ -196,9 +196,9 @@ function expectMessageFields(
   if ("content" in fields) {
     expect(record.content).toEqual(fields.content);
   }
-  if (fields.openclaw) {
-    const metadata = requireRecord(record["__openclaw"], "message metadata");
-    for (const [key, value] of Object.entries(fields.openclaw)) {
+  if (fields.bot) {
+    const metadata = requireRecord(record["__bot"], "message metadata");
+    for (const [key, value] of Object.entries(fields.bot)) {
       expect(metadata[key]).toEqual(value);
     }
   }
@@ -215,7 +215,7 @@ describe("readSessionTitleFieldsFromTranscript cache", () => {
   let tmpDir: string;
   let storePath: string;
 
-  registerTempSessionStore("openclaw-session-fs-test-", (nextTmpDir, nextStorePath) => {
+  registerTempSessionStore("bot-session-fs-test-", (nextTmpDir, nextStorePath) => {
     tmpDir = nextTmpDir;
     storePath = nextStorePath;
   });
@@ -344,7 +344,7 @@ describe("readSessionMessages", () => {
   let tmpDir: string;
   let storePath: string;
 
-  registerTempSessionStore("openclaw-session-fs-test-", (nextTmpDir, nextStorePath) => {
+  registerTempSessionStore("bot-session-fs-test-", (nextTmpDir, nextStorePath) => {
     tmpDir = nextTmpDir;
     storePath = nextStorePath;
   });
@@ -372,13 +372,13 @@ describe("readSessionMessages", () => {
     const marker = out[1] as {
       role: string;
       content?: Array<{ text?: string }>;
-      __openclaw?: { kind?: string; id?: string };
+      __bot?: { kind?: string; id?: string };
       timestamp?: number;
     };
     expect(marker.role).toBe("system");
     expect(marker.content?.[0]?.text).toBe("Compaction");
-    expect(marker["__openclaw"]?.kind).toBe("compaction");
-    expect(marker["__openclaw"]?.id).toBe("comp-1");
+    expect(marker["__bot"]?.kind).toBe("compaction");
+    expect(marker["__bot"]?.id).toBe("comp-1");
     expect(typeof marker.timestamp).toBe("number");
   });
 
@@ -406,15 +406,15 @@ describe("readSessionMessages", () => {
 
       expect(result.totalMessages).toBe(4);
       expect(result.messages).toHaveLength(2);
-      expectMessageFields(result.messages[0], { content: "recent", openclaw: { seq: 3 } });
-      expectMessageFields(result.messages[1], { content: "latest", openclaw: { seq: 4 } });
+      expectMessageFields(result.messages[0], { content: "recent", bot: { seq: 3 } });
+      expectMessageFields(result.messages[1], { content: "latest", bot: { seq: 4 } });
       expect(readFileSpy).not.toHaveBeenCalled();
     } finally {
       readFileSpy.mockRestore();
     }
   });
 
-  test("forwards the outer JSONL record timestamp to __openclaw.recordTimestampMs (#85648)", async () => {
+  test("forwards the outer JSONL record timestamp to __bot.recordTimestampMs (#85648)", async () => {
     const sessionId = "test-session-record-timestamp";
     const t1 = "2026-05-16T16:00:31.000Z";
     const t2 = "2026-05-23T04:02:33.000Z";
@@ -430,15 +430,15 @@ describe("readSessionMessages", () => {
     expect(result).toHaveLength(2);
     expectMessageFields(result[0], {
       content: "old turn",
-      openclaw: { recordTimestampMs: Date.parse(t1) },
+      bot: { recordTimestampMs: Date.parse(t1) },
     });
     expectMessageFields(result[1], {
       content: "fresh turn",
-      openclaw: { recordTimestampMs: Date.parse(t2) },
+      bot: { recordTimestampMs: Date.parse(t2) },
     });
   });
 
-  test("surfaces persisted user idempotency keys in __openclaw metadata (#79844)", async () => {
+  test("surfaces persisted user idempotency keys in __bot metadata (#79844)", async () => {
     const sessionId = "test-session-idempotency-key";
     writeTranscript(tmpDir, sessionId, [
       { type: "session", version: 1, id: sessionId },
@@ -460,7 +460,7 @@ describe("readSessionMessages", () => {
     expect(result).toHaveLength(1);
     expectMessageFields(result[0], {
       content: "pending optimistic turn",
-      openclaw: { id: "entry-user-1", idempotencyKey: "client-turn-1" },
+      bot: { id: "entry-user-1", idempotencyKey: "client-turn-1" },
     });
   });
 
@@ -579,7 +579,7 @@ describe("readSessionMessages", () => {
         "active branch",
         "latest active",
       ]);
-      expectMessageFields(messages[2], { openclaw: { id: "user-2", seq: 3 } });
+      expectMessageFields(messages[2], { bot: { id: "user-2", seq: 3 } });
       expect(sessionManagerOpenSpy).not.toHaveBeenCalled();
       expect(readFileSpy).not.toHaveBeenCalled();
     } finally {
@@ -771,7 +771,7 @@ describe("readSessionMessages", () => {
     expectMessageFields(recent.messages[0], {
       role: "assistant",
       content: "restored archive",
-      openclaw: { seq: 2 },
+      bot: { seq: 2 },
     });
   });
 
@@ -857,13 +857,13 @@ describe("readSessionMessages", () => {
       { type: "session", version: 1, id: sessionId },
       { message: { role: "assistant", content: "older store archive" } },
     ]);
-    const legacySessionsDir = path.join(tmpDir, ".openclaw", "sessions");
+    const legacySessionsDir = path.join(tmpDir, ".bot", "sessions");
     fs.mkdirSync(legacySessionsDir, { recursive: true });
     writeResetArchive(legacySessionsDir, sessionId, "2026-02-16T22-26-34.000Z", [
       { type: "session", version: 1, id: sessionId },
       { message: { role: "assistant", content: "newer legacy archive" } },
     ]);
-    await withEnvAsync({ OPENCLAW_HOME: tmpDir }, async () => {
+    await withEnvAsync({ BOT_HOME: tmpDir }, async () => {
       const fullMessages = await readSessionMessagesAsync(sessionId, storePath, undefined, {
         mode: "full",
         reason: "test cross-root reset archive fallback",
@@ -1035,9 +1035,9 @@ describe("readSessionMessages", () => {
       "tree reply",
       "reachable orphan tail",
     ]);
-    expectMessageFields(messages[0], { openclaw: { id: "legacy-user", seq: 1 } });
-    expectMessageFields(messages[1], { openclaw: { id: "tree-assistant", seq: 2 } });
-    expectMessageFields(messages[2], { openclaw: { id: "orphan-tail", seq: 3 } });
+    expectMessageFields(messages[0], { bot: { id: "legacy-user", seq: 1 } });
+    expectMessageFields(messages[1], { bot: { id: "tree-assistant", seq: 2 } });
+    expectMessageFields(messages[2], { bot: { id: "orphan-tail", seq: 3 } });
   });
 
   test("keeps legacy async parents when tree transcripts reference pre-v3 rows", async () => {
@@ -1066,8 +1066,8 @@ describe("readSessionMessages", () => {
       "legacy hello",
       "tree hello",
     ]);
-    expectMessageFields(messages[0], { openclaw: { id: "legacy-user", seq: 1 } });
-    expectMessageFields(messages[1], { openclaw: { id: "tree-assistant", seq: 2 } });
+    expectMessageFields(messages[0], { bot: { id: "legacy-user", seq: 1 } });
+    expectMessageFields(messages[1], { bot: { id: "tree-assistant", seq: 2 } });
   });
 
   test("caches async transcript indexes by file stats", async () => {
@@ -1172,7 +1172,7 @@ describe("readSessionMessages", () => {
           role: "assistant",
           content: [{ type: "text", text: "clean answer" }],
           api: "chat",
-          provider: "openclaw",
+          provider: "bot",
           model: "test",
           usage: {},
           stopReason: "stop",
@@ -1204,11 +1204,11 @@ describe("readSessionMessages", () => {
       const out = readSessionMessages(sessionId, storePath, sessionFile);
       expect(out).toHaveLength(2);
       expect(out).toHaveLength(2);
-      expectMessageFields(out[0], { role: "user", content: "clean prompt", openclaw: { seq: 1 } });
+      expectMessageFields(out[0], { role: "user", content: "clean prompt", bot: { seq: 1 } });
       expectMessageFields(out[1], {
         role: "assistant",
         content: [{ type: "text", text: "clean answer" }],
-        openclaw: { seq: 2 },
+        bot: { seq: 2 },
       });
       expect(JSON.stringify(out)).not.toContain("original wrapped prompt");
       expect(JSON.stringify(out)).not.toContain("side delivery");
@@ -1272,7 +1272,7 @@ describe("readSessionMessages", () => {
       const out = readSessionMessages(sessionId, wrongStorePath, sessionFile);
       expect(out).toHaveLength(1);
       expectMessageFields(out[0], message);
-      expect((out[0] as { __openclaw?: { seq?: number } })["__openclaw"]?.seq).toBe(1);
+      expect((out[0] as { __bot?: { seq?: number } })["__bot"]?.seq).toBe(1);
     },
   );
 
@@ -1370,7 +1370,7 @@ describe("readSessionMessages", () => {
       out.map((message) => ({
         role: (message as { role?: string }).role,
         content: (message as { content?: unknown }).content,
-        kind: (message as { __openclaw?: { kind?: string } })["__openclaw"]?.kind,
+        kind: (message as { __bot?: { kind?: string } })["__bot"]?.kind,
       })),
     ).toEqual([
       { role: "system", content: [{ type: "text", text: "Compaction" }], kind: "compaction" },
@@ -1431,13 +1431,13 @@ describe("readSessionMessages", () => {
     });
 
     expect(newest.totalMessages).toBe(3);
-    expectMessageFields(newest.messages[0], { content: "active prompt", openclaw: { seq: 2 } });
-    expectMessageFields(newest.messages[1], { content: "active answer", openclaw: { seq: 3 } });
+    expectMessageFields(newest.messages[0], { content: "active prompt", bot: { seq: 2 } });
+    expectMessageFields(newest.messages[1], { content: "active answer", bot: { seq: 3 } });
     expect(oldest.totalMessages).toBe(3);
     expectMessageFields(oldest.messages[0], {
       role: "system",
       content: [{ type: "text", text: "Compaction" }],
-      openclaw: { kind: "compaction", id: "comp-1", seq: 1 },
+      bot: { kind: "compaction", id: "comp-1", seq: 1 },
     });
   });
 
@@ -1553,7 +1553,7 @@ describe("readSessionPreviewItemsFromTranscript", () => {
   let tmpDir: string;
   let storePath: string;
 
-  registerTempSessionStore("openclaw-session-preview-test-", (nextTmpDir, nextStorePath) => {
+  registerTempSessionStore("bot-session-preview-test-", (nextTmpDir, nextStorePath) => {
     tmpDir = nextTmpDir;
     storePath = nextStorePath;
   });
@@ -1710,7 +1710,7 @@ describe("readLatestSessionUsageFromTranscript", () => {
   let tmpDir: string;
   let storePath: string;
 
-  registerTempSessionStore("openclaw-session-usage-test-", (nextTmpDir, nextStorePath) => {
+  registerTempSessionStore("bot-session-usage-test-", (nextTmpDir, nextStorePath) => {
     tmpDir = nextTmpDir;
     storePath = nextStorePath;
   });
@@ -1840,12 +1840,12 @@ describe("readLatestSessionUsageFromTranscript", () => {
 });
 
 describe("resolveSessionTranscriptCandidates", () => {
-  test("fallback candidate uses OPENCLAW_HOME instead of os.homedir()", () => {
-    withEnv({ OPENCLAW_HOME: "/srv/openclaw-home", HOME: "/home/other" }, () => {
+  test("fallback candidate uses BOT_HOME instead of os.homedir()", () => {
+    withEnv({ BOT_HOME: "/srv/bot-home", HOME: "/home/other" }, () => {
       const candidates = resolveSessionTranscriptCandidates("sess-1", undefined);
       const fallback = candidates[candidates.length - 1];
       expect(fallback).toBe(
-        path.join(path.resolve("/srv/openclaw-home"), ".openclaw", "sessions", "sess-1.jsonl"),
+        path.join(path.resolve("/srv/bot-home"), ".bot", "sessions", "sess-1.jsonl"),
       );
     });
   });
@@ -1854,8 +1854,8 @@ describe("resolveSessionTranscriptCandidates", () => {
 describe("resolveSessionTranscriptCandidates safety", () => {
   test.each([
     {
-      storePath: "/tmp/openclaw/agents/main/sessions/sessions.json",
-      sessionFile: "/tmp/openclaw/agents/ops/sessions/sess-safe.jsonl",
+      storePath: "/tmp/bot/agents/main/sessions/sessions.json",
+      sessionFile: "/tmp/bot/agents/ops/sessions/sess-safe.jsonl",
     },
     {
       storePath: "/srv/custom/agents/main/sessions/sessions.json",
@@ -1872,14 +1872,14 @@ describe("resolveSessionTranscriptCandidates safety", () => {
   test("drops unsafe session IDs instead of producing traversal paths", () => {
     const candidates = resolveSessionTranscriptCandidates(
       "../etc/passwd",
-      "/tmp/openclaw/agents/main/sessions/sessions.json",
+      "/tmp/bot/agents/main/sessions/sessions.json",
     );
 
     expect(candidates).toStrictEqual([]);
   });
 
   test("drops unsafe sessionFile candidates and keeps safe fallbacks", () => {
-    const storePath = "/tmp/openclaw/agents/main/sessions/sessions.json";
+    const storePath = "/tmp/bot/agents/main/sessions/sessions.json";
     const candidates = resolveSessionTranscriptCandidates(
       "sess-safe",
       storePath,
@@ -1893,24 +1893,24 @@ describe("resolveSessionTranscriptCandidates safety", () => {
   });
 
   test("prefers the current sessionId transcript before a stale sessionFile candidate", () => {
-    const storePath = "/tmp/openclaw/agents/main/sessions/sessions.json";
+    const storePath = "/tmp/bot/agents/main/sessions/sessions.json";
     const candidates = resolveSessionTranscriptCandidates(
       "11111111-1111-4111-8111-111111111111",
       storePath,
-      "/tmp/openclaw/agents/main/sessions/22222222-2222-4222-8222-222222222222.jsonl",
+      "/tmp/bot/agents/main/sessions/22222222-2222-4222-8222-222222222222.jsonl",
     );
 
     expect(candidates[0]).toBe(
-      path.resolve("/tmp/openclaw/agents/main/sessions/11111111-1111-4111-8111-111111111111.jsonl"),
+      path.resolve("/tmp/bot/agents/main/sessions/11111111-1111-4111-8111-111111111111.jsonl"),
     );
     expect(candidates).toContain(
-      path.resolve("/tmp/openclaw/agents/main/sessions/22222222-2222-4222-8222-222222222222.jsonl"),
+      path.resolve("/tmp/bot/agents/main/sessions/22222222-2222-4222-8222-222222222222.jsonl"),
     );
   });
 
   test("keeps explicit custom sessionFile ahead of synthesized fallback", () => {
-    const storePath = "/tmp/openclaw/agents/main/sessions/sessions.json";
-    const sessionFile = "/tmp/openclaw/agents/main/sessions/custom-transcript.jsonl";
+    const storePath = "/tmp/bot/agents/main/sessions/sessions.json";
+    const sessionFile = "/tmp/bot/agents/main/sessions/custom-transcript.jsonl";
     const candidates = resolveSessionTranscriptCandidates(
       "11111111-1111-4111-8111-111111111111",
       storePath,
@@ -1921,8 +1921,8 @@ describe("resolveSessionTranscriptCandidates safety", () => {
   });
 
   test("keeps custom topic-like transcript paths ahead of synthesized fallback", () => {
-    const storePath = "/tmp/openclaw/agents/main/sessions/sessions.json";
-    const sessionFile = "/tmp/openclaw/agents/main/sessions/custom-topic-notes.jsonl";
+    const storePath = "/tmp/bot/agents/main/sessions/sessions.json";
+    const sessionFile = "/tmp/bot/agents/main/sessions/custom-topic-notes.jsonl";
     const candidates = resolveSessionTranscriptCandidates(
       "11111111-1111-4111-8111-111111111111",
       storePath,
@@ -1933,33 +1933,33 @@ describe("resolveSessionTranscriptCandidates safety", () => {
   });
 
   test("keeps forked transcript paths ahead of synthesized fallback", () => {
-    const storePath = "/tmp/openclaw/agents/main/sessions/sessions.json";
+    const storePath = "/tmp/bot/agents/main/sessions/sessions.json";
     const sessionId = "11111111-1111-4111-8111-111111111111";
     const sessionFile =
-      "/tmp/openclaw/agents/main/sessions/2026-03-23T16-30-00-000Z_11111111-1111-4111-8111-111111111111.jsonl";
+      "/tmp/bot/agents/main/sessions/2026-03-23T16-30-00-000Z_11111111-1111-4111-8111-111111111111.jsonl";
     const candidates = resolveSessionTranscriptCandidates(sessionId, storePath, sessionFile);
 
     expect(candidates[0]).toBe(path.resolve(sessionFile));
   });
 
   test("keeps timestamped custom transcript paths ahead of synthesized fallback", () => {
-    const storePath = "/tmp/openclaw/agents/main/sessions/sessions.json";
+    const storePath = "/tmp/bot/agents/main/sessions/sessions.json";
     const sessionId = "11111111-1111-4111-8111-111111111111";
-    const sessionFile = "/tmp/openclaw/agents/main/sessions/2026-03-23T16-30-00-000Z_notes.jsonl";
+    const sessionFile = "/tmp/bot/agents/main/sessions/2026-03-23T16-30-00-000Z_notes.jsonl";
     const candidates = resolveSessionTranscriptCandidates(sessionId, storePath, sessionFile);
 
     expect(candidates[0]).toBe(path.resolve(sessionFile));
   });
 
   test("still treats generated topic transcripts from another session as stale", () => {
-    const storePath = "/tmp/openclaw/agents/main/sessions/sessions.json";
+    const storePath = "/tmp/bot/agents/main/sessions/sessions.json";
     const sessionId = "11111111-1111-4111-8111-111111111111";
     const staleSessionFile =
-      "/tmp/openclaw/agents/main/sessions/22222222-2222-4222-8222-222222222222-topic-thread.jsonl";
+      "/tmp/bot/agents/main/sessions/22222222-2222-4222-8222-222222222222-topic-thread.jsonl";
     const candidates = resolveSessionTranscriptCandidates(sessionId, storePath, staleSessionFile);
 
     expect(candidates[0]).toBe(
-      path.resolve("/tmp/openclaw/agents/main/sessions/11111111-1111-4111-8111-111111111111.jsonl"),
+      path.resolve("/tmp/bot/agents/main/sessions/11111111-1111-4111-8111-111111111111.jsonl"),
     );
     expect(candidates).toContain(path.resolve(staleSessionFile));
   });
@@ -1969,7 +1969,7 @@ describe("oversized transcript line guards", () => {
   let tmpDir: string;
   let storePath: string;
 
-  registerTempSessionStore("openclaw-session-fs-oversized-", (nextTmpDir, nextStorePath) => {
+  registerTempSessionStore("bot-session-fs-oversized-", (nextTmpDir, nextStorePath) => {
     tmpDir = nextTmpDir;
     storePath = nextStorePath;
   });
@@ -2143,13 +2143,13 @@ describe("oversized transcript line guards", () => {
 
     // The oversized line's id and parentId are extracted by regex from the
     // prefix bytes. parentId drives active-tree selection; id is attached
-    // to the __openclaw metadata. Both must be correct for the record to
+    // to the __bot metadata. Both must be correct for the record to
     // appear in the right position.
     expect(out).toHaveLength(2); // root-msg + oversized-child
     const oversized = out[1] as Record<string, unknown>;
     expect(oversized.role).toBe("assistant");
-    // id is preserved in __openclaw transcript metadata
-    const meta = (oversized as Record<string, Record<string, unknown>>)["__openclaw"];
+    // id is preserved in __bot transcript metadata
+    const meta = (oversized as Record<string, Record<string, unknown>>)["__bot"];
     expect(meta?.id).toBe("oversized-child");
     expect(meta?.idempotencyKey).toBe("oversized-key");
     expect(meta?.recordTimestampMs).toBe(Date.parse(timestamp));
@@ -2205,7 +2205,7 @@ describe("short read resilience", () => {
   let tmpDir: string;
   let storePath: string;
 
-  registerTempSessionStore("openclaw-short-read-test-", (nextTmpDir, nextStorePath) => {
+  registerTempSessionStore("bot-short-read-test-", (nextTmpDir, nextStorePath) => {
     tmpDir = nextTmpDir;
     storePath = nextStorePath;
   });

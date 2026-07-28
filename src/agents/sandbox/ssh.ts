@@ -11,7 +11,7 @@ import { createAbortError } from "../../infra/abort-signal.js";
 import { resolveRootPath } from "../../infra/boundary-path.js";
 import { toErrorObject } from "../../infra/errors.js";
 import { parseSshTarget } from "../../infra/ssh-tunnel.js";
-import { resolvePreferredOpenClawTmpDir } from "../../infra/tmp-openclaw-dir.js";
+import { resolvePreferredBotTmpDir } from "../../infra/tmp-bot-dir.js";
 import { isPlainCommandExitFailure, spawnCommand } from "../../process/exec.js";
 import { resolveUserPath } from "../../utils.js";
 import type { SandboxBackendCommandResult } from "./backend-handle.types.js";
@@ -362,7 +362,7 @@ export function buildRemoteWorkdirValidationCommand(params: {
     "/bin/sh",
     "-c",
     VALIDATE_REMOTE_WORKDIR_SCRIPT,
-    "openclaw-validate-workdir",
+    "bot-validate-workdir",
     params.workdir,
     params.root,
   ]);
@@ -581,7 +581,7 @@ export async function createSshSandboxSessionFromConfigText(params: {
   if (!host) {
     throw new Error("Failed to parse SSH config output.");
   }
-  const configDir = await fs.mkdtemp(path.join(resolveSshTmpRoot(), "openclaw-sandbox-ssh-"));
+  const configDir = await fs.mkdtemp(path.join(resolveSshTmpRoot(), "bot-sandbox-ssh-"));
   const configPath = path.join(configDir, "config");
   await fs.writeFile(configPath, params.configText, { encoding: "utf8", mode: 0o600 });
   await fs.chmod(configPath, 0o600);
@@ -601,7 +601,7 @@ export async function createSshSandboxSessionFromSettings(
     throw new Error(`Invalid sandbox SSH target: ${settings.target}`);
   }
 
-  const configDir = await fs.mkdtemp(path.join(resolveSshTmpRoot(), "openclaw-sandbox-ssh-"));
+  const configDir = await fs.mkdtemp(path.join(resolveSshTmpRoot(), "bot-sandbox-ssh-"));
   try {
     // Inline secret material is written into the temp config dir with strict
     // permissions so ssh can consume it without exposing values in argv/env.
@@ -619,7 +619,7 @@ export async function createSshSandboxSessionFromSettings(
       materializedCertificate ?? resolveOptionalLocalPath(settings.certificateFile);
     const knownHostsFile =
       materializedKnownHosts ?? resolveOptionalLocalPath(settings.knownHostsFile);
-    const hostAlias = "openclaw-sandbox";
+    const hostAlias = "bot-sandbox";
     const configPath = path.join(configDir, "config");
     const lines = [
       `Host ${hostAlias}`,
@@ -766,7 +766,7 @@ export async function uploadDirectoryToSshTarget(params: {
     "/bin/sh",
     "-c",
     `${ENSURE_REMOTE_REAL_DIRECTORY_SCRIPT}\ntar -xf - -C "$1"`,
-    "openclaw-sandbox-upload",
+    "bot-sandbox-upload",
     params.remoteDir,
     params.remoteRootDir ?? params.remoteDir,
   ]);
@@ -908,7 +908,7 @@ function parseSshConfigHost(configText: string): string | null {
 }
 
 function resolveSshTmpRoot(): string {
-  return path.resolve(resolvePreferredOpenClawTmpDir() ?? os.tmpdir());
+  return path.resolve(resolvePreferredBotTmpDir() ?? os.tmpdir());
 }
 
 function resolveOptionalLocalPath(value: string | undefined): string | undefined {

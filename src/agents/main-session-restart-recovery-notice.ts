@@ -1,7 +1,7 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { InternalSessionEntry as SessionEntry } from "../config/sessions.js";
 import { appendAssistantMessageToSessionTranscript } from "../config/sessions/transcript.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { GatewayRecoveryRuntime } from "../gateway/server-instance-runtime.types.js";
 import { resolveAgentIdFromSessionKey } from "../routing/session-key.js";
 import type { DeliveryContext } from "../utils/delivery-context.shared.js";
@@ -103,7 +103,7 @@ async function writeUnresumableSessionNotice(params: {
 }
 
 export async function failUnresumableMainSession(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   entry: SessionEntry;
   gatewayRuntime: GatewayRecoveryRuntime;
   observation: MainSessionRecoveryObservation;

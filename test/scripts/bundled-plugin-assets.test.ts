@@ -20,14 +20,14 @@ import { useAutoCleanupTempDirTracker } from "../helpers/temp-dir.js";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 async function withPluginAssetFixture(run: (rootDir: string) => Promise<void>) {
-  const rootDir = tempDirs.make("openclaw-plugin-assets-");
+  const rootDir = tempDirs.make("bot-plugin-assets-");
   fs.mkdirSync(path.join(rootDir, "extensions", "canvas"), { recursive: true });
   fs.writeFileSync(
     path.join(rootDir, "extensions", "canvas", "package.json"),
     JSON.stringify(
       {
-        name: "@openclaw/canvas-plugin",
-        openclaw: {
+        name: "@hanzo/bot-canvas-plugin",
+        bot: {
           assetScripts: {
             build: "node scripts/bundle-a2ui.mjs",
             buildOutputs: ["assets/generated-runtime.js"],
@@ -40,7 +40,7 @@ async function withPluginAssetFixture(run: (rootDir: string) => Promise<void>) {
     ),
   );
   fs.writeFileSync(
-    path.join(rootDir, "extensions", "canvas", "openclaw.plugin.json"),
+    path.join(rootDir, "extensions", "canvas", "bot.plugin.json"),
     JSON.stringify({ id: "canvas" }, null, 2),
   );
   await run(rootDir);
@@ -48,7 +48,7 @@ async function withPluginAssetFixture(run: (rootDir: string) => Promise<void>) {
 
 describe("bundled plugin assets", () => {
   it("creates a missing Discord SDK bundle without rewriting it when unchanged", async () => {
-    const rootDir = tempDirs.make("openclaw-discord-sdk-");
+    const rootDir = tempDirs.make("bot-discord-sdk-");
     const outputPath = path.join(rootDir, "embedded-app-sdk.mjs");
     const build = vi.fn(async () => ({
       outputFiles: [{ text: "export const sdk = true;\n" }],
@@ -81,7 +81,7 @@ describe("bundled plugin assets", () => {
     expect(hooks).toMatchObject([
       {
         command: "node ../../scripts/build-discord-activity-sdk.mjs",
-        packageName: "@openclaw/discord",
+        packageName: "@hanzo/bot-discord",
         phase: "build",
         pluginId: "discord",
       },
@@ -121,9 +121,9 @@ describe("bundled plugin assets", () => {
     await withPluginAssetFixture(async (rootDir) => {
       const packagePath = path.join(rootDir, "extensions", "canvas", "package.json");
       const packageJson = JSON.parse(fs.readFileSync(packagePath, "utf8")) as {
-        openclaw: { assetScripts: { buildOutputs?: string[] } };
+        bot: { assetScripts: { buildOutputs?: string[] } };
       };
-      delete packageJson.openclaw.assetScripts.buildOutputs;
+      delete packageJson.bot.assetScripts.buildOutputs;
       fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
 
       const classifier = createRunNodePathClassifier({ rootDir });
@@ -131,7 +131,7 @@ describe("bundled plugin assets", () => {
       const generatedPath = "extensions/canvas/assets/generated-runtime.js";
       expect(classifier.isRestartRelevantRunNodePath(generatedPath)).toBe(true);
 
-      packageJson.openclaw.assetScripts.buildOutputs = ["assets/generated-runtime.js"];
+      packageJson.bot.assetScripts.buildOutputs = ["assets/generated-runtime.js"];
       fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2));
       classifier.refreshGeneratedPluginAssetPaths();
 
@@ -150,9 +150,9 @@ describe("bundled plugin assets", () => {
 
       expect(hooks).toEqual([
         {
-          aliases: ["@openclaw/canvas-plugin", "canvas", "canvas-plugin"],
+          aliases: ["@hanzo/bot-canvas-plugin", "canvas", "canvas-plugin"],
           command: "node scripts/bundle-a2ui.mjs",
-          packageName: "@openclaw/canvas-plugin",
+          packageName: "@hanzo/bot-canvas-plugin",
           phase: "build",
           pluginDir: path.join(rootDir, "extensions", "canvas"),
           pluginId: "canvas",

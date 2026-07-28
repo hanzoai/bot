@@ -4,12 +4,12 @@ import {
   createPluginMetadataSnapshot,
   makeRegistry,
 } from "../config/plugin-auto-enable.test-helpers.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { setCurrentPluginMetadataSnapshot } from "./current-plugin-metadata-snapshot.js";
 import { clearCurrentPluginMetadataSnapshot } from "./current-plugin-metadata-state.js";
 
 const applyPluginAutoEnableMock = vi.hoisted(() =>
-  vi.fn((params: { config?: OpenClawConfig }) => ({
+  vi.fn((params: { config?: BotConfig }) => ({
     config: params.config,
     changes: [],
     autoEnabledReasons: {},
@@ -30,7 +30,7 @@ afterEach(() => {
 describe("resolveBundledPluginCompatibleActivationInputs", () => {
   it("passes the current manifest registry into activation auto-enable", () => {
     const manifestRegistry = makeRegistry([{ id: "openai", channels: [], providers: ["openai"] }]);
-    const workspaceDir = "/tmp/openclaw-activation-workspace";
+    const workspaceDir = "/tmp/bot-activation-workspace";
     setCurrentPluginMetadataSnapshot(
       createPluginMetadataSnapshot({
         config: {},

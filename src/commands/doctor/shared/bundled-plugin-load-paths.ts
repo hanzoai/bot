@@ -2,7 +2,7 @@
 import path from "node:path";
 import { sanitizeForLog } from "../../../../packages/terminal-core/src/ansi.js";
 import { resolveAgentWorkspaceDir, tryResolveDefaultAgentId } from "../../../agents/agent-scope.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import {
   buildBundledPluginLoadPathAliases,
   normalizeBundledLookupPath,
@@ -20,21 +20,21 @@ type BundledPluginLoadPathHit = {
   pathLabel: string;
 };
 
-function resolveBundledWorkspaceDir(cfg: OpenClawConfig): string | undefined {
+function resolveBundledWorkspaceDir(cfg: BotConfig): string | undefined {
   const defaultAgentId = tryResolveDefaultAgentId(cfg);
   return defaultAgentId ? resolveAgentWorkspaceDir(cfg, defaultAgentId) : undefined;
 }
 
-function isOpenClawNodeModulesPackageRoot(packageRoot: string): boolean {
+function isBotNodeModulesPackageRoot(packageRoot: string): boolean {
   const normalized = normalizeBundledLookupPath(packageRoot);
   const packageDir = path.basename(normalized);
   const parentDir = path.basename(path.dirname(normalized));
-  return packageDir === "openclaw" && parentDir === "node_modules";
+  return packageDir === "bot" && parentDir === "node_modules";
 }
 
-/** Find configured plugin load paths that alias bundled plugins already shipped by OpenClaw. */
+/** Find configured plugin load paths that alias bundled plugins already shipped by Bot. */
 export function scanBundledPluginLoadPathMigrations(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): BundledPluginLoadPathHit[] {
   const plugins = asObjectRecord(cfg.plugins);
@@ -83,8 +83,8 @@ export function scanBundledPluginLoadPathMigrations(
       const oldPackageRoot = oldPackaged?.packageRoot ?? oldLegacy?.packageRoot;
       const oldBundledLeaf = oldPackaged?.bundledLeaf ?? oldLegacy?.bundledLeaf;
       const oldPackageMatch =
-        // Only rewrite paths rooted in the installed OpenClaw package; user plugin paths stay intact.
-        oldPackageRoot && oldBundledLeaf && isOpenClawNodeModulesPackageRoot(oldPackageRoot)
+        // Only rewrite paths rooted in the installed Bot package; user plugin paths stay intact.
+        oldPackageRoot && oldBundledLeaf && isBotNodeModulesPackageRoot(oldPackageRoot)
           ? packagedBundledLeafMap.get(normalizeBundledLookupPath(oldBundledLeaf))
           : undefined;
       if (!oldPackageMatch) {
@@ -119,7 +119,7 @@ export function collectBundledPluginLoadPathWarnings(params: {
   }
   const lines = params.hits.map(
     (hit) =>
-      `- ${hit.pathLabel}: bundled plugin path "${hit.fromPath}" still aliases ${hit.pluginId}; OpenClaw loads the packaged bundled plugin from "${hit.toPath}".`,
+      `- ${hit.pathLabel}: bundled plugin path "${hit.fromPath}" still aliases ${hit.pluginId}; Bot loads the packaged bundled plugin from "${hit.toPath}".`,
   );
   lines.push(`- Run "${params.doctorFixCommand}" to remove these redundant bundled plugin paths.`);
   return lines.map((line) => sanitizeForLog(line));
@@ -127,10 +127,10 @@ export function collectBundledPluginLoadPathWarnings(params: {
 
 /** Remove redundant bundled plugin load path aliases while preserving unrelated custom paths. */
 export function maybeRepairBundledPluginLoadPaths(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): {
-  config: OpenClawConfig;
+  config: BotConfig;
   changes: string[];
 } {
   const hits = scanBundledPluginLoadPathMigrations(cfg, env);

@@ -1,10 +1,10 @@
 // Policy doctor strictness comparisons for scoped policy overlays.
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeAccountId, normalizeAgentId } from "openclaw/plugin-sdk/routing";
+import { normalizeProviderId } from "bot/plugin-sdk/provider-model-shared";
+import { normalizeAccountId, normalizeAgentId } from "bot/plugin-sdk/routing";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { ROUTING_MATCH_KINDS } from "../policy-routing.js";
 import { expandPolicyToolRequirement, toolListCoversTool } from "../tool-policy-conformance.js";
 import type { PolicyRuleMetadata } from "./metadata.js";

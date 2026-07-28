@@ -1,5 +1,5 @@
 /** Store binding for ACP session metadata: resolves which session-store row owns a key. */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveDefaultAgentId } from "../../agents/agent-scope-config.js";
 import { getRuntimeConfig } from "../../config/config.js";
 import { resolveStorePath } from "../../config/sessions/paths.js";
@@ -8,7 +8,7 @@ import {
   loadExactSessionEntryReadOnly,
 } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { parseAgentSessionKey } from "../../routing/session-key.js";
 
 /**
@@ -61,9 +61,9 @@ export function resolveStoreEntryForSessionKey(params: {
 /** Resolves the session store path that owns an ACP session key. */
 export function resolveSessionStorePathForAcp(params: {
   sessionKey: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   env?: NodeJS.ProcessEnv;
-}): { cfg: OpenClawConfig; agentId?: string; storePath: string } {
+}): { cfg: BotConfig; agentId?: string; storePath: string } {
   const cfg = params.cfg ?? getRuntimeConfig();
   const parsed = parseAgentSessionKey(params.sessionKey);
   const agentId = parsed?.agentId ?? resolveDefaultAgentId(cfg);
@@ -77,11 +77,11 @@ export function resolveSessionStorePathForAcp(params: {
 /** Reads one session's store binding, falling back to a lowercased key on store errors. */
 export function readSessionEntryFromStore(params: {
   sessionKey: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   env?: NodeJS.ProcessEnv;
   clone?: boolean;
 }): {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   storePath: string;
   storeSessionKey: string;

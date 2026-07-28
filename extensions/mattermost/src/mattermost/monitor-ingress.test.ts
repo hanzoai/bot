@@ -2,11 +2,11 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { fanInChannelIngressLifecycles } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import { fanInChannelIngressLifecycles } from "bot/plugin-sdk/channel-ingress-runtime";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeBotStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   createMattermostIngressMonitor,
@@ -62,12 +62,12 @@ function createQueue(stateDir: string, accountId: string): MattermostIngressQueu
 }
 
 async function withStateDir<T>(fn: (stateDir: string) => Promise<T>): Promise<T> {
-  const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-mattermost-ingress-"));
+  const created = await fs.mkdtemp(path.join(os.tmpdir(), "bot-mattermost-ingress-"));
   const stateDir = await fs.realpath(created);
   try {
     return await fn(stateDir);
   } finally {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }
@@ -102,7 +102,7 @@ function testLifecycle() {
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

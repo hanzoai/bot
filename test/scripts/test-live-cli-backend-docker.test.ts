@@ -27,16 +27,16 @@ describe("scripts/test-live-cli-backend-docker.sh", () => {
   it("forwards both fresh and resume CLI arg overrides into the Docker container", () => {
     const forwardedVars = readForwardedDockerEnvVars();
 
-    expect(forwardedVars).toContain("OPENCLAW_LIVE_CLI_BACKEND_ARGS");
-    expect(forwardedVars).toContain("OPENCLAW_LIVE_CLI_BACKEND_RESUME_ARGS");
-    expect(forwardedVars).toContain("OPENCLAW_TEST_CONSOLE");
+    expect(forwardedVars).toContain("BOT_LIVE_CLI_BACKEND_ARGS");
+    expect(forwardedVars).toContain("BOT_LIVE_CLI_BACKEND_RESUME_ARGS");
+    expect(forwardedVars).toContain("BOT_TEST_CONSOLE");
   });
 
   it("forwards advisory provider-skip controls into the Docker container", () => {
     const forwardedVars = readForwardedDockerEnvVars();
 
-    expect(forwardedVars).toContain("OPENCLAW_LIVE_CLI_BACKEND_ADVISORY");
-    expect(forwardedVars).toContain("OPENCLAW_LIVE_CLI_BACKEND_ALLOW_PROVIDER_SKIP");
+    expect(forwardedVars).toContain("BOT_LIVE_CLI_BACKEND_ADVISORY");
+    expect(forwardedVars).toContain("BOT_LIVE_CLI_BACKEND_ALLOW_PROVIDER_SKIP");
   });
 
   it("rejects invalid setup timeout values before metadata or Docker setup", () => {
@@ -44,13 +44,13 @@ describe("scripts/test-live-cli-backend-docker.sh", () => {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS: "180s",
+        BOT_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS: "180s",
       },
     });
 
     expect(result.status).toBe(2);
     expect(result.stderr).toContain(
-      "invalid OPENCLAW_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS: 180s",
+      "invalid BOT_LIVE_CLI_BACKEND_SETUP_TIMEOUT_SECONDS: 180s",
     );
     expect(result.stderr).not.toContain("Cannot find package 'tsx'");
     expect(result.stderr).not.toContain("docker");
@@ -65,7 +65,7 @@ describe("scripts/test-live-cli-backend-docker.sh", () => {
     expect(script).toContain("(4|four)");
     expect(script).not.toContain("direct_token=");
     expect(script).not.toContain("expected token");
-    expect(script).not.toContain("OPENCLAW-CLAUDE-SUBSCRIPTION-DIRECT");
+    expect(script).not.toContain("BOT-CLAUDE-SUBSCRIPTION-DIRECT");
     expect(script).toContain("direct Claude subscription probe exited with status");
     expect(script).toContain("<redacted-email>");
     expect(script).toContain("<redacted-secret>");

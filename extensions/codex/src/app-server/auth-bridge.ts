@@ -6,7 +6,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { AgentHarnessPreflightError } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { AgentHarnessPreflightError } from "bot/plugin-sdk/agent-harness-runtime";
 import {
   ensureAuthProfileStore,
   findPersistedAuthProfileCredential,
@@ -20,8 +20,8 @@ import {
   type AuthProfileCredential,
   type AuthProfileStore,
   type OAuthCredential,
-} from "openclaw/plugin-sdk/agent-runtime";
-import { hasUsableOAuthCredential } from "openclaw/plugin-sdk/provider-auth";
+} from "bot/plugin-sdk/agent-runtime";
+import { hasUsableOAuthCredential } from "bot/plugin-sdk/provider-auth";
 import { resolveCodexAppServerHomeDir, withEphemeralCodexAuthStore } from "./auth-start-options.js";
 import type { CodexAppServerClient } from "./client.js";
 import { ensureCodexComputerUseSharedPluginCache } from "./computer-use-cache.js";
@@ -267,7 +267,7 @@ export async function resolveCodexAppServerPreparedAuthHandoff(params: {
 }) {
   // A user-home app-server owns the operator's native Codex account. Codex persists
   // api-key logins into CODEX_HOME/auth.json and swaps the live account for external
-  // token logins, so a prepared OpenClaw handoff here would rewrite the account that
+  // token logins, so a prepared Bot handoff here would rewrite the account that
   // Codex CLI and Desktop share. Native homes are verified, never logged into.
   const usesNativeHome = params.homeScope === "user";
   if (params.authRequirement === "api-key" && !usesNativeHome) {
@@ -376,7 +376,7 @@ function resolveCodexAppServerEnvApiKeyCacheKey(params: {
     return undefined;
   }
   const hash = createHash("sha256");
-  hash.update("openclaw:codex:app-server-env-api-key:v1");
+  hash.update("bot:codex:app-server-env-api-key:v1");
   hash.update("\0");
   hash.update(apiKey.key);
   hash.update("\0");
@@ -408,7 +408,7 @@ export function resolveCodexAppServerPreparedApiKeyCacheKey(
 
 function fingerprintApiKeyAuthProfileCacheKey(apiKey: string): string {
   const hash = createHash("sha256");
-  hash.update("openclaw:codex:app-server-auth-profile-api-key:v1");
+  hash.update("bot:codex:app-server-auth-profile-api-key:v1");
   hash.update("\0");
   hash.update(apiKey);
   return `api_key:sha256:${hash.digest("hex")}`;
@@ -416,7 +416,7 @@ function fingerprintApiKeyAuthProfileCacheKey(apiKey: string): string {
 
 function fingerprintTokenAuthProfileCacheKey(accessToken: string): string {
   const hash = createHash("sha256");
-  hash.update("openclaw:codex:app-server-auth-profile-token:v1");
+  hash.update("bot:codex:app-server-auth-profile-token:v1");
   hash.update("\0");
   hash.update(accessToken);
   return `token:sha256:${hash.digest("hex")}`;
@@ -424,7 +424,7 @@ function fingerprintTokenAuthProfileCacheKey(accessToken: string): string {
 
 function fingerprintCodexCliAuthFileApiKeyCacheKey(apiKey: string): string {
   const hash = createHash("sha256");
-  hash.update("openclaw:codex:app-server-cli-auth-json-api-key:v1");
+  hash.update("bot:codex:app-server-cli-auth-json-api-key:v1");
   hash.update("\0");
   hash.update(apiKey);
   return `CODEX_AUTH_JSON:sha256:${hash.digest("hex")}`;

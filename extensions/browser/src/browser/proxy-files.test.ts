@@ -13,7 +13,7 @@ describe("persistBrowserProxyFiles", () => {
   let tempHome: TempHomeEnv;
 
   beforeEach(async () => {
-    tempHome = await createTempHomeEnv("openclaw-browser-proxy-files-");
+    tempHome = await createTempHomeEnv("bot-browser-proxy-files-");
   });
 
   afterEach(async () => {
@@ -33,7 +33,7 @@ describe("persistBrowserProxyFiles", () => {
     const savedPath = mapping.get(sourcePath);
     expect(typeof savedPath).toBe("string");
     expect(path.normalize(savedPath ?? "")).toContain(
-      `${path.sep}.openclaw${path.sep}media${path.sep}browser${path.sep}`,
+      `${path.sep}.bot${path.sep}media${path.sep}browser${path.sep}`,
     );
     await expect(fs.readFile(savedPath ?? "", "utf8")).resolves.toBe("hello from browser proxy");
   });
@@ -80,7 +80,7 @@ describe("persistBrowserProxyFiles", () => {
     expect((error as Error).message).toBe("browser proxy files exceed 16 MiB aggregate limit");
 
     await expect(
-      fs.stat(path.join(tempHome.home, ".openclaw", "media", "browser")),
+      fs.stat(path.join(tempHome.home, ".bot", "media", "browser")),
     ).rejects.toHaveProperty("code", "ENOENT");
   });
 
@@ -100,7 +100,7 @@ describe("persistBrowserProxyFiles", () => {
     expect((error as Error).message).toBe("browser proxy file exceeds 10 MiB limit");
 
     await expect(
-      fs.stat(path.join(tempHome.home, ".openclaw", "media", "browser")),
+      fs.stat(path.join(tempHome.home, ".bot", "media", "browser")),
     ).rejects.toHaveProperty("code", "ENOENT");
   });
 
@@ -115,7 +115,7 @@ describe("persistBrowserProxyFiles", () => {
       "browser proxy response exceeds 256 file limit",
     );
     await expect(
-      fs.stat(path.join(tempHome.home, ".openclaw", "media", "browser")),
+      fs.stat(path.join(tempHome.home, ".bot", "media", "browser")),
     ).rejects.toHaveProperty("code", "ENOENT");
   });
 

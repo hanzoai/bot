@@ -12,7 +12,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let browser: Browser;
@@ -26,8 +26,8 @@ type FrameSample = {
 };
 
 type SamplerWindow = Window & {
-  openclawSendFrameSamples?: FrameSample[];
-  openclawSendFrameSamplerStop?: () => void;
+  botSendFrameSamples?: FrameSample[];
+  botSendFrameSamplerStop?: () => void;
 };
 
 const PROBE_TEXT = "Flicker probe message 4242";
@@ -37,9 +37,9 @@ async function startFrameSampler(currentPage: Page): Promise<void> {
   await currentPage.evaluate((probeText) => {
     const win = window as SamplerWindow;
     const frames: FrameSample[] = [];
-    win.openclawSendFrameSamples = frames;
+    win.botSendFrameSamples = frames;
     let running = true;
-    win.openclawSendFrameSamplerStop = () => {
+    win.botSendFrameSamplerStop = () => {
       running = false;
     };
     const sample = () => {
@@ -63,8 +63,8 @@ async function startFrameSampler(currentPage: Page): Promise<void> {
 async function stopFrameSampler(currentPage: Page): Promise<FrameSample[]> {
   return currentPage.evaluate(() => {
     const win = window as SamplerWindow;
-    win.openclawSendFrameSamplerStop?.();
-    return win.openclawSendFrameSamples ?? [];
+    win.botSendFrameSamplerStop?.();
+    return win.botSendFrameSamples ?? [];
   });
 }
 
@@ -97,7 +97,7 @@ const BASE_HISTORY = [
     content: [{ text: "Ready.", type: "text" }],
     role: "assistant",
     timestamp: Date.now() - 5_000,
-    __openclaw: { seq: 1 },
+    __bot: { seq: 1 },
   },
 ];
 
@@ -138,7 +138,7 @@ async function finishRunAndSettle(
       content: [{ text: "Run complete.", type: "text" }],
       role: "assistant",
       timestamp: Date.now() + 1,
-      __openclaw: { seq: 3 },
+      __bot: { seq: 3 },
     },
   ]);
   // The terminal reconciliation must re-read history; baseline before the
@@ -148,7 +148,7 @@ async function finishRunAndSettle(
     content: [{ text: "Run complete.", type: "text" }],
     role: "assistant",
     timestamp: Date.now() + 1,
-    __openclaw: { seq: 3 },
+    __bot: { seq: 3 },
   };
   await gateway.emitChatFinal({ runId, text: "Run complete." });
   await currentPage
@@ -231,7 +231,7 @@ describeControlUiE2e("Control UI chat send pending handoff", () => {
       content: [{ text: PROBE_TEXT, type: "text" }],
       role: "user",
       timestamp: Date.now(),
-      __openclaw: { id: USER_ECHO_ENTRY_ID, idempotencyKey: runId, seq: 2 },
+      __bot: { id: USER_ECHO_ENTRY_ID, idempotencyKey: runId, seq: 2 },
     });
 
     const { gapFrames, keyTimeline } = analyzeFrameSamples(frames);
@@ -255,7 +255,7 @@ describeControlUiE2e("Control UI chat send pending handoff", () => {
       content: [{ text: PROBE_TEXT, type: "text" }],
       role: "user",
       timestamp: Date.now(),
-      __openclaw: { id: USER_ECHO_ENTRY_ID, idempotencyKey: runId, seq: 2 },
+      __bot: { id: USER_ECHO_ENTRY_ID, idempotencyKey: runId, seq: 2 },
     };
     await gateway.setHistoryMessages([...BASE_HISTORY, userEcho]);
     const historyRequestsBefore = (await gateway.getRequests("chat.history")).length;

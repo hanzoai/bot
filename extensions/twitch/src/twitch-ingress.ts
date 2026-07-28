@@ -4,8 +4,8 @@ import {
   createChannelIngressMonitor,
   type ChannelIngressQueue,
   type ChannelIngressMonitorLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import { getTwitchRuntime } from "./runtime.js";
 import type { TwitchChatMessage } from "./types.js";
 import { normalizeTwitchChannel } from "./utils/twitch.js";

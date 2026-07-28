@@ -1,4 +1,4 @@
-// Ios Node E2E script supports OpenClaw repository automation.
+// Ios Node E2E script supports Bot repository automation.
 import { randomUUID } from "node:crypto";
 import {
   MIN_CLIENT_PROTOCOL_VERSION,
@@ -20,7 +20,7 @@ function writeStderrLine(message: string): void {
 function usage(): string {
   return [
     "Usage: bun scripts/dev/ios-node-e2e.ts --url <wss://host[:port]> --token <gateway.auth.token> [options]",
-    "Or set env: OPENCLAW_GATEWAY_URL / OPENCLAW_GATEWAY_TOKEN",
+    "Or set env: BOT_GATEWAY_URL / BOT_GATEWAY_TOKEN",
     "",
     "Options:",
     "  --node <id|name-substring>  Select a connected iOS node",
@@ -88,10 +88,10 @@ type NodeListPayload = {
 
 type NodeListNode = NonNullable<NodeListPayload["nodes"]>[number];
 
-const urlRaw = getArg("--url") ?? process.env.OPENCLAW_GATEWAY_URL;
-const token = getArg("--token") ?? process.env.OPENCLAW_GATEWAY_TOKEN;
+const urlRaw = getArg("--url") ?? process.env.BOT_GATEWAY_URL;
+const token = getArg("--token") ?? process.env.BOT_GATEWAY_TOKEN;
 const nodeHint = getArg("--node");
-const dangerous = hasFlag("--dangerous") || process.env.OPENCLAW_RUN_DANGEROUS === "1";
+const dangerous = hasFlag("--dangerous") || process.env.BOT_RUN_DANGEROUS === "1";
 const jsonOut = hasFlag("--json");
 
 if (!urlRaw || !token) {
@@ -220,11 +220,11 @@ async function main() {
     maxProtocol: PROTOCOL_VERSION,
     client: {
       id: "cli",
-      displayName: "openclaw ios node e2e",
+      displayName: "bot ios node e2e",
       version: "dev",
       platform: "dev",
       mode: "cli",
-      instanceId: "openclaw-dev-ios-node-e2e",
+      instanceId: "bot-dev-ios-node-e2e",
     },
     locale: "en-US",
     userAgent: "ios-node-e2e",
@@ -281,7 +281,7 @@ async function main() {
     {
       id: "system.notify",
       command: "system.notify",
-      params: { title: "OpenClaw E2E", body: `ios-node-e2e @ ${isoNow()}`, delivery: "system" },
+      params: { title: "Bot E2E", body: `ios-node-e2e @ ${isoNow()}`, delivery: "system" },
     },
     {
       id: "contacts.search",

@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeChatType } from "../../channels/chat-type.js";
 import { normalizeAnyChannelId } from "../../channels/registry.js";
 import { applyMergePatch } from "../../config/merge-patch.js";
@@ -13,7 +13,7 @@ import { buildSessionCreationStamp } from "../../config/sessions/session-entry-p
 import { resolveSessionKey } from "../../config/sessions/session-key.js";
 import { formatSqliteSessionFileMarker } from "../../config/sessions/sqlite-marker.js";
 import type { SessionEntry, SessionScope } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { isVitestRuntimeEnv } from "../../infra/env.js";
 import {
   isModelSelectionLocked,
@@ -40,8 +40,8 @@ import type { SessionInitResult } from "./session.js";
 
 function isSlowReplyTestAllowed(env: NodeJS.ProcessEnv = process.env): boolean {
   return (
-    (isVitestRuntimeEnv(env) && env.OPENCLAW_ALLOW_SLOW_REPLY_TESTS === "1") ||
-    env.OPENCLAW_STRICT_FAST_REPLY_CONFIG === "0"
+    (isVitestRuntimeEnv(env) && env.BOT_ALLOW_SLOW_REPLY_TESTS === "1") ||
+    env.BOT_STRICT_FAST_REPLY_CONFIG === "0"
   );
 }
 
@@ -59,22 +59,22 @@ function resolveFastSessionKey(params: {
   return resolveSessionKey(params.sessionScope, ctx, params.mainKey, params.agentId);
 }
 
-export function withFullRuntimeReplyConfig<T extends OpenClawConfig>(config: T): T {
+export function withFullRuntimeReplyConfig<T extends BotConfig>(config: T): T {
   return markReplyConfigRuntimeMode(config, "full");
 }
 
 export function resolveGetReplyConfig(params: {
-  getRuntimeConfig: () => OpenClawConfig;
+  getRuntimeConfig: () => BotConfig;
   isFastTestEnv: boolean;
-  configOverride?: OpenClawConfig;
-}): OpenClawConfig {
+  configOverride?: BotConfig;
+}): BotConfig {
   const { configOverride } = params;
   if (configOverride == null) {
     return params.getRuntimeConfig();
   }
   if (params.isFastTestEnv && !isCompleteReplyConfig(configOverride) && !isSlowReplyTestAllowed()) {
     throw new Error(
-      "Fast reply tests must pass with withFastReplyConfig()/markCompleteReplyConfig(); set OPENCLAW_ALLOW_SLOW_REPLY_TESTS=1 to opt out.",
+      "Fast reply tests must pass with withFastReplyConfig()/markCompleteReplyConfig(); set BOT_ALLOW_SLOW_REPLY_TESTS=1 to opt out.",
     );
   }
   if (params.isFastTestEnv && isCompleteReplyConfig(configOverride)) {
@@ -83,12 +83,12 @@ export function resolveGetReplyConfig(params: {
   if (isCompleteReplyConfig(configOverride)) {
     return configOverride;
   }
-  return applyMergePatch(params.getRuntimeConfig(), configOverride) as OpenClawConfig;
+  return applyMergePatch(params.getRuntimeConfig(), configOverride) as BotConfig;
 }
 
 export function shouldUseReplyFastTestBootstrap(params: {
   isFastTestEnv: boolean;
-  configOverride?: OpenClawConfig;
+  configOverride?: BotConfig;
 }): boolean {
   return (
     params.isFastTestEnv &&
@@ -98,7 +98,7 @@ export function shouldUseReplyFastTestBootstrap(params: {
 }
 
 export function shouldUseReplyFastTestRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   isFastTestEnv: boolean;
 }): boolean {
   return (
@@ -126,7 +126,7 @@ export function shouldUseReplyFastDirectiveExecution(params: {
 
 export function buildFastReplyCommandContext(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   sessionKey?: string;
   isGroup: boolean;
@@ -162,7 +162,7 @@ export function buildFastReplyCommandContext(params: {
 }
 
 export function shouldHandleFastReplyTextCommands(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   commandSource?: string;
 }): boolean {
   return params.commandSource === "native" || params.cfg.commands?.text !== false;
@@ -170,7 +170,7 @@ export function shouldHandleFastReplyTextCommands(params: {
 
 export function initFastReplySessionState(params: {
   ctx: MsgContext;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   commandAuthorized: boolean;
   workspaceDir: string;

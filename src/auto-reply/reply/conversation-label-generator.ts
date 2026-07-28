@@ -1,5 +1,5 @@
 // Generates short labels for sessions from conversation context.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import { splitTrailingAuthProfile } from "../../agents/model-ref-profile.js";
 import {
@@ -7,7 +7,7 @@ import {
   prepareSimpleCompletionModelForAgent,
   resolveSimpleCompletionSelectionForAgent,
 } from "../../agents/simple-completion-runtime.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { logVerbose } from "../../globals.js";
 import type { TextContent } from "../../llm/types.js";
 
@@ -32,7 +32,7 @@ type ConversationLabelAttempt = {
 export type ConversationLabelParams = {
   userMessage: string;
   prompt: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   agentDir?: string;
   maxLength?: number;
@@ -75,7 +75,7 @@ function logLabelFailure(phase: LabelModelPhase, message: string): void {
 }
 
 async function prepareLabelModel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   agentDir?: string;
   attempt: ConversationLabelAttempt;
@@ -126,7 +126,7 @@ function selectedLabelModelsMatch(
 }
 
 function resolveAttemptSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   agentDir?: string;
   attempt: ConversationLabelAttempt;
@@ -150,7 +150,7 @@ function resolveRawModelProvider(modelRef: string | undefined): string | undefin
 }
 
 function resolveAttemptKey(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   agentDir?: string;
   attempt: ConversationLabelAttempt;
@@ -171,7 +171,7 @@ function resolveAttemptKey(params: {
 
 async function completeLabel(params: {
   prepared: ReadyLabelModel;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   userMessage: string;
   prompt: string;
   maxLength: number;

@@ -6,13 +6,13 @@ import {
   resolveTypedApprovalReactionTarget,
   type ApprovalReactionDecisionBinding,
   type ApprovalReactionTargetRecord,
-} from "openclaw/plugin-sdk/approval-reaction-runtime";
-import type { ExecApprovalReplyDecision } from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { OutboundDeliveryResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { MessagePresentation } from "openclaw/plugin-sdk/interactive-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "bot/plugin-sdk/approval-reaction-runtime";
+import type { ExecApprovalReplyDecision } from "bot/plugin-sdk/approval-reply-runtime";
+import type { OutboundDeliveryResult } from "bot/plugin-sdk/channel-send-result";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { MessagePresentation } from "bot/plugin-sdk/interactive-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
 import { resolveWhatsAppAccount } from "./accounts.js";
 import { getWhatsAppApprovalApprovers, whatsappApprovalAuth } from "./approval-auth.js";
 import { getOptionalWhatsAppRuntime } from "./runtime.js";
@@ -401,7 +401,7 @@ function listWhatsAppDeliveredMessageIdentities(
 
 /** Bind generic forwarded approvals to the exact WhatsApp messages accepted by Baileys. */
 export function registerWhatsAppApprovalReactionTargetForDeliveredPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   target: { channel: string; to: string; accountId?: string | null };
   payload: ReplyPayload;
   results: readonly OutboundDeliveryResult[];
@@ -550,7 +550,7 @@ function readWhatsAppApprovalReactionEvent(params: {
 }
 
 export async function maybeResolveWhatsAppApprovalReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   msg: WAMessage;
   gatewayUrl?: string;

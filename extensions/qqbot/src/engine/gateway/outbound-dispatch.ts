@@ -10,13 +10,13 @@
  * Separated from gateway.ts for testability and to keep handleMessage thin.
  */
 
-import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import { buildChannelInboundEventContext } from "openclaw/plugin-sdk/channel-inbound";
-import { bindIngressLifecycleToReplyOptions } from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isSilentReplyPayloadText, SILENT_REPLY_TOKEN } from "openclaw/plugin-sdk/reply-chunking";
-import type { FinalizedMsgContext } from "openclaw/plugin-sdk/reply-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import { buildChannelInboundEventContext } from "bot/plugin-sdk/channel-inbound";
+import { bindIngressLifecycleToReplyOptions } from "bot/plugin-sdk/channel-outbound";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { isSilentReplyPayloadText, SILENT_REPLY_TOKEN } from "bot/plugin-sdk/reply-chunking";
+import type { FinalizedMsgContext } from "bot/plugin-sdk/reply-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { createQQBotMarkdownChunker } from "../messaging/markdown-table-chunking.js";
 import {
   parseAndSendMediaTags,
@@ -139,9 +139,9 @@ export async function dispatchOutbound(
   const { runtime, cfg, account, log } = deps;
   const { event, qualifiedTarget } = inbound;
 
-  const openClawCfg = cfg as OpenClawConfig;
-  const routeAgentId = inbound.route.agentId ?? resolveDefaultAgentId(openClawCfg);
-  const workspaceDir = resolveAgentWorkspaceDir(openClawCfg, routeAgentId);
+  const botCfg = cfg as BotConfig;
+  const routeAgentId = inbound.route.agentId ?? resolveDefaultAgentId(botCfg);
+  const workspaceDir = resolveAgentWorkspaceDir(botCfg, routeAgentId);
   const gatewayMediaContext = workspaceDir
     ? { mediaAccess: { workspaceDir }, mediaLocalRoots: [workspaceDir] }
     : {};
@@ -436,7 +436,7 @@ export async function dispatchOutbound(
         raw: inbound,
       }),
       resolveTurn: () => ({
-        cfg: openClawCfg,
+        cfg: botCfg,
         channel: "qqbot",
         accountId: inbound.route.accountId,
         route: {
@@ -808,7 +808,7 @@ async function buildCtxPayload(
       id: inbound.peerId,
     },
     route: {
-      agentId: inbound.route.agentId ?? resolveDefaultAgentId(cfg as OpenClawConfig),
+      agentId: inbound.route.agentId ?? resolveDefaultAgentId(cfg as BotConfig),
       dmScope: inbound.route.dmScope,
       routeSessionKey: inbound.route.sessionKey,
       accountId: inbound.route.accountId,

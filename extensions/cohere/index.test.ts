@@ -1,11 +1,11 @@
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Context, Model } from "openclaw/plugin-sdk/llm";
-import { registerSingleProviderPlugin } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { buildManifestModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { buildOpenAICompletionsParams } from "openclaw/plugin-sdk/provider-transport-runtime";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
+import type { Context, Model } from "bot/plugin-sdk/llm";
+import { registerSingleProviderPlugin } from "bot/plugin-sdk/plugin-test-runtime";
+import { buildManifestModelProviderConfig } from "bot/plugin-sdk/provider-catalog-shared";
+import { buildOpenAICompletionsParams } from "bot/plugin-sdk/provider-transport-runtime";
 import { describe, expect, it } from "vitest";
 import plugin from "./index.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 import { COHERE_LIVE_MODEL_DISCOVERY } from "./provider-catalog.js";
 import { createCohereCompletionsWrapper } from "./stream.js";
 

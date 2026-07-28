@@ -661,7 +661,7 @@ describeTelegramDispatch("dispatchTelegramMessage progress-updates", () => {
         await dispatcherOptions.deliver(
           {
             text: "Fast mode enabled",
-            channelData: { openclawProgressKind: "fast-mode-auto" },
+            channelData: { botProgressKind: "fast-mode-auto" },
           },
           { kind: "tool" },
         );

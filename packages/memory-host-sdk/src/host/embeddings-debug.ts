@@ -1,11 +1,11 @@
 // Memory Host SDK module implements embeddings debug behavior.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 
 // Lightweight debug logging for memory embedding internals.
 
-const debugEmbeddings = isTruthyEnvValue(process.env.OPENCLAW_DEBUG_MEMORY_EMBEDDINGS);
+const debugEmbeddings = isTruthyEnvValue(process.env.BOT_DEBUG_MEMORY_EMBEDDINGS);
 
-/** Write embedding debug metadata when OPENCLAW_DEBUG_MEMORY_EMBEDDINGS is enabled. */
+/** Write embedding debug metadata when BOT_DEBUG_MEMORY_EMBEDDINGS is enabled. */
 export function debugEmbeddingsLog(message: string, meta?: Record<string, unknown>): void {
   if (!debugEmbeddings) {
     return;

@@ -1,5 +1,5 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { isRecord as isPlainRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { isRecord as isPlainRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   listAgentEntries,
   readAgentRosterProperty,
@@ -10,7 +10,7 @@ import {
   normalizeAgentModelMapForConfig,
   normalizeAgentModelRefForConfig,
 } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PathSegment } from "./config-cli-path.js";
 
 function normalizeAgentDefaultModelValue(value: unknown): unknown {
@@ -91,7 +91,7 @@ function normalizeProviderCatalogModels(provider: string, models: unknown): unkn
 }
 
 function normalizeModelProviderRefs(
-  providers: NonNullable<OpenClawConfig["models"]>["providers"] | undefined,
+  providers: NonNullable<BotConfig["models"]>["providers"] | undefined,
 ): unknown {
   if (!isPlainRecord(providers)) {
     return providers;
@@ -114,7 +114,7 @@ function normalizeModelProviderRefs(
   return mutated ? nextProviders : providers;
 }
 
-export function normalizeConfigMutationModelRefs(cfg: OpenClawConfig): OpenClawConfig {
+export function normalizeConfigMutationModelRefs(cfg: BotConfig): BotConfig {
   const defaults = cfg.agents?.defaults;
   const agentList = listAgentEntries(cfg);
   const roster = readAgentRosterProperty(cfg);

@@ -4,7 +4,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import type { SourceReplyDeliveryMode } from "../../../auto-reply/get-reply-options.types.js";
 import {
   createHeartbeatToolResponsePayload,
@@ -25,7 +25,7 @@ import {
   SILENT_REPLY_TOKEN,
 } from "../../../auto-reply/tokens.js";
 import { formatToolAggregate } from "../../../auto-reply/tool-meta.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { hasReplyPayloadContent } from "../../../interactive/payload.js";
 import type { AssistantMessage } from "../../../llm/types.js";
 import { isCronSessionKey } from "../../../routing/session-key.js";
@@ -254,7 +254,7 @@ const LITERAL_RUN_SUMMARY_PREFIXES = new Set([
   "pnpm",
   "yarn",
   "bun",
-  "openclaw",
+  "bot",
   "make",
   "cargo",
   "go",
@@ -505,7 +505,7 @@ export function buildEmbeddedRunPayloads(params: {
   lastAssistant: AssistantMessage | undefined;
   currentAssistant?: AssistantMessage | null;
   lastToolError?: ToolErrorSummary;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   isCronTrigger?: boolean;
   isHeartbeatTrigger?: boolean;
   sessionKey: string;

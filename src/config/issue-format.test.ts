@@ -15,12 +15,12 @@ describe("config issue format", () => {
           path: "agents.list[3].tools.profile",
           message: 'Invalid input, got: "none"',
           line: 247,
-          sourceFile: "openclaw.json",
+          sourceFile: "bot.json",
         },
         "×",
         { normalizeRoot: true },
       ),
-    ).toBe('× openclaw.json:247 — agents.list[3].tools.profile: Invalid input, got: "none"');
+    ).toBe('× bot.json:247 — agents.list[3].tools.profile: Invalid input, got: "none"');
   });
 
   it("formats issue lines with and without markers", () => {

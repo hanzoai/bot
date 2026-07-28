@@ -20,7 +20,7 @@ afterEach(() => {
   resetAppHostTestGlobals();
 });
 
-describe("OpenClaw shell dock suppression", () => {
+describe("Bot shell dock suppression", () => {
   it("suppresses docked panels only while a settings route owns the viewport", () => {
     vi.stubGlobal("localStorage", createStorageMock());
     vi.stubGlobal(
@@ -88,7 +88,7 @@ describe("OpenClaw shell dock suppression", () => {
       theme: { mode: "dark" },
       preload: vi.fn(),
     } as unknown as ApplicationContext;
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellRenderState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellRenderState;
     shell.runtime = { context, router: {} } as unknown as ApplicationRuntime;
     const container = document.createElement("div");
 
@@ -96,7 +96,7 @@ describe("OpenClaw shell dock suppression", () => {
     renderLit(shell.render(), container);
     expect(
       (
-        container.querySelector("openclaw-terminal-panel") as HTMLElement & {
+        container.querySelector("bot-terminal-panel") as HTMLElement & {
           suppressed: boolean;
         }
       ).suppressed,
@@ -106,7 +106,7 @@ describe("OpenClaw shell dock suppression", () => {
     renderLit(shell.render(), container);
     expect(
       (
-        container.querySelector("openclaw-terminal-panel") as HTMLElement & {
+        container.querySelector("bot-terminal-panel") as HTMLElement & {
           suppressed: boolean;
         }
       ).suppressed,

@@ -28,7 +28,7 @@ export type ResolvedBoardView = {
 };
 
 export const boardChatDockLayout = createDockPanelLayout({
-  storageKey: "openclaw.control.board-chat-dock.v1",
+  storageKey: "bot.control.board-chat-dock.v1",
   minHeight: 180,
   minWidth: 320,
   defaultDock: "right",
@@ -70,7 +70,7 @@ export function catalogRawResult(raw: unknown): string | null {
 }
 export function nativeHistoryMessageIdentity(message: unknown): string | null {
   const record = catalogRawRecord(message);
-  const metadata = catalogRawRecord(record?.["__openclaw"]);
+  const metadata = catalogRawRecord(record?.["__bot"]);
   const seq = metadata?.seq;
   const id = metadata?.id ?? record?.messageId;
   const sourceIdentity =

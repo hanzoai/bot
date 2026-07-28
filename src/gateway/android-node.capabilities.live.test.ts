@@ -1,6 +1,6 @@
 // Android node capability live tests verify paired node command allowlists and remote policy behavior.
 import { randomUUID } from "node:crypto";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { unwrapRemoteConfigSnapshot } from "../../test/helpers/gateway/android-node-capabilities-policy-config.js";
 import { shouldFetchRemotePolicyConfig } from "../../test/helpers/gateway/android-node-capabilities-policy-source.js";
@@ -9,7 +9,7 @@ import {
   findMissingRequiredAndroidNodeCommands,
 } from "../../test/helpers/gateway/android-node-capabilities-required-commands.js";
 import { isLiveTestEnabled, readLiveTestConfig } from "../agents/live-test-helpers.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { parseNodeList, parsePairingList } from "../shared/node-list-parse.js";
 import type { NodeListNode } from "../shared/node-list-types.js";
@@ -20,7 +20,7 @@ import { resolveGatewayCredentialsFromConfig } from "./credentials.js";
 import { resolveNodeCommandAllowlist } from "./node-command-policy.js";
 
 const LIVE = isLiveTestEnabled();
-const LIVE_ANDROID_NODE = isTruthyEnvValue(process.env.OPENCLAW_LIVE_ANDROID_NODE);
+const LIVE_ANDROID_NODE = isTruthyEnvValue(process.env.BOT_LIVE_ANDROID_NODE);
 const describeLive = LIVE && LIVE_ANDROID_NODE ? describe : describe.skip;
 const SKIPPED_INTERACTIVE_COMMANDS = new Set<string>();
 
@@ -324,13 +324,13 @@ const COMMAND_PROFILES: Record<string, CommandProfile> = {
 
 async function resolveGatewayConnection() {
   const cfg = await readLiveTestConfig();
-  const urlOverride = readString(process.env.OPENCLAW_ANDROID_GATEWAY_URL);
+  const urlOverride = readString(process.env.BOT_ANDROID_GATEWAY_URL);
   const details = buildGatewayConnectionDetails({
     config: cfg,
     ...(urlOverride ? { url: urlOverride } : {}),
   });
-  const tokenOverride = readString(process.env.OPENCLAW_ANDROID_GATEWAY_TOKEN);
-  const passwordOverride = readString(process.env.OPENCLAW_ANDROID_GATEWAY_PASSWORD);
+  const tokenOverride = readString(process.env.BOT_ANDROID_GATEWAY_TOKEN);
+  const passwordOverride = readString(process.env.BOT_ANDROID_GATEWAY_PASSWORD);
   const creds = resolveGatewayCredentialsFromConfig({
     cfg,
     explicitAuth: {
@@ -349,8 +349,8 @@ async function resolveGatewayConnection() {
 async function resolvePolicyConfigForRun(params: {
   client: GatewayClient;
   connectionDetails: ReturnType<typeof buildGatewayConnectionDetails>;
-  loadLocalConfig?: () => OpenClawConfig | Promise<OpenClawConfig>;
-}): Promise<OpenClawConfig> {
+  loadLocalConfig?: () => BotConfig | Promise<BotConfig>;
+}): Promise<BotConfig> {
   if (shouldFetchRemotePolicyConfig(params.connectionDetails)) {
     const raw = await params.client.request("config.get", {});
     return unwrapRemoteConfigSnapshot(raw);
@@ -383,7 +383,7 @@ describe("resolvePolicyConfigForRun", () => {
   });
 
   it("still uses local config loading for local loopback runs", async () => {
-    const localConfig = { gateway: { bind: "127.0.0.1" } } as unknown as OpenClawConfig;
+    const localConfig = { gateway: { bind: "127.0.0.1" } } as unknown as BotConfig;
     const loadLocalConfig = vi.fn(() => localConfig);
 
     const result = await resolvePolicyConfigForRun({
@@ -453,22 +453,22 @@ function isAndroidNode(node: NodeListNode): boolean {
 }
 
 function selectTargetNode(nodes: NodeListNode[]): NodeListNode {
-  const nodeIdOverride = readString(process.env.OPENCLAW_ANDROID_NODE_ID);
+  const nodeIdOverride = readString(process.env.BOT_ANDROID_NODE_ID);
   if (nodeIdOverride) {
     const match = nodes.find((node) => node.nodeId === nodeIdOverride);
     if (!match) {
-      throw new Error(`OPENCLAW_ANDROID_NODE_ID not found in node.list: ${nodeIdOverride}`);
+      throw new Error(`BOT_ANDROID_NODE_ID not found in node.list: ${nodeIdOverride}`);
     }
     return match;
   }
 
-  const nodeNameOverride = readString(process.env.OPENCLAW_ANDROID_NODE_NAME)?.toLowerCase();
+  const nodeNameOverride = readString(process.env.BOT_ANDROID_NODE_NAME)?.toLowerCase();
   if (nodeNameOverride) {
     const match = nodes.find(
       (node) => readString(node.displayName)?.toLowerCase() === nodeNameOverride,
     );
     if (!match) {
-      throw new Error(`OPENCLAW_ANDROID_NODE_NAME not found in node.list: ${nodeNameOverride}`);
+      throw new Error(`BOT_ANDROID_NODE_NAME not found in node.list: ${nodeNameOverride}`);
     }
     return match;
   }
@@ -586,7 +586,7 @@ describeLive("android node capability integration (preconditioned)", () => {
         [
           `selected node is not ready (nodeId=${nodeId}, connected=${String(target.connected)}, paired=${String(target.paired)})`,
           pendingHint,
-          "precondition: open app, keep foreground, ensure pairing approved (`openclaw nodes pending` / `openclaw nodes approve <requestId>`)",
+          "precondition: open app, keep foreground, ensure pairing approved (`bot nodes pending` / `bot nodes approve <requestId>`)",
         ].join("\n"),
       );
     }

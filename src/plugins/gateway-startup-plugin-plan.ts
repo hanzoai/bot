@@ -1,11 +1,11 @@
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 // Plans deterministic Gateway startup plugin activation from prepared registry metadata.
 import { collectConfiguredAgentHarnessRuntimes } from "../agents/harness-runtimes.js";
 import {
   listExplicitlyDisabledChannelIdsForConfig,
   type AmbientEnvTriggerPolicy,
 } from "../channels/config-presence.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveEffectivePluginActivationState } from "./config-state.js";
 import { isPluginEnabledByDefaultForPlatform } from "./default-enablement.js";
 import {
@@ -65,7 +65,7 @@ export function resolveChannelPluginIdsFromRegistry(params: {
 }
 
 export function resolveConfiguredDeferredChannelPluginIdsFromRegistry(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
   index: PluginRegistrySnapshot;
   manifestRegistry: PluginManifestRegistry;
@@ -96,13 +96,13 @@ export function resolveConfiguredDeferredChannelPluginIdsFromRegistry(params: {
 }
 
 function resolveConfiguredDeferredChannelPluginIdsFromPrepared(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   index: PluginRegistrySnapshot;
   configuredChannelIds: ReadonlySet<string>;
   pluginsConfig: ReturnType<typeof normalizePluginsConfigWithRegistry>;
   activationSource: {
     plugins: ReturnType<typeof normalizePluginsConfigWithRegistry>;
-    rootConfig?: OpenClawConfig;
+    rootConfig?: BotConfig;
   };
   manifestLookup: ManifestRegistryLookup;
   platform?: NodeJS.Platform;
@@ -132,8 +132,8 @@ function resolveConfiguredDeferredChannelPluginIdsFromPrepared(params: {
 }
 
 export function resolveGatewayStartupPluginPlanFromRegistry(params: {
-  config: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
+  config: BotConfig;
+  activationSourceConfig?: BotConfig;
   env: NodeJS.ProcessEnv;
   index: PluginRegistrySnapshot;
   manifestRegistry: PluginManifestRegistry;

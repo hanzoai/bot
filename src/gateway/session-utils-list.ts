@@ -1,8 +1,8 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import type { SessionsListParams } from "../../packages/gateway-protocol/src/index.js";
 import { readAcpSessionMetaBatch } from "../acp/runtime/session-meta.js";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
@@ -13,7 +13,7 @@ import {
 } from "../agents/subagent-registry-read.js";
 import { shouldKeepSubagentRunChildLink } from "../agents/subagent-run-liveness.js";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { withPinnedActivePluginRegistryWorkspaceDir } from "../plugins/runtime-workspace-state.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 import { isCronRunSessionKey } from "../sessions/session-key-utils.js";
@@ -66,7 +66,7 @@ type SessionEntrySelection = {
 };
 
 function populateSessionListAcpMetadata(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entries: readonly SessionEntryPair[];
   opts: SessionsListParams;
   rowContext?: SessionListRowContext;
@@ -119,7 +119,7 @@ function resolveSessionsListWindowLimit(limit: number | undefined, offset: numbe
 }
 
 function filterSessionEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   store: Record<string, SessionEntry>;
   opts: SessionsListParams;
   now: number;
@@ -274,7 +274,7 @@ function isPhantomAgentStoreListEntry(key: string, entry: SessionEntry | undefin
 }
 
 function selectSessionEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   store: Record<string, SessionEntry>;
   opts: SessionsListParams;
   now: number;
@@ -330,7 +330,7 @@ function listSessionCreatorIdentities(
 }
 
 export function filterAndSortSessionEntries(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   store: Record<string, SessionEntry>;
   opts: SessionsListParams;
   now: number;
@@ -341,7 +341,7 @@ export function filterAndSortSessionEntries(params: {
 }
 
 export function listSessionsFromStore(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   storePath: string;
   store: Record<string, SessionEntry>;
   modelCatalog?: ModelCatalogEntry[];
@@ -437,7 +437,7 @@ export function listSessionsFromStore(params: {
  * loop responsive for WebSocket heartbeats, channel I/O, and concurrent RPC.
  */
 export async function listSessionsFromStoreAsync(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   storePath: string;
   store: Record<string, SessionEntry>;
   modelCatalog?: ModelCatalogEntry[];

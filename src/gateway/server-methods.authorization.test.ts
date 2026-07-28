@@ -6,7 +6,7 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { withBotTestState } from "../test-utils/bot-test-state.js";
 import {
   createGatewayMethodRegistry,
   createPluginGatewayMethodDescriptor,
@@ -240,7 +240,7 @@ describe("gateway method authorization", () => {
   });
 
   it("rejects a mutation when its authorized session instance is replaced before commit", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withBotTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:commit-bound-authorization";
       await upsertSessionEntry(
         { agentId: "main", sessionKey },

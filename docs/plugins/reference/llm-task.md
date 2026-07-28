@@ -11,8 +11,8 @@ Generic JSON-only LLM tool for structured tasks callable from workflows.
 
 ## Distribution
 
-- Package: `@openclaw/llm-task`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-llm-task`
+- Install route: included in Bot
 
 ## Surface
 

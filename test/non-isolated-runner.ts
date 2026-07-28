@@ -25,12 +25,12 @@ type TestRunnerInternals = {
   workerState: { evaluatedModules: unknown };
 };
 
-const SHARED_TEST_SETUP = Symbol.for("openclaw.sharedTestSetup");
-const EMBEDDED_RUN_STATE = Symbol.for("openclaw.embeddedRunState");
-const REPLY_RUN_REGISTRY = Symbol.for("openclaw.replyRunRegistry");
-const DIAGNOSTIC_EVENTS_STATE = Symbol.for("openclaw.diagnosticEvents.state.v1");
+const SHARED_TEST_SETUP = Symbol.for("bot.sharedTestSetup");
+const EMBEDDED_RUN_STATE = Symbol.for("bot.embeddedRunState");
+const REPLY_RUN_REGISTRY = Symbol.for("bot.replyRunRegistry");
+const DIAGNOSTIC_EVENTS_STATE = Symbol.for("bot.diagnosticEvents.state.v1");
 const DIAGNOSTIC_EVENT_LISTENER_PRESENCE = Symbol.for(
-  "openclaw.diagnosticEventListenerPresence.v1",
+  "bot.diagnosticEventListenerPresence.v1",
 );
 const nativeTimerGlobals = {
   setTimeout: globalThis.setTimeout,
@@ -46,7 +46,7 @@ function getSharedTestHome(): string | undefined {
   const globalState = globalThis as typeof globalThis & {
     [SHARED_TEST_SETUP]?: { tempHome?: string };
   };
-  return globalState[SHARED_TEST_SETUP]?.tempHome ?? process.env.OPENCLAW_TEST_HOME;
+  return globalState[SHARED_TEST_SETUP]?.tempHome ?? process.env.BOT_TEST_HOME;
 }
 
 function resetEvaluatedModules(modules: EvaluatedModules, resetMocks: boolean) {
@@ -76,10 +76,10 @@ function restoreSharedTestHomeAfterEnvUnstub(testHomeRaw: string | undefined): v
 
   process.env.HOME = testHome;
   process.env.USERPROFILE = testHome;
-  process.env.OPENCLAW_TEST_HOME = testHome;
-  delete process.env.OPENCLAW_CONFIG_PATH;
-  delete process.env.OPENCLAW_STATE_DIR;
-  delete process.env.OPENCLAW_AGENT_DIR;
+  process.env.BOT_TEST_HOME = testHome;
+  delete process.env.BOT_CONFIG_PATH;
+  delete process.env.BOT_STATE_DIR;
+  delete process.env.BOT_AGENT_DIR;
   process.env.XDG_CONFIG_HOME = path.join(testHome, ".config");
   process.env.XDG_DATA_HOME = path.join(testHome, ".local", "share");
   process.env.XDG_STATE_HOME = path.join(testHome, ".local", "state");
@@ -163,7 +163,7 @@ function runCleanupActions(actions: CleanupAction[]): unknown {
   return firstError;
 }
 
-function resetOpenClawGlobalRunState(): void {
+function resetBotGlobalRunState(): void {
   const cleanupActions: CleanupAction[] = [];
   const globalStore = globalThis as Record<PropertyKey, unknown>;
   const embeddedRunState = globalStore[EMBEDDED_RUN_STATE] as EmbeddedRunStateForTest | undefined;
@@ -224,7 +224,7 @@ function resetOpenClawGlobalRunState(): void {
   replyRunState?.waitersByKey?.clear();
 }
 
-function resetOpenClawGlobalDiagnosticState(): void {
+function resetBotGlobalDiagnosticState(): void {
   const globalStore = globalThis as Record<PropertyKey, unknown>;
   const state = globalStore[DIAGNOSTIC_EVENTS_STATE] as DiagnosticEventsStateForTest | undefined;
   // The dispatcher intentionally survives module reloads. Mirror isolate mode
@@ -247,7 +247,7 @@ function resetOpenClawGlobalDiagnosticState(): void {
   }
 }
 
-const SERIALIZED_RESOLVE_MOCKS = Symbol.for("openclaw.serializedResolveMocks");
+const SERIALIZED_RESOLVE_MOCKS = Symbol.for("bot.serializedResolveMocks");
 
 // Vitest's BareModuleMocker.resolveMocks has no in-flight guard: pendingIds is
 // cleared only after all parallel resolveId RPCs settle, and every registration
@@ -305,7 +305,7 @@ export function serializeMockerResolveMocks(
   };
 }
 
-export default class OpenClawNonIsolatedRunner extends TestRunner {
+export default class BotNonIsolatedRunner extends TestRunner {
   override onCollectStart(file: RunnerTestFile) {
     super.onCollectStart(file);
     const internals = this as unknown as TestRunnerInternals;
@@ -315,7 +315,7 @@ export default class OpenClawNonIsolatedRunner extends TestRunner {
     restoreRealTimers();
     restoreNativeTimerGlobals();
     restoreSharedTestHomeAfterEnvUnstub(getSharedTestHome());
-    const orderLogPath = process.env.OPENCLAW_VITEST_FILE_ORDER_LOG?.trim();
+    const orderLogPath = process.env.BOT_VITEST_FILE_ORDER_LOG?.trim();
     if (orderLogPath) {
       fs.appendFileSync(orderLogPath, `START ${file.filepath}\n`);
     }
@@ -346,7 +346,7 @@ export default class OpenClawNonIsolatedRunner extends TestRunner {
       return;
     }
 
-    const orderLogPath = process.env.OPENCLAW_VITEST_FILE_ORDER_LOG?.trim();
+    const orderLogPath = process.env.BOT_VITEST_FILE_ORDER_LOG?.trim();
     if (orderLogPath) {
       for (const file of files ?? []) {
         fs.appendFileSync(orderLogPath, `END ${file.filepath}\n`);
@@ -362,8 +362,8 @@ export default class OpenClawNonIsolatedRunner extends TestRunner {
     vi.unstubAllEnvs();
     restoreSharedTestHomeAfterEnvUnstub(testHome);
     vi.clearAllMocks();
-    resetOpenClawGlobalRunState();
-    resetOpenClawGlobalDiagnosticState();
+    resetBotGlobalRunState();
+    resetBotGlobalDiagnosticState();
     // Named plugin runtimes intentionally survive duplicate module evaluation in production.
     // Clear their shared slots here so one test file cannot lend a partial runtime to the next.
     clearNamedPluginRuntimeStoresForTest();

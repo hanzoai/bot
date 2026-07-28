@@ -209,7 +209,7 @@ describe("wrapToolWorkspaceRootGuardWithOptions", () => {
     await expect(
       wrapped.execute("tc-outside-temp", { path: "/tmp/repo_meta.jsonl" }),
     ).rejects.toThrow(
-      /Path escapes sandbox root .* Use a relative path under `.openclaw\/tmp\/` inside the workspace/,
+      /Path escapes sandbox root .* Use a relative path under `.bot\/tmp\/` inside the workspace/,
     );
     expect(execute).not.toHaveBeenCalled();
   });

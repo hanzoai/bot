@@ -3,24 +3,24 @@ import { createHash } from "node:crypto";
 import type { Dirent } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import {
   buildSessionEntry,
   listSessionTranscriptCorpusEntriesForAgent,
   parseUsageCountedSessionIdFromFileName,
   sessionPathForFile,
-} from "openclaw/plugin-sdk/memory-core-host-engine-qmd";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
+} from "bot/plugin-sdk/memory-core-host-engine-qmd";
+import type { MemorySearchResult } from "bot/plugin-sdk/memory-core-host-runtime-files";
 import {
   formatMemoryDreamingDay,
   resolveMemoryDreamingWorkspaces,
   resolveMemoryLightDreamingConfig,
   resolveMemoryRemDreamingConfig,
-} from "openclaw/plugin-sdk/memory-core-host-status";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { appendRegularFile } from "openclaw/plugin-sdk/security-runtime";
-import { normalizeStringEntries, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/memory-core-host-status";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-entry";
+import { appendRegularFile } from "bot/plugin-sdk/security-runtime";
+import { normalizeStringEntries, uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import { appendFailedDreamingEvent } from "./dreaming-events.js";
 import {
   normalizeDailyIngestionState,
@@ -61,7 +61,7 @@ import {
   type ShortTermRecallEntry,
 } from "./short-term-promotion.js";
 
-type Logger = Pick<OpenClawPluginApi["logger"], "info" | "warn" | "error">;
+type Logger = Pick<BotPluginApi["logger"], "info" | "warn" | "error">;
 type DreamingHostConfig = unknown;
 type DreamingPhaseStorageConfig = {
   timezone?: string;
@@ -101,13 +101,13 @@ const GENERIC_DAY_HEADING_RE =
 const MANAGED_DAILY_DREAMING_BLOCKS = [
   {
     heading: "## Light Sleep",
-    startMarker: "<!-- openclaw:dreaming:light:start -->",
-    endMarker: "<!-- openclaw:dreaming:light:end -->",
+    startMarker: "<!-- bot:dreaming:light:start -->",
+    endMarker: "<!-- bot:dreaming:light:end -->",
   },
   {
     heading: "## REM Sleep",
-    startMarker: "<!-- openclaw:dreaming:rem:start -->",
-    endMarker: "<!-- openclaw:dreaming:rem:end -->",
+    startMarker: "<!-- bot:dreaming:rem:start -->",
+    endMarker: "<!-- bot:dreaming:rem:end -->",
   },
 ] as const;
 

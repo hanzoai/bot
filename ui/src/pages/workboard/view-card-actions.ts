@@ -170,7 +170,7 @@ function renderCardActionButton(params: {
     </button>
   `;
   return params.iconOnly
-    ? html`<openclaw-tooltip .content=${params.label}>${button}</openclaw-tooltip>`
+    ? html`<bot-tooltip .content=${params.label}>${button}</bot-tooltip>`
     : button;
 }
 
@@ -341,7 +341,7 @@ export function renderStartExecutionButton(
     </button>
   `;
   return options.iconOnly
-    ? html`<openclaw-tooltip .content=${title}>${button}</openclaw-tooltip>`
+    ? html`<bot-tooltip .content=${title}>${button}</bot-tooltip>`
     : button;
 }
 

@@ -1,6 +1,6 @@
 /** Tracks the current plugin metadata snapshot for control-plane lookups. */
-import { setCurrentManifestModelIdNormalizationRecords } from "@openclaw/model-catalog-core/provider-model-id-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { setCurrentManifestModelIdNormalizationRecords } from "@hanzo/bot-model-catalog-core/provider-model-id-normalization";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   currentPluginMetadataConfigIdentityCache,
   getCurrentPluginMetadataSnapshotState,
@@ -20,11 +20,11 @@ import { normalizePluginIdScope, serializePluginIdScope } from "./plugin-scope.j
 type CurrentPluginMetadataSnapshotState = ReturnType<
   typeof getCurrentPluginMetadataSnapshotState
 > & {
-  configIdentities: WeakSet<OpenClawConfig>;
+  configIdentities: WeakSet<BotConfig>;
 };
 
 function resolvePluginMetadataControlPlaneFingerprint(
-  config?: OpenClawConfig,
+  config?: BotConfig,
   options: Omit<ResolvePluginControlPlaneContextParams, "config"> = {},
 ): string {
   return resolvePluginControlPlaneFingerprint({
@@ -38,8 +38,8 @@ function resolvePluginMetadataControlPlaneFingerprint(
 export function setCurrentPluginMetadataSnapshot(
   snapshot: PluginMetadataSnapshot | undefined,
   options: {
-    config?: OpenClawConfig;
-    compatibleConfigs?: readonly OpenClawConfig[];
+    config?: BotConfig;
+    compatibleConfigs?: readonly BotConfig[];
     env?: NodeJS.ProcessEnv;
     workspaceDir?: string;
   } = {},
@@ -150,7 +150,7 @@ export function restoreCurrentPluginMetadataSnapshotState(
 
 export function getCurrentPluginMetadataSnapshot(
   params: {
-    config?: OpenClawConfig;
+    config?: BotConfig;
     env?: NodeJS.ProcessEnv;
     allowScopedSnapshot?: boolean;
     pluginIds?: readonly string[];

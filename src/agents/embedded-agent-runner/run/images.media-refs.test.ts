@@ -80,7 +80,7 @@ describe("fact-carried image references", () => {
   });
 
   it("loads an explicit ref matching a fact sliced into an inline slot", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-inline-explicit-ref-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-inline-explicit-ref-"));
     const imagePath = path.join(workspaceDir, "photo.png");
     await fs.writeFile(imagePath, Buffer.from(TINY_PNG_BASE64, "base64"));
     const inlineImage = { type: "image" as const, data: TINY_PNG_BASE64, mimeType: "image/png" };
@@ -108,7 +108,7 @@ describe("fact-carried image references", () => {
   });
 
   it("keeps identity-bearing refs when image order metadata has more inline slots", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-partial-inline-order-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-partial-inline-order-"));
     const imagePath = path.join(workspaceDir, "offloaded.png");
     await fs.writeFile(imagePath, Buffer.from(TINY_PNG_BASE64, "base64"));
     const firstInline = { type: "image" as const, data: TINY_PNG_BASE64, mimeType: "image/png" };
@@ -139,7 +139,7 @@ describe("fact-carried image references", () => {
   });
 
   it("fails an exact inline slot whose image block is missing", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-missing-inline-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-missing-inline-"));
     const imagePath = path.join(workspaceDir, "stale.png");
     await fs.writeFile(imagePath, Buffer.from(TINY_PNG_BASE64, "base64"));
 
@@ -162,7 +162,7 @@ describe("fact-carried image references", () => {
   });
 
   it("hydrates a fact whose only local identity is a file URL", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-image-file-url-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-image-file-url-"));
     const imagePath = path.join(workspaceDir, "photo.png");
     await fs.writeFile(imagePath, Buffer.from(TINY_PNG_BASE64, "base64"));
 
@@ -185,15 +185,15 @@ describe("fact-carried image references", () => {
   it("hydrates managed inbound media URIs before workspace path resolution", async () => {
     // Managed media URIs are canonical inbound attachment handles and should
     // work even when workspaceOnly would reject ordinary outside paths.
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-native-image-uri-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-native-image-uri-"));
     const workspaceDir = path.join(stateDir, "workspace-agent");
     const inboundDir = path.join(stateDir, "media", "inbound");
     const mediaId = "telegram-photo.png";
     await fs.mkdir(workspaceDir, { recursive: true });
     await fs.mkdir(inboundDir, { recursive: true });
     await fs.writeFile(path.join(inboundDir, mediaId), Buffer.from(TINY_PNG_BASE64, "base64"));
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+    const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
+    setTestEnvValue("BOT_STATE_DIR", stateDir);
 
     try {
       const result = await detectAndLoadPromptImages({
@@ -215,7 +215,7 @@ describe("fact-carried image references", () => {
   });
 
   it("hydrates sandbox-staged inbound media URIs", async () => {
-    const sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-native-image-sbx-uri-"));
+    const sandboxRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-native-image-sbx-uri-"));
     const inboundDir = path.join(sandboxRoot, "media", "inbound");
     const mediaId = "telegram-photo.png";
     await fs.mkdir(inboundDir, { recursive: true });
@@ -263,7 +263,7 @@ describe("fact-carried image references", () => {
   it("allows sandbox-validated host paths outside default media roots", async () => {
     const homeDir = os.homedir();
     await fs.mkdir(homeDir, { recursive: true });
-    const sandboxParent = await fs.mkdtemp(path.join(homeDir, "openclaw-sandbox-image-"));
+    const sandboxParent = await fs.mkdtemp(path.join(homeDir, "bot-sandbox-image-"));
     try {
       const sandboxRoot = path.join(sandboxParent, "sandbox");
       await fs.mkdir(sandboxRoot, { recursive: true });

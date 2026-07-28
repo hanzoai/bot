@@ -9,7 +9,7 @@ import { withEnv } from "../../src/test-utils/env.js";
 const tempDirs: string[] = [];
 
 function makeTempRoot(): string {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-npm-verify-exec-"));
+  const root = mkdtempSync(path.join(tmpdir(), "bot-npm-verify-exec-"));
   tempDirs.push(root);
   return root;
 }
@@ -71,22 +71,22 @@ describe("npm verifier command execution", () => {
   it("rejects malformed command limit environment values", () => {
     const root = makeTempRoot();
 
-    withEnv({ OPENCLAW_NPM_VERIFY_COMMAND_TIMEOUT_MS: "5m" }, () => {
+    withEnv({ BOT_NPM_VERIFY_COMMAND_TIMEOUT_MS: "5m" }, () => {
       expect(() =>
         runNpmVerifyCommand(
           { command: process.execPath, args: ["-e", "process.stdout.write('ok')"] },
           root,
         ),
-      ).toThrow("invalid OPENCLAW_NPM_VERIFY_COMMAND_TIMEOUT_MS: 5m");
+      ).toThrow("invalid BOT_NPM_VERIFY_COMMAND_TIMEOUT_MS: 5m");
     });
 
-    withEnv({ OPENCLAW_NPM_VERIFY_COMMAND_MAX_BUFFER_BYTES: "16mb" }, () => {
+    withEnv({ BOT_NPM_VERIFY_COMMAND_MAX_BUFFER_BYTES: "16mb" }, () => {
       expect(() =>
         runNpmVerifyCommand(
           { command: process.execPath, args: ["-e", "process.stdout.write('ok')"] },
           root,
         ),
-      ).toThrow("invalid OPENCLAW_NPM_VERIFY_COMMAND_MAX_BUFFER_BYTES: 16mb");
+      ).toThrow("invalid BOT_NPM_VERIFY_COMMAND_MAX_BUFFER_BYTES: 16mb");
     });
   });
 });

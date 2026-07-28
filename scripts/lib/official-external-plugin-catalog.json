@@ -1,33 +1,33 @@
 {
   "schemaVersion": 1,
-  "id": "openclaw-official-external-plugins",
+  "id": "bot-official-external-plugins",
   "generatedAt": "2026-06-22T00:00:00.000Z",
   "sequence": 1,
-  "description": "Bundled fallback feed for official external OpenClaw plugins.",
+  "description": "Bundled fallback feed for official external Bot plugins.",
   "entries": [
     {
-      "name": "@openclaw/acpx",
-      "description": "OpenClaw ACP runtime backend",
+      "name": "@hanzo/bot-acpx",
+      "description": "Bot ACP runtime backend",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "acpx",
           "label": "ACPX Runtime"
         },
         "install": {
-          "npmSpec": "@openclaw/acpx",
+          "npmSpec": "@hanzo/bot-acpx",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.4.25"
         }
       }
     },
     {
-      "name": "@openclaw/brave-plugin",
-      "description": "OpenClaw Brave plugin",
+      "name": "@hanzo/bot-brave-plugin",
+      "description": "Bot Brave plugin",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "brave",
           "label": "Brave"
@@ -42,13 +42,13 @@
             "envVars": ["BRAVE_API_KEY"],
             "placeholder": "BSA...",
             "signupUrl": "https://api-dashboard.search.brave.com/app/keys",
-            "docsUrl": "https://docs.openclaw.ai/tools/brave-search",
+            "docsUrl": "https://docs.bot.ai/tools/brave-search",
             "credentialPath": "plugins.entries.brave.config.webSearch.apiKey",
             "autoDetectOrder": 10
           }
         ],
         "install": {
-          "npmSpec": "@openclaw/brave-plugin",
+          "npmSpec": "@hanzo/bot-brave-plugin",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.4.10",
           "allowInvalidConfigRecovery": true
@@ -56,11 +56,11 @@
       }
     },
     {
-      "name": "@openclaw/codex",
-      "description": "OpenClaw Codex app-server harness and native session catalog",
+      "name": "@hanzo/bot-codex",
+      "description": "Bot Codex app-server harness and native session catalog",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "codex",
           "label": "Codex"
@@ -69,72 +69,72 @@
           "migrationProviders": ["codex"]
         },
         "install": {
-          "npmSpec": "@openclaw/codex",
+          "npmSpec": "@hanzo/bot-codex",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.5.1-beta.1"
         }
       }
     },
     {
-      "name": "@openclaw/copilot",
-      "description": "OpenClaw GitHub Copilot agent runtime plugin",
+      "name": "@hanzo/bot-copilot",
+      "description": "Bot GitHub Copilot agent runtime plugin",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "copilot",
           "label": "GitHub Copilot agent runtime"
         },
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/copilot",
-          "npmSpec": "@openclaw/copilot",
+          "clawhubSpec": "clawhub:@hanzo/bot-copilot",
+          "npmSpec": "@hanzo/bot-copilot",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.5.28"
         }
       }
     },
     {
-      "name": "@openclaw/diagnostics-otel",
-      "description": "OpenClaw diagnostics OpenTelemetry exporter",
+      "name": "@hanzo/bot-diagnostics-otel",
+      "description": "Bot diagnostics OpenTelemetry exporter",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "diagnostics-otel",
           "label": "Diagnostics OpenTelemetry"
         },
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/diagnostics-otel",
-          "npmSpec": "@openclaw/diagnostics-otel",
+          "clawhubSpec": "clawhub:@hanzo/bot-diagnostics-otel",
+          "npmSpec": "@hanzo/bot-diagnostics-otel",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.4.25"
         }
       }
     },
     {
-      "name": "@openclaw/diagnostics-prometheus",
-      "description": "OpenClaw diagnostics Prometheus exporter",
+      "name": "@hanzo/bot-diagnostics-prometheus",
+      "description": "Bot diagnostics Prometheus exporter",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "diagnostics-prometheus",
           "label": "Diagnostics Prometheus"
         },
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/diagnostics-prometheus",
-          "npmSpec": "@openclaw/diagnostics-prometheus",
+          "clawhubSpec": "clawhub:@hanzo/bot-diagnostics-prometheus",
+          "npmSpec": "@hanzo/bot-diagnostics-prometheus",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.4.25"
         }
       }
     },
     {
-      "name": "@openclaw/diffs",
-      "description": "OpenClaw diff viewer plugin",
+      "name": "@hanzo/bot-diffs",
+      "description": "Bot diff viewer plugin",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "diffs",
           "label": "Diffs"
@@ -144,37 +144,37 @@
           "order": 40
         },
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/diffs",
-          "npmSpec": "@openclaw/diffs",
+          "clawhubSpec": "clawhub:@hanzo/bot-diffs",
+          "npmSpec": "@hanzo/bot-diffs",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.4.30"
         }
       }
     },
     {
-      "name": "@openclaw/diffs-language-pack",
-      "description": "OpenClaw diffs viewer syntax highlighting language pack",
+      "name": "@hanzo/bot-diffs-language-pack",
+      "description": "Bot diffs viewer syntax highlighting language pack",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "diffs-language-pack",
           "label": "Diff Viewer Language Pack"
         },
         "install": {
-          "npmSpec": "@openclaw/diffs-language-pack",
-          "clawhubSpec": "clawhub:@openclaw/diffs-language-pack",
+          "npmSpec": "@hanzo/bot-diffs-language-pack",
+          "clawhubSpec": "clawhub:@hanzo/bot-diffs-language-pack",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.5.27"
         }
       }
     },
     {
-      "name": "@openclaw/exa-plugin",
-      "description": "OpenClaw Exa plugin.",
+      "name": "@hanzo/bot-exa-plugin",
+      "description": "Bot Exa plugin.",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "exa",
           "label": "Exa"
@@ -198,25 +198,25 @@
             ],
             "placeholder": "exa-...",
             "signupUrl": "https://exa.ai/",
-            "docsUrl": "https://docs.openclaw.ai/tools/web",
+            "docsUrl": "https://docs.bot.ai/tools/web",
             "credentialPath": "plugins.entries.exa.config.webSearch.apiKey",
             "autoDetectOrder": 65
           }
         ],
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/exa-plugin",
-          "npmSpec": "@openclaw/exa-plugin",
+          "clawhubSpec": "clawhub:@hanzo/bot-exa-plugin",
+          "npmSpec": "@hanzo/bot-exa-plugin",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.6.8"
         }
       }
     },
     {
-      "name": "@openclaw/firecrawl-plugin",
-      "description": "OpenClaw Firecrawl plugin.",
+      "name": "@hanzo/bot-firecrawl-plugin",
+      "description": "Bot Firecrawl plugin.",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "firecrawl",
           "label": "Firecrawl"
@@ -248,7 +248,7 @@
             ],
             "placeholder": "fc-...",
             "signupUrl": "https://www.firecrawl.dev/",
-            "docsUrl": "https://docs.openclaw.ai/tools/firecrawl",
+            "docsUrl": "https://docs.bot.ai/tools/firecrawl",
             "credentialPath": "plugins.entries.firecrawl.config.webSearch.apiKey",
             "autoDetectOrder": 60
           },
@@ -263,41 +263,41 @@
             "envVars": [],
             "placeholder": "(no key needed)",
             "signupUrl": "https://www.firecrawl.dev/",
-            "docsUrl": "https://docs.openclaw.ai/tools/firecrawl",
+            "docsUrl": "https://docs.bot.ai/tools/firecrawl",
             "credentialPath": ""
           }
         ],
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/firecrawl-plugin",
-          "npmSpec": "@openclaw/firecrawl-plugin",
+          "clawhubSpec": "clawhub:@hanzo/bot-firecrawl-plugin",
+          "npmSpec": "@hanzo/bot-firecrawl-plugin",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.6.8"
         }
       }
     },
     {
-      "name": "@openclaw/google-meet",
-      "description": "OpenClaw Google Meet participant plugin",
+      "name": "@hanzo/bot-google-meet",
+      "description": "Bot Google Meet participant plugin",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "google-meet",
           "label": "Google Meet"
         },
         "install": {
-          "npmSpec": "@openclaw/google-meet",
+          "npmSpec": "@hanzo/bot-google-meet",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.4.20"
         }
       }
     },
     {
-      "name": "@openclaw/gradium-speech",
-      "description": "OpenClaw Gradium speech plugin.",
+      "name": "@hanzo/bot-gradium-speech",
+      "description": "Bot Gradium speech plugin.",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "gradium",
           "label": "Gradium"
@@ -308,19 +308,19 @@
           ]
         },
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/gradium-speech",
-          "npmSpec": "@openclaw/gradium-speech",
+          "clawhubSpec": "clawhub:@hanzo/bot-gradium-speech",
+          "npmSpec": "@hanzo/bot-gradium-speech",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.6.8"
         }
       }
     },
     {
-      "name": "@openclaw/inworld-speech",
-      "description": "OpenClaw Inworld speech plugin.",
+      "name": "@hanzo/bot-inworld-speech",
+      "description": "Bot Inworld speech plugin.",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "inworld",
           "label": "Inworld"
@@ -331,19 +331,19 @@
           ]
         },
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/inworld-speech",
-          "npmSpec": "@openclaw/inworld-speech",
+          "clawhubSpec": "clawhub:@hanzo/bot-inworld-speech",
+          "npmSpec": "@hanzo/bot-inworld-speech",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.6.8"
         }
       }
     },
     {
-      "name": "@openclaw/lobster",
+      "name": "@hanzo/bot-lobster",
       "description": "Lobster workflow tool plugin (typed pipelines + resumable approvals)",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "lobster",
           "label": "Lobster"
@@ -353,19 +353,19 @@
           "order": 50
         },
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/lobster",
-          "npmSpec": "@openclaw/lobster",
+          "clawhubSpec": "clawhub:@hanzo/bot-lobster",
+          "npmSpec": "@hanzo/bot-lobster",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.4.25"
         }
       }
     },
     {
-      "name": "@openclaw/memory-lancedb",
-      "description": "OpenClaw LanceDB-backed long-term memory plugin with auto-recall/capture",
+      "name": "@hanzo/bot-memory-lancedb",
+      "description": "Bot LanceDB-backed long-term memory plugin with auto-recall/capture",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "memory-lancedb",
           "label": "Memory LanceDB"
@@ -375,19 +375,19 @@
           "order": 70
         },
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/memory-lancedb",
-          "npmSpec": "@openclaw/memory-lancedb",
+          "clawhubSpec": "clawhub:@hanzo/bot-memory-lancedb",
+          "npmSpec": "@hanzo/bot-memory-lancedb",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.5.31"
         }
       }
     },
     {
-      "name": "@openclaw/llama-cpp-provider",
-      "description": "OpenClaw llama.cpp embedding provider plugin",
+      "name": "@hanzo/bot-llama-cpp-provider",
+      "description": "Bot llama.cpp embedding provider plugin",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "llama-cpp",
           "label": "llama.cpp Provider"
@@ -396,35 +396,35 @@
           "embeddingProviders": ["local"]
         },
         "install": {
-          "npmSpec": "@openclaw/llama-cpp-provider",
+          "npmSpec": "@hanzo/bot-llama-cpp-provider",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.6.2"
         }
       }
     },
     {
-      "name": "@openclaw/openshell-sandbox",
-      "description": "OpenClaw OpenShell sandbox backend",
+      "name": "@hanzo/bot-openshell-sandbox",
+      "description": "Bot OpenShell sandbox backend",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "openshell",
           "label": "OpenShell Sandbox"
         },
         "install": {
-          "npmSpec": "@openclaw/openshell-sandbox",
+          "npmSpec": "@hanzo/bot-openshell-sandbox",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.5.12-beta.1"
         }
       }
     },
     {
-      "name": "@openclaw/parallel-plugin",
-      "description": "OpenClaw Parallel web search plugin.",
+      "name": "@hanzo/bot-parallel-plugin",
+      "description": "Bot Parallel web search plugin.",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "parallel",
           "label": "Parallel"
@@ -449,7 +449,7 @@
             ],
             "placeholder": "par-...",
             "signupUrl": "https://platform.parallel.ai",
-            "docsUrl": "https://docs.openclaw.ai/tools/parallel-search",
+            "docsUrl": "https://docs.bot.ai/tools/parallel-search",
             "credentialPath": "plugins.entries.parallel.config.webSearch.apiKey",
             "autoDetectOrder": 75
           },
@@ -464,24 +464,24 @@
             "envVars": [],
             "placeholder": "(no key needed)",
             "signupUrl": "https://parallel.ai",
-            "docsUrl": "https://docs.openclaw.ai/tools/parallel-search",
+            "docsUrl": "https://docs.bot.ai/tools/parallel-search",
             "credentialPath": ""
           }
         ],
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/parallel-plugin",
-          "npmSpec": "@openclaw/parallel-plugin",
+          "clawhubSpec": "clawhub:@hanzo/bot-parallel-plugin",
+          "npmSpec": "@hanzo/bot-parallel-plugin",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.6.8"
         }
       }
     },
     {
-      "name": "@openclaw/perplexity-plugin",
-      "description": "OpenClaw Perplexity plugin.",
+      "name": "@hanzo/bot-perplexity-plugin",
+      "description": "Bot Perplexity plugin.",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "perplexity",
           "label": "Perplexity"
@@ -506,43 +506,43 @@
             ],
             "placeholder": "pplx-...",
             "signupUrl": "https://www.perplexity.ai/settings/api",
-            "docsUrl": "https://docs.openclaw.ai/perplexity",
+            "docsUrl": "https://docs.bot.ai/perplexity",
             "credentialPath": "plugins.entries.perplexity.config.webSearch.apiKey",
             "autoDetectOrder": 50
           }
         ],
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/perplexity-plugin",
-          "npmSpec": "@openclaw/perplexity-plugin",
+          "clawhubSpec": "clawhub:@hanzo/bot-perplexity-plugin",
+          "npmSpec": "@hanzo/bot-perplexity-plugin",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.6.8"
         }
       }
     },
     {
-      "name": "@openclaw/pixverse-provider",
-      "description": "OpenClaw PixVerse video generation provider plugin",
+      "name": "@hanzo/bot-pixverse-provider",
+      "description": "Bot PixVerse video generation provider plugin",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "pixverse",
           "label": "PixVerse"
         },
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/pixverse-provider",
-          "npmSpec": "@openclaw/pixverse-provider",
+          "clawhubSpec": "clawhub:@hanzo/bot-pixverse-provider",
+          "npmSpec": "@hanzo/bot-pixverse-provider",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.5.26"
         }
       }
     },
     {
-      "name": "@openclaw/searxng-plugin",
-      "description": "OpenClaw SearXNG plugin",
+      "name": "@hanzo/bot-searxng-plugin",
+      "description": "Bot SearXNG plugin",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "searxng",
           "label": "SearXNG"
@@ -567,14 +567,14 @@
             ],
             "placeholder": "http://localhost:8080",
             "signupUrl": "https://docs.searxng.org/",
-            "docsUrl": "https://docs.openclaw.ai/tools/searxng-search",
+            "docsUrl": "https://docs.bot.ai/tools/searxng-search",
             "credentialPath": "plugins.entries.searxng.config.webSearch.baseUrl",
             "autoDetectOrder": 200
           }
         ],
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/searxng-plugin",
-          "npmSpec": "@openclaw/searxng-plugin",
+          "clawhubSpec": "clawhub:@hanzo/bot-searxng-plugin",
+          "npmSpec": "@hanzo/bot-searxng-plugin",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.6.9",
           "allowInvalidConfigRecovery": true
@@ -582,11 +582,11 @@
       }
     },
     {
-      "name": "@openclaw/tavily-plugin",
-      "description": "OpenClaw Tavily plugin",
+      "name": "@hanzo/bot-tavily-plugin",
+      "description": "Bot Tavily plugin",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "tavily",
           "label": "Tavily"
@@ -614,14 +614,14 @@
             ],
             "placeholder": "tvly-...",
             "signupUrl": "https://tavily.com/",
-            "docsUrl": "https://docs.openclaw.ai/tools/tavily",
+            "docsUrl": "https://docs.bot.ai/tools/tavily",
             "credentialPath": "plugins.entries.tavily.config.webSearch.apiKey",
             "autoDetectOrder": 70
           }
         ],
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/tavily-plugin",
-          "npmSpec": "@openclaw/tavily-plugin",
+          "clawhubSpec": "clawhub:@hanzo/bot-tavily-plugin",
+          "npmSpec": "@hanzo/bot-tavily-plugin",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.6.9",
           "allowInvalidConfigRecovery": true
@@ -629,11 +629,11 @@
       }
     },
     {
-      "name": "@openclaw/tokenjuice",
-      "description": "OpenClaw tokenjuice exec output compaction plugin",
+      "name": "@hanzo/bot-tokenjuice",
+      "description": "Bot tokenjuice exec output compaction plugin",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "tokenjuice",
           "label": "Tokenjuice"
@@ -643,25 +643,25 @@
           "order": 60
         },
         "install": {
-          "clawhubSpec": "clawhub:@openclaw/tokenjuice",
-          "npmSpec": "@openclaw/tokenjuice",
+          "clawhubSpec": "clawhub:@hanzo/bot-tokenjuice",
+          "npmSpec": "@hanzo/bot-tokenjuice",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.5.28"
         }
       }
     },
     {
-      "name": "@openclaw/voice-call",
-      "description": "OpenClaw voice-call plugin",
+      "name": "@hanzo/bot-voice-call",
+      "description": "Bot voice-call plugin",
       "source": "official",
       "kind": "plugin",
-      "openclaw": {
+      "bot": {
         "plugin": {
           "id": "voice-call",
           "label": "Voice Call"
         },
         "install": {
-          "npmSpec": "@openclaw/voice-call",
+          "npmSpec": "@hanzo/bot-voice-call",
           "defaultChoice": "npm",
           "minHostVersion": ">=2026.4.10"
         }

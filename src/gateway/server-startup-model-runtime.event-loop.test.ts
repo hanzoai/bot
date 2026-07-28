@@ -4,9 +4,9 @@ import os from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { ProviderPlugin } from "../plugins/types.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
 import { withEnvAsync } from "../test-utils/env.js";
 
 const providerMocks = vi.hoisted(() => ({
@@ -97,26 +97,26 @@ async function requestHealthzAfter(port: number, delayMs: number) {
 
 afterEach(() => {
   resetPreparedModelRuntimeSnapshotsForTest();
-  closeOpenClawAgentDatabasesForTest();
+  closeBotAgentDatabasesForTest();
   vi.clearAllMocks();
 });
 
 describe("Gateway prepared model runtime startup", () => {
   it("keeps health probes responsive without executing live provider catalogs", async () => {
-    const root = await mkdtemp(path.join(os.tmpdir(), "openclaw-model-runtime-startup-"));
+    const root = await mkdtemp(path.join(os.tmpdir(), "bot-model-runtime-startup-"));
     const stateDir = path.join(root, "state");
     const workspaceDir = path.join(root, "workspace");
     const cfg = {
       agents: {
         defaults: {
           model: { primary: "openai/gpt-5.5" },
-          models: { "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } } },
+          models: { "openai/gpt-5.5": { agentRuntime: { id: "bot" } } },
         },
       },
       gateway: { mode: "local", bind: "loopback", auth: { mode: "none" } },
       plugins: { enabled: false },
-    } satisfies OpenClawConfig;
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    } satisfies BotConfig;
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
     const agentDir = resolveAgentDir(cfg, "main", env);
     writePersistedAuthProfileStoreRaw(
       {
@@ -145,8 +145,8 @@ describe("Gateway prepared model runtime startup", () => {
     try {
       await withEnvAsync(
         {
-          OPENCLAW_SKIP_CHANNELS: "1",
-          OPENCLAW_STATE_DIR: stateDir,
+          BOT_SKIP_CHANNELS: "1",
+          BOT_STATE_DIR: stateDir,
         },
         async () => {
           const probe = requestHealthzAfter(healthServer.port, 25);
@@ -173,7 +173,7 @@ describe("Gateway prepared model runtime startup", () => {
       );
     } finally {
       await healthServer.close();
-      closeOpenClawAgentDatabasesForTest();
+      closeBotAgentDatabasesForTest();
       await rm(root, { recursive: true, force: true });
     }
   });

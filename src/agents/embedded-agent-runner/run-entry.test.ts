@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { EmbeddedAgentRunResult } from "./types.js";
 
 type CandidateOptions = {
@@ -119,7 +119,7 @@ describe("runEmbeddedAgentEntry", () => {
 
   it("keeps shared fallback and terminal behavior aligned across entry modes", async () => {
     const { runEmbeddedAgentEntry } = await import("./run-entry.js");
-    const cfg: OpenClawConfig = {};
+    const cfg: BotConfig = {};
     const runMode = async (behavior: "channel-delivery" | "command-rpc") => {
       const candidateCalls: Array<{
         provider: string;

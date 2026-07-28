@@ -1,5 +1,5 @@
-import { resolveInboundMentionDecision } from "openclaw/plugin-sdk/channel-inbound";
-import { buildInboundHistoryFromEntries } from "openclaw/plugin-sdk/reply-history";
+import { resolveInboundMentionDecision } from "bot/plugin-sdk/channel-inbound";
+import { buildInboundHistoryFromEntries } from "bot/plugin-sdk/reply-history";
 import { formatMatrixErrorMessage } from "../errors.js";
 import { isMatrixMediaSizeLimitError } from "../media-errors.js";
 import { isLikelyBareFilename } from "../media-text.js";

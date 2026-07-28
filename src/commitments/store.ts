@@ -1,18 +1,18 @@
 // Persists commitment records in the canonical shared SQLite database.
 import { randomBytes } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+  type BotStateDatabaseOptions,
+} from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import {
   DEFAULT_COMMITMENT_EXPIRE_AFTER_HOURS,
   DEFAULT_COMMITMENT_MAX_PER_HEARTBEAT,
@@ -37,12 +37,12 @@ import type {
 const ROLLING_DAY_MS = 24 * 60 * 60 * 1000;
 const ACTIVE_STATUSES = ["pending", "snoozed"] as const;
 
-function databaseOptions(env: NodeJS.ProcessEnv = process.env): OpenClawStateDatabaseOptions {
+function databaseOptions(env: NodeJS.ProcessEnv = process.env): BotStateDatabaseOptions {
   return { env };
 }
 
 export function resolveCommitmentDatabasePath(env: NodeJS.ProcessEnv = process.env): string {
-  return resolveOpenClawStateSqlitePath(env);
+  return resolveBotStateSqlitePath(env);
 }
 
 function generateCommitmentId(nowMs: number): string {
@@ -139,7 +139,7 @@ function expireStaleCommitmentsInTransaction(db: DatabaseSync, nowMs: number): n
 }
 
 function expireStaleCommitments(nowMs: number): number {
-  return runOpenClawStateWriteTransaction(({ db }) =>
+  return runBotStateWriteTransaction(({ db }) =>
     expireStaleCommitmentsInTransaction(db, nowMs),
   );
 }
@@ -183,14 +183,14 @@ function activeAndUnsnoozed<Output>(
 }
 
 export async function listPendingCommitmentsForScope(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   scope: CommitmentScope;
   nowMs?: number;
   limit?: number;
 }): Promise<CommitmentRecord[]> {
   const nowMs = params.nowMs ?? Date.now();
   expireStaleCommitments(nowMs);
-  const database = openOpenClawStateDatabase();
+  const database = openBotStateDatabase();
   const commitmentsDb = getNodeSqliteKysely<CommitmentsDatabase>(database.db);
   const scoped = applyExactScopeWhere(
     commitmentsDb.selectFrom("commitments").selectAll(),
@@ -207,7 +207,7 @@ export async function listPendingCommitmentsForScope(params: {
 }
 
 export async function upsertInferredCommitments(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   item: CommitmentExtractionItem;
   candidates: Array<{
     candidate: CommitmentCandidate;
@@ -229,7 +229,7 @@ export async function upsertInferredCommitments(params: {
     return [];
   }
   const scope = normalizeScope(params.item);
-  return runOpenClawStateWriteTransaction(({ db }) => {
+  return runBotStateWriteTransaction(({ db }) => {
     expireStaleCommitmentsInTransaction(db, nowMs);
     const commitmentsDb = getNodeSqliteKysely<CommitmentsDatabase>(db);
     const created: CommitmentRecord[] = [];
@@ -273,7 +273,7 @@ export async function upsertInferredCommitments(params: {
 }
 
 export async function listDueCommitmentsForSession(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentId: string;
   sessionKey: string;
   nowMs?: number;
@@ -285,7 +285,7 @@ export async function listDueCommitmentsForSession(params: {
   }
   const nowMs = params.nowMs ?? Date.now();
   expireStaleCommitments(nowMs);
-  const database = openOpenClawStateDatabase();
+  const database = openBotStateDatabase();
   const commitmentsDb = getNodeSqliteKysely<CommitmentsDatabase>(database.db);
   const sentCountRow = executeSqliteQueryTakeFirstSync(
     database.db,
@@ -324,7 +324,7 @@ export async function listDueCommitmentsForSession(params: {
 }
 
 export async function listDueCommitmentSessionKeys(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentId: string;
   nowMs?: number;
   limit?: number;
@@ -335,7 +335,7 @@ export async function listDueCommitmentSessionKeys(params: {
   }
   const nowMs = params.nowMs ?? Date.now();
   expireStaleCommitments(nowMs);
-  const database = openOpenClawStateDatabase();
+  const database = openBotStateDatabase();
   const commitmentsDb = getNodeSqliteKysely<CommitmentsDatabase>(database.db);
   const dueSessionRows = executeSqliteQuerySync(
     database.db,
@@ -372,7 +372,7 @@ export async function listDueCommitmentSessionKeys(params: {
 }
 
 export async function markCommitmentsAttempted(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   ids: string[];
   nowMs?: number;
 }): Promise<void> {
@@ -381,7 +381,7 @@ export async function markCommitmentsAttempted(params: {
     return;
   }
   const nowMs = params.nowMs ?? Date.now();
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runBotStateWriteTransaction(({ db }) => {
     const commitmentsDb = getNodeSqliteKysely<CommitmentsDatabase>(db);
     const rows = executeSqliteQuerySync(
       db,
@@ -400,7 +400,7 @@ export async function markCommitmentsAttempted(params: {
 }
 
 export async function markCommitmentsStatus(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   ids: string[];
   status: Extract<CommitmentStatus, "sent" | "dismissed" | "expired">;
   nowMs?: number;
@@ -410,7 +410,7 @@ export async function markCommitmentsStatus(params: {
     return;
   }
   const nowMs = params.nowMs ?? Date.now();
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runBotStateWriteTransaction(({ db }) => {
     const commitmentsDb = getNodeSqliteKysely<CommitmentsDatabase>(db);
     const rows = executeSqliteQuerySync(
       db,
@@ -435,13 +435,13 @@ export async function markCommitmentsStatus(params: {
 }
 
 export async function listCommitments(params?: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   status?: CommitmentStatus;
   agentId?: string;
   nowMs?: number;
 }): Promise<CommitmentRecord[]> {
   expireStaleCommitments(params?.nowMs ?? Date.now());
-  const database = openOpenClawStateDatabase();
+  const database = openBotStateDatabase();
   const commitmentsDb = getNodeSqliteKysely<CommitmentsDatabase>(database.db);
   let query = commitmentsDb.selectFrom("commitments").selectAll();
   if (params?.status) {

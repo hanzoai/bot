@@ -17,7 +17,7 @@ describe("resolveSkillsPromptForRun", () => {
   it("prefers snapshot prompt when available", () => {
     const prompt = resolveSkillsPromptForRun({
       skillsSnapshot: { prompt: "SNAPSHOT", skills: [] },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/bot",
     });
     expect(prompt).toBe("SNAPSHOT");
   });
@@ -28,13 +28,13 @@ describe("resolveSkillsPromptForRun", () => {
         description: "Demo",
         filePath: "/app/skills/demo-skill/SKILL.md",
         baseDir: "/app/skills/demo-skill",
-        source: "openclaw-bundled",
+        source: "bot-bundled",
       }),
       frontmatter: {},
     };
     const prompt = resolveSkillsPromptForRun({
       entries: [entry],
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/bot",
     });
     expect(prompt).toContain("<available_skills>");
     expect(prompt).toContain("/app/skills/demo-skill/SKILL.md");
@@ -47,7 +47,7 @@ describe("resolveSkillsPromptForRun", () => {
         description: "New",
         filePath: "/app/skills/new-skill/SKILL.md",
         baseDir: "/app/skills/new-skill",
-        source: "openclaw-workspace",
+        source: "bot-workspace",
       }),
       frontmatter: {},
     };
@@ -56,7 +56,7 @@ describe("resolveSkillsPromptForRun", () => {
       resolveSkillsPromptForRun({
         skillsSnapshot: { prompt: "", skills: [] },
         entries: [entry],
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/bot",
       }),
     ).toBe("");
   });
@@ -81,7 +81,7 @@ describe("resolveSkillsPromptForRun", () => {
           skills: [{ name: "cold-skill", skillKey: "cold-skill" }],
           promptFormatVersion: WORKSPACE_SKILLS_PROMPT_FORMAT_VERSION - 1,
         },
-        workspaceDir: "/tmp/openclaw",
+        workspaceDir: "/tmp/bot",
       }),
     ).toBe("");
   });
@@ -103,7 +103,7 @@ describe("resolveSkillsPromptForRun", () => {
         prompt: "LEGACY SKILL PROMPT",
         skills: [{ name: "cold-skill" }, { name: "healthy-skill" }],
       },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/bot",
     });
 
     expect(prompt).toBe("");
@@ -116,7 +116,7 @@ describe("resolveSkillsPromptForRun", () => {
         description: "Cold",
         filePath: "/app/skills/cold-skill/SKILL.md",
         baseDir: "/app/skills/cold-skill",
-        source: "openclaw-workspace",
+        source: "bot-workspace",
       }),
       frontmatter: {},
       metadata: { skillKey: "cold-alias" },
@@ -127,11 +127,11 @@ describe("resolveSkillsPromptForRun", () => {
         description: "Healthy",
         filePath: "/app/skills/healthy-skill/SKILL.md",
         baseDir: "/app/skills/healthy-skill",
-        source: "openclaw-workspace",
+        source: "bot-workspace",
       }),
       frontmatter: {},
     };
-    const snapshot = buildWorkspaceSkillSnapshot("/tmp/openclaw", {
+    const snapshot = buildWorkspaceSkillSnapshot("/tmp/bot", {
       entries: [cold, healthy],
     });
     setActiveDegradedSecretOwners([
@@ -148,7 +148,7 @@ describe("resolveSkillsPromptForRun", () => {
     const prompt = resolveSkillsPromptForRun({
       skillsSnapshot: snapshot,
       entries: [cold, healthy],
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/bot",
     });
 
     expect(prompt).not.toContain("/app/skills/cold-skill/SKILL.md");
@@ -162,12 +162,12 @@ describe("resolveSkillsPromptForRun", () => {
         description: name,
         filePath: `/app/skills/${name}/SKILL.md`,
         baseDir: `/app/skills/${name}`,
-        source: "openclaw-workspace",
+        source: "bot-workspace",
       }),
       frontmatter: {},
     });
     const capturedEntries = [createEntry("cold-skill"), createEntry("healthy-skill")];
-    const snapshot = buildWorkspaceSkillSnapshot("/tmp/openclaw", {
+    const snapshot = buildWorkspaceSkillSnapshot("/tmp/bot", {
       entries: capturedEntries,
     });
     setActiveDegradedSecretOwners([
@@ -184,7 +184,7 @@ describe("resolveSkillsPromptForRun", () => {
     const prompt = resolveSkillsPromptForRun({
       skillsSnapshot: snapshot,
       entries: [...capturedEntries, createEntry("new-skill")],
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/bot",
     });
 
     expect(prompt).not.toContain("/app/skills/cold-skill/SKILL.md");
@@ -193,7 +193,7 @@ describe("resolveSkillsPromptForRun", () => {
   });
 
   it("preserves captured skill content during degraded prompt filtering", async () => {
-    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-skill-prompt-"));
+    const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-skill-prompt-"));
     await writeSkill({
       dir: path.join(workspaceDir, "skills", "cold-skill"),
       name: "cold-skill",
@@ -249,7 +249,7 @@ describe("resolveSkillsPromptForRun", () => {
         description: "Hidden",
         filePath: "/app/skills/hidden-skill/SKILL.md",
         baseDir: "/app/skills/hidden-skill",
-        source: "openclaw-workspace",
+        source: "bot-workspace",
         disableModelInvocation: true,
       }),
       frontmatter: {},
@@ -257,7 +257,7 @@ describe("resolveSkillsPromptForRun", () => {
 
     const prompt = resolveSkillsPromptForRun({
       entries: [hidden],
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/bot",
     });
 
     expect(prompt).not.toContain("/app/skills/hidden-skill/SKILL.md");
@@ -270,7 +270,7 @@ describe("resolveSkillsPromptForRun", () => {
         description: "GitHub",
         filePath: "/app/skills/github/SKILL.md",
         baseDir: "/app/skills/github",
-        source: "openclaw-workspace",
+        source: "bot-workspace",
       }),
       frontmatter: {},
     };
@@ -280,7 +280,7 @@ describe("resolveSkillsPromptForRun", () => {
         description: "Hidden",
         filePath: "/app/skills/hidden-skill/SKILL.md",
         baseDir: "/app/skills/hidden-skill",
-        source: "openclaw-workspace",
+        source: "bot-workspace",
       }),
       frontmatter: {},
     };
@@ -295,7 +295,7 @@ describe("resolveSkillsPromptForRun", () => {
           list: [{ id: "writer" }],
         },
       },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/bot",
       agentId: "writer",
     });
 
@@ -310,7 +310,7 @@ describe("resolveSkillsPromptForRun", () => {
         description: "Weather",
         filePath: "/app/skills/weather/SKILL.md",
         baseDir: "/app/skills/weather",
-        source: "openclaw-workspace",
+        source: "bot-workspace",
       }),
       frontmatter: {},
     };
@@ -320,7 +320,7 @@ describe("resolveSkillsPromptForRun", () => {
         description: "Docs",
         filePath: "/app/skills/docs-search/SKILL.md",
         baseDir: "/app/skills/docs-search",
-        source: "openclaw-workspace",
+        source: "bot-workspace",
       }),
       frontmatter: {},
     };
@@ -335,7 +335,7 @@ describe("resolveSkillsPromptForRun", () => {
           list: [{ id: "writer", skills: ["docs-search"] }],
         },
       },
-      workspaceDir: "/tmp/openclaw",
+      workspaceDir: "/tmp/bot",
       agentId: "writer",
     });
 

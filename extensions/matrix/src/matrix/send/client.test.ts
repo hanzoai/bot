@@ -57,7 +57,7 @@ describe("matrix send client helpers", () => {
   });
 
   it("stops one-off shared clients when no active monitor client is registered", async () => {
-    vi.stubEnv("OPENCLAW_GATEWAY_PORT", "18799");
+    vi.stubEnv("BOT_GATEWAY_PORT", "18799");
 
     const result = await withResolvedMatrixSendClient(
       { cfg: TEST_CFG, accountId: "default" },

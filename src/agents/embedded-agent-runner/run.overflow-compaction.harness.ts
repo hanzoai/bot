@@ -1,7 +1,7 @@
 /**
  * Test harness mocks for embedded-run overflow compaction coverage.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { type Mock, vi } from "vitest";
 import type { ThinkLevel } from "../../auto-reply/thinking.js";
 import type { ContextEngineSessionTarget } from "../../context-engine/types.js";
@@ -917,7 +917,7 @@ export async function loadRunOverflowCompactionHarness(): Promise<{
   }));
 
   vi.doMock("../models-config.js", () => ({
-    ensureOpenClawModelsJson: vi.fn(async () => {}),
+    ensureBotModelsJson: vi.fn(async () => {}),
   }));
 
   vi.doMock("../prepared-model-runtime.js", () => ({

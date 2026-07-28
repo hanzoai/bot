@@ -2,8 +2,8 @@
 import { existsSync, readdirSync, realpathSync } from "node:fs";
 import type { Dirent } from "node:fs";
 import { delimiter, dirname, join } from "node:path";
-import { readSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
-import { lowercasePreservingWhitespace } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { readSecretFileSync } from "bot/plugin-sdk/secret-file-runtime";
+import { lowercasePreservingWhitespace } from "bot/plugin-sdk/string-coerce-runtime";
 import { CLIENT_ID_KEYS, CLIENT_SECRET_KEYS } from "./oauth.shared.js";
 
 type CredentialFs = {
@@ -27,7 +27,7 @@ const defaultFs: CredentialFs = {
   readdirSync,
 };
 
-const OAUTH_CREDENTIALS_TEST_API_KEY = Symbol.for("openclaw.google.oauthCredentialsTestApi");
+const OAUTH_CREDENTIALS_TEST_API_KEY = Symbol.for("bot.google.oauthCredentialsTestApi");
 
 let credentialFs: CredentialFs = defaultFs;
 const GEMINI_CLI_TREE_SEARCH_DEPTH = 10;

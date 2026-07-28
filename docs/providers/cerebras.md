@@ -2,7 +2,7 @@
 summary: "Cerebras setup (auth + model selection)"
 title: "Cerebras"
 read_when:
-  - You want to use Cerebras with OpenClaw
+  - You want to use Cerebras with Bot
   - You need the Cerebras API key env var or CLI auth choice
 ---
 
@@ -11,7 +11,7 @@ read_when:
 | Property        | Value                                                     |
 | --------------- | --------------------------------------------------------- |
 | Provider id     | `cerebras`                                                |
-| Plugin          | official external package (`@openclaw/cerebras-provider`) |
+| Plugin          | official external package (`@hanzo/bot-cerebras-provider`) |
 | Auth env var    | `CEREBRAS_API_KEY`                                        |
 | Onboarding flag | `--auth-choice cerebras-api-key`                          |
 | Direct CLI flag | `--cerebras-api-key <key>`                                |
@@ -22,8 +22,8 @@ read_when:
 ## Install plugin
 
 ```bash
-openclaw plugins install @openclaw/cerebras-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-cerebras-provider
+bot gateway restart
 ```
 
 ## Getting started
@@ -36,11 +36,11 @@ openclaw gateway restart
     <CodeGroup>
 
 ```bash Onboarding
-openclaw onboard --auth-choice cerebras-api-key
+bot onboard --auth-choice cerebras-api-key
 ```
 
 ```bash Direct flag
-openclaw onboard --non-interactive \
+bot onboard --non-interactive \
   --auth-choice cerebras-api-key \
   --cerebras-api-key "$CEREBRAS_API_KEY"
 ```
@@ -54,10 +54,10 @@ export CEREBRAS_API_KEY=csk-...
   </Step>
   <Step title="Verify models are available">
     ```bash
-    openclaw models list --provider cerebras
+    bot models list --provider cerebras
     ```
 
-    Lists all three static models. If `CEREBRAS_API_KEY` is unresolved, `openclaw models status --json` reports the missing credential under `auth.unusableProfiles`.
+    Lists all three static models. If `CEREBRAS_API_KEY` is unresolved, `bot models status --json` reports the missing credential under `auth.unusableProfiles`.
 
   </Step>
 </Steps>
@@ -65,7 +65,7 @@ export CEREBRAS_API_KEY=csk-...
 ## Non-interactive setup
 
 ```bash
-openclaw onboard --non-interactive \
+bot onboard --non-interactive \
   --mode local \
   --auth-choice cerebras-api-key \
   --cerebras-api-key "$CEREBRAS_API_KEY"
@@ -81,7 +81,7 @@ All three models have a 131,072-token context window and a 40,960-token max outp
 | `cerebras/gpt-oss-120b` | GPT OSS 120B | yes       | Production reasoning model                |
 | `cerebras/gemma-4-31b`  | Gemma 4 31B  | yes       | Default; preview; text-and-image input    |
 
-Fresh onboarding follows Cerebras's current [Gemma 4 recommendation](https://www.cerebras.ai/blog/gemma-4-on-cerebras-the-fastest-inference-is-now-multimodal). Cerebras describes Gemma 4 31B as its reference medium-size model for equal-or-higher intelligence than GPT OSS, with multimodal agentic support. It is a public-preview model and may change or be discontinued on shorter notice than the production GPT OSS endpoint; existing OpenClaw configurations keep their selected model.
+Fresh onboarding follows Cerebras's current [Gemma 4 recommendation](https://www.cerebras.ai/blog/gemma-4-on-cerebras-the-fastest-inference-is-now-multimodal). Cerebras describes Gemma 4 31B as its reference medium-size model for equal-or-higher intelligence than GPT OSS, with multimodal agentic support. It is a public-preview model and may change or be discontinued on shorter notice than the production GPT OSS endpoint; existing Bot configurations keep their selected model.
 
 ## Manual config
 
@@ -114,7 +114,7 @@ Most setups only need the API key. Use explicit `models.providers.cerebras` conf
 ```
 
 <Note>
-If the Gateway runs as a daemon (launchd, systemd, Docker), make sure `CEREBRAS_API_KEY` is available to that process — for example in `~/.openclaw/.env` or through `env.shellEnv`. A key exported only in an interactive shell will not help a managed service unless the env is imported separately.
+If the Gateway runs as a daemon (launchd, systemd, Docker), make sure `CEREBRAS_API_KEY` is available to that process — for example in `~/.bot/.env` or through `env.shellEnv`. A key exported only in an interactive shell will not help a managed service unless the env is imported separately.
 </Note>
 
 ## Related

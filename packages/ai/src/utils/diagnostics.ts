@@ -1,2 +1,2 @@
 /** Shared provider diagnostics. */
-export * from "@openclaw/llm-core/diagnostics";
+export * from "@hanzo/bot-llm-core/diagnostics";

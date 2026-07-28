@@ -1,7 +1,7 @@
 // Memory Lancedb helper module supports config behavior.
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { parseFiniteNumber } from "openclaw/plugin-sdk/number-runtime";
+import { parseFiniteNumber } from "bot/plugin-sdk/number-runtime";
 
 export type MemoryConfig = {
   embedding: {
@@ -27,7 +27,7 @@ export type MemoryCategory = (typeof MEMORY_CATEGORIES)[number];
 const DEFAULT_MODEL = "text-embedding-3-small";
 export const DEFAULT_CAPTURE_MAX_CHARS = 500;
 export const DEFAULT_RECALL_MAX_CHARS = 1000;
-const DEFAULT_DB_PATH = join(homedir(), ".openclaw", "memory", "lancedb");
+const DEFAULT_DB_PATH = join(homedir(), ".bot", "memory", "lancedb");
 
 const EMBEDDING_DIMENSIONS: Record<string, number> = {
   "text-embedding-3-small": 1536,
@@ -257,7 +257,7 @@ export const memoryConfigSchema = {
     },
     dbPath: {
       label: "Database Path",
-      placeholder: "~/.openclaw/memory/lancedb",
+      placeholder: "~/.bot/memory/lancedb",
       advanced: true,
       help: "Local filesystem path or cloud storage URI (s3://, gs://) for LanceDB database",
     },

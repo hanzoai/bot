@@ -1,12 +1,12 @@
 // Tracks host hook state and scheduled turn identifiers.
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { SessionEntry } from "../config/sessions.js";
 import {
   resolveSessionEntryAccessTarget,
   updateResolvedSessionEntry,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import {
   buildPluginAgentTurnPrepareContext,
@@ -69,7 +69,7 @@ function isExpired(entry: unknown, now: number) {
   return typeof entry.ttlMs === "number" && entry.ttlMs >= 0 && now - entry.createdAt > entry.ttlMs;
 }
 
-function isPluginPromptInjectionEnabled(cfg: OpenClawConfig, pluginId: string): boolean {
+function isPluginPromptInjectionEnabled(cfg: BotConfig, pluginId: string): boolean {
   const entry = cfg.plugins?.entries?.[pluginId];
   return entry?.hooks?.allowPromptInjection !== false;
 }
@@ -94,7 +94,7 @@ function toPluginNextTurnInjectionRecord(params: {
 }
 
 export async function enqueuePluginNextTurnInjection(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   pluginId: string;
   pluginName?: string;
   injection: PluginNextTurnInjection;
@@ -185,7 +185,7 @@ export async function enqueuePluginNextTurnInjection(params: {
 }
 
 async function drainPluginNextTurnInjections(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey?: string;
   now?: number;
 }): Promise<PluginNextTurnInjectionRecord[]> {
@@ -245,7 +245,7 @@ async function drainPluginNextTurnInjections(params: {
 }
 
 export async function drainPluginNextTurnInjectionContext(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey?: string;
   now?: number;
 }): Promise<PluginAgentTurnPrepareResult & { queuedInjections: PluginNextTurnInjectionRecord[] }> {
@@ -257,7 +257,7 @@ export async function drainPluginNextTurnInjectionContext(params: {
 }
 
 export function getPluginSessionExtensionStateSync(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   pluginId: string;
   sessionKey?: string;
 }): Record<string, PluginJsonValue> | undefined {
@@ -274,7 +274,7 @@ export function getPluginSessionExtensionStateSync(params: {
 }
 
 export async function patchPluginSessionExtension(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   pluginId: string;
   namespace: string;

@@ -14,7 +14,7 @@ const NODE_VERSION_RE = /^v?(\d+)\.(\d+)\.(\d+)(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z
 const NODE_RUNTIME_PROBE_SOURCE =
   "process.stdout.write(JSON.stringify({version:process.versions.node??null,bunVersion:process.versions.bun??null,execPath:process.execPath??null}))";
 const PACKAGE_CLI_NODE_PROBE_TIMEOUT_MS = 10_000;
-export const PACKAGE_INSTALL_GUARD_RELATIVE_PATH = "dist/openclaw-install-guard";
+export const PACKAGE_INSTALL_GUARD_RELATIVE_PATH = "dist/bot-install-guard";
 
 function normalizeEnvValue(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -235,14 +235,14 @@ export function enforceSupportedNodeRuntime(
   }
 
   const requirement = engine
-    ? `this OpenClaw release requires Node ${engine}.`
-    : "could not read this OpenClaw release's Node requirement.";
+    ? `this Bot release requires Node ${engine}.`
+    : "could not read this Bot release's Node requirement.";
   reportError(
     [
-      `[openclaw] error: ${requirement}`,
-      `[openclaw] detected Node ${detectedRuntime?.version ?? "missing"} (exec: ${detectedRuntime?.execPath || "unknown"}).`,
-      "[openclaw] install Node: https://nodejs.org/en/download",
-      "[openclaw] upgrade Node, then retry the OpenClaw update.",
+      `[bot] error: ${requirement}`,
+      `[bot] detected Node ${detectedRuntime?.version ?? "missing"} (exec: ${detectedRuntime?.execPath || "unknown"}).`,
+      "[bot] install Node: https://nodejs.org/en/download",
+      "[bot] upgrade Node, then retry the Bot update.",
     ].join("\n"),
   );
   return false;
@@ -261,7 +261,7 @@ export function completePackageInstallGuard(
     return true;
   } catch (error) {
     reportError(
-      `[openclaw] error: could not complete package preinstall: ${
+      `[bot] error: could not complete package preinstall: ${
         error instanceof Error ? error.message : String(error)
       }`,
     );
@@ -324,9 +324,9 @@ export function createPackageManagerWarningMessage(packageManager) {
   }
 
   return [
-    `[openclaw] warning: detected ${packageManager} for install lifecycle.`,
-    "[openclaw] this repo works best with pnpm; npm-compatible installs are slower and much larger here.",
-    "[openclaw] prefer: corepack pnpm install",
+    `[bot] warning: detected ${packageManager} for install lifecycle.`,
+    "[bot] this repo works best with pnpm; npm-compatible installs are slower and much larger here.",
+    "[bot] prefer: corepack pnpm install",
   ].join("\n");
 }
 

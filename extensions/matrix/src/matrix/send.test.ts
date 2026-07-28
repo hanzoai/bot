@@ -12,7 +12,7 @@ import {
   sendSingleTextMessageMatrix,
   sendTypingMatrix,
 } from "./send.js";
-import { MATRIX_OPENCLAW_FINALIZED_PREVIEW_KEY } from "./send/types.js";
+import { MATRIX_BOT_FINALIZED_PREVIEW_KEY } from "./send/types.js";
 
 const loadOutboundMediaFromUrlMock = vi.hoisted(() => vi.fn());
 const loadWebMediaMock = vi.fn().mockResolvedValue({
@@ -37,9 +37,9 @@ const chunkMarkdownTextWithModeMock = vi.fn<
   (text: string, limit?: number, mode?: unknown) => string[]
 >((text) => (text ? [text] : []));
 
-vi.mock("openclaw/plugin-sdk/plugin-config-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/plugin-config-runtime")>(
-    "openclaw/plugin-sdk/plugin-config-runtime",
+vi.mock("bot/plugin-sdk/plugin-config-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/plugin-config-runtime")>(
+    "bot/plugin-sdk/plugin-config-runtime",
   );
   return {
     ...actual,
@@ -646,7 +646,7 @@ describe("sendMessageMatrix media", () => {
       client,
       cfg: {} as never,
       mediaUrl: "file:///tmp/photo.png",
-      mediaLocalRoots: ["/tmp/openclaw-matrix-test"],
+      mediaLocalRoots: ["/tmp/bot-matrix-test"],
     });
 
     expect(mockCallArg(loadWebMediaMock, "loadWebMedia", 0)).toBe("file:///tmp/photo.png");
@@ -655,7 +655,7 @@ describe("sendMessageMatrix media", () => {
       "media options",
     );
     expect(mediaOptions.maxBytes).toBeUndefined();
-    expect(mediaOptions.localRoots).toEqual(["/tmp/openclaw-matrix-test"]);
+    expect(mediaOptions.localRoots).toEqual(["/tmp/bot-matrix-test"]);
   });
 });
 
@@ -907,16 +907,16 @@ describe("sendMessageMatrix threads", () => {
     await sendMessageMatrix("room:!room:example", "first|second|third", {
       client,
       cfg: {} as never,
-      extraContent: { "com.openclaw.approval": { id: "req-1" } },
+      extraContent: { "com.bot.approval": { id: "req-1" } },
     });
 
     expect(sendMessage).toHaveBeenCalledTimes(3);
     expect(sentContent(sendMessage, 0).body).toBe("first");
-    expect(sentContent(sendMessage, 0)["com.openclaw.approval"]).toEqual({ id: "req-1" });
+    expect(sentContent(sendMessage, 0)["com.bot.approval"]).toEqual({ id: "req-1" });
     expect(sentContent(sendMessage, 1).body).toBe("second");
-    expect(sentContent(sendMessage, 1)).not.toHaveProperty("com.openclaw.approval");
+    expect(sentContent(sendMessage, 1)).not.toHaveProperty("com.bot.approval");
     expect(sentContent(sendMessage, 2).body).toBe("third");
-    expect(sentContent(sendMessage, 2)).not.toHaveProperty("com.openclaw.approval");
+    expect(sentContent(sendMessage, 2)).not.toHaveProperty("com.bot.approval");
   });
 });
 
@@ -1058,11 +1058,11 @@ describe("sendSingleTextMessageMatrix", () => {
     const result = await sendSingleTextMessageMatrix("room:!room:example", "done", {
       client,
       cfg: {} as never,
-      extraContent: { [MATRIX_OPENCLAW_FINALIZED_PREVIEW_KEY]: true },
+      extraContent: { [MATRIX_BOT_FINALIZED_PREVIEW_KEY]: true },
     });
 
     expect(sentContent(sendMessage).body).toBe("done");
-    expect(sentContent(sendMessage)[MATRIX_OPENCLAW_FINALIZED_PREVIEW_KEY]).toBe(true);
+    expect(sentContent(sendMessage)[MATRIX_BOT_FINALIZED_PREVIEW_KEY]).toBe(true);
     expect(result.receipt.primaryPlatformMessageId).toBe("evt1");
     expect(result.receipt.platformMessageIds).toEqual(["evt1"]);
     expectTextReceiptPart(result.receipt.parts[0], "evt1");
@@ -1179,12 +1179,12 @@ describe("editMessageMatrix mentions", () => {
     await editMessageMatrix("room:!room:example", "$original", "done", {
       client,
       cfg: {} as never,
-      extraContent: { [MATRIX_OPENCLAW_FINALIZED_PREVIEW_KEY]: true },
+      extraContent: { [MATRIX_BOT_FINALIZED_PREVIEW_KEY]: true },
     });
 
     const content = sentContent(sendMessage);
-    expect(content[MATRIX_OPENCLAW_FINALIZED_PREVIEW_KEY]).toBe(true);
-    expect(newContent(content)[MATRIX_OPENCLAW_FINALIZED_PREVIEW_KEY]).toBe(true);
+    expect(content[MATRIX_BOT_FINALIZED_PREVIEW_KEY]).toBe(true);
+    expect(newContent(content)[MATRIX_BOT_FINALIZED_PREVIEW_KEY]).toBe(true);
   });
 
   it("preserves Markdown-significant indentation in edits", async () => {

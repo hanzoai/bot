@@ -2,36 +2,36 @@ import fs from "node:fs";
 import { afterEach, describe, expect, it } from "vitest";
 import { createTempDirTracker } from "../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  resolveOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+  resolveBotAgentSqlitePath,
+} from "../state/bot-agent-db.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import { repairReservedIncognitoSessionKeys } from "./doctor-session-incognito-key-repair.js";
 
 const tempDirs = createTempDirTracker();
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
   tempDirs.cleanup();
 });
 
 describe("doctor reserved incognito session key repair", () => {
   it("renames durable collisions and every key-bearing linkage idempotently", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-doctor-incognito-key-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-    const sqlitePath = resolveOpenClawAgentSqlitePath({ agentId: "main", env });
-    const database = openOpenClawAgentDatabase({ agentId: "main", env, path: sqlitePath });
-    const secondaryPath = resolveOpenClawAgentSqlitePath({ agentId: "work", env });
-    const secondaryDatabase = openOpenClawAgentDatabase({
+    const stateDir = fs.realpathSync(tempDirs.make("bot-doctor-incognito-key-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
+    const sqlitePath = resolveBotAgentSqlitePath({ agentId: "main", env });
+    const database = openBotAgentDatabase({ agentId: "main", env, path: sqlitePath });
+    const secondaryPath = resolveBotAgentSqlitePath({ agentId: "work", env });
+    const secondaryDatabase = openBotAgentDatabase({
       agentId: "work",
       env,
       path: secondaryPath,
     });
-    const stateDatabase = openOpenClawStateDatabase({ env });
+    const stateDatabase = openBotStateDatabase({ env });
     const oldKey = "agent:main:dashboard:incognito-collision";
     const baseLegacyKey = "agent:main:dashboard:legacy-incognito-collision";
     const newKey = `${baseLegacyKey}-1`;
@@ -212,20 +212,20 @@ describe("doctor reserved incognito session key repair", () => {
       });
       expect(
         stateDatabase.db
-          .prepare("SELECT scope FROM state_leases WHERE owner = 'openclaw-doctor'")
+          .prepare("SELECT scope FROM state_leases WHERE owner = 'bot-doctor'")
           .get(),
       ).toBeUndefined();
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeBotAgentDatabasesForTest();
     }
   });
 
   it("resumes an interrupted cross-database repair from its durable journal", () => {
-    const stateDir = fs.realpathSync(tempDirs.make("openclaw-doctor-incognito-resume-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-    const sqlitePath = resolveOpenClawAgentSqlitePath({ agentId: "main", env });
-    const database = openOpenClawAgentDatabase({ agentId: "main", env, path: sqlitePath });
-    const stateDatabase = openOpenClawStateDatabase({ env });
+    const stateDir = fs.realpathSync(tempDirs.make("bot-doctor-incognito-resume-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
+    const sqlitePath = resolveBotAgentSqlitePath({ agentId: "main", env });
+    const database = openBotAgentDatabase({ agentId: "main", env, path: sqlitePath });
+    const stateDatabase = openBotStateDatabase({ env });
     const oldKey = "agent:main:dashboard:incognito-interrupted";
     const newCollisionKey = "agent:main:dashboard:incognito-new";
     const resumedKey = "agent:main:dashboard:legacy-incognito-interrupted-resumed";
@@ -251,7 +251,7 @@ describe("doctor reserved incognito session key repair", () => {
       .run(newCollisionKey);
     stateDatabase.db
       .prepare(
-        "INSERT INTO state_leases (scope, lease_key, owner, payload_json, created_at, updated_at) VALUES ('doctor-session-key-migration', 'reserved-incognito-v1', 'openclaw-doctor', ?, 1, 1)",
+        "INSERT INTO state_leases (scope, lease_key, owner, payload_json, created_at, updated_at) VALUES ('doctor-session-key-migration', 'reserved-incognito-v1', 'bot-doctor', ?, 1, 1)",
       )
       .run(
         JSON.stringify({
@@ -281,7 +281,7 @@ describe("doctor reserved incognito session key repair", () => {
     ).toEqual([resumedKey, "agent:main:dashboard:legacy-incognito-new"].toSorted());
     expect(
       stateDatabase.db
-        .prepare("SELECT scope FROM state_leases WHERE owner = 'openclaw-doctor'")
+        .prepare("SELECT scope FROM state_leases WHERE owner = 'bot-doctor'")
         .get(),
     ).toBeUndefined();
   });

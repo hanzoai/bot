@@ -2,12 +2,12 @@
 import {
   implicitMentionKindWhen,
   resolveInboundMentionDecision,
-} from "openclaw/plugin-sdk/channel-mention-gating";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/channel-mention-gating";
+import type { OpenKeyedStoreOptions } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   createPluginStateSyncKeyedStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import { vi } from "vitest";
 import type { PluginRuntime } from "./runtime-api.js";
 import { setMatrixRuntime } from "./runtime.js";
@@ -62,8 +62,8 @@ export function installMatrixTestRuntime(options: MatrixTestRuntimeOptions = {})
   ) => options.stateDir ?? (homeDir ?? (() => "/tmp"))();
   const resolvePluginStateEnv = (storeOptions: OpenKeyedStoreOptions): NodeJS.ProcessEnv => ({
     ...(storeOptions.env ?? process.env),
-    OPENCLAW_STATE_DIR:
-      storeOptions.env?.OPENCLAW_STATE_DIR?.trim() ||
+    BOT_STATE_DIR:
+      storeOptions.env?.BOT_STATE_DIR?.trim() ||
       defaultStateDirResolver(storeOptions.env, osHomedirForTest),
   });
   const getRuntimeConfig = () => options.cfg ?? {};

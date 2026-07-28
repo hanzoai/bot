@@ -4,8 +4,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   QA_EVIDENCE_FILENAME,
   type QaEvidenceSummaryJson,
@@ -94,7 +94,7 @@ async function createFixturePlugin(root: string) {
   const realtimeCallsPath = path.join(root, "realtime-calls.jsonl");
   await fs.mkdir(pluginDir, { recursive: true });
   await fs.writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "bot.plugin.json"),
     `${JSON.stringify(
       {
         id: FIXTURE_PLUGIN_ID,
@@ -119,7 +119,7 @@ module.exports = {
       autoSelectOrder: 1,
       isConfigured: () => true,
       async synthesize(request) {
-        fs.appendFileSync(process.env.OPENCLAW_QA_SPEECH_CALLS_PATH, JSON.stringify({ text: request.text, target: request.target }) + "\\n");
+        fs.appendFileSync(process.env.BOT_QA_SPEECH_CALLS_PATH, JSON.stringify({ text: request.text, target: request.target }) + "\\n");
         return {
           audioBuffer: Buffer.from(${JSON.stringify(FIXTURE_WAV_BASE64)}, "base64"),
           fileExtension: ".wav",
@@ -133,7 +133,7 @@ module.exports = {
       label: "QA Realtime",
       isConfigured: () => true,
       async createBrowserSession(request) {
-        fs.appendFileSync(process.env.OPENCLAW_QA_REALTIME_CALLS_PATH, JSON.stringify({ tools: request.tools?.map((tool) => tool.name) ?? [] }) + "\\n");
+        fs.appendFileSync(process.env.BOT_QA_REALTIME_CALLS_PATH, JSON.stringify({ tools: request.tools?.map((tool) => tool.name) ?? [] }) + "\\n");
         return {
           provider: ${JSON.stringify(FIXTURE_REALTIME_PROVIDER_ID)},
           transport: "provider-websocket",
@@ -160,7 +160,7 @@ module.exports = {
   return { pluginDir, realtimeCallsPath, speechCallsPath };
 }
 
-function withFixturePlugin(config: OpenClawConfig, pluginDir: string): OpenClawConfig {
+function withFixturePlugin(config: BotConfig, pluginDir: string): BotConfig {
   return {
     ...config,
     plugins: {
@@ -305,7 +305,7 @@ async function waitForWebchatAudio(params: {
 }
 
 async function runWebchatAutoTtsProof(options: ProducerOptions): Promise<string> {
-  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-webchat-tts-"));
+  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-webchat-tts-"));
   const fixture = await createFixturePlugin(fixtureRoot);
   const mock = await startQaMockOpenAiServer();
   let gateway: Awaited<ReturnType<typeof startQaGatewayChild>> | undefined;
@@ -320,8 +320,8 @@ async function runWebchatAutoTtsProof(options: ProducerOptions): Promise<string>
       transportBaseUrl: "http://127.0.0.1",
       controlUiEnabled: true,
       runtimeEnvPatch: {
-        OPENCLAW_QA_SPEECH_CALLS_PATH: fixture.speechCallsPath,
-        OPENCLAW_QA_REALTIME_CALLS_PATH: fixture.realtimeCallsPath,
+        BOT_QA_SPEECH_CALLS_PATH: fixture.speechCallsPath,
+        BOT_QA_REALTIME_CALLS_PATH: fixture.realtimeCallsPath,
       },
       mutateConfig: (config) => {
         const withPlugin = withFixturePlugin(config, fixture.pluginDir);
@@ -366,7 +366,7 @@ async function runWebchatAutoTtsProof(options: ProducerOptions): Promise<string>
     if (speechCalls.length !== 1) {
       throw new Error(`expected one final-tail TTS synthesis, received ${speechCalls.length}`);
     }
-    const route = `${gateway.baseUrl}/__openclaw__/assistant-media`;
+    const route = `${gateway.baseUrl}/__bot__/assistant-media`;
     const sourceParam = encodeURIComponent(source);
     const metadata = await fetch(`${route}?meta=1&source=${sourceParam}`, {
       headers: { Authorization: `Bearer ${gateway.token}` },
@@ -470,7 +470,7 @@ async function waitForQueuedTalkSteer(client: GatewayClient, sessionKey: string)
 }
 
 async function runActiveTalkAgentRunProof(options: ProducerOptions): Promise<string> {
-  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-active-talk-"));
+  const fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-active-talk-"));
   const fixture = await createFixturePlugin(fixtureRoot);
   const mock = await startQaMockOpenAiServer({ finalOnlyMarkerPauseMs: 60_000 });
   let gateway: Awaited<ReturnType<typeof startQaGatewayChild>> | undefined;
@@ -484,8 +484,8 @@ async function runActiveTalkAgentRunProof(options: ProducerOptions): Promise<str
       transportBaseUrl: "http://127.0.0.1",
       controlUiEnabled: true,
       runtimeEnvPatch: {
-        OPENCLAW_QA_SPEECH_CALLS_PATH: fixture.speechCallsPath,
-        OPENCLAW_QA_REALTIME_CALLS_PATH: fixture.realtimeCallsPath,
+        BOT_QA_SPEECH_CALLS_PATH: fixture.speechCallsPath,
+        BOT_QA_REALTIME_CALLS_PATH: fixture.realtimeCallsPath,
       },
       mutateConfig: (config) => {
         const withPlugin = withFixturePlugin(config, fixture.pluginDir);
@@ -523,8 +523,8 @@ async function runActiveTalkAgentRunProof(options: ProducerOptions): Promise<str
     const tools = providerCalls[0]?.tools;
     if (
       !Array.isArray(tools) ||
-      !tools.includes("openclaw_agent_consult") ||
-      !tools.includes("openclaw_agent_control")
+      !tools.includes("bot_agent_consult") ||
+      !tools.includes("bot_agent_control")
     ) {
       throw new Error(
         `Talk provider did not receive consult/control tools: ${JSON.stringify(tools)}`,
@@ -533,7 +533,7 @@ async function runActiveTalkAgentRunProof(options: ProducerOptions): Promise<str
     const consultRequest = client.request("talk.client.toolCall", {
       sessionKey,
       callId: `qa-talk-${randomUUID()}`,
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "final-only marker streaming qa check: inspect the active run" },
     });
     // A failed control step can end the scenario before this long-lived request

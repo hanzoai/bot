@@ -1,5 +1,5 @@
 // Plugin entry contracts define the manifest-facing hooks implemented by plugin packages.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { emptyPluginConfigSchema } from "../plugins/config-schema.js";
 import type {
   AgentHarness as _AgentHarness,
@@ -16,25 +16,25 @@ import type {
   MigrationProviderPlugin as _MigrationProviderPlugin,
   ProviderPlugin as _ProviderPlugin,
   MigrationSummary as _MigrationSummary,
-  OpenClawGatewayDiscoveryAdvertiseContext as _OpenClawGatewayDiscoveryAdvertiseContext,
-  OpenClawGatewayDiscoveryService as _OpenClawGatewayDiscoveryService,
-  OpenClawPluginApi as _OpenClawPluginApi,
-  OpenClawPluginCommandDefinition as _OpenClawPluginCommandDefinition,
-  OpenClawPluginConfigSchema as _OpenClawPluginConfigSchema,
-  OpenClawPluginDefinition as _OpenClawPluginDefinition,
-  OpenClawPluginHttpRouteHandler as _OpenClawPluginHttpRouteHandler,
-  OpenClawPluginNodeHostCommand as _OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeHostCommandAvailabilityContext as _OpenClawPluginNodeHostCommandAvailabilityContext,
-  OpenClawPluginNodeInvokePolicy as _OpenClawPluginNodeInvokePolicy,
-  OpenClawPluginNodeInvokePolicyContext as _OpenClawPluginNodeInvokePolicyContext,
-  OpenClawPluginNodeInvokePolicyResult as _OpenClawPluginNodeInvokePolicyResult,
-  OpenClawPluginReloadRegistration as _OpenClawPluginReloadRegistration,
-  OpenClawPluginSecurityAuditCollector as _OpenClawPluginSecurityAuditCollector,
-  OpenClawPluginSecurityAuditContext as _OpenClawPluginSecurityAuditContext,
-  OpenClawPluginService as _OpenClawPluginService,
-  OpenClawPluginServiceContext as _OpenClawPluginServiceContext,
-  OpenClawPluginToolContext as _OpenClawPluginToolContext,
-  OpenClawPluginToolFactory as _OpenClawPluginToolFactory,
+  BotGatewayDiscoveryAdvertiseContext as _BotGatewayDiscoveryAdvertiseContext,
+  BotGatewayDiscoveryService as _BotGatewayDiscoveryService,
+  BotPluginApi as _BotPluginApi,
+  BotPluginCommandDefinition as _BotPluginCommandDefinition,
+  BotPluginConfigSchema as _BotPluginConfigSchema,
+  BotPluginDefinition as _BotPluginDefinition,
+  BotPluginHttpRouteHandler as _BotPluginHttpRouteHandler,
+  BotPluginNodeHostCommand as _BotPluginNodeHostCommand,
+  BotPluginNodeHostCommandAvailabilityContext as _BotPluginNodeHostCommandAvailabilityContext,
+  BotPluginNodeInvokePolicy as _BotPluginNodeInvokePolicy,
+  BotPluginNodeInvokePolicyContext as _BotPluginNodeInvokePolicyContext,
+  BotPluginNodeInvokePolicyResult as _BotPluginNodeInvokePolicyResult,
+  BotPluginReloadRegistration as _BotPluginReloadRegistration,
+  BotPluginSecurityAuditCollector as _BotPluginSecurityAuditCollector,
+  BotPluginSecurityAuditContext as _BotPluginSecurityAuditContext,
+  BotPluginService as _BotPluginService,
+  BotPluginServiceContext as _BotPluginServiceContext,
+  BotPluginToolContext as _BotPluginToolContext,
+  BotPluginToolFactory as _BotPluginToolFactory,
   PluginAgentEventEmitParams as _PluginAgentEventEmitParams,
   PluginAgentEventEmitResult as _PluginAgentEventEmitResult,
   PluginAgentEventSubscriptionRegistration as _PluginAgentEventSubscriptionRegistration,
@@ -151,26 +151,26 @@ export type MigrationProviderPlugin = _MigrationProviderPlugin;
 // The plugin-authoring scaffold generates code importing ProviderPlugin from this entrypoint.
 export type ProviderPlugin = _ProviderPlugin;
 export type MigrationSummary = _MigrationSummary;
-export type OpenClawGatewayDiscoveryAdvertiseContext = _OpenClawGatewayDiscoveryAdvertiseContext;
-export type OpenClawGatewayDiscoveryService = _OpenClawGatewayDiscoveryService;
-export type OpenClawPluginApi = _OpenClawPluginApi;
-export type OpenClawPluginCommandDefinition = _OpenClawPluginCommandDefinition;
-export type OpenClawPluginConfigSchema = _OpenClawPluginConfigSchema;
-export type OpenClawPluginDefinition = _OpenClawPluginDefinition;
-export type OpenClawPluginHttpRouteHandler = _OpenClawPluginHttpRouteHandler;
-export type OpenClawPluginNodeHostCommand = _OpenClawPluginNodeHostCommand;
-export type OpenClawPluginNodeHostCommandAvailabilityContext =
-  _OpenClawPluginNodeHostCommandAvailabilityContext;
-export type OpenClawPluginNodeInvokePolicy = _OpenClawPluginNodeInvokePolicy;
-export type OpenClawPluginNodeInvokePolicyContext = _OpenClawPluginNodeInvokePolicyContext;
-export type OpenClawPluginNodeInvokePolicyResult = _OpenClawPluginNodeInvokePolicyResult;
-export type OpenClawPluginReloadRegistration = _OpenClawPluginReloadRegistration;
-export type OpenClawPluginSecurityAuditCollector = _OpenClawPluginSecurityAuditCollector;
-export type OpenClawPluginSecurityAuditContext = _OpenClawPluginSecurityAuditContext;
-export type OpenClawPluginService = _OpenClawPluginService;
-export type OpenClawPluginServiceContext = _OpenClawPluginServiceContext;
-export type OpenClawPluginToolContext = _OpenClawPluginToolContext;
-export type OpenClawPluginToolFactory = _OpenClawPluginToolFactory;
+export type BotGatewayDiscoveryAdvertiseContext = _BotGatewayDiscoveryAdvertiseContext;
+export type BotGatewayDiscoveryService = _BotGatewayDiscoveryService;
+export type BotPluginApi = _BotPluginApi;
+export type BotPluginCommandDefinition = _BotPluginCommandDefinition;
+export type BotPluginConfigSchema = _BotPluginConfigSchema;
+export type BotPluginDefinition = _BotPluginDefinition;
+export type BotPluginHttpRouteHandler = _BotPluginHttpRouteHandler;
+export type BotPluginNodeHostCommand = _BotPluginNodeHostCommand;
+export type BotPluginNodeHostCommandAvailabilityContext =
+  _BotPluginNodeHostCommandAvailabilityContext;
+export type BotPluginNodeInvokePolicy = _BotPluginNodeInvokePolicy;
+export type BotPluginNodeInvokePolicyContext = _BotPluginNodeInvokePolicyContext;
+export type BotPluginNodeInvokePolicyResult = _BotPluginNodeInvokePolicyResult;
+export type BotPluginReloadRegistration = _BotPluginReloadRegistration;
+export type BotPluginSecurityAuditCollector = _BotPluginSecurityAuditCollector;
+export type BotPluginSecurityAuditContext = _BotPluginSecurityAuditContext;
+export type BotPluginService = _BotPluginService;
+export type BotPluginServiceContext = _BotPluginServiceContext;
+export type BotPluginToolContext = _BotPluginToolContext;
+export type BotPluginToolFactory = _BotPluginToolFactory;
 export type PluginAgentEventEmitParams = _PluginAgentEventEmitParams;
 export type PluginAgentEventEmitResult = _PluginAgentEventEmitResult;
 export type PluginAgentEventSubscriptionRegistration = _PluginAgentEventSubscriptionRegistration;
@@ -269,10 +269,10 @@ export type WorkerSshEndpoint = _WorkerSshEndpoint;
 export type WorkerSshIdentity = _WorkerSshIdentity;
 export type WorkerSshIdentityRequest = _WorkerSshIdentityRequest;
 
-export type OpenClawPluginGatewayEventScope =
-  import("../plugins/gateway-events.js").OpenClawPluginGatewayEventScope;
-export type OpenClawPluginGatewayEvents =
-  import("../plugins/gateway-events.js").OpenClawPluginGatewayEvents;
+export type BotPluginGatewayEventScope =
+  import("../plugins/gateway-events.js").BotPluginGatewayEventScope;
+export type BotPluginGatewayEvents =
+  import("../plugins/gateway-events.js").BotPluginGatewayEvents;
 export { WorkerProviderError } from "../plugins/types.js";
 
 export type {
@@ -294,8 +294,8 @@ export type {
   UnifiedModelCatalogEntry,
   UnifiedModelCatalogKind,
   UnifiedModelCatalogSource,
-} from "@openclaw/model-catalog-core/model-catalog-types";
-export type { OpenClawConfig };
+} from "@hanzo/bot-model-catalog-core/model-catalog-types";
+export type { BotConfig };
 
 export {
   buildJsonPluginConfigSchema,
@@ -309,27 +309,27 @@ type DefinePluginEntryOptions = {
   name: string;
   description: string;
   /**
-   * @deprecated Declare exclusive plugin kind in `openclaw.plugin.json` via
+   * @deprecated Declare exclusive plugin kind in `bot.plugin.json` via
    * manifest `kind`. Runtime-entry `kind` remains only as a compatibility
    * fallback for older plugins.
    */
-  kind?: OpenClawPluginDefinition["kind"];
-  configSchema?: OpenClawPluginConfigSchema | (() => OpenClawPluginConfigSchema);
-  reload?: OpenClawPluginDefinition["reload"];
-  nodeHostCommands?: OpenClawPluginDefinition["nodeHostCommands"];
-  securityAuditCollectors?: OpenClawPluginDefinition["securityAuditCollectors"];
-  register: (api: OpenClawPluginApi) => void;
+  kind?: BotPluginDefinition["kind"];
+  configSchema?: BotPluginConfigSchema | (() => BotPluginConfigSchema);
+  reload?: BotPluginDefinition["reload"];
+  nodeHostCommands?: BotPluginDefinition["nodeHostCommands"];
+  securityAuditCollectors?: BotPluginDefinition["securityAuditCollectors"];
+  register: (api: BotPluginApi) => void;
 };
 
-/** Normalized object shape that OpenClaw loads from a plugin entry module. */
+/** Normalized object shape that Bot loads from a plugin entry module. */
 type DefinedPluginEntry = {
   id: string;
   name: string;
   description: string;
-  configSchema: OpenClawPluginConfigSchema;
-  register: NonNullable<OpenClawPluginDefinition["register"]>;
+  configSchema: BotPluginConfigSchema;
+  register: NonNullable<BotPluginDefinition["register"]>;
 } & Pick<
-  OpenClawPluginDefinition,
+  BotPluginDefinition,
   "kind" | "reload" | "nodeHostCommands" | "securityAuditCollectors"
 >;
 
@@ -338,7 +338,7 @@ type DefinedPluginEntry = {
  *
  * Use this for provider, tool, command, service, memory, and context-engine
  * plugins. Channel plugins should use `defineChannelPluginEntry(...)` from
- * `openclaw/plugin-sdk/core` so they inherit the channel capability wiring.
+ * `bot/plugin-sdk/core` so they inherit the channel capability wiring.
  */
 export function definePluginEntry({
   id,

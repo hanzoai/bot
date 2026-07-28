@@ -46,7 +46,7 @@ const limits = {
 const posixIt = process.platform === "win32" ? it.skip : it;
 const { createTempDir } = createScriptTestHarness();
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-const LIVE_E2E_WORKFLOW = ".github/workflows/openclaw-live-and-e2e-checks-reusable.yml";
+const LIVE_E2E_WORKFLOW = ".github/workflows/bot-live-and-e2e-checks-reusable.yml";
 
 function writeFrozenScenarioContract(root: string, scenarios: string[]): string {
   const assertionsFile = path.join(root, "scripts/e2e/lib/upgrade-survivor/assertions.mjs");
@@ -147,7 +147,7 @@ describe("scripts/test-docker-all scheduler", () => {
     expect(result.status).toBe(0);
     expect(result.stderr).toBe("");
     expect(result.stdout).toContain("Usage: node scripts/test-docker-all.mjs [--plan-json]");
-    expect(result.stdout).toContain("OPENCLAW_DOCKER_ALL_* env vars");
+    expect(result.stdout).toContain("BOT_DOCKER_ALL_* env vars");
   });
 
   it("rejects unknown CLI options without a stack trace", () => {
@@ -164,7 +164,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("plans from an isolated release harness without installed dependencies", () => {
-    const root = tempDirs.make("openclaw-docker-plan-isolated-harness-");
+    const root = tempDirs.make("bot-docker-plan-isolated-harness-");
     const scriptsDir = path.join(root, "scripts");
     const libDir = path.join(scriptsDir, "lib");
     mkdirSync(libDir, { recursive: true });
@@ -181,9 +181,9 @@ describe("scripts/test-docker-all scheduler", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_DOCKER_ALL_PLAN_RELEASE_ALL: "1",
-          OPENCLAW_DOCKER_ALL_PROFILE: "release-path",
-          OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT: process.cwd(),
+          BOT_DOCKER_ALL_PLAN_RELEASE_ALL: "1",
+          BOT_DOCKER_ALL_PROFILE: "release-path",
+          BOT_UPGRADE_SURVIVOR_TARGET_ROOT: process.cwd(),
         },
       },
     );
@@ -198,13 +198,13 @@ describe("scripts/test-docker-all scheduler", () => {
       encoding: "utf8",
       env: {
         ...process.env,
-        OPENCLAW_DOCKER_ALL_PARALLELISM: "1e3",
+        BOT_DOCKER_ALL_PARALLELISM: "1e3",
       },
     });
 
     expect(result.status).toBe(1);
     expect(result.stdout).toBe("");
-    expect(result.stderr).toContain("OPENCLAW_DOCKER_ALL_PARALLELISM must be a positive integer");
+    expect(result.stderr).toContain("BOT_DOCKER_ALL_PARALLELISM must be a positive integer");
     expect(result.stderr).not.toContain("at ");
   });
 
@@ -212,9 +212,9 @@ describe("scripts/test-docker-all scheduler", () => {
     const localCommand = githubWorkflowRerunCommand(["install-e2e"], "a".repeat(40), {
       GITHUB_REF_NAME: "full-release-validation-temp-deleted",
       GITHUB_RUN_ID: "12345",
-      OPENCLAW_DOCKER_E2E_BARE_IMAGE: "openclaw-docker-e2e-bare:local",
-      OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE: "openclaw-docker-e2e-functional:local",
-      OPENCLAW_DOCKER_E2E_PACKAGE_ARTIFACT_NAME: "docker-e2e-package",
+      BOT_DOCKER_E2E_BARE_IMAGE: "bot-docker-e2e-bare:local",
+      BOT_DOCKER_E2E_FUNCTIONAL_IMAGE: "bot-docker-e2e-functional:local",
+      BOT_DOCKER_E2E_PACKAGE_ARTIFACT_NAME: "docker-e2e-package",
     });
     expect(localCommand).not.toContain("--ref 'full-release-validation-temp-deleted'");
     expect(localCommand).not.toContain("package_artifact_run_id=");
@@ -225,20 +225,20 @@ describe("scripts/test-docker-all scheduler", () => {
     expectDeclaredDispatchInputs(localCommand);
 
     const registryCommand = githubWorkflowRerunCommand(["install-e2e"], "b".repeat(40), {
-      OPENCLAW_DOCKER_E2E_BARE_IMAGE: "ghcr.io/openclaw/openclaw-docker-e2e-bare:test",
-      OPENCLAW_DOCKER_E2E_FUNCTIONAL_IMAGE: "ghcr.io/openclaw/openclaw-docker-e2e-functional:test",
-      OPENCLAW_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG: "true",
-      OPENCLAW_DOCKER_E2E_WORKFLOW_REF: "main",
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPEC: "openclaw@2026.5.3",
-      OPENCLAW_UPGRADE_SURVIVOR_BASELINE_SPECS: "openclaw@2026.5.3 openclaw@2026.5.2",
-      OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "plugin-dependency-cleanup",
+      BOT_DOCKER_E2E_BARE_IMAGE: "ghcr.io/hanzoai/bot-docker-e2e-bare:test",
+      BOT_DOCKER_E2E_FUNCTIONAL_IMAGE: "ghcr.io/hanzoai/bot-docker-e2e-functional:test",
+      BOT_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG: "true",
+      BOT_DOCKER_E2E_WORKFLOW_REF: "main",
+      BOT_UPGRADE_SURVIVOR_BASELINE_SPEC: "bot@2026.5.3",
+      BOT_UPGRADE_SURVIVOR_BASELINE_SPECS: "bot@2026.5.3 bot@2026.5.2",
+      BOT_UPGRADE_SURVIVOR_SCENARIOS: "plugin-dependency-cleanup",
     });
     expect(registryCommand).toContain("--ref 'main'");
     expect(registryCommand).toContain(
-      "docker_e2e_bare_image='ghcr.io/openclaw/openclaw-docker-e2e-bare:test'",
+      "docker_e2e_bare_image='ghcr.io/hanzoai/bot-docker-e2e-bare:test'",
     );
     expect(registryCommand).toContain(
-      "docker_e2e_functional_image='ghcr.io/openclaw/openclaw-docker-e2e-functional:test'",
+      "docker_e2e_functional_image='ghcr.io/hanzoai/bot-docker-e2e-functional:test'",
     );
     expect(registryCommand).toContain("shared_image_policy=existing-only");
     expect(registryCommand).toContain("allow_unreleased_changelog=true");
@@ -246,7 +246,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("preserves ephemeral package intent in generated summary and failure reruns", async () => {
-    const logDir = createTempDir("openclaw-docker-all-rerun-intent-");
+    const logDir = createTempDir("bot-docker-all-rerun-intent-");
     try {
       const selectedSha = "c".repeat(40);
       await writeRunSummary(
@@ -258,8 +258,8 @@ describe("scripts/test-docker-all scheduler", () => {
         },
         {
           ...process.env,
-          OPENCLAW_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG: "true",
-          OPENCLAW_DOCKER_E2E_SELECTED_SHA: selectedSha,
+          BOT_DOCKER_E2E_ALLOW_UNRELEASED_CHANGELOG: "true",
+          BOT_DOCKER_E2E_SELECTED_SHA: selectedSha,
         },
       );
 
@@ -287,25 +287,25 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("rejects loose numeric resource limit env vars before scheduling lanes", () => {
-    const logDir = mkdtempSync(`${tmpdir()}/openclaw-docker-all-`);
+    const logDir = mkdtempSync(`${tmpdir()}/bot-docker-all-`);
     try {
       const result = spawnSync(process.execPath, ["scripts/test-docker-all.mjs"], {
         cwd: process.cwd(),
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_DOCKER_ALL_BUILD: "0",
-          OPENCLAW_DOCKER_ALL_DOCKER_LIMIT: "1e3",
-          OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-          OPENCLAW_DOCKER_ALL_LOG_DIR: logDir,
-          OPENCLAW_DOCKER_ALL_PREFLIGHT: "0",
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
+          BOT_DOCKER_ALL_BUILD: "0",
+          BOT_DOCKER_ALL_DOCKER_LIMIT: "1e3",
+          BOT_DOCKER_ALL_DRY_RUN: "1",
+          BOT_DOCKER_ALL_LOG_DIR: logDir,
+          BOT_DOCKER_ALL_PREFLIGHT: "0",
+          BOT_DOCKER_ALL_TIMINGS: "0",
         },
       });
 
       expect(result.status).toBe(1);
       expect(result.stderr).toContain(
-        "OPENCLAW_DOCKER_ALL_DOCKER_LIMIT must be a positive integer",
+        "BOT_DOCKER_ALL_DOCKER_LIMIT must be a positive integer",
       );
       expect(result.stderr).not.toContain("at ");
     } finally {
@@ -314,20 +314,20 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("rejects release-path configs that schedule zero Docker lanes", () => {
-    const logDir = mkdtempSync(`${tmpdir()}/openclaw-docker-all-`);
+    const logDir = mkdtempSync(`${tmpdir()}/bot-docker-all-`);
     try {
       const result = spawnSync(process.execPath, ["scripts/test-docker-all.mjs"], {
         cwd: process.cwd(),
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_DOCKER_ALL_CHUNK: "openwebui",
-          OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-          OPENCLAW_DOCKER_ALL_INCLUDE_OPENWEBUI: "0",
-          OPENCLAW_DOCKER_ALL_LOG_DIR: logDir,
-          OPENCLAW_DOCKER_ALL_PREFLIGHT: "0",
-          OPENCLAW_DOCKER_ALL_PROFILE: "release-path",
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
+          BOT_DOCKER_ALL_CHUNK: "openwebui",
+          BOT_DOCKER_ALL_DRY_RUN: "1",
+          BOT_DOCKER_ALL_INCLUDE_OPENWEBUI: "0",
+          BOT_DOCKER_ALL_LOG_DIR: logDir,
+          BOT_DOCKER_ALL_PREFLIGHT: "0",
+          BOT_DOCKER_ALL_PROFILE: "release-path",
+          BOT_DOCKER_ALL_TIMINGS: "0",
         },
       });
 
@@ -344,7 +344,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("rejects candidate-controlled survivor omissions without trusted opt-in", () => {
-    const root = tempDirs.make("openclaw-docker-all-untrusted-filter-");
+    const root = tempDirs.make("bot-docker-all-untrusted-filter-");
     try {
       const assertionsFile = writeFrozenScenarioContract(root, ["unrelated"]);
       const executionMarker = path.join(root, "candidate-contract-executed");
@@ -361,11 +361,11 @@ describe("scripts/test-docker-all scheduler", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "0",
-          OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-          OPENCLAW_DOCKER_ALL_LANES: "published-upgrade-survivor",
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
-          OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT: root,
+          BOT_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "0",
+          BOT_DOCKER_ALL_DRY_RUN: "1",
+          BOT_DOCKER_ALL_LANES: "published-upgrade-survivor",
+          BOT_DOCKER_ALL_TIMINGS: "0",
+          BOT_UPGRADE_SURVIVOR_TARGET_ROOT: root,
         },
       });
 
@@ -379,7 +379,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("writes a passing summary when a frozen target cannot run selected survivor lanes", () => {
-    const root = tempDirs.make("openclaw-docker-all-filtered-");
+    const root = tempDirs.make("bot-docker-all-filtered-");
     const logDir = path.join(root, "logs");
     try {
       writeFrozenScenarioContract(root, ["unrelated"]);
@@ -388,13 +388,13 @@ describe("scripts/test-docker-all scheduler", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
-          OPENCLAW_DOCKER_ALL_BUILD: "0",
-          OPENCLAW_DOCKER_ALL_LANES: "published-upgrade-survivor",
-          OPENCLAW_DOCKER_ALL_LOG_DIR: logDir,
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
-          OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "reported-issues",
-          OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT: root,
+          BOT_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
+          BOT_DOCKER_ALL_BUILD: "0",
+          BOT_DOCKER_ALL_LANES: "published-upgrade-survivor",
+          BOT_DOCKER_ALL_LOG_DIR: logDir,
+          BOT_DOCKER_ALL_TIMINGS: "0",
+          BOT_UPGRADE_SURVIVOR_SCENARIOS: "reported-issues",
+          BOT_UPGRADE_SURVIVOR_TARGET_ROOT: root,
         },
       });
 
@@ -414,7 +414,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   it("reports omitted frozen-target lanes when another selected lane remains runnable", () => {
-    const root = tempDirs.make("openclaw-docker-all-mixed-filtered-");
+    const root = tempDirs.make("bot-docker-all-mixed-filtered-");
     try {
       writeFrozenScenarioContract(root, ["unrelated"]);
       const result = spawnSync(process.execPath, ["scripts/test-docker-all.mjs"], {
@@ -422,12 +422,12 @@ describe("scripts/test-docker-all scheduler", () => {
         encoding: "utf8",
         env: {
           ...process.env,
-          OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
-          OPENCLAW_DOCKER_ALL_DRY_RUN: "1",
-          OPENCLAW_DOCKER_ALL_LANES: "published-upgrade-survivor,plugin-binding-command-escape",
-          OPENCLAW_DOCKER_ALL_TIMINGS: "0",
-          OPENCLAW_UPGRADE_SURVIVOR_SCENARIOS: "reported-issues",
-          OPENCLAW_UPGRADE_SURVIVOR_TARGET_ROOT: root,
+          BOT_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: "1",
+          BOT_DOCKER_ALL_DRY_RUN: "1",
+          BOT_DOCKER_ALL_LANES: "published-upgrade-survivor,plugin-binding-command-escape",
+          BOT_DOCKER_ALL_TIMINGS: "0",
+          BOT_UPGRADE_SURVIVOR_SCENARIOS: "reported-issues",
+          BOT_UPGRADE_SURVIVOR_TARGET_ROOT: root,
         },
       });
 
@@ -441,7 +441,7 @@ describe("scripts/test-docker-all scheduler", () => {
   });
 
   posixIt("writes Docker run artifacts when cleanup smoke fails", async () => {
-    const root = mkdtempSync(`${tmpdir()}/openclaw-docker-all-cleanup-`);
+    const root = mkdtempSync(`${tmpdir()}/bot-docker-all-cleanup-`);
     const logDir = path.join(root, "logs");
     const fakePnpm = path.join(root, "pnpm");
     const phases: Array<Record<string, unknown>> = [];
@@ -463,7 +463,7 @@ process.exit(0);
     try {
       const baseEnv = {
         ...process.env,
-        OPENCLAW_DOCKER_E2E_IMAGE: "openclaw-test-image",
+        BOT_DOCKER_E2E_IMAGE: "bot-test-image",
         PATH: `${root}${path.delimiter}${process.env.PATH ?? ""}`,
       };
       const cleanupFailure = await runCleanupSmokePhase(baseEnv, logDir, phases);
@@ -473,10 +473,10 @@ process.exit(0);
       }
       await writeRunSummary(logDir, {
         failures: [cleanupFailure],
-        image: baseEnv.OPENCLAW_DOCKER_E2E_IMAGE,
+        image: baseEnv.BOT_DOCKER_E2E_IMAGE,
         images: {
-          bare: "openclaw-test-bare",
-          functional: "openclaw-test-image",
+          bare: "bot-test-bare",
+          functional: "bot-test-image",
         },
         lanes: [],
         phases,
@@ -663,22 +663,22 @@ process.exit(0);
   it("cleans stale stopped containers from all named Docker E2E lanes", () => {
     expect(
       dockerPreflightContainerNames(`
-openclaw-gateway-e2e-123 Exited (1) 2 minutes ago
-openclaw-config-reload-e2e-234 Created
-openclaw-plugin-binding-command-escape-e2e-345 Dead
-openclaw-kitchen-sink-rpc-e2e-456 Exited (137) 10 seconds ago
-openclaw-openwebui-gateway-567 Exited (1) 3 minutes ago
-openclaw-openwebui-678 Created
-openclaw-not-an-e2e-container Exited (1) 2 minutes ago
+bot-gateway-e2e-123 Exited (1) 2 minutes ago
+bot-config-reload-e2e-234 Created
+bot-plugin-binding-command-escape-e2e-345 Dead
+bot-kitchen-sink-rpc-e2e-456 Exited (137) 10 seconds ago
+bot-openwebui-gateway-567 Exited (1) 3 minutes ago
+bot-openwebui-678 Created
+bot-not-an-e2e-container Exited (1) 2 minutes ago
 postgres Created
 `),
     ).toEqual([
-      "openclaw-gateway-e2e-123",
-      "openclaw-config-reload-e2e-234",
-      "openclaw-plugin-binding-command-escape-e2e-345",
-      "openclaw-kitchen-sink-rpc-e2e-456",
-      "openclaw-openwebui-gateway-567",
-      "openclaw-openwebui-678",
+      "bot-gateway-e2e-123",
+      "bot-config-reload-e2e-234",
+      "bot-plugin-binding-command-escape-e2e-345",
+      "bot-kitchen-sink-rpc-e2e-456",
+      "bot-openwebui-gateway-567",
+      "bot-openwebui-678",
     ]);
   });
 
@@ -703,7 +703,7 @@ postgres Created
   });
 
   it("reads bounded lane log tails instead of full noisy logs", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-docker-all-log-tail-"));
+    const root = mkdtempSync(path.join(tmpdir(), "bot-docker-all-log-tail-"));
     try {
       const logPath = path.join(root, "lane.log");
       writeFileSync(
@@ -776,7 +776,7 @@ postgres Created
   });
 
   posixIt("kills timed-out shell command groups when the leader exits first", async () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-docker-all-timeout-"));
+    const root = mkdtempSync(path.join(tmpdir(), "bot-docker-all-timeout-"));
     const scriptPath = path.join(root, "leader-exits.mjs");
     const grandchildPidPath = path.join(root, "grandchild.pid");
     let grandchildPid = 0;
@@ -825,7 +825,7 @@ setInterval(() => {}, 1000);
   });
 
   posixIt("clamps oversized shell command kill grace before scheduling", async () => {
-    const root = createTempDir("openclaw-docker-all-oversized-grace-");
+    const root = createTempDir("bot-docker-all-oversized-grace-");
     const scriptPath = path.join(root, "leader-exits.mjs");
     const donePath = path.join(root, "done");
     const readyPath = path.join(root, "ready");
@@ -863,7 +863,7 @@ setInterval(() => {}, 1000);
   });
 
   posixIt("lets timed-out shell command descendants exit during kill grace", async () => {
-    const root = createTempDir("openclaw-docker-all-grace-");
+    const root = createTempDir("bot-docker-all-grace-");
     const scriptPath = path.join(root, "leader-exits.mjs");
     const donePath = path.join(root, "done");
     const readyPath = path.join(root, "ready");
@@ -903,7 +903,7 @@ setInterval(() => {}, 1000);
   });
 
   posixIt("lets timed-out shell capture descendants exit during kill grace", async () => {
-    const root = createTempDir("openclaw-docker-all-capture-grace-");
+    const root = createTempDir("bot-docker-all-capture-grace-");
     const scriptPath = path.join(root, "leader-exits.mjs");
     const donePath = path.join(root, "done");
     const readyPath = path.join(root, "ready");
@@ -943,7 +943,7 @@ setInterval(() => {}, 1000);
   });
 
   posixIt("cleans active shell command groups before parent signal exit", async () => {
-    const root = createTempDir("openclaw-docker-all-parent-signal-");
+    const root = createTempDir("bot-docker-all-parent-signal-");
     const leaderPath = path.join(root, "leader-exits.mjs");
     const runnerPath = path.join(root, "runner.mjs");
     const grandchildPidPath = path.join(root, "grandchild.pid");

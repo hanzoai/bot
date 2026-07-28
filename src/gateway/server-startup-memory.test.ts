@@ -1,6 +1,6 @@
 /** Gateway startup memory-service tests. */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 
 const { getMemorySearchManagerMock, resolveMemorySearchConfigMock } = vi.hoisted(() => ({
   getMemorySearchManagerMock: vi.fn(),
@@ -12,9 +12,9 @@ vi.mock("../plugins/memory-runtime.js", () => ({
 }));
 
 vi.mock("../agents/agent-scope.js", () => ({
-  listAgentEntries: (cfg: OpenClawConfig) => cfg.agents?.list ?? [],
-  listAgentIds: (cfg: OpenClawConfig) => cfg.agents?.list?.map((entry) => entry.id) ?? ["main"],
-  resolveDefaultAgentId: (cfg: OpenClawConfig) =>
+  listAgentEntries: (cfg: BotConfig) => cfg.agents?.list ?? [],
+  listAgentIds: (cfg: BotConfig) => cfg.agents?.list?.map((entry) => entry.id) ?? ["main"],
+  resolveDefaultAgentId: (cfg: BotConfig) =>
     cfg.agents?.list?.find((entry) => entry.default)?.id ?? "main",
 }));
 

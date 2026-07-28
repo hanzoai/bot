@@ -1,12 +1,12 @@
 ---
 summary: "Twilio SMS channel setup, access controls, and webhook configuration"
 read_when:
-  - You want to connect OpenClaw to SMS through Twilio
+  - You want to connect Bot to SMS through Twilio
   - You need SMS webhook or allowlist setup
 title: "SMS"
 ---
 
-OpenClaw receives and sends SMS through a Twilio phone number or Messaging Service. The Gateway registers an inbound webhook route (default `/webhooks/sms`), validates Twilio request signatures by default, and sends replies back through Twilio's Messages API.
+Bot receives and sends SMS through a Twilio phone number or Messaging Service. The Gateway registers an inbound webhook route (default `/webhooks/sms`), validates Twilio request signatures by default, and sends replies back through Twilio's Messages API.
 
 Status: official plugin, installed separately. Text only: no MMS/media, direct messages only.
 
@@ -26,10 +26,10 @@ Status: official plugin, installed separately. Text only: no MMS/media, direct m
 
 You need:
 
-- The official SMS plugin installed with `openclaw plugins install @openclaw/sms`.
+- The official SMS plugin installed with `bot plugins install @hanzo/bot-sms`.
 - A Twilio account with an SMS-capable phone number, or a Twilio Messaging Service.
 - The Twilio Account SID and Auth Token.
-- A public HTTPS URL that reaches your OpenClaw Gateway.
+- A public HTTPS URL that reaches your Bot Gateway.
 - A sender policy choice: `pairing` (default) for private use, `allowlist` for preapproved phone numbers, or `open` only for intentionally public SMS access.
 
 One Twilio number can serve both SMS and [Voice Call](/plugins/voice-call) if it has both capabilities. The SMS webhook and Voice webhook are configured separately in Twilio and use separate Gateway paths; this page only covers the SMS webhook.
@@ -39,7 +39,7 @@ One Twilio number can serve both SMS and [Voice Call](/plugins/voice-call) if it
 <Steps>
   <Step title="Install the plugin">
     ```bash
-    openclaw plugins install @openclaw/sms
+    bot plugins install @hanzo/bot-sms
     ```
   </Step>
   <Step title="Create or choose a Twilio sender">
@@ -75,8 +75,8 @@ Save this as `sms.patch.json5` and change the placeholders:
 Apply it:
 
 ```bash
-openclaw config patch --file ./sms.patch.json5 --dry-run
-openclaw config patch --file ./sms.patch.json5
+bot config patch --file ./sms.patch.json5 --dry-run
+bot config patch --file ./sms.patch.json5
 ```
 
   </Step>
@@ -107,14 +107,14 @@ tailscale funnel status
   <Step title="Start the Gateway and approve first sender">
 
 ```bash
-openclaw gateway
+bot gateway
 ```
 
 Send a text message to the Twilio number. The first message creates a pairing request. Approve it:
 
 ```bash
-openclaw pairing list sms
-openclaw pairing approve sms <CODE>
+bot pairing list sms
+bot pairing approve sms <CODE>
 ```
 
     Pairing codes expire after 1 hour.
@@ -199,7 +199,7 @@ Then enable the channel in config:
 
 ### SecretRef auth token
 
-`authToken` can be a SecretRef (`source: "env" | "file" | "exec"`). Use this when the Gateway should resolve the Twilio Auth Token from the OpenClaw secrets runtime instead of storing plaintext config:
+`authToken` can be a SecretRef (`source: "env" | "file" | "exec"`). Use this when the Gateway should resolve the Twilio Auth Token from the Bot secrets runtime instead of storing plaintext config:
 
 ```json5
 {
@@ -262,7 +262,7 @@ Set `defaultTo` when automation or agent-initiated delivery should have a defaul
 
 `channels.sms.dmPolicy` controls direct SMS access:
 
-- `pairing` (default): unknown senders get a pairing code; approve with `openclaw pairing approve sms <CODE>`.
+- `pairing` (default): unknown senders get a pairing code; approve with `bot pairing approve sms <CODE>`.
 - `allowlist`: only senders in `allowFrom` are processed. An empty `allowFrom` rejects every sender (the Gateway logs a startup warning).
 - `open`: config validation requires `allowFrom` to include `"*"`. Without the wildcard, only listed numbers can chat.
 - `disabled`: all inbound DMs are dropped.
@@ -290,20 +290,20 @@ Set `defaultTo` when automation or agent-initiated delivery should have a defaul
 With the SMS channel selected, targets accept bare E.164 numbers or the `sms:` prefix:
 
 ```bash
-openclaw message send --channel sms --target sms:+15551234567 --message "hello"
+bot message send --channel sms --target sms:+15551234567 --message "hello"
 ```
 
 When channel selection is implicit, the `twilio-sms:` prefix selects this channel without taking over the `sms:` service prefix, which iMessage uses to pick carrier SMS delivery for its own targets:
 
 ```bash
-openclaw message send --target twilio-sms:+15551234567 --message "hello"
+bot message send --target twilio-sms:+15551234567 --message "hello"
 ```
 
 The CLI requires an explicit `--target`. `defaultTo` is for automation and agent-initiated delivery paths where the target can be resolved from channel config.
 
 Agent replies from inbound SMS conversations automatically go back to the sender through the configured Twilio sender.
 
-SMS output is plain text. OpenClaw strips markdown, flattens fenced code blocks, rewrites links as `label (url)`, and splits long replies into chunks of at most `textChunkLimit` characters (default 1500) before sending them through Twilio.
+SMS output is plain text. Bot strips markdown, flattens fenced code blocks, rewrites links as `label (url)`, and splits long replies into chunks of at most `textChunkLimit` characters (default 1500) before sending them through Twilio.
 
 ## Verify Setup
 
@@ -313,19 +313,19 @@ After the Gateway starts:
 2. Run a Twilio-side probe (checks the configured Twilio webhook URL/method and recent inbound errors):
 
 ```bash
-openclaw channels capabilities --channel sms
-openclaw channels status --channel sms --probe --json
+bot channels capabilities --channel sms
+bot channels status --channel sms --probe --json
 ```
 
 3. Send an SMS to the Twilio number from your phone.
-4. Run `openclaw pairing list sms`.
-5. Approve the pairing code with `openclaw pairing approve sms <CODE>`.
+4. Run `bot pairing list sms`.
+5. Approve the pairing code with `bot pairing approve sms <CODE>`.
 6. Send another SMS and confirm the agent replies.
 
 For outbound-only testing, use:
 
 ```bash
-openclaw message send --channel sms --target sms:+15557654321 --message "OpenClaw SMS test"
+bot message send --channel sms --target sms:+15557654321 --message "Bot SMS test"
 ```
 
 ### End-to-end test from macOS iMessage/SMS
@@ -333,9 +333,9 @@ openclaw message send --channel sms --target sms:+15557654321 --message "OpenCla
 On a Mac that can send carrier SMS through Messages, you can use `imsg` to drive the sender side without touching your phone:
 
 ```bash
-imsg send --to "+15551234567" --service sms --text "OpenClaw SMS E2E $(date -u +%Y%m%dT%H%M%SZ)" --json
-openclaw pairing list sms
-openclaw pairing approve sms <CODE>
+imsg send --to "+15551234567" --service sms --text "Bot SMS E2E $(date -u +%Y%m%dT%H%M%SZ)" --json
+bot pairing list sms
+bot pairing approve sms <CODE>
 imsg send --to "+15551234567" --service sms --text "reply exactly SMS pong" --json
 ```
 
@@ -343,14 +343,14 @@ The first message should create a pairing request. The second message should rec
 
 ## Webhook security
 
-By default, OpenClaw validates `X-Twilio-Signature` using `publicWebhookUrl` and `authToken`. Keep the endpoint portion of `publicWebhookUrl` byte-for-byte aligned with the URL configured in Twilio, including scheme, host, path, and query string. OpenClaw excludes Twilio [connection-override](https://www.twilio.com/docs/usage/webhooks/webhooks-connection-overrides) fragments (`#...`) from signature computation, as Twilio requires.
+By default, Bot validates `X-Twilio-Signature` using `publicWebhookUrl` and `authToken`. Keep the endpoint portion of `publicWebhookUrl` byte-for-byte aligned with the URL configured in Twilio, including scheme, host, path, and query string. Bot excludes Twilio [connection-override](https://www.twilio.com/docs/usage/webhooks/webhooks-connection-overrides) fragments (`#...`) from signature computation, as Twilio requires.
 
 The webhook route also enforces, independent of signature validation:
 
 - `POST` only.
 - Failed-request budget of 300 requests per minute per SMS account, webhook route, and resolved client address. All requests count toward this budget, but HTTP 429 is applied only after a request fails body parsing, Twilio validation, or AccountSid matching.
 - Dispatchable callback rate limit of 30 accepted callbacks per minute per SMS account, webhook route, and resolved client address after those checks pass (HTTP 429 above that). If signature validation is disabled, this 30/min limit is the unauthenticated dispatch cap.
-- Client addresses are resolved through the shared Gateway trusted-proxy rules. If `gateway.trustedProxies` contains the reverse proxy that forwards Twilio callbacks, OpenClaw keys these limits from the forwarded client address; otherwise it falls back to the direct socket address.
+- Client addresses are resolved through the shared Gateway trusted-proxy rules. If `gateway.trustedProxies` contains the reverse proxy that forwards Twilio callbacks, Bot keys these limits from the forwarded client address; otherwise it falls back to the direct socket address.
 - The payload `AccountSid` must match the configured `accountSid` (HTTP 403 otherwise).
 - Replayed `MessageSid` values are deduplicated for 10 minutes.
 - Each SMS account's replay cache retains up to 10,000 live message SIDs. When every slot is live, new webhooks for that account fail closed with HTTP 429 and a `Retry-After` header until the oldest slot expires.
@@ -401,7 +401,7 @@ Each account must use a distinct `webhookPath`; the Gateway refuses to register 
 
 ## Troubleshooting
 
-### Twilio returns 403 or OpenClaw rejects the webhook
+### Twilio returns 403 or Bot rejects the webhook
 
 Check that `publicWebhookUrl` exactly matches the URL configured in Twilio, including scheme, host, path, and query string. Twilio signs the public URL string, so proxy rewrites and alternate hostnames can break signature validation.
 
@@ -418,7 +418,7 @@ If the Twilio message log shows error `11200`, Twilio accepted the inbound SMS b
 - The tunnel or reverse proxy exposes the exact `webhookPath`; for Tailscale Funnel, run `tailscale funnel status` and confirm `/webhooks/sms` is listed.
 - `publicWebhookUrl` uses the same scheme, host, path, and query string Twilio sends, so signature validation can reproduce the signed URL.
 
-`openclaw channels status --channel sms --probe` surfaces both mismatched Twilio webhook settings and recent `11200` errors.
+`bot channels status --channel sms --probe` surfaces both mismatched Twilio webhook settings and recent `11200` errors.
 
 ### Outbound sends fail
 

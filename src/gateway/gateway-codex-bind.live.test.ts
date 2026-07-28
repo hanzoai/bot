@@ -10,7 +10,7 @@ import { saveAuthProfileStore } from "../agents/auth-profiles/store.js";
 import { isLiveTestEnabled } from "../agents/live-test-helpers.js";
 import type { ChannelOutboundContext } from "../channels/plugins/types.adapters.js";
 import { clearConfigCache, clearRuntimeConfigSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isTruthyEnvValue } from "../infra/env.js";
 import { getSessionBindingService } from "../infra/outbound/session-binding-service.js";
 import { findBundledPluginMetadataById } from "../plugins/bundled-plugin-metadata.js";
@@ -37,14 +37,14 @@ import { restoreLiveEnv, snapshotLiveEnv, type LiveEnvSnapshot } from "./live-en
 import { startGatewayServer } from "./server.js";
 
 const LIVE = isLiveTestEnabled();
-const CODEX_BIND_LIVE = isTruthyEnvValue(process.env.OPENCLAW_LIVE_CODEX_BIND);
+const CODEX_BIND_LIVE = isTruthyEnvValue(process.env.BOT_LIVE_CODEX_BIND);
 const describeLive = LIVE && CODEX_BIND_LIVE ? describe : describe.skip;
 const CODEX_BIND_TIMEOUT_MS = resolveLiveTimeoutMs(
-  process.env.OPENCLAW_LIVE_CODEX_BIND_TIMEOUT_MS,
+  process.env.BOT_LIVE_CODEX_BIND_TIMEOUT_MS,
   900_000,
 );
 const CODEX_BIND_REQUEST_TIMEOUT_MS = resolveLiveTimeoutMs(
-  process.env.OPENCLAW_LIVE_CODEX_BIND_REQUEST_TIMEOUT_MS,
+  process.env.BOT_LIVE_CODEX_BIND_REQUEST_TIMEOUT_MS,
   300_000,
 );
 const DEFAULT_CODEX_BIND_MODEL = "gpt-5.6-luna";
@@ -322,8 +322,8 @@ async function writeGatewayConfig(params: {
 }): Promise<void> {
   const modelProvider = params.modelProvider?.trim() || "codex";
   const usesApiKeyAuth =
-    modelProvider === "openai" && process.env.OPENCLAW_LIVE_CODEX_HARNESS_AUTH === "api-key";
-  const cfg: OpenClawConfig = {
+    modelProvider === "openai" && process.env.BOT_LIVE_CODEX_HARNESS_AUTH === "api-key";
+  const cfg: BotConfig = {
     gateway: {
       mode: "local",
       port: params.port,
@@ -381,11 +381,11 @@ async function writeGatewayConfig(params: {
 }
 
 function resolveCodexBindModelProvider(): string | undefined {
-  const configured = process.env.OPENCLAW_LIVE_CODEX_BIND_PROVIDER?.trim();
+  const configured = process.env.BOT_LIVE_CODEX_BIND_PROVIDER?.trim();
   if (configured) {
     return configured;
   }
-  return process.env.OPENCLAW_LIVE_CODEX_HARNESS_AUTH === "api-key" ? "openai" : undefined;
+  return process.env.BOT_LIVE_CODEX_HARNESS_AUTH === "api-key" ? "openai" : undefined;
 }
 
 describeLive("gateway live (native Codex conversation binding)", () => {
@@ -393,11 +393,11 @@ describeLive("gateway live (native Codex conversation binding)", () => {
     "binds a Slack DM to Codex app-server, updates controls, and forwards image media paths",
     async () => {
       const previous: LiveEnvSnapshot = snapshotLiveEnv(["CODEX_HOME", "HOME"]);
-      const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-live-codex-bind-"));
+      const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-live-codex-bind-"));
       const tempHome = path.join(tempRoot, "home");
       const stateDir = path.join(tempRoot, "state");
       const workspace = path.join(tempRoot, "workspace");
-      const configPath = path.join(tempRoot, "openclaw.json");
+      const configPath = path.join(tempRoot, "bot.json");
       const token = `test-${randomUUID()}`;
       const port = await getFreeGatewayPort();
       const sessionKey = "main";
@@ -405,7 +405,7 @@ describeLive("gateway live (native Codex conversation binding)", () => {
       const slackUserId = `U${randomUUID().replace(/-/g, "").slice(0, 10).toUpperCase()}`;
       const conversationId = `user:${slackUserId}`;
       const bindModel =
-        process.env.OPENCLAW_LIVE_CODEX_BIND_MODEL?.trim() || DEFAULT_CODEX_BIND_MODEL;
+        process.env.BOT_LIVE_CODEX_BIND_MODEL?.trim() || DEFAULT_CODEX_BIND_MODEL;
       const bindProvider = resolveCodexBindModelProvider();
       const outboundReplies: CapturedOutboundReply[] = [];
 
@@ -442,14 +442,14 @@ describeLive("gateway live (native Codex conversation binding)", () => {
         deleteTestEnvValue("CODEX_HOME");
       }
       setTestEnvValue("HOME", tempHome);
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
-      setTestEnvValue("OPENCLAW_GATEWAY_TOKEN", token);
-      setTestEnvValue("OPENCLAW_SKIP_CANVAS_HOST", "1");
-      setTestEnvValue("OPENCLAW_SKIP_CHANNELS", "1");
-      setTestEnvValue("OPENCLAW_SKIP_CRON", "1");
-      setTestEnvValue("OPENCLAW_SKIP_GMAIL_WATCHER", "1");
-      setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
-      if (process.env.OPENCLAW_LIVE_CODEX_HARNESS_AUTH === "api-key") {
+      setTestEnvValue("BOT_CONFIG_PATH", configPath);
+      setTestEnvValue("BOT_GATEWAY_TOKEN", token);
+      setTestEnvValue("BOT_SKIP_CANVAS_HOST", "1");
+      setTestEnvValue("BOT_SKIP_CHANNELS", "1");
+      setTestEnvValue("BOT_SKIP_CRON", "1");
+      setTestEnvValue("BOT_SKIP_GMAIL_WATCHER", "1");
+      setTestEnvValue("BOT_STATE_DIR", stateDir);
+      if (process.env.BOT_LIVE_CODEX_HARNESS_AUTH === "api-key") {
         const apiKey = process.env.OPENAI_API_KEY?.trim();
         if (!apiKey) {
           throw new Error("API-key bind mode requires OPENAI_API_KEY.");

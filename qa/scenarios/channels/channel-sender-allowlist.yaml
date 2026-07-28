@@ -49,7 +49,7 @@ flow:
             senderId: observer
             senderName: QA Observer
             text:
-              expr: "`@openclaw reply exactly: ${config.expectedMarker}`"
+              expr: "`@bot reply exactly: ${config.expectedMarker}`"
         - waitForNoOutbound:
             quietMs: 1500
             sinceIndex: { ref: outboundStartIndex }
@@ -60,7 +60,7 @@ flow:
             senderId: driver
             senderName: QA Driver
             text:
-              expr: "`@openclaw reply exactly: ${config.expectedMarker}`"
+              expr: "`@bot reply exactly: ${config.expectedMarker}`"
         - waitForOutbound:
             conversation:
               id: { ref: config.conversationId }

@@ -1,10 +1,10 @@
-// Kimi Coding plugin entrypoint registers its OpenClaw integration.
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
-import type { SecretInput } from "openclaw/plugin-sdk/secret-input";
-import { isRecord, normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+// Kimi Coding plugin entrypoint registers its Bot integration.
+import { defineSingleProviderPluginEntry } from "bot/plugin-sdk/provider-entry";
+import { normalizeProviderId } from "bot/plugin-sdk/provider-model-shared";
+import type { SecretInput } from "bot/plugin-sdk/secret-input";
+import { isRecord, normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { applyKimiCodeConfig, KIMI_CODING_MODEL_REF } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 import { buildKimiCodingProvider, normalizeKimiCodingModelId } from "./provider-catalog.js";
 import { isKimiK3ModelId, resolveThinkingProfile } from "./provider-policy-api.js";
 import { KIMI_REPLAY_POLICY } from "./replay-policy.js";

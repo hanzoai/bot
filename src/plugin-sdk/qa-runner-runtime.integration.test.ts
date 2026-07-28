@@ -14,11 +14,11 @@ import {
 import { listQaRunnerCliContributions } from "./qa-runner-runtime.js";
 
 const ORIGINAL_ENV = {
-  OPENCLAW_ENABLE_PRIVATE_QA_CLI: process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI,
-  OPENCLAW_DISABLE_BUNDLED_PLUGINS: process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS,
-  OPENCLAW_CONFIG_PATH: process.env.OPENCLAW_CONFIG_PATH,
-  OPENCLAW_STATE_DIR: process.env.OPENCLAW_STATE_DIR,
-  OPENCLAW_TEST_FAST: process.env.OPENCLAW_TEST_FAST,
+  BOT_ENABLE_PRIVATE_QA_CLI: process.env.BOT_ENABLE_PRIVATE_QA_CLI,
+  BOT_DISABLE_BUNDLED_PLUGINS: process.env.BOT_DISABLE_BUNDLED_PLUGINS,
+  BOT_CONFIG_PATH: process.env.BOT_CONFIG_PATH,
+  BOT_STATE_DIR: process.env.BOT_STATE_DIR,
+  BOT_TEST_FAST: process.env.BOT_TEST_FAST,
 } as const;
 
 const tempDirs: string[] = [];
@@ -37,8 +37,8 @@ function resetQaRunnerRuntimeState() {
 describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
   beforeEach(() => {
     resetQaRunnerRuntimeState();
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "1";
-    process.env.OPENCLAW_TEST_FAST = "1";
+    process.env.BOT_DISABLE_BUNDLED_PLUGINS = "1";
+    process.env.BOT_TEST_FAST = "1";
   });
 
   afterEach(() => {
@@ -56,9 +56,9 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
   });
 
   it("loads an activated qa runner from a linked plugin path without a bundled install fallback", async () => {
-    const stateDir = makeTempDir("openclaw-qa-runner-state-");
+    const stateDir = makeTempDir("bot-qa-runner-state-");
     const pluginDir = path.join(stateDir, "extensions", "qa-linked");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const configPath = path.join(stateDir, "bot.json");
 
     fs.writeFileSync(
       configPath,
@@ -67,12 +67,12 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
       }),
       "utf8",
     );
-    process.env.OPENCLAW_CONFIG_PATH = configPath;
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.BOT_CONFIG_PATH = configPath;
+    process.env.BOT_STATE_DIR = stateDir;
 
     fs.mkdirSync(pluginDir, { recursive: true });
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify({
         id: "qa-linked",
         qaRunners: [
@@ -92,12 +92,12 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/qa-linked",
+        name: "@hanzo/bot-qa-linked",
         type: "module",
-        openclaw: {
+        bot: {
           extensions: ["./index.js"],
           install: {
-            npmSpec: "@openclaw/qa-linked",
+            npmSpec: "@hanzo/bot-qa-linked",
           },
         },
       }),
@@ -144,15 +144,15 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
   });
 
   it("ignores operator runner metadata and state during private QA discovery", () => {
-    const stateDir = makeTempDir("openclaw-private-qa-operator-state-");
+    const stateDir = makeTempDir("bot-private-qa-operator-state-");
     const pluginDir = path.join(stateDir, "extensions", "operator-runner");
-    const stateDatabasePath = path.join(stateDir, "openclaw.sqlite");
+    const stateDatabasePath = path.join(stateDir, "bot.sqlite");
     const stateDatabaseSentinel = "operator-state-must-remain-unopened";
 
     fs.mkdirSync(pluginDir, { recursive: true });
     fs.writeFileSync(stateDatabasePath, stateDatabaseSentinel, "utf8");
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify({
         id: "operator-runner",
         qaRunners: [{ commandName: "operator-sentinel" }],
@@ -167,18 +167,18 @@ describe("plugin-sdk qa-runner-runtime linked plugin smoke", () => {
     fs.writeFileSync(
       path.join(pluginDir, "package.json"),
       JSON.stringify({
-        name: "@openclaw/operator-runner",
+        name: "@hanzo/bot-operator-runner",
         type: "module",
-        openclaw: { extensions: ["./index.js"] },
+        bot: { extensions: ["./index.js"] },
       }),
       "utf8",
     );
     fs.writeFileSync(path.join(pluginDir, "index.js"), "export default {};\n", "utf8");
 
-    process.env.OPENCLAW_ENABLE_PRIVATE_QA_CLI = "1";
-    process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS = "0";
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    process.env.OPENCLAW_CONFIG_PATH = path.join(stateDir, "openclaw.json");
+    process.env.BOT_ENABLE_PRIVATE_QA_CLI = "1";
+    process.env.BOT_DISABLE_BUNDLED_PLUGINS = "0";
+    process.env.BOT_STATE_DIR = stateDir;
+    process.env.BOT_CONFIG_PATH = path.join(stateDir, "bot.json");
 
     const contributions = listQaRunnerCliContributions();
 

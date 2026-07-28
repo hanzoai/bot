@@ -12,7 +12,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const frenchLocaleModule = /\/src\/i18n\/locales\/fr\.ts(?:\?.*)?$/;
 
@@ -29,7 +29,7 @@ async function createContext(): Promise<BrowserContext> {
 
 async function gatewayPhase(page: Page): Promise<string | undefined> {
   return page.evaluate(() => {
-    const app = document.querySelector("openclaw-app") as HTMLElement & {
+    const app = document.querySelector("bot-app") as HTMLElement & {
       runtime?: { context: { gateway: { snapshot: { phase: string } } } };
     };
     return app.runtime?.context.gateway.snapshot.phase;
@@ -58,7 +58,7 @@ describeControlUiE2e("Control UI offline locale retry", () => {
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not available at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not available at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     server = await startControlUiE2eServer();
@@ -120,7 +120,7 @@ describeControlUiE2e("Control UI offline locale retry", () => {
       expect(navigationCount).toBe(1);
       expect(
         await page.evaluate(() =>
-          sessionStorage.getItem("openclaw.controlUi.staleChunkReloadBuildId"),
+          sessionStorage.getItem("bot.controlUi.staleChunkReloadBuildId"),
         ),
       ).toBe("e2e");
       await page.waitForTimeout(500);

@@ -1,5 +1,5 @@
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import type { ExtensionContext } from "openclaw/plugin-sdk/agent-sessions";
+import type { AgentMessage } from "bot/plugin-sdk/agent-core";
+import type { ExtensionContext } from "bot/plugin-sdk/agent-sessions";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const agentSessionMocks = vi.hoisted(() => ({

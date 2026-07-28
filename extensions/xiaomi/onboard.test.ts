@@ -2,7 +2,7 @@
 import {
   expectProviderOnboardMergedLegacyConfig,
   expectProviderOnboardPrimaryModel,
-} from "openclaw/plugin-sdk/provider-test-contracts";
+} from "bot/plugin-sdk/provider-test-contracts";
 import { describe, expect, it } from "vitest";
 import {
   applyXiaomiConfig,

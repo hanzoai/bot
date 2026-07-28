@@ -7,7 +7,7 @@ import { note } from "../../packages/terminal-core/src/note.js";
 import { DEFAULT_AGENTS_FILENAME, DEFAULT_TOOLS_FILENAME } from "../agents/workspace.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { HealthFinding } from "../flows/health-checks.js";
 import { formatErrorMessage as errorMessage } from "../infra/errors.js";
 import { shortenHomePath } from "../utils.js";
@@ -566,12 +566,12 @@ function migrationFinding(params: {
     path: params.path,
     target: params.agentId,
     requirement: params.requirement,
-    fixHint: `Run ${formatCliCommand("openclaw doctor --fix")} to merge TOOLS.md into AGENTS.md.`,
+    fixHint: `Run ${formatCliCommand("bot doctor --fix")} to merge TOOLS.md into AGENTS.md.`,
   };
 }
 
 export async function collectToolsMdMigrationFindings(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): Promise<readonly HealthFinding[]> {
   const findings: HealthFinding[] = [];
   for (const target of resolveToolsMdMigrationWorkspaceTargets(cfg)) {
@@ -628,7 +628,7 @@ export async function collectToolsMdMigrationFindings(
 }
 
 export async function maybeMigrateToolsMd(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   shouldRepair: boolean;
   env?: NodeJS.ProcessEnv;
 }): Promise<ToolsMdMigrationResult> {

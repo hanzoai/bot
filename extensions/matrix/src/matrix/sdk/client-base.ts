@@ -6,9 +6,9 @@ import {
   type MatrixClient as MatrixJsClient,
 } from "matrix-js-sdk/lib/matrix.js";
 import { VerificationMethod } from "matrix-js-sdk/lib/types.js";
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { PinnedDispatcherPolicy } from "openclaw/plugin-sdk/ssrf-dispatcher";
+import { KeyedAsyncQueue } from "bot/plugin-sdk/keyed-async-queue";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import type { PinnedDispatcherPolicy } from "bot/plugin-sdk/ssrf-dispatcher";
 import type { SsrFPolicy } from "../../runtime-api.js";
 import { SqliteBackedMatrixSyncStore } from "../client/file-sync-store.js";
 import { createMatrixJsSdkClientLogger } from "../client/logging.js";

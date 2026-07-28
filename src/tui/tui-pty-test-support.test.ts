@@ -31,8 +31,8 @@ describe("TUI PTY test support", () => {
     startPty("node", [], {
       cwd: process.cwd(),
       env: {
-        OPENCLAW_TUI_PTY_COLS: "72",
-        OPENCLAW_TUI_PTY_ROWS: "20",
+        BOT_TUI_PTY_COLS: "72",
+        BOT_TUI_PTY_ROWS: "20",
       },
       exitTimeoutMs: 1_000,
       outputTimeoutMs: 1_000,
@@ -54,8 +54,8 @@ describe("TUI PTY test support", () => {
     startPty("node", [], {
       cwd: process.cwd(),
       env: {
-        OPENCLAW_TUI_PTY_COLS: "0",
-        OPENCLAW_TUI_PTY_ROWS: "not-a-number",
+        BOT_TUI_PTY_COLS: "0",
+        BOT_TUI_PTY_ROWS: "not-a-number",
       },
       exitTimeoutMs: 1_000,
       outputTimeoutMs: 1_000,
@@ -84,8 +84,8 @@ describe("TUI PTY test support", () => {
       const run = startPty("node", [], {
         cwd: process.cwd(),
         env: {
-          OPENCLAW_TUI_PTY_TYPE_CHUNK_SIZE: chunkSize,
-          OPENCLAW_TUI_PTY_TYPE_DELAY_MS: "1",
+          BOT_TUI_PTY_TYPE_CHUNK_SIZE: chunkSize,
+          BOT_TUI_PTY_TYPE_DELAY_MS: "1",
         },
         exitTimeoutMs: 1_000,
         outputTimeoutMs: 1_000,

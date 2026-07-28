@@ -1,5 +1,5 @@
-import type { EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { EmbeddedRunAttemptParams } from "bot/plugin-sdk/agent-harness-runtime";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import {
   createAssistantCommentaryMessage as buildAssistantCommentaryMessage,
   createAssistantMessage as buildAssistantMessage,

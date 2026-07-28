@@ -1,12 +1,12 @@
 /** Session self-service tool. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { Type } from "typebox";
 import { SESSION_AGENT_ATTENTION_ICON_IDS } from "../../../packages/gateway-protocol/src/session-icon.js";
 import { getRuntimeConfig } from "../../config/config.js";
 import { resolveAgentMainSessionKey } from "../../config/sessions/main-session.js";
 import { resolveStorePath } from "../../config/sessions/paths.js";
 import { loadSessionEntry } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { GatewayTransportError } from "../../gateway/call.js";
 import { withAgentSessionModelPatchOrigin } from "../../gateway/session-model-patch-origin.js";
 import { formatErrorMessage } from "../../infra/errors.js";
@@ -101,7 +101,7 @@ const SessionsToolSchema = Type.Object(
 type SessionsToolOptions = {
   agentSessionKey?: string;
   sandboxed?: boolean;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   callGateway?: InProcessGatewayCaller;
   hasInProcessGatewayContext?: () => boolean;
 };
@@ -163,7 +163,7 @@ function readGroupNames(value: unknown): string[] {
 async function resolvePatchTarget(
   opts: SessionsToolOptions,
   sessionKey: string | undefined,
-): Promise<{ cfg: OpenClawConfig; key: string; requesterKey: string }> {
+): Promise<{ cfg: BotConfig; key: string; requesterKey: string }> {
   const context = resolveSessionToolContext(opts);
   const rawKey = sessionKey ?? context.effectiveRequesterKey;
   const resolved = await resolveSessionReference({

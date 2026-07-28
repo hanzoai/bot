@@ -22,17 +22,17 @@ describe("json output mode", () => {
   });
 
   it("detects json output flags before argv terminators", () => {
-    expect(hasJsonOutputFlag(["node", "openclaw", "nodes", "list", "--json"])).toBe(true);
-    expect(hasJsonOutputFlag(["node", "openclaw", "nodes", "list", "--json=true"])).toBe(true);
-    expect(hasJsonOutputFlag(["node", "openclaw", "models", "--status-json"])).toBe(false);
-    expect(hasJsonOutputFlag(["node", "openclaw", "nodes", "--", "--json"])).toBe(false);
+    expect(hasJsonOutputFlag(["node", "bot", "nodes", "list", "--json"])).toBe(true);
+    expect(hasJsonOutputFlag(["node", "bot", "nodes", "list", "--json=true"])).toBe(true);
+    expect(hasJsonOutputFlag(["node", "bot", "models", "--status-json"])).toBe(false);
+    expect(hasJsonOutputFlag(["node", "bot", "nodes", "--", "--json"])).toBe(false);
   });
 
   it("temporarily routes console logs to stderr while json output is being prepared", async () => {
     const snapshots: boolean[] = [];
 
     await withConsoleLogsRoutedToStderrForJson(
-      ["node", "openclaw", "nodes", "list", "--json"],
+      ["node", "bot", "nodes", "list", "--json"],
       async () => {
         snapshots.push(loggingState.forceConsoleToStderr);
       },
@@ -46,7 +46,7 @@ describe("json output mode", () => {
     loggingState.forceConsoleToStderr = true;
 
     await withConsoleLogsRoutedToStderrForJson(
-      ["node", "openclaw", "nodes", "list", "--json"],
+      ["node", "bot", "nodes", "list", "--json"],
       async () => {
         expect(loggingState.forceConsoleToStderr).toBe(true);
       },
@@ -57,7 +57,7 @@ describe("json output mode", () => {
 
   it("restores stdout routing when command metadata marks --json as parse-only", async () => {
     await withConsoleLogsRoutedToStderrForJson(
-      ["node", "openclaw", "config", "set", "gateway.port", "18789", "--json"],
+      ["node", "bot", "config", "set", "gateway.port", "18789", "--json"],
       async () => {
         expect(loggingState.forceConsoleToStderr).toBe(true);
         applyResolvedCommandOutputMode(false);
@@ -70,7 +70,7 @@ describe("json output mode", () => {
     loggingState.forceConsoleToStderr = true;
 
     await withConsoleLogsRoutedToStderrForJson(
-      ["node", "openclaw", "config", "set", "gateway.port", "18789", "--json"],
+      ["node", "bot", "config", "set", "gateway.port", "18789", "--json"],
       async () => {
         applyResolvedCommandOutputMode(false);
         expect(loggingState.forceConsoleToStderr).toBe(true);

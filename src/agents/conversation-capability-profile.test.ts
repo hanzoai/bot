@@ -4,13 +4,13 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { INTERNAL_MESSAGE_CHANNEL } from "../utils/message-channel.js";
 import { resolveConversationCapabilityProfile } from "./conversation-capability-profile.js";
 
 describe("resolveConversationCapabilityProfile", () => {
   it("prepares a direct conversation profile with sender tool restrictions", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         toolsBySender: {
           "id:guest": { deny: ["exec", "process"] },
@@ -28,9 +28,9 @@ describe("resolveConversationCapabilityProfile", () => {
       modelProvider: "openai",
       modelId: "gpt-5.5",
       modelApi: "responses",
-      workspaceDir: "/tmp/openclaw-direct-profile",
-      cwd: "/tmp/openclaw-direct-profile/task",
-      agentDir: "/tmp/openclaw-agent-direct-profile",
+      workspaceDir: "/tmp/bot-direct-profile",
+      cwd: "/tmp/bot-direct-profile/task",
+      agentDir: "/tmp/bot-agent-direct-profile",
       skillsSnapshot: {
         prompt: "",
         skills: [{ name: "ops" }],
@@ -46,15 +46,15 @@ describe("resolveConversationCapabilityProfile", () => {
       api: "responses",
     });
     expect(profile.workspace).toMatchObject({
-      workspaceRoot: "/tmp/openclaw-direct-profile",
-      runtimeRoot: "/tmp/openclaw-direct-profile/task",
-      instructionRoot: "/tmp/openclaw-agent-direct-profile",
+      workspaceRoot: "/tmp/bot-direct-profile",
+      runtimeRoot: "/tmp/bot-direct-profile/task",
+      instructionRoot: "/tmp/bot-agent-direct-profile",
     });
     expect(profile.skills.snapshot?.skills).toEqual([{ name: "ops" }]);
   });
 
   it("exempts owner WebChat from wildcard sender tool restrictions", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         toolsBySender: {
           "*": { deny: ["exec", "process"] },
@@ -74,7 +74,7 @@ describe("resolveConversationCapabilityProfile", () => {
   });
 
   it("exempts owner WebChat identified through the message channel", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         toolsBySender: {
           "*": { deny: ["exec", "process"] },
@@ -94,7 +94,7 @@ describe("resolveConversationCapabilityProfile", () => {
   });
 
   it("keeps wildcard sender tool restrictions for non-owner WebChat", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         toolsBySender: {
           "*": { deny: ["exec", "process"] },
@@ -114,7 +114,7 @@ describe("resolveConversationCapabilityProfile", () => {
   });
 
   it("keeps wildcard sender tool restrictions for owners on external channels", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         toolsBySender: {
           "*": { deny: ["exec", "process"] },
@@ -134,7 +134,7 @@ describe("resolveConversationCapabilityProfile", () => {
   });
 
   it("prepares a shared conversation profile with group per-sender restrictions", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         whatsapp: {
           groups: {
@@ -159,7 +159,7 @@ describe("resolveConversationCapabilityProfile", () => {
       senderId: "alice",
       modelProvider: "openai",
       modelId: "gpt-5.5",
-      workspaceDir: "/tmp/openclaw-shared-profile",
+      workspaceDir: "/tmp/bot-shared-profile",
     });
 
     expect(profile.conversation.scope).toBe("shared");
@@ -169,7 +169,7 @@ describe("resolveConversationCapabilityProfile", () => {
   });
 
   it("uses a scheduled owner group without reapplying sender wildcard policy", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       tools: {
         deny: ["exec"],
         toolsBySender: { "*": { deny: ["write"] } },
@@ -261,7 +261,7 @@ describe("resolveConversationCapabilityProfile", () => {
   });
 
   it("keeps inherited subagent grants out of explicit overrides", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-capability-profile-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-capability-profile-"));
     const storePath = path.join(tempDir, "sessions.json");
     const sessionKey = "agent:main:subagent:limited";
     await replaceSessionEntry({ storePath, sessionKey }, {

@@ -1,12 +1,12 @@
 // Line type declarations define plugin contracts.
-import type { BaseProbeResult } from "openclaw/plugin-sdk/channel-contract";
-import type { MessageReceipt } from "openclaw/plugin-sdk/channel-outbound";
-import type { MediaKind } from "openclaw/plugin-sdk/media-runtime";
+import type { BaseProbeResult } from "bot/plugin-sdk/channel-contract";
+import type { MessageReceipt } from "bot/plugin-sdk/channel-outbound";
+import type { MediaKind } from "bot/plugin-sdk/media-runtime";
 
 export type LineTokenSource = "config" | "env" | "file" | "none";
 export type LineCredentialStatus = "available" | "configured_unavailable" | "missing";
 export type LineCredentialUnavailableDiagnostic = Extract<
-  ReturnType<typeof import("openclaw/plugin-sdk/secret-file-runtime").tryReadSecretFileSync>,
+  ReturnType<typeof import("bot/plugin-sdk/secret-file-runtime").tryReadSecretFileSync>,
   { status: "configured_unavailable" }
 >["diagnostic"];
 

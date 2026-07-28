@@ -11,7 +11,7 @@ describe("security audit rosterless configs", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
   function makeAuditPaths(label: string) {
-    const rootDir = tempDirs.make(`openclaw-audit-${label}-`);
+    const rootDir = tempDirs.make(`bot-audit-${label}-`);
     const stateDir = path.join(rootDir, "state");
     const workspaceDir = path.join(rootDir, "workspace");
     fs.mkdirSync(stateDir, { recursive: true });
@@ -26,7 +26,7 @@ describe("security audit rosterless configs", () => {
       runSecurityAudit({
         config: {},
         stateDir,
-        configPath: path.join(stateDir, "openclaw.json"),
+        configPath: path.join(stateDir, "bot.json"),
         workspaceDir,
         env: {},
         includeFilesystem: true,
@@ -41,7 +41,7 @@ describe("security audit rosterless configs", () => {
     const baseOptions = {
       config,
       stateDir,
-      configPath: path.join(stateDir, "openclaw.json"),
+      configPath: path.join(stateDir, "bot.json"),
       workspaceDir,
       env: {},
       includeFilesystem: true,
@@ -89,7 +89,7 @@ describe("security audit rosterless configs", () => {
       const report = await runSecurityAudit({
         config: { agents: { entries } } as never,
         stateDir,
-        configPath: path.join(stateDir, "openclaw.json"),
+        configPath: path.join(stateDir, "bot.json"),
         workspaceDir,
         env: {},
         includeFilesystem: true,

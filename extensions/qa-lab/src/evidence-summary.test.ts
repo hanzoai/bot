@@ -1,6 +1,6 @@
 // Qa Lab tests cover QA evidence summary behavior.
 import { execFileSync } from "node:child_process";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import {
   QA_EVIDENCE_SUMMARY_KIND,
@@ -35,8 +35,8 @@ describe("evidence summary", () => {
       ],
       channelId: "qa-channel",
       env: {
-        OPENCLAW_QA_CHANNEL_DRIVER: "local-shim",
-        OPENCLAW_QA_REF: "abc123",
+        BOT_QA_CHANNEL_DRIVER: "local-shim",
+        BOT_QA_REF: "abc123",
       } as NodeJS.ProcessEnv,
       generatedAt: "2026-06-07T12:00:00.000Z",
       primaryModel: "mock-openai/gpt-5.6-luna",
@@ -157,7 +157,7 @@ describe("evidence summary", () => {
       "live driver selected through the QA environment",
       "custom-live-transport",
       undefined,
-      { OPENCLAW_QA_CHANNEL_DRIVER: "live" },
+      { BOT_QA_CHANNEL_DRIVER: "live" },
       "live",
       true,
     ],
@@ -165,7 +165,7 @@ describe("evidence summary", () => {
       "live driver selected through the E2E environment",
       "custom-live-transport",
       undefined,
-      { OPENCLAW_E2E_CHANNEL_DRIVER: "live" },
+      { BOT_E2E_CHANNEL_DRIVER: "live" },
       "live",
       true,
     ],
@@ -173,7 +173,7 @@ describe("evidence summary", () => {
       "explicit synthetic driver overriding live environment",
       "telegram",
       "qa-channel",
-      { OPENCLAW_QA_CHANNEL_DRIVER: "live" },
+      { BOT_QA_CHANNEL_DRIVER: "live" },
       "qa-channel",
       false,
     ],
@@ -239,7 +239,7 @@ describe("evidence summary", () => {
         { kind: "runner-result", path: "vitest-results/runtime-boundary.vitest.json" },
       ],
       env: {
-        OPENCLAW_QA_REF: "abc123",
+        BOT_QA_REF: "abc123",
       } as NodeJS.ProcessEnv,
       generatedAt: "2026-06-07T12:06:00.000Z",
       primaryModel: "mock-openai/gpt-5.6-luna",
@@ -415,7 +415,7 @@ describe("evidence summary", () => {
       ],
       channelId: "qa-channel",
       env: {
-        OPENCLAW_QA_PROFILE: "experimental-profile",
+        BOT_QA_PROFILE: "experimental-profile",
       } as NodeJS.ProcessEnv,
       generatedAt: "2026-06-07T12:09:00.000Z",
       primaryModel: "mock-openai/gpt-5.6-luna",

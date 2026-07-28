@@ -1,4 +1,4 @@
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { estimateStringChars } from "../../utils/cjk-chars.js";
 
 type ToolResultTextBudgetOptions = {

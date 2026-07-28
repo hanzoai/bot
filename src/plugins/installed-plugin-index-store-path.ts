@@ -1,8 +1,8 @@
 // Resolves filesystem paths for installed plugin index storage.
 import path from "node:path";
 import { resolveStateDir } from "../config/paths.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+import type { BotStateDatabaseOptions } from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 
 const LEGACY_INSTALLED_PLUGIN_INDEX_STORE_PATH = path.join("plugins", "installs.json");
 
@@ -15,7 +15,7 @@ export type InstalledPluginIndexStoreOptions = {
 
 function resolveStoreEnv(options: InstalledPluginIndexStoreOptions): NodeJS.ProcessEnv {
   return options.stateDir
-    ? { ...(options.env ?? process.env), OPENCLAW_STATE_DIR: options.stateDir }
+    ? { ...(options.env ?? process.env), BOT_STATE_DIR: options.stateDir }
     : (options.env ?? process.env);
 }
 
@@ -26,13 +26,13 @@ export function resolveInstalledPluginIndexStorePath(
   if (options.filePath) {
     return options.filePath;
   }
-  return resolveOpenClawStateSqlitePath(resolveStoreEnv(options));
+  return resolveBotStateSqlitePath(resolveStoreEnv(options));
 }
 
 /** Resolves state database options for the installed plugin index store. */
 export function resolveInstalledPluginIndexStateDatabaseOptions(
   options: InstalledPluginIndexStoreOptions = {},
-): OpenClawStateDatabaseOptions {
+): BotStateDatabaseOptions {
   if (options.filePath) {
     return {
       ...(options.env ? { env: options.env } : {}),

@@ -1,12 +1,12 @@
-# OpenClaw Qianfan Provider
+# Bot Qianfan Provider
 
-Official OpenClaw provider plugin for Qianfan.
+Official Bot provider plugin for Qianfan.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/qianfan-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-qianfan-provider
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/qianfan> for setup and configuration.
+See <https://docs.bot.ai/providers/qianfan> for setup and configuration.

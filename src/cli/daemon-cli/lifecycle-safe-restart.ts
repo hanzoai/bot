@@ -23,7 +23,7 @@ export function resolveGatewayRestartIntentOptions(
   return opts.wait === undefined ? undefined : { waitMs: parseDurationMs(opts.wait) };
 }
 
-/** Request an OpenClaw-aware restart through the running Gateway. */
+/** Request an Bot-aware restart through the running Gateway. */
 export async function requestSafeGatewayRestart(opts: DaemonLifecycleOptions): Promise<boolean> {
   if (opts.force) {
     throw new Error("--safe cannot be combined with --force; omit --safe to force restart now");

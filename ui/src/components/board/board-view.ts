@@ -26,7 +26,7 @@ import type {
   BoardViewWidget,
   BoardWidgetFrameUrl,
 } from "../../lib/board/view-types.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import "../../styles/board.css";
 import "../web-awesome-tabs.ts";
 import "../web-awesome.ts";
@@ -72,7 +72,7 @@ function itemsForWidgets(
   }));
 }
 
-class OpenClawBoardView extends OpenClawLightDomElement {
+class BotBoardView extends BotLightDomElement {
   @property({ attribute: false }) snapshot?: BoardViewSnapshot;
   @property({ attribute: false }) activeTabId = "";
   @property({ attribute: false }) widgetFrameUrl?: BoardWidgetFrameUrl;
@@ -347,7 +347,7 @@ class OpenClawBoardView extends OpenClawLightDomElement {
         .elementFromPoint(event.clientX, event.clientY)
         ?.closest<HTMLElement>("[data-board-tab-id]");
       const candidateTabId =
-        tabTarget?.closest("openclaw-board-view") === this
+        tabTarget?.closest("bot-board-view") === this
           ? (tabTarget.dataset.boardTabId ?? "")
           : "";
       const candidateIsValid =
@@ -505,7 +505,7 @@ class OpenClawBoardView extends OpenClawLightDomElement {
     }
     this.focusName = target.name;
     void this.updateComplete.then(() => {
-      const cell = [...this.querySelectorAll("openclaw-board-widget-cell")].find(
+      const cell = [...this.querySelectorAll("bot-board-widget-cell")].find(
         (entry) => entry.widget?.name === target.name,
       );
       cell?.querySelector<HTMLElement>(".board-widget")?.focus();
@@ -648,7 +648,7 @@ class OpenClawBoardView extends OpenClawLightDomElement {
               return nothing;
             }
             return html`
-              <openclaw-board-widget-cell
+              <bot-board-widget-cell
                 .widget=${widget}
                 .rect=${rect}
                 .contentHeightPx=${this.contentHeights.get(widget.name)}
@@ -665,7 +665,7 @@ class OpenClawBoardView extends OpenClawLightDomElement {
                 .canMutate=${this.canMutate}
                 .canGrant=${this.canGrant}
                 .ticketRefreshEnabled=${this.ticketRefreshEnabled}
-              ></openclaw-board-widget-cell>
+              ></bot-board-widget-cell>
             `;
           },
         )}
@@ -706,12 +706,12 @@ class OpenClawBoardView extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-board-view")) {
-  customElements.define("openclaw-board-view", OpenClawBoardView);
+if (!customElements.get("bot-board-view")) {
+  customElements.define("bot-board-view", BotBoardView);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-board-view": OpenClawBoardView;
+    "bot-board-view": BotBoardView;
   }
 }

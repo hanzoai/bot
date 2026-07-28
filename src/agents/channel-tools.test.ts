@@ -1,7 +1,7 @@
 /** Tests channel action discovery from plugin message-tool descriptors. */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { setActivePluginRegistry } from "../plugins/runtime.js";
 import { defaultRuntime } from "../runtime.js";
 import { createTestRegistry } from "../test-utils/channel-plugins.js";
@@ -43,7 +43,7 @@ describe("channel tools", () => {
   });
 
   it("skips crashing plugins and logs once", () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     expect(listAllChannelSupportedActions({ cfg })).toStrictEqual([]);
     expect(errorSpy).toHaveBeenCalledTimes(1);
 
@@ -77,7 +77,7 @@ describe("channel tools", () => {
 
     setActivePluginRegistry(createTestRegistry([{ pluginId: "polltest", source: "test", plugin }]));
 
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     expect(listChannelSupportedActions({ cfg, channel: "polltest" })).toStrictEqual([]);
     expect(listAllChannelSupportedActions({ cfg })).toStrictEqual([]);
   });
@@ -105,7 +105,7 @@ describe("channel tools", () => {
 
     setActivePluginRegistry(createTestRegistry([{ pluginId: "telegram", source: "test", plugin }]));
 
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     expect(listChannelSupportedActions({ cfg, channel: "tg" })).toEqual(["react"]);
   });
 
@@ -133,7 +133,7 @@ describe("channel tools", () => {
 
     setActivePluginRegistry(createTestRegistry([{ pluginId: "telegram", source: "test", plugin }]));
 
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     expect(listChannelSupportedActions({ cfg, channel: "telegram" })).toEqual(["react"]);
   });
 });

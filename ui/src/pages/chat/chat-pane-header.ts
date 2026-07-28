@@ -423,7 +423,7 @@ export abstract class ChatPaneHeader extends ChatPaneContext {
     );
     const label = t(active ? "chat.sessionDiscussion.hide" : "chat.sessionDiscussion.show");
     return html`
-      <openclaw-tooltip .content=${label}>
+      <bot-tooltip .content=${label}>
         <button
           class="btn btn--ghost btn--icon chat-icon-btn chat-session-discussion-toggle"
           type="button"
@@ -436,7 +436,7 @@ export abstract class ChatPaneHeader extends ChatPaneContext {
         >
           ${icons.messageSquare}
         </button>
-      </openclaw-tooltip>
+      </bot-tooltip>
     `;
   }
 }

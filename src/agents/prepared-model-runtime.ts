@@ -1,5 +1,5 @@
 /** Lifecycle-owned auth/model discovery snapshots for agent runs. */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
 import { isReservedSystemAgentId } from "../system-agent/agent-id.js";
 import { registerRuntimeAuthProfileStoreMutationListener } from "./auth-profiles/runtime-snapshots.js";
@@ -489,7 +489,7 @@ export function rejectPendingPreparedModelRuntimeReplacement(
 
 /** Rebuilds active owners after config/plugin runtime publication. */
 async function refreshPreparedModelRuntimeSnapshotsNow(
-  config: OpenClawConfig,
+  config: BotConfig,
   options: PreparedModelRuntimeRefreshOptions = {},
 ): Promise<void> {
   const catalogMode = options.catalogMode ?? "live";
@@ -603,7 +603,7 @@ async function refreshPreparedModelRuntimeSnapshotsNow(
 
 /** Serializes config/plugin publications so only the latest completed refresh retires owners. */
 export function refreshPreparedModelRuntimeSnapshots(
-  config: OpenClawConfig,
+  config: BotConfig,
   options: PreparedModelRuntimeRefreshOptions = {},
 ): Promise<void> {
   // Stale synchronously. Queued publication must never leave the prior generation request-visible.
@@ -763,7 +763,7 @@ function resetPreparedModelRuntimeSnapshotsForTest(): void {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.preparedModelRuntimeTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.preparedModelRuntimeTestApi")] =
     {
       resetPreparedModelRuntimeSnapshotsForTest,
       setModelRuntimeBuildTimeoutMsForTest: (timeoutMs: number) => {

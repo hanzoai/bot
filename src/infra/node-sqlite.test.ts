@@ -48,7 +48,7 @@ function expectedUnsafeSqliteError(version: string, shared: boolean): string {
     : "Upgrade to Node 22.22.3+, 24.15.0+, or 25.9.0+ before retrying.";
   return (
     "SQLite support is unavailable or unsafe in this Node runtime. " +
-    "OpenClaw requires SQLite 3.51.3+, 3.50.7+ within 3.50.x, or 3.44.6+ within 3.44.x for WAL safety; " +
+    "Bot requires SQLite 3.51.3+, 3.50.7+ within 3.50.x, or 3.44.6+ within 3.44.x for WAL safety; " +
     `Node ${process.versions.node} ${wording} SQLite ${version}, which is affected by the upstream WAL-reset ` +
     `database corruption bug. ${remediation}`
   );
@@ -59,7 +59,7 @@ describe("node SQLite locations", () => {
     vi.restoreAllMocks();
   });
 
-  it.each(["", ":memory:", "file:///tmp/openclaw.sqlite?mode=ro&immutable=1"])(
+  it.each(["", ":memory:", "file:///tmp/bot.sqlite?mode=ro&immutable=1"])(
     "preserves special location %j",
     (location) => {
       vi.spyOn(process, "platform", "get").mockReturnValue("win32");
@@ -69,7 +69,7 @@ describe("node SQLite locations", () => {
 
   it("keeps ordinary filesystem paths unchanged outside Windows", () => {
     vi.spyOn(process, "platform", "get").mockReturnValue("linux");
-    expect(resolveNodeSqliteLocation("relative/openclaw.sqlite")).toBe("relative/openclaw.sqlite");
+    expect(resolveNodeSqliteLocation("relative/bot.sqlite")).toBe("relative/bot.sqlite");
   });
 
   it("opens special locations through the shared connection boundary", () => {
@@ -83,34 +83,34 @@ describe("node SQLite locations", () => {
 
   it("normalizes ordinary filesystem paths through the Windows VFS boundary", () => {
     vi.spyOn(process, "platform", "get").mockReturnValue("win32");
-    const resolveSpy = vi.spyOn(path, "resolve").mockReturnValue("resolved-openclaw.sqlite");
+    const resolveSpy = vi.spyOn(path, "resolve").mockReturnValue("resolved-bot.sqlite");
     const namespacedSpy = vi
       .spyOn(path, "toNamespacedPath")
-      .mockReturnValue(String.raw`\\?\C:\resolved-openclaw.sqlite`);
+      .mockReturnValue(String.raw`\\?\C:\resolved-bot.sqlite`);
 
-    expect(resolveNodeSqliteLocation("relative/openclaw.sqlite")).toBe(
-      String.raw`\\?\C:\resolved-openclaw.sqlite`,
+    expect(resolveNodeSqliteLocation("relative/bot.sqlite")).toBe(
+      String.raw`\\?\C:\resolved-bot.sqlite`,
     );
-    expect(resolveSpy).toHaveBeenCalledWith("relative/openclaw.sqlite");
-    expect(namespacedSpy).toHaveBeenCalledWith("resolved-openclaw.sqlite");
+    expect(resolveSpy).toHaveBeenCalledWith("relative/bot.sqlite");
+    expect(namespacedSpy).toHaveBeenCalledWith("resolved-bot.sqlite");
   });
 
   it("keeps UNC and namespaced Windows paths on the Windows VFS path boundary", () => {
     vi.spyOn(process, "platform", "get").mockReturnValue("win32");
     const resolvedPaths = new Map([
       [
-        String.raw`\\server\share\state\openclaw.sqlite`,
-        String.raw`\\server\share\state\openclaw.sqlite`,
+        String.raw`\\server\share\state\bot.sqlite`,
+        String.raw`\\server\share\state\bot.sqlite`,
       ],
-      ["//server/share/state/openclaw.sqlite", String.raw`\\server\share\state\openclaw.sqlite`],
-      ["relative/openclaw.sqlite", String.raw`\\server\share\workdir\relative\openclaw.sqlite`],
+      ["//server/share/state/bot.sqlite", String.raw`\\server\share\state\bot.sqlite`],
+      ["relative/bot.sqlite", String.raw`\\server\share\workdir\relative\bot.sqlite`],
       [
-        String.raw`\\?\C:\deep\state\openclaw.sqlite`,
-        String.raw`\\?\C:\deep\state\openclaw.sqlite`,
+        String.raw`\\?\C:\deep\state\bot.sqlite`,
+        String.raw`\\?\C:\deep\state\bot.sqlite`,
       ],
       [
-        String.raw`\\?\UNC\server\share\state\openclaw.sqlite`,
-        String.raw`\\?\UNC\server\share\state\openclaw.sqlite`,
+        String.raw`\\?\UNC\server\share\state\bot.sqlite`,
+        String.raw`\\?\UNC\server\share\state\bot.sqlite`,
       ],
     ]);
     const resolveSpy = vi.spyOn(path, "resolve").mockImplementation((pathname) => {

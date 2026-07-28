@@ -43,7 +43,7 @@ afterEach(() => {
 describe("sidebar session status preference", () => {
   it("defaults unknown stored values to active", () => {
     expect(loadStoredSidebarSessionStatusFilter()).toBe("active");
-    localStorage.setItem("openclaw:sidebar:sessions:status-filter", "unexpected");
+    localStorage.setItem("bot:sidebar:sessions:status-filter", "unexpected");
     expect(loadStoredSidebarSessionStatusFilter()).toBe("active");
   });
 

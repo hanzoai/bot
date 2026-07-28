@@ -2,10 +2,10 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { asNullableObjectRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { asNullableObjectRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { note } from "../../packages/terminal-core/src/note.js";
 import {
   listAgentEntries,
@@ -36,7 +36,7 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { parseSqliteSessionFileMarker } from "../config/sessions/sqlite-marker.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { HealthFinding, HealthRepairEffect } from "../flows/health-checks.js";
 import { resolveRequiredHomeDir } from "../infra/home-dir.js";
 import {
@@ -183,7 +183,7 @@ function formatOrphanAgentDirPreview(entries: OrphanAgentDir[], limit = 3): stri
   return labels.join(", ");
 }
 
-function listOrphanAgentDirs(cfg: OpenClawConfig, stateDir: string): OrphanAgentDir[] {
+function listOrphanAgentDirs(cfg: BotConfig, stateDir: string): OrphanAgentDir[] {
   // agents/main/agent also owns the shipped shared legacy auth store.
   // Keep main undeletable until named agents make auth-store ownership explicit.
   const configuredIds = new Set<string>([LEGACY_IMPLICIT_AGENT_ID]);
@@ -327,7 +327,7 @@ function findOtherStateDirs(stateDir: string): string[] {
       if (entry.name.startsWith(".")) {
         continue;
       }
-      const candidates = [".openclaw"].map((dir) => path.resolve(root, entry.name, dir));
+      const candidates = [".bot"].map((dir) => path.resolve(root, entry.name, dir));
       for (const candidate of candidates) {
         if (candidate === resolvedState) {
           continue;
@@ -585,7 +585,7 @@ export function formatLinuxSdBackedStateDirWarning(
   return [
     `- State directory appears to be on SD/eMMC storage (${displayStateDir}; device ${safeSource}, fs ${safeFsType}, mount ${safeMountPoint}).`,
     "- SD/eMMC media can be slower for random I/O and wear faster under session/log churn.",
-    "- For better startup and state durability, prefer SSD/NVMe (or USB SSD on Raspberry Pi) for OPENCLAW_STATE_DIR.",
+    "- For better startup and state durability, prefer SSD/NVMe (or USB SSD on Raspberry Pi) for BOT_STATE_DIR.",
   ].join("\n");
 }
 
@@ -651,7 +651,7 @@ export function formatLinuxVolatileStateDirWarning(
   return [
     `- State directory is on a volatile filesystem (${displayStateDir}; fs ${safeFsType}, mount ${safeMountPoint}).`,
     "- Sessions, credentials, config, and SQLite state (including WAL/journal sidecars) will be lost on reboot.",
-    "- Move OPENCLAW_STATE_DIR to a persistent filesystem to avoid data loss.",
+    "- Move BOT_STATE_DIR to a persistent filesystem to avoid data loss.",
   ].join("\n");
 }
 
@@ -673,7 +673,7 @@ export function detectMacCloudSyncedStateDir(
   }
 
   // Cloud-sync roots should always be anchored to the OS account home on macOS.
-  // OPENCLAW_HOME can relocate app data defaults, but iCloud/CloudStorage remain under the OS home.
+  // BOT_HOME can relocate app data defaults, but iCloud/CloudStorage remain under the OS home.
   const homedir = deps?.homedir ?? os.homedir();
   const roots = [
     {
@@ -738,8 +738,8 @@ function isSlashRoutingSessionKey(sessionKey: string): boolean {
   return /^[^:]+:slash:[^:]+(?:$|:)/.test(scoped);
 }
 
-function shouldRequireOAuthDir(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): boolean {
-  if (env.OPENCLAW_OAUTH_DIR?.trim()) {
+function shouldRequireOAuthDir(cfg: BotConfig, env: NodeJS.ProcessEnv): boolean {
+  if (env.BOT_OAUTH_DIR?.trim()) {
     return true;
   }
   const channels = asNullableObjectRecord(cfg.channels);
@@ -774,13 +774,13 @@ function shouldRequireOAuthDir(cfg: OpenClawConfig, env: NodeJS.ProcessEnv): boo
   return false;
 }
 
-function shouldSuppressOrphanTranscriptWarning(cfg: OpenClawConfig, agentId: string): boolean {
+function shouldSuppressOrphanTranscriptWarning(cfg: BotConfig, agentId: string): boolean {
   const backendConfig = resolveMemoryBackendConfig({ cfg, agentId });
   return backendConfig?.backend === "qmd" && backendConfig.qmd?.sessions.enabled === true;
 }
 
 export function detectStateIntegrityHealthIssues(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   params?: {
     configPath?: string;
     env?: NodeJS.ProcessEnv;
@@ -914,7 +914,7 @@ export function stateIntegrityIssueToHealthFinding(
         severity: "warning",
         message: `State directory is under macOS cloud-synced storage (${issue.storage}), which can cause slow I/O and sync races.`,
         path: issue.path,
-        fixHint: "Move OPENCLAW_STATE_DIR to local non-synced storage such as ~/.openclaw.",
+        fixHint: "Move BOT_STATE_DIR to local non-synced storage such as ~/.bot.",
       };
     case "linux-sd-state-dir":
       return {
@@ -923,7 +923,7 @@ export function stateIntegrityIssueToHealthFinding(
         message: `State directory appears to be on SD/eMMC storage (${issue.source}, ${issue.fsType}), which can hurt startup and durability.`,
         path: issue.path,
         target: issue.mountPoint,
-        fixHint: "Move OPENCLAW_STATE_DIR to SSD/NVMe-backed storage.",
+        fixHint: "Move BOT_STATE_DIR to SSD/NVMe-backed storage.",
       };
     case "linux-volatile-state-dir":
       return {
@@ -932,7 +932,7 @@ export function stateIntegrityIssueToHealthFinding(
         message: `State directory is on volatile ${issue.fsType} storage and may disappear on reboot.`,
         path: issue.path,
         target: issue.mountPoint,
-        fixHint: "Move OPENCLAW_STATE_DIR to persistent local storage.",
+        fixHint: "Move BOT_STATE_DIR to persistent local storage.",
       };
     case "missing-state-dir":
       return {
@@ -941,7 +941,7 @@ export function stateIntegrityIssueToHealthFinding(
         message:
           "State directory is missing. Sessions, credentials, logs, and config are stored there.",
         path: issue.path,
-        fixHint: "Run `openclaw doctor --fix` to create the state directory.",
+        fixHint: "Run `bot doctor --fix` to create the state directory.",
       };
     case "state-dir-not-writable":
       return {
@@ -951,7 +951,7 @@ export function stateIntegrityIssueToHealthFinding(
           ? `State directory is not writable. ${issue.hint}`
           : "State directory is not writable.",
         path: issue.path,
-        fixHint: "Run `openclaw doctor --fix` to repair state directory permissions.",
+        fixHint: "Run `bot doctor --fix` to repair state directory permissions.",
       };
     case "state-dir-too-open":
       return {
@@ -959,7 +959,7 @@ export function stateIntegrityIssueToHealthFinding(
         severity: "warning",
         message: "State directory permissions are too open. Recommend chmod 700.",
         path: issue.path,
-        fixHint: "Run `openclaw doctor --fix` to tighten state directory permissions.",
+        fixHint: "Run `bot doctor --fix` to tighten state directory permissions.",
       };
     case "config-file-too-open":
       return {
@@ -967,7 +967,7 @@ export function stateIntegrityIssueToHealthFinding(
         severity: "warning",
         message: "Config file is group/world readable. Recommend chmod 600.",
         path: issue.path,
-        fixHint: "Run `openclaw doctor --fix` to tighten config file permissions.",
+        fixHint: "Run `bot doctor --fix` to tighten config file permissions.",
       };
     case "missing-runtime-dir":
       return {
@@ -975,7 +975,7 @@ export function stateIntegrityIssueToHealthFinding(
         severity: "error",
         message: `${issue.label} is missing.`,
         path: issue.path,
-        fixHint: "Run `openclaw doctor --fix` to create missing runtime state directories.",
+        fixHint: "Run `bot doctor --fix` to create missing runtime state directories.",
       };
     case "runtime-dir-not-writable":
       return {
@@ -985,7 +985,7 @@ export function stateIntegrityIssueToHealthFinding(
           ? `${issue.label} is not writable. ${issue.hint}`
           : `${issue.label} is not writable.`,
         path: issue.path,
-        fixHint: "Run `openclaw doctor --fix` to repair runtime state directory permissions.",
+        fixHint: "Run `bot doctor --fix` to repair runtime state directory permissions.",
       };
   }
   return assertNeverStateIntegrityIssue(issue);
@@ -1052,7 +1052,7 @@ function assertNeverStateIntegrityIssue(issue: never): never {
 
 /** Emits state integrity warnings and applies selected runtime repairs. */
 export async function noteStateIntegrity(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   prompter: DoctorPrompterLike,
   configPath?: string,
 ) {
@@ -1062,7 +1062,7 @@ export async function noteStateIntegrity(
   const env = process.env;
   const homedir = () => resolveRequiredHomeDir(env, os.homedir);
   const stateDir = resolveStateDir(env, homedir);
-  const defaultStateDir = path.join(homedir(), ".openclaw");
+  const defaultStateDir = path.join(homedir(), ".bot");
   const oauthDir = resolveOAuthDir(env, stateDir);
   const agentId = tryResolveDefaultAgentId(cfg);
   const sessionsDir = agentId
@@ -1089,8 +1089,8 @@ export async function noteStateIntegrity(
       [
         `- State directory is under macOS cloud-synced storage (${displayStateDir}; ${cloudSyncedStateDir.storage}).`,
         "- This can cause slow I/O and sync/lock races for sessions and credentials.",
-        "- Prefer a local non-synced state dir (for example: ~/.openclaw).",
-        `  Set locally: OPENCLAW_STATE_DIR=~/.openclaw ${formatCliCommand("openclaw doctor")}`,
+        "- Prefer a local non-synced state dir (for example: ~/.bot).",
+        `  Set locally: BOT_STATE_DIR=~/.bot ${formatCliCommand("bot doctor")}`,
       ].join("\n"),
     );
   }
@@ -1364,9 +1364,9 @@ export async function noteStateIntegrity(
       warnings.push(
         [
           `- ${missing.length}/${recentTranscriptCandidates.length} recent sessions are missing transcripts.`,
-          `  Verify sessions in store: ${formatCliCommand(`openclaw sessions --store "${absoluteStorePath}"`)}`,
-          `  Preview cleanup impact: ${formatCliCommand(`openclaw sessions cleanup --store "${absoluteStorePath}" --dry-run --fix-missing`)}`,
-          `  Prune missing entries: ${formatCliCommand(`openclaw sessions cleanup --store "${absoluteStorePath}" --enforce --fix-missing`)}`,
+          `  Verify sessions in store: ${formatCliCommand(`bot sessions --store "${absoluteStorePath}"`)}`,
+          `  Preview cleanup impact: ${formatCliCommand(`bot sessions cleanup --store "${absoluteStorePath}" --dry-run --fix-missing`)}`,
+          `  Prune missing entries: ${formatCliCommand(`bot sessions cleanup --store "${absoluteStorePath}" --enforce --fix-missing`)}`,
         ].join("\n"),
       );
     }
@@ -1379,12 +1379,12 @@ export async function noteStateIntegrity(
       warnings.push(
         [
           `- Found ${wedgedCount} with automatic restart recovery tombstoned.`,
-          "  OpenClaw will not auto-resume these child sessions on restart; reconcile their task records instead.",
+          "  Bot will not auto-resume these child sessions on restart; reconcile their task records instead.",
           `  Examples: ${wedgedSubagentSessions
             .slice(0, 3)
             .map(([key]) => key)
             .join(", ")}`,
-          `  Fix: ${formatCliCommand("openclaw tasks maintenance --apply")}`,
+          `  Fix: ${formatCliCommand("bot tasks maintenance --apply")}`,
         ].join("\n"),
       );
       const repairWedged = await prompter.confirmRuntimeRepair({
@@ -1571,7 +1571,7 @@ export function collectWorkspaceBackupTip(workspaceDir: string): string | null {
   if (fs.existsSync(gitMarker)) {
     return null;
   }
-  return "- Tip: back up the agent workspace in a private git repo; keep ~/.openclaw out of git (credentials, sessions). Details: /concepts/agent-workspace#git-backup-recommended";
+  return "- Tip: back up the agent workspace in a private git repo; keep ~/.bot out of git (credentials, sessions). Details: /concepts/agent-workspace#git-backup-recommended";
 }
 
 /** Emits the workspace backup tip when applicable. */

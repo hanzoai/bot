@@ -5,7 +5,7 @@ import { safePathSegmentHashed } from "../infra/install-safe-path.js";
 import { resolveDefaultPluginNpmDir, resolvePluginNpmProjectsDir } from "./install-paths.js";
 import { listManagedPluginNpmRootsSync } from "./npm-project-roots.js";
 
-const RETAINED_MANAGED_NPM_INSTALL_MARKER_DIR = ".openclaw-retained-npm-installs";
+const RETAINED_MANAGED_NPM_INSTALL_MARKER_DIR = ".bot-retained-npm-installs";
 
 export function resolveRetainedManagedNpmInstallPackageInfo(packageDir: string): {
   packageName: string;
@@ -66,7 +66,7 @@ export async function clearRetainedManagedNpmInstallMarker(packageDir: string): 
   try {
     await fs.promises.rmdir(path.dirname(info.markerPath));
   } catch {
-    // Best effort: keep the OpenClaw-owned marker directory if it is not empty.
+    // Best effort: keep the Bot-owned marker directory if it is not empty.
   }
   return true;
 }

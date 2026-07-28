@@ -3,8 +3,8 @@
  *
  * Keeps aliases, groups, profile expansion, and prefix matching consistent across allow/deny paths.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import {
   CORE_TOOL_GROUPS,
   resolveCoreToolProfilePolicy,

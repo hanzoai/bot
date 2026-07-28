@@ -46,7 +46,7 @@ scenario:
       prompt: |-
         Perform a restart-resilience release audit. This is one task; do not ask me to follow up.
 
-        First, use OpenClaw Code Mode to create three sequential restart checkpoints. Count prior assistant `exec` calls in this transcript whose code contains `qa_restart_wait`. If the count is below three, make exactly the next checkpoint with an `exec` call whose `restartSafe` flag is true. Its JavaScript must search for `qa_restart_wait`, call the single match with `{}`, and return `CHECKPOINT-N`, where N is the next count. If `exec` reports waiting, call `wait` with its run id. A gateway restart will interrupt each checkpoint. On the recovery turn, count the transcript again and continue with the next checkpoint; do not repeat a completed checkpoint.
+        First, use Bot Code Mode to create three sequential restart checkpoints. Count prior assistant `exec` calls in this transcript whose code contains `qa_restart_wait`. If the count is below three, make exactly the next checkpoint with an `exec` call whose `restartSafe` flag is true. Its JavaScript must search for `qa_restart_wait`, call the single match with `{}`, and return `CHECKPOINT-N`, where N is the next count. If `exec` reports waiting, call `wait` with its run id. A gateway restart will interrupt each checkpoint. On the recovery turn, count the transcript again and continue with the next checkpoint; do not repeat a completed checkpoint.
 
         After three checkpoint calls are visible, use restart-safe Code Mode to search for `qa_restart_unsafe_probe` and record whether it is visible. Do not call it. Then read all five files under `restart-audit/` and calculate:
         - component total from services, workers, and jobs
@@ -79,7 +79,7 @@ flow:
             message:
               expr: "`expected ${config.requiredProvider}/${config.requiredModel}, got ${env.primaryModel}`"
         - assert:
-            expr: "Boolean(env.gateway.runtimeEnv.OPENAI_API_KEY?.trim() || env.gateway.runtimeEnv.OPENCLAW_LIVE_OPENAI_KEY?.trim())"
+            expr: "Boolean(env.gateway.runtimeEnv.OPENAI_API_KEY?.trim() || env.gateway.runtimeEnv.BOT_LIVE_OPENAI_KEY?.trim())"
             message: live OpenAI API key did not reach the Gateway child
       detailsExpr: "`provider=${selected?.provider} model=${selected?.model} auth=env-api-key`"
 

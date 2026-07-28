@@ -1,16 +1,16 @@
 // Mattermost plugin module implements reply delivery behavior.
-import type { OpenClawConfig, PluginRuntime } from "openclaw/plugin-sdk/core";
-import { getAgentScopedMediaLocalRoots } from "openclaw/plugin-sdk/media-runtime";
+import type { BotConfig, PluginRuntime } from "bot/plugin-sdk/core";
+import { getAgentScopedMediaLocalRoots } from "bot/plugin-sdk/media-runtime";
 import {
   deliverTextOrMediaReply,
   isReasoningReplyPayload,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "bot/plugin-sdk/reply-payload";
 import type {
   ReplyDispatchKind,
   ReplyFollowupAdmissionBarrierTimeoutPolicy,
   ReplyPayload,
-} from "openclaw/plugin-sdk/reply-runtime";
+} from "bot/plugin-sdk/reply-runtime";
 import {
   resolveMattermostReplyDeliveryBarrierTimeoutMs,
   type CreateDmChannelRetryOptions,
@@ -22,7 +22,7 @@ type SendMattermostMessage = (
   to: string,
   text: string,
   opts: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string;
     mediaUrl?: string;
     mediaLocalRoots?: readonly string[];
@@ -99,7 +99,7 @@ export function toMattermostChannelDeliveryResult(outcome: MattermostReplyDelive
 
 export async function deliverMattermostReplyPayload(params: {
   core: PluginRuntime;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   payload: ReplyPayload;
   to: string;
   accountId: string;

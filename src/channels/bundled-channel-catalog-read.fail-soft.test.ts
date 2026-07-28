@@ -1,5 +1,5 @@
 // Bundled channel catalog fail-soft tests cover catalog read failures and fallback behavior.
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 afterEach(() => {
@@ -9,9 +9,9 @@ afterEach(() => {
 
 describe("listBundledChannelCatalogEntries discovery failures", () => {
   it("falls back when bundled package metadata is unavailable during import", async () => {
-    vi.doMock("../infra/openclaw-root.js", () => ({
-      resolveOpenClawPackageRootSync: () => null,
-      resolveOpenClawPackageRoot: async () => null,
+    vi.doMock("../infra/bot-root.js", () => ({
+      resolveBotPackageRootSync: () => null,
+      resolveBotPackageRoot: async () => null,
     }));
     vi.doMock("../plugins/bundled-dir.js", () => ({
       resolveBundledPluginsDir: () => undefined,

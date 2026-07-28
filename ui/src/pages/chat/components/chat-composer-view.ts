@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { html, nothing, type TemplateResult } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { ref } from "lit/directives/ref.js";
@@ -149,9 +149,9 @@ export function renderChatComposerView(context: ChatComposerViewContext) {
                 }
               })}
             >
-              <openclaw-chat-question-panel
+              <bot-chat-question-panel
                 .props=${questionPanelProps}
-              ></openclaw-chat-question-panel>
+              ></bot-chat-question-panel>
             </div>
           `
         : nothing}
@@ -273,7 +273,7 @@ export function renderChatComposerView(context: ChatComposerViewContext) {
                     props.realtimeTalkCameraDevices.length >= 2 &&
                     props.onSwitchRealtimeCamera
                       ? html`
-                          <openclaw-tooltip
+                          <bot-tooltip
                             class="agent-chat__video-preview-switch-tooltip"
                             .content=${t("chat.composer.switchCamera")}
                           >
@@ -286,7 +286,7 @@ export function renderChatComposerView(context: ChatComposerViewContext) {
                             >
                               ${icons.switchCamera}
                             </button>
-                          </openclaw-tooltip>
+                          </bot-tooltip>
                         `
                       : nothing}
                   </div>

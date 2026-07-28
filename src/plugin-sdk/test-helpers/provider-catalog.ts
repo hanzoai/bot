@@ -14,13 +14,13 @@ export {
 } from "./public-surface-loader.js";
 
 type ProviderRuntimeCatalogModule = Pick<
-  typeof import("openclaw/plugin-sdk/provider-catalog-runtime"),
+  typeof import("bot/plugin-sdk/provider-catalog-runtime"),
   "augmentModelCatalogWithProviderPlugins"
 >;
 
 export async function importProviderRuntimeCatalogModule(): Promise<ProviderRuntimeCatalogModule> {
   const { augmentModelCatalogWithProviderPlugins } =
-    await import("openclaw/plugin-sdk/provider-catalog-runtime");
+    await import("bot/plugin-sdk/provider-catalog-runtime");
   return {
     augmentModelCatalogWithProviderPlugins,
   };

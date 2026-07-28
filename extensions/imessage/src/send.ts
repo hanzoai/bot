@@ -1,20 +1,20 @@
 // Imessage plugin module implements send behavior.
 import { constants, accessSync } from "node:fs";
-import type { MediaPlaceholderTextFact } from "openclaw/plugin-sdk/channel-inbound";
+import type { MediaPlaceholderTextFact } from "bot/plugin-sdk/channel-inbound";
 import {
   createMessageReceiptFromOutboundResults,
   type MessageReceipt,
   type MessageReceiptPartKind,
   type MessageReceiptSourceResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { kindFromMime, resolveOutboundAttachmentFromUrl } from "openclaw/plugin-sdk/media-runtime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { sleep as delay } from "openclaw/plugin-sdk/runtime-env";
-import { openNodeSqliteDatabase } from "openclaw/plugin-sdk/sqlite-runtime";
-import { convertMarkdownTables } from "openclaw/plugin-sdk/text-chunking";
-import { stripInlineDirectiveTagsForDelivery } from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/channel-outbound";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { resolveMarkdownTableMode } from "bot/plugin-sdk/markdown-table-runtime";
+import { kindFromMime, resolveOutboundAttachmentFromUrl } from "bot/plugin-sdk/media-runtime";
+import { requireRuntimeConfig } from "bot/plugin-sdk/plugin-config-runtime";
+import { sleep as delay } from "bot/plugin-sdk/runtime-env";
+import { openNodeSqliteDatabase } from "bot/plugin-sdk/sqlite-runtime";
+import { convertMarkdownTables } from "bot/plugin-sdk/text-chunking";
+import { stripInlineDirectiveTagsForDelivery } from "bot/plugin-sdk/text-chunking";
 import {
   hasExclusiveIMessageLocalDatabase,
   resolveIMessageAccount,
@@ -66,7 +66,7 @@ type IMessageSendOpts = {
   timeoutMs?: number;
   chatId?: number;
   client?: IMessageRpcClient;
-  config: OpenClawConfig;
+  config: BotConfig;
   account?: ResolvedIMessageAccount;
   approvalKind?: "exec" | "plugin";
   resolveAttachmentImpl?: (

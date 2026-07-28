@@ -1,6 +1,6 @@
 // Imessage tests cover targets plugin behavior.
-import { installChannelDmPolicyContractSuite } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { installChannelDmPolicyContractSuite } from "bot/plugin-sdk/channel-test-helpers";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import {
   resolveIMessageGroupRequireMention,
@@ -216,7 +216,7 @@ describe("imessage group policy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(resolveIMessageGroupRequireMention({ cfg, groupId: "chat:family" })).toBe(false);
     expect(resolveIMessageGroupRequireMention({ cfg, groupId: "chat:other" })).toBe(true);

@@ -1,11 +1,11 @@
 // Googlechat API module exposes the plugin public contract.
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   parseMediaContentLength,
   readResponseTextSnippet,
-} from "openclaw/plugin-sdk/media-runtime";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/media-runtime";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
+import { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
 import type { ResolvedGoogleChatAccount } from "./accounts.js";
 import { shouldSuppressGoogleChatManualExecApprovalFollowupText } from "./approval-card-actions.js";
 import { getGoogleChatAccessToken } from "./auth.js";

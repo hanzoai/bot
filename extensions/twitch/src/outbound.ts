@@ -10,9 +10,9 @@ import {
   defineChannelMessageAdapter,
   type ChannelMessageSendResult,
   type MessageReceiptPartKind,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/channel-outbound";
+import { normalizeStringEntries } from "bot/plugin-sdk/string-coerce-runtime";
+import { sanitizeAssistantVisibleText } from "bot/plugin-sdk/text-chunking";
 import { resolveTwitchAccountContext } from "./config.js";
 import { TWITCH_CHAT_MESSAGE_LIMIT } from "./constants.js";
 import { sendMessageTwitchInternal } from "./send.js";
@@ -117,7 +117,7 @@ export const twitchOutbound: ChannelOutboundAdapter = {
    *
    * @example
    * const result = await twitchOutbound.sendText({
-   *   cfg: openclawConfig,
+   *   cfg: botConfig,
    *   to: "#mychannel",
    *   text: "Hello Twitch!",
    *   accountId: "default",
@@ -177,7 +177,7 @@ export const twitchOutbound: ChannelOutboundAdapter = {
    *
    * @example
    * const result = await twitchOutbound.sendMedia({
-   *   cfg: openclawConfig,
+   *   cfg: botConfig,
    *   to: "#mychannel",
    *   text: "Check this out!",
    *   mediaUrl: "https://example.com/image.png",

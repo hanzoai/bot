@@ -12,7 +12,7 @@ import type {
   PluginAutoEnableResult,
 } from "./plugin-auto-enable.types.js";
 import { hashRuntimeConfigValue } from "./runtime-snapshot.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { BotConfig } from "./types.bot.js";
 
 type PluginAutoEnableCacheEntry = {
   configFingerprint: string;
@@ -72,7 +72,7 @@ function stableFingerprintValue(value: unknown): string {
 }
 
 /** Fingerprints mutable config inputs used by plugin auto-enable detection. */
-export function fingerprintPluginAutoEnableConfig(config: OpenClawConfig): string {
+export function fingerprintPluginAutoEnableConfig(config: BotConfig): string {
   return hashRuntimeConfigValue(config);
 }
 
@@ -82,7 +82,7 @@ export function fingerprintPluginAutoEnableEnv(env: NodeJS.ProcessEnv): string {
 }
 
 function createPluginAutoEnableCacheEntry(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   discovery: PluginDiscoveryResult;
   env: NodeJS.ProcessEnv;
   manifestRegistry: PluginManifestRegistry;
@@ -101,7 +101,7 @@ function createPluginAutoEnableCacheEntry(params: {
 
 function isPluginAutoEnableCacheEntryFresh(params: {
   entry: PluginAutoEnableCacheEntry;
-  config: OpenClawConfig;
+  config: BotConfig;
   discovery: PluginDiscoveryResult;
   env: NodeJS.ProcessEnv;
   manifestRegistry: PluginManifestRegistry;
@@ -118,7 +118,7 @@ function isPluginAutoEnableCacheEntryFresh(params: {
 
 /** Applies already detected plugin auto-enable candidates to config. */
 export function materializePluginAutoEnableCandidates(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   candidates: readonly PluginAutoEnableCandidate[];
   env?: NodeJS.ProcessEnv;
   manifestRegistry?: PluginManifestRegistry;
@@ -148,7 +148,7 @@ export function materializePluginAutoEnableCandidates(params: {
 }
 
 export function applyPluginAutoEnable(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
   manifestRegistry?: PluginManifestRegistry;
   discovery?: PluginDiscoveryResult;

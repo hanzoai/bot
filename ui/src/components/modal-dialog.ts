@@ -3,9 +3,9 @@ import "@awesome.me/webawesome/dist/components/dialog/dialog.js";
 import type WaDialog from "@awesome.me/webawesome/dist/components/dialog/dialog.js";
 import { css, html } from "lit";
 import { property, query } from "lit/decorators.js";
-import { OpenClawLitElement } from "../lit/openclaw-element.ts";
+import { BotLitElement } from "../lit/bot-element.ts";
 
-export class OpenClawModalDialog extends OpenClawLitElement {
+export class BotModalDialog extends BotLitElement {
   @property({ type: Boolean }) open = true;
   @property({ type: Boolean, reflect: true }) manual = false;
   @property() label = "";
@@ -23,14 +23,14 @@ export class OpenClawModalDialog extends OpenClawLitElement {
     }
 
     wa-dialog {
-      --width: min(var(--openclaw-modal-width, 540px), calc(100vw - 48px));
+      --width: min(var(--bot-modal-width, 540px), calc(100vw - 48px));
       --spacing: 0;
       --backdrop-filter: blur(4px);
     }
 
     wa-dialog::part(dialog) {
-      max-width: var(--openclaw-modal-max-width, calc(100vw - 48px));
-      max-height: var(--openclaw-modal-max-height, calc(100dvh - 48px));
+      max-width: var(--bot-modal-max-width, calc(100vw - 48px));
+      max-height: var(--bot-modal-max-height, calc(100dvh - 48px));
       padding: 0;
       border: 0;
       background: transparent;
@@ -212,12 +212,12 @@ export class OpenClawModalDialog extends OpenClawLitElement {
   }
 }
 
-if (!customElements.get("openclaw-modal-dialog")) {
-  customElements.define("openclaw-modal-dialog", OpenClawModalDialog);
+if (!customElements.get("bot-modal-dialog")) {
+  customElements.define("bot-modal-dialog", BotModalDialog);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-modal-dialog": OpenClawModalDialog;
+    "bot-modal-dialog": BotModalDialog;
   }
 }

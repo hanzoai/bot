@@ -1,6 +1,6 @@
 // Log level tests cover allowed levels and level ordering.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import { levelToMinLevel } from "./levels.js";
 

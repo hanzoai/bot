@@ -4,7 +4,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { replaceSessionEntry } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveRequesterToolPolicies } from "./requester-tool-policy.js";
 import { resolveWebSearchToolPolicy } from "./web-search-tool-policy.js";
 
@@ -13,7 +13,7 @@ describe("resolveRequesterToolPolicies", () => {
   let storePath: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-requester-policy-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-requester-policy-"));
     storePath = path.join(tempDir, "sessions.json");
   });
 
@@ -29,7 +29,7 @@ describe("resolveRequesterToolPolicies", () => {
     } as SessionEntry);
   }
 
-  function config(overrides: OpenClawConfig = {}): OpenClawConfig {
+  function config(overrides: BotConfig = {}): BotConfig {
     return {
       ...overrides,
       session: { ...overrides.session, store: storePath },

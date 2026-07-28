@@ -1,7 +1,7 @@
 // Thinking sanitization tests cover reasoning-block retention, stripping, and
 // recovery behavior for provider transcripts and active assistant turns.
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
+import type { AgentMessage } from "bot/plugin-sdk/agent-core";
+import { createAssistantMessageEventStream } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import { castAgentMessage, castAgentMessages } from "../test-helpers/agent-message-fixtures.js";
 import {

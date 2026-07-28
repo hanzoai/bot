@@ -1,8 +1,8 @@
 // Workboard tests cover command plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import type { OpenClawPluginCommandDefinition } from "openclaw/plugin-sdk/core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import type { BotPluginCommandDefinition } from "bot/plugin-sdk/core";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi } from "../api.js";
+import type { BotPluginApi } from "../api.js";
 import { registerWorkboardCommand } from "./command.js";
 import type { PersistedWorkboardCard, WorkboardKeyedStore } from "./persistence-types.js";
 import { WorkboardStore } from "./store.js";
@@ -29,7 +29,7 @@ function createMemoryStore<T = PersistedWorkboardCard>(): WorkboardKeyedStore<T>
   };
 }
 
-function createApi(run = vi.fn().mockResolvedValue({ runId: "run-1" })): OpenClawPluginApi {
+function createApi(run = vi.fn().mockResolvedValue({ runId: "run-1" })): BotPluginApi {
   return {
     registerCommand: vi.fn(),
     runtime: {
@@ -51,11 +51,11 @@ function createApi(run = vi.fn().mockResolvedValue({ runId: "run-1" })): OpenCla
         })),
       },
     },
-  } as unknown as OpenClawPluginApi;
+  } as unknown as BotPluginApi;
 }
 
 async function runWorkboardCommand(params: {
-  api: OpenClawPluginApi;
+  api: BotPluginApi;
   store: WorkboardStore;
   args?: string;
   context?: {
@@ -66,7 +66,7 @@ async function runWorkboardCommand(params: {
     sessionKey?: string;
   };
 }) {
-  let command: OpenClawPluginCommandDefinition | undefined;
+  let command: BotPluginCommandDefinition | undefined;
   vi.mocked(params.api.registerCommand).mockImplementationOnce((definition) => {
     command = definition;
   });
@@ -173,9 +173,9 @@ describe("handleWorkboardCommand", () => {
       sandboxed: true,
       workspaceAccess: "rw" as const,
     });
-    let command: OpenClawPluginCommandDefinition | undefined;
+    let command: BotPluginCommandDefinition | undefined;
     const api = {
-      registerCommand: vi.fn((definition: OpenClawPluginCommandDefinition) => {
+      registerCommand: vi.fn((definition: BotPluginCommandDefinition) => {
         command = definition;
       }),
       runtime: {
@@ -194,7 +194,7 @@ describe("handleWorkboardCommand", () => {
           prepareWorkspaceAuthority,
         },
       },
-    } as unknown as OpenClawPluginApi;
+    } as unknown as BotPluginApi;
     registerWorkboardCommand({ api, store });
     expect(command).toBeDefined();
 
@@ -335,7 +335,7 @@ describe("handleWorkboardCommand", () => {
     createWorktree.mockResolvedValue({
       id: "managed-id",
       path: "/state/worktrees/fingerprint/wb-card",
-      branch: "openclaw/wb-card",
+      branch: "bot/wb-card",
     });
     await store.create({
       title: "Denied checkout",

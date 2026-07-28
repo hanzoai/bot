@@ -1,11 +1,11 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { sql } from "kysely";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
 import { getChildLogger } from "../../logging/logger.js";
 import {
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  runBotAgentWriteTransaction,
+  type BotAgentDatabase,
+} from "../../state/bot-agent-db.js";
 import {
   materializeSqliteSessionStateDeletePlans,
   type SqliteSessionStateDeletePlan,
@@ -65,7 +65,7 @@ function collectSqliteSessionMaintenanceBaseKeys(
 }
 
 function hasStaleSqliteSessionEntryCandidate(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   pruneAfterMs: number,
   preserveKeys: ReadonlySet<string> | undefined,
 ): boolean {
@@ -97,7 +97,7 @@ function hasStaleSqliteSessionEntryCandidate(
 }
 
 export function applySqliteSessionEntryMaintenance(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   params: {
     activeSessionKey: string;
     archiveDirectory: string;
@@ -248,7 +248,7 @@ export function finalizeSqliteSessionEntryMaintenancePlansBestEffort(
   try {
     const materializedPlans = materializeSqliteSessionStateDeletePlans(stateDeletePlans);
     let archivedTranscripts: SessionLifecycleArchivedTranscript[] = [];
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       assertPlannedSqliteLifecycleArtifactEntriesUnchanged(database, entryRemovals);
       archivedTranscripts = deleteMaterializedSqliteSessionStatePlans(
         database,

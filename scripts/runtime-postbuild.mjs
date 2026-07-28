@@ -537,14 +537,14 @@ export function writeLegacyCliExitCompatChunks(params = {}) {
 
 function shouldCopyStaticExtensionAssets(params) {
   const env = params.env ?? process.env;
-  return env.OPENCLAW_RUNTIME_POSTBUILD_STATIC_ASSETS !== "0";
+  return env.BOT_RUNTIME_POSTBUILD_STATIC_ASSETS !== "0";
 }
 
 /**
  * Runs every runtime postbuild phase after the main dist build.
  */
 export function runRuntimePostBuild(params = {}) {
-  const timingsSetting = params.timings ?? process.env.OPENCLAW_RUNTIME_POSTBUILD_TIMINGS;
+  const timingsSetting = params.timings ?? process.env.BOT_RUNTIME_POSTBUILD_TIMINGS;
   const timingsEnabled = timingsSetting !== "0" && timingsSetting !== false;
   // Per-phase lines are debug detail; default output is one summary line so a
   // routine rebuild does not print nine near-identical timing rows.

@@ -1,6 +1,6 @@
 // Covers context-window guard thresholds and user-facing warning/block text.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import {
   CONTEXT_WINDOW_HARD_MIN_TOKENS,
   evaluateContextWindowGuard,
@@ -32,7 +32,7 @@ describe("context-window-guard", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
   }
 
   it("blocks below the hard-min floor (model metadata)", () => {
@@ -153,7 +153,7 @@ describe("context-window-guard", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const info = resolveContextWindowInfo({
       cfg,
@@ -192,7 +192,7 @@ describe("context-window-guard", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const info = resolveContextWindowInfo({
       cfg,
@@ -211,7 +211,7 @@ describe("context-window-guard", () => {
   it("caps with agents.defaults.contextTokens", () => {
     const cfg = {
       agents: { defaults: { contextTokens: 20_000 } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const info = resolveContextWindowInfo({
       cfg,
       provider: "anthropic",
@@ -249,7 +249,7 @@ describe("context-window-guard", () => {
   it("does not override when cap exceeds base window", () => {
     const cfg = {
       agents: { defaults: { contextTokens: 128_000 } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const info = resolveContextWindowInfo({
       cfg,
       provider: "anthropic",
@@ -405,7 +405,7 @@ describe("context-window-guard", () => {
       runtimeBaseUrl: "http://127.0.0.1:11434/v1",
     });
 
-    expect(message).toContain("OpenClaw is capped by agents.defaults.contextTokens.");
+    expect(message).toContain("Bot is capped by agents.defaults.contextTokens.");
     expect(message).not.toContain("choose a larger model");
   });
 

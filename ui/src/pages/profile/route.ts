@@ -13,6 +13,6 @@ export const page = definePage({
   component: () =>
     import("./profile-page.ts").then(() => ({
       header: true,
-      render: () => html`<openclaw-profile-page></openclaw-profile-page>`,
+      render: () => html`<bot-profile-page></bot-profile-page>`,
     })),
 });

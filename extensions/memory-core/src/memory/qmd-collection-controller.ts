@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import type { ResolvedQmdConfig } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import type { PluginStateLeaseContext } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { createSubsystemLogger } from "bot/plugin-sdk/memory-core-host-engine-foundation";
+import type { ResolvedQmdConfig } from "bot/plugin-sdk/memory-core-host-engine-storage";
+import type { PluginStateLeaseContext } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   canMigrateLegacyQmdCollection,
   deriveLegacyQmdCollectionName,

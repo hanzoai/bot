@@ -1,6 +1,6 @@
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { createPluginRuntimeMock } from "bot/plugin-sdk/channel-test-helpers";
+import type { PluginRuntime } from "bot/plugin-sdk/core";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 import { describe, expect, it, vi } from "vitest";
 import type { CoreConfig } from "../types.js";
 import { getClickClackDiscussionBindingStore } from "./binding-store.js";
@@ -69,7 +69,7 @@ function setup() {
     agentId: "research",
     sessionId: "session-id",
     serverBaseUrl: "https://clickclack.example",
-    externalRef: "openclaw:test:research",
+    externalRef: "bot:test:research",
     externalUrl: "",
     workspaceRef: "team",
     workspaceId: "wsp_team",
@@ -88,7 +88,7 @@ function setup() {
     accountId: "default",
     serverBaseUrl: "https://clickclack.example",
     channelId: "chn_discussion",
-    externalRef: "openclaw:test:research",
+    externalRef: "bot:test:research",
   });
   if (!sideSessionKey) {
     throw new Error("expected discussion session key");
@@ -263,7 +263,7 @@ describe("ClickClack discussion session tool policy", () => {
       accountId: "default",
       serverBaseUrl: "https://other-clickclack.example",
       channelId: "chn_discussion",
-      externalRef: "openclaw:test:research",
+      externalRef: "bot:test:research",
     });
 
     expect(retargeted).not.toBe(sideSessionKey);

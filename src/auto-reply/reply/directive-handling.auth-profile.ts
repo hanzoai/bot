@@ -1,16 +1,16 @@
 // Parses auth profile directives into provider-scoped runtime overrides.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   ensureAuthProfileStore,
   findPersistedAuthProfileCredential,
 } from "../../agents/auth-profiles/store.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
 /** Resolves a user-selected auth profile override for the requested provider. */
 export function resolveProfileOverride(params: {
   rawProfile?: string;
   provider: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentDir?: string;
 }): { profileId?: string; error?: string } {
   const raw = normalizeOptionalString(params.rawProfile);

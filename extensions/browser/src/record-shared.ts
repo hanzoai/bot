@@ -5,7 +5,7 @@ import {
   asNullableRecord,
   hasNonEmptyString as sharedHasNonEmptyString,
   isRecord,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 
 /** Re-export record guards under Browser-local names. */
 export { asNullableRecord as asRecord, isRecord };

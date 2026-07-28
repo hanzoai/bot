@@ -46,7 +46,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:theme="@style/Theme.OpenClawNode">
+        android:theme="@style/Theme.BotNode">
         <service
             android:name=".NodeForegroundService"
             android:exported="false"
@@ -60,14 +60,14 @@
                 <data
                     android:scheme="wear"
                     android:host="*"
-                    android:pathPrefix="/openclaw/wear/v1/request" />
+                    android:pathPrefix="/bot/wear/v1/request" />
             </intent-filter>
             <intent-filter>
                 <action android:name="com.google.android.gms.wearable.CHANNEL_EVENT" />
                 <data
                     android:scheme="wear"
                     android:host="*"
-                    android:path="/openclaw/wear/v1/realtime/audio" />
+                    android:path="/bot/wear/v1/realtime/audio" />
             </intent-filter>
         </service>
         <service

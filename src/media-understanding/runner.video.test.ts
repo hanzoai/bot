@@ -1,7 +1,7 @@
 // Video runner tests cover provider request wiring, auth/config precedence, and
 // provider output handling for video attachments.
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import { withTempDir } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { runCapability } from "./runner.js";
@@ -42,7 +42,7 @@ function requireCapabilityOutput(result: CapabilityResult, index: number) {
 
 describe("runCapability video provider wiring", () => {
   it("truncates provider output without splitting a boundary emoji", async () => {
-    await withVideoFixture("openclaw-video-utf16-output", async ({ ctx, media, cache }) => {
+    await withVideoFixture("bot-video-utf16-output", async ({ ctx, media, cache }) => {
       const prefix = "v".repeat(79);
       const result = await runCapability({
         capability: "video",
@@ -70,7 +70,7 @@ describe("runCapability video provider wiring", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig,
+        } as unknown as BotConfig,
         ctx,
         attachments: cache,
         media,
@@ -99,8 +99,8 @@ describe("runCapability video provider wiring", () => {
     let seenBaseUrl: string | undefined;
     let seenHeaders: Record<string, string> | undefined;
 
-    await withTempDir({ prefix: "openclaw-video-auth-" }, async (isolatedAgentDir) => {
-      await withVideoFixture("openclaw-video-merge", async ({ ctx, media, cache }) => {
+    await withTempDir({ prefix: "bot-video-auth-" }, async (isolatedAgentDir) => {
+      await withVideoFixture("bot-video-merge", async ({ ctx, media, cache }) => {
         const cfg = {
           models: {
             providers: {
@@ -131,7 +131,7 @@ describe("runCapability video provider wiring", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as BotConfig;
 
         const result = await runCapability({
           capability: "video",
@@ -170,16 +170,16 @@ describe("runCapability video provider wiring", () => {
   });
 
   it("auto-selects moonshot for video when google is unavailable", async () => {
-    await withTempDir({ prefix: "openclaw-video-agent-" }, async (isolatedAgentDir) => {
+    await withTempDir({ prefix: "bot-video-agent-" }, async (isolatedAgentDir) => {
       await withEnvAsync(
         {
           GEMINI_API_KEY: undefined,
           GOOGLE_API_KEY: undefined,
           MOONSHOT_API_KEY: undefined,
-          OPENCLAW_AGENT_DIR: isolatedAgentDir,
+          BOT_AGENT_DIR: isolatedAgentDir,
         },
         async () => {
-          await withVideoFixture("openclaw-video-auto-moonshot", async ({ ctx, media, cache }) => {
+          await withVideoFixture("bot-video-auto-moonshot", async ({ ctx, media, cache }) => {
             const cfg = {
               models: {
                 providers: {
@@ -197,7 +197,7 @@ describe("runCapability video provider wiring", () => {
                   },
                 },
               },
-            } as unknown as OpenClawConfig;
+            } as unknown as BotConfig;
 
             const result = await runCapability({
               capability: "video",
@@ -240,8 +240,8 @@ describe("runCapability video provider wiring", () => {
   it("uses the provider video default when the active provider has no model", async () => {
     let seenModel: string | undefined;
 
-    await withTempDir({ prefix: "openclaw-video-active-provider-" }, async (isolatedAgentDir) => {
-      await withVideoFixture("openclaw-video-active-default", async ({ ctx, media, cache }) => {
+    await withTempDir({ prefix: "bot-video-active-provider-" }, async (isolatedAgentDir) => {
+      await withVideoFixture("bot-video-active-default", async ({ ctx, media, cache }) => {
         const cfg = {
           models: {
             providers: {
@@ -259,7 +259,7 @@ describe("runCapability video provider wiring", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as BotConfig;
 
         const result = await runCapability({
           capability: "video",
@@ -298,9 +298,9 @@ describe("runCapability video provider wiring", () => {
     let seenModel: string | undefined;
 
     await withTempDir(
-      { prefix: "openclaw-video-no-default-provider-" },
+      { prefix: "bot-video-no-default-provider-" },
       async (isolatedAgentDir) => {
-        await withVideoFixture("openclaw-video-no-default", async ({ ctx, media, cache }) => {
+        await withVideoFixture("bot-video-no-default", async ({ ctx, media, cache }) => {
           const cfg = {
             models: {
               providers: {
@@ -318,7 +318,7 @@ describe("runCapability video provider wiring", () => {
                 },
               },
             },
-          } as unknown as OpenClawConfig;
+          } as unknown as BotConfig;
 
           const result = await runCapability({
             capability: "video",
@@ -356,8 +356,8 @@ describe("runCapability video provider wiring", () => {
   it("resolves provider registry defaultModels.video when a config entry has no explicit model", async () => {
     let seenModel: string | undefined;
 
-    await withTempDir({ prefix: "openclaw-video-entry-default-" }, async (isolatedAgentDir) => {
-      await withVideoFixture("openclaw-video-entry-default", async ({ ctx, media, cache }) => {
+    await withTempDir({ prefix: "bot-video-entry-default-" }, async (isolatedAgentDir) => {
+      await withVideoFixture("bot-video-entry-default", async ({ ctx, media, cache }) => {
         const cfg = {
           models: {
             providers: {
@@ -372,7 +372,7 @@ describe("runCapability video provider wiring", () => {
               models: [{ provider: "moonshot", capabilities: ["video"] }],
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as BotConfig;
 
         const result = await runCapability({
           capability: "video",
@@ -411,8 +411,8 @@ describe("runCapability video provider wiring", () => {
     const resolveApiKeyForProvider = vi.mocked(modelAuth.resolveApiKeyForProvider);
     resolveApiKeyForProvider.mockClear();
 
-    await withTempDir({ prefix: "openclaw-video-provider-api-" }, async (isolatedAgentDir) => {
-      await withVideoFixture("openclaw-video-provider-api", async ({ ctx, media, cache }) => {
+    await withTempDir({ prefix: "bot-video-provider-api-" }, async (isolatedAgentDir) => {
+      await withVideoFixture("bot-video-provider-api", async ({ ctx, media, cache }) => {
         let seenApiKey: string | undefined;
         const cfg = {
           models: {
@@ -431,7 +431,7 @@ describe("runCapability video provider wiring", () => {
               },
             },
           },
-        } as unknown as OpenClawConfig;
+        } as unknown as BotConfig;
 
         const result = await runCapability({
           capability: "video",

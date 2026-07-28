@@ -1,13 +1,13 @@
 ---
 summary: "File logs, console output, CLI tailing, and the Control UI Logs tab"
 read_when:
-  - You need a beginner-friendly overview of OpenClaw logging
+  - You need a beginner-friendly overview of Bot logging
   - You want to configure log levels, formats, or redaction
   - You are troubleshooting and need to find logs quickly
 title: "Logging"
 ---
 
-OpenClaw has two main log surfaces:
+Bot has two main log surfaces:
 
 - **File logs** (JSON lines) written by the Gateway.
 - **Console output** in the terminal running the Gateway.
@@ -20,37 +20,37 @@ logs live, how to read them, and how to configure log levels and formats.
 By default, the Gateway writes a rolling log file per day. The default profile
 keeps the historical path:
 
-`/tmp/openclaw/openclaw-YYYY-MM-DD.log`
+`/tmp/hanzoai/bot-YYYY-MM-DD.log`
 
 Named profiles use a profile-qualified filename in the same directory:
 
-`/tmp/openclaw/openclaw-<profile>-YYYY-MM-DD.log`
+`/tmp/hanzoai/bot-<profile>-YYYY-MM-DD.log`
 
 The filename profile segment is lowercase and limited to letters, numbers, and
 dashes. Simple lowercase names stay readable, so the `--dev` shorthand writes
-`openclaw-dev-YYYY-MM-DD.log`. Case, underscores, and literal dashes use a
+`bot-dev-YYYY-MM-DD.log`. Case, underscores, and literal dashes use a
 reversible dash escape so distinct profile names never share a log file.
 Oversized values set directly through the environment use a bounded hash suffix
 to stay within filesystem filename limits. An explicit `logging.file` overrides
 these defaults.
 
-The date uses the gateway host's local timezone. When `/tmp/openclaw` is unsafe
-or unavailable (and always on Windows), OpenClaw uses a user-scoped
-`openclaw-<uid>` directory under the OS temp dir instead. Dated log files are
+The date uses the gateway host's local timezone. When `/tmp/bot` is unsafe
+or unavailable (and always on Windows), Bot uses a user-scoped
+`bot-<uid>` directory under the OS temp dir instead. Dated log files are
 pruned after 24 hours.
 
 Each file rotates when the next write would exceed `logging.maxFileBytes`
-(default: 100 MB). OpenClaw keeps up to five numbered archives beside the
-active file, such as `openclaw-YYYY-MM-DD.1.log` or
-`openclaw-dev-YYYY-MM-DD.1.log`, and keeps writing to a fresh active log instead
+(default: 100 MB). Bot keeps up to five numbered archives beside the
+active file, such as `bot-YYYY-MM-DD.1.log` or
+`bot-dev-YYYY-MM-DD.1.log`, and keeps writing to a fresh active log instead
 of suppressing diagnostics.
 
-You can override the path in `~/.openclaw/openclaw.json`:
+You can override the path in `~/.hanzoai/bot.json`:
 
 ```json
 {
   "logging": {
-    "file": "/path/to/openclaw.log"
+    "file": "/path/to/bot.log"
   }
 }
 ```
@@ -62,9 +62,9 @@ You can override the path in `~/.openclaw/openclaw.json`:
 Tail the gateway log file via RPC:
 
 ```bash
-openclaw logs --follow
-openclaw --dev logs --follow
-openclaw --profile work logs --follow
+bot logs --follow
+bot --dev logs --follow
+bot --profile work logs --follow
 ```
 
 The root profile selector resolves the same profile-specific file used by the
@@ -105,9 +105,9 @@ In JSON mode, the CLI emits `type`-tagged objects:
 - `error`: gateway connection failures (written to stderr)
 
 If the implicit local loopback Gateway asks for pairing, closes during connect,
-or times out before `logs.tail` answers, `openclaw logs` falls back to the
+or times out before `logs.tail` answers, `bot logs` falls back to the
 configured Gateway file log automatically. Explicit `--url` targets do not use
-this fallback. `openclaw logs --follow` is stricter: on Linux it uses the active
+this fallback. `bot logs --follow` is stricter: on Linux it uses the active
 user-systemd Gateway journal by PID when available, and otherwise retries the
 live Gateway with backoff instead of following a potentially stale side-by-side
 file.
@@ -115,7 +115,7 @@ file.
 If the Gateway is unreachable, the CLI prints a short hint to run:
 
 ```bash
-openclaw doctor
+bot doctor
 ```
 
 ### Control UI (web)
@@ -128,7 +128,7 @@ See [Control UI](/web/control-ui) for how to open it.
 To filter channel activity (WhatsApp/Telegram/etc), use:
 
 ```bash
-openclaw channels logs --channel whatsapp
+bot channels logs --channel whatsapp
 ```
 
 `--channel` defaults to `all`; `--lines <n>` (default 200) and `--json` are also
@@ -150,7 +150,7 @@ available:
 - `session_id`: active session id/key when the log call carries session context.
 - `channel`: active channel when the log call carries channel context.
 
-OpenClaw preserves the original structured log arguments alongside these fields
+Bot preserves the original structured log arguments alongside these fields
 so existing parsers that read numbered tslog argument keys keep working.
 
 Talk, realtime voice, and managed-room activity emits bounded lifecycle log
@@ -170,7 +170,7 @@ Console formatting is controlled by `logging.consoleStyle`.
 
 ### Gateway WebSocket logs
 
-`openclaw gateway` also has WebSocket protocol logging for RPC traffic:
+`bot gateway` also has WebSocket protocol logging for RPC traffic:
 
 - normal mode: only interesting results (errors, parse errors, slow calls)
 - `--verbose`: all request/response traffic
@@ -180,20 +180,20 @@ Console formatting is controlled by `logging.consoleStyle`.
 Examples:
 
 ```bash
-openclaw gateway
-openclaw gateway --verbose --ws-log compact
-openclaw gateway --verbose --ws-log full
+bot gateway
+bot gateway --verbose --ws-log compact
+bot gateway --verbose --ws-log full
 ```
 
 ## Configuring logging
 
-All logging configuration lives under `logging` in `~/.openclaw/openclaw.json`.
+All logging configuration lives under `logging` in `~/.hanzoai/bot.json`.
 
 ```json
 {
   "logging": {
     "level": "info",
-    "file": "/path/to/openclaw.log",
+    "file": "/path/to/bot.log",
     "consoleLevel": "info",
     "consoleStyle": "pretty",
     "redactPatterns": ["sk-.*"]
@@ -208,7 +208,7 @@ Levels: `silent`, `fatal`, `error`, `warn`, `info`, `debug`, `trace`.
 - `logging.level`: **file logs** (JSONL) level (default: `info`).
 - `logging.consoleLevel`: **console** verbosity level.
 
-You can override both via the **`OPENCLAW_LOG_LEVEL`** environment variable (e.g. `OPENCLAW_LOG_LEVEL=debug`). The env var takes precedence over the config file, so you can raise verbosity for a single run without editing `openclaw.json`. You can also pass the global CLI option **`--log-level <level>`** (for example, `openclaw --log-level debug gateway run`), which overrides the environment variable for that command.
+You can override both via the **`BOT_LOG_LEVEL`** environment variable (e.g. `BOT_LOG_LEVEL=debug`). The env var takes precedence over the config file, so you can raise verbosity for a single run without editing `bot.json`. You can also pass the global CLI option **`--log-level <level>`** (for example, `bot --log-level debug gateway run`), which overrides the environment variable for that command.
 
 `--verbose` only affects console output and WS log verbosity; it does not change
 file log levels.
@@ -219,43 +219,43 @@ When debugging provider calls, use targeted environment flags instead of raising
 all logs to `debug`:
 
 ```bash
-OPENCLAW_DEBUG_MODEL_TRANSPORT=1 openclaw gateway
-OPENCLAW_DEBUG_MODEL_PAYLOAD=tools OPENCLAW_DEBUG_SSE=events openclaw gateway
+BOT_DEBUG_MODEL_TRANSPORT=1 bot gateway
+BOT_DEBUG_MODEL_PAYLOAD=tools BOT_DEBUG_SSE=events bot gateway
 ```
 
 Available flags:
 
-- `OPENCLAW_DEBUG_MODEL_TRANSPORT=1`: emit request start, fetch response, SDK
+- `BOT_DEBUG_MODEL_TRANSPORT=1`: emit request start, fetch response, SDK
   headers, first streaming event, stream completion, and transport errors at
   `info` level.
-- `OPENCLAW_DEBUG_MODEL_PAYLOAD=summary`: include a bounded request payload
+- `BOT_DEBUG_MODEL_PAYLOAD=summary`: include a bounded request payload
   summary in model request logs.
-- `OPENCLAW_DEBUG_MODEL_PAYLOAD=tools`: include all model-facing tool names in
+- `BOT_DEBUG_MODEL_PAYLOAD=tools`: include all model-facing tool names in
   the payload summary.
-- `OPENCLAW_DEBUG_MODEL_PAYLOAD=full-redacted`: include a redacted, capped JSON
+- `BOT_DEBUG_MODEL_PAYLOAD=full-redacted`: include a redacted, capped JSON
   payload snapshot. Use only while debugging; secrets are redacted but prompts
   and message text may still be present.
-- `OPENCLAW_DEBUG_SSE=events`: emit first-event and stream-completion timing.
-- `OPENCLAW_DEBUG_SSE=peek`: also emit the first five redacted SSE event
+- `BOT_DEBUG_SSE=events`: emit first-event and stream-completion timing.
+- `BOT_DEBUG_SSE=peek`: also emit the first five redacted SSE event
   payloads, capped per event.
-- `OPENCLAW_DEBUG_CODE_MODE=1`: emit code-mode model-surface diagnostics,
+- `BOT_DEBUG_CODE_MODE=1`: emit code-mode model-surface diagnostics,
   including when native provider tools are hidden because code mode owns the
   tool surface.
 
-These flags log through normal OpenClaw logging, so `openclaw logs --follow`
+These flags log through normal Bot logging, so `bot logs --follow`
 and the Control UI Logs tab show them. Without the flags, the same diagnostics
 remain available at `debug` level.
 
 `[model-fetch]` start and response metadata (provider, API, model, status,
 latency, and request fields such as method, URL, timeout, proxy, and policy)
 is always emitted at `info` level regardless of
-`OPENCLAW_DEBUG_MODEL_TRANSPORT`, so basic model transport hygiene is visible
+`BOT_DEBUG_MODEL_TRANSPORT`, so basic model transport hygiene is visible
 without debug flags.
 
 ### Trace correlation
 
 File logs are JSONL. When a log call carries a valid diagnostic trace context,
-OpenClaw writes the trace fields as top-level JSON keys (`traceId`, `spanId`,
+Bot writes the trace fields as top-level JSON keys (`traceId`, `spanId`,
 `parentSpanId`, `traceFlags`) so external log processors can correlate the line
 with OTEL spans and provider `traceparent` propagation.
 
@@ -295,12 +295,12 @@ OTEL model-call spans/metrics when diagnostics export is enabled.
 
 A third rendering style, `compact` (tighter output, best for long sessions), is
 applied automatically when stdout is not a TTY. It is no longer a settable
-config value; `openclaw doctor --fix` maps a stored `consoleStyle: "compact"`
+config value; `bot doctor --fix` maps a stored `consoleStyle: "compact"`
 to `"pretty"`.
 
 ### Redaction
 
-OpenClaw can redact sensitive tokens before they hit console output, file logs,
+Bot can redact sensitive tokens before they hit console output, file logs,
 OTLP log records, persisted session transcript text, or Control UI tool
 event payloads (tool start args, partial/final result payloads, derived
 exec output, and patch summaries):
@@ -317,7 +317,7 @@ The built-in defaults cover common API credentials and payment-credential field
 names such as card number, CVC/CVV, shared payment token, and payment credential
 when they appear as JSON fields, URL parameters, CLI flags, or assignments.
 
-OpenClaw also redacts safety-boundary payloads shown to UI clients, support
+Bot also redacts safety-boundary payloads shown to UI clients, support
 bundles, diagnostics observers, approval prompts, or agent tools. Custom
 `logging.redactPatterns` can add project-specific patterns on those surfaces.
 
@@ -339,14 +339,14 @@ Two adjacent surfaces:
 - **Diagnostics flags** — targeted debug-log flags that route extra logs to
   `logging.file` without raising `logging.level`. Flags are case-insensitive
   and support wildcards (`telegram.*`, `*`). Configure under `diagnostics.flags`
-  or via the `OPENCLAW_DIAGNOSTICS=...` env override. Full guide:
+  or via the `BOT_DIAGNOSTICS=...` env override. Full guide:
   [Diagnostics flags](/diagnostics/flags).
 
 For OTLP export to a collector, see [OpenTelemetry export](/gateway/opentelemetry).
 
 ## Troubleshooting tips
 
-- **Gateway not reachable?** Run `openclaw doctor` first.
+- **Gateway not reachable?** Run `bot doctor` first.
 - **Logs empty?** Check that the Gateway is running and writing to the file path
   in `logging.file`.
 - **Need more detail?** Set `logging.level` to `debug` or `trace` and retry.

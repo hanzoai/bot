@@ -8,7 +8,7 @@ import {
 import type { CompactionEntry, ResetEntry, SessionContext, SessionTreeEntry } from "../types.js";
 
 type ContextBoundary = CompactionEntry | ResetEntry;
-const SESSION_HISTORY_PRELUDE = Symbol.for("openclaw.sessionHistoryPrelude");
+const SESSION_HISTORY_PRELUDE = Symbol.for("bot.sessionHistoryPrelude");
 
 function appendContextMessage(messages: AgentMessage[], entry: SessionTreeEntry): void {
   if (entry.type === "message") {

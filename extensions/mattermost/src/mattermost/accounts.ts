@@ -2,8 +2,8 @@
 import {
   createAccountListHelpers,
   hasConfiguredAccountValue,
-} from "openclaw/plugin-sdk/account-helpers";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
+} from "bot/plugin-sdk/account-helpers";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
 import {
   resolveChannelStreamingBlockCoalesce,
   resolveChannelStreamingBlockEnabled,
@@ -11,9 +11,9 @@ import {
   resolveChannelPreviewStreamMode,
   type StreamingMode,
   type TextChunkMode,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { BlockStreamingCoalesceConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import type { BlockStreamingCoalesceConfig } from "bot/plugin-sdk/config-contracts";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { normalizeResolvedSecretInputString, normalizeSecretInputString } from "../secret-input.js";
 import type {
   MattermostAccountConfig,
@@ -22,7 +22,7 @@ import type {
   MattermostReplyToMode,
 } from "../types.js";
 import { normalizeMattermostBaseUrl } from "./client.js";
-import type { OpenClawConfig } from "./runtime-api.js";
+import type { BotConfig } from "./runtime-api.js";
 
 type MattermostTokenSource = "env" | "config" | "none";
 type MattermostBaseUrlSource = "env" | "config" | "none";
@@ -77,7 +77,7 @@ function resolveMattermostRequireMention(config: MattermostAccountConfig): boole
 }
 
 export function resolveMattermostAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   allowUnresolvedSecretRef?: boolean;
 }): ResolvedMattermostAccount {

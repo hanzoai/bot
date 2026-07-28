@@ -22,7 +22,7 @@ export type LocalEmbeddingRuntimeFacts = {
   loadError?: string;
 };
 
-const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("openclaw.localEmbeddingRuntimeFacts");
+const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("bot.localEmbeddingRuntimeFacts");
 
 export function attachLocalEmbeddingRuntimeFacts(
   target: object,

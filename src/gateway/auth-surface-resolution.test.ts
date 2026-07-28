@@ -2,10 +2,10 @@
 // surfaces that need browser or control-UI access.
 import { describe, expect, it } from "vitest";
 import type { GatewayRemoteConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveGatewayInteractiveSurfaceAuth } from "./auth-surface-resolution.js";
 
-function remoteGatewayConfig(remote?: GatewayRemoteConfig): OpenClawConfig {
+function remoteGatewayConfig(remote?: GatewayRemoteConfig): BotConfig {
   return {
     gateway: {
       mode: "remote",
@@ -18,7 +18,7 @@ function remoteGatewayConfig(remote?: GatewayRemoteConfig): OpenClawConfig {
 }
 
 describe("resolveGatewayInteractiveSurfaceAuth", () => {
-  it("keeps configured local password ahead of OPENCLAW_GATEWAY_PASSWORD", async () => {
+  it("keeps configured local password ahead of BOT_GATEWAY_PASSWORD", async () => {
     await expect(
       resolveGatewayInteractiveSurfaceAuth({
         config: {
@@ -27,7 +27,7 @@ describe("resolveGatewayInteractiveSurfaceAuth", () => {
             auth: { mode: "password", password: "config-password" }, // pragma: allowlist secret
           },
         },
-        env: { OPENCLAW_GATEWAY_PASSWORD: "env-password" }, // pragma: allowlist secret
+        env: { BOT_GATEWAY_PASSWORD: "env-password" }, // pragma: allowlist secret
         surface: "local",
       }),
     ).resolves.toEqual({
@@ -37,11 +37,11 @@ describe("resolveGatewayInteractiveSurfaceAuth", () => {
     });
   });
 
-  it("falls back to OPENCLAW_GATEWAY_PASSWORD without configured local password", async () => {
+  it("falls back to BOT_GATEWAY_PASSWORD without configured local password", async () => {
     await expect(
       resolveGatewayInteractiveSurfaceAuth({
         config: { gateway: { mode: "local", auth: { mode: "password" } } },
-        env: { OPENCLAW_GATEWAY_PASSWORD: "env-password" }, // pragma: allowlist secret
+        env: { BOT_GATEWAY_PASSWORD: "env-password" }, // pragma: allowlist secret
         surface: "local",
       }),
     ).resolves.toEqual({
@@ -51,12 +51,12 @@ describe("resolveGatewayInteractiveSurfaceAuth", () => {
     });
   });
 
-  it("uses OPENCLAW_GATEWAY_TOKEN as remote interactive fallback", async () => {
+  it("uses BOT_GATEWAY_TOKEN as remote interactive fallback", async () => {
     await expect(
       resolveGatewayInteractiveSurfaceAuth({
         config: remoteGatewayConfig(),
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "env-token",
+          BOT_GATEWAY_TOKEN: "env-token",
         },
         surface: "remote",
       }),
@@ -66,12 +66,12 @@ describe("resolveGatewayInteractiveSurfaceAuth", () => {
     });
   });
 
-  it("keeps configured remote token ahead of OPENCLAW_GATEWAY_TOKEN", async () => {
+  it("keeps configured remote token ahead of BOT_GATEWAY_TOKEN", async () => {
     await expect(
       resolveGatewayInteractiveSurfaceAuth({
         config: remoteGatewayConfig({ token: "remote-token" }),
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "env-token",
+          BOT_GATEWAY_TOKEN: "env-token",
         },
         surface: "remote",
       }),
@@ -81,7 +81,7 @@ describe("resolveGatewayInteractiveSurfaceAuth", () => {
     });
   });
 
-  it("falls back to OPENCLAW_GATEWAY_TOKEN when the remote token ref is unresolved", async () => {
+  it("falls back to BOT_GATEWAY_TOKEN when the remote token ref is unresolved", async () => {
     await expect(
       resolveGatewayInteractiveSurfaceAuth({
         config: {
@@ -90,7 +90,7 @@ describe("resolveGatewayInteractiveSurfaceAuth", () => {
           }),
         },
         env: {
-          OPENCLAW_GATEWAY_TOKEN: "env-token",
+          BOT_GATEWAY_TOKEN: "env-token",
         },
         surface: "remote",
       }),

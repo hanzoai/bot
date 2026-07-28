@@ -1,12 +1,12 @@
-# OpenClaw Baseten Provider
+# Bot Baseten Provider
 
-Official OpenClaw provider plugin for Baseten Model APIs, including Thinking Machines Lab's Inkling.
+Official Bot provider plugin for Baseten Model APIs, including Thinking Machines Lab's Inkling.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/baseten-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-baseten-provider
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/baseten> for setup and configuration.
+See <https://docs.bot.ai/providers/baseten> for setup and configuration.

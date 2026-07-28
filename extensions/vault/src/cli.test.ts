@@ -30,7 +30,7 @@ function createProgram(config: Record<string, unknown> = {}): Command {
 }
 
 async function createSetupPlan(args: string[]): Promise<VaultPlan> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-vault-cli-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-vault-cli-"));
   const planPath = path.join(dir, "plan.json");
   try {
     await runSetup(planPath, args);
@@ -76,7 +76,7 @@ describe("vault CLI setup plan", () => {
   it.skipIf(process.platform === "win32")(
     "creates plans privately without overwriting files or following symlinks",
     async () => {
-      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-vault-plan-security-"));
+      const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-vault-plan-security-"));
       const privatePath = path.join(dir, "private.json");
       const existingPath = path.join(dir, "existing.json");
       const targetPath = path.join(dir, "target.json");
@@ -133,7 +133,7 @@ describe("vault CLI setup plan", () => {
     ]);
   });
 
-  it("generates arbitrary known OpenClaw and auth-profile targets", async () => {
+  it("generates arbitrary known Bot and auth-profile targets", async () => {
     const plan = await createSetupPlan([
       "--target",
       "channels.telegram.botToken=channels/telegram/botToken",

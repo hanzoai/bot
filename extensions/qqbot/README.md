@@ -1,11 +1,11 @@
-# OpenClaw QQ Bot
+# Bot QQ Bot
 
-Official OpenClaw channel plugin for QQ Bot group and direct-message workflows.
+Official Bot channel plugin for QQ Bot group and direct-message workflows.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/qqbot
+bot plugins install @hanzo/bot-qqbot
 ```
 
-Configure QQ Bot credentials in OpenClaw, then connect the bot to the groups or direct-message contexts where agents should operate.
+Configure QQ Bot credentials in Bot, then connect the bot to the groups or direct-message contexts where agents should operate.

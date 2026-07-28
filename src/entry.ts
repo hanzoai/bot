@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Boots the OpenClaw CLI entry point under Node.
-// CLI process entrypoint for OpenClaw command execution.
+// Boots the Bot CLI entry point under Node.
+// CLI process entrypoint for Bot command execution.
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { format } from "node:util";
@@ -19,20 +19,20 @@ import {
 } from "./cli/startup-trace.js";
 import { normalizeWindowsArgv } from "./cli/windows-argv.js";
 import {
-  enableOpenClawCompileCache,
+  enableBotCompileCache,
   resolveEntryInstallRoot,
-  respawnWithoutOpenClawCompileCacheIfNeeded,
+  respawnWithoutBotCompileCacheIfNeeded,
 } from "./entry.compile-cache.js";
 import { buildCliRespawnPlan, runCliRespawnPlan } from "./entry.respawn.js";
 import { tryHandleRootVersionFastPath } from "./entry.version-fast-path.js";
 import { normalizeEnv } from "./infra/env.js";
 import { isMainModule } from "./infra/is-main.js";
-import { ensureOpenClawExecMarkerOnProcess } from "./infra/openclaw-exec-env.js";
+import { ensureBotExecMarkerOnProcess } from "./infra/bot-exec-env.js";
 import { installProcessWarningFilter } from "./infra/warning-filter.js";
 
 const ENTRY_WRAPPER_PAIRS = [
-  { wrapperBasename: "openclaw.mjs", entryBasename: "entry.js" },
-  { wrapperBasename: "openclaw.js", entryBasename: "entry.js" },
+  { wrapperBasename: "bot.mjs", entryBasename: "entry.js" },
+  { wrapperBasename: "bot.js", entryBasename: "entry.js" },
 ] as const;
 
 const loadRootHelpLiveConfigModule = async () => await import("./cli/root-help-live-config.js");
@@ -44,7 +44,7 @@ async function writeCapturedCliArgumentError(message: string): Promise<void> {
   await configureGatewayStartupTraceConsoleFormatting(gatewayEntryStartupTrace);
   const { enableConsoleCapture } = await import("./logging.js");
   enableConsoleCapture();
-  console.error(`[openclaw] ${message}`);
+  console.error(`[bot] ${message}`);
 }
 
 async function writeCliDiagnosticBlock(message: string): Promise<void> {
@@ -109,8 +109,8 @@ if (
 } else {
   const entryFile = fileURLToPath(import.meta.url);
   const installRoot = resolveEntryInstallRoot(entryFile);
-  process.title = "openclaw";
-  ensureOpenClawExecMarkerOnProcess();
+  process.title = "bot";
+  ensureBotExecMarkerOnProcess();
   installProcessWarningFilter();
   normalizeEnv();
   process.argv = normalizeWindowsArgv(process.argv);
@@ -128,7 +128,7 @@ if (
   assertSupportedRuntime();
   gatewayEntryStartupTrace.mark("bootstrap");
 
-  const waitingForCompileCacheRespawn = await respawnWithoutOpenClawCompileCacheIfNeeded({
+  const waitingForCompileCacheRespawn = await respawnWithoutBotCompileCacheIfNeeded({
     currentFile: entryFile,
     installRoot,
     prepareWriteError: async () => {
@@ -139,12 +139,12 @@ if (
     },
   });
   if (!waitingForCompileCacheRespawn) {
-    enableOpenClawCompileCache({
+    enableBotCompileCache({
       installRoot,
     });
 
     if (shouldForceReadOnlyAuthStore(process.argv)) {
-      process.env.OPENCLAW_AUTH_STORE_READONLY = "1";
+      process.env.BOT_AUTH_STORE_READONLY = "1";
     }
 
     if (process.argv.includes("--no-color")) {
@@ -221,7 +221,7 @@ export async function tryHandleRootHelpFastPath(
     deps.onError ??
     (async (error: unknown) => {
       const detail = error instanceof Error ? (error.stack ?? error.message) : String(error);
-      await writeCliDiagnosticBlock(`[openclaw] Failed to display help: ${detail}`);
+      await writeCliDiagnosticBlock(`[bot] Failed to display help: ${detail}`);
       process.exit(1);
     });
   try {

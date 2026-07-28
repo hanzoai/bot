@@ -12,12 +12,12 @@ import {
 import type { CatalogOpenTarget } from "../app/settings.ts";
 import type { ThemeMode } from "../app/theme.ts";
 import { parseAgentSessionKey } from "../lib/sessions/session-key.ts";
-import { OpenClawLightDomContentsElement } from "../lit/openclaw-element.ts";
+import { BotLightDomContentsElement } from "../lit/bot-element.ts";
 import type { NewSessionTarget } from "../pages/new-session/location.ts";
 import type { SidebarWorkboardBoard, SidebarWorkboardRenderers } from "./app-sidebar-workboard.ts";
 
 /** Stable custom-element inputs. Behavior is layered in focused sidebar modules. */
-export abstract class AppSidebarBase extends OpenClawLightDomContentsElement {
+export abstract class AppSidebarBase extends BotLightDomContentsElement {
   @property({ attribute: false }) basePath = "";
   @property({ attribute: false }) activeRouteId?: NavigationRouteId;
   @property({ attribute: false }) activePluginTabId = "";

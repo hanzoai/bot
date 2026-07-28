@@ -2,15 +2,15 @@
 import {
   resolveApprovalOverGateway,
   type ApprovalResolveResult,
-} from "openclaw/plugin-sdk/approval-gateway-runtime";
-import type { ExecApprovalReplyDecision } from "openclaw/plugin-sdk/approval-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isApprovalNotFoundError } from "openclaw/plugin-sdk/error-runtime";
+} from "bot/plugin-sdk/approval-gateway-runtime";
+import type { ExecApprovalReplyDecision } from "bot/plugin-sdk/approval-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { isApprovalNotFoundError } from "bot/plugin-sdk/error-runtime";
 
 export { isApprovalNotFoundError };
 
 export async function resolveMatrixApproval(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   approvalId: string;
   approvalKind: "exec" | "plugin";
   decision: ExecApprovalReplyDecision;

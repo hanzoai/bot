@@ -67,7 +67,7 @@ flow:
             expr: "path.join(stateDir, 'agents', 'qa', 'sessions', 'sessions.json')"
         - set: commitmentDatabasePath
           value:
-            expr: "path.join(stateDir, 'state', 'openclaw.sqlite')"
+            expr: "path.join(stateDir, 'state', 'bot.sqlite')"
         - set: sqlite
           value:
             expr: "await qaImport('node:sqlite')"

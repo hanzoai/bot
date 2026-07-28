@@ -12,7 +12,7 @@ export function createUiIsolatedVitestConfig(env?: Record<string, string | undef
     environment: "jsdom",
     env,
     excludeUnitFastTests: false,
-    includeOpenClawRuntimeSetup: false,
+    includeBotRuntimeSetup: false,
     isolate: true,
     name: "ui-isolated",
     setupFiles: ["ui/src/test-helpers/lit-warnings.setup.ts"],

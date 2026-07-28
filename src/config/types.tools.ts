@@ -1,5 +1,5 @@
 // Defines tool availability and allowlist configuration types.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import type { ChatType } from "../channels/chat-type.js";
 import type { SafeBinProfileFixture } from "../infra/exec-safe-bin-policy.js";
 import type { AgentModelConfig } from "./types.agents-shared.js";
@@ -181,7 +181,7 @@ export type CodeModeConfig =
   | boolean
   | "auto"
   | {
-      /** Enable generic OpenClaw code mode. Default: false. "auto" engages it only for models whose catalog compat flags `codeMode: "preferred"`. */
+      /** Enable generic Bot code mode. Default: false. "auto" engages it only for models whose catalog compat flags `codeMode: "preferred"`. */
       enabled?: boolean | "auto";
       /** Guest runtime. Only quickjs-wasi is supported. */
       runtime?: "quickjs-wasi";
@@ -514,7 +514,7 @@ export type ToolsConfig = {
   fs?: FsToolsConfig;
   /** Runtime loop detection for repetitive/ stuck tool-call patterns. */
   loopDetection?: ToolLoopDetectionConfig;
-  /** Compact large OpenClaw, MCP, and client tool catalogs behind search/call tools. */
+  /** Compact large Bot, MCP, and client tool catalogs behind search/call tools. */
   toolSearch?: ToolSearchConfig;
   /** Generic code mode: expose exec/wait and hide normal tools behind a QuickJS catalog bridge. */
   codeMode?: CodeModeConfig;

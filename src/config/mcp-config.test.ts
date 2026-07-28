@@ -1,7 +1,7 @@
 // Covers MCP config normalization, validation, and serialization.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "bot/plugin-sdk/test-env";
 import { describe, expect, it, vi } from "vitest";
 import {
   listConfiguredMcpServers,
@@ -17,7 +17,7 @@ function validationOk(raw: unknown) {
 const mockReadSourceConfigSnapshot = vi.hoisted(() => async () => {
   const fsValue = await import("node:fs/promises");
   const pathValue = await import("node:path");
-  const configPath = pathValue.join(process.env.OPENCLAW_STATE_DIR ?? "", "openclaw.json");
+  const configPath = pathValue.join(process.env.BOT_STATE_DIR ?? "", "bot.json");
   try {
     const raw = await fsValue.readFile(configPath, "utf-8");
     const parsed = JSON.parse(raw);
@@ -39,7 +39,7 @@ const mockReadSourceConfigSnapshot = vi.hoisted(() => async () => {
 const mockReplaceConfigFile = vi.hoisted(() => async ({ nextConfig }: { nextConfig: unknown }) => {
   const fsLocal = await import("node:fs/promises");
   const pathLocal = await import("node:path");
-  const configPath = pathLocal.join(process.env.OPENCLAW_STATE_DIR ?? "", "openclaw.json");
+  const configPath = pathLocal.join(process.env.BOT_STATE_DIR ?? "", "bot.json");
   await fsLocal.writeFile(configPath, JSON.stringify(nextConfig, null, 2), "utf-8");
 });
 
@@ -62,18 +62,18 @@ async function withMcpConfigHome<T>(
 ) {
   return await withTempHome(
     async (home) => {
-      const configPath = path.join(home, ".openclaw", "openclaw.json");
+      const configPath = path.join(home, ".bot", "bot.json");
       await fs.mkdir(path.dirname(configPath), { recursive: true });
       await fs.writeFile(configPath, JSON.stringify(config, null, 2), "utf-8");
       return await fn({ configPath });
     },
     {
-      prefix: "openclaw-mcp-config-",
+      prefix: "bot-mcp-config-",
       skipSessionCleanup: true,
       env: {
-        OPENCLAW_CONFIG_PATH: undefined,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        BOT_CONFIG_PATH: undefined,
+        BOT_BUNDLED_PLUGINS_DIR: undefined,
+        BOT_DISABLE_BUNDLED_PLUGINS: undefined,
       },
     },
   );

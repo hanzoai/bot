@@ -5,8 +5,8 @@
 import {
   resolveStableChannelMessageIngress,
   type StableChannelIngressIdentityParams,
-} from "openclaw/plugin-sdk/channel-ingress-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-ingress-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { getClickClackRuntime } from "./runtime.js";
 import type { ClickClackMessage, CoreConfig, ResolvedClickClackAccount } from "./types.js";
 
@@ -50,7 +50,7 @@ export async function resolveClickClackInboundAccess(params: {
 }): Promise<ClickClackInboundAccess> {
   const runtime = getClickClackRuntime();
   const isDirect = Boolean(params.message.direct_conversation_id);
-  const cfg = params.config as OpenClawConfig;
+  const cfg = params.config as BotConfig;
   const shouldCheckCommand = runtime.channel.commands.shouldComputeCommandAuthorized(
     params.message.body,
     cfg,

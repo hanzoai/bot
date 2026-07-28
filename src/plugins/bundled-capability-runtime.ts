@@ -9,8 +9,8 @@ import {
 } from "./bundled-compat.js";
 import { resolveBundledPluginRepoEntryPath } from "./bundled-plugin-metadata.js";
 import { createCapturedPluginRegistration } from "./captured-registration.js";
-import { resolveOpenClawDevSourceRoot } from "./dev-source-root.js";
-import { discoverOpenClawPlugins, type PluginDiscoveryResult } from "./discovery.js";
+import { resolveBotDevSourceRoot } from "./dev-source-root.js";
+import { discoverBotPlugins, type PluginDiscoveryResult } from "./discovery.js";
 import type { PluginLoadOptions } from "./loader.js";
 import { loadPluginManifestRegistry } from "./manifest-registry.js";
 import { unwrapDefaultModuleExport } from "./module-export.js";
@@ -30,7 +30,7 @@ import {
   findUndeclaredPluginToolNames,
   normalizePluginToolContractNames,
 } from "./tool-contracts.js";
-import type { OpenClawPluginDefinition, OpenClawPluginModule } from "./types.js";
+import type { BotPluginDefinition, BotPluginModule } from "./types.js";
 
 const log = createSubsystemLogger("plugins");
 
@@ -58,8 +58,8 @@ function buildVitestCapabilityShimAliasMap(): Record<string, string> {
     CAPABILITY_VITEST_SHIM_ALIASES.flatMap(({ subpath, target }) => {
       const targetPath = fileURLToPath(target);
       return [
-        [`openclaw/plugin-sdk/${subpath}`, targetPath],
-        [`@openclaw/plugin-sdk/${subpath}`, targetPath],
+        [`bot/plugin-sdk/${subpath}`, targetPath],
+        [`@hanzo/bot-plugin-sdk/${subpath}`, targetPath],
       ];
     }),
   );
@@ -106,17 +106,17 @@ function buildBundledCapabilityRuntimeConfig(
 }
 
 function resolvePluginModuleExport(moduleExport: unknown): {
-  definition?: OpenClawPluginDefinition;
-  register?: OpenClawPluginDefinition["register"];
+  definition?: BotPluginDefinition;
+  register?: BotPluginDefinition["register"];
 } {
   const resolved = unwrapDefaultModuleExport(moduleExport);
   if (typeof resolved === "function") {
     return {
-      register: resolved as OpenClawPluginDefinition["register"],
+      register: resolved as BotPluginDefinition["register"],
     };
   }
   if (resolved && typeof resolved === "object") {
-    const definition = resolved as OpenClawPluginDefinition;
+    const definition = resolved as BotPluginDefinition;
     return {
       definition,
       register: definition.register,
@@ -198,7 +198,7 @@ export function loadBundledCapabilityRuntimeRegistry(params: {
   discovery?: PluginDiscoveryResult;
 }) {
   const env = params.env ?? process.env;
-  const devSourceRoot = resolveOpenClawDevSourceRoot(env);
+  const devSourceRoot = resolveBotDevSourceRoot(env);
   const pluginIds = new Set(params.pluginIds);
   const registry = createEmptyPluginRegistry();
   const moduleLoaders: PluginModuleLoaderCache = createPluginModuleLoaderCache();
@@ -235,7 +235,7 @@ export function loadBundledCapabilityRuntimeRegistry(params: {
     });
   };
 
-  const discovery = params.discovery ?? discoverOpenClawPlugins({ env });
+  const discovery = params.discovery ?? discoverBotPlugins({ env });
   const manifestRegistry = loadPluginManifestRegistry({
     config: buildBundledCapabilityRuntimeConfig(params.pluginIds, env),
     env,
@@ -296,9 +296,9 @@ export function loadBundledCapabilityRuntimeRegistry(params: {
     const safeSource = opened.path;
     fs.closeSync(opened.fd);
 
-    let mod: OpenClawPluginModule | null;
+    let mod: BotPluginModule | null;
     try {
-      mod = getModuleLoader(safeSource)(safeSource) as OpenClawPluginModule;
+      mod = getModuleLoader(safeSource)(safeSource) as BotPluginModule;
     } catch (error) {
       recordCapabilityLoadError(registry, record, String(error));
       continue;

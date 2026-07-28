@@ -1,7 +1,7 @@
 // Verifies agent-specific sandbox config, workspace roots, and Docker setup commands.
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { createRestrictedAgentSandboxConfig } from "./test-helpers/sandbox-agent-config-fixtures.js";
 
 type SpawnCall = {
@@ -42,7 +42,7 @@ let resolveSandboxContext: typeof import("./sandbox/context.js").resolveSandboxC
 let resolveSandboxConfigForAgent: typeof import("./sandbox/config.js").resolveSandboxConfigForAgent;
 let resolveSandboxRuntimeStatus: typeof import("./sandbox/runtime-status.js").resolveSandboxRuntimeStatus;
 
-async function resolveContext(config: OpenClawConfig, sessionKey: string, workspaceDir: string) {
+async function resolveContext(config: BotConfig, sessionKey: string, workspaceDir: string) {
   // Convenience wrapper keeps session-key specific sandbox context assertions compact.
   return resolveSandboxContext({
     config,
@@ -65,7 +65,7 @@ function expectDockerSetupCommand(command: string) {
 
 function createDefaultsSandboxConfig(
   scope: "agent" | "shared" | "session" = "agent",
-): OpenClawConfig {
+): BotConfig {
   return {
     agents: {
       defaults: {
@@ -78,7 +78,7 @@ function createDefaultsSandboxConfig(
   };
 }
 
-function createWorkSetupCommandConfig(scope: "agent" | "shared"): OpenClawConfig {
+function createWorkSetupCommandConfig(scope: "agent" | "shared"): BotConfig {
   return {
     agents: {
       defaults: {
@@ -93,7 +93,7 @@ function createWorkSetupCommandConfig(scope: "agent" | "shared"): OpenClawConfig
       list: [
         {
           id: "work",
-          workspace: "~/openclaw-work",
+          workspace: "~/bot-work",
           sandbox: {
             mode: "all",
             scope,
@@ -122,19 +122,19 @@ describe("Agent-specific sandbox config", () => {
   });
 
   it("should use agent-specific workspaceRoot", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           sandbox: {
             mode: "all",
             scope: "agent",
-            workspaceRoot: "~/.openclaw/sandboxes",
+            workspaceRoot: "~/.bot/sandboxes",
           },
         },
         list: [
           {
             id: "isolated",
-            workspace: "~/openclaw-isolated",
+            workspace: "~/bot-isolated",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -154,7 +154,7 @@ describe("Agent-specific sandbox config", () => {
   });
 
   it("should prefer agent config over global for multiple agents", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -165,14 +165,14 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "main",
-            workspace: "~/openclaw",
+            workspace: "~/bot",
             sandbox: {
               mode: "off",
             },
           },
           {
             id: "family",
-            workspace: "~/openclaw-family",
+            workspace: "~/bot-family",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -221,7 +221,7 @@ describe("Agent-specific sandbox config", () => {
   });
 
   it("should use global sandbox config when no agent-specific config exists", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -232,7 +232,7 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "main",
-            workspace: "~/openclaw",
+            workspace: "~/bot",
           },
         ],
       },
@@ -269,7 +269,7 @@ describe("Agent-specific sandbox config", () => {
   );
 
   it("should allow agent-specific docker settings beyond setupCommand", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -284,7 +284,7 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "work",
-            workspace: "~/openclaw-work",
+            workspace: "~/bot-work",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -317,14 +317,14 @@ describe("Agent-specific sandbox config", () => {
             list: [
               {
                 id: "main",
-                workspace: "~/openclaw",
+                workspace: "~/bot",
                 sandbox: {
                   mode: "off",
                 },
               },
             ],
           },
-        } satisfies OpenClawConfig,
+        } satisfies BotConfig,
         sessionKey: "agent:main:main",
         assert: (runtime: ReturnType<typeof resolveSandboxRuntimeStatus>) => {
           expect(runtime.mode).toBe("off");
@@ -342,7 +342,7 @@ describe("Agent-specific sandbox config", () => {
             list: [
               {
                 id: "family",
-                workspace: "~/openclaw-family",
+                workspace: "~/bot-family",
                 sandbox: {
                   mode: "all",
                   scope: "agent",
@@ -350,7 +350,7 @@ describe("Agent-specific sandbox config", () => {
               },
             ],
           },
-        } satisfies OpenClawConfig,
+        } satisfies BotConfig,
         sessionKey: "agent:family:whatsapp:group:123",
         assert: (runtime: ReturnType<typeof resolveSandboxRuntimeStatus>) => {
           expect(runtime.mode).toBe("all");
@@ -367,7 +367,7 @@ describe("Agent-specific sandbox config", () => {
   });
 
   it("should use agent-specific scope", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           sandbox: {
@@ -378,7 +378,7 @@ describe("Agent-specific sandbox config", () => {
         list: [
           {
             id: "work",
-            workspace: "~/openclaw-work",
+            workspace: "~/bot-work",
             sandbox: {
               mode: "all",
               scope: "agent",
@@ -416,7 +416,7 @@ describe("Agent-specific sandbox config", () => {
               },
             },
           },
-        } satisfies OpenClawConfig,
+        } satisfies BotConfig,
         expected: ["image"],
       },
     ]) {

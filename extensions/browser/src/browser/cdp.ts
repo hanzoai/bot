@@ -4,9 +4,9 @@
  * Provides screenshots, target creation, JavaScript evaluation, ARIA/role
  * snapshots, DOM text, and selector lookup on top of the CDP socket helpers.
  */
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { resolveIntegerOption } from "openclaw/plugin-sdk/number-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { resolveIntegerOption } from "bot/plugin-sdk/number-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { SsrFPolicy } from "../infra/net/ssrf.js";
 import {
   prepareCdpPageSession,
@@ -598,7 +598,7 @@ async function findCursorInteractiveElements(
   send: CdpSendFn,
   sessionId?: string,
 ): Promise<Map<number, CursorInteractiveInfo>> {
-  const attr = "data-openclaw-cdp-ci";
+  const attr = "data-bot-cdp-ci";
   const evaluated = (await send(
     "Runtime.evaluate",
     {

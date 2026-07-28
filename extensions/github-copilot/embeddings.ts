@@ -1,19 +1,19 @@
 // Github Copilot plugin module implements embeddings behavior.
-import { redactToolPayloadText } from "openclaw/plugin-sdk/logging-core";
+import { redactToolPayloadText } from "bot/plugin-sdk/logging-core";
 import {
   buildRemoteBaseUrlPolicy,
   sanitizeAndNormalizeEmbedding,
   withRemoteHttpResponse,
   type MemoryEmbeddingProvider,
   type MemoryEmbeddingProviderAdapter,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
-import { buildCopilotIdeHeaders } from "openclaw/plugin-sdk/provider-auth";
+} from "bot/plugin-sdk/memory-core-host-engine-embeddings";
+import { buildCopilotIdeHeaders } from "bot/plugin-sdk/provider-auth";
 import {
   readProviderJsonResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
-import { fetchWithSsrFGuard, type SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/provider-http";
+import { normalizeResolvedSecretInputString } from "bot/plugin-sdk/secret-input";
+import { fetchWithSsrFGuard, type SsrFPolicy } from "bot/plugin-sdk/ssrf-runtime";
 import { resolveFirstGithubToken } from "./auth.js";
 import { resolveGithubCopilotDomain } from "./domain.js";
 import { CopilotTokenExchangeError } from "./token-exchange-error.js";

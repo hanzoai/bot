@@ -75,7 +75,7 @@ function startModelSetupFirstRunRedirect(params: {
       snapshot.phase !== "connected" ||
       !snapshot.client ||
       !hasOperatorAdminAccess(snapshot.hello?.auth ?? null) ||
-      isGatewayMethodAdvertised(snapshot, "openclaw.setup.detect") !== true
+      isGatewayMethodAdvertised(snapshot, "bot.setup.detect") !== true
     ) {
       return;
     }

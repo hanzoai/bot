@@ -14,9 +14,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const proofDir = path.join(process.cwd(), ".artifacts", "control-ui-e2e", "agent-page-scope");
 
 let browser: Browser;
@@ -128,7 +128,7 @@ describeControlUiE2e("Control UI agent page scope", () => {
     try {
       await page.goto(`${server.baseUrl}usage`);
       await gateway.waitForRequest("agents.list");
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       await sidebar.getByRole("button", { name: /Switch agent/ }).click();
       const agentMenu = sidebar.locator("wa-dropdown.sidebar-agent-menu");
       // The card sits at the top of the sidebar: the menu drops below it so the
@@ -161,7 +161,7 @@ describeControlUiE2e("Control UI agent page scope", () => {
         .click();
       await expect.poll(() => new URL(page.url()).pathname).toBe("/usage");
       await waitForRequest(gateway, "sessions.usage", (params) => params.agentId === "writer");
-      const pageScope = page.locator(".agent-scope-control openclaw-agent-select");
+      const pageScope = page.locator(".agent-scope-control bot-agent-select");
       await expect
         .poll(() =>
           pageScope.evaluate((picker) => (picker as HTMLElement & { value: string }).value),
@@ -210,7 +210,7 @@ describeControlUiE2e("Control UI agent page scope", () => {
     try {
       await page.goto(`${server.baseUrl}sessions`);
       await gateway.waitForRequest("agents.list");
-      const pageScope = page.locator(".agent-scope-control openclaw-agent-select");
+      const pageScope = page.locator(".agent-scope-control bot-agent-select");
       await expect
         .poll(() =>
           pageScope.evaluate((picker) => (picker as HTMLElement & { value: string }).value),

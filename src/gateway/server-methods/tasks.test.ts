@@ -4,7 +4,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   INTERNAL_RUNTIME_CONTEXT_BEGIN,
@@ -29,7 +29,7 @@ import { captureEnv, setTestEnvValue } from "../../test-utils/env.js";
 import { tasksHandlers } from "./tasks.js";
 import type { RespondFn } from "./types.js";
 
-const stateDirEnvSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+const stateDirEnvSnapshot = captureEnv(["BOT_STATE_DIR"]);
 const cancelSessionMock = vi.fn();
 const killSubagentRunAdminMock = vi.fn();
 type TaskResponsePayload = {
@@ -51,8 +51,8 @@ function createTaskRecord(params: Parameters<typeof createTaskRecordOrNull>[0]):
 }
 
 beforeEach(async () => {
-  stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-gateway-tasks-"));
-  setTestEnvValue("OPENCLAW_STATE_DIR", stateDir);
+  stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-gateway-tasks-"));
+  setTestEnvValue("BOT_STATE_DIR", stateDir);
   resetTaskRegistryForTests();
   cancelSessionMock.mockReset();
   killSubagentRunAdminMock.mockReset();
@@ -348,7 +348,7 @@ describe("tasks gateway handlers", () => {
       scopeKind: "session",
       runId: "run-sanitized",
       label:
-        "Compile artifact\nOpenClaw runtime context (internal): Keep internal details private.",
+        "Compile artifact\nBot runtime context (internal): Keep internal details private.",
       task: "Compile artifact",
       status: "running",
       deliveryStatus: "pending",
@@ -356,15 +356,15 @@ describe("tasks gateway handlers", () => {
     recordTaskProgressByRunId({
       runId: "run-sanitized",
       progressSummary:
-        "Bundling output\nOpenClaw runtime context (internal): Keep internal details private.",
+        "Bundling output\nBot runtime context (internal): Keep internal details private.",
     });
     markTaskTerminalById({
       taskId: task.taskId,
       status: "failed",
       endedAt: Date.now(),
       terminalSummary:
-        "Failed after build\nOpenClaw runtime context (internal): Keep internal details private.",
-      error: "Tool failed\nOpenClaw runtime context (internal): Keep internal details private.",
+        "Failed after build\nBot runtime context (internal): Keep internal details private.",
+      error: "Tool failed\nBot runtime context (internal): Keep internal details private.",
     });
 
     const { calls, payload } = await getTaskPayload(task.taskId);
@@ -373,7 +373,7 @@ describe("tasks gateway handlers", () => {
     expect(payload?.task?.terminalSummary).toBe("Failed after build");
     expect(payload?.task?.error).toBe("Tool failed");
     expect(payload?.task?.prompt).toBe("Compile artifact");
-    expect(JSON.stringify(calls[0]?.[1])).not.toContain("OpenClaw runtime context");
+    expect(JSON.stringify(calls[0]?.[1])).not.toContain("Bot runtime context");
   });
 
   it("exposes tool activity in task summaries", async () => {

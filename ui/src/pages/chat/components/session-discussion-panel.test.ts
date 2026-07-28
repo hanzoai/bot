@@ -31,7 +31,7 @@ afterEach(() => {
 function expectedEmbedUrl(url: string, mode: "light" | "dark" = "dark"): string {
   const resolved = new URL(url);
   if (
-    resolved.searchParams.get("openclawHostTheme") !== "1" ||
+    resolved.searchParams.get("botHostTheme") !== "1" ||
     !/^\/embed\/(?:channel|thread)\/[^/]+\/[^/]+\/?$/u.test(resolved.pathname)
   ) {
     return resolved.href;
@@ -47,7 +47,7 @@ function mount(params: {
   onStateChange?: SessionDiscussionStateListener;
   canOpen?: boolean;
 }): DiscussionPanelElement {
-  const panel = document.createElement("openclaw-session-discussion") as DiscussionPanelElement;
+  const panel = document.createElement("bot-session-discussion") as DiscussionPanelElement;
   panel.sessionKey = "agent:main:first";
   panel.loadInfo = params.loadInfo;
   panel.openDiscussion = params.openDiscussion;
@@ -97,7 +97,7 @@ describe("session discussion panel", () => {
       loadInfo: vi.fn().mockResolvedValue({
         state: "open",
         embedUrl:
-          "https://discussion.example/embed/channel/T1/C1?openclawHostTheme=1&existing=1#messages",
+          "https://discussion.example/embed/channel/T1/C1?botHostTheme=1&existing=1#messages",
       }),
       openDiscussion: vi.fn(),
     });
@@ -105,7 +105,7 @@ describe("session discussion panel", () => {
     await vi.waitFor(() => {
       expect(panel.querySelector("iframe")?.getAttribute("src")).toBe(
         expectedEmbedUrl(
-          "https://discussion.example/embed/channel/T1/C1?openclawHostTheme=1&existing=1#messages",
+          "https://discussion.example/embed/channel/T1/C1?botHostTheme=1&existing=1#messages",
           "light",
         ),
       );
@@ -135,7 +135,7 @@ describe("session discussion panel", () => {
 
     expect(postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: "openclaw:widget-theme",
+        type: "bot:widget-theme",
         tokens: expect.objectContaining({ surface: "#faf9f7" }),
       }),
       "https://discussion.example",
@@ -150,7 +150,7 @@ describe("session discussion panel", () => {
     const panel = mount({
       loadInfo: vi.fn().mockResolvedValue({
         state: "open",
-        embedUrl: "https://discussion.example/embed/channel/T1/C1?openclawHostTheme=1",
+        embedUrl: "https://discussion.example/embed/channel/T1/C1?botHostTheme=1",
       }),
       openDiscussion: vi.fn(),
     });
@@ -163,7 +163,7 @@ describe("session discussion panel", () => {
 
     expect(postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
-        type: "openclaw:widget-theme",
+        type: "bot:widget-theme",
         mode: "light",
         tokens: expect.objectContaining({
           surface: "#faf9f7",
@@ -183,7 +183,7 @@ describe("session discussion panel", () => {
     const panel = mount({
       loadInfo: vi.fn().mockResolvedValue({
         state: "open",
-        embedUrl: "https://discussion.example/embed/channel/T1/C1?openclawHostTheme=1",
+        embedUrl: "https://discussion.example/embed/channel/T1/C1?botHostTheme=1",
       }),
       openDiscussion: vi.fn(),
     });
@@ -207,7 +207,7 @@ describe("session discussion panel", () => {
     const panel = mount({
       loadInfo: vi.fn().mockResolvedValue({
         state: "open",
-        embedUrl: "https://discussion.example/embed/channel/T1/C1?openclawHostTheme=1",
+        embedUrl: "https://discussion.example/embed/channel/T1/C1?botHostTheme=1",
       }),
       openDiscussion: vi.fn(),
     });
@@ -223,7 +223,7 @@ describe("session discussion panel", () => {
     await vi.waitFor(() => {
       expect(postMessage).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "openclaw:widget-theme",
+          type: "bot:widget-theme",
           mode: "dark",
           tokens: expect.objectContaining({ surface: "#0e1015" }),
         }),
@@ -239,7 +239,7 @@ describe("session discussion panel", () => {
     const panel = mount({
       loadInfo: vi.fn().mockResolvedValue({
         state: "open",
-        embedUrl: "https://discussion.example/embed/channel/T1/C1?openclawHostTheme=1",
+        embedUrl: "https://discussion.example/embed/channel/T1/C1?botHostTheme=1",
       }),
       openDiscussion: vi.fn(),
     });
@@ -254,7 +254,7 @@ describe("session discussion panel", () => {
     await vi.waitFor(() => {
       expect(postMessage).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: "openclaw:widget-theme",
+          type: "bot:widget-theme",
           mode: "dark",
           tokens: expect.objectContaining({ surface: "#211a36" }),
         }),

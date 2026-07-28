@@ -12,7 +12,7 @@ import {
   resolveClaudeSonnet5ModelIdentity,
   supportsClaudeAdaptiveThinking,
   supportsClaudeNativeXhighEffort,
-} from "@openclaw/llm-core";
+} from "@hanzo/bot-llm-core";
 import type { ProviderThinkingProfile } from "./provider-thinking.types.js";
 
 const BASE_CLAUDE_THINKING_LEVELS = [

@@ -1,7 +1,7 @@
 // In-process gateway run loop, restart signaling, drain, and update respawn handling.
 import { randomUUID } from "node:crypto";
 import net from "node:net";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { clearRuntimeConfigSnapshot } from "../../config/runtime-snapshot.js";
 import {
   captureGatewayRestartTraceHandoff,
@@ -122,15 +122,15 @@ export async function runGatewayLoop(params: {
 }) {
   // macOS/BSD process inspection reports process.title instead of the original
   // argv. Give the long-running Gateway a verifiable identity for lock readers.
-  if (process.title === "openclaw") {
-    process.title = "openclaw-gateway";
+  if (process.title === "bot") {
+    process.title = "bot-gateway";
   }
   let startupStartedAt: number;
   // Eagerly resolve the lifecycle runtime module before installing signal
   // listeners. Without this, every subsequent lifecycle path (SIGUSR1,
   // SIGTERM-with-intent, restart iteration hook, stability bundle writer)
   // depends on a dynamic import() call. After an in-place package upgrade
-  // (e.g. `npm install -g openclaw@latest` triggered via update.run),
+  // (e.g. `npm install -g bot@latest` triggered via update.run),
   // dist/ chunk hashes rotate while the process is still running. The next
   // SIGUSR1 — including the one update.run schedules for itself — would
   // hit ERR_MODULE_NOT_FOUND from inside its async IIFE, reject silently,
@@ -342,7 +342,7 @@ export async function runGatewayLoop(params: {
         });
       } else {
         gatewayLog.info(
-          `restart mode: in-process restart (${respawn.detail ?? "OPENCLAW_NO_RESPAWN"})`,
+          `restart mode: in-process restart (${respawn.detail ?? "BOT_NO_RESPAWN"})`,
         );
       }
       if (!(await reacquireLockForInProcessRestart())) {
@@ -420,7 +420,7 @@ export async function runGatewayLoop(params: {
       );
     } else {
       gatewayLog.info(
-        `restart mode: in-process restart (${respawn.detail ?? "OPENCLAW_NO_RESPAWN"})`,
+        `restart mode: in-process restart (${respawn.detail ?? "BOT_NO_RESPAWN"})`,
       );
     }
     if (isUpdateProcessRestartReason(activeRestartRequest?.restartReason)) {
@@ -914,7 +914,7 @@ export async function runGatewayLoop(params: {
           gatewayLog.warn("SIGUSR1 restart ignored (not authorized; commands.restart=false).");
           gatewayLog.warn(
             "An unauthorized SIGUSR1 restart signal was received and ignored. " +
-              "If a pending gateway restart needs to be applied, run `openclaw gateway restart` " +
+              "If a pending gateway restart needs to be applied, run `bot gateway restart` " +
               "or restart the gateway through your service manager.",
           );
           return;

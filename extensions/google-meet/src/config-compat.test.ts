@@ -1,5 +1,5 @@
 // Google Meet tests cover config compat plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { legacyConfigRules, normalizeCompatibilityConfig } from "./config-compat.js";
 
@@ -34,7 +34,7 @@ describe("google-meet config compatibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const migration = normalizeCompatibilityConfig({ cfg: config });
 
@@ -75,7 +75,7 @@ describe("google-meet config compatibility", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const migration = normalizeCompatibilityConfig({ cfg: config });
 

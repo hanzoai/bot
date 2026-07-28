@@ -1,21 +1,21 @@
-// Phone Control plugin entrypoint registers its OpenClaw integration.
+// Phone Control plugin entrypoint registers its Bot integration.
 import { randomUUID } from "node:crypto";
 import milliseconds from "ms";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeStringEntries,
   sortUniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import prettyMilliseconds from "pretty-ms";
 import {
   definePluginEntry,
-  type OpenClawPluginApi,
-  type OpenClawPluginService,
+  type BotPluginApi,
+  type BotPluginService,
 } from "./runtime-api.js";
 
 const ARM_GROUPS = ["camera", "screen", "computer", "mobile-ui", "writes", "all"] as const;
@@ -115,7 +115,7 @@ function formatDuration(ms: number): string {
   });
 }
 
-function openArmStateStore(api: OpenClawPluginApi) {
+function openArmStateStore(api: BotPluginApi) {
   return api.runtime.state.openKeyedStore<ArmStateFile>({
     namespace: ARM_STATE_NAMESPACE,
     maxEntries: 1,
@@ -123,7 +123,7 @@ function openArmStateStore(api: OpenClawPluginApi) {
   });
 }
 
-async function readStoredArmState(api: OpenClawPluginApi): Promise<StoredArmState | null> {
+async function readStoredArmState(api: BotPluginApi): Promise<StoredArmState | null> {
   const entries = await openArmStateStore(api).entries();
   if (entries.length === 0) {
     return null;
@@ -138,16 +138,16 @@ async function readStoredArmState(api: OpenClawPluginApi): Promise<StoredArmStat
   return { key: entry.key, state: entry.value };
 }
 
-async function readArmState(api: OpenClawPluginApi): Promise<ArmStateFile | null> {
+async function readArmState(api: BotPluginApi): Promise<ArmStateFile | null> {
   return (await readStoredArmState(api))?.state ?? null;
 }
 
-async function registerArmState(api: OpenClawPluginApi, state: ArmStateFileV3): Promise<void> {
+async function registerArmState(api: BotPluginApi, state: ArmStateFileV3): Promise<void> {
   await openArmStateStore(api).register(state.generation, state);
 }
 
 async function activateArmState(
-  api: OpenClawPluginApi,
+  api: BotPluginApi,
   preparing: ArmStateFileV3,
 ): Promise<boolean> {
   const store = openArmStateStore(api);
@@ -166,7 +166,7 @@ async function activateArmState(
   });
 }
 
-async function consumeArmState(api: OpenClawPluginApi, expected: StoredArmState): Promise<boolean> {
+async function consumeArmState(api: BotPluginApi, expected: StoredArmState): Promise<boolean> {
   const consumed = await openArmStateStore(api).consume(expected.key);
   if (!consumed) {
     return false;
@@ -255,9 +255,9 @@ function hasPhoneControlAllowOverride(cfg: PhoneControlConfigView): boolean {
 }
 
 function patchConfigNodeLists(
-  cfg: OpenClawPluginApi["config"],
+  cfg: BotPluginApi["config"],
   next: { allowCommands: string[]; denyCommands: string[] },
-): OpenClawPluginApi["config"] {
+): BotPluginApi["config"] {
   return {
     ...cfg,
     gateway: {
@@ -271,7 +271,7 @@ function patchConfigNodeLists(
 }
 
 async function disarmNow(params: {
-  api: OpenClawPluginApi;
+  api: BotPluginApi;
   reason: string;
   expectedKey?: string;
   fallbackState?: ArmStateFileV3;
@@ -460,7 +460,7 @@ export default definePluginEntry({
   id: "phone-control",
   name: "Phone Control",
   description: "Temporary allowlist control for phone automation commands",
-  register(api: OpenClawPluginApi) {
+  register(api: BotPluginApi) {
     let expiryInterval: ReturnType<typeof setInterval> | null = null;
     let initialExpiryTick: ReturnType<typeof setImmediate> | null = null;
     let acceptingLeaseMutations = true;
@@ -503,7 +503,7 @@ export default definePluginEntry({
       api.logger.warn(`phone-control: ${reason} reconciliation failed: ${String(err)}`);
     };
 
-    const timerService: OpenClawPluginService = {
+    const timerService: BotPluginService = {
       id: "phone-control-expiry",
       start: async (ctx) => {
         const tick = async () =>

@@ -2,25 +2,25 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import type {
   OpenKeyedStoreOptions,
   PluginStateSyncKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
+import { createTestPluginApi } from "bot/plugin-sdk/plugin-test-api";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+} from "bot/plugin-sdk/runtime-config-snapshot";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerBrowserPlugin } from "../../plugin-registration.js";
-import type { OpenClawPluginApi } from "../../runtime-api.js";
+import type { BotPluginApi } from "../../runtime-api.js";
 import type { CloseTrackedCdpTargetResult } from "./cdp.helpers.js";
 import { BROWSER_TAB_UNREACHABLE_RETIRE_MS } from "./constants.js";
 import {
@@ -44,13 +44,13 @@ vi.mock("./cdp.helpers.js", async (importOriginal) => ({
 function clearProcessLocalTabState(): void {
   const state = globalThis as Record<symbol, unknown>;
   for (const name of [
-    "openclaw.browser.session-tabs.volatile",
-    "openclaw.browser.session-tabs.active-durable-keys",
-    "openclaw.browser.session-tabs.cold-native-activity",
-    "openclaw.browser.session-tabs.interaction-storage-keys",
-    "openclaw.browser.session-tabs.exact-interaction-storage-keys",
-    "openclaw.browser.session-tabs.volatile-aliases",
-    "openclaw.browser.session-tabs.exact-volatile-aliases",
+    "bot.browser.session-tabs.volatile",
+    "bot.browser.session-tabs.active-durable-keys",
+    "bot.browser.session-tabs.cold-native-activity",
+    "bot.browser.session-tabs.interaction-storage-keys",
+    "bot.browser.session-tabs.exact-interaction-storage-keys",
+    "bot.browser.session-tabs.volatile-aliases",
+    "bot.browser.session-tabs.exact-volatile-aliases",
   ]) {
     delete state[Symbol.for(name)];
   }
@@ -68,12 +68,12 @@ function setBrowserProfileConfig(): void {
         },
       },
     },
-  } satisfies OpenClawConfig;
+  } satisfies BotConfig;
   setRuntimeConfigSnapshot(config, config);
 }
 
 describe("durable session tab registry", () => {
-  const originalStateDir = process.env.OPENCLAW_STATE_DIR;
+  const originalStateDir = process.env.BOT_STATE_DIR;
   let stateDir: string;
   let freshModuleCounter = 0;
 
@@ -103,7 +103,7 @@ describe("durable session tab registry", () => {
               createPluginStateKeyedStoreForTests("browser", options),
             openSyncKeyedStore,
           },
-        } as unknown as OpenClawPluginApi["runtime"],
+        } as unknown as BotPluginApi["runtime"],
       }),
     );
   }
@@ -119,8 +119,8 @@ describe("durable session tab registry", () => {
   beforeEach(() => {
     clearRuntimeConfigSnapshot();
     clearProcessLocalTabState();
-    stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-browser-tabs-"));
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-browser-tabs-"));
+    process.env.BOT_STATE_DIR = stateDir;
     resetPluginStateStoreForTests();
     installRuntime();
     openStore().clear();
@@ -133,9 +133,9 @@ describe("durable session tab registry", () => {
     resetPluginStateStoreForTests();
     fs.rmSync(stateDir, { recursive: true, force: true });
     if (originalStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = originalStateDir;
+      process.env.BOT_STATE_DIR = originalStateDir;
     }
   });
 

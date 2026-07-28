@@ -6,7 +6,7 @@ import type {
   AgentToolResultMiddlewareRuntime,
 } from "./agent-tool-result-middleware-types.js";
 import { listAgentToolResultMiddlewares } from "./agent-tool-result-middleware.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadBotPlugins } from "./loader.js";
 import type { PluginAgentToolResultMiddlewareOwner, PluginRegistry } from "./registry-types.js";
 import { getActivePluginRegistry } from "./runtime.js";
 
@@ -86,7 +86,7 @@ export async function loadAgentToolResultMiddlewaresForRuntime(params: {
         runtime: params.runtime,
       })
         ? loadedRegistry
-        : loadOpenClawPlugins({
+        : loadBotPlugins({
             config: (await import("../config/config.js")).getRuntimeConfig(),
             onlyPluginIds: missingPluginIds,
             manifestRegistry: {

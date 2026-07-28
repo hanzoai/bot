@@ -19,18 +19,18 @@ const moduleLoaders: PluginModuleLoaderCache = new Map();
 const loadedFacadeModules = new Map<string, unknown>();
 const loadedFacadePluginIds = new Set<string>();
 let facadeLoaderSourceTransformFactory: PluginModuleLoaderFactory | undefined;
-let cachedOpenClawPackageRoot: string | undefined;
+let cachedBotPackageRoot: string | undefined;
 
-function getOpenClawPackageRoot() {
-  if (cachedOpenClawPackageRoot) {
-    return cachedOpenClawPackageRoot;
+function getBotPackageRoot() {
+  if (cachedBotPackageRoot) {
+    return cachedBotPackageRoot;
   }
-  cachedOpenClawPackageRoot =
+  cachedBotPackageRoot =
     resolveLoaderPackageRoot({
       modulePath: fileURLToPath(import.meta.url),
       moduleUrl: import.meta.url,
     }) ?? fileURLToPath(new URL("../..", import.meta.url));
-  return cachedOpenClawPackageRoot;
+  return cachedBotPackageRoot;
 }
 
 function resolveFacadeModuleLocation(params: {
@@ -42,7 +42,7 @@ function resolveFacadeModuleLocation(params: {
   return resolveBundledFacadeModuleLocation({
     ...params,
     currentModulePath: CURRENT_MODULE_PATH,
-    packageRoot: getOpenClawPackageRoot(),
+    packageRoot: getBotPackageRoot(),
     bundledPluginsDir,
   });
 }
@@ -143,8 +143,8 @@ function resolveFacadeBoundaryOpenParams(boundaryRoot: string): {
   boundaryLabel: string;
   rejectHardlinks: boolean;
 } {
-  if (isPathAtOrInside(boundaryRoot, getOpenClawPackageRoot())) {
-    return { boundaryLabel: "OpenClaw package root", rejectHardlinks: false };
+  if (isPathAtOrInside(boundaryRoot, getBotPackageRoot())) {
+    return { boundaryLabel: "Bot package root", rejectHardlinks: false };
   }
   const bundledDir = resolveBundledPluginsDir();
   if (bundledDir && isPathAtOrInside(boundaryRoot, bundledDir)) {
@@ -280,7 +280,7 @@ export function resetFacadeLoaderStateForTest(): void {
   loadedFacadePluginIds.clear();
   moduleLoaders.clear();
   facadeLoaderSourceTransformFactory = undefined;
-  cachedOpenClawPackageRoot = undefined;
+  cachedBotPackageRoot = undefined;
 }
 
 /** Override source transform loader creation for facade-loader tests. */

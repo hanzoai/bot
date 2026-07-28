@@ -22,7 +22,7 @@ import {
 import * as chatThread from "./components/chat-thread.ts";
 import { prepareInitialUserMessageHandoff } from "./initial-turn-handoff.ts";
 
-const SKIP_REWIND_CONFIRM_PREFERENCE = "openclaw:skip-rewind-confirm";
+const SKIP_REWIND_CONFIRM_PREFERENCE = "bot:skip-rewind-confirm";
 const confirmationOwners = new Set<HTMLElement>();
 
 function createDeferred<T>() {
@@ -37,7 +37,7 @@ function createDeferred<T>() {
 
 describe("chat pane first-turn attachment lifecycle", () => {
   it("claims the connected client's first message before attaching the pane", () => {
-    const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+    const pane = document.createElement("bot-chat-pane") as unknown as TestChatPane;
     const targetSessionKey = "agent:main:created-session";
     const client = {
       addEventListener: vi.fn(() => vi.fn()),

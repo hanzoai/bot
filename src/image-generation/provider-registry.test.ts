@@ -1,6 +1,6 @@
 /** Tests image-generation provider registry aliases and plugin capability integration. */
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import type { ImageGenerationProviderPlugin } from "../plugins/types.js";
 
 type ProviderRegistryModule = typeof import("./provider-registry.js");
@@ -51,7 +51,7 @@ describe("image-generation provider registry", () => {
   };
 
   beforeAll(async () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     const { listImageGenerationProviders } = await loadProviderRegistry();
     const providers = listImageGenerationProviders(cfg);
     delegationCase = {
@@ -67,7 +67,7 @@ describe("image-generation provider registry", () => {
   });
 
   it("delegates provider resolution to the capability provider boundary", () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
 
     expect(delegationCase.providers).toStrictEqual([]);
     expect(delegationCase.calls).toContainEqual([

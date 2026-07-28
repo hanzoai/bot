@@ -16,8 +16,8 @@ import {
   toPluginMessageContext,
   toPluginMessageSentEvent,
   triggerInternalHook,
-} from "openclaw/plugin-sdk/hook-runtime";
-import { getGlobalHookRunner } from "openclaw/plugin-sdk/plugin-runtime";
+} from "bot/plugin-sdk/hook-runtime";
+import { getGlobalHookRunner } from "bot/plugin-sdk/plugin-runtime";
 
 type EmitSlackMessageSentHookParams = {
   /** Optional canonical session key. When set, the internal `message:sent` hook fires too. */

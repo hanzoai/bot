@@ -2,7 +2,7 @@ import {
   clearActiveEmbeddedRun,
   embeddedAgentLog,
   runAgentCleanupStep,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { isIncognitoSessionKey } from "../incognito-session.js";
 import {
   CODEX_APP_SERVER_UNSUBSCRIBE_TIMEOUT_MS,

@@ -1,4 +1,4 @@
-/** CLI entrypoint for `openclaw gateway status`. */
+/** CLI entrypoint for `bot gateway status`. */
 import { isRich } from "../../packages/terminal-core/src/theme.js";
 import { parseGatewayPortOption } from "../cli/gateway-port-option.js";
 import { withProgress } from "../cli/progress.js";

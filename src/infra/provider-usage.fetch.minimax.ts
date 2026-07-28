@@ -1,6 +1,6 @@
 // Fetches and normalizes MiniMax provider usage records.
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { asDateTimestampMs } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { readProviderJsonResponse } from "../agents/provider-http-errors.js";
 import { isRecord } from "../utils.js";
 import { readTrimmedStringAlias } from "../utils/string-readers.js";
@@ -399,7 +399,7 @@ export async function fetchMinimaxUsage(
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
-        "MM-API-Source": "OpenClaw",
+        "MM-API-Source": "Bot",
       },
     },
     timeoutMs,

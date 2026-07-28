@@ -38,7 +38,7 @@ let virtualModulesCase: {
 beforeAll(async () => {
   const { clearExtensionCache, loadExtensionsCached } = await import("./loader.js");
   clearExtensionCache();
-  const dir = await mkdtemp(join(tmpdir(), "openclaw-extension-sdk-"));
+  const dir = await mkdtemp(join(tmpdir(), "bot-extension-sdk-"));
   tempDirs.push(dir);
   const extensionPath = join(dir, "extension.ts");
   await writeFile(extensionPath, "export default function extension() {}\n");
@@ -65,12 +65,12 @@ describe("loadExtensionsCached in Bun binary mode", () => {
     expect(virtualModulesCase.errors).toEqual([]);
     expect(virtualModulesCase.virtualModuleIds).toEqual(
       expect.arrayContaining([
-        "openclaw/plugin-sdk/agent-core",
-        "@openclaw/plugin-sdk/agent-core",
-        "openclaw/plugin-sdk/llm",
-        "@openclaw/plugin-sdk/llm",
-        "openclaw/plugin-sdk/agent-sessions",
-        "@openclaw/plugin-sdk/agent-sessions",
+        "bot/plugin-sdk/agent-core",
+        "@hanzo/bot-plugin-sdk/agent-core",
+        "bot/plugin-sdk/llm",
+        "@hanzo/bot-plugin-sdk/llm",
+        "bot/plugin-sdk/agent-sessions",
+        "@hanzo/bot-plugin-sdk/agent-sessions",
       ]),
     );
   });

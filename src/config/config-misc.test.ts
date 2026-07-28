@@ -8,9 +8,9 @@ import {
 } from "./config-paths.js";
 import { readConfigFileSnapshot } from "./config.js";
 import { findLegacyConfigIssues } from "./legacy.js";
-import { buildWebSearchProviderConfig, withTempHome, writeOpenClawConfig } from "./test-helpers.js";
+import { buildWebSearchProviderConfig, withTempHome, writeBotConfig } from "./test-helpers.js";
 import { validateConfigObject, validateConfigObjectRaw } from "./validation.js";
-import { OpenClawSchema } from "./zod-schema.js";
+import { BotSchema } from "./zod-schema.js";
 
 const nonBooleanConfigCases = [
   {
@@ -64,7 +64,7 @@ function expectSomeIssueMessageContains(issues: Array<{ message: string }>, text
 
 describe("boolean config validation", () => {
   it.each(nonBooleanConfigCases)("rejects non-boolean values for $name", ({ config }) => {
-    const result = OpenClawSchema.safeParse(config);
+    const result = BotSchema.safeParse(config);
     expect(result.success).toBe(false);
   });
 
@@ -100,7 +100,7 @@ describe("agent timeoutSeconds config", () => {
     ["negative", -1, false],
     ["fractional", 1.5, false],
   ])("agents.defaults.timeoutSeconds %s", (_label, timeoutSeconds, ok) => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       agents: { defaults: { timeoutSeconds }, entries: { main: { default: true } } },
     });
     expect(result.success).toBe(ok);
@@ -109,7 +109,7 @@ describe("agent timeoutSeconds config", () => {
 
 describe("model provider localService config", () => {
   it("accepts standalone timeout overlays for bundled model providers", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       models: {
         providers: {
           openai: {
@@ -171,7 +171,7 @@ describe("model provider localService config", () => {
   });
 
   it("rejects standalone timeout overlays for unknown model providers", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       models: {
         providers: {
           anyManifestProvider: {
@@ -194,7 +194,7 @@ describe("model provider localService config", () => {
   });
 
   it("requires models when a model provider declaration sets baseUrl", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       models: {
         providers: {
           custom: {
@@ -212,7 +212,7 @@ describe("model provider localService config", () => {
   });
 
   it("requires baseUrl when a model provider declaration sets models", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       models: {
         providers: {
           custom: {
@@ -230,7 +230,7 @@ describe("model provider localService config", () => {
   });
 
   it("accepts on-demand local provider service settings", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       models: {
         providers: {
           ds4: {
@@ -299,22 +299,22 @@ describe("model provider localService config", () => {
 
 describe("$schema key in config (#14998)", () => {
   it("accepts config with $schema string", () => {
-    const result = OpenClawSchema.safeParse({
-      $schema: "https://openclaw.ai/config.json",
+    const result = BotSchema.safeParse({
+      $schema: "https://bot.ai/config.json",
     });
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.$schema).toBe("https://openclaw.ai/config.json");
+      expect(result.data.$schema).toBe("https://bot.ai/config.json");
     }
   });
 
   it("accepts config without $schema", () => {
-    const result = OpenClawSchema.safeParse({});
+    const result = BotSchema.safeParse({});
     expect(result.success).toBe(true);
   });
 
   it("rejects non-string $schema", () => {
-    const result = OpenClawSchema.safeParse({ $schema: 123 });
+    const result = BotSchema.safeParse({ $schema: 123 });
     expect(result.success).toBe(false);
   });
 
@@ -328,18 +328,18 @@ describe("$schema key in config (#14998)", () => {
 
   it("preserves $schema through validateConfigObject round-trip", () => {
     const res = validateConfigObject({
-      $schema: "https://openclaw.ai/config.json",
+      $schema: "https://bot.ai/config.json",
     });
     expect(res.ok).toBe(true);
     if (res.ok) {
-      expect(res.config.$schema).toBe("https://openclaw.ai/config.json");
+      expect(res.config.$schema).toBe("https://bot.ai/config.json");
     }
   });
 });
 
 describe("accessGroups config", () => {
   it("accepts Discord channel audience access groups", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       accessGroups: {
         maintainers: {
           type: "discord.channelAudience",
@@ -360,7 +360,7 @@ describe("accessGroups config", () => {
   });
 
   it("rejects unknown access group membership modes", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       accessGroups: {
         maintainers: {
           type: "discord.channelAudience",
@@ -375,7 +375,7 @@ describe("accessGroups config", () => {
   });
 
   it("accepts message sender access groups for any channel", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       accessGroups: {
         owners: {
           type: "message.senders",
@@ -400,7 +400,7 @@ describe("accessGroups config", () => {
 
 describe("plugins.slots.contextEngine", () => {
   it("accepts a contextEngine slot id", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       plugins: {
         slots: {
           contextEngine: "my-context-engine",
@@ -414,12 +414,12 @@ describe("plugins.slots.contextEngine", () => {
 describe("models.catalogRefresh", () => {
   it("accepts the refresh toggle and an http(s) override", () => {
     expect(
-      OpenClawSchema.safeParse({
+      BotSchema.safeParse({
         models: { catalogRefresh: { enabled: false, url: "https://catalog.example.test/v1.json" } },
       }).success,
     ).toBe(true);
     expect(
-      OpenClawSchema.safeParse({
+      BotSchema.safeParse({
         models: { catalogRefresh: { url: "http://localhost:8080/catalog.json" } },
       }).success,
     ).toBe(true);
@@ -427,17 +427,17 @@ describe("models.catalogRefresh", () => {
 
   it("rejects invalid refresh values", () => {
     expect(
-      OpenClawSchema.safeParse({ models: { catalogRefresh: { enabled: "false" } } }).success,
+      BotSchema.safeParse({ models: { catalogRefresh: { enabled: "false" } } }).success,
     ).toBe(false);
     expect(
-      OpenClawSchema.safeParse({ models: { catalogRefresh: { url: "file:///tmp/catalog.json" } } })
+      BotSchema.safeParse({ models: { catalogRefresh: { url: "file:///tmp/catalog.json" } } })
         .success,
     ).toBe(false);
     expect(
-      OpenClawSchema.safeParse({ models: { catalogRefresh: { url: "not a url" } } }).success,
+      BotSchema.safeParse({ models: { catalogRefresh: { url: "not a url" } } }).success,
     ).toBe(false);
     expect(
-      OpenClawSchema.safeParse({
+      BotSchema.safeParse({
         models: { catalogRefresh: { url: "http://catalog.internal.example/catalog.json" } },
       }).success,
     ).toBe(false);
@@ -447,7 +447,7 @@ describe("models.catalogRefresh", () => {
 describe("diagnostics.otel.captureContent", () => {
   it("accepts supported OTEL log exporters and rejects unknown values", () => {
     for (const logsExporter of ["otlp", "stdout", "both"]) {
-      const result = OpenClawSchema.safeParse({
+      const result = BotSchema.safeParse({
         diagnostics: {
           otel: {
             logs: true,
@@ -458,7 +458,7 @@ describe("diagnostics.otel.captureContent", () => {
       expect(result.success).toBe(true);
     }
 
-    const invalid = OpenClawSchema.safeParse({
+    const invalid = BotSchema.safeParse({
       diagnostics: {
         otel: {
           logs: true,
@@ -471,7 +471,7 @@ describe("diagnostics.otel.captureContent", () => {
 
   it("accepts boolean OTEL content capture config", () => {
     for (const captureContent of [true, false]) {
-      const result = OpenClawSchema.safeParse({
+      const result = BotSchema.safeParse({
         diagnostics: {
           otel: {
             captureContent,
@@ -529,7 +529,7 @@ describe("ui.prefs.sidebarEntries", () => {
 describe("gateway.controlUi.embedSandbox", () => {
   it("accepts strict, scripts, and trusted modes", () => {
     for (const mode of ["strict", "scripts", "trusted"] as const) {
-      const result = OpenClawSchema.safeParse({
+      const result = BotSchema.safeParse({
         gateway: {
           controlUi: {
             embedSandbox: mode,
@@ -541,7 +541,7 @@ describe("gateway.controlUi.embedSandbox", () => {
   });
 
   it("rejects unsupported values", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       gateway: {
         controlUi: {
           embedSandbox: "yolo",
@@ -555,7 +555,7 @@ describe("gateway.controlUi.embedSandbox", () => {
 describe("gateway.controlUi.allowExternalEmbedUrls", () => {
   it("accepts boolean values", () => {
     for (const value of [true, false]) {
-      const result = OpenClawSchema.safeParse({
+      const result = BotSchema.safeParse({
         gateway: {
           controlUi: {
             allowExternalEmbedUrls: value,
@@ -570,7 +570,7 @@ describe("gateway.controlUi.allowExternalEmbedUrls", () => {
 describe("gateway.controlUi.sessionObserver", () => {
   it("accepts boolean values", () => {
     for (const value of [true, false]) {
-      const result = OpenClawSchema.safeParse({
+      const result = BotSchema.safeParse({
         gateway: { controlUi: { sessionObserver: value } },
       });
       expect(result.success).toBe(true);
@@ -580,7 +580,7 @@ describe("gateway.controlUi.sessionObserver", () => {
 
 describe("plugins.entries.*.hooks", () => {
   it.each([true, false])("accepts allowConversationAccess=%s", (allowConversationAccess) => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -596,7 +596,7 @@ describe("plugins.entries.*.hooks", () => {
   });
 
   it("accepts allowPromptInjection=false alongside allowConversationAccess=true", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -612,7 +612,7 @@ describe("plugins.entries.*.hooks", () => {
   });
 
   it("accepts bounded typed hook timeout overrides", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       plugins: {
         entries: {
           "memory-recall": {
@@ -631,7 +631,7 @@ describe("plugins.entries.*.hooks", () => {
   });
 
   it("rejects non-boolean conversation access values", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -653,7 +653,7 @@ describe("plugins.entries.*.hooks", () => {
       { timeouts: { before_prompt_build: -1 } },
       { timeouts: { before_prompt_build: 1.5 } },
     ]) {
-      const result = OpenClawSchema.safeParse({
+      const result = BotSchema.safeParse({
         plugins: {
           entries: {
             "memory-recall": { hooks },
@@ -667,16 +667,16 @@ describe("plugins.entries.*.hooks", () => {
 
 describe("mcp.apps.enabled", () => {
   it.each([true, false])("accepts %s", (enabled) => {
-    expect(OpenClawSchema.safeParse({ mcp: { apps: { enabled } } }).success).toBe(true);
+    expect(BotSchema.safeParse({ mcp: { apps: { enabled } } }).success).toBe(true);
   });
 
   it("rejects non-boolean values", () => {
-    expect(OpenClawSchema.safeParse({ mcp: { apps: { enabled: "yes" } } }).success).toBe(false);
+    expect(BotSchema.safeParse({ mcp: { apps: { enabled: "yes" } } }).success).toBe(false);
   });
 
   it("accepts only a bare HTTP(S) sandbox origin", () => {
     expect(
-      OpenClawSchema.safeParse({
+      BotSchema.safeParse({
         mcp: {
           apps: {
             enabled: true,
@@ -686,21 +686,21 @@ describe("mcp.apps.enabled", () => {
         },
       }).success,
     ).toBe(true);
-    expect(OpenClawSchema.safeParse({ mcp: { apps: { sandboxPort: 65536 } } }).success).toBe(false);
+    expect(BotSchema.safeParse({ mcp: { apps: { sandboxPort: 65536 } } }).success).toBe(false);
     for (const sandboxOrigin of [
       "https://mcp-apps.example.com/path",
       "https://mcp-apps.example.com?query=1",
       "https://user:pass@mcp-apps.example.com",
       "data:text/html,hello",
     ]) {
-      expect(OpenClawSchema.safeParse({ mcp: { apps: { sandboxOrigin } } }).success).toBe(false);
+      expect(BotSchema.safeParse({ mcp: { apps: { sandboxOrigin } } }).success).toBe(false);
     }
   });
 });
 
 describe("plugins.entries.*.subagent", () => {
   it("accepts trusted subagent override settings", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -716,7 +716,7 @@ describe("plugins.entries.*.subagent", () => {
   });
 
   it("rejects invalid trusted subagent override settings", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -734,7 +734,7 @@ describe("plugins.entries.*.subagent", () => {
 
 describe("plugins.entries.*.llm", () => {
   it("accepts trusted llm override settings", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -751,7 +751,7 @@ describe("plugins.entries.*.llm", () => {
   });
 
   it("rejects invalid trusted llm override settings", () => {
-    const result = OpenClawSchema.safeParse({
+    const result = BotSchema.safeParse({
       plugins: {
         entries: {
           "voice-call": {
@@ -897,7 +897,7 @@ describe("config identity/materialization regressions", () => {
               theme: "space lobster",
               emoji: "🦞",
             },
-            groupChat: { mentionPatterns: ["@openclaw"] },
+            groupChat: { mentionPatterns: ["@bot"] },
           },
         },
       },
@@ -909,7 +909,7 @@ describe("config identity/materialization regressions", () => {
     expect(res.ok).toBe(true);
     if (res.ok) {
       expect(res.config.channels?.whatsapp?.responsePrefix).toBe("✅");
-      expect(res.config.agents?.list?.[0]?.groupChat?.mentionPatterns).toEqual(["@openclaw"]);
+      expect(res.config.agents?.list?.[0]?.groupChat?.mentionPatterns).toEqual(["@bot"]);
     }
   });
 
@@ -979,7 +979,7 @@ describe("config identity/materialization regressions", () => {
 
 describe("cron webhook schema", () => {
   it("accepts cron.webhookToken SecretRef values", () => {
-    const res = OpenClawSchema.safeParse({
+    const res = BotSchema.safeParse({
       cron: {
         webhookToken: {
           source: "env",
@@ -1026,7 +1026,7 @@ describe("model compat config schema", () => {
   it.each(["together", "zai", "qwen", "qwen-chat-template"] as const)(
     "accepts full openai-completions compat fields with %s thinking format",
     (thinkingFormat) => {
-      const res = OpenClawSchema.safeParse({
+      const res = BotSchema.safeParse({
         models: {
           providers: {
             local: {
@@ -1086,7 +1086,7 @@ describe("config paths", () => {
 describe("config strict validation", () => {
   it("rejects unknown fields", () => {
     const res = validateConfigObject({
-      agents: { list: [{ id: "openclaw" }] },
+      agents: { list: [{ id: "bot" }] },
       customUnknownField: { nested: "value" },
     });
     expect(res.ok).toBe(false);
@@ -1120,7 +1120,7 @@ describe("config strict validation", () => {
 
   it("rejects top-level memorySearch without read-time auto-migration", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeBotConfig(home, {
         memorySearch: {
           provider: "local",
           fallback: "none",
@@ -1144,7 +1144,7 @@ describe("config strict validation", () => {
 
   it("rejects top-level heartbeat agent settings without read-time auto-migration", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeBotConfig(home, {
         heartbeat: {
           every: "30m",
           model: "anthropic/claude-3-5-haiku-20241022",
@@ -1166,7 +1166,7 @@ describe("config strict validation", () => {
 
   it("rejects top-level heartbeat visibility without read-time auto-migration", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeBotConfig(home, {
         heartbeat: {
           showOk: true,
           showAlerts: false,
@@ -1248,7 +1248,7 @@ describe("config strict validation", () => {
 
   it("rejects legacy sandbox perSession without read-time auto-migration", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeBotConfig(home, {
         agents: {
           defaults: {
             sandbox: {
@@ -1257,7 +1257,7 @@ describe("config strict validation", () => {
           },
           list: [
             {
-              id: "openclaw",
+              id: "bot",
               sandbox: {
                 perSession: false,
               },
@@ -1270,7 +1270,7 @@ describe("config strict validation", () => {
 
       expect(snap.valid).toBe(false);
       expect(issuePaths(snap.issues)).toContain("agents.defaults.sandbox");
-      expect(issuePaths(snap.issues)).toContain("agents.entries.openclaw.sandbox");
+      expect(issuePaths(snap.issues)).toContain("agents.entries.bot.sandbox");
       expect(issuePaths(snap.legacyIssues)).toContain("agents.defaults.sandbox");
       expect(snap.sourceConfigBeforeMigrations?.agents?.defaults?.sandbox).toEqual({
         perSession: true,
@@ -1278,7 +1278,7 @@ describe("config strict validation", () => {
       expect(snap.sourceConfigBeforeMigrations?.agents?.list?.[0]?.sandbox).toEqual({
         perSession: false,
       });
-      expect(snap.sourceConfig.agents?.entries?.openclaw?.sandbox).toEqual({
+      expect(snap.sourceConfig.agents?.entries?.bot?.sandbox).toEqual({
         perSession: false,
       });
     });
@@ -1286,12 +1286,12 @@ describe("config strict validation", () => {
 
   it("rejects resolved-only gateway.bind aliases as invalid schema values, not legacy", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
-        gateway: { bind: "${OPENCLAW_BIND}" },
+      await writeBotConfig(home, {
+        gateway: { bind: "${BOT_BIND}" },
       });
 
-      const prev = process.env.OPENCLAW_BIND;
-      process.env.OPENCLAW_BIND = "0.0.0.0";
+      const prev = process.env.BOT_BIND;
+      process.env.BOT_BIND = "0.0.0.0";
       try {
         const snap = await readConfigFileSnapshot();
         expect(snap.valid).toBe(false);
@@ -1299,9 +1299,9 @@ describe("config strict validation", () => {
         expect(issuePaths(snap.issues)).toContain("gateway.bind");
       } finally {
         if (prev === undefined) {
-          delete process.env.OPENCLAW_BIND;
+          delete process.env.BOT_BIND;
         } else {
-          process.env.OPENCLAW_BIND = prev;
+          process.env.BOT_BIND = prev;
         }
       }
     });
@@ -1309,7 +1309,7 @@ describe("config strict validation", () => {
 
   it("rejects literal gateway.bind host aliases as legacy", async () => {
     await withTempHome(async (home) => {
-      await writeOpenClawConfig(home, {
+      await writeBotConfig(home, {
         gateway: { bind: "0.0.0.0" },
       });
 

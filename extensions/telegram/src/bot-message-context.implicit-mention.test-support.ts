@@ -42,7 +42,7 @@ describe("buildTelegramMessageContext implicitMention forum service messages", (
             : {}),
           from: {
             id: params.replyFromId ?? BOT_ID,
-            first_name: "OpenClaw",
+            first_name: "Bot",
             is_bot: params.replyFromIsBot ?? true,
           },
           ...params.replyToMessageExtra,

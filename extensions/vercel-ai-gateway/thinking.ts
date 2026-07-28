@@ -1,10 +1,10 @@
 // Vercel Ai Gateway plugin module implements thinking behavior.
-import type { ProviderThinkingProfile } from "openclaw/plugin-sdk/core";
+import type { ProviderThinkingProfile } from "bot/plugin-sdk/core";
 import {
   matchesExactOrPrefix,
   resolveClaudeThinkingProfile,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-model-shared";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 
 const UPSTREAM_OPENAI_PREFIX = "openai/";
 const UPSTREAM_ANTHROPIC_PREFIX = "anthropic/";

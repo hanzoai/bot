@@ -3,13 +3,13 @@ import {
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
 } from "../config/runtime-snapshot.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 /** Resolves the source config used for plugin activation policy decisions. */
 export function resolvePluginActivationSourceConfig(params: {
-  config?: OpenClawConfig;
-  activationSourceConfig?: OpenClawConfig;
-}): OpenClawConfig {
+  config?: BotConfig;
+  activationSourceConfig?: BotConfig;
+}): BotConfig {
   if (params.activationSourceConfig !== undefined) {
     return params.activationSourceConfig;
   }

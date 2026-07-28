@@ -2,19 +2,19 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
 import type { ModelDefinitionConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import { resolveModelRuntimePolicy as resolveModelRuntimePolicyBase } from "./model-runtime-policy.js";
 
-const ORIGINAL_BUILD_PRIVATE_QA = process.env.OPENCLAW_BUILD_PRIVATE_QA;
-const ORIGINAL_QA_FORCE_RUNTIME = process.env.OPENCLAW_QA_FORCE_RUNTIME;
+const ORIGINAL_BUILD_PRIVATE_QA = process.env.BOT_BUILD_PRIVATE_QA;
+const ORIGINAL_QA_FORCE_RUNTIME = process.env.BOT_QA_FORCE_RUNTIME;
 
 function resolveModelRuntimePolicy(
   params: Parameters<typeof resolveModelRuntimePolicyBase>[0],
 ): ReturnType<typeof resolveModelRuntimePolicyBase> {
   return resolveModelRuntimePolicyBase({
     ...params,
-    config: migratePersistedImplicitMainRoster(params.config).config as OpenClawConfig,
+    config: migratePersistedImplicitMainRoster(params.config).config as BotConfig,
   });
 }
 
@@ -38,7 +38,7 @@ const createModelConfig = (
 });
 
 function restoreEnv(
-  name: "OPENCLAW_BUILD_PRIVATE_QA" | "OPENCLAW_QA_FORCE_RUNTIME",
+  name: "BOT_BUILD_PRIVATE_QA" | "BOT_QA_FORCE_RUNTIME",
   value: string | undefined,
 ): void {
   // Tests mutate private QA env gates; restore exact process state after each.
@@ -49,7 +49,7 @@ function restoreEnv(
   setTestEnvValue(name, value);
 }
 
-function makeProviderRuntimeConfig(runtime: string): OpenClawConfig {
+function makeProviderRuntimeConfig(runtime: string): BotConfig {
   return {
     models: {
       providers: {
@@ -60,18 +60,18 @@ function makeProviderRuntimeConfig(runtime: string): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 afterEach(() => {
-  restoreEnv("OPENCLAW_BUILD_PRIVATE_QA", ORIGINAL_BUILD_PRIVATE_QA);
-  restoreEnv("OPENCLAW_QA_FORCE_RUNTIME", ORIGINAL_QA_FORCE_RUNTIME);
+  restoreEnv("BOT_BUILD_PRIVATE_QA", ORIGINAL_BUILD_PRIVATE_QA);
+  restoreEnv("BOT_QA_FORCE_RUNTIME", ORIGINAL_QA_FORCE_RUNTIME);
 });
 
 describe("resolveModelRuntimePolicy", () => {
   it("ignores the QA force-runtime override when the private QA gate is unset", () => {
-    deleteTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA");
-    setTestEnvValue("OPENCLAW_QA_FORCE_RUNTIME", "openclaw");
+    deleteTestEnvValue("BOT_BUILD_PRIVATE_QA");
+    setTestEnvValue("BOT_QA_FORCE_RUNTIME", "bot");
 
     expect(
       resolveModelRuntimePolicy({
@@ -88,8 +88,8 @@ describe("resolveModelRuntimePolicy", () => {
   it("respects the QA force-runtime override when the private QA gate is set", () => {
     // The force-runtime override is intentionally gated to private QA builds so
     // normal users cannot accidentally change model runtime selection via env.
-    setTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA", "1");
-    setTestEnvValue("OPENCLAW_QA_FORCE_RUNTIME", "openclaw");
+    setTestEnvValue("BOT_BUILD_PRIVATE_QA", "1");
+    setTestEnvValue("BOT_QA_FORCE_RUNTIME", "bot");
 
     expect(
       resolveModelRuntimePolicy({
@@ -98,14 +98,14 @@ describe("resolveModelRuntimePolicy", () => {
         modelId: "gpt-5.5",
       }),
     ).toEqual({
-      policy: { id: "openclaw" },
+      policy: { id: "bot" },
       source: "model",
     });
   });
 
   it("ignores invalid QA force-runtime values even when the private QA gate is set", () => {
-    setTestEnvValue("OPENCLAW_BUILD_PRIVATE_QA", "1");
-    setTestEnvValue("OPENCLAW_QA_FORCE_RUNTIME", "bogus");
+    setTestEnvValue("BOT_BUILD_PRIVATE_QA", "1");
+    setTestEnvValue("BOT_QA_FORCE_RUNTIME", "bogus");
 
     expect(
       resolveModelRuntimePolicy({
@@ -124,11 +124,11 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "vllm/*": { agentRuntime: { id: "openclaw" } },
+            "vllm/*": { agentRuntime: { id: "bot" } },
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -137,7 +137,7 @@ describe("resolveModelRuntimePolicy", () => {
         modelId: "qwen-local",
       }),
     ).toEqual({
-      policy: { id: "openclaw" },
+      policy: { id: "bot" },
       source: "model",
       matchedProvider: "vllm",
     });
@@ -148,11 +148,11 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "vllm/*": { agentRuntime: { id: "openclaw" } },
+            "vllm/*": { agentRuntime: { id: "bot" } },
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -160,7 +160,7 @@ describe("resolveModelRuntimePolicy", () => {
         provider: "vllm",
       }),
     ).toEqual({
-      policy: { id: "openclaw" },
+      policy: { id: "bot" },
       source: "model",
       matchedProvider: "vllm",
     });
@@ -173,12 +173,12 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "vllm/*": { agentRuntime: { id: "openclaw" } },
+            "vllm/*": { agentRuntime: { id: "bot" } },
             "vllm/qwen-local": { agentRuntime: { id: "codex" } },
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -198,7 +198,7 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "vllm/*": { agentRuntime: { id: "openclaw" } },
+            "vllm/*": { agentRuntime: { id: "bot" } },
           },
         },
       },
@@ -210,7 +210,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -234,7 +234,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -260,7 +260,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -280,12 +280,12 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "claude-opus-4-7": { agentRuntime: { id: "openclaw" } },
+            "claude-opus-4-7": { agentRuntime: { id: "bot" } },
             "anthropic/claude-opus-4-7": { agentRuntime: { id: "claude-cli" } },
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -305,7 +305,7 @@ describe("resolveModelRuntimePolicy", () => {
       agents: {
         defaults: {
           models: {
-            "vllm/*": { agentRuntime: { id: "openclaw" } },
+            "vllm/*": { agentRuntime: { id: "bot" } },
           },
         },
       },
@@ -318,7 +318,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -327,7 +327,7 @@ describe("resolveModelRuntimePolicy", () => {
         modelId: "qwen-local",
       }),
     ).toEqual({
-      policy: { id: "openclaw" },
+      policy: { id: "bot" },
       source: "model",
       matchedProvider: "vllm",
     });
@@ -342,7 +342,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -366,7 +366,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -386,7 +386,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -418,7 +418,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({
@@ -445,7 +445,7 @@ describe("resolveModelRuntimePolicy", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveModelRuntimePolicy({

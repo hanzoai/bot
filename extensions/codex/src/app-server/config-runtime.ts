@@ -8,17 +8,17 @@ import type {
   CodexAppServerStartOptions,
   CodexManagedCommandOrder,
   CodexComputerUseConfig,
-  OpenClawExecMode,
-  OpenClawExecPolicyForCodexAppServer,
+  BotExecMode,
+  BotExecPolicyForCodexAppServer,
   ProviderAuthAliasConfig,
   ResolvedCodexComputerUseConfig,
 } from "./config-contracts.js";
 import {
-  assertCodexAppServerAllowedForOpenClawExecMode,
+  assertCodexAppServerAllowedForBotExecMode,
   resolveApprovalPolicy,
   resolveApprovalsReviewer,
-  resolveCodexPolicyModeForOpenClawExecMode,
-  resolveEffectiveOpenClawExecModeForCodexAppServer,
+  resolveCodexPolicyModeForBotExecMode,
+  resolveEffectiveBotExecModeForCodexAppServer,
   resolveSandbox,
   selectForcedDangerFullAccessSandbox,
   selectForcedPromptingSandbox,
@@ -63,8 +63,8 @@ import type { CodexSandboxPolicy } from "./protocol.js";
 export function resolveCodexAppServerRuntimeOptions(
   params: {
     pluginConfig?: unknown;
-    execMode?: OpenClawExecMode;
-    execPolicy?: OpenClawExecPolicyForCodexAppServer;
+    execMode?: BotExecMode;
+    execPolicy?: BotExecPolicyForCodexAppServer;
     modelProvider?: string;
     model?: string;
     config?: ProviderAuthAliasConfig;
@@ -76,7 +76,7 @@ export function resolveCodexAppServerRuntimeOptions(
     readRequirementsFile?: (path: string) => string | undefined;
     platform?: NodeJS.Platform;
     hostName?: string;
-    openClawSandboxActive?: boolean;
+    botSandboxActive?: boolean;
     managedCommandOrder?: CodexManagedCommandOrder;
   } = {},
 ): CodexAppServerRuntimeOptions {
@@ -86,7 +86,7 @@ export function resolveCodexAppServerRuntimeOptions(
   const transport = resolveTransport(config.transport);
   const homeScope: CodexAppServerHomeScope = config.homeScope ?? "agent";
   const configCommand = readNonEmptyString(config.command);
-  const envCommand = readNonEmptyString(env.OPENCLAW_CODEX_APP_SERVER_BIN);
+  const envCommand = readNonEmptyString(env.BOT_CODEX_APP_SERVER_BIN);
   const command = configCommand ?? envCommand ?? "codex";
   const commandSource: CodexAppServerCommandSource = configCommand
     ? "config"
@@ -96,7 +96,7 @@ export function resolveCodexAppServerRuntimeOptions(
   if (commandSource === "config" || commandSource === "env") {
     assertCodexAppServerCommandHasNoInlineArgs({ command, source: commandSource });
   }
-  const args = resolveArgs(config.args, env.OPENCLAW_CODEX_APP_SERVER_ARGS);
+  const args = resolveArgs(config.args, env.BOT_CODEX_APP_SERVER_ARGS);
   const headers = normalizeHeaders(config.headers);
   const clearEnv = normalizeStringList(config.clearEnv);
   const authToken = normalizeCodexAppServerSecretInput({
@@ -107,17 +107,17 @@ export function resolveCodexAppServerRuntimeOptions(
   const connectionClass = inferCodexAppServerConnectionClass({ transport, url });
   const remoteAppsSubstrate: CodexAppServerRemoteAppsSubstrate = "preconfigured";
   const remoteWorkspaceRoot = normalizeRemoteWorkspaceRoot(config.remoteWorkspaceRoot);
-  const execMode = resolveEffectiveOpenClawExecModeForCodexAppServer({
+  const execMode = resolveEffectiveBotExecModeForCodexAppServer({
     execMode: params.execMode,
     execPolicy: params.execPolicy,
   });
-  assertCodexAppServerAllowedForOpenClawExecMode(execMode);
+  assertCodexAppServerAllowedForBotExecMode(execMode);
   const explicitPolicyMode =
-    resolvePolicyMode(config.mode) ?? resolvePolicyMode(env.OPENCLAW_CODEX_APP_SERVER_MODE);
+    resolvePolicyMode(config.mode) ?? resolvePolicyMode(env.BOT_CODEX_APP_SERVER_MODE);
   const configuredSandbox =
-    resolveSandbox(config.sandbox) ?? resolveSandbox(env.OPENCLAW_CODEX_APP_SERVER_SANDBOX);
+    resolveSandbox(config.sandbox) ?? resolveSandbox(env.BOT_CODEX_APP_SERVER_SANDBOX);
   const explicitApprovalsReviewer = resolveApprovalsReviewer(config.approvalsReviewer);
-  const normalizedPolicyMode = resolveCodexPolicyModeForOpenClawExecMode(execMode);
+  const normalizedPolicyMode = resolveCodexPolicyModeForBotExecMode(execMode);
   const ignoreLegacyYoloPolicyMode =
     normalizedPolicyMode === "guardian" && explicitPolicyMode === "yolo";
   const canUseModelBackedReviewer = canUseCodexModelBackedApprovalsReviewerForModel({
@@ -142,7 +142,7 @@ export function resolveCodexAppServerRuntimeOptions(
     (execMode !== "auto" || !canUseModelBackedReviewer);
   const forceUserReviewer = forceUserReviewerForUnknownModel || forceUserReviewerForExecMode;
   const forceGuardianReviewer = execMode === "auto" && canUseModelBackedReviewer;
-  const execModeRequiringPromptingApprovals: Extract<OpenClawExecMode, "auto" | "ask"> | undefined =
+  const execModeRequiringPromptingApprovals: Extract<BotExecMode, "auto" | "ask"> | undefined =
     execMode === "auto" || execMode === "ask" ? execMode : forceUserReviewer ? "ask" : undefined;
   const forceDangerFullAccessSandbox =
     params.execPolicy?.touched === true &&
@@ -176,7 +176,7 @@ export function resolveCodexAppServerRuntimeOptions(
             ? selectForcedDangerFullAccessSandbox({
                 configuredSandbox,
                 defaultPolicy,
-                openClawSandboxActive: Boolean(params.openClawSandboxActive),
+                botSandboxActive: Boolean(params.botSandboxActive),
               })
             : selectForcedPromptingSandbox({
                 configuredSandbox,
@@ -223,7 +223,7 @@ export function resolveCodexAppServerRuntimeOptions(
   });
 
   const configApprovalPolicy = resolveApprovalPolicy(config.approvalPolicy);
-  const envApprovalPolicy = resolveApprovalPolicy(env.OPENCLAW_CODEX_APP_SERVER_APPROVAL_POLICY);
+  const envApprovalPolicy = resolveApprovalPolicy(env.BOT_CODEX_APP_SERVER_APPROVAL_POLICY);
   const approvalPolicy =
     configApprovalPolicy ??
     envApprovalPolicy ??
@@ -346,75 +346,75 @@ export function resolveCodexComputerUseConfig(
   const marketplaceSource =
     readNonEmptyString(params.overrides?.marketplaceSource) ??
     readNonEmptyString(config.marketplaceSource) ??
-    readNonEmptyString(env.OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_SOURCE);
+    readNonEmptyString(env.BOT_CODEX_COMPUTER_USE_MARKETPLACE_SOURCE);
   const marketplacePath =
     readNonEmptyString(params.overrides?.marketplacePath) ??
     readNonEmptyString(config.marketplacePath) ??
-    readNonEmptyString(env.OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_PATH);
+    readNonEmptyString(env.BOT_CODEX_COMPUTER_USE_MARKETPLACE_PATH);
   const marketplaceName =
     readNonEmptyString(params.overrides?.marketplaceName) ??
     readNonEmptyString(config.marketplaceName) ??
-    readNonEmptyString(env.OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_NAME);
+    readNonEmptyString(env.BOT_CODEX_COMPUTER_USE_MARKETPLACE_NAME);
   const configuredPluginName =
     readNonEmptyString(params.overrides?.pluginName) ??
     readNonEmptyString(config.pluginName) ??
-    readNonEmptyString(env.OPENCLAW_CODEX_COMPUTER_USE_PLUGIN_NAME);
+    readNonEmptyString(env.BOT_CODEX_COMPUTER_USE_PLUGIN_NAME);
   const configuredMcpServerName =
     readNonEmptyString(params.overrides?.mcpServerName) ??
     readNonEmptyString(config.mcpServerName) ??
-    readNonEmptyString(env.OPENCLAW_CODEX_COMPUTER_USE_MCP_SERVER_NAME);
+    readNonEmptyString(env.BOT_CODEX_COMPUTER_USE_MCP_SERVER_NAME);
   const autoInstall =
     params.overrides?.autoInstall ??
     config.autoInstall ??
-    readBooleanEnv(env.OPENCLAW_CODEX_COMPUTER_USE_AUTO_INSTALL) ??
+    readBooleanEnv(env.BOT_CODEX_COMPUTER_USE_AUTO_INSTALL) ??
     false;
   const marketplaceDiscoveryTimeoutMs = normalizePositiveNumber(
     params.overrides?.marketplaceDiscoveryTimeoutMs ??
       config.marketplaceDiscoveryTimeoutMs ??
-      readNumberEnv(env.OPENCLAW_CODEX_COMPUTER_USE_MARKETPLACE_DISCOVERY_TIMEOUT_MS),
+      readNumberEnv(env.BOT_CODEX_COMPUTER_USE_MARKETPLACE_DISCOVERY_TIMEOUT_MS),
     DEFAULT_CODEX_COMPUTER_USE_MARKETPLACE_DISCOVERY_TIMEOUT_MS,
   );
   const liveTestTimeoutMs = normalizePositiveNumber(
     params.overrides?.liveTestTimeoutMs ??
       config.liveTestTimeoutMs ??
-      readNumberEnv(env.OPENCLAW_CODEX_COMPUTER_USE_LIVE_TEST_TIMEOUT_MS),
+      readNumberEnv(env.BOT_CODEX_COMPUTER_USE_LIVE_TEST_TIMEOUT_MS),
     DEFAULT_CODEX_COMPUTER_USE_LIVE_TEST_TIMEOUT_MS,
   );
   const toolCallTimeoutMs = normalizePositiveNumber(
     params.overrides?.toolCallTimeoutMs ??
       config.toolCallTimeoutMs ??
-      readNumberEnv(env.OPENCLAW_CODEX_COMPUTER_USE_TOOL_CALL_TIMEOUT_MS),
+      readNumberEnv(env.BOT_CODEX_COMPUTER_USE_TOOL_CALL_TIMEOUT_MS),
     DEFAULT_CODEX_COMPUTER_USE_TOOL_CALL_TIMEOUT_MS,
   );
   const healthCheckIntervalMinutes = normalizeComputerUseHealthCheckIntervalMinutes(
     params.overrides?.healthCheckIntervalMinutes ??
       config.healthCheckIntervalMinutes ??
-      readNumberEnv(env.OPENCLAW_CODEX_COMPUTER_USE_HEALTH_CHECK_INTERVAL_MINUTES),
+      readNumberEnv(env.BOT_CODEX_COMPUTER_USE_HEALTH_CHECK_INTERVAL_MINUTES),
   );
   const healthCheckEnabled =
     params.overrides?.healthCheckEnabled ??
     config.healthCheckEnabled ??
-    readBooleanEnv(env.OPENCLAW_CODEX_COMPUTER_USE_HEALTH_CHECK_ENABLED) ??
+    readBooleanEnv(env.BOT_CODEX_COMPUTER_USE_HEALTH_CHECK_ENABLED) ??
     false;
   const pluginCacheMode =
     normalizeComputerUsePluginCacheMode(params.overrides?.pluginCacheMode) ??
     normalizeComputerUsePluginCacheMode(config.pluginCacheMode) ??
-    normalizeComputerUsePluginCacheMode(env.OPENCLAW_CODEX_COMPUTER_USE_PLUGIN_CACHE_MODE) ??
+    normalizeComputerUsePluginCacheMode(env.BOT_CODEX_COMPUTER_USE_PLUGIN_CACHE_MODE) ??
     "independent";
   const strictReadiness =
     params.overrides?.strictReadiness ??
     config.strictReadiness ??
-    readBooleanEnv(env.OPENCLAW_CODEX_COMPUTER_USE_STRICT_READINESS) ??
+    readBooleanEnv(env.BOT_CODEX_COMPUTER_USE_STRICT_READINESS) ??
     false;
   const autoRepair =
     params.overrides?.autoRepair ??
     config.autoRepair ??
-    readBooleanEnv(env.OPENCLAW_CODEX_COMPUTER_USE_AUTO_REPAIR) ??
+    readBooleanEnv(env.BOT_CODEX_COMPUTER_USE_AUTO_REPAIR) ??
     false;
   const enabled =
     params.overrides?.enabled ??
     config.enabled ??
-    readBooleanEnv(env.OPENCLAW_CODEX_COMPUTER_USE) ??
+    readBooleanEnv(env.BOT_CODEX_COMPUTER_USE) ??
     Boolean(
       autoInstall ||
       marketplaceSource ||

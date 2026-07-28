@@ -1,7 +1,7 @@
-// Focused welcome-delivery tests for openclaw.chat: caretaker greeting wiring,
+// Focused welcome-delivery tests for bot.chat: caretaker greeting wiring,
 // audit-cursor acknowledgement, and the onboarding template path.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetCommandQueueStateForTest } from "../../process/command-queue.test-support.js";
 import { systemAgentHandlers, type SystemAgentChatSession } from "./system-agent.js";
@@ -102,8 +102,8 @@ async function callChat(
     calls.push({ ok, payload, error });
   };
   await expectDefined(
-    systemAgentHandlers["openclaw.chat"],
-    'systemAgentHandlers["openclaw.chat"] test invariant',
+    systemAgentHandlers["bot.chat"],
+    'systemAgentHandlers["bot.chat"] test invariant',
   )({ params, respond, context, client: defaultClient } as never);
   return expectDefined(calls[0], "system-agent response");
 }
@@ -129,7 +129,7 @@ beforeEach(() => {
     auditSequence: 0,
   });
   greetingMocks.resolveSystemAgentGreeting.mockResolvedValue({
-    text: "I'm OpenClaw. All systems nominal.",
+    text: "I'm Bot. All systems nominal.",
     source: "model",
   });
   greetingMocks.buildSystemAgentGreetingQuestion.mockReturnValue(quickActions);
@@ -144,7 +144,7 @@ afterEach(() => {
   resetCommandQueueStateForTest();
 });
 
-describe("openclaw.chat caretaker welcome", () => {
+describe("bot.chat caretaker welcome", () => {
   it("returns caretaker quick actions and persists the resolved greeting", async () => {
     greetingMocks.loadSystemAgentGreetingFacts.mockReturnValueOnce({
       updateAvailable: "2026.7.20",
@@ -190,7 +190,7 @@ describe("openclaw.chat caretaker welcome", () => {
   it("does not plan a greeting when a fresh session is created with a message", async () => {
     const sessions = new Map<string, SystemAgentChatSession>();
     greetingMocks.resolveSystemAgentGreeting.mockResolvedValueOnce({
-      text: "Hi, I'm OpenClaw — caretaker of this gateway, config, channels, and agents.",
+      text: "Hi, I'm Bot — caretaker of this gateway, config, channels, and agents.",
       source: "template",
     });
 
@@ -210,7 +210,7 @@ describe("openclaw.chat caretaker welcome", () => {
     expect(sessions.get("fresh-with-message")?.welcomeAuditSequence).toBe(0);
     const welcome = await callChat(context, { sessionId: "fresh-with-message" });
     expect(welcome.payload).toMatchObject({
-      reply: "Hi, I'm OpenClaw — caretaker of this gateway, config, channels, and agents.",
+      reply: "Hi, I'm Bot — caretaker of this gateway, config, channels, and agents.",
     });
     expect(greetingMocks.acknowledgeSystemAgentGreetingDelivery).toHaveBeenCalledWith({
       auditSequence: 0,
@@ -230,8 +230,8 @@ describe("openclaw.chat caretaker welcome", () => {
 
     await expect(
       expectDefined(
-        systemAgentHandlers["openclaw.chat"],
-        'systemAgentHandlers["openclaw.chat"] test invariant',
+        systemAgentHandlers["bot.chat"],
+        'systemAgentHandlers["bot.chat"] test invariant',
       )({
         params: { sessionId: "failed-delivery" },
         respond: () => {
@@ -247,7 +247,7 @@ describe("openclaw.chat caretaker welcome", () => {
     expect(sessions.get("failed-delivery")?.welcomeAuditSequence).toBe(42);
 
     const retry = await callChat(context, { sessionId: "failed-delivery" });
-    expect(retry.payload).toMatchObject({ reply: "I'm OpenClaw. All systems nominal." });
+    expect(retry.payload).toMatchObject({ reply: "I'm Bot. All systems nominal." });
     expect(greetingMocks.acknowledgeSystemAgentGreetingDelivery).toHaveBeenCalledWith({
       auditSequence: 42,
     });

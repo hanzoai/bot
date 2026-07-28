@@ -1,5 +1,5 @@
 // Memory Wiki plugin module implements claim health behavior.
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import type { WikiClaim, WikiPageSummary } from "./markdown.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;

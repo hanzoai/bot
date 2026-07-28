@@ -1,7 +1,7 @@
 // Manages APNs registration state and direct/relay push sending.
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { resolveTimerTimeoutMs } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import type { DeviceIdentity } from "./device-identity.js";
 import { toErrorObject } from "./errors.js";
 import { getApnsBearerToken, type ApnsAuthConfig } from "./push-apns-auth.js";
@@ -67,8 +67,8 @@ type ApnsPushResult = {
 type ApnsPushAlertResult = ApnsPushResult;
 type ApnsPushWakeResult = ApnsPushResult;
 
-const EXEC_APPROVAL_NOTIFICATION_CATEGORY = "openclaw.exec-approval";
-const PLUGIN_APPROVAL_NOTIFICATION_CATEGORY = "openclaw.plugin-approval";
+const EXEC_APPROVAL_NOTIFICATION_CATEGORY = "bot.exec-approval";
+const PLUGIN_APPROVAL_NOTIFICATION_CATEGORY = "bot.plugin-approval";
 
 type ApnsPushType = "alert" | "background";
 

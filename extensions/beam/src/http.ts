@@ -1,11 +1,11 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { getPluginRuntimeGatewayRequestScope } from "openclaw/plugin-sdk/plugin-runtime";
+import { getPluginRuntimeGatewayRequestScope } from "bot/plugin-sdk/plugin-runtime";
 import {
   beginWebhookRequestPipelineOrReject,
   createFixedWindowRateLimiter,
   createWebhookInFlightLimiter,
   readJsonWebhookBodyOrReject,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "bot/plugin-sdk/webhook-ingress";
 import type { BeamStore } from "./store.js";
 import { BEAM_HOST_ID, BEAM_MAX_BODY_BYTES, parseBeamUpload } from "./types.js";
 

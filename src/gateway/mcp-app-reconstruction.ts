@@ -1,5 +1,5 @@
 import { type CallToolResult, ContentBlockSchema } from "@modelcontextprotocol/sdk/types.js";
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { BoardMcpAppDescriptor } from "../../packages/gateway-protocol/src/index.js";
 import { getOrCreateSessionMcpRuntime } from "../agents/agent-bundle-mcp-runtime.js";
 import type { SessionMcpRuntime } from "../agents/agent-bundle-mcp-types.js";
@@ -9,12 +9,12 @@ import {
   getMcpAppViewLease,
   type McpAppViewLease,
 } from "../agents/mcp-ui-resource.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveAgentIdFromSessionKey } from "../routing/session-key.js";
 import { visitSessionMessagesAsync } from "./session-transcript-readers.js";
 import { loadSessionEntryReadOnly } from "./session-utils.js";
 
-const MCP_APP_RESTORE_IN_FLIGHT_KEY = Symbol.for("openclaw.mcpAppRestoreInFlight");
+const MCP_APP_RESTORE_IN_FLIGHT_KEY = Symbol.for("bot.mcpAppRestoreInFlight");
 
 type McpAppDescriptor = {
   viewId: string;
@@ -240,7 +240,7 @@ function getRestoreInFlight(): Map<string, Promise<ReconstructionResult | undefi
 }
 
 async function reconstructMcpAppView(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   lookup: TranscriptLookup;
   allowedAppToolNames: ReadonlySet<string>;
@@ -301,7 +301,7 @@ async function reconstructMcpAppView(params: {
 }
 
 async function restoreMcpAppViewOnce(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   viewId: string;
 }): Promise<ReconstructionResult | undefined> {
@@ -319,7 +319,7 @@ async function restoreMcpAppViewOnce(params: {
 }
 
 export async function mintMcpAppViewFromTranscript(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   descriptor: BoardMcpAppDescriptor;
   allowedAppToolNames: ReadonlySet<string>;
@@ -339,7 +339,7 @@ export async function mintMcpAppViewFromTranscript(params: {
 }
 
 export async function restoreMcpAppView(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   viewId: string;
 }): Promise<ReconstructionResult | undefined> {

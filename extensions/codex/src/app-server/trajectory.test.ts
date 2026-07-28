@@ -2,12 +2,12 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import { upsertSessionEntry } from "bot/plugin-sdk/session-store-runtime";
 import {
   appendSqliteTrajectoryRuntimeEvents,
   loadSqliteTrajectoryRuntimeEvents,
   type SqliteTrajectoryRuntimeEventForTest,
-} from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "bot/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   type CodexHostTrajectoryRecorder,
@@ -21,7 +21,7 @@ type CodexTrajectoryRecorder = NonNullable<ReturnType<typeof createCodexTrajecto
 const tempDirs: string[] = [];
 
 function makeTempDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-codex-trajectory-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-codex-trajectory-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -95,7 +95,7 @@ function createSqliteHostTrajectoryRecorder(params: {
   return {
     recordEvent: (type, data) => {
       events.push({
-        traceSchema: "openclaw-trajectory",
+        traceSchema: "bot-trajectory",
         schemaVersion: 1,
         traceId: `${params.sessionId}:test`,
         source: "runtime",
@@ -144,7 +144,7 @@ describe("Codex trajectory recorder", () => {
     const recorder = createCodexTrajectoryRecorder({
       cwd: tmpDir,
       attempt: {
-        sessionFile: "sqlite:main:other:/tmp/openclaw-agent.sqlite",
+        sessionFile: "sqlite:main:other:/tmp/bot-agent.sqlite",
         sessionId: "session-1",
         model: { api: "responses" },
       } as never,
@@ -165,7 +165,7 @@ describe("Codex trajectory recorder", () => {
     const recorder = createCodexTrajectoryRecorder({
       cwd: makeTempDir(),
       attempt: {
-        sessionFile: "sqlite:main:session-1:/tmp/openclaw-agent.sqlite",
+        sessionFile: "sqlite:main:session-1:/tmp/bot-agent.sqlite",
         sessionId: "session-1",
         model: { api: "responses" },
       } as never,
@@ -236,7 +236,7 @@ describe("Codex trajectory recorder", () => {
     const tools = [
       {
         type: "namespace" as const,
-        name: "openclaw",
+        name: "bot",
         description: "",
         tools: [
           {
@@ -269,11 +269,11 @@ describe("Codex trajectory recorder", () => {
     const recorder = createCodexTrajectoryRecorder({
       cwd: makeTempDir(),
       attempt: {
-        sessionFile: "sqlite:main:session-1:/tmp/openclaw-agent.sqlite",
+        sessionFile: "sqlite:main:session-1:/tmp/bot-agent.sqlite",
         sessionId: "session-1",
         model: { api: "responses" },
       } as never,
-      env: { OPENCLAW_TRAJECTORY: "0" },
+      env: { BOT_TRAJECTORY: "0" },
       warn,
     });
 

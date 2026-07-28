@@ -1,7 +1,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import type { resolveSessionModelRef } from "../agents/session-model-ref.js";
 import type { buildSubagentRunReadIndex } from "../agents/subagent-registry-read.js";
 import type { ThinkLevel, listThinkingLevelOptions } from "../auto-reply/thinking.js";

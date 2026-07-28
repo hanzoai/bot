@@ -1,9 +1,9 @@
 /**
  * BytePlus model catalog helpers derived from the plugin manifest.
  */
-import { buildManifestModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-shared";
-import type { ModelDefinitionConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import { buildManifestModelProviderConfig } from "bot/plugin-sdk/provider-catalog-shared";
+import type { ModelDefinitionConfig } from "bot/plugin-sdk/provider-model-shared";
+import manifest from "./bot.plugin.json" with { type: "json" };
 
 const BYTEPLUS_MANIFEST_PROVIDER = buildManifestModelProviderConfig({
   providerId: "byteplus",

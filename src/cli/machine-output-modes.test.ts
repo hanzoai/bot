@@ -21,11 +21,11 @@ describe("built-in machine-output resolvers", () => {
     ["heartbeat disable", ["system", "heartbeat", "disable"]],
     ["presence", ["system", "presence"]],
   ])("detects system %s", (_name, path) => {
-    expect(isSystemMachineOutput(["node", "openclaw", ...path])).toBe(true);
+    expect(isSystemMachineOutput(["node", "bot", ...path])).toBe(true);
   });
 
   it("detects non-TTY doctor lint without changing terminal output", () => {
-    const argv = ["node", "openclaw", "doctor", "--lint"];
+    const argv = ["node", "bot", "doctor", "--lint"];
     expect(isDoctorMachineOutput({ argv, stdoutIsTTY: false })).toBe(true);
     expect(isDoctorMachineOutput({ argv, stdoutIsTTY: true })).toBe(false);
   });
@@ -33,21 +33,21 @@ describe("built-in machine-output resolvers", () => {
   it.each(["blob", "coverage", "purge", "query", "sessions"])(
     "detects proxy %s output",
     (command) => {
-      expect(isProxyMachineOutput(["node", "openclaw", "proxy", command])).toBe(true);
+      expect(isProxyMachineOutput(["node", "bot", "proxy", command])).toBe(true);
     },
   );
 
   it("accepts supported root options after the command root", () => {
     expect(
-      isProxyMachineOutput(["node", "openclaw", "proxy", "--log-level", "debug", "sessions"]),
+      isProxyMachineOutput(["node", "bot", "proxy", "--log-level", "debug", "sessions"]),
     ).toBe(true);
     expect(
-      isSkillsMachineOutput(["node", "openclaw", "skills", "--log-level", "debug", "verify", "x"]),
+      isSkillsMachineOutput(["node", "bot", "skills", "--log-level", "debug", "verify", "x"]),
     ).toBe(true);
     expect(
       isGatewayMachineOutput([
         "node",
-        "openclaw",
+        "bot",
         "gateway",
         "--log-level",
         "debug",
@@ -58,7 +58,7 @@ describe("built-in machine-output resolvers", () => {
     expect(
       isGatewayMachineOutput([
         "node",
-        "openclaw",
+        "bot",
         "gateway",
         "--log-level=debug",
         "restart-handoff",
@@ -68,12 +68,12 @@ describe("built-in machine-output resolvers", () => {
   });
 
   it("reserves raw cron scratch and config get output", () => {
-    expect(isCronMachineOutput(["node", "openclaw", "cron", "scratch", "job"])).toBe(true);
-    expect(isConfigMachineOutput(["node", "openclaw", "config", "get", "gateway.port"])).toBe(true);
+    expect(isCronMachineOutput(["node", "bot", "cron", "scratch", "job"])).toBe(true);
+    expect(isConfigMachineOutput(["node", "bot", "config", "get", "gateway.port"])).toBe(true);
     expect(
       isConfigMachineOutput([
         "node",
-        "openclaw",
+        "bot",
         "config",
         "--section",
         "agents",
@@ -87,7 +87,7 @@ describe("built-in machine-output resolvers", () => {
     expect(
       isConfigSetJsonParseOnly([
         "node",
-        "openclaw",
+        "bot",
         "config",
         "set",
         "gateway.port",
@@ -98,7 +98,7 @@ describe("built-in machine-output resolvers", () => {
     expect(
       isConfigSetJsonParseOnly([
         "node",
-        "openclaw",
+        "bot",
         "config",
         "set",
         "gateway.port",
@@ -113,7 +113,7 @@ describe("built-in machine-output resolvers", () => {
     expect(
       isSkillsMachineOutput([
         "node",
-        "openclaw",
+        "bot",
         "skills",
         "--agent",
         "main",

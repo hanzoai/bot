@@ -6,7 +6,7 @@ import { readConfigFileSnapshot } from "../../config/config.js";
 import { resolveFutureConfigActionBlock } from "../../config/future-version-guard.js";
 import { formatConfigIssueLines } from "../../config/issue-format.js";
 import { isPluginPackagingRuntimeOutputInvalidConfigSnapshot } from "../../config/recovery-policy.js";
-import type { ConfigFileSnapshot } from "../../config/types.openclaw.js";
+import type { ConfigFileSnapshot } from "../../config/types.bot.js";
 import { collectCandidateAgentDirs } from "../../secrets/runtime-fast-path.js";
 import { formatPluginPackagingRuntimeOutputRecoveryHint } from "../config-recovery-hints.js";
 

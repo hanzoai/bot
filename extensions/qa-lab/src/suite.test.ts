@@ -13,7 +13,7 @@ import { createTempDirHarness } from "./temp-dir.test-helper.js";
 const fetchWithSsrFGuardMock = vi.hoisted(() => vi.fn());
 const tempDirs = createTempDirHarness();
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", () => ({
+vi.mock("bot/plugin-sdk/ssrf-runtime", () => ({
   fetchWithSsrFGuard: fetchWithSsrFGuardMock,
 }));
 
@@ -338,53 +338,53 @@ describe("qa suite", () => {
     );
     expect(
       qaSuiteProgressTesting.resolveQaSuiteTransportReadyTimeoutMs(undefined, {
-        OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: "180000",
+        BOT_QA_TRANSPORT_READY_TIMEOUT_MS: "180000",
       }),
     ).toBe(180_000);
     expect(
       qaSuiteProgressTesting.resolveQaSuiteTransportReadyTimeoutMs(undefined, {
-        OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: "bad",
+        BOT_QA_TRANSPORT_READY_TIMEOUT_MS: "bad",
       }),
     ).toBe(120_000);
     for (const value of ["0x10", "1e3", "10.5"]) {
       expect(
         qaSuiteProgressTesting.resolveQaSuiteTransportReadyTimeoutMs(undefined, {
-          OPENCLAW_QA_TRANSPORT_READY_TIMEOUT_MS: value,
+          BOT_QA_TRANSPORT_READY_TIMEOUT_MS: value,
         }),
       ).toBe(120_000);
     }
     expect(qaSuiteProgressTesting.resolveQaSuiteTransportReadyTimeoutMs(90_000, {})).toBe(90_000);
   });
 
-  it("applies OPENCLAW_QA_SUITE_PROGRESS override and falls back on invalid values", () => {
+  it("applies BOT_QA_SUITE_PROGRESS override and falls back on invalid values", () => {
     expect(
       qaSuiteProgressTesting.shouldLogQaSuiteProgress({
         CI: "false",
-        OPENCLAW_QA_SUITE_PROGRESS: "true",
+        BOT_QA_SUITE_PROGRESS: "true",
       }),
     ).toBe(true);
     expect(
       qaSuiteProgressTesting.shouldLogQaSuiteProgress({
         CI: "true",
-        OPENCLAW_QA_SUITE_PROGRESS: "false",
+        BOT_QA_SUITE_PROGRESS: "false",
       }),
     ).toBe(false);
     expect(
       qaSuiteProgressTesting.shouldLogQaSuiteProgress({
         CI: "false",
-        OPENCLAW_QA_SUITE_PROGRESS: "on",
+        BOT_QA_SUITE_PROGRESS: "on",
       }),
     ).toBe(true);
     expect(
       qaSuiteProgressTesting.shouldLogQaSuiteProgress({
         CI: "true",
-        OPENCLAW_QA_SUITE_PROGRESS: "off",
+        BOT_QA_SUITE_PROGRESS: "off",
       }),
     ).toBe(false);
     expect(
       qaSuiteProgressTesting.shouldLogQaSuiteProgress({
         CI: "true",
-        OPENCLAW_QA_SUITE_PROGRESS: "definitely",
+        BOT_QA_SUITE_PROGRESS: "definitely",
       }),
     ).toBe(true);
   });
@@ -781,12 +781,12 @@ describe("qa suite", () => {
   it("arms gateway heap checkpoint env only when requested", () => {
     expect(
       qaSuiteProgressTesting.buildQaGatewayHeapCheckpointRuntimeEnvPatch({
-        OPENCLAW_QA_GATEWAY_HEAP_CHECKPOINTS: "0",
+        BOT_QA_GATEWAY_HEAP_CHECKPOINTS: "0",
       }),
     ).toBeUndefined();
     expect(
       qaSuiteProgressTesting.buildQaGatewayHeapCheckpointRuntimeEnvPatch({
-        OPENCLAW_QA_GATEWAY_HEAP_CHECKPOINTS: "1",
+        BOT_QA_GATEWAY_HEAP_CHECKPOINTS: "1",
         NODE_OPTIONS: "--max-old-space-size=4096",
       }),
     ).toEqual({
@@ -811,9 +811,9 @@ describe("qa suite", () => {
         mockBaseUrl: "http://127.0.0.1:44080",
       }),
     ).toEqual({
-      OPENCLAW_BUILD_PRIVATE_QA: "1",
-      OPENCLAW_QA_FORCE_RUNTIME: "codex",
-      OPENCLAW_CODEX_APP_SERVER_ARGS:
+      BOT_BUILD_PRIVATE_QA: "1",
+      BOT_QA_FORCE_RUNTIME: "codex",
+      BOT_CODEX_APP_SERVER_ARGS:
         "app-server -c openai_base_url=http://127.0.0.1:44080/v1 -c sandbox_workspace_write.exclude_tmpdir_env_var=true -c sandbox_workspace_write.exclude_slash_tmp=true --listen stdio://",
       OPENAI_API_KEY: "qa-mock-openai-key",
       CODEX_API_KEY: "qa-mock-openai-key",
@@ -824,12 +824,12 @@ describe("qa suite", () => {
     expect(
       qaSuiteProgressTesting.buildQaRuntimeEnvPatch({
         providerMode: "mock-openai",
-        forcedRuntime: "openclaw",
+        forcedRuntime: "bot",
         mockBaseUrl: "http://127.0.0.1:44080",
       }),
     ).toEqual({
-      OPENCLAW_BUILD_PRIVATE_QA: "1",
-      OPENCLAW_QA_FORCE_RUNTIME: "openclaw",
+      BOT_BUILD_PRIVATE_QA: "1",
+      BOT_QA_FORCE_RUNTIME: "bot",
     });
   });
 
@@ -840,9 +840,9 @@ describe("qa suite", () => {
         forcedRuntime: "codex",
       }),
     ).toEqual({
-      OPENCLAW_BUILD_PRIVATE_QA: "1",
-      OPENCLAW_QA_FORCE_RUNTIME: "codex",
-      OPENCLAW_CODEX_APP_SERVER_ARGS:
+      BOT_BUILD_PRIVATE_QA: "1",
+      BOT_QA_FORCE_RUNTIME: "codex",
+      BOT_CODEX_APP_SERVER_ARGS:
         "app-server -c sandbox_workspace_write.exclude_tmpdir_env_var=true " +
         "-c sandbox_workspace_write.exclude_slash_tmp=true --listen stdio://",
     });
@@ -857,9 +857,9 @@ describe("qa suite", () => {
           'app-server -c openai_base_url="https://live.example/v1" --listen stdio://',
       }),
     ).toEqual({
-      OPENCLAW_BUILD_PRIVATE_QA: "1",
-      OPENCLAW_QA_FORCE_RUNTIME: "codex",
-      OPENCLAW_CODEX_APP_SERVER_ARGS:
+      BOT_BUILD_PRIVATE_QA: "1",
+      BOT_QA_FORCE_RUNTIME: "codex",
+      BOT_CODEX_APP_SERVER_ARGS:
         'app-server -c openai_base_url="https://live.example/v1" --listen stdio:// ' +
         "-c sandbox_workspace_write.exclude_tmpdir_env_var=true " +
         "-c sandbox_workspace_write.exclude_slash_tmp=true",
@@ -883,8 +883,8 @@ describe("qa suite", () => {
         },
       },
     });
-    const sutOpenClawCommand = {
-      executablePath: "/usr/local/bin/openclaw-telegram-sut-launcher",
+    const sutBotCommand = {
+      executablePath: "/usr/local/bin/bot-telegram-sut-launcher",
       usePackagedPlugins: true,
     };
 
@@ -903,7 +903,7 @@ describe("qa suite", () => {
           adapterFactories: [adapterFactory],
           channelId: "telegram",
           adapterOptions: { repoRoot: "/repo" },
-          sutOpenClawCommand,
+          sutBotCommand,
           thinkingDefault: "minimal",
           claudeCliAuthMode: "subscription",
           enabledPluginIds: ["acpx"],
@@ -917,7 +917,7 @@ describe("qa suite", () => {
       adapterFactories: [adapterFactory],
       channelId: "telegram",
       adapterOptions: { repoRoot: "/repo" },
-      sutOpenClawCommand,
+      sutBotCommand,
       concurrency: 1,
       startLab,
       controlUiEnabled: true,
@@ -999,7 +999,7 @@ describe("qa suite", () => {
       qaSuiteProgressTesting.remapModelRefForForcedRuntime({
         modelRef: "mock-openai/gpt-5.6-luna",
         providerMode: "mock-openai",
-        forcedRuntime: "openclaw",
+        forcedRuntime: "bot",
       }),
     ).toBe("mock-openai/gpt-5.6-luna");
   });

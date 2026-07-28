@@ -339,7 +339,7 @@ export const ja_JP: TranslationMap = {
     genericSubtitle: "このパネルの読み込み中に問題が発生しました。",
     staleTitle: "新しいバージョンが利用可能です",
     staleSubtitle:
-      "OpenClaw がバックグラウンドで更新されました。最新のパネルを表示するには再読み込みしてください。",
+      "Bot がバックグラウンドで更新されました。最新のパネルを表示するには再読み込みしてください。",
     reloading: "再読み込み中…",
     retry: "再試行",
   },
@@ -347,7 +347,7 @@ export const ja_JP: TranslationMap = {
     pairing: {
       button: "モバイルデバイスをペアリング",
       adminRequired: "セットアップコードを作成するには管理者アクセスが必要です。",
-      title: "OpenClaw mobile",
+      title: "Bot mobile",
       subtitle:
         "新しいスマートフォンを接続するには、モバイルアプリでこのQRコードをスキャンしてください。",
       noApp: "まだアプリをお持ちでないですか？",
@@ -363,14 +363,14 @@ export const ja_JP: TranslationMap = {
       transportLimitedHint:
         "このGateway URLは平文のws://を使用しています。wss://またはTailscale Serveを使用してから、フルアクセス用の新しいコードを作成してください。",
       failed: "セットアップコードを作成できませんでした。",
-      qrAlt: "OpenClaw mobile ペアリングQRコード",
+      qrAlt: "Bot mobile ペアリングQRコード",
       qrUnavailable: "QRを利用できません。代わりにセットアップコードをコピーしてください。",
       copySetupCode: "セットアップコードをコピー",
       newCode: "新しいコード",
       showSetupCode: "セットアップコードを表示",
       pending: "レビュー待ちのデバイスリクエスト: {count}",
       review: "レビュー",
-      waiting: "公式の OpenClaw mobile アプリはスキャン後に自動的に接続します。",
+      waiting: "公式の Bot mobile アプリはスキャン後に自動的に接続します。",
       help: "ペアリングのヘルプ",
       manageDevices: "デバイスを管理",
     },
@@ -518,11 +518,11 @@ export const ja_JP: TranslationMap = {
     ownerSession: "セッション",
     ownerWorkboard: "Workboard",
     title: "管理対象ワークツリー",
-    subtitle: "OpenClaw が所有する分離されたリポジトリのチェックアウト。",
+    subtitle: "Bot が所有する分離されたリポジトリのチェックアウト。",
     cleanNow: "今すぐクリーンアップ",
     cleanupTitle: "クリーンアップ",
     cleanupSubtitle:
-      "OpenClaw は、ディスク容量を確保するために古い worktree を定期的に削除します。クリーンアップの実行基準を調整できます。",
+      "Bot は、ディスク容量を確保するために古い worktree を定期的に削除します。クリーンアップの実行基準を調整できます。",
     cleanupMaxCount: "worktree の最大数",
     cleanupMaxCountHelp:
       "すべてのリポジトリで保持する管理対象 worktree の最大数です。古い worktree から順にスナップショットが作成され、削除されます。件数制限を無効にするには 0 に設定します。",
@@ -574,8 +574,8 @@ export const ja_JP: TranslationMap = {
     cloudWorker: "クラウド · {profile}",
     cloudWorkerProvider: "クラウドワーカーのプロバイダー: {provider}",
     cloudRequiresWorktree: "クラウドワーカーには管理対象のワークツリーが必要です",
-    cloudRequiresOpenClawRuntime:
-      "クラウドワーカーにはOpenClawランタイムが必要です。{runtime}が選択されています。",
+    cloudRequiresBotRuntime:
+      "クラウドワーカーにはBotランタイムが必要です。{runtime}が選択されています。",
     cloudSecureContextRequired:
       "復旧時にタスクを保護できるようにするには、クラウドワーカーにセキュアなブラウザーコンテキストが必要です。",
     cloudStartFailed:
@@ -1365,7 +1365,7 @@ export const ja_JP: TranslationMap = {
       title: "プッシュ通知",
       nativeTitle: "通知",
       hint: "ゲートウェイからブラウザのプッシュ通知を受け取ります。",
-      nativeHint: "通知はこの Mac の OpenClaw アプリによってネイティブに表示されます。",
+      nativeHint: "通知はこの Mac の Bot アプリによってネイティブに表示されます。",
       unavailableHint: "このブラウザでは利用できません。",
       unavailable: "利用不可",
       checking: "確認中...",
@@ -1390,7 +1390,7 @@ export const ja_JP: TranslationMap = {
       blockedHint:
         "通知がブロックされています。通知を許可するには、ブラウザのサイト権限を更新してください。",
       nativeBlockedHint:
-        "macOSでOpenClawの通知が無効になっています。システム設定 > 通知で許可してください。",
+        "macOSでBotの通知が無効になっています。システム設定 > 通知で許可してください。",
     },
     appearance: {
       theme: "テーマ",
@@ -1468,7 +1468,7 @@ export const ja_JP: TranslationMap = {
     autoSaveFailed: "保存に失敗しました",
     autoSaveConflict: "設定が別の場所で変更されました",
     retry: "再試行",
-    applyBannerText: "openclaw.json に保存しました — Gateway を再起動して適用してください。",
+    applyBannerText: "bot.json に保存しました — Gateway を再起動して適用してください。",
     applyBannerAction: "再起動して適用",
     rawDiscard: "破棄",
     rawDraftBlocksApply:
@@ -1529,7 +1529,7 @@ export const ja_JP: TranslationMap = {
     },
   },
   approvalPage: {
-    brandName: "OpenClaw",
+    brandName: "Bot",
     eyebrow: "Operator approval",
     loadingTitle: "Loading approval",
     loadingDescription: "Checking the current approval state with the Gateway.",
@@ -1538,7 +1538,7 @@ export const ja_JP: TranslationMap = {
       "This approval could not be found or this device is not authorized to review it.",
     connectionErrorTitle: "Connection interrupted",
     connectionErrorDescription:
-      "OpenClaw cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
+      "Bot cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
     retry: "Retry",
     execTitle: "Command approval",
     pending: "Waiting for your decision",
@@ -1717,7 +1717,7 @@ export const ja_JP: TranslationMap = {
     chat: "チャット",
     settings: "設定",
     settingsGeneral: "一般",
-    askOpenClaw: "OpenClaw に質問",
+    askBot: "Bot に質問",
     settingsGroupConnections: "接続",
     settingsGroupAgents: "エージェントとツール",
     settingsGroupSecurity: "プライバシーとセキュリティ",
@@ -1845,7 +1845,7 @@ export const ja_JP: TranslationMap = {
     skillWorkshop: "Skill Workshop",
     nodes: "ノード",
     chat: "チャット",
-    custodian: "OpenClaw",
+    custodian: "Bot",
     config: "設定",
     profile: "プロフィール",
     communications: "通信",
@@ -1882,7 +1882,7 @@ export const ja_JP: TranslationMap = {
     nodes: "ペアリング済みデバイスとコマンド。",
     chat: "すばやく介入するための Gateway チャット。",
     custodian: "システムのセットアップとケア。",
-    config: "openclaw.json を編集。",
+    config: "bot.json を編集。",
     profile: "エージェントの統計、連続記録、リーフでの活動。",
     communications: "チャンネル、メッセージ、音声設定。",
     appearance: "テーマ、UI、セットアップウィザードの設定。",
@@ -1905,7 +1905,7 @@ export const ja_JP: TranslationMap = {
   modelSetup: {
     heading: "AIに接続",
     intro:
-      "OpenClawは、CLIログイン、APIキー、プロバイダーへのサインインなど、既にお持ちのAIアクセスを再利用します。",
+      "Botは、CLIログイン、APIキー、プロバイダーへのサインインなど、既にお持ちのAIアクセスを再利用します。",
     loading: "このGatewayで利用可能なAIアクセスを確認しています…",
     retry: "再試行",
     checkAgain: "再確認",
@@ -1918,7 +1918,7 @@ export const ja_JP: TranslationMap = {
     },
     access: {
       adminRequired: "モデルの設定にはoperator.adminアクセスが必要です。",
-      gatewayTooOld: "Gatewayで実行中のOpenClawのバージョンが古いです",
+      gatewayTooOld: "Gatewayで実行中のBotのバージョンが古いです",
     },
     candidates: {
       title: "このGatewayで検出",
@@ -2034,12 +2034,12 @@ export const ja_JP: TranslationMap = {
     confirmReplace:
       "既存のコピー先ファイルは、置き換える前に移行レポート内にバックアップされます。",
     confirmBackup:
-      "OpenClaw は、メモリをコピーする前に検証済みのインポート前バックアップを作成します。",
+      "Bot は、メモリをコピーする前に検証済みのインポート前バックアップを作成します。",
     confirmImport: "メモリをインポート",
     disconnected: "メモリをインポートするには Gateway に接続してください。",
     title: "アシスタントのメモリをインポート",
     subtitle:
-      "Codex の統合メモリと Claude Code の自動メモリを確認してから、OpenClaw にコピーします。",
+      "Codex の統合メモリと Claude Code の自動メモリを確認してから、Bot にコピーします。",
     agent: "コピー先エージェント",
     replaceExisting: "既存のインポートを置き換える",
     replaceHint: "競合を再度プレビューし、置き換える前に各項目のバックアップを保持します。",
@@ -2047,7 +2047,7 @@ export const ja_JP: TranslationMap = {
   onboarding: {
     memoryImport: {
       title: "アシスタントのメモリを引き継ぐ",
-      body: "OpenClaw が他のコーディングアシスタントのメモリを検出しました。エージェントのワークスペースにインポートしますか？",
+      body: "Bot が他のコーディングアシスタントのメモリを検出しました。エージェントのワークスペースにインポートしますか？",
       plannedCount: "{count} 件をインポートできます",
       alreadyImported: "インポート済み: {count} 件",
       sourceUnavailable: "ソースパスを利用できません",
@@ -2063,35 +2063,35 @@ export const ja_JP: TranslationMap = {
       unknownError: "リクエストに失敗しました",
       doneTitle: "メモリのインポートが完了しました",
       doneBody:
-        "{migrated} 件を移行し、{skipped} 件をスキップしました。OpenClaw のセットアップを続行できます。",
+        "{migrated} 件を移行し、{skipped} 件をスキップしました。Bot のセットアップを続行できます。",
     },
   },
   custodian: {
-    title: "OpenClaw",
+    title: "Bot",
     subtitle: "システムセットアップガイド",
     subtitleCaretaker: "システムのセットアップとケア。",
     exitSetup: "セットアップを終了",
     newAgent: "新しいエージェント",
     hatchDraft: "起きて、友よ！",
-    placeholder: "OpenClaw にメッセージ…",
+    placeholder: "Bot にメッセージ…",
     sensitivePlaceholder: "機密の値を入力…",
     sensitiveReply: "機密の返信を送信しました",
     send: "送信",
-    thinking: "OpenClaw が考えています",
+    thinking: "Bot が考えています",
     earlier: "以前",
-    requestFailed: "OpenClaw は返信できませんでした。もう一度お試しください。",
+    requestFailed: "Bot は返信できませんでした。もう一度お試しください。",
     connectionChanged:
       "Gateway 接続が変更されました。このセットアップを続けるには再試行してください。",
     sessionRestarted:
-      "{error} OpenClaw は新しいセッションを開始しました。以前のメッセージはコンテキストとして残ります。",
-    unsupportedGateway: "OpenClaw でセットアップを続けるには Gateway を更新してください。",
+      "{error} Bot は新しいセッションを開始しました。以前のメッセージはコンテキストとして残ります。",
+    unsupportedGateway: "Bot でセットアップを続けるには Gateway を更新してください。",
     history: {
       button: "履歴",
       title: "最近の変更",
       description: "このシステムで変更された内容（新しい順）。",
       loading: "最近の変更を読み込み中…",
       empty: "まだ記録された変更はありません。",
-      requestFailed: "OpenClaw は変更履歴を読み込めませんでした。",
+      requestFailed: "Bot は変更履歴を読み込めませんでした。",
       loadMore: "さらに読み込む",
       loadingMore: "さらに読み込み中…",
       changedPaths: "変更されたパス ({count})",
@@ -2232,7 +2232,7 @@ export const ja_JP: TranslationMap = {
       notes: "Markdown、Obsidian、Notion、Bear にメモを取り込みます。",
     },
     noInstalledTitle: "オプションのプラグインはインストールされていません",
-    noInstalledBody: "注目のプラグインを見つけるか、ClawHub を検索して OpenClaw を拡張しましょう。",
+    noInstalledBody: "注目のプラグインを見つけるか、ClawHub を検索して Bot を拡張しましょう。",
     noInstalledMatchTitle: "一致するインストール済みプラグインはありません",
     noMatchBody: "別の検索を試してください。",
     filterAll: "すべて",
@@ -2267,7 +2267,7 @@ export const ja_JP: TranslationMap = {
     detailPluginId: "プラグイン ID",
     offlineTitle: "Gatewayがオフラインです",
     offlineBody: "接続して、インストール済みおよびおすすめのプラグインを閲覧してください。",
-    optionalCapability: "任意のOpenClaw機能です。",
+    optionalCapability: "任意のBot機能です。",
     enabled: "有効",
     disabled: "無効",
     available: "利用可能",
@@ -2322,7 +2322,7 @@ export const ja_JP: TranslationMap = {
     },
   },
   aboutPage: {
-    productName: "OpenClaw",
+    productName: "Bot",
     tagline: "あなた自身のデバイスで動作する、パーソナルAIアシスタント。",
     waveHello: "Clawdに手を振って挨拶",
     linksLabel: "コミュニティとリソース",
@@ -2332,7 +2332,7 @@ export const ja_JP: TranslationMap = {
     linkDiscord: "Discord",
     linkX: "X (Twitter)",
     linkChangelog: "変更履歴",
-    license: "© 2026 OpenClaw Foundation — MIT License.",
+    license: "© 2026 Bot Foundation — MIT License.",
     artifactTitle: "Control UI",
     artifactSubtitle: "このブラウザーアーティファクトのビルド時に埋め込まれた ID。",
     artifactDetails: "Control UI のビルド詳細",
@@ -2350,7 +2350,7 @@ export const ja_JP: TranslationMap = {
       "アクティブな Gateway 接続によって報告されます。この Control UI ビルドとは別です。",
   },
   appsPage: {
-    heroTitle: "OpenClawをどこへでも",
+    heroTitle: "Botをどこへでも",
     heroTagline:
       "スマートフォン、時計、デスクトップ、ブラウザ向けのコンパニオンアプリ。さらにエージェントの機能を拡張するプラグインも。",
     sectionMobile: "スマートフォンで",
@@ -2374,11 +2374,11 @@ export const ja_JP: TranslationMap = {
     cards: {
       ios: {
         title: "iPhone",
-        desc: "iOSからチャット、通話、アクションの承認、OpenClawへの共有ができます。",
+        desc: "iOSからチャット、通話、アクションの承認、Botへの共有ができます。",
       },
       android: {
         title: "Android",
-        desc: "AndroidスマートフォンをOpenClawの完全なノードとして利用 — チャット、カメラ、Canvas。",
+        desc: "AndroidスマートフォンをBotの完全なノードとして利用 — チャット、カメラ、Canvas。",
       },
       appleWatch: {
         title: "Apple Watch",
@@ -2386,7 +2386,7 @@ export const ja_JP: TranslationMap = {
       },
       wearOs: {
         title: "Wear OS",
-        desc: "AndroidコンパニオンがOpenClawを腕時計に拡張します。",
+        desc: "AndroidコンパニオンがBotを腕時計に拡張します。",
       },
       macos: {
         title: "macOS",
@@ -2394,7 +2394,7 @@ export const ja_JP: TranslationMap = {
       },
       windows: {
         title: "Windows",
-        desc: "WindowsコンパニオンがPCをOpenClawノードとして接続します。",
+        desc: "WindowsコンパニオンがPCをBotノードとして接続します。",
       },
       linux: {
         title: "Linux",
@@ -2402,11 +2402,11 @@ export const ja_JP: TranslationMap = {
       },
       chrome: {
         title: "Chrome拡張機能",
-        desc: "OpenClaw に既存の Chrome を操作させます — タブ、ページ、フォーム。",
+        desc: "Bot に既存の Chrome を操作させます — タブ、ページ、フォーム。",
       },
       plugins: {
         title: "プラグインと ClawHub",
-        desc: "コミュニティのチャンネル、ツール、Skills で OpenClaw を拡張します。",
+        desc: "コミュニティのチャンネル、ツール、Skills で Bot を拡張します。",
       },
     },
   },
@@ -2603,7 +2603,7 @@ export const ja_JP: TranslationMap = {
     selfLearning: {
       pitchTitle: "自己学習を有効にする",
       pitchBody:
-        "OpenClaw は修正内容や完了した重要な実行をレビューし、このボード向けのスキル提案の下書きを作成します。追加のバックグラウンドトークンを消費し、下書きは保留中の提案として追加されます。",
+        "Bot は修正内容や完了した重要な実行をレビューし、このボード向けのスキル提案の下書きを作成します。追加のバックグラウンドトークンを消費し、下書きは保留中の提案として追加されます。",
       enable: "自己学習を有効にする",
       enabling: "有効化中…",
       updateError: "自己学習の設定を更新できませんでした。",
@@ -3775,9 +3775,9 @@ export const ja_JP: TranslationMap = {
         summary:
           "Gateway には到達できますが、このブラウザーが接続する前に一致するトークンまたはパスワードが必要です。",
         stepPaste:
-          "openclaw dashboard --no-open のトークンを貼り付けるか、構成済みのパスワードを入力します。",
+          "bot dashboard --no-open のトークンを貼り付けるか、構成済みのパスワードを入力します。",
         stepGenerate:
-          "トークンが構成されていない場合は、Gateway ホストで openclaw doctor --generate-gateway-token を実行します。",
+          "トークンが構成されていない場合は、Gateway ホストで bot doctor --generate-gateway-token を実行します。",
         stepConnect: "認証情報を更新したら、もう一度 Connect をクリックします。",
       },
       authFailed: {
@@ -3785,7 +3785,7 @@ export const ja_JP: TranslationMap = {
         summary:
           "指定された認証情報は拒否されました。最も一般的な原因は、古いトークン、または別の Gateway URL からコピーしたトークンです。",
         stepDashboard:
-          "openclaw dashboard --no-open を実行し、新しい URL を開くか、そのトークンを貼り付けます。",
+          "bot dashboard --no-open を実行し、新しい URL を開くか、そのトークンを貼り付けます。",
         stepReplace:
           "古いトークン/パスワード値を置き換えてください。別の Gateway URL のトークンは再利用しないでください。",
         stepMode:
@@ -3808,8 +3808,8 @@ export const ja_JP: TranslationMap = {
           "このブラウザーで Control UI を使用するには、Gateway ホストからの一度限りの承認が必要です。",
         upgradeSummary:
           "このブラウザーは既に認識されていますが、要求されたアクセスが変わったため、新しい承認が必要です。",
-        stepList: "Gateway ホストで openclaw devices list を実行します。",
-        stepApproveId: "このリクエストを承認します: openclaw devices approve {requestId}.",
+        stepList: "Gateway ホストで bot devices list を実行します。",
+        stepApproveId: "このリクエストを承認します: bot devices approve {requestId}.",
         stepApprove: "その一覧から保留中のブラウザー/デバイスリクエストを承認します。",
         stepReconnect: "承認が完了したら再接続します。",
       },
@@ -3839,21 +3839,21 @@ export const ja_JP: TranslationMap = {
           "提供された Control UI と実行中の Gateway で、サポートされる接続プロトコルが一致していません。",
         refresh: "ページを更新",
         stepDashboard:
-          "openclaw dashboard で提供元の dashboard を開き直し、UI と Gateway が同じインストールから来るようにします。",
+          "bot dashboard で提供元の dashboard を開き直し、UI と Gateway が同じインストールから来るようにします。",
         stepDevUi:
           "pnpm ui:dev を使用している場合は、現在の checkout に対して開発 UI を再ビルドまたは再起動します。",
-        stepRestart: "OpenClaw 更新後に Gateway を再起動し、現在のプロトコルを提供させます。",
+        stepRestart: "Bot 更新後に Gateway を再起動し、現在のプロトコルを提供させます。",
       },
       network: {
         title: "接続できません",
         summary:
           "ブラウザーは Gateway 接続を完了できませんでした。認証情報を再試行する前に、ターゲットとトランスポートを確認してください。",
         stepGateway:
-          "openclaw status または openclaw gateway run で Gateway が実行中であることを確認します。",
+          "bot status または bot gateway run で Gateway が実行中であることを確認します。",
         stepUrl:
           "WebSocket URL を確認し、Gateway が HTTPS/Tailscale Serve の背後にある場合は wss:// を使用します。",
         stepDashboard:
-          "openclaw dashboard --no-open で dashboard を開き直し、現在の URL と認証詳細を再コピーします。",
+          "bot dashboard --no-open で dashboard を開き直し、現在の URL と認証詳細を再コピーします。",
       },
     },
   },
@@ -3949,7 +3949,7 @@ export const ja_JP: TranslationMap = {
       remoteViewOnly: "このセッションはペアリング済みノード上にあり、表示専用です。",
       unsupportedViewOnly: "この外部セッションソースは表示専用です。",
       sessionMenu: "External session actions",
-      openInOpenClaw: "Open in OpenClaw",
+      openInBot: "Open in Bot",
       openInTerminal: "Open in terminal",
       terminalUnavailable: "Terminal opening is unavailable for this session.",
     },
@@ -4004,7 +4004,7 @@ export const ja_JP: TranslationMap = {
     followUpModeOverriding: "サーバーのデフォルトを上書き中 ({mode})",
     followUpModeReset: "サーバーの既定値にリセット",
     catalogOpenTarget: "外部セッションを開く場所",
-    catalogOpenTargetViewer: "OpenClaw viewer",
+    catalogOpenTargetViewer: "Bot viewer",
     catalogOpenTargetTerminal: "Terminal",
     onboardingDisabled: "セットアップ中は無効",
     commandPaletteTitle: "検索または移動… (⌘K)",
@@ -4022,7 +4022,7 @@ export const ja_JP: TranslationMap = {
       titleOne: "1件のクラウドワークスペースの競合",
       titleMany: "{count}件のクラウドワークスペースの競合",
       description:
-        "OpenClaw はローカルバージョンを保持し、その他のクラウド変更を適用しました。ステージされた結果を確認するか、競合するパスについてクラウドのバージョンを採用してください。",
+        "Bot はローカルバージョンを保持し、その他のクラウド変更を適用しました。ステージされた結果を確認するか、競合するパスについてクラウドのバージョンを採用してください。",
       morePaths: "他 +{count} 件のパス",
       stagedResult: "ステージされたクラウド結果",
       copyStagedResult: "ステージされた結果の参照をコピー",
@@ -4033,7 +4033,7 @@ export const ja_JP: TranslationMap = {
       commandHelp:
         "これらは Bash または zsh（Windows では Git Bash）で実行してください。inspect でパスが存在しないと表示された場合、クラウドがそれを削除しています。確認のうえ、ローカルパスを手動で削除してください。checkout がファイル/ディレクトリの競合を報告した場合は、ブロックしているローカルパスを移動または削除してから再試行してください。ステージされた参照が見つからない場合、この通知は古くなっています。ローカルパスは変更しないでください。",
       commandsUnavailable:
-        "このファイル名にはターミナル制御文字が含まれているため、OpenClaw はコピー可能なシェルコマンドを生成しません。ステージされた参照を直接確認し、パスは慎重に手動で入力してください。",
+        "このファイル名にはターミナル制御文字が含まれているため、Bot はコピー可能なシェルコマンドを生成しません。ステージされた参照を直接確認し、パスは慎重に手動で入力してください。",
       dismiss: "ワークスペース競合の通知を閉じる",
       eventSender: "クラウドワークスペース",
       eventTitleOne: "1件の競合とともにクラウド結果を適用しました",
@@ -4614,7 +4614,7 @@ export const ja_JP: TranslationMap = {
       filters: "フィルター",
       shownOf: "{total} 件中 {shown} 件",
       emptyTitle: "スケジュールされたタスクはまだありません",
-      emptyHint: "OpenClaw に何をいつ実行させるかを記述すると、スケジュールに従って実行されます。",
+      emptyHint: "Bot に何をいつ実行させるかを記述すると、スケジュールに従って実行されます。",
       noMatching: "現在のフィルターに一致するタスクはありません。",
       loadMore: "さらに読み込む",
       loading: "読み込み中...",
@@ -4681,7 +4681,7 @@ export const ja_JP: TranslationMap = {
     detail: {
       tabsLabel: "自動化の詳細",
       newTitle: "新規スケジュールタスク",
-      newSubtitle: "OpenClaw に何をさせるかを記述し、実行するタイミングを選択します。",
+      newSubtitle: "Bot に何をさせるかを記述し、実行するタイミングを選択します。",
       back: "すべての自動化",
       settingsTab: "設定",
       historyTitle: "実行履歴",
@@ -4754,7 +4754,7 @@ export const ja_JP: TranslationMap = {
       descriptionPlaceholder: "このジョブの任意のコンテキスト",
       agentPlaceholder: "main または ops",
       agentHelp: "入力を始めると既知のエージェントを選択でき、カスタム値を入力することもできます。",
-      promptPlaceholder: "OpenClaw に実行させたいことを記述...",
+      promptPlaceholder: "Bot に実行させたいことを記述...",
       repeat: "繰り返し",
       repeatInterval: "間隔",
       repeatOnce: "1回",

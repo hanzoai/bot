@@ -1,5 +1,5 @@
 // Resolves or installs channel plugins needed by setup/onboarding flows.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveAgentWorkspaceDir, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import {
   listRawChannelPluginCatalogEntries,
@@ -8,7 +8,7 @@ import {
 import { getChannelPlugin, normalizeChannelId } from "../../channels/plugins/index.js";
 import type { ChannelPlugin } from "../../channels/plugins/types.plugin.js";
 import type { ChannelId } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { RuntimeEnv } from "../../runtime.js";
 import { createClackPrompter } from "../../wizard/clack-prompter.js";
 import type { WizardPrompter } from "../../wizard/prompts.js";
@@ -27,7 +27,7 @@ type ChannelPluginSnapshot = {
 };
 
 type ResolveInstallableChannelPluginResult = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelId?: ChannelId;
   plugin?: ChannelPlugin;
   catalogEntry?: ChannelPluginCatalogEntry;
@@ -36,7 +36,7 @@ type ResolveInstallableChannelPluginResult = {
   supportsRequestedCapability?: boolean;
 };
 
-function resolveWorkspaceDir(cfg: OpenClawConfig) {
+function resolveWorkspaceDir(cfg: BotConfig) {
   return resolveAgentWorkspaceDir(cfg, resolveDefaultAgentId(cfg));
 }
 
@@ -54,7 +54,7 @@ function resolveResolvedChannelId(params: {
   return normalizeChannelId(params.catalogEntry.id) ?? (params.catalogEntry.id as ChannelId);
 }
 
-function resolveCatalogChannelEntry(raw: string, cfg: OpenClawConfig | null) {
+function resolveCatalogChannelEntry(raw: string, cfg: BotConfig | null) {
   const trimmed = normalizeOptionalLowercaseString(raw);
   if (!trimmed) {
     return undefined;
@@ -89,7 +89,7 @@ function findScopedChannelPlugin(
 }
 
 function loadScopedChannelPlugin(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime: RuntimeEnv;
   channelId: ChannelId;
   supports: (plugin: ChannelPlugin) => boolean;
@@ -108,7 +108,7 @@ function loadScopedChannelPlugin(params: {
 
 /** Resolve an existing channel plugin, scoped setup plugin, or installable catalog entry. */
 export async function resolveInstallableChannelPlugin(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime: RuntimeEnv;
   rawChannel?: string | null;
   channelId?: ChannelId;

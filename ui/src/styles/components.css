@@ -15,7 +15,7 @@
   animation: fade-in 0.3s var(--ease-out) 0.2s forwards;
 }
 
-openclaw-session-owner-chip {
+bot-session-owner-chip {
   display: inline-flex;
   flex: 0 0 auto;
 }
@@ -1581,7 +1581,7 @@ openclaw-session-owner-chip {
   }
 }
 
-openclaw-chat-session-rail {
+bot-chat-session-rail {
   display: contents;
 }
 
@@ -3383,7 +3383,7 @@ td.data-table-key-col {
   white-space: nowrap;
 }
 
-.agent-scope-control openclaw-agent-select {
+.agent-scope-control bot-agent-select {
   min-width: 150px;
   max-width: min(240px, 40vw);
 }
@@ -3402,7 +3402,7 @@ td.data-table-key-col {
     display: none;
   }
 
-  .agent-scope-control openclaw-agent-select {
+  .agent-scope-control bot-agent-select {
     min-width: 128px;
     max-width: 44vw;
   }

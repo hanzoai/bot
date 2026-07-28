@@ -140,7 +140,7 @@ export async function copyCopilotSidepanelExtension(tempDirs: {
   make: (prefix: string) => string;
 }): Promise<string> {
   const extensionDir = path.dirname(fileURLToPath(import.meta.url));
-  const target = tempDirs.make("openclaw-copilot-extension-");
+  const target = tempDirs.make("bot-copilot-extension-");
   await fs.cp(extensionDir, target, {
     recursive: true,
     filter: (source) => !source.endsWith(".test.ts"),

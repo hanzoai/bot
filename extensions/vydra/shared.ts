@@ -1,7 +1,7 @@
 // Vydra plugin module implements shared behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { extensionForMime, type MediaKind } from "openclaw/plugin-sdk/media-mime";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { extensionForMime, type MediaKind } from "bot/plugin-sdk/media-mime";
+import { resolveApiKeyForProvider } from "bot/plugin-sdk/provider-auth-runtime";
 import {
   assertOkOrThrowHttpError,
   createProviderOperationDeadline,
@@ -12,13 +12,13 @@ import {
   sanitizeConfiguredModelProviderRequest,
   type ProviderOperationDeadline,
   type ProviderOperationTimeoutMs,
-} from "openclaw/plugin-sdk/provider-http";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import type { SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/provider-http";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
+import type { SsrFPolicy } from "bot/plugin-sdk/ssrf-runtime";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 
 export const DEFAULT_VYDRA_BASE_URL = "https://www.vydra.ai/api/v1";
 export const DEFAULT_VYDRA_IMAGE_MODEL = "grok-imagine";
@@ -102,7 +102,7 @@ function resolveVydraBaseUrlFromConfig(cfg: unknown): string {
 }
 
 export async function resolveVydraRequestContext(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentDir?: string;
   authStore?: VydraAuthStore;
   capability: "image" | "video";

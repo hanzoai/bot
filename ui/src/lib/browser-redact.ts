@@ -1,5 +1,5 @@
 // Browser-safe redaction for tool details rendered by the Control UI.
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 
 const PAYMENT_CREDENTIAL_KEYS =
   "card[-_]?number|card[-_]?cvc|card[-_]?cvv|cvc|cvv|security[-_]?code|securityCode|payment[-_]?credential|paymentCredential|shared[-_]?payment[-_]?token|sharedPaymentToken";
@@ -20,7 +20,7 @@ const SECRET_DETAIL_PATTERNS: RegExp[] = [
   ),
   /Authorization\s*[:=]\s*Bearer\s+([A-Za-z0-9._\-+=]+)/gi,
   /Authorization\s*[:=]\s*Basic\s+([A-Za-z0-9+/=]+)/gi,
-  /(?:X-OpenClaw-Token|x-pomerium-jwt-assertion|X-Api-Key|X-Auth-Token)\s*[:=]\s*([^\s"',;]+)/gi,
+  /(?:X-Bot-Token|x-pomerium-jwt-assertion|X-Api-Key|X-Auth-Token)\s*[:=]\s*([^\s"',;]+)/gi,
   /\bBearer\s+([A-Za-z0-9._\-+=]{18,})\b/gi,
   new RegExp(
     `(^|[\\s,;])(?:access_token|refresh_token|auth[-_]?token|api[-_]?key|client[-_]?secret|app[-_]?secret|token|secret|password|passwd|${PAYMENT_CREDENTIAL_KEYS})=([^\\s&#]+)`,

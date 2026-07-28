@@ -27,7 +27,7 @@ scenario:
       memoryFact: "Hidden QA fact: the project codename is ORBIT-9."
       memoryQuery: "hidden project codename"
       expectedNeedle: ORBIT-9
-      prompt: "@openclaw Memory tools check: what is the hidden project codename stored only in memory? Use memory tools first."
+      prompt: "@bot Memory tools check: what is the hidden project codename stored only in memory? Use memory tools first."
       promptSnippet: "Memory tools check"
 
 flow:

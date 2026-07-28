@@ -1,7 +1,7 @@
 // Qa Lab plugin module implements suite launch behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import { isRepoRootRelativeRef, toRepoRelativePath } from "./cli-paths.js";
 import {
   QA_EVIDENCE_FILENAME,
@@ -192,10 +192,10 @@ async function resolveQaFlowChannelGroups(
   }
   // Package-only live lanes mount the QA harness without its dev tree. Load
   // Crabline only for Crabline-owned runs so unrelated transports stay isolated.
-  const { OPENCLAW_CRABLINE_DEFAULT_CHANNEL, resolveOpenClawCrablineChannelDriverSelection } =
+  const { BOT_CRABLINE_DEFAULT_CHANNEL, resolveBotCrablineChannelDriverSelection } =
     await import("@openclaw/crabline");
   const channels = resolveQaSuiteScenarioChannels({
-    defaultChannel: OPENCLAW_CRABLINE_DEFAULT_CHANNEL,
+    defaultChannel: BOT_CRABLINE_DEFAULT_CHANNEL,
     explicitChannel: runParams.channelDriverSelection?.channel,
     scenarios: [...scenarios],
   });
@@ -207,7 +207,7 @@ async function resolveQaFlowChannelGroups(
         channelId: undefined,
         channelDriverSelection:
           runParams.channelDriverSelection ??
-          resolveOpenClawCrablineChannelDriverSelection({ channel: singleChannel }),
+          resolveBotCrablineChannelDriverSelection({ channel: singleChannel }),
         scenarios: [...scenarios],
       },
     ];
@@ -217,10 +217,10 @@ async function resolveQaFlowChannelGroups(
   return channels.map((channel) => ({
     channel,
     channelId: undefined,
-    channelDriverSelection: resolveOpenClawCrablineChannelDriverSelection({ channel }),
+    channelDriverSelection: resolveBotCrablineChannelDriverSelection({ channel }),
     scenarios: scenarios.filter(
       (scenario) =>
-        (normalizeQaSuiteScenarioChannel(scenario) ?? OPENCLAW_CRABLINE_DEFAULT_CHANNEL) ===
+        (normalizeQaSuiteScenarioChannel(scenario) ?? BOT_CRABLINE_DEFAULT_CHANNEL) ===
         channel,
     ),
   }));
@@ -531,7 +531,7 @@ function renderUnifiedQaSuiteReport(params: {
   startedAt: Date;
 }) {
   return renderQaMarkdownReport({
-    title: "OpenClaw QA Scenario Suite",
+    title: "Bot QA Scenario Suite",
     startedAt: params.startedAt,
     finishedAt: params.finishedAt,
     checks: [],

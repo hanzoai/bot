@@ -1,12 +1,12 @@
-# OpenClaw StepFun Provider
+# Bot StepFun Provider
 
-Official OpenClaw provider plugin for StepFun.
+Official Bot provider plugin for StepFun.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/stepfun-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-stepfun-provider
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/stepfun> for setup and configuration.
+See <https://docs.bot.ai/providers/stepfun> for setup and configuration.

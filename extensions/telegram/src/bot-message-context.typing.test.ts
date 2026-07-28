@@ -1,6 +1,6 @@
 // Telegram tests cover bot message context.typing plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import { buildChannelInboundEventContext } from "openclaw/plugin-sdk/channel-inbound";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { buildChannelInboundEventContext } from "bot/plugin-sdk/channel-inbound";
 import { describe, expect, it, vi } from "vitest";
 import { buildTelegramMessageContextForTest } from "./bot-message-context.test-harness.js";
 import type { TelegramSendChatActionHandler } from "./sendchataction-401-backoff.js";
@@ -76,7 +76,7 @@ describe("buildTelegramMessageContext typing", () => {
           text: "hello",
         },
         cfg: {
-          agents: { defaults: { model: "anthropic/claude-opus-4-5", workspace: "/tmp/openclaw" } },
+          agents: { defaults: { model: "anthropic/claude-opus-4-5", workspace: "/tmp/bot" } },
           channels: { telegram: { dmPolicy: "disabled", allowFrom: [] } },
           messages: { groupChat: { mentionPatterns: [] } },
         },

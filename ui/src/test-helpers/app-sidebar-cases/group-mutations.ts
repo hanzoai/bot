@@ -38,7 +38,7 @@ function dispatchDragEvent(
 }
 
 describe("AppSidebar group mutation collapsed state", () => {
-  const COLLAPSED_STORAGE_KEY = "openclaw:sidebar:sessions:collapsed-sections";
+  const COLLAPSED_STORAGE_KEY = "bot:sidebar:sessions:collapsed-sections";
 
   async function mountCollapsedGroup(options: {
     groupsRename?: () => Promise<SessionGroupMutationResult>;

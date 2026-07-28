@@ -17,9 +17,9 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const captureUiProof = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const captureUiProof = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const proofDir = path.join(process.cwd(), ".artifacts", "control-ui-e2e", "profile-identity");
 
 async function screenshot(page: Page, name: string) {
@@ -160,7 +160,7 @@ describeControlUiE2e("Control UI profile page mocked Gateway E2E", () => {
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     server = await startControlUiE2eServer();
@@ -191,7 +191,7 @@ describeControlUiE2e("Control UI profile page mocked Gateway E2E", () => {
 
       await page.locator(".profile-hero__name").waitFor({ timeout: 10_000 });
       await expect(page.locator(".profile-hero__name").textContent()).resolves.toContain(
-        "OpenClaw",
+        "Bot",
       );
       await expect(page.locator(".profile-hero__handle").textContent()).resolves.toContain("@main");
       // No avatar configured: the lobster mascot fills in.
@@ -249,9 +249,9 @@ describeControlUiE2e("Control UI profile page mocked Gateway E2E", () => {
     await page.addInitScript((sameOriginGatewayUrl) => {
       (
         window as Window & {
-          ["__OPENCLAW_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
+          ["__BOT_NATIVE_CONTROL_AUTH__"]?: { gatewayUrl: string; token: string };
         }
-      )["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = {
+      )["__BOT_NATIVE_CONTROL_AUTH__"] = {
         gatewayUrl: sameOriginGatewayUrl,
         token: "test",
       };
@@ -307,7 +307,7 @@ describeControlUiE2e("Control UI profile page mocked Gateway E2E", () => {
         "img-src 'self' data: blob:",
       );
 
-      const profileAvatar = page.locator("#settings-profile-identity openclaw-viewer-avatar img");
+      const profileAvatar = page.locator("#settings-profile-identity bot-viewer-avatar img");
       await profileAvatar.waitFor({ timeout: 10_000 });
       const imageUrl = await profileAvatar.getAttribute("src");
       expect(imageUrl).toMatch(/^blob:/u);
@@ -327,7 +327,7 @@ describeControlUiE2e("Control UI profile page mocked Gateway E2E", () => {
       }
 
       await page.getByRole("button", { name: "Back to app" }).click();
-      const sidebarAvatar = page.locator(".sidebar-identity-card openclaw-viewer-avatar img");
+      const sidebarAvatar = page.locator(".sidebar-identity-card bot-viewer-avatar img");
       await sidebarAvatar.waitFor({ timeout: 10_000 });
       await expect.poll(() => avatarRequests.length).toBe(1);
       expect(avatarRequests[0]).toEqual({

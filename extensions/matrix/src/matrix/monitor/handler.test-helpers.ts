@@ -1,6 +1,6 @@
 // Matrix helper module supports handler helpers behavior.
-import type { PreparedInboundReply } from "openclaw/plugin-sdk/channel-inbound";
-import { finalizeInboundContext as finalizeCoreInboundContext } from "openclaw/plugin-sdk/reply-runtime";
+import type { PreparedInboundReply } from "bot/plugin-sdk/channel-inbound";
+import { finalizeInboundContext as finalizeCoreInboundContext } from "bot/plugin-sdk/reply-runtime";
 import { vi, type Mock } from "vitest";
 import type { RuntimeEnv, RuntimeLogger } from "../../runtime-api.js";
 import type {
@@ -174,7 +174,7 @@ export function createMatrixHandlerTestHarness(
       prepared.markRunComplete();
       prepared.markDispatchIdle();
     }
-  }) as typeof import("openclaw/plugin-sdk/reply-runtime").dispatchInboundMessageWithBufferedDispatcher;
+  }) as typeof import("bot/plugin-sdk/reply-runtime").dispatchInboundMessageWithBufferedDispatcher;
   const createChannelInboundEnvelopeBuilder = (() => (input: { body: string }) =>
     (options.formatAgentEnvelope ?? (({ body }: { body: string }) => body))({
       body: input.body,

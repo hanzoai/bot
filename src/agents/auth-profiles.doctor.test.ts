@@ -37,7 +37,7 @@ describe("formatAuthDoctorHint", () => {
     });
 
     expect(hint).toBe(
-      "Legacy Qwen Portal OAuth profiles are not refreshable. Re-authenticate with a current Qwen API key: openclaw onboard --auth-choice qwen-api-key.",
+      "Legacy Qwen Portal OAuth profiles are not refreshable. Re-authenticate with a current Qwen API key: bot onboard --auth-choice qwen-api-key.",
     );
     expect(buildProviderAuthDoctorHintWithPluginMock).not.toHaveBeenCalled();
   });
@@ -62,7 +62,7 @@ describe("formatAuthDoctorHint", () => {
     });
 
     expect(hint).toContain("unsupported enterprise domain");
-    expect(hint).toContain("openclaw models auth login --provider github-copilot --force");
+    expect(hint).toContain("bot models auth login --provider github-copilot --force");
     expect(buildProviderAuthDoctorHintWithPluginMock).not.toHaveBeenCalled();
   });
 

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { buildAgentRunTerminalOutcome } from "../agent-run-terminal-outcome.js";
 import { ensureSelectedAgentHarnessPlugin } from "../harness/runtime-plugin.js";
 import type { ModelFallbackResultClassification } from "../model-fallback-attempt.js";
@@ -67,7 +67,7 @@ type EmbeddedAgentRunEntryResult<T extends EmbeddedAgentRunResult> = {
 
 type EmbeddedAgentRunEntryParams<T extends EmbeddedAgentRunResult> = {
   selection: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     provider: string;
     model: string;
     requestedRouteResolution?: ModelFallbackRouteResolution;

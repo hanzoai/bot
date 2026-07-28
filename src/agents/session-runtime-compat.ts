@@ -4,7 +4,7 @@
  * Resolves persisted runtime overrides without leaking provider-specific CLI runtime bindings across model routes.
  */
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isDefaultAgentRuntimeId } from "./agent-runtime-id.js";
 import { normalizeOptionalAgentRuntimeId } from "./agent-runtime-id.js";
 import { isCliRuntimeAliasForProvider } from "./model-runtime-aliases.js";
@@ -41,17 +41,17 @@ export function resolvePersistedSessionRuntimeId(
 export function resolveCompatibleAgentRuntimeForProvider(params: {
   provider?: string | null;
   runtime?: string | null;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): string | undefined {
   const runtime = normalizeOptionalAgentRuntimeId(params.runtime);
   if (!runtime || isDefaultAgentRuntimeId(runtime)) {
     return undefined;
   }
-  if (runtime === "openclaw") {
+  if (runtime === "bot") {
     return runtime;
   }
   const provider = params.provider?.trim().toLowerCase() ?? "";
-  // The Codex harness owns both OpenClaw's virtual Codex namespace and canonical OpenAI routes.
+  // The Codex harness owns both Bot's virtual Codex namespace and canonical OpenAI routes.
   if (runtime === "codex" && (provider === "codex" || provider === "openai")) {
     return runtime;
   }
@@ -61,7 +61,7 @@ export function resolveCompatibleAgentRuntimeForProvider(params: {
 export function resolveSessionRuntimeOverrideForProvider(params: {
   provider?: string | null;
   entry?: SessionRuntimeOverrideEntry;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 }): string | undefined {
   const lockedHarness = normalizeOptionalAgentRuntimeId(params.entry?.agentHarnessId);
   if (

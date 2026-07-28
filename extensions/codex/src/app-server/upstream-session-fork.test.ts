@@ -1,4 +1,4 @@
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { createPluginRuntimeMock } from "bot/plugin-sdk/plugin-test-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CodexSessionCatalogControl } from "../session-catalog-types.js";
 import type { CodexThreadForkParams, CodexTurn } from "./protocol.js";
@@ -21,7 +21,7 @@ const boundary = {
   retainedMarker: { turnId: "turn-1", userMessageCount: 1 },
 } as const;
 
-vi.mock("openclaw/plugin-sdk/session-catalog", async (importOriginal) => ({
+vi.mock("bot/plugin-sdk/session-catalog", async (importOriginal) => ({
   ...(await importOriginal()),
   deleteSessionUpstreamLink: linkMocks.delete,
   upsertSessionUpstreamLink: linkMocks.upsert,

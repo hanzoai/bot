@@ -4,8 +4,8 @@ import { HEARTBEAT_TOKEN } from "../auto-reply/tokens.js";
 import { listDueCommitmentSessionKeys } from "../commitments/store.js";
 import { readCommitmentsForTest, seedCommitmentsForTest } from "../commitments/store.test-utils.js";
 import type { CommitmentRecord } from "../commitments/types.js";
-import type { OpenClawConfig } from "../config/config.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { BotConfig } from "../config/config.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { getLastHeartbeatEvent, resetHeartbeatEventsForTest } from "./heartbeat-events.js";
 import { resolveHeartbeatRunScope } from "./heartbeat-run-scope.js";
@@ -61,10 +61,10 @@ async function loadCommitmentStore(): Promise<CommitmentTestStore> {
 
 describe("runHeartbeatOnce commitments", () => {
   const nowMs = Date.parse("2026-04-29T17:00:00.000Z");
-  const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+  const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
 
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     setHeartbeatsEnabled(true);
     vi.useRealTimers();
     vi.unstubAllEnvs();
@@ -126,9 +126,9 @@ describe("runHeartbeatOnce commitments", () => {
     runScope?: "commitment-only";
   }) {
     return await withTempHeartbeatSandbox(async ({ tmpDir, storePath, replySpy }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
+      setTestEnvValue("BOT_STATE_DIR", tmpDir);
       const sessionKey = "agent:main:telegram:user-155462274";
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -214,9 +214,9 @@ describe("runHeartbeatOnce commitments", () => {
   it("keeps free-form reasons from changing cron-carried heartbeat task priority", async () => {
     const { result, sendTelegram, store } = await withTempHeartbeatSandbox(
       async ({ tmpDir, storePath, replySpy }) => {
-        setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
+        setTestEnvValue("BOT_STATE_DIR", tmpDir);
         const sessionKey = "agent:main:telegram:user-155462274";
-        const cfg: OpenClawConfig = {
+        const cfg: BotConfig = {
           agents: {
             defaults: {
               workspace: tmpDir,
@@ -301,9 +301,9 @@ describe("runHeartbeatOnce commitments", () => {
   it("does not deliver due commitments when heartbeat target is none", async () => {
     const { result, sendTelegram, store } = await withTempHeartbeatSandbox(
       async ({ tmpDir, storePath, replySpy }) => {
-        setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
+        setTestEnvValue("BOT_STATE_DIR", tmpDir);
         const sessionKey = "agent:main:telegram:user-155462274";
-        const cfg: OpenClawConfig = {
+        const cfg: BotConfig = {
           agents: {
             defaults: {
               workspace: tmpDir,
@@ -379,9 +379,9 @@ describe("runHeartbeatOnce commitments", () => {
     vi.setSystemTime(nowMs);
 
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
+      setTestEnvValue("BOT_STATE_DIR", tmpDir);
       const dueSessionKey = "agent:main:telegram:user-155462274";
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -426,9 +426,9 @@ describe("runHeartbeatOnce commitments", () => {
     vi.setSystemTime(nowMs);
 
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
+      setTestEnvValue("BOT_STATE_DIR", tmpDir);
       const dueSessionKey = "agent:main:telegram:user-155462274";
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -474,9 +474,9 @@ describe("runHeartbeatOnce commitments", () => {
     vi.setSystemTime(nowMs);
 
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
+      setTestEnvValue("BOT_STATE_DIR", tmpDir);
       const dueSessionKey = "agent:main:telegram:user-155462274";
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -552,9 +552,9 @@ describe("runHeartbeatOnce commitments", () => {
 
   it("does not mark suppressed commitment sends as delivered or duplicate-dismiss their retry", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath, replySpy }) => {
-      setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
+      setTestEnvValue("BOT_STATE_DIR", tmpDir);
       const sessionKey = "agent:main:telegram:user-155462274";
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -691,9 +691,9 @@ describe("runHeartbeatOnce commitments", () => {
   it("appends scratch directives to the commitment prompt", async () => {
     const { result, sendTelegram, store } = await withTempHeartbeatSandbox(
       async ({ tmpDir, storePath, replySpy }) => {
-        setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
+        setTestEnvValue("BOT_STATE_DIR", tmpDir);
         const sessionKey = "agent:main:telegram:user-155462274";
-        const cfg: OpenClawConfig = {
+        const cfg: BotConfig = {
           agents: {
             defaults: {
               workspace: tmpDir,
@@ -769,9 +769,9 @@ describe("runHeartbeatOnce commitments", () => {
   it("keeps commitment-only fan-out isolated from global work and state", async () => {
     const { pendingEvents, result, sendTelegram, sessionStore, store } =
       await withTempHeartbeatSandbox(async ({ tmpDir, storePath, replySpy }) => {
-        setTestEnvValue("OPENCLAW_STATE_DIR", tmpDir);
+        setTestEnvValue("BOT_STATE_DIR", tmpDir);
         const sessionKey = "agent:main:telegram:user-155462274";
-        const cfg: OpenClawConfig = {
+        const cfg: BotConfig = {
           agents: {
             defaults: {
               workspace: tmpDir,

@@ -1,7 +1,7 @@
 // Signal tests cover event handler.inbound context plugin behavior.
-import { expectChannelInboundContextContract as expectInboundContextContract } from "openclaw/plugin-sdk/channel-contract-testing";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { MsgContext } from "openclaw/plugin-sdk/reply-runtime";
+import { expectChannelInboundContextContract as expectInboundContextContract } from "bot/plugin-sdk/channel-contract-testing";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { MsgContext } from "bot/plugin-sdk/reply-runtime";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveSignalReplyContextWithPersistence } from "../reply-authors.js";
 import { resetSignalReplyAuthorsForTests } from "../reply-authors.test-helpers.js";
@@ -13,7 +13,7 @@ let createSignalEventHandler: typeof import("./event-handler.js").createSignalEv
 
 type DispatchInboundMessageMockParams = {
   ctx: MsgContext;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   dispatcher?: {
     sendFinalReply: (payload: { text: string }) => void;
     markComplete: () => void;
@@ -70,9 +70,9 @@ vi.mock("../send-reactions.js", () => ({
   sendReactionSignal: sendReactionSignalMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/reply-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/reply-runtime")>(
-    "openclaw/plugin-sdk/reply-runtime",
+vi.mock("bot/plugin-sdk/reply-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/reply-runtime")>(
+    "bot/plugin-sdk/reply-runtime",
   );
   return {
     ...actual,
@@ -82,9 +82,9 @@ vi.mock("openclaw/plugin-sdk/reply-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/channel-inbound")>(
-    "openclaw/plugin-sdk/channel-inbound",
+vi.mock("bot/plugin-sdk/channel-inbound", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/channel-inbound")>(
+    "bot/plugin-sdk/channel-inbound",
   );
   type RunParams = Parameters<typeof actual.runChannelInboundEvent>[0];
   return {
@@ -124,7 +124,7 @@ vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
           channel: resolved.channel,
           accountId: resolved.accountId,
           routeSessionKey: resolved.route.sessionKey,
-          storePath: "/tmp/openclaw/signal-sessions.json",
+          storePath: "/tmp/bot/signal-sessions.json",
           ctxPayload: resolved.ctxPayload,
           recordInboundSession: recordInboundSessionMock,
           afterRecord: resolved.afterRecord,
@@ -162,9 +162,9 @@ vi.mock("openclaw/plugin-sdk/channel-inbound", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/conversation-runtime")>(
-    "openclaw/plugin-sdk/conversation-runtime",
+vi.mock("bot/plugin-sdk/conversation-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/conversation-runtime")>(
+    "bot/plugin-sdk/conversation-runtime",
   );
   return {
     ...actual,
@@ -174,9 +174,9 @@ vi.mock("openclaw/plugin-sdk/conversation-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/system-event-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/system-event-runtime")>(
-    "openclaw/plugin-sdk/system-event-runtime",
+vi.mock("bot/plugin-sdk/system-event-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/system-event-runtime")>(
+    "bot/plugin-sdk/system-event-runtime",
   );
   return {
     ...actual,
@@ -229,7 +229,7 @@ describe("signal createSignalEventHandler inbound context", () => {
   it("passes a finalized MsgContext to dispatchInboundMessage", async () => {
     const handler = createSignalEventHandler(
       createBaseSignalEventHandlerDeps({
-        cfg: { messages: { inbound: { debounceMs: 0 } } } as OpenClawConfig,
+        cfg: { messages: { inbound: { debounceMs: 0 } } } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -255,7 +255,7 @@ describe("signal createSignalEventHandler inbound context", () => {
   it("normalizes direct chat To/OriginatingTo targets to canonical Signal ids", async () => {
     const handler = createSignalEventHandler(
       createBaseSignalEventHandlerDeps({
-        cfg: { messages: { inbound: { debounceMs: 0 } } } as OpenClawConfig,
+        cfg: { messages: { inbound: { debounceMs: 0 } } } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -281,7 +281,7 @@ describe("signal createSignalEventHandler inbound context", () => {
   it("sets ReplyToId from the inbound Signal timestamp", async () => {
     const handler = createSignalEventHandler(
       createBaseSignalEventHandlerDeps({
-        cfg: { messages: { inbound: { debounceMs: 0 } } } as OpenClawConfig,
+        cfg: { messages: { inbound: { debounceMs: 0 } } } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -329,7 +329,7 @@ describe("signal createSignalEventHandler inbound context", () => {
   ])("falls back to $name timestamp for native reply metadata", async ({ envelope }) => {
     const handler = createSignalEventHandler(
       createBaseSignalEventHandlerDeps({
-        cfg: { messages: { inbound: { debounceMs: 0 } } } as OpenClawConfig,
+        cfg: { messages: { inbound: { debounceMs: 0 } } } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -352,7 +352,7 @@ describe("signal createSignalEventHandler inbound context", () => {
   it("uses editMessage.targetSentTimestamp as the native reply target", async () => {
     const handler = createSignalEventHandler(
       createBaseSignalEventHandlerDeps({
-        cfg: { messages: { inbound: { debounceMs: 0 } } } as OpenClawConfig,
+        cfg: { messages: { inbound: { debounceMs: 0 } } } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -402,7 +402,7 @@ describe("signal createSignalEventHandler inbound context", () => {
         cfg: {
           messages: { inbound: { debounceMs: 10 } },
           channels: { signal: { replyToMode: "batched" } },
-        } as OpenClawConfig,
+        } as BotConfig,
         deliverReplies: deliverRepliesMock,
         historyLimit: 0,
       }),
@@ -459,7 +459,7 @@ describe("signal createSignalEventHandler inbound context", () => {
           session: { dmScope: "per-channel-peer" },
           messages: { inbound: { debounceMs: 0 } },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -500,7 +500,7 @@ describe("signal createSignalEventHandler inbound context", () => {
   it("keeps direct chat text in BodyForAgent while Body remains the legacy envelope", async () => {
     const handler = createSignalEventHandler(
       createBaseSignalEventHandlerDeps({
-        cfg: { messages: { inbound: { debounceMs: 0 } } } as OpenClawConfig,
+        cfg: { messages: { inbound: { debounceMs: 0 } } } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -559,7 +559,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -634,7 +634,7 @@ describe("signal createSignalEventHandler inbound context", () => {
               },
             },
             channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-          } as OpenClawConfig,
+          } as BotConfig,
           statusReactionTiming: {
             debounceMs: 0,
             doneHoldMs: 0,
@@ -712,7 +712,7 @@ describe("signal createSignalEventHandler inbound context", () => {
               },
             },
             channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-          } as OpenClawConfig,
+          } as BotConfig,
           statusReactionTiming: {
             debounceMs: 0,
             doneHoldMs: 0,
@@ -784,7 +784,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -841,7 +841,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -889,7 +889,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         sendReadReceipts: true,
         historyLimit: 0,
       }),
@@ -941,7 +941,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             statusReactions: { enabled: true },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -974,7 +974,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             statusReactions: { enabled: true },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -1002,7 +1002,7 @@ describe("signal createSignalEventHandler inbound context", () => {
         cfg: {
           messages: { inbound: { debounceMs: 0 } },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -1041,7 +1041,7 @@ describe("signal createSignalEventHandler inbound context", () => {
               reactionLevel: "off",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -1098,7 +1098,7 @@ describe("signal createSignalEventHandler inbound context", () => {
               reactionLevel: "ack",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -1152,7 +1152,7 @@ describe("signal createSignalEventHandler inbound context", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         accountId: "work",
         historyLimit: 0,
       }),
@@ -1186,7 +1186,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             statusReactions: { enabled: true },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -1234,7 +1234,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -1291,7 +1291,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -1344,7 +1344,7 @@ describe("signal createSignalEventHandler inbound context", () => {
               groups: { "*": { requireMention: false } },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         groupPolicy: "allowlist",
         groupAllowFrom: ["g1"],
         historyLimit: 0,
@@ -1400,7 +1400,7 @@ describe("signal createSignalEventHandler inbound context", () => {
               groups: { "*": { requireMention: true } },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         groupPolicy: "allowlist",
         groupAllowFrom: ["g1"],
         historyLimit: 0,
@@ -1452,7 +1452,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -1495,7 +1495,7 @@ describe("signal createSignalEventHandler inbound context", () => {
             },
           },
           channels: { signal: { dmPolicy: "open", allowFrom: ["*"] } },
-        } as OpenClawConfig,
+        } as BotConfig,
         historyLimit: 0,
       }),
     );
@@ -1538,7 +1538,7 @@ describe("signal createSignalEventHandler inbound context", () => {
     ]);
     const handler = createSignalEventHandler(
       createBaseSignalEventHandlerDeps({
-        cfg: { messages: { inbound: { debounceMs: 0 } } } as OpenClawConfig,
+        cfg: { messages: { inbound: { debounceMs: 0 } } } as BotConfig,
         groupHistories,
         historyLimit: 5,
       }),
@@ -1838,7 +1838,7 @@ describe("signal createSignalEventHandler inbound context", () => {
     };
     const handler = createSignalEventHandler(
       createBaseSignalEventHandlerDeps({
-        cfg: cfg as OpenClawConfig,
+        cfg: cfg as BotConfig,
         dmPolicy: "allowlist",
         allowFrom: [],
         reactionMode: "all",

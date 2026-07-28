@@ -81,7 +81,7 @@ vi.mock("./status.summary.runtime.js", () => ({
       provider: "openai",
       model: "gpt-5.5",
     })),
-    resolveSessionRuntimeLabel: vi.fn(() => "OpenClaw Default"),
+    resolveSessionRuntimeLabel: vi.fn(() => "Bot Default"),
     resolveStatusModelLookupRef: vi.fn(({ provider, model }) =>
       typeof model === "string" && model.length > 0
         ? {
@@ -334,9 +334,9 @@ describe("getStatusSummary", () => {
         state: "configured-unavailable",
         diagnostic: {
           kind: "plugin-verification",
-          reason: "missing-openclaw-peer-link",
+          reason: "missing-bot-peer-link",
           detail:
-            "/private/plugins/peer-plugin/node_modules/openclaw points to /private/other/openclaw instead of /private/host/openclaw",
+            "/private/plugins/peer-plugin/node_modules/bot points to /private/other/bot instead of /private/host/bot",
           installPath: "/private/plugins/peer-plugin",
         },
       },
@@ -368,9 +368,9 @@ describe("getStatusSummary", () => {
         state: "configured-unavailable",
         diagnostic: {
           kind: "plugin-verification",
-          reason: "missing-openclaw-peer-link",
+          reason: "missing-bot-peer-link",
           detail:
-            'Plugin declares peerDependency "openclaw", but its host peer link is missing or invalid.',
+            'Plugin declares peerDependency "bot", but its host peer link is missing or invalid.',
         },
       },
     ]);

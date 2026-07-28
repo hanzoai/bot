@@ -5,10 +5,10 @@ import { testApi } from "./logger.js";
 describe("shouldSkipMutatingLoggingConfigRead", () => {
   it("matches config schema and validate invocations", () => {
     expect(
-      testApi.shouldSkipMutatingLoggingConfigRead(["node", "openclaw", "config", "schema"]),
+      testApi.shouldSkipMutatingLoggingConfigRead(["node", "bot", "config", "schema"]),
     ).toBe(true);
     expect(
-      testApi.shouldSkipMutatingLoggingConfigRead(["node", "openclaw", "config", "validate"]),
+      testApi.shouldSkipMutatingLoggingConfigRead(["node", "bot", "config", "validate"]),
     ).toBe(true);
   });
 
@@ -16,7 +16,7 @@ describe("shouldSkipMutatingLoggingConfigRead", () => {
     expect(
       testApi.shouldSkipMutatingLoggingConfigRead([
         "node",
-        "openclaw",
+        "bot",
         "--profile",
         "work",
         "--no-color",
@@ -29,8 +29,8 @@ describe("shouldSkipMutatingLoggingConfigRead", () => {
 
   it("does not match other commands", () => {
     expect(
-      testApi.shouldSkipMutatingLoggingConfigRead(["node", "openclaw", "config", "get", "foo"]),
+      testApi.shouldSkipMutatingLoggingConfigRead(["node", "bot", "config", "get", "foo"]),
     ).toBe(false);
-    expect(testApi.shouldSkipMutatingLoggingConfigRead(["node", "openclaw", "status"])).toBe(false);
+    expect(testApi.shouldSkipMutatingLoggingConfigRead(["node", "bot", "status"])).toBe(false);
   });
 });

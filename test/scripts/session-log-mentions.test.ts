@@ -13,7 +13,7 @@ import {
 const tempRoots: string[] = [];
 
 function makeTempRoot() {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-session-log-mentions-"));
+  const root = mkdtempSync(path.join(tmpdir(), "bot-session-log-mentions-"));
   tempRoots.push(root);
   return root;
 }
@@ -90,7 +90,7 @@ describe("session log mention scanner", () => {
   it("counts mentions from SQLite transcript rows", async () => {
     const root = makeTempRoot();
     const sessionsDir = path.join(root, "agents", "main", "sessions");
-    const sqlitePath = path.join(root, "agents", "main", "agent", "openclaw-agent.sqlite");
+    const sqlitePath = path.join(root, "agents", "main", "agent", "bot-agent.sqlite");
     await fs.mkdir(path.dirname(sqlitePath), { recursive: true });
     const db = new DatabaseSync(sqlitePath);
     try {
@@ -153,7 +153,7 @@ describe("session log mention scanner", () => {
   it("rejects oversized SQLite transcript rows before counting them", async () => {
     const root = makeTempRoot();
     const sessionsDir = path.join(root, "agents", "main", "sessions");
-    const sqlitePath = path.join(root, "agents", "main", "agent", "openclaw-agent.sqlite");
+    const sqlitePath = path.join(root, "agents", "main", "agent", "bot-agent.sqlite");
     await fs.mkdir(path.dirname(sqlitePath), { recursive: true });
     const db = new DatabaseSync(sqlitePath);
     try {
@@ -240,13 +240,13 @@ describe("session log mention scanner", () => {
   it("rejects loose numeric env limits instead of parsing prefixes", () => {
     expect(() =>
       readSessionLogMentionLimits({
-        OPENCLAW_SESSION_LOG_MENTION_FILE_MAX_BYTES: "1e3",
+        BOT_SESSION_LOG_MENTION_FILE_MAX_BYTES: "1e3",
       }),
-    ).toThrow("invalid OPENCLAW_SESSION_LOG_MENTION_FILE_MAX_BYTES: 1e3");
+    ).toThrow("invalid BOT_SESSION_LOG_MENTION_FILE_MAX_BYTES: 1e3");
     expect(() =>
       readSessionLogMentionLimits({
-        OPENCLAW_SESSION_LOG_MENTION_TOTAL_MAX_BYTES: "1000ms",
+        BOT_SESSION_LOG_MENTION_TOTAL_MAX_BYTES: "1000ms",
       }),
-    ).toThrow("invalid OPENCLAW_SESSION_LOG_MENTION_TOTAL_MAX_BYTES: 1000ms");
+    ).toThrow("invalid BOT_SESSION_LOG_MENTION_TOTAL_MAX_BYTES: 1000ms");
   });
 });

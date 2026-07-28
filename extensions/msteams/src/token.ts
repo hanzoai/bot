@@ -1,5 +1,5 @@
 // Msteams plugin module implements token behavior.
-import { isFutureDateTimestampMs } from "openclaw/plugin-sdk/number-runtime";
+import { isFutureDateTimestampMs } from "bot/plugin-sdk/number-runtime";
 import type { MSTeamsConfig } from "../runtime-api.js";
 import { loadMSTeamsDelegatedTokens, saveMSTeamsDelegatedTokens } from "./delegated-state.js";
 import type { MSTeamsDelegatedTokens } from "./oauth.shared.js";

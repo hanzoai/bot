@@ -15,8 +15,8 @@
     },
     {
       "id": "native.android.85cc8de945e3929c",
-      "source": "OpenClaw translations · $languageTag",
-      "translated": "OpenClaw अनुवाद · $languageTag"
+      "source": "Bot translations · $languageTag",
+      "translated": "Bot अनुवाद · $languageTag"
     },
     {
       "id": "native.android.914725056e04bd7a",
@@ -360,8 +360,8 @@
     },
     {
       "id": "native.android.ff4c22906eac1e9e",
-      "source": "OPENCLAW",
-      "translated": "OPENCLAW"
+      "source": "BOT",
+      "translated": "BOT"
     },
     {
       "id": "native.android.dec357dfc9b8c0a5",
@@ -385,13 +385,13 @@
     },
     {
       "id": "native.android.25ce6f89dd2fda90",
-      "source": "OpenClaw Node · Talk",
-      "translated": "OpenClaw नोड · बातचीत"
+      "source": "Bot Node · Talk",
+      "translated": "Bot नोड · बातचीत"
     },
     {
       "id": "native.android.b48f7aeb7a884942",
-      "source": "OpenClaw Node · Connected",
-      "translated": "OpenClaw नोड · कनेक्टेड"
+      "source": "Bot Node · Connected",
+      "translated": "Bot नोड · कनेक्टेड"
     },
     {
       "id": "native.android.b781a577d8da896d",
@@ -400,8 +400,8 @@
     },
     {
       "id": "native.android.97365bea9725ae80",
-      "source": "OpenClaw Node",
-      "translated": "OpenClaw नोड"
+      "source": "Bot Node",
+      "translated": "Bot नोड"
     },
     {
       "id": "native.android.3e0889d921c92cab",
@@ -420,8 +420,8 @@
     },
     {
       "id": "native.android.f4886ad80e8149cf",
-      "source": "OpenClaw node connection status",
-      "translated": "OpenClaw नोड की कनेक्शन स्थिति"
+      "source": "Bot node connection status",
+      "translated": "Bot नोड की कनेक्शन स्थिति"
     },
     {
       "id": "native.android.20fb810920ccb98c",
@@ -950,8 +950,8 @@
     },
     {
       "id": "native.android.3b076d12026fd953",
-      "source": "OpenClaw is syncing back up",
-      "translated": "OpenClaw फिर से सिंक हो रहा है"
+      "source": "Bot is syncing back up",
+      "translated": "Bot फिर से सिंक हो रहा है"
     },
     {
       "id": "native.android.8dd8abf489f1fe50",
@@ -970,8 +970,8 @@
     },
     {
       "id": "native.android.8e22550e0205b237",
-      "source": "Welcome to OpenClaw",
-      "translated": "OpenClaw में आपका स्वागत है"
+      "source": "Welcome to Bot",
+      "translated": "Bot में आपका स्वागत है"
     },
     {
       "id": "native.android.fee881b8134958ab",
@@ -1050,8 +1050,8 @@
     },
     {
       "id": "native.android.237761be968be3f4",
-      "source": "OpenClaw needs ${labels.joinToString(\", \")} permissions to continue.",
-      "translated": "जारी रखने के लिए OpenClaw को ${labels.joinToString(\", \")} अनुमतियों की आवश्यकता है।"
+      "source": "Bot needs ${labels.joinToString(\", \")} permissions to continue.",
+      "translated": "जारी रखने के लिए Bot को ${labels.joinToString(\", \")} अनुमतियों की आवश्यकता है।"
     },
     {
       "id": "native.android.f9b9d558dc078d96",
@@ -1220,18 +1220,18 @@
     },
     {
       "id": "native.android.c9b3801fdf5499a9",
-      "source": "OpenClaw Passive",
-      "translated": "OpenClaw निष्क्रिय"
+      "source": "Bot Passive",
+      "translated": "Bot निष्क्रिय"
     },
     {
       "id": "native.android.e2a79a2c3ddba922",
-      "source": "OpenClaw Time Sensitive",
-      "translated": "OpenClaw समय-संवेदी"
+      "source": "Bot Time Sensitive",
+      "translated": "Bot समय-संवेदी"
     },
     {
       "id": "native.android.a79d6ccab877c9ca",
-      "source": "OpenClaw Active",
-      "translated": "OpenClaw सक्रिय"
+      "source": "Bot Active",
+      "translated": "Bot सक्रिय"
     },
     {
       "id": "native.android.2aa3ad1a12683954",
@@ -1245,13 +1245,13 @@
     },
     {
       "id": "native.android.e1a8681198e91766",
-      "source": "OpenClaw request failed.",
-      "translated": "OpenClaw अनुरोध विफल रहा।"
+      "source": "Bot request failed.",
+      "translated": "Bot अनुरोध विफल रहा।"
     },
     {
       "id": "native.android.a71a93ec69cee4d9",
-      "source": "The Gateway connection changed. Restart OpenClaw to reconnect.",
-      "translated": "Gateway कनेक्शन बदल गया। पुनः कनेक्ट करने के लिए OpenClaw को पुनः प्रारंभ करें।"
+      "source": "The Gateway connection changed. Restart Bot to reconnect.",
+      "translated": "Gateway कनेक्शन बदल गया। पुनः कनेक्ट करने के लिए Bot को पुनः प्रारंभ करें।"
     },
     {
       "id": "native.android.356609f717b92350",
@@ -1470,8 +1470,8 @@
     },
     {
       "id": "native.android.5ce94621017855b6",
-      "source": "Talk or dictate with OpenClaw",
-      "translated": "OpenClaw के साथ बोलें या डिक्टेट करें"
+      "source": "Talk or dictate with Bot",
+      "translated": "Bot के साथ बोलें या डिक्टेट करें"
     },
     {
       "id": "native.android.e2cf5a38587382cb",
@@ -1515,8 +1515,8 @@
     },
     {
       "id": "native.android.9f877120690b0c59",
-      "source": "Search OpenClaw",
-      "translated": "OpenClaw में खोजें"
+      "source": "Search Bot",
+      "translated": "Bot में खोजें"
     },
     {
       "id": "native.android.c142846e7b88306c",
@@ -1555,8 +1555,8 @@
     },
     {
       "id": "native.android.9a839f6e3e05a744",
-      "source": "OpenClaw thread",
-      "translated": "OpenClaw थ्रेड"
+      "source": "Bot thread",
+      "translated": "Bot थ्रेड"
     },
     {
       "id": "native.android.d83f82a1e4a5ed99",
@@ -2690,8 +2690,8 @@
     },
     {
       "id": "native.android.8b55ed05cd70b8d9",
-      "source": "Device pairing actions are unavailable in this Gateway session. Run openclaw devices list on the Gateway host and manage the request there. Node capability approval is separate and still uses nodes approve <request id>.",
-      "translated": "इस Gateway सत्र में डिवाइस पेयरिंग की कार्रवाइयाँ उपलब्ध नहीं हैं। Gateway होस्ट पर openclaw devices list चलाएँ और अनुरोध को वहीं प्रबंधित करें। नोड क्षमता की स्वीकृति अलग है और अब भी nodes approve <request id> का उपयोग करती है।"
+      "source": "Device pairing actions are unavailable in this Gateway session. Run bot devices list on the Gateway host and manage the request there. Node capability approval is separate and still uses nodes approve <request id>.",
+      "translated": "इस Gateway सत्र में डिवाइस पेयरिंग की कार्रवाइयाँ उपलब्ध नहीं हैं। Gateway होस्ट पर bot devices list चलाएँ और अनुरोध को वहीं प्रबंधित करें। नोड क्षमता की स्वीकृति अलग है और अब भी nodes approve <request id> का उपयोग करती है।"
     },
     {
       "id": "native.android.0d8e9ede9c229b8e",
@@ -2750,18 +2750,18 @@
     },
     {
       "id": "native.android.1556c7b90c4a24ff",
-      "source": "Enter the setup code from openclaw qr.",
-      "translated": "openclaw qr से सेटअप कोड दर्ज करें।"
+      "source": "Enter the setup code from bot qr.",
+      "translated": "bot qr से सेटअप कोड दर्ज करें।"
     },
     {
       "id": "native.android.c6d2aa9f033cecc8",
-      "source": "Setup code was not accepted. Generate a fresh code with openclaw qr.",
-      "translated": "सेटअप कोड स्वीकार नहीं किया गया। openclaw qr से नया कोड जनरेट करें।"
+      "source": "Setup code was not accepted. Generate a fresh code with bot qr.",
+      "translated": "सेटअप कोड स्वीकार नहीं किया गया। bot qr से नया कोड जनरेट करें।"
     },
     {
       "id": "native.android.3c50060d3efc154d",
-      "source": "That QR code is not an OpenClaw setup QR. Generate a fresh code with openclaw qr, then try again.",
-      "translated": "वह QR कोड OpenClaw सेटअप QR नहीं है। openclaw qr से नया कोड जनरेट करें, फिर दोबारा कोशिश करें।"
+      "source": "That QR code is not an Bot setup QR. Generate a fresh code with bot qr, then try again.",
+      "translated": "वह QR कोड Bot सेटअप QR नहीं है। bot qr से नया कोड जनरेट करें, फिर दोबारा कोशिश करें।"
     },
     {
       "id": "native.android.f8cd1cbe29c4c582",
@@ -2770,13 +2770,13 @@
     },
     {
       "id": "native.android.63ed21b4888ba5d3",
-      "source": "Could not read that image. Choose a clear screenshot or image of the QR from openclaw qr.",
-      "translated": "उस इमेज को पढ़ा नहीं जा सका। openclaw qr से मिले QR का स्पष्ट स्क्रीनशॉट या इमेज चुनें।"
+      "source": "Could not read that image. Choose a clear screenshot or image of the QR from bot qr.",
+      "translated": "उस इमेज को पढ़ा नहीं जा सका। bot qr से मिले QR का स्पष्ट स्क्रीनशॉट या इमेज चुनें।"
     },
     {
       "id": "native.android.61beaad5c5279eb9",
-      "source": "No setup QR code was found in that image. Choose the QR generated by openclaw qr, or enter the setup code manually.",
-      "translated": "उस इमेज में कोई सेटअप QR कोड नहीं मिला। openclaw qr से जनरेट किया गया QR चुनें या सेटअप कोड मैन्युअल रूप से दर्ज करें।"
+      "source": "No setup QR code was found in that image. Choose the QR generated by bot qr, or enter the setup code manually.",
+      "translated": "उस इमेज में कोई सेटअप QR कोड नहीं मिला। bot qr से जनरेट किया गया QR चुनें या सेटअप कोड मैन्युअल रूप से दर्ज करें।"
     },
     {
       "id": "native.android.4c4912a456b4213a",
@@ -2820,18 +2820,18 @@
     },
     {
       "id": "native.android.64c8db13ef91513c",
-      "source": "Welcome to OpenClaw",
-      "translated": "OpenClaw में आपका स्वागत है"
+      "source": "Welcome to Bot",
+      "translated": "Bot में आपका स्वागत है"
     },
     {
       "id": "native.android.c38e106cc8f1e9ff",
-      "source": "Turn this device into a secure OpenClaw node for chat, voice, camera, and device tools.",
-      "translated": "इस डिवाइस को chat, voice, camera, और device tools के लिए सुरक्षित OpenClaw नोड में बदलें।"
+      "source": "Turn this device into a secure Bot node for chat, voice, camera, and device tools.",
+      "translated": "इस डिवाइस को chat, voice, camera, और device tools के लिए सुरक्षित Bot नोड में बदलें।"
     },
     {
       "id": "native.android.f941909a3fa51055",
-      "source": "OpenClaw logo",
-      "translated": "OpenClaw लोगो"
+      "source": "Bot logo",
+      "translated": "Bot लोगो"
     },
     {
       "id": "native.android.cc878f72a6b70b23",
@@ -2845,8 +2845,8 @@
     },
     {
       "id": "native.android.3bfe29d4d13d3c3e",
-      "source": "Use OpenClaw from your phone",
-      "translated": "अपने फ़ोन से OpenClaw का उपयोग करें"
+      "source": "Use Bot from your phone",
+      "translated": "अपने फ़ोन से Bot का उपयोग करें"
     },
     {
       "id": "native.android.c0b539eeb4612f5d",
@@ -2855,8 +2855,8 @@
     },
     {
       "id": "native.android.5aed4b5c8d6b246d",
-      "source": "The connected OpenClaw agent can use device capabilities you enable. Continue only if you trust the Gateway and agent you connect to.",
-      "translated": "कनेक्ट किया गया OpenClaw एजेंट उन डिवाइस क्षमताओं का उपयोग कर सकता है जिन्हें आप सक्षम करते हैं। केवल तभी जारी रखें जब आप उस Gateway और एजेंट पर भरोसा करते हों जिससे आप कनेक्ट करते हैं।"
+      "source": "The connected Bot agent can use device capabilities you enable. Continue only if you trust the Gateway and agent you connect to.",
+      "translated": "कनेक्ट किया गया Bot एजेंट उन डिवाइस क्षमताओं का उपयोग कर सकता है जिन्हें आप सक्षम करते हैं। केवल तभी जारी रखें जब आप उस Gateway और एजेंट पर भरोसा करते हों जिससे आप कनेक्ट करते हैं।"
     },
     {
       "id": "native.android.63c31ee564d63347",
@@ -2865,8 +2865,8 @@
     },
     {
       "id": "native.android.f50a9c1ee6d47055",
-      "source": "Scan a QR code or use the setup code from your OpenClaw Gateway.",
-      "translated": "QR कोड स्कैन करें या अपने OpenClaw Gateway से सेटअप कोड का उपयोग करें।"
+      "source": "Scan a QR code or use the setup code from your Bot Gateway.",
+      "translated": "QR कोड स्कैन करें या अपने Bot Gateway से सेटअप कोड का उपयोग करें।"
     },
     {
       "id": "native.android.58d80589d9d4b7ff",
@@ -2895,8 +2895,8 @@
     },
     {
       "id": "native.android.c8a43dbba02941f0",
-      "source": "Have a terminal open on the device running OpenClaw.",
-      "translated": "OpenClaw चला रहे डिवाइस पर terminal खुला रखें।"
+      "source": "Have a terminal open on the device running Bot.",
+      "translated": "Bot चला रहे डिवाइस पर terminal खुला रखें।"
     },
     {
       "id": "native.android.71ce00f359981a0b",
@@ -2930,8 +2930,8 @@
     },
     {
       "id": "native.android.d4b295b5146af4b8",
-      "source": "openclaw gateway",
-      "translated": "openclaw gateway"
+      "source": "bot gateway",
+      "translated": "bot gateway"
     },
     {
       "id": "native.android.250b7dda7cff6b5d",
@@ -2945,8 +2945,8 @@
     },
     {
       "id": "native.android.db24e4be7a1b5547",
-      "source": "openclaw qr",
-      "translated": "openclaw qr"
+      "source": "bot qr",
+      "translated": "bot qr"
     },
     {
       "id": "native.android.96d40475de2885d6",
@@ -2970,8 +2970,8 @@
     },
     {
       "id": "native.android.05987e822ac102ec",
-      "source": "Open the camera and frame the code from openclaw qr.",
-      "translated": "कैमरा खोलें और openclaw qr से कोड को फ्रेम में लाएँ।"
+      "source": "Open the camera and frame the code from bot qr.",
+      "translated": "कैमरा खोलें और bot qr से कोड को फ्रेम में लाएँ।"
     },
     {
       "id": "native.android.90fa932d2e0adbd9",
@@ -3140,8 +3140,8 @@
     },
     {
       "id": "native.android.f43cb6ed03dc6766",
-      "source": "Gateway pairing is complete. Approve this phone as a node so OpenClaw can use the device capabilities you enable.",
-      "translated": "Gateway पेयरिंग पूरी हो गई है। इस फ़ोन को नोड के रूप में स्वीकृत करें ताकि OpenClaw आपके द्वारा सक्षम की गई डिवाइस क्षमताओं का उपयोग कर सके।"
+      "source": "Gateway pairing is complete. Approve this phone as a node so Bot can use the device capabilities you enable.",
+      "translated": "Gateway पेयरिंग पूरी हो गई है। इस फ़ोन को नोड के रूप में स्वीकृत करें ताकि Bot आपके द्वारा सक्षम की गई डिवाइस क्षमताओं का उपयोग कर सके।"
     },
     {
       "id": "native.android.8e49feba12c350ac",
@@ -3185,8 +3185,8 @@
     },
     {
       "id": "native.android.d4c3bcf880727fb3",
-      "source": "Only enable access you are comfortable letting OpenClaw use while this phone is connected. You can change these later in Android Settings.",
-      "translated": "केवल वही एक्सेस सक्षम करें जिसे आप इस फ़ोन के कनेक्ट रहने के दौरान OpenClaw को उपयोग करने देने में सहज हों। आप इन्हें बाद में Android Settings में बदल सकते हैं।"
+      "source": "Only enable access you are comfortable letting Bot use while this phone is connected. You can change these later in Android Settings.",
+      "translated": "केवल वही एक्सेस सक्षम करें जिसे आप इस फ़ोन के कनेक्ट रहने के दौरान Bot को उपयोग करने देने में सहज हों। आप इन्हें बाद में Android Settings में बदल सकते हैं।"
     },
     {
       "id": "native.android.44549cfd7e6a1ab8",
@@ -3230,8 +3230,8 @@
     },
     {
       "id": "native.android.176b4f5d1c9f8ce2",
-      "source": "Approval is in progress.\nOpenClaw will reconnect automatically.",
-      "translated": "स्वीकृति की प्रक्रिया जारी है।\nOpenClaw अपने-आप फिर से कनेक्ट हो जाएगा।"
+      "source": "Approval is in progress.\nBot will reconnect automatically.",
+      "translated": "स्वीकृति की प्रक्रिया जारी है।\nBot अपने-आप फिर से कनेक्ट हो जाएगा।"
     },
     {
       "id": "native.android.466e3fb210732587",
@@ -3240,8 +3240,8 @@
     },
     {
       "id": "native.android.7b95b9e103bbbb92",
-      "source": "OpenClaw is checking gateway and node access.",
-      "translated": "OpenClaw, Gateway और नोड एक्सेस की जाँच कर रहा है।"
+      "source": "Bot is checking gateway and node access.",
+      "translated": "Bot, Gateway और नोड एक्सेस की जाँच कर रहा है।"
     },
     {
       "id": "native.android.a75fc5ca269cbb15",
@@ -3335,8 +3335,8 @@
     },
     {
       "id": "native.android.1c93d0cbb8e05a7a",
-      "source": "Gateway approval is pending. Run openclaw devices list on the gateway host, approve this phone, then retry.",
-      "translated": "Gateway की स्वीकृति लंबित है। gateway होस्ट पर openclaw devices list चलाएँ, इस फ़ोन को स्वीकृत करें, फिर दोबारा कोशिश करें।"
+      "source": "Gateway approval is pending. Run bot devices list on the gateway host, approve this phone, then retry.",
+      "translated": "Gateway की स्वीकृति लंबित है। gateway होस्ट पर bot devices list चलाएँ, इस फ़ोन को स्वीकृत करें, फिर दोबारा कोशिश करें।"
     },
     {
       "id": "native.android.d0c1dcc8236a1ab9",
@@ -3350,8 +3350,8 @@
     },
     {
       "id": "native.android.bdd063b9f766050b",
-      "source": "Gateway approval is in progress. OpenClaw will retry automatically.",
-      "translated": "Gateway की स्वीकृति जारी है। OpenClaw अपने-आप फिर से प्रयास करेगा।"
+      "source": "Gateway approval is in progress. Bot will retry automatically.",
+      "translated": "Gateway की स्वीकृति जारी है। Bot अपने-आप फिर से प्रयास करेगा।"
     },
     {
       "id": "native.android.45cfb86623fa2251",
@@ -3405,18 +3405,18 @@
     },
     {
       "id": "native.android.c94c164d474cb0db",
-      "source": "This app is older than the Gateway. Update OpenClaw on this device, then retry.",
-      "translated": "यह ऐप Gateway से पुराना है। इस डिवाइस पर OpenClaw अपडेट करें, फिर दोबारा कोशिश करें।"
+      "source": "This app is older than the Gateway. Update Bot on this device, then retry.",
+      "translated": "यह ऐप Gateway से पुराना है। इस डिवाइस पर Bot अपडेट करें, फिर दोबारा कोशिश करें।"
     },
     {
       "id": "native.android.48ba24436b643607",
-      "source": "The Gateway is older than this app. Update OpenClaw on the Gateway host, then retry.",
-      "translated": "Gateway इस ऐप से पुराना है। Gateway होस्ट पर OpenClaw अपडेट करें, फिर दोबारा कोशिश करें।"
+      "source": "The Gateway is older than this app. Update Bot on the Gateway host, then retry.",
+      "translated": "Gateway इस ऐप से पुराना है। Gateway होस्ट पर Bot अपडेट करें, फिर दोबारा कोशिश करें।"
     },
     {
       "id": "native.android.1473077d05ac1739",
-      "source": "The app and Gateway use incompatible protocol versions. Update OpenClaw on both, then retry.",
-      "translated": "ऐप और Gateway असंगत प्रोटोकॉल संस्करणों का उपयोग करते हैं। दोनों पर OpenClaw अपडेट करें, फिर दोबारा कोशिश करें।"
+      "source": "The app and Gateway use incompatible protocol versions. Update Bot on both, then retry.",
+      "translated": "ऐप और Gateway असंगत प्रोटोकॉल संस्करणों का उपयोग करते हैं। दोनों पर Bot अपडेट करें, फिर दोबारा कोशिश करें।"
     },
     {
       "id": "native.android.6379bfb6b09ef8cd",
@@ -3425,23 +3425,23 @@
     },
     {
       "id": "native.android.ee7dad03cd78babe",
-      "source": "openclaw devices approve $requestId",
-      "translated": "openclaw devices approve $requestId"
+      "source": "bot devices approve $requestId",
+      "translated": "bot devices approve $requestId"
     },
     {
       "id": "native.android.3792801e2951bb11",
-      "source": "openclaw devices list",
-      "translated": "openclaw devices list"
+      "source": "bot devices list",
+      "translated": "bot devices list"
     },
     {
       "id": "native.android.8fe20d8f8090064d",
-      "source": "openclaw nodes approve $requestId",
-      "translated": "openclaw nodes approve $requestId"
+      "source": "bot nodes approve $requestId",
+      "translated": "bot nodes approve $requestId"
     },
     {
       "id": "native.android.2961a521c1b6837f",
-      "source": "openclaw nodes approve REQUEST_ID",
-      "translated": "openclaw nodes approve REQUEST_ID"
+      "source": "bot nodes approve REQUEST_ID",
+      "translated": "bot nodes approve REQUEST_ID"
     },
     {
       "id": "native.android.a7933196a18ec924",
@@ -3545,8 +3545,8 @@
     },
     {
       "id": "native.android.d096df67bff5e611",
-      "source": "Show OpenClaw alerts",
-      "translated": "OpenClaw अलर्ट दिखाएँ"
+      "source": "Show Bot alerts",
+      "translated": "Bot अलर्ट दिखाएँ"
     },
     {
       "id": "native.android.93cbec65dbc5de69",
@@ -3855,8 +3855,8 @@
     },
     {
       "id": "native.android.fc145645b9620e57",
-      "source": "OpenClaw thread",
-      "translated": "OpenClaw थ्रेड"
+      "source": "Bot thread",
+      "translated": "Bot थ्रेड"
     },
     {
       "id": "native.android.71cbb8dde8bf138b",
@@ -3920,8 +3920,8 @@
     },
     {
       "id": "native.android.b5e4ae7f8c9eca2d",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.android.f46b06f8550516e4",
@@ -4110,8 +4110,8 @@
     },
     {
       "id": "native.android.5e3e4cd42004cb28",
-      "source": "Scheduled OpenClaw work from your gateway.",
-      "translated": "आपके gateway से निर्धारित OpenClaw कार्य।"
+      "source": "Scheduled Bot work from your gateway.",
+      "translated": "आपके gateway से निर्धारित Bot कार्य।"
     },
     {
       "id": "native.android.31a5440e22667f02",
@@ -4270,8 +4270,8 @@
     },
     {
       "id": "native.android.fea93eda5bf97d9e",
-      "source": "How this phone appears to OpenClaw.",
-      "translated": "यह फ़ोन OpenClaw में कैसे दिखाई देता है।"
+      "source": "How this phone appears to Bot.",
+      "translated": "यह फ़ोन Bot में कैसे दिखाई देता है।"
     },
     {
       "id": "native.android.695229fd01afbc2d",
@@ -4310,8 +4310,8 @@
     },
     {
       "id": "native.android.6e58157abced395f",
-      "source": "Runs on-device while OpenClaw is visible.",
-      "translated": "OpenClaw दिखाई देने के दौरान डिवाइस पर चलता है।"
+      "source": "Runs on-device while Bot is visible.",
+      "translated": "Bot दिखाई देने के दौरान डिवाइस पर चलता है।"
     },
     {
       "id": "native.android.6464166ab71fde3f",
@@ -4390,8 +4390,8 @@
     },
     {
       "id": "native.android.5ff888931aae2738",
-      "source": "Check that OpenClaw can speak clearly on this phone.",
-      "translated": "जाँचें कि OpenClaw इस फ़ोन पर स्पष्ट रूप से बोल सकता है।"
+      "source": "Check that Bot can speak clearly on this phone.",
+      "translated": "जाँचें कि Bot इस फ़ोन पर स्पष्ट रूप से बोल सकता है।"
     },
     {
       "id": "native.android.f82d5d81f5dc9b43",
@@ -4500,8 +4500,8 @@
     },
     {
       "id": "native.android.9feed8722db5d2cc",
-      "source": "Choose what reaches OpenClaw.",
-      "translated": "चुनें कि OpenClaw तक क्या पहुँचे।"
+      "source": "Choose what reaches Bot.",
+      "translated": "चुनें कि Bot तक क्या पहुँचे।"
     },
     {
       "id": "native.android.d32071018de11907",
@@ -4520,8 +4520,8 @@
     },
     {
       "id": "native.android.5a077bf9cf4f47c8",
-      "source": "OpenClaw can receive selected alerts.",
-      "translated": "OpenClaw चयनित अलर्ट प्राप्त कर सकता है।"
+      "source": "Bot can receive selected alerts.",
+      "translated": "Bot चयनित अलर्ट प्राप्त कर सकता है।"
     },
     {
       "id": "native.android.a04ee29c0a3b68f5",
@@ -4680,8 +4680,8 @@
     },
     {
       "id": "native.android.bdafaceb7af93f5a",
-      "source": "OpenClaw can list launcher-visible apps.",
-      "translated": "OpenClaw लॉन्चर में दिखाई देने वाले ऐप्स की सूची बना सकता है।"
+      "source": "Bot can list launcher-visible apps.",
+      "translated": "Bot लॉन्चर में दिखाई देने वाले ऐप्स की सूची बना सकता है।"
     },
     {
       "id": "native.android.be89d5601904322a",
@@ -4710,8 +4710,8 @@
     },
     {
       "id": "native.android.58549715b04997cc",
-      "source": "Always allows requested location checks while OpenClaw is in the background; Android shows this in the persistent node notification.",
-      "translated": "OpenClaw के बैकग्राउंड में होने पर अनुरोधित स्थान जांचों की हमेशा अनुमति देता है; Android इसे लगातार दिखाई देने वाली नोड सूचना में दिखाता है।"
+      "source": "Always allows requested location checks while Bot is in the background; Android shows this in the persistent node notification.",
+      "translated": "Bot के बैकग्राउंड में होने पर अनुरोधित स्थान जांचों की हमेशा अनुमति देता है; Android इसे लगातार दिखाई देने वाली नोड सूचना में दिखाता है।"
     },
     {
       "id": "native.android.d5a8d7f97a7971b1",
@@ -4720,8 +4720,8 @@
     },
     {
       "id": "native.android.031d3ed6fb8a6559",
-      "source": "OpenClaw only checks location when your paired Gateway requests it. On the next Android screen, choose $backgroundPermissionLabel to allow checks while the app is in the background.",
-      "translated": "OpenClaw केवल तभी स्थान की जाँच करता है, जब आपका युग्मित Gateway इसका अनुरोध करता है। ऐप के बैकग्राउंड में होने पर जाँच की अनुमति देने के लिए अगली Android स्क्रीन पर $backgroundPermissionLabel चुनें।"
+      "source": "Bot only checks location when your paired Gateway requests it. On the next Android screen, choose $backgroundPermissionLabel to allow checks while the app is in the background.",
+      "translated": "Bot केवल तभी स्थान की जाँच करता है, जब आपका युग्मित Gateway इसका अनुरोध करता है। ऐप के बैकग्राउंड में होने पर जाँच की अनुमति देने के लिए अगली Android स्क्रीन पर $backgroundPermissionLabel चुनें।"
     },
     {
       "id": "native.android.c48805f3de1d72ca",
@@ -4735,13 +4735,13 @@
     },
     {
       "id": "native.android.c3a001bb0191892d",
-      "source": "OpenClaw collects and sends the names, package IDs, and status of apps visible on this phone when your paired OpenClaw Gateway asks for them. This lets your assistant answer questions and take actions using installed apps.",
-      "translated": "OpenClaw इस फ़ोन पर दिखाई देने वाले ऐप्स के नाम, पैकेज ID और स्थिति एकत्र करके भेजता है जब आपका पेयर किया गया OpenClaw Gateway उन्हें माँगता है। इससे आपका असिस्टेंट इंस्टॉल किए गए ऐप्स का उपयोग करके प्रश्नों का उत्तर दे सकता है और कार्रवाइयाँ कर सकता है।"
+      "source": "Bot collects and sends the names, package IDs, and status of apps visible on this phone when your paired Bot Gateway asks for them. This lets your assistant answer questions and take actions using installed apps.",
+      "translated": "Bot इस फ़ोन पर दिखाई देने वाले ऐप्स के नाम, पैकेज ID और स्थिति एकत्र करके भेजता है जब आपका पेयर किया गया Bot Gateway उन्हें माँगता है। इससे आपका असिस्टेंट इंस्टॉल किए गए ऐप्स का उपयोग करके प्रश्नों का उत्तर दे सकता है और कार्रवाइयाँ कर सकता है।"
     },
     {
       "id": "native.android.b05f8909de072d71",
-      "source": "Your phone sends this information to your Gateway, not to a server run by OpenClaw. Your Gateway may include it in requests to the AI provider you chose.",
-      "translated": "आपका फ़ोन यह जानकारी आपके Gateway को भेजता है, न कि OpenClaw द्वारा चलाए जाने वाले किसी सर्वर को। आपका Gateway इसे आपके चुने हुए AI प्रदाता के अनुरोधों में शामिल कर सकता है।"
+      "source": "Your phone sends this information to your Gateway, not to a server run by Bot. Your Gateway may include it in requests to the AI provider you chose.",
+      "translated": "आपका फ़ोन यह जानकारी आपके Gateway को भेजता है, न कि Bot द्वारा चलाए जाने वाले किसी सर्वर को। आपका Gateway इसे आपके चुने हुए AI प्रदाता के अनुरोधों में शामिल कर सकता है।"
     },
     {
       "id": "native.android.95a3cc1b163c1edf",
@@ -4785,8 +4785,8 @@
     },
     {
       "id": "native.android.9d658ff26e59274b",
-      "source": "Connection between this phone and OpenClaw.",
-      "translated": "इस फ़ोन और OpenClaw के बीच कनेक्शन।"
+      "source": "Connection between this phone and Bot.",
+      "translated": "इस फ़ोन और Bot के बीच कनेक्शन।"
     },
     {
       "id": "native.android.718cb50d1bff3e32",
@@ -4895,8 +4895,8 @@
     },
     {
       "id": "native.android.de12fd162a566974",
-      "source": "Android can scan or paste an existing setup code, but this gateway does not expose setup-code generation to the app yet. Generate the QR/code on the gateway host with openclaw qr, then scan it here or paste the setup code below.",
-      "translated": "Android मौजूदा सेटअप कोड को स्कैन या पेस्ट कर सकता है, लेकिन यह gateway अभी ऐप को सेटअप-कोड जनरेशन उपलब्ध नहीं कराता है। gateway host पर openclaw qr के साथ QR/कोड जनरेट करें, फिर उसे यहाँ स्कैन करें या नीचे सेटअप कोड पेस्ट करें।"
+      "source": "Android can scan or paste an existing setup code, but this gateway does not expose setup-code generation to the app yet. Generate the QR/code on the gateway host with bot qr, then scan it here or paste the setup code below.",
+      "translated": "Android मौजूदा सेटअप कोड को स्कैन या पेस्ट कर सकता है, लेकिन यह gateway अभी ऐप को सेटअप-कोड जनरेशन उपलब्ध नहीं कराता है। gateway host पर bot qr के साथ QR/कोड जनरेट करें, फिर उसे यहाँ स्कैन करें या नीचे सेटअप कोड पेस्ट करें।"
     },
     {
       "id": "native.android.ac1032dabe06ab02",
@@ -4995,8 +4995,8 @@
     },
     {
       "id": "native.android.f6ab96d066bd583c",
-      "source": "Use a secure wss:// or Tailscale Serve Gateway, generate a full-access setup code in the Control UI or with openclaw qr, then scan or paste it below and reconnect to enable settings and upgrades.",
-      "translated": "एक सुरक्षित wss:// या Tailscale Serve Gateway का उपयोग करें, Control UI में या openclaw qr के साथ एक फुल-एक्सेस सेटअप कोड जनरेट करें, फिर उसे नीचे स्कैन या पेस्ट करें और सेटिंग्स तथा अपग्रेड सक्षम करने के लिए फिर से कनेक्ट करें।"
+      "source": "Use a secure wss:// or Tailscale Serve Gateway, generate a full-access setup code in the Control UI or with bot qr, then scan or paste it below and reconnect to enable settings and upgrades.",
+      "translated": "एक सुरक्षित wss:// या Tailscale Serve Gateway का उपयोग करें, Control UI में या bot qr के साथ एक फुल-एक्सेस सेटअप कोड जनरेट करें, फिर उसे नीचे स्कैन या पेस्ट करें और सेटिंग्स तथा अपग्रेड सक्षम करने के लिए फिर से कनेक्ट करें।"
     },
     {
       "id": "native.android.5311e446ce2bf857",
@@ -5105,8 +5105,8 @@
     },
     {
       "id": "native.android.c2d37ac2ad4c9e3c",
-      "source": "OpenClaw for Android.",
-      "translated": "Android के लिए OpenClaw।"
+      "source": "Bot for Android.",
+      "translated": "Android के लिए Bot।"
     },
     {
       "id": "native.android.38889ec3f682dcf8",
@@ -5150,18 +5150,18 @@
     },
     {
       "id": "native.android.aac3310699b496c8",
-      "source": "© 2026 OpenClaw Foundation — MIT License.",
-      "translated": "© 2026 OpenClaw Foundation — MIT लाइसेंस।"
+      "source": "© 2026 Bot Foundation — MIT License.",
+      "translated": "© 2026 Bot Foundation — MIT लाइसेंस।"
     },
     {
       "id": "native.android.a157bbb606e9b398",
-      "source": "OpenClaw logo",
-      "translated": "OpenClaw लोगो"
+      "source": "Bot logo",
+      "translated": "Bot लोगो"
     },
     {
       "id": "native.android.7b78b4869baf2160",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.android.ad4c14835d1b71ca",
@@ -5175,8 +5175,8 @@
     },
     {
       "id": "native.android.996367534eb94cc2",
-      "source": "OpenClaw appreciates its partners in the open-source community.",
-      "translated": "OpenClaw ओपन-सोर्स समुदाय में अपने भागीदारों की सराहना करता है।"
+      "source": "Bot appreciates its partners in the open-source community.",
+      "translated": "Bot ओपन-सोर्स समुदाय में अपने भागीदारों की सराहना करता है।"
     },
     {
       "id": "native.android.24da1d2eb750ba07",
@@ -5225,8 +5225,8 @@
     },
     {
       "id": "native.android.c971506716c96e91",
-      "source": "OpenClaw turns this phone into a clean mobile command surface for threads, voice, providers, and Gateway.",
-      "translated": "OpenClaw इस फ़ोन को थ्रेड, वॉइस, प्रोवाइडर और Gateway के लिए एक सुव्यवस्थित मोबाइल कमांड इंटरफ़ेस में बदल देता है।"
+      "source": "Bot turns this phone into a clean mobile command surface for threads, voice, providers, and Gateway.",
+      "translated": "Bot इस फ़ोन को थ्रेड, वॉइस, प्रोवाइडर और Gateway के लिए एक सुव्यवस्थित मोबाइल कमांड इंटरफ़ेस में बदल देता है।"
     },
     {
       "id": "native.android.3a3bea53e6a6ada7",
@@ -5700,8 +5700,8 @@
     },
     {
       "id": "native.android.2e33a4fd5f60b550",
-      "source": "Start a chat and your active OpenClaw conversations will appear here.",
-      "translated": "चैट शुरू करें और आपकी सक्रिय OpenClaw बातचीत यहाँ दिखाई देंगी।"
+      "source": "Start a chat and your active Bot conversations will appear here.",
+      "translated": "चैट शुरू करें और आपकी सक्रिय Bot बातचीत यहाँ दिखाई देंगी।"
     },
     {
       "id": "native.android.85726cfd4207d48a",
@@ -5975,8 +5975,8 @@
     },
     {
       "id": "native.android.4f369a09c8731092",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.android.4878165188c0310c",
@@ -6135,8 +6135,8 @@
     },
     {
       "id": "native.android.ca1451df912ed5cf",
-      "source": "OpenClaw ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-      "translated": "OpenClaw ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
+      "source": "Bot ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+      "translated": "Bot ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
     },
     {
       "id": "native.android.b7d8c506999a68f7",
@@ -6325,8 +6325,8 @@
     },
     {
       "id": "native.android.e197964b10ba02ce",
-      "source": "OpenClaw mobile",
-      "translated": "OpenClaw मोबाइल"
+      "source": "Bot mobile",
+      "translated": "Bot मोबाइल"
     },
     {
       "id": "native.android.45005deba537cc59",
@@ -6945,8 +6945,8 @@
     },
     {
       "id": "native.android.4b2c29c94377f235",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.android.7a7da7d8f8613d33",
@@ -6970,8 +6970,8 @@
     },
     {
       "id": "native.android.06e5bfbad4b42e3b",
-      "source": "Connect this phone to a Gateway before opening OpenClaw.",
-      "translated": "OpenClaw खोलने से पहले इस फ़ोन को किसी Gateway से कनेक्ट करें।"
+      "source": "Connect this phone to a Gateway before opening Bot.",
+      "translated": "Bot खोलने से पहले इस फ़ोन को किसी Gateway से कनेक्ट करें।"
     },
     {
       "id": "native.android.44cca3625b125c19",
@@ -6980,18 +6980,18 @@
     },
     {
       "id": "native.android.6089cc78ebd95573",
-      "source": "Checking whether this Gateway supports the OpenClaw settings assistant.",
-      "translated": "जांच रहे हैं कि यह Gateway OpenClaw सेटिंग्स असिस्टेंट का समर्थन करता है या नहीं।"
+      "source": "Checking whether this Gateway supports the Bot settings assistant.",
+      "translated": "जांच रहे हैं कि यह Gateway Bot सेटिंग्स असिस्टेंट का समर्थन करता है या नहीं।"
     },
     {
       "id": "native.android.3c3a35369bc2f1f9",
-      "source": "Update this Gateway to use the OpenClaw settings assistant.",
-      "translated": "OpenClaw सेटिंग्स असिस्टेंट का उपयोग करने के लिए इस Gateway को अपडेट करें।"
+      "source": "Update this Gateway to use the Bot settings assistant.",
+      "translated": "Bot सेटिंग्स असिस्टेंट का उपयोग करने के लिए इस Gateway को अपडेट करें।"
     },
     {
       "id": "native.android.41b7b9cd883e3e81",
-      "source": "OpenClaw is working…",
-      "translated": "OpenClaw काम कर रहा है…"
+      "source": "Bot is working…",
+      "translated": "Bot काम कर रहा है…"
     },
     {
       "id": "native.android.072481856dd25c89",
@@ -7000,8 +7000,8 @@
     },
     {
       "id": "native.android.25fcaa5f2ef2546e",
-      "source": "OpenClaw is ready to continue in your ordinary chat.",
-      "translated": "OpenClaw आपकी सामान्य चैट में जारी रखने के लिए तैयार है।"
+      "source": "Bot is ready to continue in your ordinary chat.",
+      "translated": "Bot आपकी सामान्य चैट में जारी रखने के लिए तैयार है।"
     },
     {
       "id": "native.android.88377fbc76395226",
@@ -7030,8 +7030,8 @@
     },
     {
       "id": "native.android.4753194a1f8c6c6b",
-      "source": "Reply to OpenClaw…",
-      "translated": "OpenClaw को उत्तर दें…"
+      "source": "Reply to Bot…",
+      "translated": "Bot को उत्तर दें…"
     },
     {
       "id": "native.android.07d2609a561a43b0",
@@ -7110,8 +7110,8 @@
     },
     {
       "id": "native.android.9d977253fdcda216",
-      "source": "OpenClaw speaking",
-      "translated": "OpenClaw बोल रहा है"
+      "source": "Bot speaking",
+      "translated": "Bot बोल रहा है"
     },
     {
       "id": "native.android.1babfd757bbcfeb4",
@@ -7190,8 +7190,8 @@
     },
     {
       "id": "native.android.2e2b5efe4ca2380a",
-      "source": "OpenClaw is replying",
-      "translated": "OpenClaw जवाब दे रहा है"
+      "source": "Bot is replying",
+      "translated": "Bot जवाब दे रहा है"
     },
     {
       "id": "native.android.64731fc46a862f86",
@@ -7290,8 +7290,8 @@
     },
     {
       "id": "native.android.253debc9d0714dda",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.android.24057bba4bbfa27a",
@@ -7310,8 +7310,8 @@
     },
     {
       "id": "native.android.5b8bd9f2b69b91ea",
-      "source": "OpenClaw is preparing a response.",
-      "translated": "OpenClaw जवाब तैयार कर रहा है।"
+      "source": "Bot is preparing a response.",
+      "translated": "Bot जवाब तैयार कर रहा है।"
     },
     {
       "id": "native.android.420cccbd48298a8d",
@@ -7325,8 +7325,8 @@
     },
     {
       "id": "native.android.285eeed928be0fc1",
-      "source": "OpenClaw only listens when you start Talk or Dictation.",
-      "translated": "OpenClaw केवल तब सुनता है जब आप Talk या Dictation शुरू करते हैं।"
+      "source": "Bot only listens when you start Talk or Dictation.",
+      "translated": "Bot केवल तब सुनता है जब आप Talk या Dictation शुरू करते हैं।"
     },
     {
       "id": "native.android.b10a51fe9d4b8d2d",
@@ -7335,8 +7335,8 @@
     },
     {
       "id": "native.android.c8bff891c9a442d9",
-      "source": "OpenClaw is speaking",
-      "translated": "OpenClaw बोल रहा है"
+      "source": "Bot is speaking",
+      "translated": "Bot बोल रहा है"
     },
     {
       "id": "native.android.248e1292eff12b84",
@@ -7825,8 +7825,8 @@
     },
     {
       "id": "native.android.dfbd755eb43b4d26",
-      "source": "OpenClaw · Live",
-      "translated": "OpenClaw · लाइव"
+      "source": "Bot · Live",
+      "translated": "Bot · लाइव"
     },
     {
       "id": "native.android.b3ff30d4e0b3ce58",
@@ -7840,8 +7840,8 @@
     },
     {
       "id": "native.android.82e9fe45e93909b6",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.android.02b4598277aca860",
@@ -8035,8 +8035,8 @@
     },
     {
       "id": "native.android.ebe49a8b8df80bd3",
-      "source": "Catch me up on my recent OpenClaw threads and suggest next steps.",
-      "translated": "मेरे हाल के OpenClaw थ्रेड की जानकारी दें और अगले चरण सुझाएँ।"
+      "source": "Catch me up on my recent Bot threads and suggest next steps.",
+      "translated": "मेरे हाल के Bot थ्रेड की जानकारी दें और अगले चरण सुझाएँ।"
     },
     {
       "id": "native.android.79f64f0b5ecaa07c",
@@ -8060,8 +8060,8 @@
     },
     {
       "id": "native.android.1656b8b922a5e3f2",
-      "source": "Ask OpenClaw to use Android capabilities.",
-      "translated": "OpenClaw से Android क्षमताओं का उपयोग करने के लिए कहें।"
+      "source": "Ask Bot to use Android capabilities.",
+      "translated": "Bot से Android क्षमताओं का उपयोग करने के लिए कहें।"
     },
     {
       "id": "native.android.04c826e3507eb47e",
@@ -8070,8 +8070,8 @@
     },
     {
       "id": "native.android.67075c8d2ccc0bb5",
-      "source": "OpenClaw · Live",
-      "translated": "OpenClaw · लाइव"
+      "source": "Bot · Live",
+      "translated": "Bot · लाइव"
     },
     {
       "id": "native.android.869f1130ca16bab5",
@@ -8085,8 +8085,8 @@
     },
     {
       "id": "native.android.25d8575c0063aee5",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.android.5aafbef3744d86f3",
@@ -8115,8 +8115,8 @@
     },
     {
       "id": "native.android.d851a32f367f8b31",
-      "source": "OpenClaw is working",
-      "translated": "OpenClaw काम कर रहा है"
+      "source": "Bot is working",
+      "translated": "Bot काम कर रहा है"
     },
     {
       "id": "native.android.0fd6b75cadc0ce75",
@@ -8225,8 +8225,8 @@
     },
     {
       "id": "native.android.f1d69eb66c5dfa39",
-      "source": "Message OpenClaw",
-      "translated": "OpenClaw को संदेश भेजें"
+      "source": "Message Bot",
+      "translated": "Bot को संदेश भेजें"
     },
     {
       "id": "native.android.9b42791ed9da90d3",
@@ -8525,8 +8525,8 @@
     },
     {
       "id": "native.android.79d7a1026ef43e80",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.android.e8318a46a213cb91",
@@ -8560,13 +8560,13 @@
     },
     {
       "id": "native.android.794873efdfcdff4f",
-      "source": "OpenClaw gateway",
-      "translated": "OpenClaw Gateway"
+      "source": "Bot gateway",
+      "translated": "Bot Gateway"
     },
     {
       "id": "native.android.2d3b6dd9a8f186fe",
-      "source": "Ask OpenClaw anything",
-      "translated": "OpenClaw से कुछ भी पूछें"
+      "source": "Ask Bot anything",
+      "translated": "Bot से कुछ भी पूछें"
     },
     {
       "id": "native.android.608ccdaeababf056",
@@ -8600,8 +8600,8 @@
     },
     {
       "id": "native.android.3457b4ee28d964ee",
-      "source": "OpenClaw will surface approvals, failed jobs, and channel issues here.",
-      "translated": "OpenClaw अनुमोदन, विफल जॉब्स और चैनल समस्याएँ यहाँ दिखाएगा।"
+      "source": "Bot will surface approvals, failed jobs, and channel issues here.",
+      "translated": "Bot अनुमोदन, विफल जॉब्स और चैनल समस्याएँ यहाँ दिखाएगा।"
     },
     {
       "id": "native.android.7a6a37643fcfb2d9",
@@ -8885,23 +8885,23 @@
     },
     {
       "id": "native.android.f392ee2d50d6b7ce",
-      "source": "ask OpenClaw $prompt",
-      "translated": "OpenClaw से $prompt पूछें"
+      "source": "ask Bot $prompt",
+      "translated": "Bot से $prompt पूछें"
     },
     {
       "id": "native.android.ea9d1a78cfa13033",
-      "source": "tell OpenClaw to $prompt",
-      "translated": "OpenClaw को $prompt बताने के लिए कहें"
+      "source": "tell Bot to $prompt",
+      "translated": "Bot को $prompt बताने के लिए कहें"
     },
     {
       "id": "native.android.7f96ac9b9e10abd0",
-      "source": "open OpenClaw and ask $prompt",
-      "translated": "OpenClaw खोलें और $prompt पूछें"
+      "source": "open Bot and ask $prompt",
+      "translated": "Bot खोलें और $prompt पूछें"
     },
     {
       "id": "native.android.a3c395b04ae7a621",
-      "source": "OpenClaw Node",
-      "translated": "OpenClaw Node"
+      "source": "Bot Node",
+      "translated": "Bot Node"
     },
     {
       "id": "native.android.cd32b06480d9bb69",
@@ -8985,13 +8985,13 @@
     },
     {
       "id": "native.android.e3661fcea979a74c",
-      "source": "OpenClaw Git commit",
-      "translated": "OpenClaw Git कमिट"
+      "source": "Bot Git commit",
+      "translated": "Bot Git कमिट"
     },
     {
       "id": "native.android.a610564c863cdef7",
-      "source": "OpenClaw build timestamp",
-      "translated": "OpenClaw बिल्ड टाइमस्टैम्प"
+      "source": "Bot build timestamp",
+      "translated": "Bot बिल्ड टाइमस्टैम्प"
     },
     {
       "id": "native.android.9b9a42b4f56bea2a",
@@ -9170,8 +9170,8 @@
     },
     {
       "id": "native.android.16d2abc828935351",
-      "source": "Enabling lets OpenClaw observe and control other apps' screens when armed. Android accessibility access is required.",
-      "translated": "सक्षम करने पर OpenClaw आर्म होने पर अन्य ऐप्स की स्क्रीन देख और नियंत्रित कर सकता है। Android एक्सेसिबिलिटी एक्सेस आवश्यक है।"
+      "source": "Enabling lets Bot observe and control other apps' screens when armed. Android accessibility access is required.",
+      "translated": "सक्षम करने पर Bot आर्म होने पर अन्य ऐप्स की स्क्रीन देख और नियंत्रित कर सकता है। Android एक्सेसिबिलिटी एक्सेस आवश्यक है।"
     },
     {
       "id": "native.android.2762510a90e577a3",
@@ -9185,8 +9185,8 @@
     },
     {
       "id": "native.android.b3cae8c7b0ac2222",
-      "source": "OpenClaw UI control",
-      "translated": "OpenClaw UI नियंत्रण"
+      "source": "Bot UI control",
+      "translated": "Bot UI नियंत्रण"
     },
     {
       "id": "native.android.d980d910a3466dc2",
@@ -9195,13 +9195,13 @@
     },
     {
       "id": "native.android.7f56eb025a774101",
-      "source": "Allows the third-party OpenClaw build to inspect and control the active app during local development.",
-      "translated": "तृतीय-पक्ष OpenClaw बिल्ड को स्थानीय विकास के दौरान सक्रिय ऐप का निरीक्षण और नियंत्रण करने की अनुमति देता है।"
+      "source": "Allows the third-party Bot build to inspect and control the active app during local development.",
+      "translated": "तृतीय-पक्ष Bot बिल्ड को स्थानीय विकास के दौरान सक्रिय ऐप का निरीक्षण और नियंत्रण करने की अनुमति देता है।"
     },
     {
       "id": "native.android.e1c713595c555f5f",
-      "source": "OpenClaw Accessibility Developer",
-      "translated": "OpenClaw Accessibility Developer"
+      "source": "Bot Accessibility Developer",
+      "translated": "Bot Accessibility Developer"
     },
     {
       "id": "native.android.342644995c7fa39d",
@@ -9390,8 +9390,8 @@
     },
     {
       "id": "native.android.b8de3221042b2fd3",
-      "source": "Talk or type on your watch. The paired phone sends the message through its authenticated OpenClaw session.",
-      "translated": "अपनी घड़ी पर बोलें या टाइप करें। युग्मित फ़ोन अपने प्रमाणित OpenClaw सत्र के माध्यम से संदेश भेजता है।"
+      "source": "Talk or type on your watch. The paired phone sends the message through its authenticated Bot session.",
+      "translated": "अपनी घड़ी पर बोलें या टाइप करें। युग्मित फ़ोन अपने प्रमाणित Bot सत्र के माध्यम से संदेश भेजता है।"
     },
     {
       "id": "native.android.44c6bb3c4c7b61ae",
@@ -9500,13 +9500,13 @@
     },
     {
       "id": "native.android.5d98a2a8a4f1f793",
-      "source": "Reconnect the Gateway in OpenClaw on the paired phone.",
-      "translated": "जोड़े गए फ़ोन पर OpenClaw में Gateway को फिर से कनेक्ट करें।"
+      "source": "Reconnect the Gateway in Bot on the paired phone.",
+      "translated": "जोड़े गए फ़ोन पर Bot में Gateway को फिर से कनेक्ट करें।"
     },
     {
       "id": "native.android.867011d568b0b0db",
-      "source": "Open OpenClaw on phone",
-      "translated": "फ़ोन पर OpenClaw खोलें"
+      "source": "Open Bot on phone",
+      "translated": "फ़ोन पर Bot खोलें"
     },
     {
       "id": "native.android.e70d812f3bc1bb40",
@@ -9520,8 +9520,8 @@
     },
     {
       "id": "native.android.d6c4dc6d15a4eaac",
-      "source": "Keep the paired phone nearby and install the matching OpenClaw app.",
-      "translated": "जोड़े गए फ़ोन को पास रखें और उससे मेल खाने वाला OpenClaw ऐप इंस्टॉल करें।"
+      "source": "Keep the paired phone nearby and install the matching Bot app.",
+      "translated": "जोड़े गए फ़ोन को पास रखें और उससे मेल खाने वाला Bot ऐप इंस्टॉल करें।"
     },
     {
       "id": "native.android.bfebf63a2c96e9cd",
@@ -9555,8 +9555,8 @@
     },
     {
       "id": "native.android.ce39278848b1615d",
-      "source": "Update OpenClaw on both phone and watch.",
-      "translated": "फ़ोन और घड़ी, दोनों पर OpenClaw अपडेट करें।"
+      "source": "Update Bot on both phone and watch.",
+      "translated": "फ़ोन और घड़ी, दोनों पर Bot अपडेट करें।"
     },
     {
       "id": "native.android.b5d6a37fb96f38f1",
@@ -9570,8 +9570,8 @@
     },
     {
       "id": "native.android.6b973e2d4540f1dc",
-      "source": "OpenClaw replies",
-      "translated": "OpenClaw के जवाब"
+      "source": "Bot replies",
+      "translated": "Bot के जवाब"
     },
     {
       "id": "native.android.daf75f1939c5048f",
@@ -9580,8 +9580,8 @@
     },
     {
       "id": "native.android.2ab12cfd9399407c",
-      "source": "OpenClaw reply",
-      "translated": "OpenClaw का जवाब"
+      "source": "Bot reply",
+      "translated": "Bot का जवाब"
     },
     {
       "id": "native.android.289456e2626dd0f4",
@@ -9595,8 +9595,8 @@
     },
     {
       "id": "native.android.3ec65645eda5ded7",
-      "source": "Open OpenClaw to reply",
-      "translated": "जवाब देने के लिए OpenClaw खोलें"
+      "source": "Open Bot to reply",
+      "translated": "जवाब देने के लिए Bot खोलें"
     },
     {
       "id": "native.android.7658464805a4b605",
@@ -9605,8 +9605,8 @@
     },
     {
       "id": "native.android.6b2e913641d45f02",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.android.7c74dd9a2bf91d3a",
@@ -9625,13 +9625,13 @@
     },
     {
       "id": "native.apple.093081590556db7f",
-      "source": "OPENCLAW",
-      "translated": "OPENCLAW"
+      "source": "BOT",
+      "translated": "BOT"
     },
     {
       "id": "native.apple.86d546e1f1247028",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.9fd01bdb5a753f3e",
@@ -11880,8 +11880,8 @@
     },
     {
       "id": "native.apple.3548c8d1ab43e85e",
-      "source": "OpenClaw could not prepare the Markdown file.",
-      "translated": "OpenClaw Markdown फ़ाइल तैयार नहीं कर सका।"
+      "source": "Bot could not prepare the Markdown file.",
+      "translated": "Bot Markdown फ़ाइल तैयार नहीं कर सका।"
     },
     {
       "id": "native.apple.202b97e93b938049",
@@ -12000,13 +12000,13 @@
     },
     {
       "id": "native.apple.14492e334b87e4f2",
-      "source": "Check OpenClaw status",
-      "translated": "OpenClaw स्थिति जांचें"
+      "source": "Check Bot status",
+      "translated": "Bot स्थिति जांचें"
     },
     {
       "id": "native.apple.bbf7bd23da1e7865",
-      "source": "Summarize the current OpenClaw status and tell me what needs attention.",
-      "translated": "वर्तमान OpenClaw स्थिति का सारांश दें और मुझे बताएं कि किस पर ध्यान देने की आवश्यकता है।"
+      "source": "Summarize the current Bot status and tell me what needs attention.",
+      "translated": "वर्तमान Bot स्थिति का सारांश दें और मुझे बताएं कि किस पर ध्यान देने की आवश्यकता है।"
     },
     {
       "id": "native.apple.ea8cbb1b4230c652",
@@ -13115,8 +13115,8 @@
     },
     {
       "id": "native.apple.56935c5384889b8e",
-      "source": "Browse the current OpenClaw reference.",
-      "translated": "वर्तमान OpenClaw संदर्भ ब्राउज़ करें।"
+      "source": "Browse the current Bot reference.",
+      "translated": "वर्तमान Bot संदर्भ ब्राउज़ करें।"
     },
     {
       "id": "native.apple.2ee2f8c71fa2d2cc",
@@ -13145,8 +13145,8 @@
     },
     {
       "id": "native.apple.cf9bb65f8e405cc8",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.20d011936ab5cd30",
@@ -13450,8 +13450,8 @@
     },
     {
       "id": "native.apple.9bb1dae351d0e3a4",
-      "source": "Enable OpenClaw Hosted Push Relay?",
-      "translated": "OpenClaw Hosted Push Relay सक्षम करें?"
+      "source": "Enable Bot Hosted Push Relay?",
+      "translated": "Bot Hosted Push Relay सक्षम करें?"
     },
     {
       "id": "native.apple.f8c042a923222472",
@@ -13630,8 +13630,8 @@
     },
     {
       "id": "native.apple.2d878afa870cd7cc",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.b99af99847ac7823",
@@ -13690,13 +13690,13 @@
     },
     {
       "id": "native.apple.3503aca018f04865",
-      "source": "Setup sent. Open OpenClaw on the watch to connect.",
-      "translated": "सेटअप भेजा गया। कनेक्ट करने के लिए watch पर OpenClaw खोलें।"
+      "source": "Setup sent. Open Bot on the watch to connect.",
+      "translated": "सेटअप भेजा गया। कनेक्ट करने के लिए watch पर Bot खोलें।"
     },
     {
       "id": "native.apple.a9a778465dfe1198",
-      "source": "Setup queued for the watch. Open OpenClaw before the code expires.",
-      "translated": "watch के लिए सेटअप कतारबद्ध है। कोड समाप्त होने से पहले OpenClaw खोलें।"
+      "source": "Setup queued for the watch. Open Bot before the code expires.",
+      "translated": "watch के लिए सेटअप कतारबद्ध है। कोड समाप्त होने से पहले Bot खोलें।"
     },
     {
       "id": "native.apple.ba8d38a642bee7f3",
@@ -13705,8 +13705,8 @@
     },
     {
       "id": "native.apple.07668650c75a20f1",
-      "source": "Pairing required. Run /pair approve in your OpenClaw chat, then connect again.",
-      "translated": "पेयरिंग आवश्यक है। अपनी OpenClaw चैट में /pair approve चलाएँ, फिर दोबारा कनेक्ट करें।"
+      "source": "Pairing required. Run /pair approve in your Bot chat, then connect again.",
+      "translated": "पेयरिंग आवश्यक है। अपनी Bot चैट में /pair approve चलाएँ, फिर दोबारा कनेक्ट करें।"
     },
     {
       "id": "native.apple.101b491eed1648ce",
@@ -13785,8 +13785,8 @@
     },
     {
       "id": "native.apple.3d805ac21285b092",
-      "source": "Foreground approvals still appear while OpenClaw is connected.",
-      "translated": "OpenClaw के कनेक्टेड रहने पर फ़ोरग्राउंड अनुमोदन अभी भी दिखाई देते हैं।"
+      "source": "Foreground approvals still appear while Bot is connected.",
+      "translated": "Bot के कनेक्टेड रहने पर फ़ोरग्राउंड अनुमोदन अभी भी दिखाई देते हैं।"
     },
     {
       "id": "native.apple.0b7a54926d06b7d8",
@@ -13925,18 +13925,18 @@
     },
     {
       "id": "native.apple.817057c658a751c7",
-      "source": "This build uses OpenClaw's hosted push relay at %@ for notification delivery data.",
-      "translated": "यह बिल्ड सूचना वितरण डेटा के लिए %@ पर OpenClaw के होस्ट किए गए पुश रिले का उपयोग करता है।"
+      "source": "This build uses Bot's hosted push relay at %@ for notification delivery data.",
+      "translated": "यह बिल्ड सूचना वितरण डेटा के लिए %@ पर Bot के होस्ट किए गए पुश रिले का उपयोग करता है।"
     },
     {
       "id": "native.apple.d70d23305da2016a",
-      "source": "This build is not configured to use OpenClaw's hosted push relay.",
-      "translated": "यह बिल्ड OpenClaw के होस्ट किए गए पुश रिले का उपयोग करने के लिए कॉन्फ़िगर नहीं किया गया है।"
+      "source": "This build is not configured to use Bot's hosted push relay.",
+      "translated": "यह बिल्ड Bot के होस्ट किए गए पुश रिले का उपयोग करने के लिए कॉन्फ़िगर नहीं किया गया है।"
     },
     {
       "id": "native.apple.6c81c3d48548ca05",
-      "source": "Enabling this sends delivery data through OpenClaw's hosted push relay.",
-      "translated": "इसे सक्षम करने पर वितरण डेटा OpenClaw के होस्ट किए गए पुश रिले के माध्यम से भेजा जाता है।"
+      "source": "Enabling this sends delivery data through Bot's hosted push relay.",
+      "translated": "इसे सक्षम करने पर वितरण डेटा Bot के होस्ट किए गए पुश रिले के माध्यम से भेजा जाता है।"
     },
     {
       "id": "native.apple.80fade864c8ad242",
@@ -13975,8 +13975,8 @@
     },
     {
       "id": "native.apple.fc49f9b63e160581",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.2c2cdafd79f8ba5b",
@@ -14060,8 +14060,8 @@
     },
     {
       "id": "native.apple.7793f5de6975faef",
-      "source": "Use a secure wss:// or Tailscale Serve Gateway, then scan a full-access setup code from the Control UI or openclaw qr and reconnect to enable settings and upgrades.",
-      "translated": "एक सुरक्षित wss:// या Tailscale Serve Gateway का उपयोग करें, फिर Control UI या openclaw qr से एक फुल-एक्सेस सेटअप कोड स्कैन करें और सेटिंग्स तथा अपग्रेड सक्षम करने के लिए फिर से कनेक्ट करें।"
+      "source": "Use a secure wss:// or Tailscale Serve Gateway, then scan a full-access setup code from the Control UI or bot qr and reconnect to enable settings and upgrades.",
+      "translated": "एक सुरक्षित wss:// या Tailscale Serve Gateway का उपयोग करें, फिर Control UI या bot qr से एक फुल-एक्सेस सेटअप कोड स्कैन करें और सेटिंग्स तथा अपग्रेड सक्षम करने के लिए फिर से कनेक्ट करें।"
     },
     {
       "id": "native.apple.666cea428e126188",
@@ -14125,8 +14125,8 @@
     },
     {
       "id": "native.apple.1bd0f0b41f4d4750",
-      "source": "Install the OpenClaw watch app before enabling direct mode.",
-      "translated": "डायरेक्ट मोड सक्षम करने से पहले OpenClaw watch ऐप इंस्टॉल करें।"
+      "source": "Install the Bot watch app before enabling direct mode.",
+      "translated": "डायरेक्ट मोड सक्षम करने से पहले Bot watch ऐप इंस्टॉल करें।"
     },
     {
       "id": "native.apple.3710cda9cb13870f",
@@ -14165,8 +14165,8 @@
     },
     {
       "id": "native.apple.2e042499c42824f5",
-      "source": "Enable Notifications to receive approval alerts while OpenClaw is not open.",
-      "translated": "OpenClaw खुला न होने पर अनुमोदन अलर्ट प्राप्त करने के लिए सूचनाएं सक्षम करें।"
+      "source": "Enable Notifications to receive approval alerts while Bot is not open.",
+      "translated": "Bot खुला न होने पर अनुमोदन अलर्ट प्राप्त करने के लिए सूचनाएं सक्षम करें।"
     },
     {
       "id": "native.apple.fc1f2fdbe437cb9d",
@@ -14275,8 +14275,8 @@
     },
     {
       "id": "native.apple.d1ee91d07764faf0",
-      "source": "Turns OpenClaw notification delivery on or off",
-      "translated": "OpenClaw सूचना वितरण को चालू या बंद करता है"
+      "source": "Turns Bot notification delivery on or off",
+      "translated": "Bot सूचना वितरण को चालू या बंद करता है"
     },
     {
       "id": "native.apple.31f9c5fa6c3ca5dd",
@@ -14295,8 +14295,8 @@
     },
     {
       "id": "native.apple.a82dc4a746268028",
-      "source": "OpenClaw appreciates its partners in the open-source community.",
-      "translated": "OpenClaw ओपन-सोर्स समुदाय में अपने साझेदारों की सराहना करता है।"
+      "source": "Bot appreciates its partners in the open-source community.",
+      "translated": "Bot ओपन-सोर्स समुदाय में अपने साझेदारों की सराहना करता है।"
     },
     {
       "id": "native.apple.eaa4fe72f3730f3f",
@@ -14330,8 +14330,8 @@
     },
     {
       "id": "native.apple.b962116ff5bf1905",
-      "source": "© 2026 OpenClaw Foundation — MIT License.",
-      "translated": "© 2026 OpenClaw Foundation — MIT License."
+      "source": "© 2026 Bot Foundation — MIT License.",
+      "translated": "© 2026 Bot Foundation — MIT License."
     },
     {
       "id": "native.apple.106434d1305d153b",
@@ -14730,13 +14730,13 @@
     },
     {
       "id": "native.apple.675219772ee5adf0",
-      "source": "OpenClaw can show approval prompts and event alerts when the app is not active.",
-      "translated": "जब ऐप सक्रिय न हो तब OpenClaw स्वीकृति संकेत और इवेंट अलर्ट दिखा सकता है।"
+      "source": "Bot can show approval prompts and event alerts when the app is not active.",
+      "translated": "जब ऐप सक्रिय न हो तब Bot स्वीकृति संकेत और इवेंट अलर्ट दिखा सकता है।"
     },
     {
       "id": "native.apple.44133229b2b05062",
-      "source": "OpenClaw notifications are off.",
-      "translated": "OpenClaw सूचनाएँ बंद हैं।"
+      "source": "Bot notifications are off.",
+      "translated": "Bot सूचनाएँ बंद हैं।"
     },
     {
       "id": "native.apple.9794732a37cb580f",
@@ -14755,8 +14755,8 @@
     },
     {
       "id": "native.apple.bfe6a918d23fa20e",
-      "source": "OpenClaw cannot determine the current notification permission state.",
-      "translated": "OpenClaw वर्तमान सूचना अनुमति स्थिति निर्धारित नहीं कर सकता।"
+      "source": "Bot cannot determine the current notification permission state.",
+      "translated": "Bot वर्तमान सूचना अनुमति स्थिति निर्धारित नहीं कर सकता।"
     },
     {
       "id": "native.apple.fc7d007916016c0d",
@@ -14770,8 +14770,8 @@
     },
     {
       "id": "native.apple.737eb52b08f2640c",
-      "source": "Connected to openclaw-gateway.tailnet.ts.net.",
-      "translated": "openclaw-gateway.tailnet.ts.net. से कनेक्टेड"
+      "source": "Connected to bot-gateway.tailnet.ts.net.",
+      "translated": "bot-gateway.tailnet.ts.net. से कनेक्टेड"
     },
     {
       "id": "native.apple.b59e37e73db49f94",
@@ -15250,18 +15250,18 @@
     },
     {
       "id": "native.apple.8aee90eb1e1061b9",
-      "source": "The Gateway connection changed. Restart OpenClaw to reconnect.",
-      "translated": "Gateway कनेक्शन बदल गया। पुनः कनेक्ट करने के लिए OpenClaw को पुनः आरंभ करें।"
+      "source": "The Gateway connection changed. Restart Bot to reconnect.",
+      "translated": "Gateway कनेक्शन बदल गया। पुनः कनेक्ट करने के लिए Bot को पुनः आरंभ करें।"
     },
     {
       "id": "native.apple.47bc765cd8464c1e",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.a791a671fb60b5f7",
-      "source": "OpenClaw is working…",
-      "translated": "OpenClaw काम कर रहा है…"
+      "source": "Bot is working…",
+      "translated": "Bot काम कर रहा है…"
     },
     {
       "id": "native.apple.bd0e286399723c42",
@@ -15285,8 +15285,8 @@
     },
     {
       "id": "native.apple.441f1770a487a055",
-      "source": "Connect this iPhone to a Gateway before opening the OpenClaw settings assistant.",
-      "translated": "OpenClaw सेटिंग्स सहायक खोलने से पहले इस iPhone को किसी Gateway से कनेक्ट करें।"
+      "source": "Connect this iPhone to a Gateway before opening the Bot settings assistant.",
+      "translated": "Bot सेटिंग्स सहायक खोलने से पहले इस iPhone को किसी Gateway से कनेक्ट करें।"
     },
     {
       "id": "native.apple.8e0a20f39742ff98",
@@ -15295,13 +15295,13 @@
     },
     {
       "id": "native.apple.9115f5d67e36fd08",
-      "source": "Checking whether this Gateway supports the OpenClaw settings assistant.",
-      "translated": "जाँच की जा रही है कि यह Gateway OpenClaw सेटिंग्स सहायक का समर्थन करता है या नहीं।"
+      "source": "Checking whether this Gateway supports the Bot settings assistant.",
+      "translated": "जाँच की जा रही है कि यह Gateway Bot सेटिंग्स सहायक का समर्थन करता है या नहीं।"
     },
     {
       "id": "native.apple.3a7955c72e7ab728",
-      "source": "Update this Gateway to use the OpenClaw settings assistant.",
-      "translated": "OpenClaw सेटिंग्स सहायक का उपयोग करने के लिए इस Gateway को अपडेट करें।"
+      "source": "Update this Gateway to use the Bot settings assistant.",
+      "translated": "Bot सेटिंग्स सहायक का उपयोग करने के लिए इस Gateway को अपडेट करें।"
     },
     {
       "id": "native.apple.fd24248c00007ba3",
@@ -15310,8 +15310,8 @@
     },
     {
       "id": "native.apple.7ec6b261897ee62c",
-      "source": "OpenClaw is ready to continue in your ordinary chat.",
-      "translated": "OpenClaw आपकी सामान्य चैट में जारी रखने के लिए तैयार है।"
+      "source": "Bot is ready to continue in your ordinary chat.",
+      "translated": "Bot आपकी सामान्य चैट में जारी रखने के लिए तैयार है।"
     },
     {
       "id": "native.apple.ad820dd76c74e3f8",
@@ -15330,8 +15330,8 @@
     },
     {
       "id": "native.apple.e40e721e131e606e",
-      "source": "Reply to OpenClaw…",
-      "translated": "OpenClaw को उत्तर दें…"
+      "source": "Reply to Bot…",
+      "translated": "Bot को उत्तर दें…"
     },
     {
       "id": "native.apple.5b0adbb8a28011ab",
@@ -15380,8 +15380,8 @@
     },
     {
       "id": "native.apple.c218ef5194d0ee56",
-      "source": "Run OpenClaw agent?",
-      "translated": "OpenClaw agent चलाएं?"
+      "source": "Run Bot agent?",
+      "translated": "Bot agent चलाएं?"
     },
     {
       "id": "native.apple.5d2fb30a9c85ad10",
@@ -15735,8 +15735,8 @@
     },
     {
       "id": "native.apple.c18f5bd36f119282",
-      "source": "Run openclaw gateway --port 18789.",
-      "translated": "openclaw gateway --port 18789 चलाएं।"
+      "source": "Run bot gateway --port 18789.",
+      "translated": "bot gateway --port 18789 चलाएं।"
     },
     {
       "id": "native.apple.a4eb9a9b02915961",
@@ -15780,8 +15780,8 @@
     },
     {
       "id": "native.apple.8f6f60c9a5196918",
-      "source": "Exec approvals can only be reviewed while OpenClaw is open and connected.\n\nEnable Notifications to receive approval notifications while OpenClaw is not open.",
-      "translated": "Exec अनुमोदनों की समीक्षा केवल तब की जा सकती है जब OpenClaw खुला और कनेक्टेड हो.\n\nOpenClaw खुला न होने पर अनुमोदन सूचनाएँ प्राप्त करने के लिए सूचनाएँ सक्षम करें."
+      "source": "Exec approvals can only be reviewed while Bot is open and connected.\n\nEnable Notifications to receive approval notifications while Bot is not open.",
+      "translated": "Exec अनुमोदनों की समीक्षा केवल तब की जा सकती है जब Bot खुला और कनेक्टेड हो.\n\nBot खुला न होने पर अनुमोदन सूचनाएँ प्राप्त करने के लिए सूचनाएँ सक्षम करें."
     },
     {
       "id": "native.apple.a2378696390cca1e",
@@ -15830,73 +15830,73 @@
     },
     {
       "id": "native.apple.cf820096080f7031",
-      "source": "OpenClaw uses your calendars to show events and scheduling context when you enable calendar access.",
-      "translated": "जब आप कैलेंडर एक्सेस सक्षम करते हैं, तो OpenClaw इवेंट और शेड्यूलिंग संदर्भ दिखाने के लिए आपके कैलेंडर का उपयोग करता है."
+      "source": "Bot uses your calendars to show events and scheduling context when you enable calendar access.",
+      "translated": "जब आप कैलेंडर एक्सेस सक्षम करते हैं, तो Bot इवेंट और शेड्यूलिंग संदर्भ दिखाने के लिए आपके कैलेंडर का उपयोग करता है."
     },
     {
       "id": "native.apple.fe85b609e9a9a144",
-      "source": "OpenClaw uses your calendars to add events when you enable calendar access.",
-      "translated": "जब आप कैलेंडर एक्सेस सक्षम करते हैं, तो OpenClaw इवेंट जोड़ने के लिए आपके कैलेंडर का उपयोग करता है."
+      "source": "Bot uses your calendars to add events when you enable calendar access.",
+      "translated": "जब आप कैलेंडर एक्सेस सक्षम करते हैं, तो Bot इवेंट जोड़ने के लिए आपके कैलेंडर का उपयोग करता है."
     },
     {
       "id": "native.apple.ff5729a17d66ad91",
-      "source": "OpenClaw uses the camera when you scan a Gateway setup QR code or ask your paired Gateway or assistant to capture a photo or short video from this iPhone, for example to connect to your Gateway or show your assistant a document, device screen, or workspace.",
-      "translated": "जब आप Gateway सेटअप QR कोड स्कैन करते हैं या अपने paired Gateway या assistant से इस iPhone से फ़ोटो या छोटा वीडियो कैप्चर करने के लिए कहते हैं, तो OpenClaw कैमरे का उपयोग करता है, उदाहरण के लिए आपके Gateway से कनेक्ट करने या आपके assistant को कोई दस्तावेज़, डिवाइस स्क्रीन, या कार्यक्षेत्र दिखाने के लिए."
+      "source": "Bot uses the camera when you scan a Gateway setup QR code or ask your paired Gateway or assistant to capture a photo or short video from this iPhone, for example to connect to your Gateway or show your assistant a document, device screen, or workspace.",
+      "translated": "जब आप Gateway सेटअप QR कोड स्कैन करते हैं या अपने paired Gateway या assistant से इस iPhone से फ़ोटो या छोटा वीडियो कैप्चर करने के लिए कहते हैं, तो Bot कैमरे का उपयोग करता है, उदाहरण के लिए आपके Gateway से कनेक्ट करने या आपके assistant को कोई दस्तावेज़, डिवाइस स्क्रीन, या कार्यक्षेत्र दिखाने के लिए."
     },
     {
       "id": "native.apple.2f21aa6f5cd72915",
-      "source": "OpenClaw uses your contacts so you can search and reference people while using the assistant.",
-      "translated": "OpenClaw आपके संपर्कों का उपयोग करता है ताकि आप assistant का उपयोग करते समय लोगों को खोज और संदर्भित कर सकें."
+      "source": "Bot uses your contacts so you can search and reference people while using the assistant.",
+      "translated": "Bot आपके संपर्कों का उपयोग करता है ताकि आप assistant का उपयोग करते समय लोगों को खोज और संदर्भित कर सकें."
     },
     {
       "id": "native.apple.9d550c77a37bb165",
-      "source": "OpenClaw discovers and connects to your OpenClaw gateway on the local network.",
-      "translated": "OpenClaw स्थानीय नेटवर्क पर आपके OpenClaw gateway को खोजता है और उससे कनेक्ट करता है."
+      "source": "Bot discovers and connects to your Bot gateway on the local network.",
+      "translated": "Bot स्थानीय नेटवर्क पर आपके Bot gateway को खोजता है और उससे कनेक्ट करता है."
     },
     {
       "id": "native.apple.d822c41a0b7e9739",
-      "source": "OpenClaw can share your location in the background when you enable Always.",
-      "translated": "जब आप Always सक्षम करते हैं, तो OpenClaw पृष्ठभूमि में आपका स्थान साझा कर सकता है."
+      "source": "Bot can share your location in the background when you enable Always.",
+      "translated": "जब आप Always सक्षम करते हैं, तो Bot पृष्ठभूमि में आपका स्थान साझा कर सकता है."
     },
     {
       "id": "native.apple.441062ce99375692",
-      "source": "OpenClaw uses your location when you allow location sharing.",
-      "translated": "जब आप स्थान साझा करने की अनुमति देते हैं, तो OpenClaw आपके स्थान का उपयोग करता है."
+      "source": "Bot uses your location when you allow location sharing.",
+      "translated": "जब आप स्थान साझा करने की अनुमति देते हैं, तो Bot आपके स्थान का उपयोग करता है."
     },
     {
       "id": "native.apple.7c2cbe7077e4eff1",
-      "source": "OpenClaw uses the microphone for realtime chat, voice wake, push-to-talk, and voice notes.",
-      "translated": "OpenClaw माइक्रोफ़ोन का उपयोग रियलटाइम चैट, वॉइस वेक, पुश-टू-टॉक और वॉइस नोट्स के लिए करता है।"
+      "source": "Bot uses the microphone for realtime chat, voice wake, push-to-talk, and voice notes.",
+      "translated": "Bot माइक्रोफ़ोन का उपयोग रियलटाइम चैट, वॉइस वेक, पुश-टू-टॉक और वॉइस नोट्स के लिए करता है।"
     },
     {
       "id": "native.apple.85345f18204d67ec",
-      "source": "OpenClaw may use motion data to support device-aware interactions and automations.",
-      "translated": "OpenClaw device-aware इंटरैक्शन और ऑटोमेशन का समर्थन करने के लिए motion data का उपयोग कर सकता है."
+      "source": "Bot may use motion data to support device-aware interactions and automations.",
+      "translated": "Bot device-aware इंटरैक्शन और ऑटोमेशन का समर्थन करने के लिए motion data का उपयोग कर सकता है."
     },
     {
       "id": "native.apple.1d3a6099d7e11895",
-      "source": "OpenClaw reads your steps, sleep, resting heart rate, and workouts from the Apple Health app to create summaries you request and send them through your Gateway to your configured AI provider.",
-      "translated": "OpenClaw आपके अनुरोधित सारांश बनाने के लिए Apple Health ऐप से आपके कदमों, नींद, आराम की हृदय गति और वर्कआउट को पढ़ता है और उन्हें आपके Gateway के माध्यम से आपके कॉन्फ़िगर किए गए AI प्रदाता को भेजता है।"
+      "source": "Bot reads your steps, sleep, resting heart rate, and workouts from the Apple Health app to create summaries you request and send them through your Gateway to your configured AI provider.",
+      "translated": "Bot आपके अनुरोधित सारांश बनाने के लिए Apple Health ऐप से आपके कदमों, नींद, आराम की हृदय गति और वर्कआउट को पढ़ता है और उन्हें आपके Gateway के माध्यम से आपके कॉन्फ़िगर किए गए AI प्रदाता को भेजता है।"
     },
     {
       "id": "native.apple.c90a204b3232c401",
-      "source": "OpenClaw does not write to the Apple Health app. It uses read-only data to create summaries you request and send them through your Gateway to your configured AI provider.",
-      "translated": "OpenClaw Apple Health ऐप में कुछ भी नहीं लिखता है। यह आपके अनुरोधित सारांश बनाने के लिए केवल-पढ़ने योग्य डेटा का उपयोग करता है और उन्हें आपके Gateway के माध्यम से आपके कॉन्फ़िगर किए गए AI प्रदाता को भेजता है।"
+      "source": "Bot does not write to the Apple Health app. It uses read-only data to create summaries you request and send them through your Gateway to your configured AI provider.",
+      "translated": "Bot Apple Health ऐप में कुछ भी नहीं लिखता है। यह आपके अनुरोधित सारांश बनाने के लिए केवल-पढ़ने योग्य डेटा का उपयोग करता है और उन्हें आपके Gateway के माध्यम से आपके कॉन्फ़िगर किए गए AI प्रदाता को भेजता है।"
     },
     {
       "id": "native.apple.40ed4259ec869f1b",
-      "source": "OpenClaw lets your assistant read photos you allow and lets you choose photos to share.",
-      "translated": "OpenClaw आपके असिस्टेंट को आपकी अनुमति वाली फ़ोटो पढ़ने देता है और आपको साझा करने के लिए फ़ोटो चुनने देता है।"
+      "source": "Bot lets your assistant read photos you allow and lets you choose photos to share.",
+      "translated": "Bot आपके असिस्टेंट को आपकी अनुमति वाली फ़ोटो पढ़ने देता है और आपको साझा करने के लिए फ़ोटो चुनने देता है।"
     },
     {
       "id": "native.apple.81b673f0c6fc4371",
-      "source": "OpenClaw uses your reminders to list, add, and complete tasks when you enable reminders access.",
-      "translated": "जब आप रिमाइंडर एक्सेस सक्षम करते हैं, तो OpenClaw आपके रिमाइंडर का उपयोग कार्यों को सूचीबद्ध करने, जोड़ने और पूरा करने के लिए करता है।"
+      "source": "Bot uses your reminders to list, add, and complete tasks when you enable reminders access.",
+      "translated": "जब आप रिमाइंडर एक्सेस सक्षम करते हैं, तो Bot आपके रिमाइंडर का उपयोग कार्यों को सूचीबद्ध करने, जोड़ने और पूरा करने के लिए करता है।"
     },
     {
       "id": "native.apple.2275552c26460945",
-      "source": "OpenClaw uses on-device speech recognition for talk mode and voice wake.",
-      "translated": "OpenClaw टॉक मोड और वॉइस वेक के लिए ऑन-डिवाइस स्पीच रिकग्निशन का उपयोग करता है।"
+      "source": "Bot uses on-device speech recognition for talk mode and voice wake.",
+      "translated": "Bot टॉक मोड और वॉइस वेक के लिए ऑन-डिवाइस स्पीच रिकग्निशन का उपयोग करता है।"
     },
     {
       "id": "native.apple.46111fe0569488ab",
@@ -15970,18 +15970,18 @@
     },
     {
       "id": "native.apple.2dc593065171c201",
-      "source": "Location sharing is disabled in OpenClaw. Location Services are off in iOS Settings.",
-      "translated": "OpenClaw में स्थान साझा करना अक्षम है। iOS सेटिंग्स में स्थान सेवाएँ बंद हैं।"
+      "source": "Location sharing is disabled in Bot. Location Services are off in iOS Settings.",
+      "translated": "Bot में स्थान साझा करना अक्षम है। iOS सेटिंग्स में स्थान सेवाएँ बंद हैं।"
     },
     {
       "id": "native.apple.1dc990a9cc0500c5",
-      "source": "Location sharing is disabled in OpenClaw. iOS currently allows Always.",
-      "translated": "OpenClaw में स्थान साझा करना अक्षम है। iOS अभी हमेशा की अनुमति देता है।"
+      "source": "Location sharing is disabled in Bot. iOS currently allows Always.",
+      "translated": "Bot में स्थान साझा करना अक्षम है। iOS अभी हमेशा की अनुमति देता है।"
     },
     {
       "id": "native.apple.9a4e858d2b218d41",
-      "source": "Location sharing is disabled in OpenClaw. iOS currently allows While Using.",
-      "translated": "OpenClaw में स्थान साझा करना अक्षम है। iOS अभी उपयोग करते समय की अनुमति देता है।"
+      "source": "Location sharing is disabled in Bot. iOS currently allows While Using.",
+      "translated": "Bot में स्थान साझा करना अक्षम है। iOS अभी उपयोग करते समय की अनुमति देता है।"
     },
     {
       "id": "native.apple.ab481eb11214797f",
@@ -16055,8 +16055,8 @@
     },
     {
       "id": "native.apple.633f011b81108a8c",
-      "source": "OpenClaw cannot determine the current iOS location permission.",
-      "translated": "OpenClaw वर्तमान iOS लोकेशन अनुमति निर्धारित नहीं कर सकता।"
+      "source": "Bot cannot determine the current iOS location permission.",
+      "translated": "Bot वर्तमान iOS लोकेशन अनुमति निर्धारित नहीं कर सकता।"
     },
     {
       "id": "native.apple.e5673992d3aeac64",
@@ -16085,8 +16085,8 @@
     },
     {
       "id": "native.apple.f6b19113d5d8e7db",
-      "source": "OpenClaw cannot determine the current iOS location permission.",
-      "translated": "OpenClaw वर्तमान iOS स्थान अनुमति निर्धारित नहीं कर सकता।"
+      "source": "Bot cannot determine the current iOS location permission.",
+      "translated": "Bot वर्तमान iOS स्थान अनुमति निर्धारित नहीं कर सकता।"
     },
     {
       "id": "native.apple.2892e5b02c6789f0",
@@ -16360,8 +16360,8 @@
     },
     {
       "id": "native.apple.d4d9568dca8ceaa9",
-      "source": "The connected OpenClaw agent can use device capabilities you enable.",
-      "translated": "कनेक्ट किया गया OpenClaw एजेंट आपके द्वारा सक्षम की गई डिवाइस क्षमताओं का उपयोग कर सकता है।"
+      "source": "The connected Bot agent can use device capabilities you enable.",
+      "translated": "कनेक्ट किया गया Bot एजेंट आपके द्वारा सक्षम की गई डिवाइस क्षमताओं का उपयोग कर सकता है।"
     },
     {
       "id": "native.apple.fdd93eb6b6eef525",
@@ -16385,8 +16385,8 @@
     },
     {
       "id": "native.apple.e8b4dc00cd23ae73",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.9b414850baa618da",
@@ -16560,8 +16560,8 @@
     },
     {
       "id": "native.apple.559dccb9f9dfbbad",
-      "source": "OpenClaw is checking gateway and node access.",
-      "translated": "OpenClaw gateway और नोड एक्सेस की जाँच कर रहा है।"
+      "source": "Bot is checking gateway and node access.",
+      "translated": "Bot gateway और नोड एक्सेस की जाँच कर रहा है।"
     },
     {
       "id": "native.apple.4404f435fb496b62",
@@ -16580,13 +16580,13 @@
     },
     {
       "id": "native.apple.da636328de464a40",
-      "source": "Request ID: check `openclaw devices list`.",
-      "translated": "अनुरोध ID: `openclaw devices list` देखें।"
+      "source": "Request ID: check `bot devices list`.",
+      "translated": "अनुरोध ID: `bot devices list` देखें।"
     },
     {
       "id": "native.apple.d5a5f13a1dd28c9d",
-      "source": "Approve this device on the gateway.\n1) `%1$@`\n2) `/pair approve` in your OpenClaw chat\n%2$@\nOpenClaw will also retry automatically when you return to this app.",
-      "translated": "Gateway पर इस डिवाइस को मंज़ूरी दें।\n1) `%1$@`\n2) अपनी OpenClaw चैट में `/pair approve`\n%2$@\nइस ऐप पर वापस आने पर OpenClaw अपने-आप फिर से प्रयास भी करेगा।"
+      "source": "Approve this device on the gateway.\n1) `%1$@`\n2) `/pair approve` in your Bot chat\n%2$@\nBot will also retry automatically when you return to this app.",
+      "translated": "Gateway पर इस डिवाइस को मंज़ूरी दें।\n1) `%1$@`\n2) अपनी Bot चैट में `/pair approve`\n%2$@\nइस ऐप पर वापस आने पर Bot अपने-आप फिर से प्रयास भी करेगा।"
     },
     {
       "id": "native.apple.af3890b1e07c3084",
@@ -16670,8 +16670,8 @@
     },
     {
       "id": "native.apple.5b46de1ccb06852b",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.0e07e7044608f954",
@@ -16775,8 +16775,8 @@
     },
     {
       "id": "native.apple.8855710a55de2ed5",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.7029e1235380a92c",
@@ -16960,8 +16960,8 @@
     },
     {
       "id": "native.apple.a55a43940452b04b",
-      "source": "OpenClaw iOS",
-      "translated": "OpenClaw iOS"
+      "source": "Bot iOS",
+      "translated": "Bot iOS"
     },
     {
       "id": "native.apple.35b6f99d627028f6",
@@ -17180,8 +17180,8 @@
     },
     {
       "id": "native.apple.4ebb39f445d7dbff",
-      "source": "OpenClaw reacts when any trigger appears in a transcription. Keep them short to avoid false positives.",
-      "translated": "जब भी किसी ट्रांसक्रिप्शन में कोई ट्रिगर दिखाई देता है, OpenClaw प्रतिक्रिया देता है। गलत ट्रिगर से बचने के लिए इन्हें छोटा रखें।"
+      "source": "Bot reacts when any trigger appears in a transcription. Keep them short to avoid false positives.",
+      "translated": "जब भी किसी ट्रांसक्रिप्शन में कोई ट्रिगर दिखाई देता है, Bot प्रतिक्रिया देता है। गलत ट्रिगर से बचने के लिए इन्हें छोटा रखें।"
     },
     {
       "id": "native.apple.994760420a194561",
@@ -17450,18 +17450,18 @@
     },
     {
       "id": "native.apple.5b40cb9cf4ee4d4f",
-      "source": "Asking OpenClaw",
-      "translated": "OpenClaw से पूछा जा रहा है"
+      "source": "Asking Bot",
+      "translated": "Bot से पूछा जा रहा है"
     },
     {
       "id": "native.apple.34531893ae6091b1",
-      "source": "Still asking OpenClaw",
-      "translated": "अभी भी OpenClaw से पूछा जा रहा है"
+      "source": "Still asking Bot",
+      "translated": "अभी भी Bot से पूछा जा रहा है"
     },
     {
       "id": "native.apple.027ab0bbb4553124",
-      "source": "Updating OpenClaw",
-      "translated": "OpenClaw को अपडेट किया जा रहा है"
+      "source": "Updating Bot",
+      "translated": "Bot को अपडेट किया जा रहा है"
     },
     {
       "id": "native.apple.471dc394d6b9e443",
@@ -17515,8 +17515,8 @@
     },
     {
       "id": "native.apple.deb282fd61fd2de3",
-      "source": "OpenClaw unavailable",
-      "translated": "OpenClaw उपलब्ध नहीं है"
+      "source": "Bot unavailable",
+      "translated": "Bot उपलब्ध नहीं है"
     },
     {
       "id": "native.apple.f4adf2762402e92a",
@@ -17580,13 +17580,13 @@
     },
     {
       "id": "native.apple.1065cfe92d7c1eb6",
-      "source": "Asking OpenClaw",
-      "translated": "OpenClaw से पूछा जा रहा है"
+      "source": "Asking Bot",
+      "translated": "Bot से पूछा जा रहा है"
     },
     {
       "id": "native.apple.d2db26b3bb266491",
-      "source": "Updating OpenClaw",
-      "translated": "OpenClaw अपडेट किया जा रहा है"
+      "source": "Updating Bot",
+      "translated": "Bot अपडेट किया जा रहा है"
     },
     {
       "id": "native.apple.4b89dccea20c58fa",
@@ -17595,8 +17595,8 @@
     },
     {
       "id": "native.apple.8a62f0e9416188e3",
-      "source": "OpenClaw unavailable",
-      "translated": "OpenClaw उपलब्ध नहीं है"
+      "source": "Bot unavailable",
+      "translated": "Bot उपलब्ध नहीं है"
     },
     {
       "id": "native.apple.8a944b06087fe8ef",
@@ -17680,8 +17680,8 @@
     },
     {
       "id": "native.apple.12a4a51d251f65c0",
-      "source": "OpenClaw connects this Apple Watch directly to your Gateway on trusted local networks.",
-      "translated": "OpenClaw इस Apple Watch को विश्वसनीय लोकल नेटवर्क पर सीधे आपके Gateway से कनेक्ट करता है।"
+      "source": "Bot connects this Apple Watch directly to your Gateway on trusted local networks.",
+      "translated": "Bot इस Apple Watch को विश्वसनीय लोकल नेटवर्क पर सीधे आपके Gateway से कनेक्ट करता है।"
     },
     {
       "id": "native.apple.130180e0065c80fc",
@@ -17730,8 +17730,8 @@
     },
     {
       "id": "native.apple.32473b10033ac0f4",
-      "source": "Reconnects when OpenClaw is active",
-      "translated": "OpenClaw सक्रिय होने पर फिर से कनेक्ट होता है"
+      "source": "Reconnects when Bot is active",
+      "translated": "Bot सक्रिय होने पर फिर से कनेक्ट होता है"
     },
     {
       "id": "native.apple.760267006777c454",
@@ -18020,8 +18020,8 @@
     },
     {
       "id": "native.apple.ca02fd2965efe74e",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.1ba2f03dc98103c0",
@@ -18170,8 +18170,8 @@
     },
     {
       "id": "native.apple.c7d87356e6cdb374",
-      "source": "Uses Wi-Fi or cellular while OpenClaw is active",
-      "translated": "OpenClaw सक्रिय होने पर Wi-Fi या सेल्युलर का उपयोग करता है"
+      "source": "Uses Wi-Fi or cellular while Bot is active",
+      "translated": "Bot सक्रिय होने पर Wi-Fi या सेल्युलर का उपयोग करता है"
     },
     {
       "id": "native.apple.08583448d9b2455e",
@@ -18360,8 +18360,8 @@
     },
     {
       "id": "native.apple.3fdc651e507de84b",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.c1de056da9ee1b27",
@@ -18400,8 +18400,8 @@
     },
     {
       "id": "native.apple.b816e4b9e492ae6c",
-      "source": "Message OpenClaw",
-      "translated": "OpenClaw को संदेश भेजें"
+      "source": "Message Bot",
+      "translated": "Bot को संदेश भेजें"
     },
     {
       "id": "native.apple.502a884cec1f0d5d",
@@ -18525,8 +18525,8 @@
     },
     {
       "id": "native.apple.5ac0c79487a492b4",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.95b5730738a28d71",
@@ -18570,8 +18570,8 @@
     },
     {
       "id": "native.apple.4ec07761308f7f50",
-      "source": "© 2026 OpenClaw Foundation — MIT License.",
-      "translated": "© 2026 OpenClaw Foundation — MIT License."
+      "source": "© 2026 Bot Foundation — MIT License.",
+      "translated": "© 2026 Bot Foundation — MIT License."
     },
     {
       "id": "native.apple.37661ff1af405580",
@@ -18640,28 +18640,28 @@
     },
     {
       "id": "native.apple.edfef1f4b5cb081f",
-      "source": "OpenClaw couldn’t be installed in Applications. Move it there manually, then open that copy.",
-      "translated": "OpenClaw को Applications में इंस्टॉल नहीं किया जा सका। इसे मैन्युअल रूप से वहां ले जाएं, फिर उस कॉपी को खोलें।"
+      "source": "Bot couldn’t be installed in Applications. Move it there manually, then open that copy.",
+      "translated": "Bot को Applications में इंस्टॉल नहीं किया जा सका। इसे मैन्युअल रूप से वहां ले जाएं, फिर उस कॉपी को खोलें।"
     },
     {
       "id": "native.apple.7f86f5acf3d32ec2",
-      "source": "Replace the older OpenClaw in Applications?",
-      "translated": "Applications में पुराने OpenClaw को बदलें?"
+      "source": "Replace the older Bot in Applications?",
+      "translated": "Applications में पुराने Bot को बदलें?"
     },
     {
       "id": "native.apple.088b39cc34b44e54",
-      "source": "Install OpenClaw in Applications?",
-      "translated": "OpenClaw को Applications में इंस्टॉल करें?"
+      "source": "Install Bot in Applications?",
+      "translated": "Bot को Applications में इंस्टॉल करें?"
     },
     {
       "id": "native.apple.c8898d685457401f",
-      "source": "This copy is newer than the installed app. OpenClaw will replace it and reopen from Applications.",
-      "translated": "यह कॉपी इंस्टॉल किए गए ऐप से नई है। OpenClaw इसे बदल देगा और Applications से फिर से खुलेगा।"
+      "source": "This copy is newer than the installed app. Bot will replace it and reopen from Applications.",
+      "translated": "यह कॉपी इंस्टॉल किए गए ऐप से नई है। Bot इसे बदल देगा और Applications से फिर से खुलेगा।"
     },
     {
       "id": "native.apple.a77a46d0ca32551f",
-      "source": "OpenClaw will copy itself to Applications and reopen there so updates and launch at login stay reliable.",
-      "translated": "OpenClaw खुद को Applications में कॉपी करेगा और वहां से फिर से खुलेगा ताकि अपडेट और लॉगिन पर लॉन्च विश्वसनीय बने रहें।"
+      "source": "Bot will copy itself to Applications and reopen there so updates and launch at login stay reliable.",
+      "translated": "Bot खुद को Applications में कॉपी करेगा और वहां से फिर से खुलेगा ताकि अपडेट और लॉगिन पर लॉन्च विश्वसनीय बने रहें।"
     },
     {
       "id": "native.apple.22ebb7b228c8275a",
@@ -18675,8 +18675,8 @@
     },
     {
       "id": "native.apple.9ac444c15bd52f0e",
-      "source": "OpenClaw is installed in Applications, but couldn’t reopen automatically. Open it there manually.",
-      "translated": "OpenClaw Applications में इंस्टॉल है, लेकिन स्वचालित रूप से फिर से नहीं खुल सका। इसे वहां मैन्युअल रूप से खोलें।"
+      "source": "Bot is installed in Applications, but couldn’t reopen automatically. Open it there manually.",
+      "translated": "Bot Applications में इंस्टॉल है, लेकिन स्वचालित रूप से फिर से नहीं खुल सका। इसे वहां मैन्युअल रूप से खोलें।"
     },
     {
       "id": "native.apple.d1faee12838b677f",
@@ -18795,18 +18795,18 @@
     },
     {
       "id": "native.apple.cfc2509b8bbcf1d7",
-      "source": "OpenClaw Gateway \\(version) is ready.",
-      "translated": "OpenClaw Gateway \\(version) तैयार है।"
+      "source": "Bot Gateway \\(version) is ready.",
+      "translated": "Bot Gateway \\(version) तैयार है।"
     },
     {
       "id": "native.apple.9b767e46895714f9",
-      "source": "OpenClaw Gateway is not installed yet.",
-      "translated": "OpenClaw Gateway अभी इंस्टॉल नहीं है।"
+      "source": "Bot Gateway is not installed yet.",
+      "translated": "Bot Gateway अभी इंस्टॉल नहीं है।"
     },
     {
       "id": "native.apple.b4dc58a1b294e140",
-      "source": "The OpenClaw Gateway could not be verified. Setup will repair it.",
-      "translated": "OpenClaw Gateway सत्यापित नहीं किया जा सका। सेटअप इसे सुधार देगा।"
+      "source": "The Bot Gateway could not be verified. Setup will repair it.",
+      "translated": "Bot Gateway सत्यापित नहीं किया जा सका। सेटअप इसे सुधार देगा।"
     },
     {
       "id": "native.apple.4088056ae7b0f3b4",
@@ -18815,13 +18815,13 @@
     },
     {
       "id": "native.apple.86e7c86924ad0c70",
-      "source": "Repairing the OpenClaw Gateway update…",
-      "translated": "OpenClaw Gateway अपडेट की मरम्मत की जा रही है…"
+      "source": "Repairing the Bot Gateway update…",
+      "translated": "Bot Gateway अपडेट की मरम्मत की जा रही है…"
     },
     {
       "id": "native.apple.b59713e1e3e7ee65",
-      "source": "Updating the OpenClaw Gateway to \\(targetVersion)…",
-      "translated": "OpenClaw Gateway को \\(targetVersion) पर अपडेट किया जा रहा है…"
+      "source": "Updating the Bot Gateway to \\(targetVersion)…",
+      "translated": "Bot Gateway को \\(targetVersion) पर अपडेट किया जा रहा है…"
     },
     {
       "id": "native.apple.7772913c171b78ac",
@@ -18840,8 +18840,8 @@
     },
     {
       "id": "native.apple.66f44c526206f5de",
-      "source": "OpenClaw Gateway \\(installedVersion) is installed.",
-      "translated": "OpenClaw Gateway \\(installedVersion) इंस्टॉल है।"
+      "source": "Bot Gateway \\(installedVersion) is installed.",
+      "translated": "Bot Gateway \\(installedVersion) इंस्टॉल है।"
     },
     {
       "id": "native.apple.6f14c557e2573526",
@@ -18925,8 +18925,8 @@
     },
     {
       "id": "native.apple.81435e60c0b78093",
-      "source": "OpenClaw could not load editable settings for this channel.",
-      "translated": "OpenClaw इस चैनल के लिए संपादन योग्य सेटिंग्स लोड नहीं कर सका।"
+      "source": "Bot could not load editable settings for this channel.",
+      "translated": "Bot इस चैनल के लिए संपादन योग्य सेटिंग्स लोड नहीं कर सका।"
     },
     {
       "id": "native.apple.f74dfc887ee4f936",
@@ -18995,8 +18995,8 @@
     },
     {
       "id": "native.apple.60f2b09010a7809b",
-      "source": "Config invalid; fix it in ~/.openclaw/openclaw.json.",
-      "translated": "Config invalid; fix it in ~/.openclaw/openclaw.json."
+      "source": "Config invalid; fix it in ~/.hanzoai/bot.json.",
+      "translated": "Config invalid; fix it in ~/.hanzoai/bot.json."
     },
     {
       "id": "native.apple.313dabb10c37e00c",
@@ -19150,8 +19150,8 @@
     },
     {
       "id": "native.apple.8103e662c0e40760",
-      "source": "Edit ~/.openclaw/openclaw.json using the schema-driven form.",
-      "translated": "schema-driven फ़ॉर्म का उपयोग करके ~/.openclaw/openclaw.json संपादित करें।"
+      "source": "Edit ~/.hanzoai/bot.json using the schema-driven form.",
+      "translated": "schema-driven फ़ॉर्म का उपयोग करके ~/.hanzoai/bot.json संपादित करें।"
     },
     {
       "id": "native.apple.a3465ec90e435ea9",
@@ -19400,8 +19400,8 @@
     },
     {
       "id": "native.apple.df6243155293f80b",
-      "source": "What should OpenClaw do?",
-      "translated": "OpenClaw को क्या करना चाहिए?"
+      "source": "What should Bot do?",
+      "translated": "Bot को क्या करना चाहिए?"
     },
     {
       "id": "native.apple.81b5ba441a230f07",
@@ -19770,8 +19770,8 @@
     },
     {
       "id": "native.apple.d8b3e55c41a77627",
-      "source": "When enabled, OpenClaw won't install or manage \\(gatewayLaunchdLabel). It will only attach to an existing Gateway.",
-      "translated": "सक्षम होने पर, OpenClaw \\(gatewayLaunchdLabel) को इंस्टॉल या प्रबंधित नहीं करेगा। यह केवल मौजूदा Gateway से अटैच करेगा।"
+      "source": "When enabled, Bot won't install or manage \\(gatewayLaunchdLabel). It will only attach to an existing Gateway.",
+      "translated": "सक्षम होने पर, Bot \\(gatewayLaunchdLabel) को इंस्टॉल या प्रबंधित नहीं करेगा। यह केवल मौजूदा Gateway से अटैच करेगा।"
     },
     {
       "id": "native.apple.15e528c55a96394f",
@@ -19855,8 +19855,8 @@
     },
     {
       "id": "native.apple.f8e4e2b25dbdbd44",
-      "source": "Deep links (openclaw://…) are always enabled; the key controls unattended runs.",
-      "translated": "Deep links (openclaw://…) हमेशा सक्षम रहते हैं; कुंजी अनअटेंडेड रन को नियंत्रित करती है."
+      "source": "Deep links (bot://…) are always enabled; the key controls unattended runs.",
+      "translated": "Deep links (bot://…) हमेशा सक्षम रहते हैं; कुंजी अनअटेंडेड रन को नियंत्रित करती है."
     },
     {
       "id": "native.apple.aeba5ae43a292c55",
@@ -19905,8 +19905,8 @@
     },
     {
       "id": "native.apple.5437c7d545b749ca",
-      "source": "Writes a rotating, local-only log under ~/Library/Logs/OpenClaw/. Enable only while actively debugging.",
-      "translated": "Writes a rotating, local-only log under ~/Library/Logs/OpenClaw/. Enable only while actively debugging."
+      "source": "Writes a rotating, local-only log under ~/Library/Logs/Bot/. Enable only while actively debugging.",
+      "translated": "Writes a rotating, local-only log under ~/Library/Logs/Bot/. Enable only while actively debugging."
     },
     {
       "id": "native.apple.5b35a89bea603457",
@@ -19955,13 +19955,13 @@
     },
     {
       "id": "native.apple.5e9e8bf8e35c48ef",
-      "source": "OpenClaw project root",
-      "translated": "OpenClaw प्रोजेक्ट रूट"
+      "source": "Bot project root",
+      "translated": "Bot प्रोजेक्ट रूट"
     },
     {
       "id": "native.apple.8b01a6daf7a7b94e",
-      "source": "Path to openclaw repo",
-      "translated": "openclaw repo का पथ"
+      "source": "Path to bot repo",
+      "translated": "bot repo का पथ"
     },
     {
       "id": "native.apple.b9e064d213c6b451",
@@ -19990,8 +19990,8 @@
     },
     {
       "id": "native.apple.a8154f17cda71415",
-      "source": "Used by the CLI session loader; stored in ~/.openclaw/openclaw.json.",
-      "translated": "CLI सेशन लोडर द्वारा उपयोग किया जाता है; ~/.openclaw/openclaw.json में संग्रहीत।"
+      "source": "Used by the CLI session loader; stored in ~/.hanzoai/bot.json.",
+      "translated": "CLI सेशन लोडर द्वारा उपयोग किया जाता है; ~/.hanzoai/bot.json में संग्रहीत।"
     },
     {
       "id": "native.apple.3e472353e27107af",
@@ -20020,13 +20020,13 @@
     },
     {
       "id": "native.apple.3307505d507faf31",
-      "source": "Note: macOS may require restarting OpenClaw after enabling Accessibility or Screen Recording.",
-      "translated": "नोट: Accessibility या Screen Recording सक्षम करने के बाद macOS को OpenClaw रीस्टार्ट करने की आवश्यकता हो सकती है।"
+      "source": "Note: macOS may require restarting Bot after enabling Accessibility or Screen Recording.",
+      "translated": "नोट: Accessibility या Screen Recording सक्षम करने के बाद macOS को Bot रीस्टार्ट करने की आवश्यकता हो सकती है।"
     },
     {
       "id": "native.apple.e52d463773aef1e1",
-      "source": "Restart OpenClaw",
-      "translated": "OpenClaw रीस्टार्ट करें"
+      "source": "Restart Bot",
+      "translated": "Bot रीस्टार्ट करें"
     },
     {
       "id": "native.apple.e299e77f3ad75a75",
@@ -20145,13 +20145,13 @@
     },
     {
       "id": "native.apple.a8af393b84d63ab8",
-      "source": "OpenClaw is paused",
-      "translated": "OpenClaw रोका गया है"
+      "source": "Bot is paused",
+      "translated": "Bot रोका गया है"
     },
     {
       "id": "native.apple.7ba1542539c0d40b",
-      "source": "Unpause OpenClaw to run agent actions.",
-      "translated": "एजेंट कार्रवाइयाँ चलाने के लिए OpenClaw फिर से शुरू करें।"
+      "source": "Unpause Bot to run agent actions.",
+      "translated": "एजेंट कार्रवाइयाँ चलाने के लिए Bot फिर से शुरू करें।"
     },
     {
       "id": "native.apple.7c1e1dbfde976ab9",
@@ -20175,8 +20175,8 @@
     },
     {
       "id": "native.apple.50f1211af2a1945e",
-      "source": "Run OpenClaw agent?",
-      "translated": "OpenClaw एजेंट चलाएँ?"
+      "source": "Run Bot agent?",
+      "translated": "Bot एजेंट चलाएँ?"
     },
     {
       "id": "native.apple.4f3841d5de0135c4",
@@ -20260,8 +20260,8 @@
     },
     {
       "id": "native.apple.66ad783199ef9729",
-      "source": "Discover OpenClaw gateways on your LAN",
-      "translated": "अपने LAN पर OpenClaw gateways खोजें"
+      "source": "Discover Bot gateways on your LAN",
+      "translated": "अपने LAN पर Bot gateways खोजें"
     },
     {
       "id": "native.apple.110f6e64e25dcd2e",
@@ -20420,8 +20420,8 @@
     },
     {
       "id": "native.apple.1c4fca89983d7487",
-      "source": "Everyday OpenClaw app behavior.",
-      "translated": "रोज़मर्रा का OpenClaw ऐप व्यवहार।"
+      "source": "Everyday Bot app behavior.",
+      "translated": "रोज़मर्रा का Bot ऐप व्यवहार।"
     },
     {
       "id": "native.apple.7d03158a40ddb60a",
@@ -20435,13 +20435,13 @@
     },
     {
       "id": "native.apple.405e74c96498b7c0",
-      "source": "Automatically start OpenClaw after you sign in.",
-      "translated": "आपके साइन इन करने के बाद OpenClaw को अपने आप शुरू करें।"
+      "source": "Automatically start Bot after you sign in.",
+      "translated": "आपके साइन इन करने के बाद Bot को अपने आप शुरू करें।"
     },
     {
       "id": "native.apple.8b74758a60f78642",
-      "source": "Move OpenClaw to Applications before enabling launch at login.",
-      "translated": "लॉगिन पर लॉन्च सक्षम करने से पहले OpenClaw को Applications में ले जाएँ।"
+      "source": "Move Bot to Applications before enabling launch at login.",
+      "translated": "लॉगिन पर लॉन्च सक्षम करने से पहले Bot को Applications में ले जाएँ।"
     },
     {
       "id": "native.apple.927819c087ca3520",
@@ -20450,8 +20450,8 @@
     },
     {
       "id": "native.apple.e7a0819bd2f4e1dc",
-      "source": "Keep OpenClaw visible in the Dock. When off, windows still show the Dock icon while open.",
-      "translated": "OpenClaw को Dock में दृश्यमान रखें। बंद होने पर, विंडो खुली रहने के दौरान भी Dock आइकन दिखाती हैं।"
+      "source": "Keep Bot visible in the Dock. When off, windows still show the Dock icon while open.",
+      "translated": "Bot को Dock में दृश्यमान रखें। बंद होने पर, विंडो खुली रहने के दौरान भी Dock आइकन दिखाती हैं।"
     },
     {
       "id": "native.apple.af23f7b5fb03a877",
@@ -20580,13 +20580,13 @@
     },
     {
       "id": "native.apple.64e197a4a8b384ef",
-      "source": "OpenClaw paused",
-      "translated": "OpenClaw रुका हुआ है"
+      "source": "Bot paused",
+      "translated": "Bot रुका हुआ है"
     },
     {
       "id": "native.apple.7fe6df69d8050832",
-      "source": "OpenClaw active",
-      "translated": "OpenClaw सक्रिय है"
+      "source": "Bot active",
+      "translated": "Bot सक्रिय है"
     },
     {
       "id": "native.apple.2f4258fa73e04344",
@@ -20640,8 +20640,8 @@
     },
     {
       "id": "native.apple.8021dcd7963a4cc2",
-      "source": "OpenClaw starts and monitors the Gateway on this Mac.",
-      "translated": "OpenClaw इस Mac पर Gateway शुरू करता है और उसकी निगरानी करता है।"
+      "source": "Bot starts and monitors the Gateway on this Mac.",
+      "translated": "Bot इस Mac पर Gateway शुरू करता है और उसकी निगरानी करता है।"
     },
     {
       "id": "native.apple.fe2a790f28ffd1ae",
@@ -20655,8 +20655,8 @@
     },
     {
       "id": "native.apple.d261da13966fa812",
-      "source": "OpenClaw runs",
-      "translated": "OpenClaw चलता है"
+      "source": "Bot runs",
+      "translated": "Bot चलता है"
     },
     {
       "id": "native.apple.397850fa5e803f53",
@@ -20755,8 +20755,8 @@
     },
     {
       "id": "native.apple.c663b8a50de8a7d8",
-      "source": "/home/you/Projects/openclaw",
-      "translated": "/home/you/Projects/openclaw"
+      "source": "/home/you/Projects/bot",
+      "translated": "/home/you/Projects/bot"
     },
     {
       "id": "native.apple.938ee646aac4ce66",
@@ -20765,8 +20765,8 @@
     },
     {
       "id": "native.apple.09f99e863e081f9f",
-      "source": "/Applications/OpenClaw.app/.../openclaw",
-      "translated": "/Applications/OpenClaw.app/.../openclaw"
+      "source": "/Applications/Bot.app/.../bot",
+      "translated": "/Applications/Bot.app/.../bot"
     },
     {
       "id": "native.apple.f588f7dad51aae2e",
@@ -20840,8 +20840,8 @@
     },
     {
       "id": "native.apple.24aa092829f9a3b1",
-      "source": "The current gateway.remote.token value is not plain text. OpenClaw for macOS cannot use it directly; enter a plaintext token here to replace it.",
-      "translated": "मौजूदा gateway.remote.token मान सादा टेक्स्ट नहीं है. macOS के लिए OpenClaw इसे सीधे उपयोग नहीं कर सकता; इसे बदलने के लिए यहाँ एक plaintext टोकन दर्ज करें."
+      "source": "The current gateway.remote.token value is not plain text. Bot for macOS cannot use it directly; enter a plaintext token here to replace it.",
+      "translated": "मौजूदा gateway.remote.token मान सादा टेक्स्ट नहीं है. macOS के लिए Bot इसे सीधे उपयोग नहीं कर सकता; इसे बदलने के लिए यहाँ एक plaintext टोकन दर्ज करें."
     },
     {
       "id": "native.apple.d0b21bc12ab63cad",
@@ -20980,8 +20980,8 @@
     },
     {
       "id": "native.apple.876c066efa88aee3",
-      "source": "Latest presence beacons from OpenClaw nodes. Updated periodically.",
-      "translated": "OpenClaw नोड्स से नवीनतम उपस्थिति बीकन। समय-समय पर अपडेट किए जाते हैं।"
+      "source": "Latest presence beacons from Bot nodes. Updated periodically.",
+      "translated": "Bot नोड्स से नवीनतम उपस्थिति बीकन। समय-समय पर अपडेट किए जाते हैं।"
     },
     {
       "id": "native.apple.8a6bcd51fd9f1f62",
@@ -21090,13 +21090,13 @@
     },
     {
       "id": "native.apple.13a7356f48278757",
-      "source": "OpenClaw - Voice Wake live meter active",
-      "translated": "OpenClaw - Voice Wake लाइव मीटर सक्रिय"
+      "source": "Bot - Voice Wake live meter active",
+      "translated": "Bot - Voice Wake लाइव मीटर सक्रिय"
     },
     {
       "id": "native.apple.fae2cf18519da0d5",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.ef59188264be95d4",
@@ -21205,8 +21205,8 @@
     },
     {
       "id": "native.apple.fbab65790d6eca89",
-      "source": "About OpenClaw",
-      "translated": "OpenClaw के बारे में"
+      "source": "About Bot",
+      "translated": "Bot के बारे में"
     },
     {
       "id": "native.apple.14c8f4b1a57569f3",
@@ -21220,18 +21220,18 @@
     },
     {
       "id": "native.apple.5021ed413c045620",
-      "source": "OpenClaw Not Configured",
-      "translated": "OpenClaw कॉन्फ़िगर नहीं किया गया"
+      "source": "Bot Not Configured",
+      "translated": "Bot कॉन्फ़िगर नहीं किया गया"
     },
     {
       "id": "native.apple.4d10ab5feb4add3f",
-      "source": "Remote OpenClaw Active",
-      "translated": "Remote OpenClaw सक्रिय"
+      "source": "Remote Bot Active",
+      "translated": "Remote Bot सक्रिय"
     },
     {
       "id": "native.apple.b49dea5c1fdb3dd3",
-      "source": "OpenClaw Active",
-      "translated": "OpenClaw सक्रिय"
+      "source": "Bot Active",
+      "translated": "Bot सक्रिय"
     },
     {
       "id": "native.apple.1df24a30d7963640",
@@ -21480,13 +21480,13 @@
     },
     {
       "id": "native.apple.3db546546fbaf38e",
-      "source": "OpenClaw is preparing a local model.",
-      "translated": "OpenClaw एक लोकल मॉडल तैयार कर रहा है।"
+      "source": "Bot is preparing a local model.",
+      "translated": "Bot एक लोकल मॉडल तैयार कर रहा है।"
     },
     {
       "id": "native.apple.c5992a23c991f948",
-      "source": "OpenClaw is completing provider sign-in.",
-      "translated": "OpenClaw प्रोवाइडर साइन-इन पूरा कर रहा है।"
+      "source": "Bot is completing provider sign-in.",
+      "translated": "Bot प्रोवाइडर साइन-इन पूरा कर रहा है।"
     },
     {
       "id": "native.apple.0f3c1c6f0672bed7",
@@ -21520,8 +21520,8 @@
     },
     {
       "id": "native.apple.e3e27d22fd2312a2",
-      "source": "OpenClaw will check again before changing any inference settings.",
-      "translated": "किसी भी inference सेटिंग को बदलने से पहले OpenClaw फिर से जाँच करेगा।"
+      "source": "Bot will check again before changing any inference settings.",
+      "translated": "किसी भी inference सेटिंग को बदलने से पहले Bot फिर से जाँच करेगा।"
     },
     {
       "id": "native.apple.a0a8f45082d0ba99",
@@ -21560,8 +21560,8 @@
     },
     {
       "id": "native.apple.a0431b20c0650139",
-      "source": "Need help? Chat with OpenClaw",
-      "translated": "मदद चाहिए? OpenClaw से चैट करें"
+      "source": "Need help? Chat with Bot",
+      "translated": "मदद चाहिए? Bot से चैट करें"
     },
     {
       "id": "native.apple.6526ced182e1fe50",
@@ -21645,8 +21645,8 @@
     },
     {
       "id": "native.apple.4a1e5a5600b907f4",
-      "source": "Use an existing subscription or provider account. OpenClaw opens the provider’s own sign-in flow, then verifies it with a real reply.",
-      "translated": "किसी मौजूदा सदस्यता या प्रदाता खाते का उपयोग करें। OpenClaw प्रदाता के अपने साइन-इन फ़्लो को खोलता है, फिर एक वास्तविक उत्तर के साथ इसे सत्यापित करता है।"
+      "source": "Use an existing subscription or provider account. Bot opens the provider’s own sign-in flow, then verifies it with a real reply.",
+      "translated": "किसी मौजूदा सदस्यता या प्रदाता खाते का उपयोग करें। Bot प्रदाता के अपने साइन-इन फ़्लो को खोलता है, फिर एक वास्तविक उत्तर के साथ इसे सत्यापित करता है।"
     },
     {
       "id": "native.apple.14b23c357d7a9eff",
@@ -21780,8 +21780,8 @@
     },
     {
       "id": "native.apple.e874bd0fad63f012",
-      "source": "OpenClaw — setup helper",
-      "translated": "OpenClaw — सेटअप सहायक"
+      "source": "Bot — setup helper",
+      "translated": "Bot — सेटअप सहायक"
     },
     {
       "id": "native.apple.bea852c8622c8214",
@@ -21840,18 +21840,18 @@
     },
     {
       "id": "native.apple.b92f94ddc6bbc8e5",
-      "source": "OpenClaw was interrupted. Restart to try again.",
-      "translated": "OpenClaw बाधित हो गया था। फिर से कोशिश करने के लिए रीस्टार्ट करें।"
+      "source": "Bot was interrupted. Restart to try again.",
+      "translated": "Bot बाधित हो गया था। फिर से कोशिश करने के लिए रीस्टार्ट करें।"
     },
     {
       "id": "native.apple.829845818e97978a",
-      "source": "The Gateway connection changed. Restart OpenClaw to reconnect.",
-      "translated": "Gateway कनेक्शन बदल गया है। फिर से कनेक्ट करने के लिए OpenClaw को रीस्टार्ट करें।"
+      "source": "The Gateway connection changed. Restart Bot to reconnect.",
+      "translated": "Gateway कनेक्शन बदल गया है। फिर से कनेक्ट करने के लिए Bot को रीस्टार्ट करें।"
     },
     {
       "id": "native.apple.012861f82eff0ca9",
-      "source": "OpenClaw is working…",
-      "translated": "OpenClaw काम कर रहा है…"
+      "source": "Bot is working…",
+      "translated": "Bot काम कर रहा है…"
     },
     {
       "id": "native.apple.2f7ad21b747fbc15",
@@ -21865,8 +21865,8 @@
     },
     {
       "id": "native.apple.35a542956f4f5497",
-      "source": "Reply to OpenClaw… (yes sets everything up)",
-      "translated": "OpenClaw को जवाब दें… (हाँ कहने पर सब कुछ सेट हो जाएगा)"
+      "source": "Reply to Bot… (yes sets everything up)",
+      "translated": "Bot को जवाब दें… (हाँ कहने पर सब कुछ सेट हो जाएगा)"
     },
     {
       "id": "native.apple.134b9ae1d8a543df",
@@ -21895,8 +21895,8 @@
     },
     {
       "id": "native.apple.b57ee4f83cff23f3",
-      "source": "OpenClaw can bring useful context from AI tools you already use into your new assistant.",
-      "translated": "OpenClaw आपके पहले से उपयोग किए जा रहे AI टूल्स से उपयोगी संदर्भ आपके नए सहायक में ला सकता है।"
+      "source": "Bot can bring useful context from AI tools you already use into your new assistant.",
+      "translated": "Bot आपके पहले से उपयोग किए जा रहे AI टूल्स से उपयोगी संदर्भ आपके नए सहायक में ला सकता है।"
     },
     {
       "id": "native.apple.46cab71d748860b8",
@@ -21975,8 +21975,8 @@
     },
     {
       "id": "native.apple.6dbe5b174271b62a",
-      "source": "Imported \\(imported) \\(self.memoryLabel(imported)) into OpenClaw.",
-      "translated": "\\(imported) \\(self.memoryLabel(imported)) को OpenClaw में आयात किया गया।"
+      "source": "Imported \\(imported) \\(self.memoryLabel(imported)) into Bot.",
+      "translated": "\\(imported) \\(self.memoryLabel(imported)) को Bot में आयात किया गया।"
     },
     {
       "id": "native.apple.d47b887f98e13e24",
@@ -21990,8 +21990,8 @@
     },
     {
       "id": "native.apple.ea8beaeecef15e54",
-      "source": "Welcome to OpenClaw",
-      "translated": "OpenClaw में आपका स्वागत है"
+      "source": "Welcome to Bot",
+      "translated": "Bot में आपका स्वागत है"
     },
     {
       "id": "native.apple.0629bbbd6db95199",
@@ -22035,8 +22035,8 @@
     },
     {
       "id": "native.apple.fb64a5b187cfdc15",
-      "source": "OpenClaw can take actions using the permissions and services you enable. Review prompts and only connect tools you trust.",
-      "translated": "OpenClaw आपके सक्षम की गई अनुमतियों और सेवाओं का उपयोग करके कार्रवाइयाँ कर सकता है। प्रॉम्प्ट की समीक्षा करें और केवल उन टूल्स को कनेक्ट करें जिन पर आप भरोसा करते हैं।"
+      "source": "Bot can take actions using the permissions and services you enable. Review prompts and only connect tools you trust.",
+      "translated": "Bot आपके सक्षम की गई अनुमतियों और सेवाओं का उपयोग करके कार्रवाइयाँ कर सकता है। प्रॉम्प्ट की समीक्षा करें और केवल उन टूल्स को कनेक्ट करें जिन पर आप भरोसा करते हैं।"
     },
     {
       "id": "native.apple.a5d02aaf6208e924",
@@ -22045,8 +22045,8 @@
     },
     {
       "id": "native.apple.e6acb60b10ef1206",
-      "source": "Most people pick this Mac — OpenClaw installs everything and keeps it running in the background. You can change this anytime in Settings.",
-      "translated": "अधिकतर लोग यह Mac चुनते हैं — OpenClaw सब कुछ इंस्टॉल करता है और इसे बैकग्राउंड में चालू रखता है। आप इसे Settings में कभी भी बदल सकते हैं।"
+      "source": "Most people pick this Mac — Bot installs everything and keeps it running in the background. You can change this anytime in Settings.",
+      "translated": "अधिकतर लोग यह Mac चुनते हैं — Bot सब कुछ इंस्टॉल करता है और इसे बैकग्राउंड में चालू रखता है। आप इसे Settings में कभी भी बदल सकते हैं।"
     },
     {
       "id": "native.apple.21f1053c1054db24",
@@ -22070,8 +22070,8 @@
     },
     {
       "id": "native.apple.d54084b48f40aa0a",
-      "source": "OK — OpenClaw won’t start anything yet. Pick Local or Remote later in Settings → General.",
-      "translated": "OK — OpenClaw अभी कुछ भी शुरू नहीं करेगा। बाद में Settings → General में Local या Remote चुनें।"
+      "source": "OK — Bot won’t start anything yet. Pick Local or Remote later in Settings → General.",
+      "translated": "OK — Bot अभी कुछ भी शुरू नहीं करेगा। बाद में Settings → General में Local या Remote चुनें।"
     },
     {
       "id": "native.apple.8d9eb247d41a0ca7",
@@ -22170,8 +22170,8 @@
     },
     {
       "id": "native.apple.dca75ab0dd73f0a4",
-      "source": "/home/you/Projects/openclaw",
-      "translated": "/home/you/Projects/openclaw"
+      "source": "/home/you/Projects/bot",
+      "translated": "/home/you/Projects/bot"
     },
     {
       "id": "native.apple.6998a7754dea6eb1",
@@ -22180,8 +22180,8 @@
     },
     {
       "id": "native.apple.5a3f4f943c8ee86a",
-      "source": "/Applications/OpenClaw.app/.../openclaw",
-      "translated": "/Applications/OpenClaw.app/.../openclaw"
+      "source": "/Applications/Bot.app/.../bot",
+      "translated": "/Applications/Bot.app/.../bot"
     },
     {
       "id": "native.apple.56e9b0831ec1eded",
@@ -22225,8 +22225,8 @@
     },
     {
       "id": "native.apple.2a50c3ee94dde35d",
-      "source": "The current gateway.remote.token value is not plain text. OpenClaw for macOS cannot use it directly; enter a plaintext token here to replace it.",
-      "translated": "वर्तमान gateway.remote.token मान प्लेन टेक्स्ट नहीं है। macOS के लिए OpenClaw इसे सीधे उपयोग नहीं कर सकता; इसे बदलने के लिए यहाँ एक प्लेनटेक्स्ट टोकन दर्ज करें।"
+      "source": "The current gateway.remote.token value is not plain text. Bot for macOS cannot use it directly; enter a plaintext token here to replace it.",
+      "translated": "वर्तमान gateway.remote.token मान प्लेन टेक्स्ट नहीं है। macOS के लिए Bot इसे सीधे उपयोग नहीं कर सकता; इसे बदलने के लिए यहाँ एक प्लेनटेक्स्ट टोकन दर्ज करें।"
     },
     {
       "id": "native.apple.ef011af3c0e22127",
@@ -22245,8 +22245,8 @@
     },
     {
       "id": "native.apple.ce0d1241d7417406",
-      "source": "These macOS permissions let OpenClaw automate apps and capture context on this Mac. Status updates automatically.",
-      "translated": "ये macOS permissions OpenClaw को इस Mac पर apps को automate करने और context capture करने देती हैं। Status अपने-आप update होता है।"
+      "source": "These macOS permissions let Bot automate apps and capture context on this Mac. Status updates automatically.",
+      "translated": "ये macOS permissions Bot को इस Mac पर apps को automate करने और context capture करने देती हैं। Status अपने-आप update होता है।"
     },
     {
       "id": "native.apple.42af85cdf91d0264",
@@ -22255,8 +22255,8 @@
     },
     {
       "id": "native.apple.d0b8cf59f852b3d0",
-      "source": "Install OpenClaw",
-      "translated": "OpenClaw इंस्टॉल करें"
+      "source": "Install Bot",
+      "translated": "Bot इंस्टॉल करें"
     },
     {
       "id": "native.apple.0b0fc42b8827e01f",
@@ -22330,8 +22330,8 @@
     },
     {
       "id": "native.apple.952e85bfb2d4b4f5",
-      "source": "On your gateway host: install/update the `openclaw` package and make sure credentials exist\n(typically `~/.openclaw/credentials/oauth.json`). Then connect again if needed.",
-      "translated": "अपने gateway host पर: `openclaw` पैकेज इंस्टॉल/अपडेट करें और सुनिश्चित करें कि क्रेडेंशियल मौजूद हैं\n(आमतौर पर `~/.openclaw/credentials/oauth.json`)। फिर ज़रूरत पड़ने पर दोबारा कनेक्ट करें।"
+      "source": "On your gateway host: install/update the `bot` package and make sure credentials exist\n(typically `~/.bot/credentials/oauth.json`). Then connect again if needed.",
+      "translated": "अपने gateway host पर: `bot` पैकेज इंस्टॉल/अपडेट करें और सुनिश्चित करें कि क्रेडेंशियल मौजूद हैं\n(आमतौर पर `~/.bot/credentials/oauth.json`)। फिर ज़रूरत पड़ने पर दोबारा कनेक्ट करें।"
     },
     {
       "id": "native.apple.4e5ccb411db3e80f",
@@ -22340,8 +22340,8 @@
     },
     {
       "id": "native.apple.409bfb3a6e0f9f7c",
-      "source": "Click the OpenClaw menu bar icon for the compact chat panel and status.",
-      "translated": "कॉम्पैक्ट चैट पैनल और स्थिति के लिए OpenClaw मेनू बार आइकन पर क्लिक करें।"
+      "source": "Click the Bot menu bar icon for the compact chat panel and status.",
+      "translated": "कॉम्पैक्ट चैट पैनल और स्थिति के लिए Bot मेनू बार आइकन पर क्लिक करें।"
     },
     {
       "id": "native.apple.1b6cfcf3be8765c2",
@@ -22475,13 +22475,13 @@
     },
     {
       "id": "native.apple.11b1b5e9dd510766",
-      "source": "A node wants to connect to OpenClaw.",
-      "translated": "एक नोड OpenClaw से कनेक्ट करना चाहता है।"
+      "source": "A node wants to connect to Bot.",
+      "translated": "एक नोड Bot से कनेक्ट करना चाहता है।"
     },
     {
       "id": "native.apple.2e9d9d1f5d4346d4",
-      "source": "A device wants to connect to OpenClaw.",
-      "translated": "एक डिवाइस OpenClaw से कनेक्ट करना चाहता है।"
+      "source": "A device wants to connect to Bot.",
+      "translated": "एक डिवाइस Bot से कनेक्ट करना चाहता है।"
     },
     {
       "id": "native.apple.2412e85f7d11395e",
@@ -22490,8 +22490,8 @@
     },
     {
       "id": "native.apple.a09a61f4efe1e63e",
-      "source": "OpenClaw Mac app",
-      "translated": "OpenClaw Mac ऐप"
+      "source": "Bot Mac app",
+      "translated": "Bot Mac ऐप"
     },
     {
       "id": "native.apple.6b29ec65de666dab",
@@ -22545,8 +22545,8 @@
     },
     {
       "id": "native.apple.870e09824984a9b2",
-      "source": "Share this Mac's idle duration so OpenClaw can identify the Mac you used most recently and route node alerts. Never sends keys, pointer positions, app names, or window titles. Requires Accessibility.",
-      "translated": "इस Mac की निष्क्रियता अवधि साझा करें ताकि OpenClaw उस Mac की पहचान कर सके जिसे आपने हाल ही में सबसे अधिक उपयोग किया और नोड अलर्ट रूट कर सके। कभी भी कीज़, पॉइंटर स्थिति, ऐप नाम, या विंडो शीर्षक नहीं भेजता। Accessibility आवश्यक है।"
+      "source": "Share this Mac's idle duration so Bot can identify the Mac you used most recently and route node alerts. Never sends keys, pointer positions, app names, or window titles. Requires Accessibility.",
+      "translated": "इस Mac की निष्क्रियता अवधि साझा करें ताकि Bot उस Mac की पहचान कर सके जिसे आपने हाल ही में सबसे अधिक उपयोग किया और नोड अलर्ट रूट कर सके। कभी भी कीज़, पॉइंटर स्थिति, ऐप नाम, या विंडो शीर्षक नहीं भेजता। Accessibility आवश्यक है।"
     },
     {
       "id": "native.apple.89a4f5934df8268a",
@@ -22580,8 +22580,8 @@
     },
     {
       "id": "native.apple.4344ff6c0e9d7187",
-      "source": "OpenClaw only asks for macOS capabilities when a feature needs them.",
-      "translated": "OpenClaw केवल तभी macOS क्षमताओं के लिए पूछता है, जब किसी सुविधा को उनकी आवश्यकता होती है।"
+      "source": "Bot only asks for macOS capabilities when a feature needs them.",
+      "translated": "Bot केवल तभी macOS क्षमताओं के लिए पूछता है, जब किसी सुविधा को उनकी आवश्यकता होती है।"
     },
     {
       "id": "native.apple.4fecdab98e2f6a11",
@@ -22715,13 +22715,13 @@
     },
     {
       "id": "native.apple.65c21de72f06fd33",
-      "source": "OpenClaw updated",
-      "translated": "OpenClaw अपडेट हो गया"
+      "source": "Bot updated",
+      "translated": "Bot अपडेट हो गया"
     },
     {
       "id": "native.apple.6197fc2d1ebd6b2e",
-      "source": "Finishing your OpenClaw update",
-      "translated": "आपका OpenClaw अपडेट पूरा किया जा रहा है"
+      "source": "Finishing your Bot update",
+      "translated": "आपका Bot अपडेट पूरा किया जा रहा है"
     },
     {
       "id": "native.apple.226b698fbbfc3cc4",
@@ -22735,8 +22735,8 @@
     },
     {
       "id": "native.apple.91debe404bb7affc",
-      "source": "The managed OpenClaw runtime could not be reinstalled.",
-      "translated": "प्रबंधित OpenClaw रनटाइम को फिर से इंस्टॉल नहीं किया जा सका।"
+      "source": "The managed Bot runtime could not be reinstalled.",
+      "translated": "प्रबंधित Bot रनटाइम को फिर से इंस्टॉल नहीं किया जा सका।"
     },
     {
       "id": "native.apple.1cc391ec928070c4",
@@ -22760,43 +22760,43 @@
     },
     {
       "id": "native.apple.69b54e24b90414dd",
-      "source": "OpenClaw \\(receipt.toVersion) and its Gateway are ready.",
-      "translated": "OpenClaw \\(receipt.toVersion) और इसका Gateway तैयार हैं।"
+      "source": "Bot \\(receipt.toVersion) and its Gateway are ready.",
+      "translated": "Bot \\(receipt.toVersion) और इसका Gateway तैयार हैं।"
     },
     {
       "id": "native.apple.f9d6fa6d7aaf23b6",
-      "source": "OpenClaw \\(receipt.toVersion) and its Mac node runtime are ready.",
-      "translated": "OpenClaw \\(receipt.toVersion) और इसका Mac नोड रनटाइम तैयार हैं।"
+      "source": "Bot \\(receipt.toVersion) and its Mac node runtime are ready.",
+      "translated": "Bot \\(receipt.toVersion) और इसका Mac नोड रनटाइम तैयार हैं।"
     },
     {
       "id": "native.apple.a3fa88f5fd3c2732",
-      "source": "Your agent could not be notified yet. OpenClaw will retry after the next app launch.",
-      "translated": "आपके एजेंट को अभी सूचित नहीं किया जा सका। अगली बार ऐप लॉन्च होने के बाद OpenClaw फिर से प्रयास करेगा।"
+      "source": "Your agent could not be notified yet. Bot will retry after the next app launch.",
+      "translated": "आपके एजेंट को अभी सूचित नहीं किया जा सका। अगली बार ऐप लॉन्च होने के बाद Bot फिर से प्रयास करेगा।"
     },
     {
       "id": "native.apple.e9020028ddab1ba6",
-      "source": "OpenClaw could not notify your agent automatically. The app and Gateway update are complete.",
-      "translated": "OpenClaw आपके एजेंट को स्वचालित रूप से सूचित नहीं कर सका। ऐप और Gateway का अपडेट पूरा हो गया है।"
+      "source": "Bot could not notify your agent automatically. The app and Gateway update are complete.",
+      "translated": "Bot आपके एजेंट को स्वचालित रूप से सूचित नहीं कर सका। ऐप और Gateway का अपडेट पूरा हो गया है।"
     },
     {
       "id": "native.apple.afc120cf0a96ea30",
-      "source": "OpenClaw could not notify your agent automatically. The app and Mac node update are complete.",
-      "translated": "OpenClaw आपके एजेंट को स्वचालित रूप से सूचित नहीं कर सका। ऐप और Mac नोड का अपडेट पूरा हो गया है।"
+      "source": "Bot could not notify your agent automatically. The app and Mac node update are complete.",
+      "translated": "Bot आपके एजेंट को स्वचालित रूप से सूचित नहीं कर सका। ऐप और Mac नोड का अपडेट पूरा हो गया है।"
     },
     {
       "id": "native.apple.71ad85442725f45c",
-      "source": "OpenClaw could not confirm the agent notification. It will not retry, to avoid a duplicate welcome.",
-      "translated": "OpenClaw एजेंट की सूचना की पुष्टि नहीं कर सका। डुप्लिकेट स्वागत संदेश से बचने के लिए यह दोबारा प्रयास नहीं करेगा।"
+      "source": "Bot could not confirm the agent notification. It will not retry, to avoid a duplicate welcome.",
+      "translated": "Bot एजेंट की सूचना की पुष्टि नहीं कर सका। डुप्लिकेट स्वागत संदेश से बचने के लिए यह दोबारा प्रयास नहीं करेगा।"
     },
     {
       "id": "native.apple.a3deea03e4870dd0",
-      "source": "The remote Gateway is older than this Mac app, so OpenClaw skipped the agent notification.",
-      "translated": "रिमोट Gateway इस Mac ऐप से पुराना है, इसलिए OpenClaw ने एजेंट की सूचना छोड़ दी।"
+      "source": "The remote Gateway is older than this Mac app, so Bot skipped the agent notification.",
+      "translated": "रिमोट Gateway इस Mac ऐप से पुराना है, इसलिए Bot ने एजेंट की सूचना छोड़ दी।"
     },
     {
       "id": "native.apple.3636a8b503ff00d2",
-      "source": "The Gateway remains paused, so OpenClaw did not wake your agent.",
-      "translated": "Gateway अभी भी रुका हुआ है, इसलिए OpenClaw ने आपके एजेंट को सक्रिय नहीं किया।"
+      "source": "The Gateway remains paused, so Bot did not wake your agent.",
+      "translated": "Gateway अभी भी रुका हुआ है, इसलिए Bot ने आपके एजेंट को सक्रिय नहीं किया।"
     },
     {
       "id": "native.apple.0f533623878f3d67",
@@ -22840,8 +22840,8 @@
     },
     {
       "id": "native.apple.9ac2dfa295929a92",
-      "source": "OpenClaw installed the update but could not verify the Gateway connection.",
-      "translated": "OpenClaw ने अपडेट इंस्टॉल कर दिया, लेकिन Gateway कनेक्शन सत्यापित नहीं कर सका।"
+      "source": "Bot installed the update but could not verify the Gateway connection.",
+      "translated": "Bot ने अपडेट इंस्टॉल कर दिया, लेकिन Gateway कनेक्शन सत्यापित नहीं कर सका।"
     },
     {
       "id": "native.apple.3abafcfb64b362fb",
@@ -22850,8 +22850,8 @@
     },
     {
       "id": "native.apple.00e3d2037782506c",
-      "source": "OpenClaw could not read the Gateway service ownership record. Retry after checking the Gateway LaunchAgent.",
-      "translated": "OpenClaw, Gateway सेवा के स्वामित्व का रिकॉर्ड नहीं पढ़ सका। Gateway LaunchAgent की जाँच करने के बाद फिर से प्रयास करें।"
+      "source": "Bot could not read the Gateway service ownership record. Retry after checking the Gateway LaunchAgent.",
+      "translated": "Bot, Gateway सेवा के स्वामित्व का रिकॉर्ड नहीं पढ़ सका। Gateway LaunchAgent की जाँच करने के बाद फिर से प्रयास करें।"
     },
     {
       "id": "native.apple.c4b8806a570dad31",
@@ -22860,8 +22860,8 @@
     },
     {
       "id": "native.apple.0483bf19d612560b",
-      "source": "OpenClaw could not read the node service ownership record. Retry after checking the node LaunchAgent.",
-      "translated": "OpenClaw, नोड सेवा के स्वामित्व का रिकॉर्ड नहीं पढ़ सका। नोड LaunchAgent की जाँच करने के बाद फिर से प्रयास करें।"
+      "source": "Bot could not read the node service ownership record. Retry after checking the node LaunchAgent.",
+      "translated": "Bot, नोड सेवा के स्वामित्व का रिकॉर्ड नहीं पढ़ सका। नोड LaunchAgent की जाँच करने के बाद फिर से प्रयास करें।"
     },
     {
       "id": "native.apple.d0f712a2ed470a3e",
@@ -22980,8 +22980,8 @@
     },
     {
       "id": "native.apple.507c2d9c7e94716f",
-      "source": "Allow OpenClaw to read text from \\(appName)",
-      "translated": "OpenClaw को \\(appName) से टेक्स्ट पढ़ने की अनुमति दें"
+      "source": "Allow Bot to read text from \\(appName)",
+      "translated": "Bot को \\(appName) से टेक्स्ट पढ़ने की अनुमति दें"
     },
     {
       "id": "native.apple.c5313d544a833af0",
@@ -23150,13 +23150,13 @@
     },
     {
       "id": "native.apple.88d0123c86b06144",
-      "source": "Allow OpenClaw to capture windows",
-      "translated": "OpenClaw को विंडो कैप्चर करने की अनुमति दें"
+      "source": "Allow Bot to capture windows",
+      "translated": "Bot को विंडो कैप्चर करने की अनुमति दें"
     },
     {
       "id": "native.apple.677c5733cd132aed",
-      "source": "Allow OpenClaw to capture a screen area",
-      "translated": "OpenClaw को स्क्रीन का क्षेत्र कैप्चर करने की अनुमति दें"
+      "source": "Allow Bot to capture a screen area",
+      "translated": "Bot को स्क्रीन का क्षेत्र कैप्चर करने की अनुमति दें"
     },
     {
       "id": "native.apple.529a6fc5aeba03b0",
@@ -23210,23 +23210,23 @@
     },
     {
       "id": "native.apple.b52cb4aae7ca6573",
-      "source": "Paste the token configured on the gateway host. On the gateway host, run `openclaw config get gateway.auth.token`. If the gateway uses an environment variable instead, use `OPENCLAW_GATEWAY_TOKEN`.",
-      "translated": "Paste the token configured on the gateway host. On the gateway host, run `openclaw config get gateway.auth.token`. If the gateway uses an environment variable instead, use `OPENCLAW_GATEWAY_TOKEN`."
+      "source": "Paste the token configured on the gateway host. On the gateway host, run `bot config get gateway.auth.token`. If the gateway uses an environment variable instead, use `BOT_GATEWAY_TOKEN`.",
+      "translated": "Paste the token configured on the gateway host. On the gateway host, run `bot config get gateway.auth.token`. If the gateway uses an environment variable instead, use `BOT_GATEWAY_TOKEN`."
     },
     {
       "id": "native.apple.bbb87d21ce8a291e",
-      "source": "Check `gateway.auth.token` or `OPENCLAW_GATEWAY_TOKEN` on the gateway host and try again.",
-      "translated": "gateway host पर `gateway.auth.token` या `OPENCLAW_GATEWAY_TOKEN` जाँचें और फिर से प्रयास करें।"
+      "source": "Check `gateway.auth.token` or `BOT_GATEWAY_TOKEN` on the gateway host and try again.",
+      "translated": "gateway host पर `gateway.auth.token` या `BOT_GATEWAY_TOKEN` जाँचें और फिर से प्रयास करें।"
     },
     {
       "id": "native.apple.c26f61d639591f81",
-      "source": "This gateway is set to token auth, but no `gateway.auth.token` is configured on the gateway host. If the gateway uses an environment variable instead, set `OPENCLAW_GATEWAY_TOKEN` before starting the gateway.",
-      "translated": "This gateway is set to token auth, but no `gateway.auth.token` is configured on the gateway host. If the gateway uses an environment variable instead, set `OPENCLAW_GATEWAY_TOKEN` before starting the gateway."
+      "source": "This gateway is set to token auth, but no `gateway.auth.token` is configured on the gateway host. If the gateway uses an environment variable instead, set `BOT_GATEWAY_TOKEN` before starting the gateway.",
+      "translated": "This gateway is set to token auth, but no `gateway.auth.token` is configured on the gateway host. If the gateway uses an environment variable instead, set `BOT_GATEWAY_TOKEN` before starting the gateway."
     },
     {
       "id": "native.apple.83145f8f53d7be34",
-      "source": "Scan or paste a fresh setup code from an already-paired OpenClaw client, then try again.",
-      "translated": "पहले से paired OpenClaw client से एक नया setup code स्कैन या पेस्ट करें, फिर दोबारा प्रयास करें।"
+      "source": "Scan or paste a fresh setup code from an already-paired Bot client, then try again.",
+      "translated": "पहले से paired Bot client से एक नया setup code स्कैन या पेस्ट करें, फिर दोबारा प्रयास करें।"
     },
     {
       "id": "native.apple.a8bf4f7ab4a35dc0",
@@ -23235,8 +23235,8 @@
     },
     {
       "id": "native.apple.52c0f97f0b3bb792",
-      "source": "Approve this device from an already-paired OpenClaw client. In your OpenClaw chat, run `/pair approve`, then click **Check connection** again.",
-      "translated": "Approve this device from an already-paired OpenClaw client. In your OpenClaw chat, run `/pair approve`, then click **Check connection** again."
+      "source": "Approve this device from an already-paired Bot client. In your Bot chat, run `/pair approve`, then click **Check connection** again.",
+      "translated": "Approve this device from an already-paired Bot client. In your Bot chat, run `/pair approve`, then click **Check connection** again."
     },
     {
       "id": "native.apple.e73170e4ab1dbe8f",
@@ -23245,8 +23245,8 @@
     },
     {
       "id": "native.apple.e3f983b8c517da29",
-      "source": "Gateway token mismatch. Check gateway.auth.token or OPENCLAW_GATEWAY_TOKEN on the gateway host.",
-      "translated": "Gateway token mismatch. gateway host पर gateway.auth.token या OPENCLAW_GATEWAY_TOKEN जाँचें।"
+      "source": "Gateway token mismatch. Check gateway.auth.token or BOT_GATEWAY_TOKEN on the gateway host.",
+      "translated": "Gateway token mismatch. gateway host पर gateway.auth.token या BOT_GATEWAY_TOKEN जाँचें।"
     },
     {
       "id": "native.apple.cd96754a96e5aa35",
@@ -23265,8 +23265,8 @@
     },
     {
       "id": "native.apple.3e5a2b2a24f73418",
-      "source": "Pairing required. In an already-paired OpenClaw client, run /pair approve, then check the connection again.",
-      "translated": "Pairing required. In an already-paired OpenClaw client, run /pair approve, then check the connection again."
+      "source": "Pairing required. In an already-paired Bot client, run /pair approve, then check the connection again.",
+      "translated": "Pairing required. In an already-paired Bot client, run /pair approve, then check the connection again."
     },
     {
       "id": "native.apple.58e76e9c8b04290a",
@@ -23310,48 +23310,48 @@
     },
     {
       "id": "native.apple.2d7556d00f123112",
-      "source": "OpenClaw needs notification permission to show alerts for agent actions.",
-      "translated": "OpenClaw को एजेंट कार्रवाइयों के अलर्ट दिखाने के लिए नोटिफ़िकेशन अनुमति चाहिए।"
+      "source": "Bot needs notification permission to show alerts for agent actions.",
+      "translated": "Bot को एजेंट कार्रवाइयों के अलर्ट दिखाने के लिए नोटिफ़िकेशन अनुमति चाहिए।"
     },
     {
       "id": "native.apple.d9e7be03543b508f",
-      "source": "OpenClaw captures the screen when the agent needs screenshots for context.",
-      "translated": "जब एजेंट को संदर्भ के लिए स्क्रीनशॉट की आवश्यकता होती है, तो OpenClaw स्क्रीन कैप्चर करता है।"
+      "source": "Bot captures the screen when the agent needs screenshots for context.",
+      "translated": "जब एजेंट को संदर्भ के लिए स्क्रीनशॉट की आवश्यकता होती है, तो Bot स्क्रीन कैप्चर करता है।"
     },
     {
       "id": "native.apple.eca927767423799c",
-      "source": "OpenClaw can capture photos or short video clips when requested by the agent.",
-      "translated": "एजेंट द्वारा अनुरोध किए जाने पर OpenClaw फ़ोटो या छोटे वीडियो क्लिप कैप्चर कर सकता है।"
+      "source": "Bot can capture photos or short video clips when requested by the agent.",
+      "translated": "एजेंट द्वारा अनुरोध किए जाने पर Bot फ़ोटो या छोटे वीडियो क्लिप कैप्चर कर सकता है।"
     },
     {
       "id": "native.apple.9389d1100944a1fd",
-      "source": "OpenClaw can share your location when requested by the agent.",
-      "translated": "एजेंट द्वारा अनुरोध किए जाने पर OpenClaw आपका स्थान साझा कर सकता है।"
+      "source": "Bot can share your location when requested by the agent.",
+      "translated": "एजेंट द्वारा अनुरोध किए जाने पर Bot आपका स्थान साझा कर सकता है।"
     },
     {
       "id": "native.apple.59da76aed1cb07ee",
-      "source": "OpenClaw uses the local network to connect to your remote OpenClaw gateway over LAN, Tailnet, or SSH.",
-      "translated": "OpenClaw स्थानीय नेटवर्क का उपयोग करके LAN, Tailnet, या SSH पर आपके रिमोट OpenClaw gateway से कनेक्ट करता है।"
+      "source": "Bot uses the local network to connect to your remote Bot gateway over LAN, Tailnet, or SSH.",
+      "translated": "Bot स्थानीय नेटवर्क का उपयोग करके LAN, Tailnet, या SSH पर आपके रिमोट Bot gateway से कनेक्ट करता है।"
     },
     {
       "id": "native.apple.0fdd4a93f90c6f95",
-      "source": "OpenClaw uses the microphone for Voice Wake, push-to-talk, Talk Mode, Quick Chat dictation, and agent audio capture.",
-      "translated": "OpenClaw माइक्रोफ़ोन का उपयोग Voice Wake, push-to-talk, Talk Mode, Quick Chat डिक्टेशन, और एजेंट ऑडियो कैप्चर के लिए करता है।"
+      "source": "Bot uses the microphone for Voice Wake, push-to-talk, Talk Mode, Quick Chat dictation, and agent audio capture.",
+      "translated": "Bot माइक्रोफ़ोन का उपयोग Voice Wake, push-to-talk, Talk Mode, Quick Chat डिक्टेशन, और एजेंट ऑडियो कैप्चर के लिए करता है।"
     },
     {
       "id": "native.apple.44701896858c9029",
-      "source": "OpenClaw uses Apple Speech for Voice Wake, push-to-talk, Talk Mode, and Quick Chat dictation. Voice Wake stays on-device.",
-      "translated": "OpenClaw Voice Wake, push-to-talk, Talk Mode, और Quick Chat डिक्टेशन के लिए Apple Speech का उपयोग करता है। Voice Wake ऑन-डिवाइस रहता है।"
+      "source": "Bot uses Apple Speech for Voice Wake, push-to-talk, Talk Mode, and Quick Chat dictation. Voice Wake stays on-device.",
+      "translated": "Bot Voice Wake, push-to-talk, Talk Mode, और Quick Chat डिक्टेशन के लिए Apple Speech का उपयोग करता है। Voice Wake ऑन-डिवाइस रहता है।"
     },
     {
       "id": "native.apple.2d5411b5cc54a93e",
-      "source": "OpenClaw needs Automation (AppleScript) permission to drive Terminal and other apps for agent actions.",
-      "translated": "OpenClaw को एजेंट कार्रवाइयों के लिए Terminal और अन्य ऐप्स को नियंत्रित करने हेतु Automation (AppleScript) अनुमति चाहिए।"
+      "source": "Bot needs Automation (AppleScript) permission to drive Terminal and other apps for agent actions.",
+      "translated": "Bot को एजेंट कार्रवाइयों के लिए Terminal और अन्य ऐप्स को नियंत्रित करने हेतु Automation (AppleScript) अनुमति चाहिए।"
     },
     {
       "id": "native.apple.e16fc45de0f2bb86",
-      "source": "OpenClaw can access Reminders when requested by the agent for the apple-reminders skill.",
-      "translated": "apple-reminders skill के लिए एजेंट द्वारा अनुरोध किए जाने पर OpenClaw Reminders तक पहुँच सकता है।"
+      "source": "Bot can access Reminders when requested by the agent for the apple-reminders skill.",
+      "translated": "apple-reminders skill के लिए एजेंट द्वारा अनुरोध किए जाने पर Bot Reminders तक पहुँच सकता है।"
     },
     {
       "id": "native.apple.6f7c6ef00a40a571",
@@ -23495,8 +23495,8 @@
     },
     {
       "id": "native.apple.59bed721dff1a25f",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.04b9c8402f19b8ce",
@@ -23745,8 +23745,8 @@
     },
     {
       "id": "native.apple.d769a8ac65441d48",
-      "source": "Saved to openclaw.json under skills.entries.\\(self.editor.skillKey)",
-      "translated": "openclaw.json में skills.entries.\\(self.editor.skillKey) के अंतर्गत सहेजा गया"
+      "source": "Saved to bot.json under skills.entries.\\(self.editor.skillKey)",
+      "translated": "bot.json में skills.entries.\\(self.editor.skillKey) के अंतर्गत सहेजा गया"
     },
     {
       "id": "native.apple.af47aadb262d225d",
@@ -23785,8 +23785,8 @@
     },
     {
       "id": "native.apple.4b27b3be5f3f1f66",
-      "source": "OpenClaw",
-      "translated": "OpenClaw"
+      "source": "Bot",
+      "translated": "Bot"
     },
     {
       "id": "native.apple.9427da914cdbfbf3",
@@ -24135,8 +24135,8 @@
     },
     {
       "id": "native.apple.800bb607f45c05e4",
-      "source": "Stored in ~/.openclaw/openclaw.json. Prefer OPENCLAW_GATEWAY_PASSWORD for production.",
-      "translated": "~/.openclaw/openclaw.json में संग्रहीत। प्रोडक्शन के लिए OPENCLAW_GATEWAY_PASSWORD को प्राथमिकता दें।"
+      "source": "Stored in ~/.hanzoai/bot.json. Prefer BOT_GATEWAY_PASSWORD for production.",
+      "translated": "~/.hanzoai/bot.json में संग्रहीत। प्रोडक्शन के लिए BOT_GATEWAY_PASSWORD को प्राथमिकता दें।"
     },
     {
       "id": "native.apple.3942d43ca047de29",
@@ -24430,8 +24430,8 @@
     },
     {
       "id": "native.apple.237e9371a693b0ff",
-      "source": "OpenClaw reacts when any trigger appears in a transcription. Keep phrases short to avoid false positives.",
-      "translated": "OpenClaw किसी भी ट्रिगर के ट्रांसक्रिप्शन में दिखाई देने पर प्रतिक्रिया देता है। गलत सक्रियण से बचने के लिए वाक्यांश छोटे रखें।"
+      "source": "Bot reacts when any trigger appears in a transcription. Keep phrases short to avoid false positives.",
+      "translated": "Bot किसी भी ट्रिगर के ट्रांसक्रिप्शन में दिखाई देने पर प्रतिक्रिया देता है। गलत सक्रियण से बचने के लिए वाक्यांश छोटे रखें।"
     },
     {
       "id": "native.apple.2bcc6f4eca98f7f2",
@@ -24525,13 +24525,13 @@
     },
     {
       "id": "native.apple.448dfe21a7f3a883",
-      "source": "Check OpenClaw status",
-      "translated": "OpenClaw की स्थिति जाँचें"
+      "source": "Check Bot status",
+      "translated": "Bot की स्थिति जाँचें"
     },
     {
       "id": "native.apple.00f4977e0123ce7a",
-      "source": "Summarize the current OpenClaw status and tell me what needs attention.",
-      "translated": "OpenClaw की मौजूदा स्थिति का सारांश दें और बताएँ कि किन बातों पर ध्यान देने की आवश्यकता है।"
+      "source": "Summarize the current Bot status and tell me what needs attention.",
+      "translated": "Bot की मौजूदा स्थिति का सारांश दें और बताएँ कि किन बातों पर ध्यान देने की आवश्यकता है।"
     },
     {
       "id": "native.apple.9c1a9be47ac92727",
@@ -26385,8 +26385,8 @@
     },
     {
       "id": "native.apple.1823d7bddaa73a1a",
-      "source": "OpenClaw could not read the gateway certificate for %@.",
-      "translated": "OpenClaw, %@ के लिए Gateway सर्टिफ़िकेट को पढ़ नहीं सका।"
+      "source": "Bot could not read the gateway certificate for %@.",
+      "translated": "Bot, %@ के लिए Gateway सर्टिफ़िकेट को पढ़ नहीं सका।"
     },
     {
       "id": "native.apple.b737f84578f558eb",
@@ -26400,8 +26400,8 @@
     },
     {
       "id": "native.apple.7493b8bf5dcaa05f",
-      "source": "OpenClaw could not securely save the TLS certificate pin for %@.",
-      "translated": "OpenClaw %@ के लिए TLS प्रमाणपत्र पिन को सुरक्षित रूप से सहेज नहीं सका।"
+      "source": "Bot could not securely save the TLS certificate pin for %@.",
+      "translated": "Bot %@ के लिए TLS प्रमाणपत्र पिन को सुरक्षित रूप से सहेज नहीं सका।"
     },
     {
       "id": "native.apple.9a4c4bd6b41420ae",

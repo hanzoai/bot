@@ -3,9 +3,9 @@
  * @see https://bot.zaloplatforms.com/docs
  */
 
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
-import { resolvePinnedHostnameWithPolicy, type SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+import { resolveTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
+import { readProviderJsonResponse } from "bot/plugin-sdk/provider-http";
+import { resolvePinnedHostnameWithPolicy, type SsrFPolicy } from "bot/plugin-sdk/ssrf-runtime";
 import { ZALO_DEFAULT_REQUEST_TIMEOUT_MS, ZALO_SEND_PHOTO_REQUEST_TIMEOUT_MS } from "./timeouts.js";
 
 const ZALO_API_BASE = "https://bot-api.zaloplatforms.com";

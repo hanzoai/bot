@@ -1,4 +1,4 @@
-import { emitTrustedDiagnosticEvent } from "openclaw/plugin-sdk/diagnostic-runtime";
+import { emitTrustedDiagnosticEvent } from "bot/plugin-sdk/diagnostic-runtime";
 import {
   CODEX_APP_SERVER_INTERRUPT_TIMEOUT_MS,
   interruptCodexTurnBestEffort,
@@ -97,10 +97,10 @@ export function createCodexAttemptTurnState(resources: CodexAttemptResources) {
     params.runTimeoutOverrideMs,
   );
   const turnAttemptIdleTimeoutMs = Math.max(100, Math.floor(params.timeoutMs));
-  const pendingOpenClawDynamicToolCompletionIds = new Set<string>();
+  const pendingBotDynamicToolCompletionIds = new Set<string>();
   // One execution promise per call id prevents duplicate delivery from
   // repeating non-idempotent computer input while the attempt remains active.
-  const openClawDynamicToolExecutions = createCodexDynamicToolExecutionRegistry();
+  const botDynamicToolExecutions = createCodexDynamicToolExecutionRegistry();
   const activeTurnItemIds = new Set<string>();
   const activeCompletionBlockerItemIds = new Set<string>();
   const activeFinalizationHookRunIds = new Set<string>();
@@ -193,8 +193,8 @@ export function createCodexAttemptTurnState(resources: CodexAttemptResources) {
     postToolRawAssistantCompletionIdleTimeoutMs,
     turnTerminalIdleTimeoutMs,
     turnAttemptIdleTimeoutMs,
-    pendingOpenClawDynamicToolCompletionIds,
-    openClawDynamicToolExecutions,
+    pendingBotDynamicToolCompletionIds,
+    botDynamicToolExecutions,
     activeTurnItemIds,
     activeCompletionBlockerItemIds,
     activeFinalizationHookRunIds,

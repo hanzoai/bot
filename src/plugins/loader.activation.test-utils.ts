@@ -6,7 +6,7 @@ import { getContextEngineRegistration } from "../context-engine/registry.js";
 import { withEnv } from "../test-utils/env.js";
 import { getCompactionProvider } from "./compaction-provider.js";
 import { writePersistedInstalledPluginIndexInstallRecordsSync } from "./installed-plugin-index-records.js";
-import { loadOpenClawPlugins } from "./loader.js";
+import { loadBotPlugins } from "./loader.js";
 import {
   EMPTY_PLUGIN_SCHEMA,
   makeTempDir,
@@ -42,16 +42,16 @@ import type { PluginSdkResolutionPreference } from "./sdk-alias.js";
 afterEach(globalAfterEach0);
 afterAll(globalAfterAll1);
 
-describe("loadOpenClawPlugins", () => {
+describe("loadBotPlugins", () => {
   it.each([
     {
       name: "does not reuse cached registries when env-resolved install paths change",
       setup: () => {
         useNoBundledPlugins();
-        const openclawHome = makeTempDir();
+        const botHome = makeTempDir();
         const ignoredHome = makeTempDir();
         const stateDir = makeTempDir();
-        const pluginDir = path.join(openclawHome, "plugins", "tracked-install-cache");
+        const pluginDir = path.join(botHome, "plugins", "tracked-install-cache");
         mkdirSafe(pluginDir);
         const plugin = writePlugin({
           id: "tracked-install-cache",
@@ -83,25 +83,25 @@ describe("loadOpenClawPlugins", () => {
         const secondHome = makeTempDir();
         return {
           loadFirst: () =>
-            loadOpenClawPlugins({
+            loadBotPlugins({
               ...options,
               env: {
                 ...process.env,
-                OPENCLAW_HOME: openclawHome,
+                BOT_HOME: botHome,
                 HOME: ignoredHome,
-                OPENCLAW_STATE_DIR: stateDir,
-                OPENCLAW_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
+                BOT_STATE_DIR: stateDir,
+                BOT_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
               },
             }),
           loadVariant: () =>
-            loadOpenClawPlugins({
+            loadBotPlugins({
               ...options,
               env: {
                 ...process.env,
-                OPENCLAW_HOME: secondHome,
+                BOT_HOME: secondHome,
                 HOME: ignoredHome,
-                OPENCLAW_STATE_DIR: stateDir,
-                OPENCLAW_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
+                BOT_STATE_DIR: stateDir,
+                BOT_BUNDLED_PLUGINS_DIR: "/nonexistent/bundled/plugins",
               },
             }),
         };
@@ -130,9 +130,9 @@ describe("loadOpenClawPlugins", () => {
         };
 
         return {
-          loadFirst: () => loadOpenClawPlugins(options),
+          loadFirst: () => loadBotPlugins(options),
           loadVariant: () =>
-            loadOpenClawPlugins({
+            loadBotPlugins({
               ...options,
               pluginSdkResolution: "workspace" as PluginSdkResolutionPreference,
             }),
@@ -162,9 +162,9 @@ describe("loadOpenClawPlugins", () => {
         };
 
         return {
-          loadFirst: () => loadOpenClawPlugins(options),
+          loadFirst: () => loadBotPlugins(options),
           loadVariant: () =>
-            loadOpenClawPlugins({
+            loadBotPlugins({
               ...options,
               runtimeOptions: {
                 allowGatewaySubagentBinding: true,
@@ -188,12 +188,12 @@ describe("loadOpenClawPlugins", () => {
       body: `module.exports = { id: "tilde-bundled", register() {} };`,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       env: {
         ...process.env,
         HOME: homeDir,
-        OPENCLAW_HOME: undefined,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: override,
+        BOT_HOME: undefined,
+        BOT_BUNDLED_PLUGINS_DIR: override,
       },
       config: {
         plugins: {
@@ -210,34 +210,34 @@ describe("loadOpenClawPlugins", () => {
     ).toBe(fs.realpathSync(plugin.file));
   });
 
-  it("prefers OPENCLAW_HOME over HOME for env-expanded load paths", () => {
+  it("prefers BOT_HOME over HOME for env-expanded load paths", () => {
     const ignoredHome = makeTempDir();
-    const openclawHome = makeTempDir();
+    const botHome = makeTempDir();
     const stateDir = makeTempDir();
     const bundledDir = makeTempDir();
     const plugin = writePlugin({
-      id: "openclaw-home-demo",
-      dir: path.join(openclawHome, "plugins", "openclaw-home-demo"),
+      id: "bot-home-demo",
+      dir: path.join(botHome, "plugins", "bot-home-demo"),
       filename: "index.cjs",
-      body: `module.exports = { id: "openclaw-home-demo", register() {} };`,
+      body: `module.exports = { id: "bot-home-demo", register() {} };`,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       env: {
         ...process.env,
         HOME: ignoredHome,
-        OPENCLAW_HOME: openclawHome,
-        OPENCLAW_STATE_DIR: stateDir,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: bundledDir,
+        BOT_HOME: botHome,
+        BOT_STATE_DIR: stateDir,
+        BOT_BUNDLED_PLUGINS_DIR: bundledDir,
       },
       config: {
         plugins: {
-          allow: ["openclaw-home-demo"],
+          allow: ["bot-home-demo"],
           entries: {
-            "openclaw-home-demo": { enabled: true },
+            "bot-home-demo": { enabled: true },
           },
           load: {
-            paths: ["~/plugins/openclaw-home-demo"],
+            paths: ["~/plugins/bot-home-demo"],
           },
         },
       },
@@ -245,7 +245,7 @@ describe("loadOpenClawPlugins", () => {
 
     expect(
       fs.realpathSync(
-        registry.plugins.find((entry) => entry.id === "openclaw-home-demo")?.source ?? "",
+        registry.plugins.find((entry) => entry.id === "bot-home-demo")?.source ?? "",
       ),
     ).toBe(fs.realpathSync(plugin.file));
   });
@@ -372,7 +372,7 @@ describe("loadOpenClawPlugins", () => {
     });
 
     expect(() =>
-      loadOpenClawPlugins({
+      loadBotPlugins({
         cache: false,
         throwOnLoadError: true,
         config: {
@@ -428,7 +428,7 @@ describe("loadOpenClawPlugins", () => {
       body: `module.exports = { default: { default: { id: "missing-register-shape" } } };`,
     });
 
-    const registry = withEnv({ OPENCLAW_PLUGIN_LOAD_DEBUG: "1" }, () =>
+    const registry = withEnv({ BOT_PLUGIN_LOAD_DEBUG: "1" }, () =>
       loadRegistryFromSinglePlugin({
         plugin,
         pluginConfig: {
@@ -510,7 +510,7 @@ describe("loadOpenClawPlugins", () => {
       }
     });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           const channel = registry.channels.find((entry) => entry.plugin.id === "demo");
           expect(channel?.plugin.id).toBe("demo");
         },
@@ -556,7 +556,7 @@ describe("loadOpenClawPlugins", () => {
       }
     });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           expect(countMatching(registry.channels, (entry) => entry.plugin.id === "demo")).toBe(1);
           expect(
             registry.channels.find((entry) => entry.plugin.id === "demo")?.plugin.meta?.label,
@@ -569,7 +569,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "context-engine-malformed", register(api) {
     api.registerContextEngine({ id: "broken-context" });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           expectRegistryErrorDiagnostic({
             registry,
             pluginId: "context-engine-malformed",
@@ -584,7 +584,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "context-engine-core-collision", register(api) {
     api.registerContextEngine("legacy", () => ({}));
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           expectRegistryErrorDiagnostic({
             registry,
             pluginId: "context-engine-core-collision",
@@ -598,7 +598,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "compaction-provider-malformed", register(api) {
     api.registerCompactionProvider({ id: "broken-compaction", label: "Broken" });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           expectRegistryErrorDiagnostic({
             registry,
             pluginId: "compaction-provider-malformed",
@@ -613,7 +613,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "memory-prompt-supplement-malformed", register(api) {
     api.registerMemoryPromptSupplement({ id: "broken-memory-prompt" });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           expectRegistryErrorDiagnostic({
             registry,
             pluginId: "memory-prompt-supplement-malformed",
@@ -628,7 +628,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "memory-prompt-preparation-malformed", register(api) {
     api.registerMemoryPromptPreparation({ id: "broken-memory-prompt" });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           expectRegistryErrorDiagnostic({
             registry,
             pluginId: "memory-prompt-preparation-malformed",
@@ -643,7 +643,7 @@ describe("loadOpenClawPlugins", () => {
         body: `module.exports = { id: "cli-missing-metadata", register(api) {
     api.registerCli(() => {});
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           expect(registry.cliRegistrars).toHaveLength(0);
           expectRegistryErrorDiagnostic({
             registry,
@@ -666,7 +666,7 @@ describe("loadOpenClawPlugins", () => {
       ],
     });
   } };`,
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           expect(registry.cliRegistrars).toHaveLength(1);
           expect(registry.cliRegistrars[0]?.parentPath).toEqual(["nodes"]);
           expect(registry.cliRegistrars[0]?.commands).toEqual(["demo-node"]);
@@ -730,7 +730,7 @@ describe("loadOpenClawPlugins", () => {
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
     api.registerHook("gateway:startup", () => {}, { name: "shared-hook" });
   } };`,
-        selectCount: (registry: ReturnType<typeof loadOpenClawPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadBotPlugins>) =>
           countMatching(registry.hooks, (entry) => entry.entry.hook.name === "shared-hook"),
         duplicateMessage: "hook already registered: shared-hook (hook-owner-a)",
         assert: expectDuplicateRegistrationResult,
@@ -742,7 +742,7 @@ describe("loadOpenClawPlugins", () => {
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
     api.registerService({ id: "shared-service", start() {} });
   } };`,
-        selectCount: (registry: ReturnType<typeof loadOpenClawPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadBotPlugins>) =>
           countMatching(registry.services, (entry) => entry.service.id === "shared-service"),
         duplicateMessage: "service already registered: shared-service (service-owner-a)",
         assert: expectDuplicateRegistrationResult,
@@ -754,13 +754,13 @@ describe("loadOpenClawPlugins", () => {
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
     api.registerGatewayDiscoveryService({ id: "shared-discovery", advertise() {} });
   } };`,
-        selectCount: (registry: ReturnType<typeof loadOpenClawPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadBotPlugins>) =>
           registry.gatewayDiscoveryServices.filter(
             (entry) => entry.service.id === "shared-discovery",
           ).length,
         duplicateMessage:
           "gateway discovery service already registered: shared-discovery (discovery-owner-a)",
-        assertPrimaryOwner: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assertPrimaryOwner: (registry: ReturnType<typeof loadBotPlugins>) => {
           expect(
             registry.plugins.find((entry) => entry.id === "discovery-owner-a")
               ?.gatewayDiscoveryServiceIds,
@@ -778,7 +778,7 @@ describe("loadOpenClawPlugins", () => {
         selectCount: () => 1,
         duplicateMessage:
           "context engine already registered: shared-context-engine-loader-test (plugin:context-engine-owner-a)",
-        assertPrimaryOwner: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assertPrimaryOwner: (registry: ReturnType<typeof loadBotPlugins>) => {
           expect(
             registry.plugins.find((entry) => entry.id === "context-engine-owner-a")
               ?.contextEngineIds,
@@ -793,10 +793,10 @@ describe("loadOpenClawPlugins", () => {
         buildBody: (ownerId: string) => `module.exports = { id: "${ownerId}", register(api) {
     api.registerCli(() => {}, { commands: ["shared-cli"] });
   } };`,
-        selectCount: (registry: ReturnType<typeof loadOpenClawPlugins>) =>
+        selectCount: (registry: ReturnType<typeof loadBotPlugins>) =>
           registry.cliRegistrars.length,
         duplicateMessage: "cli command already registered: shared-cli (cli-owner-a)",
-        assertPrimaryOwner: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assertPrimaryOwner: (registry: ReturnType<typeof loadBotPlugins>) => {
           expect(registry.cliRegistrars[0]?.pluginId).toBe("cli-owner-a");
         },
         assert: expectDuplicateRegistrationResult,
@@ -943,7 +943,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           expect(
             registry.httpRoutes.find((entry) => entry.pluginId === "http-route-missing-auth"),
           ).toBeUndefined();
@@ -965,7 +965,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           const routes = registry.httpRoutes.filter(
             (entry) => entry.pluginId === "http-route-replace-self",
           );
@@ -992,7 +992,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           const route = registry.httpRoutes.find((entry) => entry.path === "/demo");
           expect(route?.pluginId).toBe("http-route-owner-a");
           expectDiagnosticContaining({
@@ -1013,7 +1013,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           const routes = registry.httpRoutes.filter(
             (entry) => entry.pluginId === "http-route-overlap",
           );
@@ -1037,7 +1037,7 @@ describe("loadOpenClawPlugins", () => {
   } };`,
           }),
         ],
-        assert: (registry: ReturnType<typeof loadOpenClawPlugins>) => {
+        assert: (registry: ReturnType<typeof loadBotPlugins>) => {
           const routes = registry.httpRoutes.filter(
             (entry) => entry.pluginId === "http-route-overlap-same-auth",
           );
@@ -1059,7 +1059,7 @@ describe("loadOpenClawPlugins", () => {
       body: `module.exports = { id: "config-disable", register() {} };`,
     });
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -1084,8 +1084,8 @@ describe("loadOpenClawPlugins", () => {
       path.join(pluginDir, "package.json"),
       JSON.stringify(
         {
-          name: "@openclaw/nested-default-channel",
-          openclaw: {
+          name: "@hanzo/bot-nested-default-channel",
+          bot: {
             extensions: ["./index.cjs"],
           },
         },
@@ -1095,7 +1095,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
     fs.writeFileSync(
-      path.join(pluginDir, "openclaw.plugin.json"),
+      path.join(pluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "nested-default-channel",
@@ -1143,7 +1143,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         channels: {
@@ -1179,7 +1179,7 @@ describe("loadOpenClawPlugins", () => {
       body: `module.exports = { id: "unrelated-plugin", register() { throw new Error("unrelated plugin should not load"); } };`,
     });
     fs.writeFileSync(
-      path.join(unrelated.dir, "openclaw.plugin.json"),
+      path.join(unrelated.dir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "unrelated-plugin",
@@ -1192,7 +1192,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -1242,7 +1242,7 @@ describe("loadOpenClawPlugins", () => {
   };`,
     });
     fs.writeFileSync(
-      path.join(plugin.dir, "openclaw.plugin.json"),
+      path.join(plugin.dir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "lazy-channel-plugin",
@@ -1264,7 +1264,7 @@ describe("loadOpenClawPlugins", () => {
       },
     };
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config,
     });
@@ -1275,7 +1275,7 @@ describe("loadOpenClawPlugins", () => {
       "disabled",
     );
 
-    const broadSetupRegistry = loadOpenClawPlugins({
+    const broadSetupRegistry = loadBotPlugins({
       cache: false,
       config,
       includeSetupOnlyChannelPlugins: true,
@@ -1288,7 +1288,7 @@ describe("loadOpenClawPlugins", () => {
       broadSetupRegistry.plugins.find((entry) => entry.id === "lazy-channel-plugin")?.status,
     ).toBe("disabled");
 
-    const scopedSetupRegistry = loadOpenClawPlugins({
+    const scopedSetupRegistry = loadBotPlugins({
       cache: false,
       config,
       includeSetupOnlyChannelPlugins: true,
@@ -1334,7 +1334,7 @@ describe("loadOpenClawPlugins", () => {
   };`,
     });
     fs.writeFileSync(
-      path.join(workspacePluginDir, "openclaw.plugin.json"),
+      path.join(workspacePluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "workspace-shadow",
@@ -1347,7 +1347,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       workspaceDir,
       includeSetupOnlyChannelPlugins: true,
@@ -1400,7 +1400,7 @@ describe("loadOpenClawPlugins", () => {
   };`,
     });
     fs.writeFileSync(
-      path.join(workspacePluginDir, "openclaw.plugin.json"),
+      path.join(workspacePluginDir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "trusted-workspace-shadow",
@@ -1413,7 +1413,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       workspaceDir,
       includeSetupOnlyChannelPlugins: true,
@@ -1469,7 +1469,7 @@ describe("loadOpenClawPlugins", () => {
   };`,
     });
     fs.writeFileSync(
-      path.join(plugin.dir, "openclaw.plugin.json"),
+      path.join(plugin.dir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "untrusted-load-path-channel",
@@ -1482,7 +1482,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const scopedSetupRegistry = loadOpenClawPlugins({
+    const scopedSetupRegistry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -1534,7 +1534,7 @@ describe("loadOpenClawPlugins", () => {
   };`,
     });
     fs.writeFileSync(
-      path.join(plugin.dir, "openclaw.plugin.json"),
+      path.join(plugin.dir, "bot.plugin.json"),
       JSON.stringify(
         {
           id: "denylisted-load-path-channel",
@@ -1547,7 +1547,7 @@ describe("loadOpenClawPlugins", () => {
       "utf-8",
     );
 
-    const scopedSetupRegistry = loadOpenClawPlugins({
+    const scopedSetupRegistry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -1604,7 +1604,7 @@ describe("loadOpenClawPlugins", () => {
         "utf-8",
       );
       fs.writeFileSync(
-        path.join(globalDir, "openclaw.plugin.json"),
+        path.join(globalDir, "bot.plugin.json"),
         JSON.stringify(
           {
             id: "untrusted-global-channel",
@@ -1620,10 +1620,10 @@ describe("loadOpenClawPlugins", () => {
         path.join(globalDir, "package.json"),
         JSON.stringify(
           {
-            name: "@openclaw/untrusted-global-channel",
+            name: "@hanzo/bot-untrusted-global-channel",
             version: "0.0.0-test",
             main: "./index.cjs",
-            openclaw: {
+            bot: {
               extensions: ["./index.cjs"],
             },
           },
@@ -1633,7 +1633,7 @@ describe("loadOpenClawPlugins", () => {
         "utf-8",
       );
 
-      const scopedSetupRegistry = loadOpenClawPlugins({
+      const scopedSetupRegistry = loadBotPlugins({
         cache: false,
         config: {
           plugins: {

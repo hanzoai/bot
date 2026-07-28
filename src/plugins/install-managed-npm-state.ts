@@ -8,7 +8,7 @@ import {
   type ManagedNpmRootPeerDependencySnapshot,
   readManagedNpmRootPeerDependencySnapshot,
   removeManagedNpmRootDependency,
-  repairManagedNpmRootOpenClawPeer,
+  repairManagedNpmRootBotPeer,
   restoreManagedNpmRootPeerDependencySnapshot,
 } from "../infra/npm-managed-root.js";
 import { parseRegistryNpmSpec, validateRegistryNpmSpec } from "../infra/npm-registry-spec.js";
@@ -23,11 +23,11 @@ import {
 import { loadPluginInstallRuntime } from "./install-shared.js";
 import type { PluginInstallLogger } from "./install-types.js";
 import { hasRetainedManagedNpmInstallMarker } from "./managed-npm-retention.js";
-import type { OpenClawPackageManifest } from "./manifest.js";
-import { relinkOpenClawPeerDependenciesInManagedNpmRoot } from "./plugin-peer-link.js";
+import type { BotPackageManifest } from "./manifest.js";
+import { relinkBotPeerDependenciesInManagedNpmRoot } from "./plugin-peer-link.js";
 
 const rollbackSnapshotCopyMode = fsConstants.COPYFILE_FICLONE;
-const MANAGED_NPM_PROJECT_QUARANTINE_DIR = "_openclaw-quarantined-npm-projects";
+const MANAGED_NPM_PROJECT_QUARANTINE_DIR = "_bot-quarantined-npm-projects";
 const MANAGED_NPM_PROJECT_REBUILD_ARTIFACTS = [
   "node_modules",
   "package-lock.json",
@@ -57,7 +57,7 @@ export async function rollbackManagedNpmPluginInstall(params: {
         npmRoot: params.npmRoot,
         snapshot: params.snapshot,
       });
-      await relinkOpenClawPeerDependenciesInManagedNpmRoot({
+      await relinkBotPeerDependenciesInManagedNpmRoot({
         npmRoot: params.npmRoot,
         logger: params.logger,
       });
@@ -178,21 +178,21 @@ export async function rollbackManagedNpmPluginInstall(params: {
       );
     }
   }
-  if (params.packageName !== "openclaw") {
+  if (params.packageName !== "bot") {
     try {
-      await repairManagedNpmRootOpenClawPeer({
+      await repairManagedNpmRootBotPeer({
         npmRoot: params.npmRoot,
         timeoutMs: params.timeoutMs,
         logger: params.logger,
       });
     } catch (error) {
       params.logger.warn?.(
-        `Failed to repair managed npm openclaw peer after rollback: ${String(error)}`,
+        `Failed to repair managed npm bot peer after rollback: ${String(error)}`,
       );
     }
   }
   try {
-    await relinkOpenClawPeerDependenciesInManagedNpmRoot({
+    await relinkBotPeerDependenciesInManagedNpmRoot({
       npmRoot: params.npmRoot,
       logger: params.logger,
     });
@@ -324,7 +324,7 @@ async function writeOrRemoveRollbackFile(filePath: string, contents: string | un
 export async function createManagedNpmPluginInstallRollbackSnapshot(params: {
   npmRoot: string;
 }): Promise<ManagedNpmPluginInstallRollbackSnapshot> {
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-npm-plugin-rollback-"));
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-npm-plugin-rollback-"));
   let nodeModulesBackupDir: string | undefined;
   const nodeModulesDir = path.join(params.npmRoot, "node_modules");
   try {
@@ -372,15 +372,15 @@ async function shouldCopyManagedNpmRollbackSnapshotEntry(params: {
   }
 
   const relativeParts = path.relative(params.nodeModulesDir, params.sourcePath).split(path.sep);
-  const isPluginLocalOpenClawPeer =
+  const isPluginLocalBotPeer =
     (relativeParts.length === 3 &&
       relativeParts[1] === "node_modules" &&
-      relativeParts[2] === "openclaw") ||
+      relativeParts[2] === "bot") ||
     (relativeParts.length === 4 &&
       relativeParts[0]?.startsWith("@") &&
       relativeParts[2] === "node_modules" &&
-      relativeParts[3] === "openclaw");
-  if (!isPluginLocalOpenClawPeer) {
+      relativeParts[3] === "bot");
+  if (!isPluginLocalBotPeer) {
     return true;
   }
 
@@ -501,7 +501,7 @@ export async function listManagedNpmRootPackageNames(npmRoot: string): Promise<S
 
   const packageNames = new Set<string>();
   for (const entry of entries.toSorted((left, right) => left.name.localeCompare(right.name))) {
-    if (entry.name === ".bin" || entry.name === "openclaw") {
+    if (entry.name === ".bin" || entry.name === "bot") {
       continue;
     }
     if (entry.name.startsWith("@")) {
@@ -673,7 +673,7 @@ export async function resolveManagedNpmGenerationUseForInstall(params: {
 }
 
 export function resolveRequiredPlatformPackageNames(
-  packageMetadata?: OpenClawPackageManifest,
+  packageMetadata?: BotPackageManifest,
 ): { ok: true; packageNames: string[] } | { ok: false; error: string } {
   const raw = packageMetadata?.install?.requiredPlatformPackages as unknown;
   if (raw === undefined) {
@@ -682,7 +682,7 @@ export function resolveRequiredPlatformPackageNames(
   if (!Array.isArray(raw)) {
     return {
       ok: false,
-      error: "package.json openclaw.install.requiredPlatformPackages must be an array",
+      error: "package.json bot.install.requiredPlatformPackages must be an array",
     };
   }
   const packageNames = new Set<string>();
@@ -691,7 +691,7 @@ export function resolveRequiredPlatformPackageNames(
       return {
         ok: false,
         error:
-          "package.json openclaw.install.requiredPlatformPackages must contain only npm package names",
+          "package.json bot.install.requiredPlatformPackages must contain only npm package names",
       };
     }
     const specError = validateRegistryNpmSpec(value);
@@ -699,7 +699,7 @@ export function resolveRequiredPlatformPackageNames(
     if (specError || !parsed || parsed.selectorKind !== "none") {
       return {
         ok: false,
-        error: `package.json openclaw.install.requiredPlatformPackages contains invalid package name: ${value}`,
+        error: `package.json bot.install.requiredPlatformPackages contains invalid package name: ${value}`,
       };
     }
     packageNames.add(parsed.name);

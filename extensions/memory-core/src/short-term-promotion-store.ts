@@ -1,5 +1,5 @@
-import { KeyedAsyncQueue } from "openclaw/plugin-sdk/keyed-async-queue";
-import { sleep } from "openclaw/plugin-sdk/runtime-env";
+import { KeyedAsyncQueue } from "bot/plugin-sdk/keyed-async-queue";
+import { sleep } from "bot/plugin-sdk/runtime-env";
 import { asRecord } from "./dreaming-shared.js";
 import {
   SHORT_TERM_LOCK_MAX_ENTRIES,

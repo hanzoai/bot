@@ -1,7 +1,7 @@
 // Imported by dispatch-from-config.test.ts to keep its mocked suite in one Vitest module graph.
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { registerAgentHarness } from "../../agents/harness/registry.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import { settleReplyDispatcher } from "../dispatch-dispatcher.js";
 import { getReplyPayloadMetadata, setReplyPayloadMetadata } from "../reply-payload.js";
 import type { MsgContext } from "../templating.js";
@@ -588,7 +588,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
         Surface: "webchat",
         SessionKey: "agent:forge:webchat:forge-main",
       }),
-      cfg: { messages: { visibleReplies: "message_tool" } } as OpenClawConfig,
+      cfg: { messages: { visibleReplies: "message_tool" } } as BotConfig,
       dispatcher,
       replyResolver,
     });
@@ -779,7 +779,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       dispatcher,
       replyResolver,
     });
@@ -832,7 +832,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       dispatcher,
       replyResolver,
     });
@@ -882,7 +882,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
             model: { primary: "anthropic/claude-sonnet-4.6" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       dispatcher,
       replyResolver,
     });
@@ -919,7 +919,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
         CommandSource: undefined,
         SessionKey: "agent:main:main",
       }),
-      cfg: { messages: { visibleReplies: "automatic" } } as OpenClawConfig,
+      cfg: { messages: { visibleReplies: "automatic" } } as BotConfig,
       dispatcher,
       replyResolver,
     });
@@ -1146,7 +1146,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
           groupChat: { visibleReplies: "message_tool" },
         },
         tools: { allow: ["read"] },
-      } as OpenClawConfig,
+      } as BotConfig,
       dispatcher,
       replyResolver,
     });
@@ -1183,7 +1183,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       dispatcher,
       replyResolver,
     });
@@ -1206,7 +1206,7 @@ describe("sendPolicy deny — suppress delivery, not processing (#53328)", () =>
         ChatType: "channel",
         SessionKey: "test:discord:channel:C1",
       }),
-      cfg: { tools: { allow: ["read"] } } as OpenClawConfig,
+      cfg: { tools: { allow: ["read"] } } as BotConfig,
       dispatcher,
       replyResolver,
       replyOptions: {

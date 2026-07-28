@@ -11,8 +11,8 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { readRegularFileSync } from "openclaw/plugin-sdk/security-runtime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { readRegularFileSync } from "bot/plugin-sdk/security-runtime";
 import { formatErrorMessage } from "./format.js";
 import { debugLog, debugError, debugWarn } from "./log.js";
 import { normalizeLowercaseStringOrEmpty as normalizeLowercase } from "./string-normalize.js";

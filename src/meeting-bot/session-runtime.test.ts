@@ -169,7 +169,7 @@ function createTestRuntime(params: {
         state: "active",
         createdAt,
         updatedAt: createdAt,
-        participantIdentity: "OpenClaw",
+        participantIdentity: "Bot",
         realtime: { enabled: false, toolPolicy: "none" },
         notes: [],
       };
@@ -232,7 +232,7 @@ afterEach(async () => {
 
 describe("MeetingSessionRuntime durable transcripts", () => {
   it("persists joined agent-mode captions and writes summary rows on leave", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-meeting-notes-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-meeting-notes-"));
     tempDirs.push(stateDir);
     const snapshots = [
       {
@@ -315,7 +315,7 @@ describe("MeetingSessionRuntime durable transcripts", () => {
     await runtime.leave(session.id);
 
     const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, BOT_STATE_DIR: stateDir },
     });
     const storedSession = await store.readSession(session.id);
     expect(storedSession).toMatchObject({
@@ -341,7 +341,7 @@ describe("MeetingSessionRuntime durable transcripts", () => {
   });
 
   it("keeps transcribe finalization when durable session startup fails", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-meeting-notes-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-meeting-notes-"));
     tempDirs.push(tempDir);
     const blockedStateDir = path.join(tempDir, "not-a-directory");
     await fs.writeFile(blockedStateDir, "blocked", "utf8");
@@ -371,7 +371,7 @@ describe("MeetingSessionRuntime durable transcripts", () => {
   });
 
   it("does not let subscriber delivery failure block meeting leave", async () => {
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-meeting-notes-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-meeting-notes-"));
     tempDirs.push(stateDir);
     const empty = { droppedLines: 0, epoch: "page-1", lines: [] };
     const final = {
@@ -419,7 +419,7 @@ describe("MeetingSessionRuntime durable transcripts", () => {
     expect(releaseBrowserTab).toHaveBeenCalledOnce();
 
     const store = new TranscriptsStore(path.join(stateDir, "transcripts"), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      env: { ...process.env, BOT_STATE_DIR: stateDir },
     });
     const stored = await store.readSession(session.id);
     expect(await store.readUtterancesForSession(stored!)).toHaveLength(1);

@@ -1,7 +1,7 @@
 // Implements identity metadata updates for configured agents.
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   listAgentIds,
   resolveAgentWorkspaceDir,
@@ -13,7 +13,7 @@ import { replaceConfigFile } from "../config/config.js";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
 import { logConfigUpdated } from "../config/logging.js";
 import type { AgentConfig, IdentityConfig } from "../config/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { type RuntimeEnv, writeRuntimeJson } from "../runtime.js";
 import { defaultRuntime } from "../runtime.js";
@@ -66,7 +66,7 @@ export async function agentsSetIdentityCommand(
   }
   const cfg = migratePersistedImplicitMainRoster(
     configSnapshot.sourceConfig ?? configSnapshot.config,
-  ).config as OpenClawConfig;
+  ).config as BotConfig;
   const baseHash = configSnapshot.hash;
 
   const agentRaw = normalizeOptionalString(opts.agent);
@@ -122,7 +122,7 @@ export async function agentsSetIdentityCommand(
   const resolvedAgentId = expectDefined(agentId, "agent id");
   const resolvedAgentIds = listAgentIds(cfg).map((id) => normalizeAgentId(id));
   if (!resolvedAgentIds.includes(resolvedAgentId)) {
-    runtime.error(`Agent "${resolvedAgentId}" not found. Create it with \`openclaw agents add\`.`);
+    runtime.error(`Agent "${resolvedAgentId}" not found. Create it with \`bot agents add\`.`);
     runtime.exit(1);
     return;
   }

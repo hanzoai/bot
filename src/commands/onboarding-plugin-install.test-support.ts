@@ -7,7 +7,7 @@ type OnboardingPluginInstallTestApi = {
 
 function getTestApi(): OnboardingPluginInstallTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.onboardingPluginInstallTestApi")
+    Symbol.for("bot.onboardingPluginInstallTestApi")
   ] as OnboardingPluginInstallTestApi;
 }
 

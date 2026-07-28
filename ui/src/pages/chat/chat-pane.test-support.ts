@@ -145,7 +145,7 @@ export function createTestChatPane(params: {
   client: GatewayBrowserClient;
   sessions: SessionCapability;
 }) {
-  const pane = document.createElement("openclaw-chat-pane") as unknown as TestChatPane;
+  const pane = document.createElement("bot-chat-pane") as unknown as TestChatPane;
   Object.defineProperty(pane, "isConnected", {
     configurable: true,
     value: true,

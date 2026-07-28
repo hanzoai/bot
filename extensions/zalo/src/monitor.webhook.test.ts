@@ -3,10 +3,10 @@ import type { RequestListener } from "node:http";
 import {
   createEmptyPluginRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { withServer } from "openclaw/plugin-sdk/test-env";
+} from "bot/plugin-sdk/plugin-test-runtime";
+import { withServer } from "bot/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import type { ZaloRuntimeEnv } from "./monitor.types.js";
 import { zaloWebhookRuntime } from "./monitor.webhook.js";
 import type { ResolvedZaloAccount } from "./types.js";
@@ -47,13 +47,13 @@ function registerTarget(params: {
   secret?: string;
   statusSink?: (patch: { lastInboundAt?: number; lastOutboundAt?: number }) => void;
   account?: ResolvedZaloAccount;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   runtime?: Partial<ZaloRuntimeEnv>;
   acceptWebhook?: (rawEvent: string) => Promise<void>;
 }): () => void {
   return registerZaloWebhookTarget({
     account: params.account ?? DEFAULT_ACCOUNT,
-    config: params.config ?? ({} as OpenClawConfig),
+    config: params.config ?? ({} as BotConfig),
     runtime: (params.runtime ?? {}) as ZaloRuntimeEnv,
     secret: params.secret ?? "secret",
     path: params.path,
@@ -356,7 +356,7 @@ describe("handleZaloWebhookRequest", () => {
         gateway: {
           trustedProxies: ["127.0.0.1"],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     try {

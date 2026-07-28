@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 let resolveApiKeyForProvider: typeof import("../agents/model-auth.js").resolveApiKeyForProvider;
-let closeOpenClawAgentDatabasesForTest: typeof import("../state/openclaw-agent-db.js").closeOpenClawAgentDatabasesForTest;
-let withOpenClawTestState: typeof import("../test-utils/openclaw-test-state.js").withOpenClawTestState;
+let closeBotAgentDatabasesForTest: typeof import("../state/bot-agent-db.js").closeBotAgentDatabasesForTest;
+let withBotTestState: typeof import("../test-utils/bot-test-state.js").withBotTestState;
 let activateSecretsRuntimeSnapshot: typeof import("./runtime.js").activateSecretsRuntimeSnapshot;
 let clearSecretsRuntimeSnapshot: typeof import("./runtime.js").clearSecretsRuntimeSnapshot;
 let prepareSecretsRuntimeSnapshot: typeof import("./runtime.js").prepareSecretsRuntimeSnapshot;
@@ -18,21 +18,21 @@ describe("auth profile migration isolation", () => {
       prepareSecretsRuntimeSnapshot,
     } = await import("./runtime.js"));
     ({ resolveApiKeyForProvider } = await import("../agents/model-auth.js"));
-    ({ closeOpenClawAgentDatabasesForTest } = await import("../state/openclaw-agent-db.js"));
-    ({ withOpenClawTestState } = await import("../test-utils/openclaw-test-state.js"));
+    ({ closeBotAgentDatabasesForTest } = await import("../state/bot-agent-db.js"));
+    ({ withBotTestState } = await import("../test-utils/bot-test-state.js"));
     clearSecretsRuntimeSnapshot();
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
     vi.unstubAllEnvs();
   });
 
   afterEach(() => {
     clearSecretsRuntimeSnapshot();
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
     vi.unstubAllEnvs();
   });
 
   it("isolates one legacy owner and blocks env fallback without affecting a healthy agent", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
         label: "auth-migration-isolation",
@@ -82,7 +82,7 @@ describe("auth profile migration isolation", () => {
           resolveApiKeyForProvider({ provider: "openai", agentDir: legacyAgentDir }),
         ).rejects.toMatchObject({
           code: "AUTH_PROFILE_MIGRATION_REQUIRED",
-          action: "openclaw doctor --fix",
+          action: "bot doctor --fix",
           sourceKinds: ["legacy-auth"],
         });
         await expect(

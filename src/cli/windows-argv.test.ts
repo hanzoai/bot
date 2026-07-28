@@ -9,14 +9,14 @@ describe("normalizeWindowsArgv", () => {
     try {
       expect(
         normalizeWindowsArgv([
-          "openclaw",
+          "bot",
           "C:\\Program Files\\nodejs\\node.exe",
-          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\bot\\dist\\index.js",
           "status",
         ]),
       ).toEqual([
-        "openclaw",
-        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+        "bot",
+        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\bot\\dist\\index.js",
         "status",
       ]);
     } finally {
@@ -29,16 +29,16 @@ describe("normalizeWindowsArgv", () => {
     try {
       expect(
         normalizeWindowsArgv([
-          "openclaw",
+          "bot",
           "C:\\Program Files\\nodejs\\node.exe",
-          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\bot\\dist\\index.js",
           "agent",
           "--message",
           "debug node.exe-wrapper startup",
         ]),
       ).toEqual([
-        "openclaw",
-        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+        "bot",
+        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\bot\\dist\\index.js",
         "agent",
         "--message",
         "debug node.exe-wrapper startup",
@@ -55,13 +55,13 @@ describe("normalizeWindowsArgv", () => {
         normalizeWindowsArgv([
           "C:\\Program Files\\nodejs\\node.exe",
           "C:\\Program Files\\nodejs\\node.exe",
-          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+          "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\bot\\dist\\index.js",
           "debug node.exe-wrapper startup",
           "--verbose",
         ]),
       ).toEqual([
         "C:\\Program Files\\nodejs\\node.exe",
-        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\openclaw\\dist\\index.js",
+        "C:\\Users\\me\\AppData\\Roaming\\npm\\node_modules\\bot\\dist\\index.js",
         "debug node.exe-wrapper startup",
         "--verbose",
       ]);
@@ -73,8 +73,8 @@ describe("normalizeWindowsArgv", () => {
   it("preserves exact node.exe option values outside the launcher prefix", () => {
     const platform = mockProcessPlatform("win32");
     try {
-      expect(normalizeWindowsArgv(["openclaw", "run", "--message", "node.exe"])).toEqual([
-        "openclaw",
+      expect(normalizeWindowsArgv(["bot", "run", "--message", "node.exe"])).toEqual([
+        "bot",
         "run",
         "--message",
         "node.exe",

@@ -1,7 +1,7 @@
 // Whatsapp plugin module implements channel react action behavior.
-import { readBooleanParam } from "openclaw/plugin-sdk/boolean-param";
-import { jsonResult } from "openclaw/plugin-sdk/channel-actions";
-import { canonicalizeBase64, estimateBase64DecodedBytes } from "openclaw/plugin-sdk/media-runtime";
+import { readBooleanParam } from "bot/plugin-sdk/boolean-param";
+import { jsonResult } from "bot/plugin-sdk/channel-actions";
+import { canonicalizeBase64, estimateBase64DecodedBytes } from "bot/plugin-sdk/media-runtime";
 import {
   isWhatsAppGroupJid,
   resolveAuthorizedWhatsAppOutboundTarget,
@@ -13,7 +13,7 @@ import {
   readStringOrNumberParam,
   readStringParam,
   sendMessageWhatsApp,
-  type OpenClawConfig,
+  type BotConfig,
 } from "./channel-react-action.runtime.js";
 
 const WHATSAPP_CHANNEL = "whatsapp" as const;
@@ -21,7 +21,7 @@ const WHATSAPP_CHANNEL = "whatsapp" as const;
 type WhatsAppMessageActionParams = {
   action: string;
   params: Record<string, unknown>;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   requesterSenderId?: string | null;
   mediaAccess?: {

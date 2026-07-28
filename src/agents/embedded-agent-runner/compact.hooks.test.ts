@@ -1,7 +1,7 @@
 // Hook integration coverage for direct and queued embedded compaction.
 
-import { expectDefined } from "@openclaw/normalization-core";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import type { AgentMessage } from "bot/plugin-sdk/agent-core";
 import { beforeAll, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { createReplyOperation } from "../../auto-reply/reply/reply-run-registry.js";
 import {
@@ -14,7 +14,7 @@ import {
   compactWithSafetyTimeoutMock,
   createAgentSessionMock,
   createPreparedEmbeddedAgentSettingsManagerMock,
-  createOpenClawCodingToolsMock,
+  createBotCodingToolsMock,
   enqueueCommandInLaneMock,
   ensureAuthProfileStoreMock,
   ensureRuntimePluginsLoaded,
@@ -452,7 +452,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
     expectRecordFields(fallbackPlanCall[0], {
       provider: "anthropic",
       modelId: "claude-fallback",
-      harnessId: "openclaw",
+      harnessId: "bot",
       modelRoute: undefined,
     });
   });
@@ -553,7 +553,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
           auth: { order: { openai: ["openai:subscription", "openai:platform"] } },
           agents: {
             defaults: {
-              models: { "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } } },
+              models: { "openai/gpt-5.5": { agentRuntime: { id: "bot" } } },
             },
           },
         },
@@ -623,7 +623,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
           },
           agents: {
             defaults: {
-              models: { "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } } },
+              models: { "openai/gpt-5.5": { agentRuntime: { id: "bot" } } },
             },
           },
         },
@@ -671,8 +671,8 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
       runAttempt: vi.fn(),
     } as never);
     selectAgentHarnessForPreparedModelProvidersMock.mockReturnValue({
-      id: "openclaw",
-      label: "OpenClaw test harness",
+      id: "bot",
+      label: "Bot test harness",
       supports: () => ({ supported: true }),
       runAttempt: vi.fn(),
     } as never);
@@ -684,7 +684,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
     expect(result.ok).toBe(true);
     expect(selectAgentHarnessForPreparedModelProvidersMock).toHaveBeenCalledTimes(2);
     expect(buildAgentRuntimePlanMock).toHaveBeenCalledWith(
-      expect.objectContaining({ harnessId: "openclaw", harnessRuntime: "openclaw" }),
+      expect.objectContaining({ harnessId: "bot", harnessRuntime: "bot" }),
     );
   });
 
@@ -976,7 +976,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
       senderE164: "+15551234567",
     });
 
-    expectRecordFields(mockCallArg(createOpenClawCodingToolsMock), {
+    expectRecordFields(mockCallArg(createBotCodingToolsMock), {
       senderId: "sender-1",
       senderName: "Alice",
       senderUsername: "alice_u",
@@ -998,7 +998,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
         workspaceDir: "/tmp/workspace",
       });
 
-      expectRecordFields(mockCallArg(createOpenClawCodingToolsMock), { modelHasVision });
+      expectRecordFields(mockCallArg(createBotCodingToolsMock), { modelHasVision });
     },
   );
 
@@ -1010,7 +1010,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
       cwd: "/tmp/task-repo",
     });
 
-    expectRecordFields(mockCallArg(createOpenClawCodingToolsMock), {
+    expectRecordFields(mockCallArg(createBotCodingToolsMock), {
       cwd: "/tmp/task-repo",
       workspaceDir: "/tmp/workspace",
       spawnWorkspaceDir: "/tmp/workspace",
@@ -1029,7 +1029,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
       contextTokenBudget: 64_000,
     });
 
-    expectRecordFields(mockCallArg(createOpenClawCodingToolsMock), {
+    expectRecordFields(mockCallArg(createBotCodingToolsMock), {
       modelContextWindowTokens: 64_000,
     });
     expectRecordFields(mockCallArg(guardSessionManagerMock, 0, 1), {
@@ -1052,7 +1052,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
       workspaceDir: "/tmp/workspace",
     });
 
-    expect(createOpenClawCodingToolsMock).not.toHaveBeenCalled();
+    expect(createBotCodingToolsMock).not.toHaveBeenCalled();
   });
 
   it("quarantines unsupported tool schemas before creating the compaction model session", async () => {
@@ -1066,7 +1066,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
       authStorage: { setRuntimeApiKey: vi.fn() },
       modelRegistry: {},
     });
-    createOpenClawCodingToolsMock.mockReturnValueOnce([
+    createBotCodingToolsMock.mockReturnValueOnce([
       {
         name: "healthy_lookup",
         label: "Healthy Lookup",
@@ -1108,7 +1108,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
       contextTokenBudget: 64_000,
     });
 
-    expectRecordFields(mockCallArg(createOpenClawCodingToolsMock), {
+    expectRecordFields(mockCallArg(createBotCodingToolsMock), {
       modelContextWindowTokens: 32_000,
     });
   });
@@ -1169,7 +1169,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
     }
   });
 
-  it("keeps model-locked OpenClaw compaction on its exact model without fallbacks", async () => {
+  it("keeps model-locked Bot compaction on its exact model without fallbacks", async () => {
     sessionCompactImpl.mockRejectedValueOnce(
       Object.assign(new Error("primary compaction rate limited"), { status: 429 }),
     );
@@ -1181,7 +1181,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
       workspaceDir: "/tmp/workspace",
       provider: "openai",
       model: "gpt-primary",
-      agentHarnessId: "openclaw",
+      agentHarnessId: "bot",
       modelSelectionLocked: true,
       modelFallbacksOverride: ["anthropic/claude-fallback"],
       config: {
@@ -1204,7 +1204,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
   });
 
   it("revalidates immutable Ultra for each compaction fallback candidate", async () => {
-    resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "openclaw" });
+    resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "bot" });
     sessionCompactImpl
       .mockRejectedValueOnce(
         Object.assign(new Error("primary compaction rate limited"), {
@@ -1232,7 +1232,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
         agents: {
           defaults: {
             models: {
-              "openai/gpt-5.6-sol": { agentRuntime: { id: "openclaw" } },
+              "openai/gpt-5.6-sol": { agentRuntime: { id: "bot" } },
             },
           },
         },
@@ -1328,7 +1328,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
       runtimeSource: "implicit",
     } as never);
     // Only ChatGPT OAuth is available — no API-key profile. Auth-aware
-    // selection must pick codex (harness-owned) instead of forced openclaw.
+    // selection must pick codex (harness-owned) instead of forced bot.
     ensureAuthProfileStoreMock.mockReturnValue({
       version: 1,
       profiles: {
@@ -1477,7 +1477,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
         modelProviders: expect.arrayContaining([
           expect.objectContaining({
             preparedAuth: expect.objectContaining({ source: "profile" }),
-            runtimePolicy: expect.objectContaining({ compatibleIds: ["openclaw", "codex"] }),
+            runtimePolicy: expect.objectContaining({ compatibleIds: ["bot", "codex"] }),
           }),
         ]),
       }),
@@ -1489,8 +1489,8 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
     });
   });
 
-  it("preserves direct OpenAI API-key compaction when OpenClaw runtime is active", async () => {
-    resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "openclaw" });
+  it("preserves direct OpenAI API-key compaction when Bot runtime is active", async () => {
+    resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "bot" });
 
     const result = await compactEmbeddedAgentSessionDirect({
       sessionId: "session-1",
@@ -1586,7 +1586,7 @@ describe("compactEmbeddedAgentSessionDirect hooks", () => {
   });
 
   it("materializes subscription-auth OpenAI compaction while preserving logical context", async () => {
-    resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "openclaw" });
+    resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "bot" });
     mockResolvedModel({ contextWindow: 1_000_000 });
     ensureAuthProfileStoreMock.mockReturnValue({
       version: 1,
@@ -2989,7 +2989,7 @@ describe("compactEmbeddedAgentSession hooks (ownsCompaction engine)", () => {
           },
           agents: {
             defaults: {
-              models: { "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } } },
+              models: { "openai/gpt-5.5": { agentRuntime: { id: "bot" } } },
             },
           },
         },
@@ -3097,7 +3097,7 @@ describe("compactEmbeddedAgentSession hooks (ownsCompaction engine)", () => {
     );
   });
 
-  it("preserves concrete OpenClaw pins over explicit Codex policy for queued compaction", async () => {
+  it("preserves concrete Bot pins over explicit Codex policy for queued compaction", async () => {
     resolveAgentHarnessPolicyMock.mockReturnValue({
       runtime: "codex",
       runtimeSource: "model",
@@ -3116,7 +3116,7 @@ describe("compactEmbeddedAgentSession hooks (ownsCompaction engine)", () => {
       wrappedCompactionArgs({
         provider: "openai",
         model: "gpt-5.5",
-        agentHarnessId: "openclaw",
+        agentHarnessId: "bot",
         config: {
           models: {
             providers: {
@@ -3298,7 +3298,7 @@ describe("compactEmbeddedAgentSession hooks (ownsCompaction engine)", () => {
         modelProviders: expect.arrayContaining([
           expect.objectContaining({
             preparedAuth: expect.objectContaining({ source: "harness" }),
-            runtimePolicy: expect.objectContaining({ compatibleIds: ["openclaw", "codex"] }),
+            runtimePolicy: expect.objectContaining({ compatibleIds: ["bot", "codex"] }),
           }),
         ]),
       }),
@@ -3417,9 +3417,9 @@ describe("compactEmbeddedAgentSession hooks (ownsCompaction engine)", () => {
     );
   });
 
-  it("keeps unbound api-key queued compaction on openclaw without native harness compaction", async () => {
+  it("keeps unbound api-key queued compaction on bot without native harness compaction", async () => {
     resolveAgentHarnessPolicyMock.mockReturnValue({
-      runtime: "openclaw",
+      runtime: "bot",
       runtimeSource: "implicit",
     } as never);
 
@@ -3446,13 +3446,13 @@ describe("compactEmbeddedAgentSession hooks (ownsCompaction engine)", () => {
       }),
     );
     expect(selectAgentHarnessMock.mock.results[0]?.value).toEqual(
-      expect.objectContaining({ id: "openclaw" }),
+      expect.objectContaining({ id: "bot" }),
     );
   });
 
   it("resolves reusable queued direct auth without a stored profile", async () => {
     resolveAgentHarnessPolicyMock.mockReturnValue({
-      runtime: "openclaw",
+      runtime: "bot",
       runtimeSource: "implicit",
     } as never);
 
@@ -3561,7 +3561,7 @@ describe("compactEmbeddedAgentSession hooks (ownsCompaction engine)", () => {
 
   it("keeps queued custom OpenAI Responses compaction embedded without a harness binding", async () => {
     resolveAgentHarnessPolicyMock.mockReturnValue({
-      runtime: "openclaw",
+      runtime: "bot",
       runtimeSource: "implicit",
     } as never);
 
@@ -3677,7 +3677,7 @@ describe("compactEmbeddedAgentSession hooks (ownsCompaction engine)", () => {
   ])(
     "fails model-locked Codex compaction on %s without a context-engine fallback",
     async (failureReason, reason) => {
-      resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "openclaw" });
+      resolveAgentHarnessPolicyMock.mockReturnValue({ runtime: "bot" });
       maybeCompactAgentHarnessSessionMock.mockResolvedValueOnce({
         ok: false,
         compacted: false,

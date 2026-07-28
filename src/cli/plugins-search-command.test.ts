@@ -56,7 +56,7 @@ describe("plugins search command", () => {
         {
           score: 12,
           package: {
-            name: "openclaw-calendar",
+            name: "bot-calendar",
             displayName: "Calendar",
             family: "code-plugin",
             channel: "community",
@@ -72,7 +72,7 @@ describe("plugins search command", () => {
         {
           score: 10,
           package: {
-            name: "openclaw-calendar-bundle",
+            name: "bot-calendar-bundle",
             displayName: "Calendar Bundle",
             family: "bundle-plugin",
             channel: "official",
@@ -97,9 +97,9 @@ describe("plugins search command", () => {
       family: "bundle-plugin",
       limit: 5,
     });
-    expect(mocks.logs.join("\n")).toContain("openclaw-calendar");
+    expect(mocks.logs.join("\n")).toContain("bot-calendar");
     expect(mocks.logs.join("\n")).toContain(
-      "Install: openclaw plugins install clawhub:openclaw-calendar",
+      "Install: bot plugins install clawhub:bot-calendar",
     );
   });
 

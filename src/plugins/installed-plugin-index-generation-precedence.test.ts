@@ -1,10 +1,10 @@
 // Covers loader precedence between a plugin's flat project dir and newer
-// `__openclaw-generation__` dirs when reconciling persisted install records.
+// `__bot-generation__` dirs when reconciling persisted install records.
 import fs from "node:fs";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import {
   resolvePluginNpmGenerationProjectDir,
   resolvePluginNpmProjectDir,
@@ -21,12 +21,12 @@ import {
 } from "./managed-npm-retention.js";
 import { writeManagedNpmPlugin } from "./test-helpers/managed-npm-plugin.js";
 
-const PACKAGE_NAME = "@openclaw/discord";
+const PACKAGE_NAME = "@hanzo/bot-discord";
 const PLUGIN_ID = "discord";
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 function makeStateDir(): string {
-  return tempDirs.make("openclaw-plugin-generation-precedence-");
+  return tempDirs.make("bot-plugin-generation-precedence-");
 }
 
 function expectRecordFields(record: unknown, expected: Record<string, unknown>) {
@@ -40,7 +40,7 @@ function expectRecordFields(record: unknown, expected: Record<string, unknown>) 
   return actual;
 }
 
-/** Writes a managed plugin version into an `__openclaw-generation__` dir. */
+/** Writes a managed plugin version into an `__bot-generation__` dir. */
 function writeManagedGeneration(params: {
   stateDir: string;
   version: string;
@@ -95,7 +95,7 @@ function setInstallTimestamp(packageDir: string, timestampMs: number): void {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   clearLoadInstalledPluginIndexInstallRecordsCache();
 });
 
@@ -240,8 +240,8 @@ describe("managed npm generation-dir loader precedence", () => {
     expect(emitWarning).toHaveBeenCalledWith(
       expect.stringContaining("without an authoritative active path"),
       expect.objectContaining({
-        code: "OPENCLAW_PLUGIN_INSTALL_RECOVERY_FALLBACK",
-        type: "OpenClawPluginRecoveryWarning",
+        code: "BOT_PLUGIN_INSTALL_RECOVERY_FALLBACK",
+        type: "BotPluginRecoveryWarning",
       }),
     );
   });
@@ -287,7 +287,7 @@ describe("managed npm generation-dir loader precedence", () => {
     });
     expect(emitWarning).toHaveBeenCalledWith(
       expect.stringContaining("without an authoritative active path"),
-      expect.objectContaining({ code: "OPENCLAW_PLUGIN_INSTALL_RECOVERY_FALLBACK" }),
+      expect.objectContaining({ code: "BOT_PLUGIN_INSTALL_RECOVERY_FALLBACK" }),
     );
   });
 
@@ -303,7 +303,7 @@ describe("managed npm generation-dir loader precedence", () => {
     setInstallTimestamp(recentPackageDir, Date.UTC(2026, 0, 2));
     writeManagedNpmPlugin({
       stateDir,
-      packageName: "@openclaw/unrelated",
+      packageName: "@hanzo/bot-unrelated",
       pluginId: "unrelated",
       version: "1.0.0",
       layout: "legacy",
@@ -364,7 +364,7 @@ describe("managed npm generation-dir loader precedence", () => {
     // A managed generation with a higher version exists on disk...
     writeManagedGeneration({ stateDir, version: "2.0.0", generationKey: "discord-managed" });
     // ...but the persisted record points at a custom install outside the npm root.
-    const customInstallPath = path.join(stateDir, "custom", "node_modules", "@openclaw", "discord");
+    const customInstallPath = path.join(stateDir, "custom", "node_modules", "@bot", "discord");
 
     await writePersistedInstalledPluginIndexInstallRecords(
       {

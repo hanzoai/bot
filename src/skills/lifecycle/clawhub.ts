@@ -1,5 +1,5 @@
 // ClawHub lifecycle facade: public API plus install/update coordination.
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type {
   ClawHubRiskAcknowledgementRequest,
   ClawHubTrustErrorCode,
@@ -314,7 +314,7 @@ export async function installSkillFromClawHub(params: {
   acknowledgeClawHubRisk?: boolean;
   onClawHubRisk?: (request: ClawHubRiskAcknowledgementRequest) => boolean | Promise<boolean>;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   /** True when a Claw lifecycle caller already owns package coordination. */
   clawManaged?: boolean;
 }): Promise<InstallClawHubSkillResult> {
@@ -335,7 +335,7 @@ export async function updateSkillsFromClawHub(params: {
   acknowledgeClawHubRisk?: boolean;
   onClawHubRisk?: (request: ClawHubRiskAcknowledgementRequest) => boolean | Promise<boolean>;
   logger?: Logger;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): Promise<UpdateClawHubSkillResult[]> {
   const lock = await readClawHubSkillsLockfile(params.workspaceDir);
   const slugs = params.slug

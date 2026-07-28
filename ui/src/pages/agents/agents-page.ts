@@ -39,7 +39,7 @@ import {
 } from "../../lib/cron/index.ts";
 import { parseAgentSessionKey } from "../../lib/sessions/session-key.ts";
 import { normalizeStringEntries } from "../../lib/string-coerce.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { loadAgentFileContent, saveAgentFile } from "./files.ts";
 import {
@@ -67,7 +67,7 @@ type AgentsRequestSources = Partial<
   Pick<ApplicationContext, "agents" | "agentIdentity" | "sessions">
 >;
 
-class AgentsPage extends OpenClawLightDomElement implements AgentsState {
+class AgentsPage extends BotLightDomElement implements AgentsState {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -944,7 +944,7 @@ class AgentsPage extends OpenClawLightDomElement implements AgentsState {
   }
 }
 
-if (!customElements.get("openclaw-agents-page")) {
-  customElements.define("openclaw-agents-page", AgentsPage);
+if (!customElements.get("bot-agents-page")) {
+  customElements.define("bot-agents-page", AgentsPage);
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

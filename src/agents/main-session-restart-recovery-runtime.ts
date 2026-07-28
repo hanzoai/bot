@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { GatewayRecoveryRuntime } from "../gateway/server-instance-runtime.types.js";
 import { runWithGatewayIndependentRootWorkAdmission } from "../process/gateway-work-admission.js";
 import {
@@ -25,7 +25,7 @@ import {
 } from "./main-session-restart-recovery-store.js";
 
 async function recoverRestartAbortedMainSessionsWithOptions(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   onExhaustedTarget?: (target: ExhaustedRestartRecoveryTarget) => void;
   stateDir?: string;
   resumedSessionKeys?: Set<string>;
@@ -60,7 +60,7 @@ async function recoverRestartAbortedMainSessionsWithOptions(params: {
 }
 
 export async function recoverRestartAbortedMainSessions(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   stateDir?: string;
   resumedSessionKeys?: Set<string>;
   activeSessionIds?: Iterable<string>;
@@ -73,7 +73,7 @@ export async function recoverRestartAbortedMainSessions(params: {
 /** Retries one exact durable Control UI row from its owning per-agent SQLite store. */
 export async function retryRestartAbortedMainSessionRecovery(params: {
   canonicalSessionKey?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   expectedRecoveryRunId: string;
   expectedRecoverySourceRunId: string;
   expectedSessionId: string;
@@ -128,7 +128,7 @@ export async function retryRestartAbortedMainSessionRecovery(params: {
 
 /** Reconciles one interrupted row after its final foreground owner releases. */
 export async function retryRestartAbortedMainSessionRecoveryAfterOwnerRelease(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   expectedSessionId: string;
   sessionKey: string;
   storePath: string;
@@ -139,7 +139,7 @@ export async function retryRestartAbortedMainSessionRecoveryAfterOwnerRelease(pa
 
 async function recoverExpectedRestartRecoveryTarget(params: {
   canonicalSessionKey?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   expectedSessionId: string;
   observationOnly?: boolean;
   sessionKey: string;
@@ -192,7 +192,7 @@ async function recoverExpectedRestartRecoveryTarget(params: {
 export function scheduleRestartAbortedMainSessionRecoveryAfterOwnerRelease(params: {
   delayMs?: number;
   expectedSessionId: string;
-  getConfig: () => OpenClawConfig;
+  getConfig: () => BotConfig;
   getGatewayRuntime: () => GatewayRecoveryRuntime | undefined;
   maxRetries?: number;
   sessionKey: string;
@@ -256,7 +256,7 @@ export function scheduleRestartAbortedMainSessionRecoveryAfterOwnerRelease(param
 }
 
 async function recoverStartupOrphanedMainSessionsWithOptions(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   stateDir?: string;
   activeSessionIds?: Iterable<string>;
   activeSessionKeys?: Iterable<string>;
@@ -291,7 +291,7 @@ async function recoverStartupOrphanedMainSessionsWithOptions(params: {
 }
 
 export async function recoverStartupOrphanedMainSessions(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   stateDir?: string;
   activeSessionIds?: Iterable<string>;
   activeSessionKeys?: Iterable<string>;
@@ -303,7 +303,7 @@ export async function recoverStartupOrphanedMainSessions(params: {
 }
 
 export function scheduleRestartAbortedMainSessionRecovery(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   delayMs?: number;
   maxRetries?: number;
   stateDir?: string;

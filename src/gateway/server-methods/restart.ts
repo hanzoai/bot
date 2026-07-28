@@ -1,6 +1,6 @@
 // Gateway RPC handlers for safe gateway restart requests and preflight state.
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import { readActiveGatewayLockIdentity } from "../../infra/gateway-lock.js";
 import {

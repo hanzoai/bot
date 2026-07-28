@@ -1,8 +1,8 @@
-// Test Device Pair Telegram script supports OpenClaw repository automation.
+// Test Device Pair Telegram script supports Bot repository automation.
 import { pathToFileURL } from "node:url";
 import { getRuntimeConfig } from "../../src/config/config.js";
 import { matchPluginCommand, executePluginCommand } from "../../src/plugins/commands.js";
-import { loadOpenClawPlugins } from "../../src/plugins/loader.js";
+import { loadBotPlugins } from "../../src/plugins/loader.js";
 
 type SendMessageTelegram = (
   chatId: string,
@@ -16,7 +16,7 @@ type SendMessageTelegram = (
 type DevicePairTelegramDeps = {
   executePluginCommand: typeof executePluginCommand;
   getRuntimeConfig: typeof getRuntimeConfig;
-  loadOpenClawPlugins: typeof loadOpenClawPlugins;
+  loadBotPlugins: typeof loadBotPlugins;
   matchPluginCommand: typeof matchPluginCommand;
   sendMessageTelegram: SendMessageTelegram;
 };
@@ -120,7 +120,7 @@ function createDefaultDeps(): DevicePairTelegramDeps {
   return {
     executePluginCommand,
     getRuntimeConfig,
-    loadOpenClawPlugins,
+    loadBotPlugins,
     matchPluginCommand,
     sendMessageTelegram: async (...args) => {
       const sendMessageTelegram = await loadTelegramRuntimeSendMessage();
@@ -142,7 +142,7 @@ async function runDevicePairTelegram(
   }
 
   const cfg = deps.getRuntimeConfig();
-  deps.loadOpenClawPlugins({ config: cfg });
+  deps.loadBotPlugins({ config: cfg });
 
   const match = deps.matchPluginCommand("/pair", { channel: "telegram" });
   if (!match) {

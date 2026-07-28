@@ -5,9 +5,9 @@ import { sha256File } from "../infra/crypto-digest.js";
 import { ensureAbsoluteDirectory } from "../infra/fs-safe.js";
 import { executeSqliteQuerySync } from "../infra/kysely-sync.js";
 import {
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  type BotStateDatabaseOptions,
+} from "../state/bot-state-db.js";
 import type { TranscriptSessionDescriptor } from "./provider-types.js";
 import { ensureMeetingTranscriptsSchema } from "./sqlite-schema.js";
 import {
@@ -20,7 +20,7 @@ import { meetingTranscriptDb } from "./store-sqlite.js";
 type ExportOwnershipParams = {
   session: TranscriptSessionDescriptor;
   exportRootDir: string;
-  databaseOptions: OpenClawStateDatabaseOptions;
+  databaseOptions: BotStateDatabaseOptions;
 };
 
 const TRANSCRIPT_EXPORT_FILE_NAMES = new Set([
@@ -30,9 +30,9 @@ const TRANSCRIPT_EXPORT_FILE_NAMES = new Set([
   "transcript.jsonl",
 ]);
 
-function database(options: OpenClawStateDatabaseOptions) {
+function database(options: BotStateDatabaseOptions) {
   ensureMeetingTranscriptsSchema(options);
-  return openOpenClawStateDatabase(options);
+  return openBotStateDatabase(options);
 }
 
 export async function assertTranscriptExportPathAvailable(

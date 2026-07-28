@@ -1,13 +1,13 @@
 ---
-summary: "Host OpenClaw on Oracle Cloud's Always Free ARM tier"
+summary: "Host Bot on Oracle Cloud's Always Free ARM tier"
 read_when:
-  - Setting up OpenClaw on Oracle Cloud
-  - Looking for free VPS hosting for OpenClaw
-  - Want 24/7 OpenClaw on a small server
+  - Setting up Bot on Oracle Cloud
+  - Looking for free VPS hosting for Bot
+  - Want 24/7 Bot on a small server
 title: "Oracle Cloud"
 ---
 
-Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up to 4 OCPU, 24 GB RAM, 200 GB storage) at no cost.
+Run a persistent Bot Gateway on Oracle Cloud's **Always Free** ARM tier (up to 4 OCPU, 24 GB RAM, 200 GB storage) at no cost.
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up
     1. Log into [Oracle Cloud Console](https://cloud.oracle.com/).
     2. Navigate to **Compute > Instances > Create Instance**.
     3. Configure:
-       - **Name:** `openclaw`
+       - **Name:** `bot`
        - **Image:** Ubuntu 24.04 (aarch64)
        - **Shape:** `VM.Standard.A1.Flex` (Ampere ARM)
        - **OCPUs:** 2 (or up to 4)
@@ -52,7 +52,7 @@ Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up
 
   <Step title="Configure user and hostname">
     ```bash
-    sudo hostnamectl set-hostname openclaw
+    sudo hostnamectl set-hostname bot
     sudo passwd ubuntu
     sudo loginctl enable-linger ubuntu
     ```
@@ -64,16 +64,16 @@ Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up
   <Step title="Install Tailscale">
     ```bash
     curl -fsSL https://tailscale.com/install.sh | sh
-    sudo tailscale up --ssh --hostname=openclaw
+    sudo tailscale up --ssh --hostname=bot
     ```
 
-    From now on, connect via Tailscale: `ssh ubuntu@openclaw`.
+    From now on, connect via Tailscale: `ssh ubuntu@bot`.
 
   </Step>
 
-  <Step title="Install OpenClaw">
+  <Step title="Install Bot">
     ```bash
-    curl -fsSL https://openclaw.ai/install.sh | bash
+    curl -fsSL https://bot.ai/install.sh | bash
     source ~/.bashrc
     ```
 
@@ -85,13 +85,13 @@ Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up
     Use token auth with Tailscale Serve for secure remote access.
 
     ```bash
-    openclaw config set gateway.bind loopback
-    openclaw config set gateway.auth.mode token
-    openclaw doctor --generate-gateway-token
-    openclaw config set gateway.tailscale.mode serve
-    openclaw config set gateway.trustedProxies '["127.0.0.1"]'
+    bot config set gateway.bind loopback
+    bot config set gateway.auth.mode token
+    bot doctor --generate-gateway-token
+    bot config set gateway.tailscale.mode serve
+    bot config set gateway.trustedProxies '["127.0.0.1"]'
 
-    systemctl --user restart openclaw-gateway.service
+    systemctl --user restart bot-gateway.service
     ```
 
     `gateway.trustedProxies=["127.0.0.1"]` here is only for the local Tailscale Serve proxy's forwarded-IP/local-client handling. It is **not** `gateway.auth.mode: "trusted-proxy"`. Diff viewer routes keep fail-closed behavior in this setup: raw `127.0.0.1` viewer requests without forwarded proxy headers return `Diff not found`. Use `mode=file` / `mode=both` for attachments, or intentionally enable remote viewers and set `plugins.entries.diffs.config.viewerBaseUrl` (or pass a proxy `baseUrl`) if you need shareable viewer links.
@@ -112,8 +112,8 @@ Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up
 
   <Step title="Verify">
     ```bash
-    openclaw --version
-    systemctl --user status openclaw-gateway.service
+    bot --version
+    systemctl --user status bot-gateway.service
     tailscale serve status
     curl http://localhost:18789
     ```
@@ -121,7 +121,7 @@ Run a persistent OpenClaw Gateway on Oracle Cloud's **Always Free** ARM tier (up
     Access the Control UI from any device on your tailnet:
 
     ```
-    https://openclaw.<tailnet-name>.ts.net/
+    https://bot.<tailnet-name>.ts.net/
     ```
 
     Replace `<tailnet-name>` with your tailnet name (visible in `tailscale status`).
@@ -144,8 +144,8 @@ With the VCN locked down (only UDP 41641 open) and the Gateway bound to loopback
 
 Still recommended:
 
-- `chmod 700 ~/.openclaw` to restrict credential file permissions.
-- `openclaw security audit` for an OpenClaw-specific posture check.
+- `chmod 700 ~/.bot` to restrict credential file permissions.
+- `bot security audit` for an Bot-specific posture check.
 - Regular `sudo apt update && sudo apt upgrade` for OS patches.
 - Review devices in the [Tailscale admin console](https://login.tailscale.com/admin) periodically.
 
@@ -164,7 +164,7 @@ sudo systemctl disable --now ssh
 
 ## ARM notes
 
-The Always Free tier is ARM (`aarch64`). Most OpenClaw features work fine; a small number of native binaries need ARM builds:
+The Always Free tier is ARM (`aarch64`). Most Bot features work fine; a small number of native binaries need ARM builds:
 
 - Node.js, Telegram, WhatsApp (Baileys): pure JavaScript, no issues.
 - Most npm packages with native code: pre-built `linux-arm64` artifacts available.
@@ -174,15 +174,15 @@ Verify the architecture with `uname -m` (should print `aarch64`). For binaries w
 
 ## Persistence and backups
 
-OpenClaw state lives under:
+Bot state lives under:
 
-- `~/.openclaw/` -- `openclaw.json`, per-agent `auth-profiles.json`, channel/provider state, and session data.
-- `~/.openclaw/workspace/` -- the agent workspace (SOUL.md, memory, artifacts).
+- `~/.bot/` -- `bot.json`, per-agent `auth-profiles.json`, channel/provider state, and session data.
+- `~/.bot/workspace/` -- the agent workspace (SOUL.md, memory, artifacts).
 
 These survive reboots. To take a portable snapshot:
 
 ```bash
-openclaw backup create
+bot backup create
 ```
 
 ## Fallback: SSH tunnel
@@ -190,7 +190,7 @@ openclaw backup create
 If Tailscale Serve is not working, use an SSH tunnel from your local machine:
 
 ```bash
-ssh -L 18789:127.0.0.1:18789 ubuntu@openclaw
+ssh -L 18789:127.0.0.1:18789 ubuntu@bot
 ```
 
 Then open `http://localhost:18789`.
@@ -199,9 +199,9 @@ Then open `http://localhost:18789`.
 
 **Instance creation fails ("Out of capacity")** -- Free tier ARM instances are popular. Try a different availability domain or retry during off-peak hours.
 
-**Tailscale will not connect** -- Run `sudo tailscale up --ssh --hostname=openclaw --reset` to re-authenticate.
+**Tailscale will not connect** -- Run `sudo tailscale up --ssh --hostname=bot --reset` to re-authenticate.
 
-**Gateway will not start** -- Run `openclaw doctor --non-interactive` and check logs with `journalctl --user -u openclaw-gateway.service -n 50`.
+**Gateway will not start** -- Run `bot doctor --non-interactive` and check logs with `journalctl --user -u bot-gateway.service -n 50`.
 
 **ARM binary issues** -- Most npm packages work on ARM64. For native binaries, look for `linux-arm64` or `aarch64` releases. Verify architecture with `uname -m`.
 
@@ -209,7 +209,7 @@ Then open `http://localhost:18789`.
 
 - [Channels](/channels) -- connect Telegram, WhatsApp, Discord, and more
 - [Gateway configuration](/gateway/configuration) -- all config options
-- [Updating](/install/updating) -- keep OpenClaw up to date
+- [Updating](/install/updating) -- keep Bot up to date
 
 ## Related
 

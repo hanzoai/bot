@@ -32,7 +32,7 @@ describe("tts runtime facade", () => {
       'from "../../packages/speech-core/src/tts-settings.js";',
     );
     expect(settingsFacadeSource).not.toContain("tts-runtime");
-    expect(packageSettingsSource).toContain('from "openclaw/plugin-sdk/speech-settings";');
+    expect(packageSettingsSource).toContain('from "bot/plugin-sdk/speech-settings";');
     expect(packageSettingsSource).not.toContain("plugin-sdk/media-runtime");
   });
 

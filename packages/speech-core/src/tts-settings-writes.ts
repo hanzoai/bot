@@ -1,8 +1,8 @@
 // TTS preference mutations stay off the agent prompt's read-only import path.
 import path from "node:path";
-import type { TtsAutoMode, TtsProvider } from "openclaw/plugin-sdk/config-contracts";
-import { privateFileStoreSync } from "openclaw/plugin-sdk/security-runtime";
-import { canonicalizeSpeechProviderId } from "openclaw/plugin-sdk/speech-core";
+import type { TtsAutoMode, TtsProvider } from "bot/plugin-sdk/config-contracts";
+import { privateFileStoreSync } from "bot/plugin-sdk/security-runtime";
+import { canonicalizeSpeechProviderId } from "bot/plugin-sdk/speech-core";
 import { normalizeTtsPersonaId, readTtsPrefs, type TtsUserPrefs } from "./tts-settings.js";
 
 function updateTtsPrefs(prefsPath: string, update: (prefs: TtsUserPrefs) => void): void {

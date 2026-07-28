@@ -13,7 +13,7 @@ import {
   GENERIC_EXTERNAL_RUN_FAILURE_TEXT,
   HEARTBEAT_EXTERNAL_RUN_FAILURE_TEXT,
 } from "../auto-reply/reply/agent-runner-failure-copy.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { patchSessionEntry } from "../config/sessions/session-accessor.js";
 import {
   deleteCronJobScratch,
@@ -21,8 +21,8 @@ import {
   readHeartbeatMonitorScratch,
 } from "../cron/scratch-store.js";
 import { resolveCronJobsStorePath, saveCronJobsStore } from "../cron/store.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { stripTrailingHeartbeatNotifyFalse } from "./heartbeat-delivery-normalization.js";
 import { getLastHeartbeatEvent, resetHeartbeatEventsForTest } from "./heartbeat-events.js";
 import { claimHeartbeatOutcomeForRun } from "./heartbeat-outcome-store.js";
@@ -69,7 +69,7 @@ describe("runHeartbeatOnce heartbeat response tool", () => {
     isolatedSession?: boolean;
     target?: "telegram" | "last" | "none";
     showOk?: boolean;
-  }): OpenClawConfig {
+  }): BotConfig {
     return {
       agents: {
         defaults: {
@@ -104,7 +104,7 @@ describe("runHeartbeatOnce heartbeat response tool", () => {
         },
       },
       session: { store: params.storePath },
-    } as OpenClawConfig;
+    } as BotConfig;
   }
 
   function createDeps(params: {
@@ -121,7 +121,7 @@ describe("runHeartbeatOnce heartbeat response tool", () => {
 
   function expectTelegramSend(
     sendTelegram: ReturnType<typeof vi.fn>,
-    params: { text: string; cfg: OpenClawConfig; silent?: boolean },
+    params: { text: string; cfg: BotConfig; silent?: boolean },
   ) {
     expect(sendTelegram).toHaveBeenCalledTimes(1);
     expect(sendTelegram.mock.calls).toEqual([
@@ -233,7 +233,7 @@ describe("runHeartbeatOnce heartbeat response tool", () => {
       beforeSeed?: (params: {
         tmpDir: string;
         storePath: string;
-        cfg: OpenClawConfig;
+        cfg: BotConfig;
       }) => Promise<void>;
       tasks?: Parameters<typeof runHeartbeatOnce>[0]["tasks"];
     } = {},
@@ -365,7 +365,7 @@ describe("runHeartbeatOnce heartbeat response tool", () => {
 
   it("persists a meaningful quiet outcome for the base session", async () => {
     await withTempTelegramHeartbeatSandbox(async ({ tmpDir, storePath, replySpy }) => {
-      vi.stubEnv("OPENCLAW_STATE_DIR", tmpDir);
+      vi.stubEnv("BOT_STATE_DIR", tmpDir);
       const cfg = createConfig({ tmpDir, storePath });
       const sessionKey = await seedMainSessionStore(storePath, cfg, {
         lastChannel: "telegram",
@@ -401,8 +401,8 @@ describe("runHeartbeatOnce heartbeat response tool", () => {
         wakeSource: "manual",
         wakeReason: "operator check",
       });
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeBotAgentDatabasesForTest();
+      closeBotStateDatabaseForTest();
     });
   });
 
@@ -754,7 +754,7 @@ describe("runHeartbeatOnce heartbeat response tool", () => {
     expectHeartbeatToolPrompt(result);
   });
 
-  it("uses the isolated Codex runtime instead of the base OpenClaw runtime", async () => {
+  it("uses the isolated Codex runtime instead of the base Bot runtime", async () => {
     // One direction proves prompt recalculation after isolation. Reciprocal
     // runtime precedence is covered directly by thinking-runtime.test.ts.
     const result = await runPromptScenario({
@@ -762,7 +762,7 @@ describe("runHeartbeatOnce heartbeat response tool", () => {
       session: {
         modelProvider: "anthropic",
         model: "claude-sonnet-4-6",
-        agentRuntimeOverride: "openclaw",
+        agentRuntimeOverride: "bot",
       },
     });
 
@@ -906,7 +906,7 @@ describe("runHeartbeatOnce heartbeat response tool", () => {
   });
 
   it("uses the heartbeat response tool prompt when the Codex runtime is env-forced", async () => {
-    vi.stubEnv("OPENCLAW_AGENT_RUNTIME", "codex");
+    vi.stubEnv("BOT_AGENT_RUNTIME", "codex");
     const result = await runPromptScenario({
       config: { model: "openai/gpt-5.5" },
     });

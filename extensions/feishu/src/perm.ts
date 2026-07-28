@@ -1,7 +1,7 @@
 // Feishu plugin module implements perm behavior.
 import type * as Lark from "@larksuiteoapi/node-sdk";
-import { jsonResult } from "openclaw/plugin-sdk/tool-results";
-import type { OpenClawPluginApi } from "../runtime-api.js";
+import { jsonResult } from "bot/plugin-sdk/tool-results";
+import type { BotPluginApi } from "../runtime-api.js";
 import { listEnabledFeishuAccounts } from "./accounts.js";
 import { FeishuPermSchema, type FeishuPermParams } from "./perm-schema.js";
 import { createFeishuToolClient, resolveAnyEnabledFeishuToolsConfig } from "./tool-account.js";
@@ -110,7 +110,7 @@ async function removeMember(
 
 // ============ Tool Registration ============
 
-export function registerFeishuPermTools(api: OpenClawPluginApi) {
+export function registerFeishuPermTools(api: BotPluginApi) {
   if (!api.config) {
     return;
   }

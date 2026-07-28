@@ -32,7 +32,7 @@ describe("directory durability compatibility", () => {
   });
 
   it.runIf(process.platform !== "win32")("reports a completed directory sync", async () => {
-    const directoryPath = tempDirs.make("openclaw-directory-sync-");
+    const directoryPath = tempDirs.make("bot-directory-sync-");
 
     await expect(syncDirectoryIfSupported(directoryPath)).resolves.toEqual({ status: "synced" });
   });
@@ -41,7 +41,7 @@ describe("directory durability compatibility", () => {
     "keeps the existing %s unsupported-filesystem compatibility",
     async (code) => {
       vi.spyOn(process, "platform", "get").mockReturnValue("linux");
-      const directoryPath = tempDirs.make("openclaw-directory-unsupported-");
+      const directoryPath = tempDirs.make("bot-directory-unsupported-");
       const originalOpen = fs.open.bind(fs);
       vi.spyOn(fs, "open").mockImplementation(async (filePath, flags, mode) => {
         const handle = await originalOpen(filePath, flags, mode);
@@ -58,7 +58,7 @@ describe("directory durability compatibility", () => {
 
   it("propagates real directory I/O failures", async () => {
     vi.spyOn(process, "platform", "get").mockReturnValue("linux");
-    const directoryPath = tempDirs.make("openclaw-directory-io-");
+    const directoryPath = tempDirs.make("bot-directory-io-");
     const originalOpen = fs.open.bind(fs);
     vi.spyOn(fs, "open").mockImplementation(async (filePath, flags, mode) => {
       const handle = await originalOpen(filePath, flags, mode);
@@ -73,7 +73,7 @@ describe("directory durability compatibility", () => {
     "preserves Windows %s directory-open compatibility",
     async (code) => {
       vi.spyOn(process, "platform", "get").mockReturnValue("win32");
-      const directoryPath = tempDirs.make("openclaw-directory-windows-");
+      const directoryPath = tempDirs.make("bot-directory-windows-");
       vi.spyOn(fs, "open").mockRejectedValue(Object.assign(new Error(code), { code }));
 
       await expect(syncDirectoryIfSupported(directoryPath)).resolves.toEqual({

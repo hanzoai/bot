@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import type { AssistantMessage, Context, Model } from "@openclaw/ai";
-import { streamOpenAICompletions } from "@openclaw/ai/internal/openai";
+import type { AssistantMessage, Context, Model } from "@hanzo/bot-ai";
+import { streamOpenAICompletions } from "@hanzo/bot-ai/internal/openai";
 import { describe, expect, it } from "vitest";
 import {
   classifyAssistantFailoverReason,

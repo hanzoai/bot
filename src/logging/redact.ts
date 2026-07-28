@@ -9,11 +9,11 @@ import {
   HTTP_AUTH_SCHEME_PATTERN,
   HTTP_AUTH_SERIALIZED_QUOTE_PATTERN,
   redactStructuredAuthHeaders,
-} from "@openclaw/acp-core";
-import { expectDefined } from "@openclaw/normalization-core";
+} from "@hanzo/bot-acp-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Redaction helpers scrub secrets and sensitive identifiers from log output.
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
+import type { BotConfig } from "../config/types.bot.js";
 import { compileConfigRegex } from "../security/config-regex.js";
 import { readLoggingConfig } from "./config.js";
 import { replacePatternBounded } from "./redact-bounded.js";
@@ -22,7 +22,7 @@ import { redactRegisteredSecretValues } from "./secret-redaction-registry.js";
 
 export type RedactSensitiveMode = "off" | "tools";
 export type RedactPattern = string | RegExp;
-type LoggingConfig = OpenClawConfig["logging"];
+type LoggingConfig = BotConfig["logging"];
 
 const DEFAULT_REDACT_MODE: RedactSensitiveMode = "tools";
 const DEFAULT_REDACT_MIN_LENGTH = 18;
@@ -213,7 +213,7 @@ const DEFAULT_REDACT_PATTERNS: string[] = [
   AUTHORIZATION_BASIC_REDACT_PATTERN,
   AUTHORIZATION_BOT_REDACT_PATTERN,
   ...HTTP_AUTH_HEADER_REDACT_PATTERNS,
-  String.raw`(?:X-OpenClaw-Token|x-pomerium-jwt-assertion|X-Api-Key|X-Auth-Token)\s*[:=]\s*([^\s"',;]+)`,
+  String.raw`(?:X-Bot-Token|x-pomerium-jwt-assertion|X-Api-Key|X-Auth-Token)\s*[:=]\s*([^\s"',;]+)`,
   STANDALONE_BEARER_REDACT_PATTERN,
   // URL userinfo and common connection-string password slots.
   String.raw`\b(?:https?|wss?|ftp):\/\/[^\/\s:@]*:([^\/\s@]+)@`,

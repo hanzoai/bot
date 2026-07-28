@@ -1,4 +1,4 @@
-import type { LookupFn } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { LookupFn } from "bot/plugin-sdk/ssrf-runtime";
 // Qqbot tests cover api-client plugin behavior.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createStreamingResponse } from "../../../../test-support/streaming-error-response.js";
@@ -6,12 +6,12 @@ import { createStreamingResponse } from "../../../../test-support/streaming-erro
 const fetchWithSsrFGuardMock = vi.hoisted(() => vi.fn());
 const ssrfRuntimeActual = vi.hoisted(() => ({
   fetchWithSsrFGuard: undefined as
-    | typeof import("openclaw/plugin-sdk/ssrf-runtime").fetchWithSsrFGuard
+    | typeof import("bot/plugin-sdk/ssrf-runtime").fetchWithSsrFGuard
     | undefined,
 }));
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/ssrf-runtime")>();
+vi.mock("bot/plugin-sdk/ssrf-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/ssrf-runtime")>();
   ssrfRuntimeActual.fetchWithSsrFGuard = actual.fetchWithSsrFGuard;
   return {
     ...actual,

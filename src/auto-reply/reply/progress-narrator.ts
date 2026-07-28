@@ -8,7 +8,7 @@ import { resolveUtilityModelRefForAgent } from "../../agents/utility-model.js";
 import { PROGRESS_STATUS_PREAMBLE_FRESH_MS } from "../../channels/progress-draft-compositor.js";
 import { sanitizeProgressStatusText } from "../../channels/progress-draft-status-text.js";
 import { isChannelProgressDraftWorkToolName, isCommandToolName } from "../../channels/streaming.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { logVerbose } from "../../globals.js";
 import type { AgentEventPayload, AgentEventStream } from "../../infra/agent-events.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
@@ -49,7 +49,7 @@ function normalizeNarrationText(raw: string): string {
 }
 
 function createProgressNarrator(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   userMessage?: string;
   onUpdate: (payload: { text: string }) => Promise<void> | void;
@@ -395,7 +395,7 @@ function createProgressNarrator(params: {
  * Returns the options unchanged otherwise.
  */
 export function attachProgressNarratorToReplyOptions(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   userMessage?: string;
   opts?: InternalGetReplyOptions;

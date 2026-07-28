@@ -2,15 +2,15 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   asObjectRecord,
   defineChannelAliasMigration,
   defineKeyMoveMigration,
   hasLegacyAccountStreamingAliases,
   normalizeChannelConfigEntries,
-} from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/runtime-doctor";
 import { resolveSlackNativeStreaming, resolveSlackStreamingMode } from "./streaming-compat.js";
 
 const streamingAliasMigration = defineChannelAliasMigration({
@@ -114,50 +114,50 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "slack"],
     message:
-      'channels.slack.capabilities.interactiveReplies is retired; use typed presentation actions instead. Run "openclaw doctor --fix".',
+      'channels.slack.capabilities.interactiveReplies is retired; use typed presentation actions instead. Run "bot doctor --fix".',
     match: hasInteractiveRepliesCapability,
   },
   {
     path: ["channels", "slack", "accounts"],
     message:
-      'channels.slack.accounts.<id>.capabilities.interactiveReplies is retired; use typed presentation actions instead. Run "openclaw doctor --fix".',
+      'channels.slack.accounts.<id>.capabilities.interactiveReplies is retired; use typed presentation actions instead. Run "bot doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, hasInteractiveRepliesCapability),
   },
   {
     path: ["channels", "slack"],
     message:
-      'channels.slack.dm.replyToMode moved to replyToModeByChatType.direct. Run "openclaw doctor --fix".',
+      'channels.slack.dm.replyToMode moved to replyToModeByChatType.direct. Run "bot doctor --fix".',
     match: dmReplyModeMigration.hasLegacy,
   },
   {
     path: ["channels", "slack", "accounts"],
     message:
-      'channels.slack.accounts.<id>.dm.replyToMode moved to replyToModeByChatType.direct. Run "openclaw doctor --fix".',
+      'channels.slack.accounts.<id>.dm.replyToMode moved to replyToModeByChatType.direct. Run "bot doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, dmReplyModeMigration.hasLegacy),
   },
   {
     path: ["channels", "slack"],
     message:
-      'channels.slack.thread.requireExplicitMention is legacy; use channels.slack.implicitMentions.threadParticipation instead. Run "openclaw doctor --fix".',
+      'channels.slack.thread.requireExplicitMention is legacy; use channels.slack.implicitMentions.threadParticipation instead. Run "bot doctor --fix".',
     match: threadMentionPolicyMigration.hasLegacy,
   },
   {
     path: ["channels", "slack", "accounts"],
     message:
-      'channels.slack.accounts.<id>.thread.requireExplicitMention is legacy; use channels.slack.accounts.<id>.implicitMentions.threadParticipation instead. Run "openclaw doctor --fix".',
+      'channels.slack.accounts.<id>.thread.requireExplicitMention is legacy; use channels.slack.accounts.<id>.implicitMentions.threadParticipation instead. Run "bot doctor --fix".',
     match: (value) =>
       hasLegacyAccountStreamingAliases(value, threadMentionPolicyMigration.hasLegacy),
   },
   {
     path: ["channels", "slack"],
     message:
-      'channels.slack.channels.<id>.allow is legacy; use channels.slack.channels.<id>.enabled instead. Run "openclaw doctor --fix".',
+      'channels.slack.channels.<id>.allow is legacy; use channels.slack.channels.<id>.enabled instead. Run "bot doctor --fix".',
     match: channelAllowMigration.hasLegacy,
   },
   {
     path: ["channels", "slack", "accounts"],
     message:
-      'channels.slack.accounts.<id>.channels.<id>.allow is legacy; use channels.slack.accounts.<id>.channels.<id>.enabled instead. Run "openclaw doctor --fix".',
+      'channels.slack.accounts.<id>.channels.<id>.allow is legacy; use channels.slack.accounts.<id>.channels.<id>.enabled instead. Run "bot doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, channelAllowMigration.hasLegacy),
   },
 ];
@@ -183,7 +183,7 @@ function normalizeSlackEntry(params: {
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): ChannelDoctorConfigMutation {
   const changes: string[] = [];
   const aliases = streamingAliasMigration.normalizeChannelConfig({ cfg, changes });

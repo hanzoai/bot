@@ -17,9 +17,9 @@ import {
   isChromeCdpOwnedByPid,
   isChromeCdpReady,
   isChromeReachable,
-  launchOpenClawChrome,
+  launchBotChrome,
   ManagedChromeCleanupError,
-  stopOpenClawChrome,
+  stopBotChrome,
 } from "./chrome.js";
 import type { ResolvedBrowserProfile } from "./config.js";
 import { BROWSER_ERROR_REASONS, BrowserProfileUnavailableError } from "./errors.js";
@@ -89,16 +89,16 @@ function ensureOptionsKey(options?: BrowserEnsureOptions): string {
 
 function formatLocalPortOwnershipHint(profile: ResolvedBrowserProfile): string {
   const resetHint =
-    `If OpenClaw should own this local profile, run action=reset-profile profile=${profile.name} ` +
+    `If Bot should own this local profile, run action=reset-profile profile=${profile.name} ` +
     "to stop the conflicting process.";
   if (!profile.cdpIsLoopback) {
     return resetHint;
   }
   return (
     `${resetHint} If this port is an externally managed CDP service such as Browserless, ` +
-    `set browser.profiles.${profile.name}.attachOnly=true so OpenClaw attaches without trying ` +
+    `set browser.profiles.${profile.name}.attachOnly=true so Bot attaches without trying ` +
     "to manage the local process. For Browserless Docker, set EXTERNAL to the same WebSocket " +
-    "endpoint OpenClaw can reach via browser.profiles.<name>.cdpUrl."
+    "endpoint Bot can reach via browser.profiles.<name>.cdpUrl."
   );
 }
 
@@ -251,7 +251,7 @@ export function createProfileAvailability({
     running: NonNullable<ProfileRuntimeState["running"]>,
   ) => {
     try {
-      await stopOpenClawChrome(running);
+      await stopBotChrome(running);
       releaseProfileHandle(profileState, running);
     } catch (err) {
       getProfileLifecycle(profileState).blockedReason = "managed Chrome cleanup failed";
@@ -298,7 +298,7 @@ export function createProfileAvailability({
       return (
         `Chrome MCP existing-session attach for profile "${profile.name}" could not connect to Chrome. ` +
         "Enable remote debugging in the browser inspect page, keep the browser open, approve the attach prompt, and retry. " +
-        'If you do not need your signed-in browser session, use the managed "openclaw" profile instead.' +
+        'If you do not need your signed-in browser session, use the managed "bot" profile instead.' +
         detail
       );
     }
@@ -336,7 +336,7 @@ export function createProfileAvailability({
     signal: AbortSignal,
     running: NonNullable<ProfileRuntimeState["running"]>,
   ): Promise<void> => {
-    // launchOpenClawChrome() can return before Chrome is fully ready to serve /json/version + CDP WS.
+    // launchBotChrome() can return before Chrome is fully ready to serve /json/version + CDP WS.
     // If a follow-up call races ahead, we can hit PortInUseError trying to launch again on the same port.
     const deadlineMs =
       Date.now() + (state().resolved.localCdpReadyTimeoutMs ?? CDP_READY_AFTER_LAUNCH_WINDOW_MS);
@@ -397,7 +397,7 @@ export function createProfileAvailability({
   ) => {
     assertManagedLaunchNotCoolingDown(profile.name, profileState);
     try {
-      return await launchOpenClawChrome(current.resolved, profile, {
+      return await launchBotChrome(current.resolved, profile, {
         ...launchOptions,
         signal,
       });
@@ -456,7 +456,7 @@ export function createProfileAvailability({
           return;
         }
       }
-      // Browser control service can restart while a loopback OpenClaw browser is still
+      // Browser control service can restart while a loopback Bot browser is still
       // alive. Give that pre-existing browser one longer probe window before falling
       // back to local executable resolution.
       if (!attachOnly && !remoteCdp && profile.cdpIsLoopback && !runtime.running) {
@@ -472,7 +472,7 @@ export function createProfileAvailability({
         if (capabilities.mode === "local-extension") {
           const { EXTENSION_PAIRING_HINT } = await getExtensionRelayModule();
           throw new BrowserProfileUnavailableError(
-            `The OpenClaw Chrome extension is not connected for profile "${profile.name}". ` +
+            `The Bot Chrome extension is not connected for profile "${profile.name}". ` +
               `Open Chrome on this machine and check the extension popup shows "Connected". ${EXTENSION_PAIRING_HINT}`,
           );
         }
@@ -527,7 +527,7 @@ export function createProfileAvailability({
       if (capabilities.mode === "local-extension") {
         const { EXTENSION_PAIRING_HINT } = await getExtensionRelayModule();
         throw new BrowserProfileUnavailableError(
-          `The extension relay for profile "${profile.name}" is running but the OpenClaw Chrome extension is not connected. ${EXTENSION_PAIRING_HINT}`,
+          `The extension relay for profile "${profile.name}" is running but the Bot Chrome extension is not connected. ${EXTENSION_PAIRING_HINT}`,
         );
       }
       const detail = await describeCdpFailure(PROFILE_ATTACH_RETRY_TIMEOUT_MS);
@@ -542,7 +542,7 @@ export function createProfileAvailability({
     if (!runtime.running) {
       const detail = await describeCdpFailure(PROFILE_ATTACH_RETRY_TIMEOUT_MS);
       throw new BrowserProfileUnavailableError(
-        `Port ${profile.cdpPort} is in use for profile "${profile.name}" but not by openclaw. ` +
+        `Port ${profile.cdpPort} is in use for profile "${profile.name}" but not by bot. ` +
           `${formatLocalPortOwnershipHint(profile)} ${detail}`,
       );
     }

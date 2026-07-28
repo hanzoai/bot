@@ -1,6 +1,6 @@
 // Zalouser plugin module implements directory behavior.
 import { resolveZalouserAccountSync } from "./accounts.js";
-import type { ChannelDirectoryEntry, OpenClawConfig } from "./channel-api.js";
+import type { ChannelDirectoryEntry, BotConfig } from "./channel-api.js";
 import { parseZalouserDirectoryGroupId } from "./session-route.js";
 
 type ZalouserDirectoryDeps = {
@@ -33,7 +33,7 @@ function mapUser(params: {
 
 export async function listZalouserDirectoryGroupMembers(
   params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string;
     groupId: string;
     limit?: number;

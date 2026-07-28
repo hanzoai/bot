@@ -5,7 +5,7 @@ import type {
   SessionDiscussionState,
 } from "../../../../../packages/gateway-protocol/src/index.js";
 import { t } from "../../../i18n/index.ts";
-import { OpenClawLightDomElement } from "../../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../../lit/bot-element.ts";
 import { buildWidgetThemeMessage, postWidgetTheme } from "./widget-theme.ts";
 
 type SessionDiscussionInfoLoader = (sessionKey: string) => Promise<SessionDiscussionInfo>;
@@ -51,7 +51,7 @@ function resolveDiscussionEmbedUrl(value: string | undefined): string | null {
     return null;
   }
   if (
-    url.searchParams.get("openclawHostTheme") !== "1" ||
+    url.searchParams.get("botHostTheme") !== "1" ||
     !/^\/embed\/(?:channel|thread)\/[^/]+\/[^/]+\/?$/u.test(url.pathname)
   ) {
     // Provider-issued and signed discussion URLs are opaque. Only ClickClack's
@@ -72,7 +72,7 @@ function resolveDiscussionEmbedUrl(value: string | undefined): string | null {
   return url.href;
 }
 
-class SessionDiscussionPanel extends OpenClawLightDomElement {
+class SessionDiscussionPanel extends BotLightDomElement {
   @property() sessionKey = "";
   @property({ attribute: false }) loadInfo: SessionDiscussionInfoLoader | null = null;
   @property({ attribute: false }) openDiscussion: SessionDiscussionOpener | null = null;
@@ -260,12 +260,12 @@ class SessionDiscussionPanel extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-session-discussion")) {
-  customElements.define("openclaw-session-discussion", SessionDiscussionPanel);
+if (!customElements.get("bot-session-discussion")) {
+  customElements.define("bot-session-discussion", SessionDiscussionPanel);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-session-discussion": SessionDiscussionPanel;
+    "bot-session-discussion": SessionDiscussionPanel;
   }
 }

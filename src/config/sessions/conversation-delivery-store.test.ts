@@ -2,7 +2,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { normalizeLegacySessionEntryDelivery } from "../../infra/state-migrations.legacy-session-store.js";
 import { buildConversationRef } from "../../routing/conversation-ref.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../../state/bot-agent-db.js";
 import { withTempDir } from "../../test-helpers/temp-dir.js";
 import type { DeliveryContext } from "../../utils/delivery-context.types.js";
 import {
@@ -38,7 +38,7 @@ async function withConversationStore(
     conversationRef: string;
   }) => Promise<void> | void,
 ): Promise<void> {
-  await withTempDir({ prefix: "openclaw-conversation-delivery-" }, async (dir) => {
+  await withTempDir({ prefix: "bot-conversation-delivery-" }, async (dir) => {
     const storePath = path.join(dir, "sessions.json");
     const scope = { agentId: "main", storePath };
     try {
@@ -66,7 +66,7 @@ async function withConversationStore(
         }),
       });
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeBotAgentDatabasesForTest();
     }
   });
 }

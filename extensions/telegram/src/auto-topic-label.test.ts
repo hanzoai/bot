@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 const generateConversationLabel = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/reply-dispatch-runtime", () => ({
+vi.mock("bot/plugin-sdk/reply-dispatch-runtime", () => ({
   generateConversationLabel,
 }));
 

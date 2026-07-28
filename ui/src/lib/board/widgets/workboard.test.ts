@@ -125,7 +125,7 @@ describe("Workboard plugin widgets", () => {
       }
       throw new Error(`Unexpected method: ${method}`);
     });
-    const element = document.createElement("openclaw-workboard-card-widget");
+    const element = document.createElement("bot-workboard-card-widget");
     element.widget = pluginWidget("workboard:card", { cardId: "card-ready" });
     element.sessionKey = "agent:main:test";
     await mount(element, createContext(request), request);
@@ -152,7 +152,7 @@ describe("Workboard plugin widgets", () => {
       }
       throw new Error(`Unexpected method: ${method}`);
     });
-    const element = document.createElement("openclaw-workboard-card-widget");
+    const element = document.createElement("bot-workboard-card-widget");
     element.widget = pluginWidget("workboard:card", { cardId: "card-ready" });
     element.sessionKey = "agent:main:test";
     Reflect.set(element, "canMutate", false);
@@ -190,7 +190,7 @@ describe("Workboard plugin widgets", () => {
       }
       throw new Error(`Unexpected method: ${method}`);
     });
-    const element = document.createElement("openclaw-workboard-card-widget");
+    const element = document.createElement("bot-workboard-card-widget");
     element.widget = pluginWidget("workboard:card", { cardId: "card-ready" });
     element.sessionKey = "agent:main:test";
     const provider = createApplicationContextProvider(createContext(staleRequest));
@@ -253,7 +253,7 @@ describe("Workboard plugin widgets", () => {
       cards: [archivedCard],
       statuses: ["ready", "running", "done"],
     }));
-    const element = document.createElement("openclaw-workboard-card-widget");
+    const element = document.createElement("bot-workboard-card-widget");
     element.widget = pluginWidget("workboard:card", { cardId: archivedCard.id });
     element.sessionKey = "agent:main:test";
 
@@ -267,7 +267,7 @@ describe("Workboard plugin widgets", () => {
 
   it("renders per-status board counts and the top ready/running cards", async () => {
     const request = vi.fn(async () => ({ cards, statuses: ["ready", "running", "done"] }));
-    const element = document.createElement("openclaw-workboard-mini-widget");
+    const element = document.createElement("bot-workboard-mini-widget");
     element.widget = pluginWidget("workboard:mini", { boardId: "ops", limit: 2 });
     element.sessionKey = "agent:main:test";
     await mount(element, createContext(request), request);
@@ -294,7 +294,7 @@ describe("Workboard plugin widgets", () => {
       cards: [...cards, archivedCard],
       statuses: ["ready", "running", "done"],
     }));
-    const element = document.createElement("openclaw-workboard-mini-widget");
+    const element = document.createElement("bot-workboard-mini-widget");
     element.widget = pluginWidget("workboard:mini", { boardId: "ops", limit: 5 });
     element.sessionKey = "agent:main:test";
 
@@ -328,7 +328,7 @@ describe("Workboard plugin widgets", () => {
       cards: mixedCards,
       statuses: ["ready", "running", "done"],
     }));
-    const element = document.createElement("openclaw-workboard-mini-widget");
+    const element = document.createElement("bot-workboard-mini-widget");
     element.widget = pluginWidget("workboard:mini", {});
     element.sessionKey = "agent:main:test";
     await mount(element, createContext(request), request);
@@ -347,7 +347,7 @@ describe("Workboard plugin widgets", () => {
       .fn()
       .mockRejectedValueOnce(new Error("temporary failure"))
       .mockResolvedValueOnce({ cards, statuses: ["ready", "running", "done"] });
-    const element = document.createElement("openclaw-workboard-mini-widget");
+    const element = document.createElement("bot-workboard-mini-widget");
     element.widget = pluginWidget("workboard:mini", { boardId: "ops" });
     element.sessionKey = "agent:main:test";
     await mount(element, createContext(request), request);
@@ -374,7 +374,7 @@ describe("Workboard plugin widgets", () => {
     const events: {
       listener?: Parameters<ApplicationContext["gateway"]["subscribeEvents"]>[0];
     } = {};
-    const element = document.createElement("openclaw-workboard-mini-widget");
+    const element = document.createElement("bot-workboard-mini-widget");
     element.widget = pluginWidget("workboard:mini", { boardId: "ops" });
     const provider = createApplicationContextProvider(createContext(request, events));
     provider.append(element);
@@ -401,7 +401,7 @@ describe("Workboard plugin widgets", () => {
         ? await firstList.promise
         : { cards, statuses: ["ready", "running", "done"] };
     });
-    const element = document.createElement("openclaw-workboard-mini-widget");
+    const element = document.createElement("bot-workboard-mini-widget");
     element.widget = pluginWidget("workboard:mini", { boardId: "ops" });
     const provider = createApplicationContextProvider(createContext(request));
     provider.append(element);
@@ -431,7 +431,7 @@ describe("Workboard plugin widgets", () => {
     const currentEvents: {
       listener?: Parameters<ApplicationContext["gateway"]["subscribeEvents"]>[0];
     } = {};
-    const element = document.createElement("openclaw-workboard-mini-widget");
+    const element = document.createElement("bot-workboard-mini-widget");
     element.widget = pluginWidget("workboard:mini", { boardId: "ops" });
     const provider = createApplicationContextProvider(createContext(staleRequest));
     provider.append(element);

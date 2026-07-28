@@ -1,6 +1,6 @@
 // Msteams tests cover reaction handler plugin behavior.
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig, PluginRuntime } from "../../runtime-api.js";
+import type { BotConfig, PluginRuntime } from "../../runtime-api.js";
 import type { MSTeamsMessageHandlerDeps } from "../monitor-handler.types.js";
 import { setMSTeamsRuntime } from "../runtime.js";
 import { createMSTeamsReactionHandler } from "./reaction-handler.js";
@@ -28,7 +28,7 @@ function buildMockRuntime(overrides?: Partial<PluginRuntime>): PluginRuntime {
   } as unknown as PluginRuntime;
 }
 
-function buildDeps(cfg: OpenClawConfig, _runtime?: PluginRuntime): MSTeamsMessageHandlerDeps {
+function buildDeps(cfg: BotConfig, _runtime?: PluginRuntime): MSTeamsMessageHandlerDeps {
   return {
     cfg,
     runtime: { error: vi.fn() } as unknown as MSTeamsMessageHandlerDeps["runtime"],
@@ -56,9 +56,9 @@ function createReactionTestHarness() {
   const mockRuntime = buildMockRuntime();
   setMSTeamsRuntime(mockRuntime);
 
-  const cfg: OpenClawConfig = {
+  const cfg: BotConfig = {
     channels: { msteams: { allowFrom: ["allowed-aad"] } },
-  } as OpenClawConfig;
+  } as BotConfig;
 
   const deps = buildDeps(cfg, mockRuntime);
   const handler = createMSTeamsReactionHandler(deps);
@@ -115,13 +115,13 @@ describe("createMSTeamsReactionHandler", () => {
       const mockRuntime = buildMockRuntime();
       setMSTeamsRuntime(mockRuntime);
 
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         channels: {
           msteams: {
             allowFrom: ["allowed-aad"],
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
 
       const deps = buildDeps(cfg);
       const handler = createMSTeamsReactionHandler(deps);
@@ -161,9 +161,9 @@ describe("createMSTeamsReactionHandler", () => {
         const mockRuntime = buildMockRuntime();
         setMSTeamsRuntime(mockRuntime);
 
-        const cfg: OpenClawConfig = {
+        const cfg: BotConfig = {
           channels: { msteams: { allowFrom: ["allowed-aad"] } },
-        } as OpenClawConfig;
+        } as BotConfig;
 
         const deps = buildDeps(cfg, mockRuntime);
         const handler = createMSTeamsReactionHandler(deps);
@@ -293,7 +293,7 @@ describe("createMSTeamsReactionHandler", () => {
     it("allows reaction from static access group DM sender", async () => {
       const mockRuntime = buildMockRuntime();
       setMSTeamsRuntime(mockRuntime);
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         accessGroups: {
           operators: {
             type: "message.senders",
@@ -306,7 +306,7 @@ describe("createMSTeamsReactionHandler", () => {
             allowFrom: ["accessGroup:operators"],
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       const handler = createMSTeamsReactionHandler(buildDeps(cfg, mockRuntime));
       const enqueue = mockRuntime.system.enqueueSystemEvent as ReturnType<typeof vi.fn>;
 

@@ -15,12 +15,12 @@ const WORKFLOW_CASES = [
   {
     name: "macOS",
     path: ".github/workflows/macos-periphery.yml",
-    scopedPath: "apps/macos/Sources/OpenClaw/Test.swift",
+    scopedPath: "apps/macos/Sources/Bot/Test.swift",
   },
   {
-    name: "shared OpenClawKit",
-    path: ".github/workflows/shared-openclawkit-periphery.yml",
-    scopedPath: "apps/shared/OpenClawKit/Sources/OpenClawKit/Test.swift",
+    name: "shared BotKit",
+    path: ".github/workflows/shared-botkit-periphery.yml",
+    scopedPath: "apps/shared/BotKit/Sources/BotKit/Test.swift",
   },
 ] as const;
 
@@ -164,10 +164,10 @@ describe("Periphery scope workflows", () => {
   });
 
   it("ignores scoped files added only by base-branch drift", async () => {
-    const repoRoot = makeTempRepoRoot(tempDirs, "openclaw-periphery-scope-");
+    const repoRoot = makeTempRepoRoot(tempDirs, "bot-periphery-scope-");
     git(repoRoot, ["init", "--initial-branch=main"]);
-    git(repoRoot, ["config", "user.name", "OpenClaw Test"]);
-    git(repoRoot, ["config", "user.email", "openclaw-test@example.com"]);
+    git(repoRoot, ["config", "user.name", "Bot Test"]);
+    git(repoRoot, ["config", "user.email", "bot-test@example.com"]);
 
     writeFixture(repoRoot, "docs/base.md", "base\n");
     git(repoRoot, ["add", "."]);
@@ -182,7 +182,7 @@ describe("Periphery scope workflows", () => {
     git(repoRoot, ["switch", "main"]);
     writeFixture(
       repoRoot,
-      "apps/shared/OpenClawKit/Sources/OpenClawKit/Main.swift",
+      "apps/shared/BotKit/Sources/BotKit/Main.swift",
       "struct Main {}\n",
     );
     git(repoRoot, ["add", "."]);
@@ -191,14 +191,14 @@ describe("Periphery scope workflows", () => {
 
     const oldDiff = spawnSync(
       "git",
-      ["diff", "--quiet", eventBase, "HEAD", "--", "apps/shared/OpenClawKit/"],
+      ["diff", "--quiet", eventBase, "HEAD", "--", "apps/shared/BotKit/"],
       { cwd: repoRoot },
     );
     expect(oldDiff.status).toBe(1);
 
     const outputs = new Map<string, string>();
     const execute = compileFunction(
-      `return (async () => {\n${scopeScript(".github/workflows/shared-openclawkit-periphery.yml")}\n})();`,
+      `return (async () => {\n${scopeScript(".github/workflows/shared-botkit-periphery.yml")}\n})();`,
       ["context", "core", "exec"],
     ) as (context: unknown, core: unknown, exec: unknown) => Promise<void>;
     await execute(

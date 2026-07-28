@@ -2,7 +2,7 @@
  * GitHub Copilot OAuth flow
  */
 
-import { resolveTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveTimerTimeoutMs } from "@hanzo/bot-normalization-core/number-coercion";
 import {
   assertOkOrThrowProviderError,
   readProviderJsonResponse,

@@ -1,4 +1,4 @@
-import OpenClawKit
+import BotKit
 
 extension GatewaySettingsStore {
     struct GatewayRegistry: Codable, Equatable {

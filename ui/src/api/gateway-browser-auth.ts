@@ -1,4 +1,4 @@
-import type { GatewayConnectAuthSelection } from "@openclaw/gateway-client/browser";
+import type { GatewayConnectAuthSelection } from "@hanzo/bot-gateway-client/browser";
 import { loadDeviceAuthToken, peekStoredDeviceIdentityId } from "../lib/nodes/index.ts";
 
 const CONTROL_UI_OPERATOR_ROLE = "operator";

@@ -1,6 +1,6 @@
 // Browser tests cover server context.existing session plugin behavior.
 import fs from "node:fs";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import "../test-support/browser-security.mock.js";
 import type { BrowserServerState } from "./server-context.js";
@@ -176,7 +176,7 @@ describe("browser server-context existing-session profile", () => {
     );
     state.resolved.profiles["chrome-live"] = {
       ...chromeLiveProfile,
-      cdpUrl: "http://openclaw:relay-token@127.0.0.1:9222",
+      cdpUrl: "http://bot:relay-token@127.0.0.1:9222",
     };
     const ctx = createBrowserRouteContext({ getState: () => state });
 
@@ -192,7 +192,7 @@ describe("browser server-context existing-session profile", () => {
           [string, ChromeLiveProfile, { ephemeral?: boolean; timeoutMs?: number }]
         >
       )[0] ?? [];
-    expect(ensuredProfile?.cdpUrl).toBe("http://openclaw:relay-token@127.0.0.1:9222");
+    expect(ensuredProfile?.cdpUrl).toBe("http://bot:relay-token@127.0.0.1:9222");
   });
 
   it("keeps the next real attach on the normal sticky session path after an idle status probe", async () => {
@@ -644,7 +644,7 @@ describe("browser server-context existing-session profile", () => {
 
     const pending = live.ensureBrowserAvailable();
     const assertion = expect(pending).rejects.toThrow(
-      /could not connect to Chrome.*managed "openclaw" profile.*DevToolsActivePort/s,
+      /could not connect to Chrome.*managed "bot" profile.*DevToolsActivePort/s,
     );
     await vi.advanceTimersByTimeAsync(8_000);
     await assertion;

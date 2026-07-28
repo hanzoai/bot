@@ -3,10 +3,10 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import type { CliDeps } from "../cli/deps.types.js";
 import type { CronFailureDestinationConfig } from "../config/types.cron.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { redactCronCommandSummaryForExternalDelivery } from "../cron/command-output-summary.js";
 import {
   resolveCronDeliveryPlan,
@@ -32,7 +32,7 @@ type CronLogger = {
 
 type CronAgentResolver = (requested?: string | null) => {
   agentId: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 };
 
 type CronWebhookTarget = {

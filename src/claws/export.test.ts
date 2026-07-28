@@ -3,8 +3,8 @@ import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import type { McpServerConfig } from "../config/types.mcp.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { BotConfig } from "../config/types.bot.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { applyClawAddPlan } from "./add.js";
 import { exportClawAgent } from "./export.js";
 import { buildClawAddPlan } from "./lifecycle.js";
@@ -12,12 +12,12 @@ import { installClawMcpServers } from "./mcp.js";
 import { persistClawPackageRef, updateClawInstallRecordStatus } from "./provenance.js";
 import { readClawManifestFile } from "./reader.js";
 import { parseClawManifest } from "./schema.js";
-import type { ClawOpenClawProfile, ClawSourceIdentity } from "./types.js";
+import type { ClawBotProfile, ClawSourceIdentity } from "./types.js";
 
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   vi.unstubAllEnvs();
 });
 
@@ -29,7 +29,7 @@ async function installedFixture(
     withPackage?: boolean;
   } = {},
 ) {
-  const root = tempDirs.make("openclaw-claw-export-");
+  const root = tempDirs.make("bot-claw-export-");
   await mkdir(join(root, "source", "reference"), { recursive: true });
   const content = (label: string) => `managed ${label}\n`;
   await writeFile(join(root, "source", "SOUL.md"), options.soulContent ?? content("soul"));
@@ -45,7 +45,7 @@ async function installedFixture(
       name: "Worker",
       ...(options.avatar ? { identity: { avatar: options.avatar } } : {}),
     },
-    metadata: { "openclaw.config": "profiles/openclaw.yml" },
+    metadata: { "bot.config": "profiles/bot.yml" },
     workspace: {
       bootstrapFiles: { "SOUL.md": { source: "source/SOUL.md" } },
       files: [
@@ -77,7 +77,7 @@ async function installedFixture(
   if (!parsed.ok) {
     throw new Error(JSON.stringify(parsed.diagnostics));
   }
-  const openClawProfile: ClawOpenClawProfile = {
+  const botProfile: ClawBotProfile = {
     schemaVersion: 1,
     agent: {
       tools: {
@@ -100,7 +100,7 @@ async function installedFixture(
     name: "@acme/worker",
     version: "1.2.3",
     packageRoot: root,
-    manifestPath: join(root, "openclaw.claw.json"),
+    manifestPath: join(root, "bot.claw.json"),
     integrityKind: "artifact",
     integrity: "sha256:manifest",
     byteLength: 100,
@@ -108,13 +108,13 @@ async function installedFixture(
   const plan = await buildClawAddPlan({
     manifest: parsed.manifest,
     source,
-    openClawProfile,
+    botProfile,
     context: { workspace: join(root, "workspace-worker") },
   });
-  let config: OpenClawConfig = {};
+  let config: BotConfig = {};
   await applyClawAddPlan(plan, {
     consentPlanIntegrity: plan.planIntegrity,
-    env: { OPENCLAW_STATE_DIR: join(root, "state") },
+    env: { BOT_STATE_DIR: join(root, "state") },
     commitConfig: async (transform) => {
       config = transform(config);
     },
@@ -139,14 +139,14 @@ async function installedFixture(
         version: "2.0.0",
         integrity: "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       },
-      { env: { OPENCLAW_STATE_DIR: join(root, "state") } },
+      { env: { BOT_STATE_DIR: join(root, "state") } },
     );
   }
   return {
     root,
     plan,
     config,
-    env: { OPENCLAW_STATE_DIR: join(root, "state") },
+    env: { BOT_STATE_DIR: join(root, "state") },
     packageDeps: {
       planSkill: async () => ({
         ok: true as const,
@@ -193,13 +193,13 @@ describe("exportClawAgent", () => {
     });
 
     expect(result).toMatchObject({
-      schemaVersion: "openclaw.clawExportResult.v1",
+      schemaVersion: "bot.clawExportResult.v1",
       stability: "experimental",
       agentId: "worker",
       manifest: {
         schemaVersion: 1,
         agent: { id: "worker", name: "Worker" },
-        metadata: { "openclaw.config": "profiles/openclaw.yml" },
+        metadata: { "bot.config": "profiles/bot.yml" },
         workspace: {
           bootstrapFiles: {},
           files: [{ source: "workspace/reference/policy.md", path: "reference/policy.md" }],
@@ -233,7 +233,7 @@ describe("exportClawAgent", () => {
           },
         ],
       },
-      openClawProfile: {
+      botProfile: {
         schemaVersion: 1,
         agent: {
           tools: {
@@ -254,8 +254,8 @@ describe("exportClawAgent", () => {
     });
     const packageJson = JSON.parse(await readFile(join(out, "package.json"), "utf8"));
     expect(packageJson).toMatchObject({
-      name: "openclaw-claw-worker",
-      openclaw: { claw: "CLAW.md" },
+      name: "bot-claw-worker",
+      bot: { claw: "CLAW.md" },
     });
     expect(packageJson.version).toMatch(/^0\.0\.0-export\.[0-9a-f]{64}$/);
     const clawMarkdown = await readFile(join(out, "CLAW.md"), "utf8");
@@ -268,7 +268,7 @@ describe("exportClawAgent", () => {
     }
     expect(exported.clawMarkdownBody?.toString("utf8")).toBe("managed soul\n");
     expect(exported.manifest.workspace.bootstrapFiles).not.toHaveProperty("SOUL.md");
-    await expect(readFile(join(out, "profiles", "openclaw.yml"), "utf8")).resolves.toContain(
+    await expect(readFile(join(out, "profiles", "bot.yml"), "utf8")).resolves.toContain(
       "profile: coding",
     );
     await expect(readFile(join(out, "workspace", "SOUL.md"), "utf8")).rejects.toThrow();

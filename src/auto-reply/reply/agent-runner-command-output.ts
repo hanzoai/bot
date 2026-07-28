@@ -1,7 +1,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import type { GetReplyOptions } from "../types.js";
 
 function readRecordValue(value: unknown): Record<string, unknown> | undefined {

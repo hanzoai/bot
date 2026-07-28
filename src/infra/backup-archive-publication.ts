@@ -173,7 +173,7 @@ export async function createBackupArchivePublication(
   const canonicalOutputPath = path.join(canonicalParentPath, path.basename(requestedOutputPath));
   await assertTargetAbsent(canonicalOutputPath);
   const stagingDir = await fs.mkdtemp(
-    path.join(canonicalParentPath, `.openclaw-backup-publish-${randomUUID()}-`),
+    path.join(canonicalParentPath, `.bot-backup-publish-${randomUUID()}-`),
   );
   let stagingIdentity: Stats | undefined;
   try {
@@ -282,7 +282,7 @@ export async function publishPreparedBackupArchive(params: {
     await assertPublicationParentUnchanged(plan);
     preparedHandle = await openPreparedArchive(plan, prepared);
     await assertTargetAbsent(plan.canonicalOutputPath);
-    // Node has no portable link-by-handle primitive. Under OpenClaw's one-user
+    // Node has no portable link-by-handle primitive. Under Bot's one-user
     // host trust model, post-link identity checks fence cooperative replacement
     // races and ensure a changed staging pathname can never produce success.
     try {

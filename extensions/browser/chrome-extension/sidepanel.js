@@ -131,21 +131,21 @@ function updateState(state) {
         action: "share",
         title: "Keep the boundary visible",
         detail:
-          "Sharing adds this tab to the OpenClaw group. The copilot can act here, but nowhere else.",
+          "Sharing adds this tab to the Bot group. The copilot can act here, but nowhere else.",
       });
       break;
     case "needs-pairing":
       setGate({
         title: "Pair the extension first",
         detail:
-          "Open the OpenClaw toolbar popup and paste the output of openclaw browser extension pair.",
+          "Open the Bot toolbar popup and paste the output of bot browser extension pair.",
       });
       break;
     case "approval":
       setGate({
         title: "Approve this copilot device",
         detail:
-          "On the Gateway, run openclaw devices list, inspect this dedicated browser identity, then approve its current request.",
+          "On the Gateway, run bot devices list, inspect this dedicated browser identity, then approve its current request.",
       });
       break;
     case "denied":
@@ -200,7 +200,7 @@ function connectPanelPort() {
   }
   let nextPort;
   try {
-    nextPort = chrome.runtime.connect({ name: "openclaw-copilot-panel" });
+    nextPort = chrome.runtime.connect({ name: "bot-copilot-panel" });
   } catch {
     schedulePortReconnect();
     return;

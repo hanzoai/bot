@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/sandbox";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/sandbox";
 import { afterEach, describe, expect, it } from "vitest";
 import { resolveOutboundMediaPath } from "./outbound-media-send.js";
 import { resolveTrustedOutboundMediaPath } from "./trusted-media-path.js";
@@ -21,8 +21,8 @@ afterEach(() => {
 
 function makeTtsStyleVoiceFile(): string {
   // Mirrors cron auto-TTS: speech-core writes the voice file under the preferred
-  // OpenClaw temp root, which is outside the QQ Bot media storage tree.
-  const tmpRoot = resolvePreferredOpenClawTmpDir();
+  // Bot temp root, which is outside the QQ Bot media storage tree.
+  const tmpRoot = resolvePreferredBotTmpDir();
   const ttsDir = makeTrackedDir(tmpRoot, "tts-");
   const voicePath = path.join(ttsDir, "voice-123.mp3");
   fs.writeFileSync(voicePath, "audio");
@@ -37,7 +37,7 @@ function makeTrackedDir(parentDir: string, prefix: string): string {
 }
 
 describe("resolveTrustedOutboundMediaPath", () => {
-  it("trusts framework media under OpenClaw's hardened temp root", () => {
+  it("trusts framework media under Bot's hardened temp root", () => {
     const voicePath = makeTtsStyleVoiceFile();
     expect(resolveTrustedOutboundMediaPath(voicePath)).toBe(fs.realpathSync(voicePath));
   });
@@ -51,7 +51,7 @@ describe("resolveTrustedOutboundMediaPath", () => {
   });
 
   it("accepts a not-yet-flushed temp file only when allowMissing is set", () => {
-    const tmpRoot = resolvePreferredOpenClawTmpDir();
+    const tmpRoot = resolvePreferredBotTmpDir();
     const ttsDir = makeTrackedDir(tmpRoot, "tts-pending-");
     const pendingPath = path.join(ttsDir, "voice-pending.mp3");
 

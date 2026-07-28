@@ -1,7 +1,7 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 export async function hasActiveGatewayExecCredential(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<boolean> {
   const [{ resolveSecretInputRef }, { gatewaySecretInputPathCanWin }, secretPaths] =

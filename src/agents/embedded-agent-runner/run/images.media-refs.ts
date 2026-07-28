@@ -24,14 +24,14 @@ export type MediaImageRef = DetectedImageRef & {
   workspaceDir?: string;
 };
 
-export function isOpenClawCliImageCachePath(filePath: string): boolean {
+export function isBotCliImageCachePath(filePath: string): boolean {
   const parts = filePath.replaceAll("\\", "/").split("/");
   return parts.some((part, index) => {
-    if (part === ".openclaw-cli-images") {
+    if (part === ".bot-cli-images") {
       return true;
     }
     const parent = parts[index - 1] ?? "";
-    return part === "openclaw-cli-images" && /^openclaw(?:-\d+)?$/.test(parent);
+    return part === "bot-cli-images" && /^bot(?:-\d+)?$/.test(parent);
   });
 }
 
@@ -73,7 +73,7 @@ function mediaFactToImageRef(fact: MediaFact, factIndex: number): MediaImageRef 
     resolved = resolveUserPath(resolved);
   }
   const hydrate = fact.hydrationSuppressed !== true;
-  if (!resolved || isOpenClawCliImageCachePath(resolved)) {
+  if (!resolved || isBotCliImageCachePath(resolved)) {
     return {
       aliases: [fact.path, fact.url].filter((value): value is string => Boolean(value)),
       detect: false,

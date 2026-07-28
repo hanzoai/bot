@@ -1,8 +1,8 @@
 // Discord plugin module implements native command route behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import * as conversationRuntime from "openclaw/plugin-sdk/conversation-binding-runtime";
-import type { ResolvedAgentRoute } from "openclaw/plugin-sdk/routing";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import * as conversationRuntime from "bot/plugin-sdk/conversation-binding-runtime";
+import type { ResolvedAgentRoute } from "bot/plugin-sdk/routing";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   resolveDiscordBoundConversationRoute,
   resolveDiscordEffectiveRoute,
@@ -28,7 +28,7 @@ type DiscordNativeInteractionRouteState = {
 };
 
 export async function resolveDiscordNativeInteractionRouteState(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   guildId?: string;
   memberRoleIds?: string[];

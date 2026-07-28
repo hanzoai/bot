@@ -1,6 +1,6 @@
 // Usage reporting tests cover run-level metadata attribution, runtime plugin
 // bootstrap inputs, and forwarding fields into embedded attempts.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { makeAttemptResult } from "./run.overflow-compaction.fixture.js";
 import {
@@ -267,7 +267,7 @@ describe("runEmbeddedAgent usage reporting", () => {
     expect(result.meta.agentMeta?.promptTokens).toBe(150);
   });
 
-  it("reports the resolved model provider when OpenClaw marks the assistant message as the native runtime", async () => {
+  it("reports the resolved model provider when Bot marks the assistant message as the native runtime", async () => {
     mockedResolveModelAsync.mockResolvedValueOnce({
       model: {
         id: "openai/gpt-5.4",
@@ -285,8 +285,8 @@ describe("runEmbeddedAgent usage reporting", () => {
       makeAttemptResult({
         assistantTexts: ["Response 1"],
         lastAssistant: makeAssistantMessage({
-          provider: "openclaw",
-          model: "openclaw",
+          provider: "bot",
+          model: "bot",
           usage: { input: 100, output: 50, total: 150 } as unknown as AssistantMessage["usage"],
         }),
         attemptUsage: { input: 100, output: 50, total: 150 },

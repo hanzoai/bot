@@ -10,9 +10,9 @@ import {
   upsertSessionEntry,
 } from "../config/sessions/session-accessor.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  resolveIncognitoOpenClawAgentSqlitePath,
-} from "../state/openclaw-agent-db.js";
+  closeBotAgentDatabasesForTest,
+  resolveIncognitoBotAgentSqlitePath,
+} from "../state/bot-agent-db.js";
 import { withTempDir } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import {
@@ -23,7 +23,7 @@ import {
 
 describe("internal session effects", () => {
   it("keeps hidden effects from an incognito run in the sentinel store", async () => {
-    const storePath = resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" });
+    const storePath = resolveIncognitoBotAgentSqlitePath({ agentId: "main" });
     try {
       const target = await prepareInternalSessionEffectsSession({
         agentId: "main",
@@ -36,14 +36,14 @@ describe("internal session effects", () => {
       );
       expect(loadExactSessionEntry(target)?.entry.incognito).toBe(true);
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeBotAgentDatabasesForTest();
     }
   });
 
   it("does not archive an incognito internal-effects transcript during rotation", async () => {
-    await withTempDir({ prefix: "openclaw-incognito-internal-rotation-" }, async (dir) => {
-      await withEnvAsync({ OPENCLAW_STATE_DIR: dir }, async () => {
-        const storePath = resolveIncognitoOpenClawAgentSqlitePath({ agentId: "main" });
+    await withTempDir({ prefix: "bot-incognito-internal-rotation-" }, async (dir) => {
+      await withEnvAsync({ BOT_STATE_DIR: dir }, async () => {
+        const storePath = resolveIncognitoBotAgentSqlitePath({ agentId: "main" });
         try {
           const target = await prepareInternalSessionEffectsSession({
             agentId: "main",
@@ -89,14 +89,14 @@ describe("internal session effects", () => {
           expect(await fs.readdir(dir)).toContain("private-internal.jsonl");
           expect((await fs.readdir(dir)).some((name) => name.includes(".reset."))).toBe(false);
         } finally {
-          closeOpenClawAgentDatabasesForTest();
+          closeBotAgentDatabasesForTest();
         }
       });
     });
   });
 
   it("creates a hidden deterministic SQLite session", async () => {
-    await withTempDir({ prefix: "openclaw-internal-session-effects-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-internal-session-effects-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const target = await prepareInternalSessionEffectsSession({
         agentId: "main",
@@ -130,7 +130,7 @@ describe("internal session effects", () => {
   });
 
   it("escapes the reserved prefix for a durable internal-effects run id", async () => {
-    await withTempDir({ prefix: "openclaw-internal-session-effects-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-internal-session-effects-" }, async (dir) => {
       const target = resolveInternalSessionEffectsTarget({
         agentId: "main",
         runId: "incognito-not-private",
@@ -144,7 +144,7 @@ describe("internal session effects", () => {
   });
 
   it("forks visible SQLite history into the hidden session", async () => {
-    await withTempDir({ prefix: "openclaw-internal-session-effects-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-internal-session-effects-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const source = {
         agentId: "main",
@@ -180,7 +180,7 @@ describe("internal session effects", () => {
   });
 
   it("hard-deletes the hidden entry and transcript rows", async () => {
-    await withTempDir({ prefix: "openclaw-internal-session-effects-" }, async (dir) => {
+    await withTempDir({ prefix: "bot-internal-session-effects-" }, async (dir) => {
       const storePath = path.join(dir, "sessions.json");
       const target = await prepareInternalSessionEffectsSession({
         agentId: "main",

@@ -6,8 +6,8 @@ import {
   type MessageReceipt,
   type MessageReceiptPartKind,
   type MessageReceiptSourceResult,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { normalizeStringEntries, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import { normalizeStringEntries, uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 
 export type WhatsAppSendKind =
   | "contact"

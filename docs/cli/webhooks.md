@@ -1,40 +1,40 @@
 ---
-summary: "CLI reference for `openclaw webhooks` (Gmail Pub/Sub setup and runner)"
+summary: "CLI reference for `bot webhooks` (Gmail Pub/Sub setup and runner)"
 read_when:
-  - You want to wire Gmail Pub/Sub events into OpenClaw
+  - You want to wire Gmail Pub/Sub events into Bot
   - You need the full flag list and default values
 title: "Webhooks"
 ---
 
-# `openclaw webhooks`
+# `bot webhooks`
 
 Webhook helpers and integrations. Today this surface is scoped to Gmail Pub/Sub flows built on the bundled `gog` watcher.
 
 ## Subcommands
 
 ```bash
-openclaw webhooks gmail setup --account <email> [...]
-openclaw webhooks gmail run   [--account <email>] [...]
+bot webhooks gmail setup --account <email> [...]
+bot webhooks gmail run   [--account <email>] [...]
 ```
 
 | Subcommand    | Description                                                                           |
 | ------------- | ------------------------------------------------------------------------------------- |
-| `gmail setup` | One-time wizard: Gmail watch, Pub/Sub topic/subscription, and OpenClaw hook delivery. |
+| `gmail setup` | One-time wizard: Gmail watch, Pub/Sub topic/subscription, and Bot hook delivery. |
 | `gmail run`   | Run `gog watch serve` plus the watch auto-renew loop in the foreground.               |
 
 <Note>
-The Gateway also auto-starts `gog gmail watch serve` on boot once `hooks.enabled=true` and `hooks.gmail.account` is set (set by `gmail setup`). `gmail run` is the same logic in the foreground, useful for debugging or when the Gateway watcher is disabled. See [Gmail Pub/Sub integration](/automation/cron-jobs#gmail-pubsub-integration) for the auto-start details and `OPENCLAW_SKIP_GMAIL_WATCHER` opt-out.
+The Gateway also auto-starts `gog gmail watch serve` on boot once `hooks.enabled=true` and `hooks.gmail.account` is set (set by `gmail setup`). `gmail run` is the same logic in the foreground, useful for debugging or when the Gateway watcher is disabled. See [Gmail Pub/Sub integration](/automation/cron-jobs#gmail-pubsub-integration) for the auto-start details and `BOT_SKIP_GMAIL_WATCHER` opt-out.
 </Note>
 
 ## `webhooks gmail setup`
 
 ```bash
-openclaw webhooks gmail setup --account you@example.com
-openclaw webhooks gmail setup --account you@example.com --project my-gcp-project --json
-openclaw webhooks gmail setup --account you@example.com --hook-url https://gateway.example.com/hooks/gmail
+bot webhooks gmail setup --account you@example.com
+bot webhooks gmail setup --account you@example.com --project my-gcp-project --json
+bot webhooks gmail setup --account you@example.com --hook-url https://gateway.example.com/hooks/gmail
 ```
 
-Installs `gcloud` and `gog` if missing, authenticates `gcloud`, creates the Pub/Sub topic and subscription, starts the Gmail watch, and writes `hooks.gmail` config with `hooks.enabled=true`. Prints `Next: openclaw webhooks gmail run`.
+Installs `gcloud` and `gog` if missing, authenticates `gcloud`, creates the Pub/Sub topic and subscription, starts the Gmail watch, and writes `hooks.gmail` config with `hooks.enabled=true`. Prints `Next: bot webhooks gmail run`.
 
 ### Required
 
@@ -52,12 +52,12 @@ Installs `gcloud` and `gog` if missing, authenticates `gcloud`, creates the Pub/
 | `--label <label>`       | `INBOX`                | Gmail label to watch.                                                                                                                   |
 | `--push-endpoint <url>` | (none)                 | Explicit Pub/Sub push endpoint. Overrides Tailscale.                                                                                    |
 
-### OpenClaw delivery options
+### Bot delivery options
 
 | Flag                   | Default                                      | Description                                |
 | ---------------------- | -------------------------------------------- | ------------------------------------------ |
-| `--hook-url <url>`     | Built from `hooks.path` and the Gateway port | OpenClaw webhook URL.                      |
-| `--hook-token <token>` | `hooks.token`, or a generated token          | OpenClaw webhook token.                    |
+| `--hook-url <url>`     | Built from `hooks.path` and the Gateway port | Bot webhook URL.                      |
+| `--hook-token <token>` | `hooks.token`, or a generated token          | Bot webhook token.                    |
 | `--push-token <token>` | Generated token                              | Push token forwarded to `gog watch serve`. |
 
 ### `gog watch serve` options
@@ -88,12 +88,12 @@ Installs `gcloud` and `gog` if missing, authenticates `gcloud`, creates the Pub/
 ## `webhooks gmail run`
 
 ```bash
-openclaw webhooks gmail run --account you@example.com
+bot webhooks gmail run --account you@example.com
 ```
 
 Runs `gog watch serve` plus the watch auto-renew loop in the foreground, restarting `gog watch serve` after a 2s delay if it exits unexpectedly.
 
-`run` accepts the same Pub/Sub, OpenClaw delivery, `gog watch serve`, and Tailscale flags as `setup`, except:
+`run` accepts the same Pub/Sub, Bot delivery, `gog watch serve`, and Tailscale flags as `setup`, except:
 
 - `--account` is **optional** on `run`; it falls back to `hooks.gmail.account`.
 - `run` does **not** accept `--project`, `--push-endpoint`, or `--json`.
@@ -102,7 +102,7 @@ Runs `gog watch serve` plus the watch auto-renew loop in the foreground, restart
 | Category          | Flags                                                                            |
 | ----------------- | -------------------------------------------------------------------------------- |
 | Pub/Sub           | `--account`, `--topic`, `--subscription`, `--label`                              |
-| OpenClaw delivery | `--hook-url`, `--hook-token`, `--push-token`                                     |
+| Bot delivery | `--hook-url`, `--hook-token`, `--push-token`                                     |
 | `gog watch serve` | `--bind`, `--port`, `--path`, `--include-body`, `--max-bytes`, `--renew-minutes` |
 | Tailscale         | `--tailscale`, `--tailscale-path`, `--tailscale-target`                          |
 

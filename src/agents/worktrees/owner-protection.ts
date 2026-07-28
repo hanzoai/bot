@@ -1,10 +1,10 @@
 import { resolveSessionEntryAccessTarget } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { IDLE_GC_MS } from "./service.js";
 import type { ManagedWorktreeOwnerKind } from "./types.js";
 
 export function createManagedWorktreeOwnerProtection(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   now: () => number = Date.now,
 ): (ownerKind: ManagedWorktreeOwnerKind, ownerId: string) => boolean {
   return (ownerKind, ownerId) => {

@@ -9,7 +9,7 @@ title: "Audit history"
 
 # Audit history
 
-The Gateway keeps a bounded, metadata-only audit ledger in the shared OpenClaw
+The Gateway keeps a bounded, metadata-only audit ledger in the shared Bot
 state database. It answers operational questions such as "which agent ran,
 when, and how did it end", "which tool actions did a run execute", and, when
 message auditing is enabled, "did an accepted inbound message reach dispatch"
@@ -113,19 +113,19 @@ compliance archive; if you need one, use an external system fed by
 
 ## Storage, retention, and migration
 
-Records live in the shared state database (`state/openclaw.sqlite`) and are
+Records live in the shared state database (`state/bot.sqlite`) and are
 written off the delivery hot path. Queries never return records older than 30
 days, and the ledger is capped at 100,000 rows; expired rows are pruned during
 startup, hourly maintenance, and later writes. Retention maintenance keeps
 running even when collection is disabled.
 
 Upgrading from a Gateway with the earlier run/tool-only ledger migrates the
-schema automatically at startup (or via `openclaw doctor --fix`); existing
+schema automatically at startup (or via `bot doctor --fix`); existing
 rows and their ledger sequences are preserved.
 
 ## Querying
 
-- CLI: [`openclaw audit`](/cli/audit) with filters for agent, session, run,
+- CLI: [`bot audit`](/cli/audit) with filters for agent, session, run,
   kind, status, direction, channel, time bounds, and cursor paging.
 - Gateway RPC: `audit.activity.list` (requires `operator.read`) returns the
   versioned V1 activity event union; the shipped `audit.list` RPC is unchanged

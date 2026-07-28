@@ -2,8 +2,8 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import { normalizeAtHashSlug } from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeAtHashSlug } from "@hanzo/bot-normalization-core/string-normalization";
 import { CHAT_CHANNEL_ORDER } from "../../channels/registry.js";
 
 /** Explicit allowFrom fields supported by elevated sender matching. */

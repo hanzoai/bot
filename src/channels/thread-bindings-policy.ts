@@ -1,7 +1,7 @@
 // Thread-binding policy resolution for channel/account session spawning.
-import { MAX_DATE_TIMESTAMP_MS } from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { MAX_DATE_TIMESTAMP_MS } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAccountId } from "../routing/session-key.js";
 import {
   resolveThreadBindingLifecycle as resolveSharedThreadBindingLifecycle,
@@ -150,7 +150,7 @@ export function resolveThreadBindingsEnabled(params: {
 }
 
 function resolveChannelThreadBindings(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: string;
   accountId: string;
 }): {
@@ -174,7 +174,7 @@ function normalizeSpawnContext(value: unknown): ThreadBindingSpawnContext | unde
 
 /** Resolves effective spawn policy from account, channel, then global thread-binding config. */
 export function resolveThreadBindingSpawnPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: string;
   accountId?: string;
   kind: ThreadBindingSpawnKind;
@@ -208,7 +208,7 @@ export function resolveThreadBindingSpawnPolicy(params: {
 
 /** Resolves idle timeout for a concrete channel/account config scope. */
 export function resolveThreadBindingIdleTimeoutMsForChannel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: string;
   accountId?: string;
 }): number {
@@ -221,7 +221,7 @@ export function resolveThreadBindingIdleTimeoutMsForChannel(params: {
 
 /** Resolves max age for a concrete channel/account config scope. */
 export function resolveThreadBindingMaxAgeMsForChannel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: string;
   accountId?: string;
 }): number {
@@ -233,7 +233,7 @@ export function resolveThreadBindingMaxAgeMsForChannel(params: {
 }
 
 function resolveThreadBindingChannelScope(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: string;
   accountId?: string;
 }) {

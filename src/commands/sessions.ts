@@ -7,7 +7,7 @@
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { isRich, theme } from "../../packages/terminal-core/src/theme.js";
 import { readAcpSessionMetaForEntry } from "../acp/runtime/session-meta.js";
 import { resolveModelAgentRuntimeMetadata } from "../agents/agent-runtime-metadata.js";
@@ -23,7 +23,7 @@ import {
   parseSqliteSessionFileMarker,
 } from "../config/sessions/sqlite-marker.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveStoredSessionKeyForAgentStore } from "../gateway/session-store-key.js";
 import { info } from "../globals.js";
 import { parseStrictPositiveInteger } from "../infra/parse-finite-number.js";
@@ -215,7 +215,7 @@ const formatKindCell = (kind: SessionRow["kind"], rich: boolean) => {
 };
 
 function resolveSessionRuntimeLabel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: SessionEntry;
   agentRuntime: ReturnType<typeof resolveModelAgentRuntimeMetadata>;
   modelProvider: string;
@@ -224,7 +224,7 @@ function resolveSessionRuntimeLabel(params: {
   sessionKey: string;
 }): string {
   const id = normalizeOptionalLowercaseString(params.agentRuntime.id);
-  const resolvedHarness = id && id !== "openclaw" && id !== "auto" ? id : undefined;
+  const resolvedHarness = id && id !== "bot" && id !== "auto" ? id : undefined;
   return resolveAgentRuntimeLabel({
     config: params.cfg,
     sessionEntry: params.entry,
@@ -280,7 +280,7 @@ function stripChannelRecipientPrefix(
 }
 
 function resolveDisplayRuntimePolicySessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   key: string;
   entry: SessionEntry;
 }): string | undefined {
@@ -571,6 +571,6 @@ const testing = {
 } as const;
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.sessionsCommandTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.sessionsCommandTestApi")] =
     testing;
 }

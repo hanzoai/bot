@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ConfigFileSnapshot, OpenClawConfig } from "../config/types.openclaw.js";
+import type { ConfigFileSnapshot, BotConfig } from "../config/types.bot.js";
 import { withoutPluginInstallRecords } from "../plugins/installed-plugin-index-records.js";
 
 const mocks = vi.hoisted(() => ({
@@ -20,7 +20,7 @@ vi.mock("../plugins/install-record-commit.js", async (importOriginal) => ({
 import { resolveQuickstartGatewayDefaults, writeWizardConfigFile } from "./setup.shared.js";
 
 describe("resolveQuickstartGatewayDefaults", () => {
-  const storedConfig: OpenClawConfig = {
+  const storedConfig: BotConfig = {
     gateway: {
       port: 19111,
       bind: "custom",
@@ -104,14 +104,14 @@ describe("resolveQuickstartGatewayDefaults", () => {
   it("maps an explicit env-backed token to the canonical SecretRef", () => {
     expect(
       resolveQuickstartGatewayDefaults(storedConfig, {
-        gatewayTokenRefEnv: " OPENCLAW_GATEWAY_TOKEN ",
+        gatewayTokenRefEnv: " BOT_GATEWAY_TOKEN ",
       }),
     ).toMatchObject({
       authMode: "token",
       token: {
         source: "env",
         provider: "default",
-        id: "OPENCLAW_GATEWAY_TOKEN",
+        id: "BOT_GATEWAY_TOKEN",
       },
     });
   });
@@ -121,7 +121,7 @@ describe("writeWizardConfigFile pending install ownership", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.commitConfigWriteWithPendingPluginInstalls.mockImplementation(
-      async (params: { nextConfig: OpenClawConfig }) => ({
+      async (params: { nextConfig: BotConfig }) => ({
         config: withoutPluginInstallRecords(params.nextConfig),
         installRecords: {},
         movedInstallRecords: true,
@@ -132,7 +132,7 @@ describe("writeWizardConfigFile pending install ownership", () => {
   });
 
   it("rejects a normal write with pending records but no migration base", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       plugins: { installs: { demo: { source: "npm", spec: "demo@1.0.0" } } },
     };
 
@@ -143,7 +143,7 @@ describe("writeWizardConfigFile pending install ownership", () => {
   });
 
   it("migrates the baseline as source before the final wizard write", async () => {
-    const baseConfig: OpenClawConfig = {
+    const baseConfig: BotConfig = {
       plugins: { installs: { demo: { source: "npm", spec: "demo@1.0.0" } } },
     };
 
@@ -164,7 +164,7 @@ describe("writeWizardConfigFile pending install ownership", () => {
   });
 
   it("commits fresh pending records after baseline migration is complete", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       plugins: { installs: { fresh: { source: "npm", spec: "fresh@1.0.0" } } },
     };
 
@@ -180,7 +180,7 @@ describe("writeWizardConfigFile pending install ownership", () => {
   });
 
   it("binds the final write to the live-verified config hash", async () => {
-    const config: OpenClawConfig = { gateway: { port: 18789 } };
+    const config: BotConfig = { gateway: { port: 18789 } };
 
     await writeWizardConfigFile(config, { baseHash: "verified-hash" });
 
@@ -197,9 +197,9 @@ describe("writeWizardConfigFile pending install ownership", () => {
   });
 
   it("preserves an absent config snapshot through the final write", async () => {
-    const config: OpenClawConfig = { gateway: { port: 18789 } };
+    const config: BotConfig = { gateway: { port: 18789 } };
     const baseSnapshot: ConfigFileSnapshot = {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       exists: false,
       raw: null,
       parsed: undefined,

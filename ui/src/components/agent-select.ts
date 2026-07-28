@@ -8,7 +8,7 @@ import type { AgentIdentityResult, GatewayAgentRow } from "../api/types.ts";
 import { t } from "../i18n/index.ts";
 import { resolveAgentTextAvatar } from "../lib/agents/display.ts";
 import { resolveAgentAvatarUrl } from "../lib/avatar.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../lit/bot-element.ts";
 import { icons } from "./icons.ts";
 import { syncDropdownItemRadio } from "./web-awesome.ts";
 
@@ -67,7 +67,7 @@ export function renderAgentSelectCopy(option: AgentSelectOption) {
   `;
 }
 
-export class AgentSelect extends OpenClawLightDomElement {
+export class AgentSelect extends BotLightDomElement {
   @property({ attribute: false }) options: readonly AgentSelectOption[] = [];
   @property({ attribute: false }) value = "";
   @property({ attribute: false }) placeholder = "";

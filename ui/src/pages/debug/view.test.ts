@@ -71,7 +71,7 @@ describe("renderDebug", () => {
     const status = container.querySelector(".settings-status");
     expect(status?.className).toContain("settings-status--warn");
     expect(normalizedText(status)).toBe("1 个警告 · 2 条信息");
-    expect(command.textContent).toBe("openclaw security audit --deep");
+    expect(command.textContent).toBe("bot security audit --deep");
   });
 
   it("does not render Invalid Date for Date-invalid event timestamps", () => {

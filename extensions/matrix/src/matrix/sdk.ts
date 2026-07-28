@@ -1,6 +1,6 @@
 // Matrix plugin module implements sdk behavior.
 import type { Room } from "matrix-js-sdk/lib/models/room.js";
-import { normalizeStringEntries, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeStringEntries, uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveMatrixRoomKeyBackupReadinessError } from "./backup-health.js";
 import { formatMatrixErrorMessage, isMatrixNotFoundError } from "./errors.js";
 import {

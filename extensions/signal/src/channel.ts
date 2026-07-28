@@ -1,33 +1,33 @@
 // Signal plugin module implements channel behavior.
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/account-id";
-import { buildDmGroupAccountAllowlistAdapter } from "openclaw/plugin-sdk/allowlist-config-edit";
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-contract";
-import { createChatChannelPlugin, type ChannelPlugin } from "openclaw/plugin-sdk/channel-core";
+import { DEFAULT_ACCOUNT_ID } from "bot/plugin-sdk/account-id";
+import { buildDmGroupAccountAllowlistAdapter } from "bot/plugin-sdk/allowlist-config-edit";
+import type { ChannelOutboundAdapter } from "bot/plugin-sdk/channel-contract";
+import { createChatChannelPlugin, type ChannelPlugin } from "bot/plugin-sdk/channel-core";
 import {
   createReplyToFanout,
   defineChannelMessageAdapter,
   resolveOutboundSendDep,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { createPairingPrefixStripper } from "openclaw/plugin-sdk/channel-pairing";
-import { attachChannelToResult } from "openclaw/plugin-sdk/channel-send-result";
-import { PAIRING_APPROVED_MESSAGE } from "openclaw/plugin-sdk/channel-status";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { resolveChannelMediaMaxBytes } from "openclaw/plugin-sdk/media-runtime";
-import { questionGatewayRuntime } from "openclaw/plugin-sdk/question-gateway-runtime";
-import { chunkText, resolveTextChunkLimit } from "openclaw/plugin-sdk/reply-chunking";
-import { buildOutboundBaseSessionKey, type RoutePeer } from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/channel-outbound";
+import { createPairingPrefixStripper } from "bot/plugin-sdk/channel-pairing";
+import { attachChannelToResult } from "bot/plugin-sdk/channel-send-result";
+import { PAIRING_APPROVED_MESSAGE } from "bot/plugin-sdk/channel-status";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { resolveMarkdownTableMode } from "bot/plugin-sdk/markdown-table-runtime";
+import { resolveChannelMediaMaxBytes } from "bot/plugin-sdk/media-runtime";
+import { questionGatewayRuntime } from "bot/plugin-sdk/question-gateway-runtime";
+import { chunkText, resolveTextChunkLimit } from "bot/plugin-sdk/reply-chunking";
+import { buildOutboundBaseSessionKey, type RoutePeer } from "bot/plugin-sdk/routing";
 import {
   buildBaseChannelStatusSummary,
   collectStatusIssuesFromLastError,
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "bot/plugin-sdk/status-helpers";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import { sanitizeAssistantVisibleText } from "bot/plugin-sdk/text-chunking";
 import {
   resolveSignalAccount,
   resolveSignalReplyToMode,

@@ -1,5 +1,5 @@
 // Shared doctor dispatcher for channel plugin repair, warning, and compatibility adapters.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   getBundledChannelPlugin,
   getBundledChannelSetupPlugin,
@@ -12,7 +12,7 @@ import type {
   ChannelDoctorEmptyAllowlistAccountContext,
   ChannelDoctorSequenceResult,
 } from "../../../channels/plugins/types.adapters.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { isUnresolvedSecretInputError } from "../../../config/types.secrets.js";
 
 type ChannelDoctorEntry = {
@@ -26,12 +26,12 @@ type ChannelDoctorPluginCandidate = {
 };
 
 type ChannelDoctorLookupContext = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
 };
 
 type ChannelDoctorEmptyAllowlistLookupParams = ChannelDoctorEmptyAllowlistAccountContext & {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
 };
 
 const channelDoctorFunctionKeys = new Set<keyof ChannelDoctorAdapter>([
@@ -64,7 +64,7 @@ export type ChannelDoctorEmptyAllowlistPolicyHooks = {
   ) => boolean;
 };
 
-function collectConfiguredChannelIds(cfg: OpenClawConfig): string[] {
+function collectConfiguredChannelIds(cfg: BotConfig): string[] {
   if (cfg.plugins?.enabled === false) {
     return [];
   }
@@ -95,7 +95,7 @@ function collectConfiguredChannelIds(cfg: OpenClawConfig): string[] {
     .toSorted();
 }
 
-function isChannelDoctorBlockedByConfig(channelId: string, cfg: OpenClawConfig): boolean {
+function isChannelDoctorBlockedByConfig(channelId: string, cfg: BotConfig): boolean {
   if (cfg.plugins?.enabled === false) {
     return true;
   }
@@ -294,7 +294,7 @@ export function createChannelDoctorEmptyAllowlistPolicyHooks(
 
 /** Run interactive/non-interactive channel setup repair sequences and collect notes. */
 export async function runChannelDoctorConfigSequences(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   shouldRepair: boolean;
 }): Promise<ChannelDoctorSequenceResult> {
@@ -316,7 +316,7 @@ export async function runChannelDoctorConfigSequences(params: {
 
 /** Collect compatibility migrations from configured channel doctor adapters in order. */
 export function collectChannelDoctorCompatibilityMutations(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   options: { env?: NodeJS.ProcessEnv } = {},
 ): ChannelDoctorConfigMutation[] {
   const channelIds = collectConfiguredChannelIds(cfg);
@@ -338,7 +338,7 @@ export function collectChannelDoctorCompatibilityMutations(
 
 /** Collect stale channel config cleanup mutations from configured channel doctor adapters. */
 export async function collectChannelDoctorStaleConfigMutations(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   options: { env?: NodeJS.ProcessEnv; channelIds?: readonly string[] } = {},
 ): Promise<ChannelDoctorConfigMutation[]> {
   const mutations: ChannelDoctorConfigMutation[] = [];
@@ -360,7 +360,7 @@ export async function collectChannelDoctorStaleConfigMutations(
 
 /** Collect channel-specific doctor preview warnings for configured channels. */
 export async function collectChannelDoctorPreviewWarnings(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   doctorFixCommand: string;
   env?: NodeJS.ProcessEnv;
 }): Promise<string[]> {
@@ -390,7 +390,7 @@ export async function collectChannelDoctorPreviewWarnings(params: {
 
 /** Collect warnings for mutable channel allowlists that doctor cannot safely edit. */
 export async function collectChannelDoctorMutableAllowlistWarnings(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): Promise<string[]> {
   const warnings: string[] = [];
@@ -408,7 +408,7 @@ export async function collectChannelDoctorMutableAllowlistWarnings(params: {
 
 /** Collect channel repair mutations and warning-only repair results from doctor adapters. */
 export async function collectChannelDoctorRepairMutations(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   doctorFixCommand: string;
   env?: NodeJS.ProcessEnv;
 }): Promise<ChannelDoctorConfigMutation[]> {

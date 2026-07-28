@@ -20,7 +20,7 @@ describe("google-meet CLI", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/ssrf-runtime");
+    vi.doUnmock("bot/plugin-sdk/ssrf-runtime");
     vi.resetModules();
   });
 
@@ -256,7 +256,7 @@ describe("google-meet CLI", () => {
 
   it("prints markdown artifact and attendance output", async () => {
     stubMeetArtifactsApi();
-    const tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-artifacts-"));
+    const tempDir = mkdtempSync(path.join(tmpdir(), "bot-google-meet-artifacts-"));
     const outputPath = path.join(tempDir, "artifacts.md");
     const artifactsStdout = captureStdout();
 
@@ -398,7 +398,7 @@ describe("google-meet CLI", () => {
   it("writes an export bundle", async () => {
     stubMeetArtifactsApi();
     const stdout = captureStdout();
-    const tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-export-"));
+    const tempDir = mkdtempSync(path.join(tmpdir(), "bot-google-meet-export-"));
 
     try {
       await setupCli({}).parseAsync(
@@ -465,7 +465,7 @@ describe("google-meet CLI", () => {
   it("neutralizes spreadsheet formulas in exported attendance CSV files", async () => {
     stubMeetArtifactsApi({ participantDisplayName: "\uFF1D1+1" });
     const stdout = captureStdout();
-    const tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-export-csv-"));
+    const tempDir = mkdtempSync(path.join(tmpdir(), "bot-google-meet-export-csv-"));
 
     try {
       await setupCli({}).parseAsync(
@@ -495,7 +495,7 @@ describe("google-meet CLI", () => {
   it("includes artifact warnings in export summaries and manifests", async () => {
     stubMeetArtifactsApi({ failSmartNoteDocumentBody: true });
     const stdout = captureStdout();
-    const tempDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-export-warning-"));
+    const tempDir = mkdtempSync(path.join(tmpdir(), "bot-google-meet-export-warning-"));
 
     try {
       await setupCli({}).parseAsync(
@@ -534,7 +534,7 @@ describe("google-meet CLI", () => {
   it("prints a dry-run export manifest without writing files", async () => {
     stubMeetArtifactsApi();
     const stdout = captureStdout();
-    const parentDir = mkdtempSync(path.join(tmpdir(), "openclaw-google-meet-export-dry-run-"));
+    const parentDir = mkdtempSync(path.join(tmpdir(), "bot-google-meet-export-dry-run-"));
     const outputDir = path.join(parentDir, "bundle");
 
     try {

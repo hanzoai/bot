@@ -1,9 +1,9 @@
 import type {
   BeforeToolCallFailureDisposition,
   EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { emitTrustedDiagnosticEvent } from "openclaw/plugin-sdk/diagnostic-runtime";
-import { asDateTimestampMs } from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { emitTrustedDiagnosticEvent } from "bot/plugin-sdk/diagnostic-runtime";
+import { asDateTimestampMs } from "bot/plugin-sdk/number-runtime";
 import { resolveCodexToolAbortTerminalReason } from "./dynamic-tool-execution.js";
 import {
   auditNativeToolName,

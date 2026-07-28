@@ -33,7 +33,7 @@ export function createCronStoreHarness(options?: { prefix?: string }) {
   const stores = new Map<string, string>();
 
   beforeAll(async () => {
-    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), options?.prefix ?? "openclaw-cron-"));
+    fixtureRoot = await fs.mkdtemp(path.join(os.tmpdir(), options?.prefix ?? "bot-cron-"));
   });
 
   async function cleanupStore(storePath: string, dir: string) {

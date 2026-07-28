@@ -1,7 +1,7 @@
 // Telegram message-like update registration and cache/dispatch ordering.
 import type { Message } from "grammy/types";
-import type { TelegramGroupConfig } from "openclaw/plugin-sdk/config-contracts";
-import { danger } from "openclaw/plugin-sdk/runtime-env";
+import type { TelegramGroupConfig } from "bot/plugin-sdk/config-contracts";
+import { danger } from "bot/plugin-sdk/runtime-env";
 import { withTelegramApiErrorLogging } from "./api-logging.js";
 import type { TelegramHandlerAuthorizationRuntime } from "./bot-handlers.authorization.runtime.js";
 import type { TelegramHandlerInboundRuntime } from "./bot-handlers.inbound.runtime.js";

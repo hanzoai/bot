@@ -105,7 +105,7 @@ export type ResolvedSecretPlanTarget = {
 };
 
 export function resolveSecretPlanTargetByPath(params: {
-  configFile: "openclaw.json" | "auth-profiles.json";
+  configFile: "bot.json" | "auth-profiles.json";
   pathSegments: string[];
 }): ResolvedSecretPlanTarget | null {
   const resolved = resolveSecretPlanTargetByPathInternal(params);

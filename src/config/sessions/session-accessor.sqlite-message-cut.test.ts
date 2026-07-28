@@ -1,10 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+} from "../../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import {
   deliveryContextFromSession,
   normalizeSessionDeliveryState,
@@ -30,12 +30,12 @@ const sessionKey = "agent:main:message-cut";
 
 afterEach(() => {
   vi.restoreAllMocks();
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
 });
 
 function trackFullTranscriptLoads(env: NodeJS.ProcessEnv): () => number {
-  const database = openOpenClawAgentDatabase({ agentId, env });
+  const database = openBotAgentDatabase({ agentId, env });
   const prepare = vi.spyOn(database.db, "prepare");
   return () =>
     prepare.mock.calls.filter(
@@ -69,8 +69,8 @@ async function createSiblingSession(params: {
 }
 
 async function createSession(options: { activeLeafTarget?: string } = {}) {
-  const stateDir = tempDirs.make("openclaw-message-cut-");
-  const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+  const stateDir = tempDirs.make("bot-message-cut-");
+  const env = { ...process.env, BOT_STATE_DIR: stateDir };
   const sessionId = "message-cut-source";
   const scope = { agentId, env, sessionId, sessionKey };
   await upsertSessionEntry(scope, {
@@ -121,7 +121,7 @@ async function createSession(options: { activeLeafTarget?: string } = {}) {
           { type: "text", text: "second prompt" },
           { type: "image", data: "aW1hZ2U=", mimeType: "image/png" },
         ],
-        __openclaw: {
+        __bot: {
           media: [
             { path: "/state/media/inbound/stored-image.png", contentType: "image/png" },
             { path: "/state/media/inbound/notes.txt", contentType: "text/plain" },

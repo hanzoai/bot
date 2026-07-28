@@ -8,7 +8,7 @@ const install = {
 
 function packageRef(overrides: Partial<PersistedClawPackageRef> = {}): PersistedClawPackageRef {
   return {
-    schemaVersion: "openclaw.clawPackageRef.v1",
+    schemaVersion: "bot.clawPackageRef.v1",
     agentId: "worker",
     clawName: "@acme/worker",
     kind: "plugin",

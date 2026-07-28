@@ -1,7 +1,7 @@
 // Webhooks API module exposes the plugin public contract.
 export {
   definePluginEntry,
-  type OpenClawPluginApi,
+  type BotPluginApi,
   type PluginLogger,
   type PluginRuntime,
-} from "openclaw/plugin-sdk/core";
+} from "bot/plugin-sdk/core";

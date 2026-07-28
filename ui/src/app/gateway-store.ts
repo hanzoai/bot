@@ -305,7 +305,7 @@ export function createApplicationGateway(
         ? nextConnection.bootstrapToken
         : undefined,
       password: nextConnection.password.trim() ? nextConnection.password : undefined,
-      clientName: "openclaw-control-ui",
+      clientName: "bot-control-ui",
       clientVersion: CONTROL_UI_BUILD_INFO.version ?? "dev",
       mode: "webchat",
       instanceId: generateUUID(),

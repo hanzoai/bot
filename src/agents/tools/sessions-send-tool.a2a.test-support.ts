@@ -11,7 +11,7 @@ type SessionsSendA2ATestApi = {
 
 function getTestApi(): SessionsSendA2ATestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.sessionsSendA2ATestApi")
+    Symbol.for("bot.sessionsSendA2ATestApi")
   ] as SessionsSendA2ATestApi;
 }
 

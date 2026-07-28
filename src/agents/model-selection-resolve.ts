@@ -5,7 +5,7 @@
  * handling before checking aliases, allowlists, catalogs, and plugin manifests.
  */
 import { resolveAgentModelFallbackValues } from "../config/model-input.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveAgentModelFallbacksOverride } from "./agent-scope.js";
 import type { ModelCatalogEntry } from "./model-catalog.types.js";
 import type { ModelManifestNormalizationContext, ModelRef } from "./model-ref-shared.js";
@@ -25,7 +25,7 @@ export {
   resolveModelRefFromString,
 } from "./model-selection-shared.js";
 
-function resolveDefaultFallbackModels(cfg: OpenClawConfig, agentId?: string): string[] {
+function resolveDefaultFallbackModels(cfg: BotConfig, agentId?: string): string[] {
   if (agentId) {
     const override = resolveAgentModelFallbacksOverride(cfg, agentId);
     if (override !== undefined) {
@@ -38,7 +38,7 @@ function resolveDefaultFallbackModels(cfg: OpenClawConfig, agentId?: string): st
 /** Returns whether a normalized model ref is available, allowed, or fallback-backed. */
 export function getModelRefStatus(
   params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     catalog: ModelCatalogEntry[];
     ref: ModelRef;
     defaultProvider: string;
@@ -62,7 +62,7 @@ export function getModelRefStatus(
 /** Resolves a raw model string into an allowed model ref or an explanatory error. */
 export function resolveAllowedModelRef(
   params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     catalog: ModelCatalogEntry[];
     raw: string;
     defaultProvider: string;

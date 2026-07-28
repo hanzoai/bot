@@ -1,5 +1,5 @@
 // Whatsapp tests cover status reaction plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestWebInboundMessage } from "../../inbound/test-message.test-helper.js";
 import type { AdmittedWebInboundMessage } from "../../inbound/types.js";
@@ -59,7 +59,7 @@ describe("createWhatsAppStatusReactionController", () => {
           reactionLevel: "ack",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const controller = await createWhatsAppStatusReactionController({
       cfg,
@@ -135,7 +135,7 @@ describe("createWhatsAppStatusReactionController", () => {
           reactionLevel: "ack",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const controller = await createWhatsAppStatusReactionController({
       cfg,
@@ -181,7 +181,7 @@ describe("createWhatsAppStatusReactionController", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const controller = await createWhatsAppStatusReactionController({
       cfg,

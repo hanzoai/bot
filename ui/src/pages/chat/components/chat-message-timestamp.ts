@@ -88,7 +88,7 @@ export function renderChatTimestamp(timestamp: number, interactive = false) {
   if (interactive) {
     return timeEl;
   }
-  return html`<openclaw-tooltip content=${display.label}>${timeEl}</openclaw-tooltip>`;
+  return html`<bot-tooltip content=${display.label}>${timeEl}</bot-tooltip>`;
 }
 
 function resolveMessageMetaDetails(target: EventTarget | null): HTMLDetailsElement | null {

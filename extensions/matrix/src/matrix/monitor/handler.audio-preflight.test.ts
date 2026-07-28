@@ -41,7 +41,7 @@ function createAudioPreflightHarness(
       channel: "matrix",
       matchedBy: "binding.account",
     }),
-    resolveStorePath: () => "/tmp/openclaw-test-session.json",
+    resolveStorePath: () => "/tmp/bot-test-session.json",
     getRoomInfo: async () => ({
       name: "Audio Room",
       canonicalAlias: "#audio:example.org",

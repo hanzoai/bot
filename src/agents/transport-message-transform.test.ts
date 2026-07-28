@@ -1,6 +1,6 @@
 // Transport message transform tests cover replay cleanup for provider-specific
 // tool-call/result sequencing before messages are sent back to transports.
-import type { Api, Context, Model } from "openclaw/plugin-sdk/llm";
+import type { Api, Context, Model } from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { transformTransportMessages } from "./transport-message-transform.js";
 
@@ -148,7 +148,7 @@ describe("transformTransportMessages synthetic tool-result policy", () => {
       sourceModel: "claude-fable-5",
       sourceResponseModel: undefined,
       targetProvider: "anthropic",
-      targetApi: "openclaw-anthropic-messages-transport" as const,
+      targetApi: "bot-anthropic-messages-transport" as const,
       targetModel: "claude-fable-5",
       targetCanonicalModelId: undefined,
     },
@@ -334,8 +334,8 @@ describe("transformTransportMessages synthetic tool-result policy", () => {
   });
 
   it.each([
-    "openclaw-openai-responses-transport",
-    "openclaw-openai-chatgpt-responses-transport",
+    "bot-openai-responses-transport",
+    "bot-openai-chatgpt-responses-transport",
   ] as const)("preserves real %s results and aborts missing parallel siblings", (api) => {
     const messages: Context["messages"] = [
       {
@@ -601,13 +601,13 @@ describe("transformTransportMessages synthetic tool-result policy", () => {
 
     const anthropicAlias = transformTransportMessages(
       messages,
-      makeModel("openclaw-anthropic-messages-transport" as Api, "anthropic", "claude-opus-4-6"),
+      makeModel("bot-anthropic-messages-transport" as Api, "anthropic", "claude-opus-4-6"),
     );
     expect(anthropicAlias.map((msg) => msg.role)).toEqual(["assistant", "toolResult", "user"]);
 
     const googleAlias = transformTransportMessages(
       messages,
-      makeModel("openclaw-google-generative-ai-transport" as Api, "google", "gemini-2.5-pro"),
+      makeModel("bot-google-generative-ai-transport" as Api, "google", "gemini-2.5-pro"),
     );
     expect(googleAlias.map((msg) => msg.role)).toEqual(["assistant", "toolResult", "user"]);
     const googleToolResult = requireToolResultMessage(googleAlias[1]);

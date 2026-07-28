@@ -56,7 +56,7 @@ export async function scanStatus(
       const overview = await collectStatusScanOverview({
         commandName: "status",
         opts,
-        showSecrets: process.env.OPENCLAW_SHOW_SECRETS?.trim() !== "0",
+        showSecrets: process.env.BOT_SHOW_SECRETS?.trim() !== "0",
         includeLiveChannelStatus: isFullScan,
         includeChannelSetupRuntimeFallback: isFullScan,
         // Fast status avoids local secret resolution and relies on config/runtime hints.

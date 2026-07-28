@@ -1,7 +1,7 @@
 import { resolveInlineAgentImageAttachments } from "../../auto-reply/reply/agent-turn-attachments.js";
 import type { CliDeps } from "../../cli/deps.types.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   assertAgentRunLifecycleGenerationCurrent,
   registerAgentRunContext,
@@ -33,7 +33,7 @@ type AcpReadyResolution = Extract<
 >;
 
 export async function runAcpAgentCommand(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   deps: CliDeps;
   runtime: RuntimeEnv;
   opts: AgentCommandOpts;

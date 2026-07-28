@@ -2,8 +2,8 @@
  * Browser CLI observation commands for console, PDF, and response bodies.
  */
 import type { Command } from "commander";
-import type { JsonSchemaObject } from "openclaw/plugin-sdk/json-schema-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { JsonSchemaObject } from "bot/plugin-sdk/json-schema-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   completeBrowserExtract,
   resolveBrowserExtractTimeoutMs,

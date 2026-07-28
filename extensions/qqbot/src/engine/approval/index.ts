@@ -9,9 +9,9 @@
 import type {
   ExecApprovalPendingView,
   PluginApprovalPendingView,
-} from "openclaw/plugin-sdk/approval-handler-runtime";
-import { resolveExecApprovalCommandDisplay } from "openclaw/plugin-sdk/approval-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/approval-handler-runtime";
+import { resolveExecApprovalCommandDisplay } from "bot/plugin-sdk/approval-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { ChatScope, InlineKeyboard, KeyboardButton } from "../types.js";
 
 // ============ Types ============

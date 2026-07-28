@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { DoctorPrompter } from "./doctor-prompter.js";
 
 const note = vi.hoisted(() => vi.fn());
@@ -39,7 +39,7 @@ describe("root memory repair", () => {
   let tmpDir = "";
 
   beforeEach(async () => {
-    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-root-memory-"));
+    tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-root-memory-"));
     note.mockClear();
   });
 
@@ -170,7 +170,7 @@ describe("root memory repair", () => {
     }
     const cfg = {
       agents: { defaults: { workspace: tmpDir }, entries: { main: { default: true } } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const prompter = {
       confirmRuntimeRepair: vi.fn(async () => true),
     } as unknown as DoctorPrompter;
@@ -276,7 +276,7 @@ describe("root memory repair", () => {
     await fs.writeFile(path.join(tmpDir, "memory.md"), "# Legacy\n", "utf8");
     const cfg = {
       agents: { defaults: { workspace: tmpDir }, entries: { main: { default: true } } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const prompter = {
       confirmRuntimeRepair: vi.fn(async () => true),
     } as unknown as DoctorPrompter;
@@ -298,7 +298,7 @@ describe("root memory repair", () => {
     await fs.writeFile(path.join(tmpDir, "memory.md"), "# Legacy\n".repeat(1_000_000), "utf8");
     const cfg = {
       agents: { defaults: { workspace: tmpDir }, entries: { main: { default: true } } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const prompter = {
       confirmRuntimeRepair: vi.fn(async () => true),
     } as unknown as DoctorPrompter;
@@ -345,7 +345,7 @@ describe("root memory repair", () => {
     await fs.writeFile(path.join(tmpDir, "memory.md"), "# Legacy\n", "utf8");
     const cfg = {
       agents: { defaults: { workspace: tmpDir }, entries: { main: { default: true } } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const prompter = {
       confirmRuntimeRepair: vi.fn(async () => true),
     } as unknown as DoctorPrompter;
@@ -376,7 +376,7 @@ describe("root memory repair", () => {
     await fs.writeFile(legacyPath, "# Legacy\n", "utf8");
     const cfg = {
       agents: { defaults: { workspace: tmpDir }, entries: { main: { default: true } } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const prompter = {
       confirmRuntimeRepair: vi.fn(async () => true),
     } as unknown as DoctorPrompter;

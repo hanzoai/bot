@@ -52,7 +52,7 @@ describe("custodian page", () => {
     const assistantGroup = page.querySelector<HTMLElement>(".chat-group.assistant")!;
     expect(assistantGroup.querySelector("strong")?.textContent).toBe("aboard");
     expect(assistantGroup.querySelector(".chat-avatar.assistant")?.textContent?.trim()).toBe("OC");
-    const card = page.querySelector("openclaw-option-card")!;
+    const card = page.querySelector("bot-option-card")!;
     await card.updateComplete;
     expect(page.querySelector(".option-card__choice--recommended")?.textContent).toContain(
       "Talk to my agent",
@@ -62,7 +62,7 @@ describe("custodian page", () => {
 
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
     await page.updateComplete;
-    expect(request.mock.calls[0]?.[0]).toBe("openclaw.chat");
+    expect(request.mock.calls[0]?.[0]).toBe("bot.chat");
     expect(request.mock.calls[0]?.[1]).toMatchObject({ welcomeVariant: "onboarding" });
     // The engine receives the parseable reply text; the transcript shows the label.
     expect(request.mock.calls[1]?.[1]).toMatchObject({
@@ -76,7 +76,7 @@ describe("custodian page", () => {
 
   it("renders advertised durable history before the live welcome with a divider", async () => {
     const request = vi.fn(async (method: string, _params?: unknown) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "bot.chat.history") {
         return {
           turns: [
             { role: "user", text: "Earlier question", at: 1 },
@@ -84,7 +84,7 @@ describe("custodian page", () => {
           ],
         };
       }
-      if (method === "openclaw.chat") {
+      if (method === "bot.chat") {
         return {
           sessionId: "control-ui-onboarding-00000000-0000-4000-8000-000000000001",
           reply: "Live welcome",
@@ -93,15 +93,15 @@ describe("custodian page", () => {
       }
       throw new Error(`unexpected request ${method}`);
     });
-    const { context } = createContext(request, ["openclaw.chat", "openclaw.chat.history"]);
+    const { context } = createContext(request, ["bot.chat", "bot.chat.history"]);
     const { page } = await mountPage(context);
 
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
     await page.updateComplete;
 
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
+      "bot.chat.history",
+      "bot.chat",
     ]);
     expect(request.mock.calls[0]?.[1]).toEqual({});
     const rows = Array.from(page.querySelectorAll(".chat-group, .chat-divider")).map((row) =>
@@ -118,7 +118,7 @@ describe("custodian page", () => {
   it("continues to the welcome when the bounded history request times out", async () => {
     const request = vi.fn(
       async (method: string, _params?: unknown, options?: { timeoutMs?: number }) => {
-        if (method === "openclaw.chat.history") {
+        if (method === "bot.chat.history") {
           expect(options).toEqual({ timeoutMs: 15_000 });
           throw new Error("history request timed out");
         }
@@ -129,23 +129,23 @@ describe("custodian page", () => {
         };
       },
     );
-    const { context } = createContext(request, ["openclaw.chat", "openclaw.chat.history"]);
+    const { context } = createContext(request, ["bot.chat", "bot.chat.history"]);
     const { page } = await mountPage(context);
 
     await waitForFast(() => expect(page.textContent).toContain("Welcome without history."));
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
+      "bot.chat.history",
+      "bot.chat",
     ]);
   });
 
   it("keeps rows for a same-ownership client replacement and requests a fresh welcome", async () => {
     let chatCalls = 0;
     const request = vi.fn(async (method: string, _params?: unknown) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "bot.chat.history") {
         return { turns: [{ role: "assistant", text: "Earlier state", at: 1 }] };
       }
-      if (method === "openclaw.chat") {
+      if (method === "bot.chat") {
         chatCalls += 1;
         return {
           sessionId: "control-ui-onboarding-00000000-0000-4000-8000-000000000001",
@@ -156,8 +156,8 @@ describe("custodian page", () => {
       throw new Error(`unexpected request ${method}`);
     });
     const { context, setGatewaySnapshot } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "bot.chat",
+      "bot.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
@@ -167,9 +167,9 @@ describe("custodian page", () => {
     await waitForFast(() => expect(page.textContent).toContain("Fresh session welcome"));
 
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
-      "openclaw.chat",
+      "bot.chat.history",
+      "bot.chat",
+      "bot.chat",
     ]);
     expect(request.mock.calls[2]?.[1]).toMatchObject({
       sessionId: expect.stringMatching(/^control-ui-onboarding-/),
@@ -219,7 +219,7 @@ describe("custodian page", () => {
         reply: "Recovered welcome.",
         action: "none",
       });
-    const { context } = createContext(request, ["openclaw.chat", "openclaw.chat.history"]);
+    const { context } = createContext(request, ["bot.chat", "bot.chat.history"]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(page.querySelector('[role="alert"] button')).not.toBeNull());
 
@@ -227,10 +227,10 @@ describe("custodian page", () => {
     await waitForFast(() => expect(page.textContent).toContain("Recovered welcome."));
 
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
-      "openclaw.chat.history",
-      "openclaw.chat",
+      "bot.chat.history",
+      "bot.chat",
+      "bot.chat.history",
+      "bot.chat",
     ]);
     expect(page.textContent).toContain("Loaded transcript row");
   });
@@ -274,7 +274,7 @@ describe("custodian page", () => {
       isOther: false,
     };
     const request = vi.fn(async (method: string) => {
-      if (method === "openclaw.chat.history") {
+      if (method === "bot.chat.history") {
         return { turns: [{ role: "assistant", text: "Earlier row", at: 1 }] };
       }
       return {
@@ -285,13 +285,13 @@ describe("custodian page", () => {
       };
     });
     const { context, setGatewaySnapshot } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "bot.chat",
+      "bot.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
     await page.updateComplete;
-    expect(page.querySelector("openclaw-option-card")).not.toBeNull();
+    expect(page.querySelector("bot-option-card")).not.toBeNull();
 
     setGatewaySnapshot({ phase: "reconnecting" });
     await page.updateComplete;
@@ -301,10 +301,10 @@ describe("custodian page", () => {
     await page.updateComplete;
 
     expect(request.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
+      "bot.chat.history",
+      "bot.chat",
     ]);
-    expect(page.querySelector("openclaw-option-card")).not.toBeNull();
+    expect(page.querySelector("bot-option-card")).not.toBeNull();
     expect(page.textContent).toContain("Choose the next step.");
   });
 
@@ -400,8 +400,8 @@ describe("custodian page", () => {
         action: "none",
       });
     const { context, setGatewaySnapshot, setGatewayToken } = createContext(request, [
-      "openclaw.chat",
-      "openclaw.chat.history",
+      "bot.chat",
+      "bot.chat.history",
     ]);
     const { page } = await mountPage(context);
     await waitForFast(() => expect(request).toHaveBeenCalledTimes(2));
@@ -427,8 +427,8 @@ describe("custodian page", () => {
       message: "test-token-placeholder",
     });
     expect(replacementRequest.mock.calls.map(([method]) => method)).toEqual([
-      "openclaw.chat.history",
-      "openclaw.chat",
+      "bot.chat.history",
+      "bot.chat",
     ]);
     expect(replacementRequest.mock.calls[1]?.[1]).toMatchObject({
       sessionId: expect.stringMatching(/^control-ui-onboarding-/),
@@ -505,7 +505,7 @@ describe("custodian page", () => {
     const question = {
       id: "access",
       header: "Access",
-      question: "How should OpenClaw work?",
+      question: "How should Bot work?",
       options: [{ label: "Full access", recommended: true }, { label: "Ask first" }],
       isOther: false,
     };
@@ -533,7 +533,7 @@ describe("custodian page", () => {
     await page.updateComplete;
     expect(request.mock.calls[1]?.[1]).toMatchObject({ message: "cancel" });
     expect(page.querySelector(".chat-group.user")?.textContent).toContain("Skip for now");
-    await waitForFast(() => expect(page.querySelector("openclaw-option-card")).toBeNull());
+    await waitForFast(() => expect(page.querySelector("bot-option-card")).toBeNull());
   });
 
   it("exits onboarding locally when the question declares an exit skip action", async () => {
@@ -594,7 +594,7 @@ describe("custodian page", () => {
     await page.updateComplete;
 
     expect(page.querySelector(".chat-group.assistant")).toBeNull();
-    expect(page.querySelector("openclaw-option-card")).not.toBeNull();
+    expect(page.querySelector("bot-option-card")).not.toBeNull();
     expect(page.textContent).toContain("Which channel?");
     expect(page.textContent).not.toContain("NO_REPLY");
   });
@@ -603,7 +603,7 @@ describe("custodian page", () => {
     const question = {
       id: "access",
       header: "Access",
-      question: "How should OpenClaw work?",
+      question: "How should Bot work?",
       options: [{ label: "Full access", recommended: true }, { label: "Ask first" }],
       isOther: false,
     };
@@ -647,7 +647,7 @@ describe("custodian page", () => {
   it("requests the normal caretaker greeting outside onboarding", async () => {
     const request = vi.fn().mockResolvedValue({
       sessionId: "control-ui-onboarding-00000000-0000-4000-8000-000000000001",
-      reply: "OpenClaw here. Everything is healthy.",
+      reply: "Bot here. Everything is healthy.",
       action: "none",
     });
     const { context } = createContext(request);
@@ -674,7 +674,7 @@ describe("custodian page", () => {
       .fn()
       .mockResolvedValueOnce({
         sessionId: "control-ui-caretaker-00000000-0000-4000-8000-000000000001",
-        reply: "I'm OpenClaw. All systems nominal.",
+        reply: "I'm Bot. All systems nominal.",
         action: "none",
         question: {
           id: "system-agent-quick-actions",

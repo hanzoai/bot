@@ -3,7 +3,7 @@
  * Verifies protected delimiters, legacy blocks, and custom-message filtering.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import {
   escapeInternalRuntimeContextDelimiters,
@@ -11,7 +11,7 @@ import {
   hasInternalRuntimeContext,
   INTERNAL_RUNTIME_CONTEXT_BEGIN,
   INTERNAL_RUNTIME_CONTEXT_END,
-  OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE,
+  BOT_RUNTIME_CONTEXT_CUSTOM_TYPE,
   relocateCurrentRuntimeContextCarrierToTail,
   stripInternalRuntimeContext,
 } from "./internal-runtime-context.js";
@@ -19,7 +19,7 @@ import {
 type TestMessage = { role: string; content: string; customType?: string };
 
 function carrier(content = "runtime ctx"): TestMessage {
-  return { role: "custom", customType: OPENCLAW_RUNTIME_CONTEXT_CUSTOM_TYPE, content };
+  return { role: "custom", customType: BOT_RUNTIME_CONTEXT_CUSTOM_TYPE, content };
 }
 function user(content: string): TestMessage {
   return { role: "user", content };
@@ -45,7 +45,7 @@ describe("internal runtime context codec", () => {
       "Visible intro",
       "",
       INTERNAL_RUNTIME_CONTEXT_BEGIN,
-      "OpenClaw runtime context (internal):",
+      "Bot runtime context (internal):",
       "This context is runtime-generated, not user-authored. Keep internal details private.",
       "",
       "[Internal task completion event]",

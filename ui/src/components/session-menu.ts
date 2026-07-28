@@ -9,7 +9,7 @@ import {
 } from "../../../packages/gateway-protocol/src/session-icon.js";
 import { t } from "../i18n/index.ts";
 import { EDITOR_IDS, EDITOR_LABELS, type EditorId } from "../lib/editor-links.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../lit/bot-element.ts";
 import { DropdownMenuController } from "./dropdown-menu-controller.ts";
 import { icons } from "./icons.ts";
 import { activateMenuShortcut, menuShortcutHint } from "./menu-shortcuts.ts";
@@ -62,7 +62,7 @@ const EMPTY_SESSION: SessionMenuData = {
   icon: undefined,
 };
 
-class SessionMenu extends OpenClawLightDomElement {
+class SessionMenu extends BotLightDomElement {
   @property({ attribute: false }) session: SessionMenuData = EMPTY_SESSION;
   // >1 renders the batch menu: only actions that apply to every selected
   // session (unread/group/archive/delete); `session` then carries aggregated
@@ -95,7 +95,7 @@ class SessionMenu extends OpenClawLightDomElement {
     // Sidebar-hosted menus live inside the nav stacking context (z-index 10),
     // which paints below the sidebar resizer divider (z-index 20); promoting
     // the menu to the popover top layer keeps app chrome from bleeding
-    // through it (same pattern as openclaw-native-link-menu).
+    // through it (same pattern as bot-native-link-menu).
     promoteToPopoverTopLayer(this);
   }
 
@@ -607,6 +607,6 @@ class SessionMenu extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-session-menu")) {
-  customElements.define("openclaw-session-menu", SessionMenu);
+if (!customElements.get("bot-session-menu")) {
+  customElements.define("bot-session-menu", SessionMenu);
 }

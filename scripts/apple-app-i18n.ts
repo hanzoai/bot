@@ -37,15 +37,15 @@ const INFLECTED_COUNT_SEGMENT_RE =
   /\^\[[^\]]*\\\([A-Za-z_][A-Za-z0-9_]*\)[^\]]*\]\(inflect: true\)/gu;
 const INFLECTED_COUNT_MARKER = "](inflect: true)";
 const IOS_CATALOG_PATH = "apps/ios/Resources/Localizable.xcstrings";
-const MACOS_CATALOG_PATH = "apps/macos/Sources/OpenClaw/Resources/Localizable.xcstrings";
+const MACOS_CATALOG_PATH = "apps/macos/Sources/Bot/Resources/Localizable.xcstrings";
 const IOS_CONTRADICTIONS_PATH = "apps/.i18n/apple-translation-contradictions.json";
 const NATIVE_SOURCE_PATH = "apps/.i18n/native-source.json";
 const NATIVE_TRANSLATIONS_DIR = "apps/.i18n/native";
-const SHARED_CHAT_UI_SOURCE_PREFIX = "apps/shared/OpenClawKit/Sources/OpenClawChatUI/";
+const SHARED_CHAT_UI_SOURCE_PREFIX = "apps/shared/BotKit/Sources/BotChatUI/";
 const IOS_SOURCE_PREFIXES = [
   "apps/ios/",
   SHARED_CHAT_UI_SOURCE_PREFIX,
-  "apps/shared/OpenClawKit/Sources/OpenClawKit/",
+  "apps/shared/BotKit/Sources/BotKit/",
 ] as const;
 const APPLE_CATALOG_KINDS = new Set([
   "conditional-branch",
@@ -59,16 +59,16 @@ const APPLE_CATALOG_KINDS = new Set([
 ]);
 const IOS_CATALOG_EXCLUSIONS = new Set([
   // Product names and preview-only single-character fixtures are intentionally verbatim.
-  "OpenClaw",
+  "Bot",
   "z",
 ]);
 const MACOS_SOURCE_PREFIXES = [
-  "apps/macos/Sources/OpenClaw/",
+  "apps/macos/Sources/Bot/",
   SHARED_CHAT_UI_SOURCE_PREFIX,
 ] as const;
 const MACOS_CATALOG_EXCLUSIONS = new Set([
   // Product names are intentionally verbatim.
-  "OpenClaw",
+  "Bot",
 ]);
 const IOS_INFO_PLIST_TARGETS = [
   {
@@ -153,7 +153,7 @@ const APPLE_LOCALE_DIRECTORIES: Record<string, string> = {
   "zh-TW": "zh-Hant",
 };
 const LOCALIZED_WRAPPER_CONTRACTS: Record<string, readonly string[]> = {
-  "apps/macos/Sources/OpenClaw/SettingsComponents.swift": [
+  "apps/macos/Sources/Bot/SettingsComponents.swift": [
     "enum SettingsTextValue: ExpressibleByStringLiteral",
     "case localized(LocalizedStringKey)",
     "case verbatim(String)",
@@ -165,21 +165,21 @@ const LOCALIZED_WRAPPER_CONTRACTS: Record<string, readonly string[]> = {
     "struct SettingsToggleRow: View {\n    let title: SettingsTextValue\n    let subtitle: SettingsTextValue?",
     "Text(verbatim: value)",
   ],
-  "apps/ios/Sources/Design/OpenClawProComponents.swift": [
-    "enum OpenClawTextValue: ExpressibleByStringLiteral",
-    "struct ProSectionHeader: View {\n    let title: OpenClawTextValue",
-    "struct OpenClawNoticeBanner: View {\n    let icon: String\n    let title: OpenClawTextValue\n    let message: OpenClawTextValue",
-    "struct OpenClawAdaptiveHeaderRow<Leading: View, Accessory: View>: View {\n    let title: OpenClawTextValue\n    let subtitle: OpenClawTextValue?",
-    "struct OpenClawStatusBadge: View {\n    @Environment(\\.colorScheme) private var colorScheme\n    let label: OpenClawTextValue",
-    "struct ProMetricTile: View {\n    @Environment(\\.colorScheme) private var colorScheme\n    let title: OpenClawTextValue",
-    "struct ProPanelHeader: View {\n    let title: OpenClawTextValue",
-    "struct ProStatusRow: View {\n    let icon: String\n    let title: OpenClawTextValue\n    let detail: OpenClawTextValue",
+  "apps/ios/Sources/Design/BotProComponents.swift": [
+    "enum BotTextValue: ExpressibleByStringLiteral",
+    "struct ProSectionHeader: View {\n    let title: BotTextValue",
+    "struct BotNoticeBanner: View {\n    let icon: String\n    let title: BotTextValue\n    let message: BotTextValue",
+    "struct BotAdaptiveHeaderRow<Leading: View, Accessory: View>: View {\n    let title: BotTextValue\n    let subtitle: BotTextValue?",
+    "struct BotStatusBadge: View {\n    @Environment(\\.colorScheme) private var colorScheme\n    let label: BotTextValue",
+    "struct ProMetricTile: View {\n    @Environment(\\.colorScheme) private var colorScheme\n    let title: BotTextValue",
+    "struct ProPanelHeader: View {\n    let title: BotTextValue",
+    "struct ProStatusRow: View {\n    let icon: String\n    let title: BotTextValue\n    let detail: BotTextValue",
   ],
   "apps/ios/Sources/Design/SettingsProTabSupport.swift": [
-    "struct SettingsDetailRow: View {\n    let label: LocalizedStringKey\n    let value: OpenClawTextValue",
-    "init(_ label: LocalizedStringKey, value: OpenClawTextValue)",
+    "struct SettingsDetailRow: View {\n    let label: LocalizedStringKey\n    let value: BotTextValue",
+    "init(_ label: LocalizedStringKey, value: BotTextValue)",
     "self.value.text",
-    "struct SettingsApprovalItem: Identifiable {\n    let id: String\n    let icon: String\n    let title: OpenClawTextValue\n    let detail: OpenClawTextValue\n    let priority: OpenClawTextValue",
+    "struct SettingsApprovalItem: Identifiable {\n    let id: String\n    let icon: String\n    let title: BotTextValue\n    let detail: BotTextValue\n    let priority: BotTextValue",
     "self.item.title.text",
     "self.item.detail.text",
     "self.item.priority.text",
@@ -192,9 +192,9 @@ const LOCALIZED_WRAPPER_CONTRACTS: Record<string, readonly string[]> = {
     "Text(verbatim: account.detailText)",
   ],
   "apps/ios/Sources/Design/SettingsProTabActions.swift": [
-    "func detailStatusCard(\n        icon: String,\n        title: OpenClawTextValue,\n        detail: OpenClawTextValue,\n        value: OpenClawTextValue",
-    "func diagnosticCheckRow(\n        icon: String,\n        title: OpenClawTextValue,\n        detail: OpenClawTextValue,\n        value: OpenClawTextValue",
-    "pendingApproval.commandPreview.map(OpenClawTextValue.verbatim)",
+    "func detailStatusCard(\n        icon: String,\n        title: BotTextValue,\n        detail: BotTextValue,\n        value: BotTextValue",
+    "func diagnosticCheckRow(\n        icon: String,\n        title: BotTextValue,\n        detail: BotTextValue,\n        value: BotTextValue",
+    "pendingApproval.commandPreview.map(BotTextValue.verbatim)",
     'format: String(localized: "Agent: %@")',
   ],
   "apps/ios/Sources/Design/SettingsProTabSections.swift": [
@@ -231,24 +231,24 @@ const LOCALIZED_WRAPPER_CONTRACTS: Record<string, readonly string[]> = {
   "apps/ios/Sources/Design/AgentProTab+Overview.swift": [
     "subtitle: .verbatim(self.agentTotalText)",
     'AttributedString(localized: "^[\\(count) agent](inflect: true) total")',
-    "func agentMenuRow(\n        icon: String,\n        title: OpenClawTextValue,\n        detail: OpenClawTextValue",
-    "func metricTile(\n        icon: String,\n        title: OpenClawTextValue,\n        value: String,\n        detail: OpenClawTextValue",
+    "func agentMenuRow(\n        icon: String,\n        title: BotTextValue,\n        detail: BotTextValue",
+    "func metricTile(\n        icon: String,\n        title: BotTextValue,\n        value: String,\n        detail: BotTextValue",
   ],
   "apps/ios/Sources/Design/AgentProNodesDestination.swift": [
-    "private func nodeDetailRow(\n        _ title: OpenClawTextValue,\n        copyLabel: LocalizedStringKey",
-    "private func nodeListCard(title: OpenClawTextValue, values: [String])",
-    "private func detailMetric(label: OpenClawTextValue, value: String)",
-    "title: OpenClawTextValue,\n        detail: OpenClawTextValue",
+    "private func nodeDetailRow(\n        _ title: BotTextValue,\n        copyLabel: LocalizedStringKey",
+    "private func nodeListCard(title: BotTextValue, values: [String])",
+    "private func detailMetric(label: BotTextValue, value: String)",
+    "title: BotTextValue,\n        detail: BotTextValue",
   ],
   "apps/ios/Sources/Design/AgentProDreamingDestination.swift": [
-    "private func detailMetric(label: OpenClawTextValue, value: String)",
+    "private func detailMetric(label: BotTextValue, value: String)",
     "label.text",
     "Text(verbatim: value)",
   ],
   "apps/ios/Sources/Design/AgentProTab+DetailComponents.swift": [
-    "func detailMetric(label: OpenClawTextValue, value: String)",
+    "func detailMetric(label: BotTextValue, value: String)",
     "Text(verbatim: value)",
-    "func emptyDetailRow(\n        icon: String,\n        title: OpenClawTextValue,\n        detail: OpenClawTextValue)",
+    "func emptyDetailRow(\n        icon: String,\n        title: BotTextValue,\n        detail: BotTextValue)",
     "title.text",
     "detail.text",
   ],
@@ -256,8 +256,8 @@ const LOCALIZED_WRAPPER_CONTRACTS: Record<string, readonly string[]> = {
     "Text(verbatim: self.item.title)",
     "Text(verbatim: self.item.trailing)",
     "Text(verbatim: self.item.detail)",
-    "struct CommandEmptyStateRow: View {\n    let icon: String\n    let title: OpenClawTextValue\n    let detail: OpenClawTextValue",
-    "private func actionButton(\n        _ title: OpenClawTextValue",
+    "struct CommandEmptyStateRow: View {\n    let icon: String\n    let title: BotTextValue\n    let detail: BotTextValue",
+    "private func actionButton(\n        _ title: BotTextValue",
     "self.actionButton(.verbatim(category)",
   ],
   "apps/ios/Sources/Design/IPadSkillWorkshopScreen.swift": [
@@ -317,7 +317,7 @@ const LOCALIZED_WRAPPER_CONTRACTS: Record<string, readonly string[]> = {
   ],
 };
 const RAW_LOCALIZATION_BYPASSES: Record<string, readonly string[]> = {
-  "apps/macos/Sources/OpenClaw/SettingsComponents.swift": [
+  "apps/macos/Sources/Bot/SettingsComponents.swift": [
     "let title: String",
     "let subtitle: String?",
     "Text(self.title)",
@@ -504,7 +504,7 @@ type InfoPlistTranslation = {
 function parseStringsFile(source: string): Map<string, InfoPlistTranslation> {
   const values = new Map<string, InfoPlistTranslation>();
   for (const match of source.matchAll(
-    /(?:^\/\* OpenClaw source: ("(?:\\.|[^"\\])*") \*\/\n)?^\s*("(?:\\.|[^"\\])*")\s*=\s*("(?:\\.|[^"\\])*");/gmu,
+    /(?:^\/\* Bot source: ("(?:\\.|[^"\\])*") \*\/\n)?^\s*("(?:\\.|[^"\\])*")\s*=\s*("(?:\\.|[^"\\])*");/gmu,
   )) {
     values.set(JSON.parse(match[2] ?? '""') as string, {
       source: match[1] ? (JSON.parse(match[1]) as string) : undefined,
@@ -872,7 +872,7 @@ async function syncIosInfoPlist(write: boolean): Promise<number> {
         const candidates = infoPlistTranslationCandidates(artifact, sourceId, source);
         const value = selectInfoPlistTranslation(source, candidates, existing.get(key));
         return [
-          `/* OpenClaw source: ${stringsLiteral(source)} */`,
+          `/* Bot source: ${stringsLiteral(source)} */`,
           `${stringsLiteral(key)} = ${stringsLiteral(value)};`,
         ].join("\n");
       });

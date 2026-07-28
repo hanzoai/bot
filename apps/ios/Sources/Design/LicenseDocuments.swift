@@ -75,14 +75,14 @@ struct LicenseDocumentDetailView: View {
     var body: some View {
         ScrollView {
             Text(verbatim: self.document.body)
-                .font(OpenClawType.monoFootnote)
+                .font(BotType.monoFootnote)
                 .foregroundStyle(.primary)
                 .textSelection(.enabled)
                 .accessibilityIdentifier("licenses-detail-text")
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(OpenClawProMetric.pagePadding)
+                .padding(BotProMetric.pagePadding)
         }
-        .background(OpenClawProBackground())
+        .background(BotProBackground())
         .navigationTitle(self.document.title)
         .navigationBarTitleDisplayMode(.inline)
     }

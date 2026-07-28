@@ -1,7 +1,7 @@
 // Gateway node connect reconciliation.
 // Computes approved runtime surfaces and pending pairing upgrades on reconnect.
 import type { ConnectParams } from "../../packages/gateway-protocol/src/index.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeNodeApprovalSurfaceList } from "../infra/node-pairing-surface.js";
 import type {
   NodePairingPairedNode,
@@ -117,7 +117,7 @@ function buildNodePairingRequestInput(params: {
 
 /** Reconciles a connecting node against stored approval and requests pairing when needed. */
 export async function reconcileNodePairingOnConnect(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   connectParams: ConnectParams;
   pairedNode: NodePairingPairedNode | null;
   reportedClientIp?: string;

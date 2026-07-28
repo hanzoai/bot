@@ -1,7 +1,7 @@
 // Qqbot plugin module implements register clear storage behavior.
 import fs from "node:fs";
 import path from "node:path";
-import { formatByteSize } from "openclaw/plugin-sdk/number-runtime";
+import { formatByteSize } from "bot/plugin-sdk/number-runtime";
 import { getQQBotMediaPath } from "../../utils/platform.js";
 import type { SlashCommandRegistry } from "../slash-commands.js";
 
@@ -76,7 +76,7 @@ const CLEAR_STORAGE_MAX_DISPLAY = 10;
  * Resolve the canonical QQBot downloads directory.
  *
  * All inbound attachments and outbound fallback downloads are stored directly
- * under `~/.openclaw/media/qqbot/downloads/` without appId subdivision.
+ * under `~/.bot/media/qqbot/downloads/` without appId subdivision.
  * The clear-storage command therefore cleans the entire downloads root.
  */
 function resolveQqbotDownloadsDir(): string {
@@ -144,7 +144,7 @@ export function registerClearStorageCommands(registry: SlashCommandRegistry): vo
     handler: async (ctx) => {
       const isForce = ctx.args.trim() === "--force";
       const targetDir = resolveQqbotDownloadsDir();
-      const displayDir = `~/.openclaw/media/qqbot/downloads`;
+      const displayDir = `~/.bot/media/qqbot/downloads`;
 
       if (!isForce) {
         const files = scanDirectoryFiles(targetDir);
@@ -175,7 +175,7 @@ export function registerClearStorageCommands(registry: SlashCommandRegistry): vo
           ``,
           `---`,
           ``,
-          `确认清理后，上述保存在 OpenClaw 运行主机磁盘上的文件将永久删除，后续对话过程中 AI 无法再找回相关文件。`,
+          `确认清理后，上述保存在 Bot 运行主机磁盘上的文件将永久删除，后续对话过程中 AI 无法再找回相关文件。`,
           `‼️ 点击指令确认删除`,
           `<qqbot-cmd-enter text="/bot-clear-storage --force" />`,
         );

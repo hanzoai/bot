@@ -2,14 +2,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import { listAgentIds, resolveAgentDir } from "../agents/agent-scope.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveUserPath } from "../utils.js";
 
 /**
  * Lists deduplicated auth-profile store agent dirs that may contain SecretRefs.
  * Covers implicit main, discovered state-dir agents, and config-declared agent dirs.
  */
-export function listAuthProfileStoreAgentDirs(config: OpenClawConfig, stateDir: string): string[] {
+export function listAuthProfileStoreAgentDirs(config: BotConfig, stateDir: string): string[] {
   const paths = new Set<string>();
   // Scope default auth store discovery to the provided stateDir instead of
   // ambient process env, so scans do not include unrelated host-global stores.

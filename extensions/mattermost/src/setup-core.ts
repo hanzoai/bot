@@ -1,17 +1,17 @@
 // Mattermost plugin module implements setup core behavior.
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
 import {
   defineChannelSetupContract,
   type ChannelSetupAdapter,
   type ChannelSetupInput,
-} from "openclaw/plugin-sdk/channel-setup";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-setup";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   applyAccountNameToChannelSection,
   applySetupAccountConfigPatch,
   migrateBaseNameToDefaultAccount,
-} from "openclaw/plugin-sdk/setup";
-import { createSetupInputPresenceValidator } from "openclaw/plugin-sdk/setup-runtime";
+} from "bot/plugin-sdk/setup";
+import { createSetupInputPresenceValidator } from "bot/plugin-sdk/setup-runtime";
 import {
   resolveMattermostAccount,
   type ResolvedMattermostAccount,
@@ -32,7 +32,7 @@ export function isMattermostConfigured(account: ResolvedMattermostAccount): bool
   return tokenConfigured && Boolean(account.baseUrl);
 }
 
-export function resolveMattermostAccountWithSecrets(cfg: OpenClawConfig, accountId: string) {
+export function resolveMattermostAccountWithSecrets(cfg: BotConfig, accountId: string) {
   return resolveMattermostAccount({
     cfg,
     accountId,
@@ -41,11 +41,11 @@ export function resolveMattermostAccountWithSecrets(cfg: OpenClawConfig, account
 }
 
 export function applyMattermostSetupConfigPatch(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   name?: string;
   patch: Record<string, unknown>;
-}): OpenClawConfig {
+}): BotConfig {
   const namedConfig = applyAccountNameToChannelSection({
     cfg: params.cfg,
     channelKey: channel,

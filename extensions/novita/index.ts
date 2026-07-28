@@ -1,9 +1,9 @@
-// Novita plugin entrypoint registers its OpenClaw integration.
-import { readConfiguredProviderCatalogEntries } from "openclaw/plugin-sdk/provider-catalog-shared";
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
-import { buildProviderReplayFamilyHooks } from "openclaw/plugin-sdk/provider-model-shared";
-import { buildProviderToolCompatFamilyHooks } from "openclaw/plugin-sdk/provider-tools";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+// Novita plugin entrypoint registers its Bot integration.
+import { readConfiguredProviderCatalogEntries } from "bot/plugin-sdk/provider-catalog-shared";
+import { defineSingleProviderPluginEntry } from "bot/plugin-sdk/provider-entry";
+import { buildProviderReplayFamilyHooks } from "bot/plugin-sdk/provider-model-shared";
+import { buildProviderToolCompatFamilyHooks } from "bot/plugin-sdk/provider-tools";
+import manifest from "./bot.plugin.json" with { type: "json" };
 import { buildNovitaProvider } from "./provider-catalog.js";
 
 const PROVIDER_ID = "novita";

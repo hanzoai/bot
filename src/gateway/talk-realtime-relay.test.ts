@@ -11,10 +11,10 @@ import {
   readSessionTranscriptMessageEvents,
   replaceSessionEntry,
 } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import type { RealtimeVoiceProviderPlugin } from "../plugins/types.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { clientVoiceSessionTesting } from "../talk/client-voice-session.test-support.js";
 import type {
   RealtimeVoiceBridge,
@@ -93,11 +93,11 @@ describe("talk realtime gateway relay", () => {
   }
 
   it("appends finalized relay transcripts to the canonical agent session", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
     const tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-voice-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "bot-relay-voice-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     let bridgeRequest: RealtimeVoiceBridgeCreateRequest | undefined;
     try {
       await replaceSessionEntry(
@@ -160,19 +160,19 @@ describe("talk realtime gateway relay", () => {
         ),
       );
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeBotAgentDatabasesForTest();
+      closeBotStateDatabaseForTest();
       envSnapshot.restore();
       await fs.rm(tempDir, { recursive: true, force: true });
     }
   });
 
   it("creates the relay voice record before binding a transcript-free consult", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
     const tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-voice-consult-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "bot-relay-voice-consult-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     try {
       const session = createTalkRealtimeRelaySession({
         context: {
@@ -219,20 +219,20 @@ describe("talk realtime gateway relay", () => {
       );
     } finally {
       clientVoiceSessionTesting.reset();
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeBotAgentDatabasesForTest();
+      closeBotStateDatabaseForTest();
       envSnapshot.restore();
       await fs.rm(tempDir, { recursive: true, force: true });
     }
   });
 
   it("pins an unscoped relay owner before the configured default changes", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
     const tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-owner-pin-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "bot-relay-owner-pin-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
-    let runtimeConfig: OpenClawConfig = {
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
+    let runtimeConfig: BotConfig = {
       agents: { entries: { main: { default: true }, ops: {} } },
     };
     try {
@@ -271,19 +271,19 @@ describe("talk realtime gateway relay", () => {
       );
       expect(clientVoiceSessionTesting.readRecord("ops", session.relaySessionId)).toBeUndefined();
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeBotAgentDatabasesForTest();
+      closeBotStateDatabaseForTest();
       envSnapshot.restore();
       await fs.rm(tempDir, { recursive: true, force: true });
     }
   });
 
   it("pins a scoped relay owner from the trimmed session key", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
     const tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-trimmed-owner-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "bot-relay-trimmed-owner-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     try {
       const session = createTalkRealtimeRelaySessionRaw({
         context: {
@@ -314,19 +314,19 @@ describe("talk realtime gateway relay", () => {
       });
       expect(clientVoiceSessionTesting.readRecord("ops", session.relaySessionId)).toBeUndefined();
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeBotAgentDatabasesForTest();
+      closeBotStateDatabaseForTest();
       envSnapshot.restore();
       await fs.rm(tempDir, { recursive: true, force: true });
     }
   });
 
   it("logs relay transcript append failures", async () => {
-    const envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
+    const envSnapshot = captureEnv(["BOT_STATE_DIR"]);
     const tempDir = await fs.realpath(
-      await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-relay-voice-failure-")),
+      await fs.mkdtemp(path.join(os.tmpdir(), "bot-relay-voice-failure-")),
     );
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
     let bridgeRequest: RealtimeVoiceBridgeCreateRequest | undefined;
     const warn = vi.fn();
     try {
@@ -376,8 +376,8 @@ describe("talk realtime gateway relay", () => {
         ),
       );
     } finally {
-      closeOpenClawAgentDatabasesForTest();
-      closeOpenClawStateDatabaseForTest();
+      closeBotAgentDatabasesForTest();
+      closeBotStateDatabaseForTest();
       envSnapshot.restore();
       await fs.rm(tempDir, { recursive: true, force: true });
     }
@@ -452,7 +452,7 @@ describe("talk realtime gateway relay", () => {
       bridgeRequest?.onToolCall?.({
         itemId: `item-${callId}`,
         callId,
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "Can you check this?" },
       });
     }
@@ -619,7 +619,7 @@ describe("talk realtime gateway relay", () => {
         bridgeRequest?.onToolCall?.({
           itemId: "item-1",
           callId: "call-1",
-          name: "openclaw_agent_consult",
+          name: "bot_agent_consult",
           args: { question: "hello" },
         });
       }),
@@ -766,7 +766,7 @@ describe("talk realtime gateway relay", () => {
       type: "toolCall",
       itemId: "item-1",
       callId: "call-1",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "hello" },
     });
     expectRecordFields(toolCallPayload.talkEvent, {
@@ -821,9 +821,9 @@ describe("talk realtime gateway relay", () => {
       "call-1",
       {
         status: "working",
-        tool: "openclaw_agent_consult",
+        tool: "bot_agent_consult",
         message:
-          "Tell the person briefly that you are checking, then wait for the final OpenClaw result before answering with the actual result.",
+          "Tell the person briefly that you are checking, then wait for the final Bot result before answering with the actual result.",
       },
       { willContinue: true },
     );
@@ -884,7 +884,7 @@ describe("talk realtime gateway relay", () => {
     expectRecordFields(toolResultPayloads[0]?.talkEvent, {
       type: "tool.progress",
       callId: "call-1",
-      payload: { name: "openclaw_agent_consult", status: "working" },
+      payload: { name: "bot_agent_consult", status: "working" },
     });
     expectRecordFields(toolResultPayloads[1], {
       relaySessionId: session.relaySessionId,
@@ -1266,7 +1266,7 @@ describe("talk realtime gateway relay", () => {
     expectRecordFields(forcedToolCall, {
       relaySessionId: session.relaySessionId,
       type: "toolCall",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       forced: true,
     });
     expectRecordFields(forcedToolCall.args, {
@@ -1291,22 +1291,22 @@ describe("talk realtime gateway relay", () => {
       options: { willContinue: true },
     });
     expect(bridge.sendUserMessage).toHaveBeenLastCalledWith(
-      "Briefly tell the person that you are checking with OpenClaw. Do not answer the request yet. Wait for the OpenClaw result before giving the actual answer.",
+      "Briefly tell the person that you are checking with Bot. Do not answer the request yet. Wait for the Bot result before giving the actual answer.",
     );
 
     bridgeRequest?.onToolCall?.({
       itemId: "native-item",
       callId: "native-call",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "Can you check this?" },
     });
     expect(bridge.submitToolResult).toHaveBeenLastCalledWith(
       "native-call",
       {
         status: "working",
-        tool: "openclaw_agent_consult",
+        tool: "bot_agent_consult",
         message:
-          "Tell the person briefly that you are checking, then wait for the final OpenClaw result before answering with the actual result.",
+          "Tell the person briefly that you are checking, then wait for the final Bot result before answering with the actual result.",
       },
       { willContinue: true },
     );
@@ -1328,13 +1328,13 @@ describe("talk realtime gateway relay", () => {
       "native-call",
       {
         status: "already_delivered",
-        message: "OpenClaw already delivered this consult result internally. Do not repeat it.",
+        message: "Bot already delivered this consult result internally. Do not repeat it.",
       },
       { suppressResponse: true },
     );
     expect(bridge.sendUserMessage).toHaveBeenLastCalledWith(
       [
-        "OpenClaw finished checking. Speak this result naturally and concisely.",
+        "Bot finished checking. Speak this result naturally and concisely.",
         "Do not mention tool calls, JSON, or internal routing.",
         "",
         "Here is the checked answer.",
@@ -1364,16 +1364,16 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "native-other-item",
       callId: "native-other-call",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "Can you check something else?" },
     });
     expect(bridge.submitToolResult).toHaveBeenLastCalledWith(
       "native-other-call",
       {
         status: "working",
-        tool: "openclaw_agent_consult",
+        tool: "bot_agent_consult",
         message:
-          "Tell the person briefly that you are checking, then wait for the final OpenClaw result before answering with the actual result.",
+          "Tell the person briefly that you are checking, then wait for the final Bot result before answering with the actual result.",
       },
       { willContinue: true },
     );
@@ -1385,7 +1385,7 @@ describe("talk realtime gateway relay", () => {
       relaySessionId: session.relaySessionId,
       type: "toolCall",
       callId: "native-other-call",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "Can you check something else?" },
     });
     stopTalkRealtimeRelaySession({ relaySessionId: session.relaySessionId, connId: "conn-1" });
@@ -1505,7 +1505,7 @@ describe("talk realtime gateway relay", () => {
     fixture.bridgeRequest?.onToolCall?.({
       itemId: "late-item",
       callId: "native-2",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "Can you check this?" },
     });
     expect(fixture.submitToolResult.mock.calls.map((call) => call[0])).toEqual(["native-1"]);
@@ -1602,14 +1602,14 @@ describe("talk realtime gateway relay", () => {
     fixture.bridgeRequest?.onToolCall?.({
       itemId: "late-item",
       callId: "late-call",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "Can you check this?" },
     });
     expect(fixture.submitToolResult).toHaveBeenCalledWith(
       "late-call",
       {
         status: "already_delivered",
-        message: "OpenClaw already delivered this consult result internally. Do not repeat it.",
+        message: "Bot already delivered this consult result internally. Do not repeat it.",
       },
       undefined,
     );
@@ -1697,7 +1697,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "native-item",
       callId: "native-call",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "Can you check this for me?" },
     });
     await vi.advanceTimersByTimeAsync(250);
@@ -1732,7 +1732,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "unicode-native-item",
       callId: "unicode-native-call",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "проверь статус" },
     });
     await vi.advanceTimersByTimeAsync(250);
@@ -1930,7 +1930,7 @@ describe("talk realtime gateway relay", () => {
       "call-1",
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Bot cancelled this consult before completion. Do not restart it.",
       },
       { suppressResponse: true },
     );
@@ -2008,7 +2008,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "item-1",
       callId: "call-1",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "check" },
     });
     const finalSubmission = submitTalkRealtimeRelayToolResult({
@@ -2209,7 +2209,7 @@ describe("talk realtime gateway relay", () => {
       { phase: "first" },
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Bot cancelled this consult before completion. Do not restart it.",
       },
     ]);
     expect(submitToolResult.mock.calls[1]?.[2]).toEqual({ suppressResponse: true });
@@ -2267,7 +2267,7 @@ describe("talk realtime gateway relay", () => {
       { status: "working" },
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Bot cancelled this consult before completion. Do not restart it.",
       },
     ]);
     expect(submitToolResult.mock.calls[1]?.[2]).toBeUndefined();
@@ -2334,7 +2334,7 @@ describe("talk realtime gateway relay", () => {
       { answer: "stale" },
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Bot cancelled this consult before completion. Do not restart it.",
       },
     ]);
   });
@@ -2625,7 +2625,7 @@ describe("talk realtime gateway relay", () => {
         suppress: expectedSuppress,
         providerResult: {
           status: "cancelled",
-          message: "Cancelled the active OpenClaw run.",
+          message: "Cancelled the active Bot run.",
         },
       });
       expect(abortEmbeddedRun).toHaveBeenCalledTimes(1);
@@ -2633,7 +2633,7 @@ describe("talk realtime gateway relay", () => {
         "call-1",
         {
           status: "cancelled",
-          message: "Cancelled the active OpenClaw run.",
+          message: "Cancelled the active Bot run.",
         },
         expectedOptions,
       );
@@ -2858,7 +2858,7 @@ describe("talk realtime gateway relay", () => {
       mode: "cancel",
       providerResult: {
         status: "cancelled",
-        message: "Cancelled the active OpenClaw run.",
+        message: "Cancelled the active Bot run.",
       },
     });
     expect(abortEmbeddedRun).toHaveBeenCalledTimes(1);
@@ -2891,7 +2891,7 @@ describe("talk realtime gateway relay", () => {
     fixture.bridgeRequest?.onToolCall?.({
       itemId: "late-native-item",
       callId: "native-2",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "Can you check this?" },
     });
     await submitTalkRealtimeRelayToolResult({
@@ -2910,7 +2910,7 @@ describe("talk realtime gateway relay", () => {
     for (const call of fixture.submitToolResult.mock.calls) {
       expect(call[1]).toEqual({
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Bot cancelled this consult before completion. Do not restart it.",
       });
       expect(call[2]).toBeUndefined();
     }
@@ -2931,7 +2931,7 @@ describe("talk realtime gateway relay", () => {
     expectRecordFields((terminal.talkEvent as Record<string, unknown>).payload, {
       result: {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Bot cancelled this consult before completion. Do not restart it.",
       },
       forced: true,
     });
@@ -2962,7 +2962,7 @@ describe("talk realtime gateway relay", () => {
       expect.objectContaining({ status: "working" }),
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Bot cancelled this consult before completion. Do not restart it.",
       },
     ]);
     expect(fixture.submitToolResult.mock.calls[1]?.[2]).toBeUndefined();
@@ -3008,7 +3008,7 @@ describe("talk realtime gateway relay", () => {
       { answer: "stale" },
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Bot cancelled this consult before completion. Do not restart it.",
       },
     ]);
   });
@@ -3082,7 +3082,7 @@ describe("talk realtime gateway relay", () => {
     bridgeRequest?.onToolCall?.({
       itemId: "native-item",
       callId: "native-call",
-      name: "openclaw_agent_consult",
+      name: "bot_agent_consult",
       args: { question: "Can you check this?" },
     });
     registerTalkRealtimeRelayAgentRun({
@@ -3113,7 +3113,7 @@ describe("talk realtime gateway relay", () => {
       "native-call",
       {
         status: "already_delivered",
-        message: "OpenClaw already delivered this consult result internally. Do not repeat it.",
+        message: "Bot already delivered this consult result internally. Do not repeat it.",
       },
       { suppressResponse: true },
     );

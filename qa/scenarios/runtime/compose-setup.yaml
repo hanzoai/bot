@@ -10,9 +10,9 @@ scenario:
   objective: Launch the documented Docker Compose topology from the package-backed functional image and record the exact package, image, and service container identities.
   successCriteria:
     - The scheduler builds the real package artifact and package-backed functional image through the canonical Docker planner.
-    - "`docker compose up` starts the documented `openclaw-gateway` service with isolated state, config, workspace, and auth-profile mounts."
+    - "`docker compose up` starts the documented `bot-gateway` service with isolated state, config, workspace, and auth-profile mounts."
     - The Gateway reaches healthy state and the documented container-side health command passes.
-    - "The `openclaw-cli` Compose service runs successfully in the Gateway network namespace."
+    - "The `bot-cli` Compose service runs successfully in the Gateway network namespace."
     - Evidence records the package digest and version, functional image ID, and Gateway and CLI container IDs.
   docsRefs:
     - docs/install/docker.md
@@ -21,7 +21,7 @@ scenario:
     - docker-compose.yml
     - scripts/e2e/compose-setup.sh
     - scripts/lib/docker-e2e-scenarios.mjs
-    - scripts/package-openclaw-for-docker.mjs
+    - scripts/package-bot-for-docker.mjs
     - test/e2e/qa-lab/runtime/docker-artifact-proof.ts
   execution:
     kind: script

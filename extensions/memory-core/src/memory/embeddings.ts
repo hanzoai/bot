@@ -4,14 +4,14 @@ import {
   type EmbeddingProviderAdapter,
   type EmbeddingProvider as GenericEmbeddingProvider,
   type EmbeddingProviderRuntime as GenericEmbeddingProviderRuntime,
-} from "openclaw/plugin-sdk/embedding-providers";
+} from "bot/plugin-sdk/embedding-providers";
 import {
   getMemoryEmbeddingProvider as getLegacyMemoryEmbeddingProvider,
   type MemoryEmbeddingProvider,
   type MemoryEmbeddingProviderAdapter,
   type MemoryEmbeddingProviderCreateOptions,
   type MemoryEmbeddingProviderRuntime,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "bot/plugin-sdk/memory-core-host-engine-embeddings";
 import { formatErrorMessage } from "../dreaming-shared.js";
 import type { MemoryCoreAcquireLocalService } from "./embedding-local-service.js";
 
@@ -38,15 +38,15 @@ type CreateEmbeddingProviderOptions = MemoryEmbeddingProviderCreateOptions & {
 
 const DEFAULT_MEMORY_EMBEDDING_PROVIDER = "openai";
 const LOCAL_LLAMA_CPP_PROVIDER_ID = "local";
-const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("openclaw.localEmbeddingRuntimeFacts");
+const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("bot.localEmbeddingRuntimeFacts");
 
 function createMissingLlamaCppProviderError(): Error {
   return new Error(
     [
       "Unknown memory embedding provider: local.",
       "Local GGUF embeddings are provided by the official llama.cpp provider plugin.",
-      "Install it with: openclaw plugins install @openclaw/llama-cpp-provider",
-      "Then restart OpenClaw and retry: openclaw memory status --deep",
+      "Install it with: bot plugins install @hanzo/bot-llama-cpp-provider",
+      "Then restart Bot and retry: bot memory status --deep",
     ].join("\n"),
   );
 }

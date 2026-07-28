@@ -6,7 +6,7 @@ read_when:
 title: "Command queue"
 ---
 
-OpenClaw serializes inbound auto-reply runs (all channels) through a tiny in-process queue to prevent multiple agent runs from colliding, while still allowing safe parallelism across sessions.
+Bot serializes inbound auto-reply runs (all channels) through a tiny in-process queue to prevent multiple agent runs from colliding, while still allowing safe parallelism across sessions.
 
 ## Why
 
@@ -30,13 +30,13 @@ When unset, all inbound channel surfaces use:
 - `cap: 20`
 - `drop: "summarize"`
 
-Same-turn steering is the default. A prompt that arrives mid-run is injected into the active runtime when the run can accept steering, so no second session run is started. If the active run cannot accept steering, OpenClaw waits for the active run to finish before starting the prompt.
+Same-turn steering is the default. A prompt that arrives mid-run is injected into the active runtime when the run can accept steering, so no second session run is started. If the active run cannot accept steering, Bot waits for the active run to finish before starting the prompt.
 
 ## Queue modes
 
 `/queue` controls what normal inbound messages do while a session already has an active run:
 
-- `steer`: inject messages into the active runtime. OpenClaw delivers all pending steering messages **after the current assistant turn finishes executing its tool calls**, before the next LLM call; Codex app-server receives one batched `turn/steer`. If the run is not actively streaming or steering is unavailable, OpenClaw waits until the active run ends before starting the prompt.
+- `steer`: inject messages into the active runtime. Bot delivers all pending steering messages **after the current assistant turn finishes executing its tool calls**, before the next LLM call; Codex app-server receives one batched `turn/steer`. If the run is not actively streaming or steering is unavailable, Bot waits until the active run ends before starting the prompt.
 - `followup`: do not steer. Enqueue each message for a later agent turn after the current run ends.
 - `collect`: do not steer. Coalesce queued messages into a **single** followup turn after the quiet window. If messages target different channels/threads, they drain individually to preserve routing.
 - `interrupt`: abort the active run for that session, then run the newest message.
@@ -83,7 +83,7 @@ When channel streaming is `partial` or `block`, steering can look like several s
 
 ## Precedence
 
-For mode selection, OpenClaw resolves:
+For mode selection, Bot resolves:
 
 1. Inline or stored per-session `/queue` override.
 2. `messages.queue.byChannel.<channel>`.
@@ -116,11 +116,11 @@ overflow summary.
 - Queued waits are not projected as active agent runs for `sessions.list` and
   do not own active-run timeout semantics; only the active phase does.
 
-Gateway-backed clients (including `openclaw tui`) forward mid-run prompts and
+Gateway-backed clients (including `bot tui`) forward mid-run prompts and
 let the Gateway apply the queue mode. Esc/`/stop` uses a session-scoped abort
 so lost local handles cannot leave a still-queued prompt running.
 
-`openclaw chat` and `openclaw tui --local` apply the same four modes in the
+`bot chat` and `bot tui --local` apply the same four modes in the
 embedded runtime. Local `steer` injects into an active embedded run when that
 runtime accepts steering and otherwise becomes a followup; `followup` and
 `collect` remain local pending work; `interrupt` aborts the active local run

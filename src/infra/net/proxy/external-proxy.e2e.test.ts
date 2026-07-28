@@ -1,4 +1,4 @@
-// End-to-end proxy smoke tests run child OpenClaw modules through a local
+// End-to-end proxy smoke tests run child Bot modules through a local
 // HTTP/HTTPS forward proxy, including Discord-style HTTP, TLS, and WebSocket paths.
 import { execFileSync, spawn } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -12,7 +12,7 @@ import { WebSocketServer } from "ws";
 import { withTempDir } from "../../../test-helpers/temp-dir.js";
 import { createNodeEvalArgs } from "../../../test-utils/node-process.js";
 import { resolveSystemBin } from "../../resolve-system-bin.js";
-import { resolvePreferredOpenClawTmpDir } from "../../tmp-openclaw-dir.js";
+import { resolvePreferredBotTmpDir } from "../../tmp-bot-dir.js";
 
 const CHILD_PROCESS_TIMEOUT_MS = process.env.CI ? 45_000 : 15_000;
 const PROBE_TIMEOUT_MS = process.env.CI ? 15_000 : 5_000;
@@ -50,7 +50,7 @@ function createDiscordTlsFixture(dir: string): DiscordTlsFixture {
       "-days",
       "1",
       "-subj",
-      "/CN=OpenClaw Proxy Test CA",
+      "/CN=Bot Proxy Test CA",
     ],
     { stdio: "ignore" },
   );
@@ -106,8 +106,8 @@ async function withDiscordTlsFixture<T>(
 ): Promise<T> {
   return await withTempDir(
     {
-      prefix: "openclaw-discord-tls-",
-      parentDir: resolvePreferredOpenClawTmpDir(),
+      prefix: "bot-discord-tls-",
+      parentDir: resolvePreferredBotTmpDir(),
     },
     async (dir) => {
       return await run(createDiscordTlsFixture(dir));
@@ -446,23 +446,23 @@ describe("SSRF external proxy routing", () => {
           throw new Error("expected external proxy routing to start");
         }
         try {
-          const response = await undiciFetch(process.env.OPENCLAW_TEST_TARGET_URL, {
+          const response = await undiciFetch(process.env.BOT_TEST_TARGET_URL, {
             signal: AbortSignal.timeout(${PROBE_TIMEOUT_MS}),
           });
           const body = await response.text();
-          const globalFetchResponse = await fetch(process.env.OPENCLAW_TEST_GLOBAL_FETCH_TARGET_URL, {
+          const globalFetchResponse = await fetch(process.env.BOT_TEST_GLOBAL_FETCH_TARGET_URL, {
             signal: AbortSignal.timeout(${PROBE_TIMEOUT_MS}),
           });
           const globalFetchBody = await globalFetchResponse.text();
-          const nodeHttp = await nodeHttpGet(process.env.OPENCLAW_TEST_NODE_HTTP_TARGET_URL);
-          const explicitAgent = await nodeHttpGet(process.env.OPENCLAW_TEST_EXPLICIT_AGENT_TARGET_URL, {
+          const nodeHttp = await nodeHttpGet(process.env.BOT_TEST_NODE_HTTP_TARGET_URL);
+          const explicitAgent = await nodeHttpGet(process.env.BOT_TEST_EXPLICIT_AGENT_TARGET_URL, {
             agent: new http.Agent(),
           });
           await expectFailure("node:https", () =>
-            nodeHttpsProbe(process.env.OPENCLAW_TEST_NODE_HTTPS_TARGET_URL),
+            nodeHttpsProbe(process.env.BOT_TEST_NODE_HTTPS_TARGET_URL),
           );
-          await websocketProbe(process.env.OPENCLAW_TEST_WS_TARGET_URL);
-          await gatewayLoopbackBypassProbe(process.env.OPENCLAW_TEST_GATEWAY_BYPASS_WS_URL);
+          await websocketProbe(process.env.BOT_TEST_WS_TARGET_URL);
+          await gatewayLoopbackBypassProbe(process.env.BOT_TEST_GATEWAY_BYPASS_WS_URL);
           await expectFailure("non-loopback bypass", () =>
             gatewayLoopbackBypassProbe("wss://gateway.example.com/socket"),
           );
@@ -478,14 +478,14 @@ describe("SSRF external proxy routing", () => {
       `,
       {
         ...process.env,
-        OPENCLAW_PROXY_URL: `http://127.0.0.1:${proxyPort}`,
-        OPENCLAW_TEST_TARGET_URL: `http://127.0.0.1:${targetPort}/private-metadata`,
-        OPENCLAW_TEST_GLOBAL_FETCH_TARGET_URL: `http://127.0.0.1:${globalFetchTargetPort}/global-fetch-metadata`,
-        OPENCLAW_TEST_NODE_HTTP_TARGET_URL: `http://127.0.0.1:${targetPort}/node-http-metadata`,
-        OPENCLAW_TEST_EXPLICIT_AGENT_TARGET_URL: `http://127.0.0.1:${targetPort}/explicit-agent`,
-        OPENCLAW_TEST_NODE_HTTPS_TARGET_URL: `https://127.0.0.1:${httpsLikeTargetPort}/https-connect-proof`,
-        OPENCLAW_TEST_WS_TARGET_URL: `ws://127.0.0.1:${wsTargetPort}/websocket-proxied`,
-        OPENCLAW_TEST_GATEWAY_BYPASS_WS_URL: `ws://127.0.0.1:${gatewayBypassWsTargetPort}/gateway-bypass`,
+        BOT_PROXY_URL: `http://127.0.0.1:${proxyPort}`,
+        BOT_TEST_TARGET_URL: `http://127.0.0.1:${targetPort}/private-metadata`,
+        BOT_TEST_GLOBAL_FETCH_TARGET_URL: `http://127.0.0.1:${globalFetchTargetPort}/global-fetch-metadata`,
+        BOT_TEST_NODE_HTTP_TARGET_URL: `http://127.0.0.1:${targetPort}/node-http-metadata`,
+        BOT_TEST_EXPLICIT_AGENT_TARGET_URL: `http://127.0.0.1:${targetPort}/explicit-agent`,
+        BOT_TEST_NODE_HTTPS_TARGET_URL: `https://127.0.0.1:${httpsLikeTargetPort}/https-connect-proof`,
+        BOT_TEST_WS_TARGET_URL: `ws://127.0.0.1:${wsTargetPort}/websocket-proxied`,
+        BOT_TEST_GATEWAY_BYPASS_WS_URL: `ws://127.0.0.1:${gatewayBypassWsTargetPort}/gateway-bypass`,
         NO_PROXY: "127.0.0.1,localhost",
         no_proxy: "localhost",
       },
@@ -550,7 +550,7 @@ describe("SSRF external proxy routing", () => {
           throw new Error("expected external proxy routing to start");
         }
         try {
-          const response = await nodeHttpsGet(process.env.OPENCLAW_TEST_DISCORD_TLS_URL);
+          const response = await nodeHttpsGet(process.env.BOT_TEST_DISCORD_TLS_URL);
           console.log(JSON.stringify(response));
         } finally {
           await stopProxy(handle);
@@ -559,8 +559,8 @@ describe("SSRF external proxy routing", () => {
         {
           ...process.env,
           NODE_EXTRA_CA_CERTS: tlsFixture.caPath,
-          OPENCLAW_PROXY_URL: `http://127.0.0.1:${proxyPort}`,
-          OPENCLAW_TEST_DISCORD_TLS_URL: `https://discord.com:${tlsTargetPort}/tls-proxy-proof`,
+          BOT_PROXY_URL: `http://127.0.0.1:${proxyPort}`,
+          BOT_TEST_DISCORD_TLS_URL: `https://discord.com:${tlsTargetPort}/tls-proxy-proof`,
           NO_PROXY: "127.0.0.1,localhost",
           no_proxy: "localhost",
         },

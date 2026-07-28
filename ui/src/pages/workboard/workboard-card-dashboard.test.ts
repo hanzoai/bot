@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import "./workboard-card-dashboard.ts";
 
-type DashboardElement = HTMLElementTagNameMap["openclaw-workboard-card-dashboard"] & {
+type DashboardElement = HTMLElementTagNameMap["bot-workboard-card-dashboard"] & {
   updateComplete: Promise<boolean>;
 };
 
@@ -37,7 +37,7 @@ async function mountDashboard(
   sessionKey: string,
   client: GatewayBrowserClient,
 ): Promise<DashboardElement> {
-  const element = document.createElement("openclaw-workboard-card-dashboard");
+  const element = document.createElement("bot-workboard-card-dashboard");
   element.sessionKey = sessionKey;
   element.client = client;
   element.connected = true;
@@ -78,7 +78,7 @@ describe("Workboard card dashboard", () => {
         element.querySelector(".workboard-card-dashboard__toggle")?.getAttribute("aria-expanded"),
       ).toBe("true"),
     );
-    expect(element.querySelector("openclaw-board-view")).not.toBeNull();
+    expect(element.querySelector("bot-board-view")).not.toBeNull();
   });
 
   it("disables widget ticket refresh while the dashboard is collapsed", async () => {
@@ -98,8 +98,8 @@ describe("Workboard card dashboard", () => {
       },
     ]);
     const element = await mountDashboard("agent:main:workboard-collapse", client);
-    await vi.waitFor(() => expect(element.querySelector("openclaw-board-view")).not.toBeNull());
-    const board = element.querySelector("openclaw-board-view")!;
+    await vi.waitFor(() => expect(element.querySelector("bot-board-view")).not.toBeNull());
+    const board = element.querySelector("bot-board-view")!;
     expect(board.ticketRefreshEnabled).toBe(true);
 
     element.querySelector<HTMLButtonElement>(".workboard-card-dashboard__toggle")?.click();

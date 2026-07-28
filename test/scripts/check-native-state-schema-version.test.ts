@@ -13,7 +13,7 @@ describe("native state schema version guard", () => {
     expect(() =>
       compareNativeStateSchemaVersions({
         swiftSource: "private static let maximumSupportedSchemaVersion: Int64 = 5\n",
-        typescriptSource: "export const OPENCLAW_STATE_SCHEMA_VERSION = 6;\n",
+        typescriptSource: "export const BOT_STATE_SCHEMA_VERSION = 6;\n",
       }),
     ).toThrow("Native state schema version drift: Swift supports 5, TypeScript owns 6");
   });

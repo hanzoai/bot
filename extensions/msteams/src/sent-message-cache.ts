@@ -1,12 +1,12 @@
 // Msteams plugin module implements sent message cache behavior.
-import { createPersistentDedupeCache } from "openclaw/plugin-sdk/dedupe-runtime";
+import { createPersistentDedupeCache } from "bot/plugin-sdk/dedupe-runtime";
 import { getOptionalMSTeamsRuntime } from "./runtime.js";
 
 const TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_ENTRIES = 20_000;
 const PERSISTENT_MAX_ENTRIES = 1000;
 const PERSISTENT_NAMESPACE = "msteams.sent-messages";
-const MSTEAMS_SENT_MESSAGES_KEY = Symbol.for("openclaw.msteamsSentMessages");
+const MSTEAMS_SENT_MESSAGES_KEY = Symbol.for("bot.msteamsSentMessages");
 
 type MSTeamsSentMessageRecord = {
   sentAt: number;

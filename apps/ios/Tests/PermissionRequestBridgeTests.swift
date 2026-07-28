@@ -1,6 +1,6 @@
 import Photos
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 @Suite(.serialized) struct PermissionRequestBridgeTests {
     @Test func `box resumes immediately when cancelled before install`() async {

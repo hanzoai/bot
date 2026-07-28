@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Normalizes MCP server config for runtime launch and validation.
 import { stableStringify } from "../agents/stable-stringify.js";
 import { markClawMcpServerIndependentlyOwned } from "../state/claw-mcp-adoption.js";
@@ -12,7 +12,7 @@ import { replaceConfigFile } from "./mutate.js";
 import { redactSensitiveArgv } from "./redact-argv.js";
 import { REDACTED_SENTINEL, restoreRedactedValues } from "./redact-snapshot.js";
 import { buildConfigSchema } from "./schema.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { BotConfig } from "./types.bot.js";
 import { validateConfigObjectWithPlugins } from "./validation.js";
 
 type ConfigMcpServers = ReturnType<typeof normalizeConfiguredMcpServers>;
@@ -25,7 +25,7 @@ type ConfigMcpReadResult =
   | {
       ok: true;
       path: string;
-      config: OpenClawConfig;
+      config: BotConfig;
       mcpServers: ConfigMcpServers;
       baseHash?: string;
     }
@@ -35,7 +35,7 @@ type ConfigMcpWriteResult =
   | {
       ok: true;
       path: string;
-      config: OpenClawConfig;
+      config: BotConfig;
       mcpServers: ConfigMcpServers;
       removed?: boolean;
       updated?: boolean;

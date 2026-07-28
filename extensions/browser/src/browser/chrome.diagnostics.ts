@@ -1,11 +1,11 @@
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
+import { readProviderJsonResponse } from "bot/plugin-sdk/provider-http";
 /**
  * Chrome CDP diagnostics.
  *
  * Probes /json/version and WebSocket health, redacts sensitive endpoint data,
  * and formats status output for browser doctor/status flows.
  */
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import type { SsrFPolicy } from "../infra/net/ssrf.js";
 import { rawDataToString } from "../infra/ws.js";
 import { redactSensitiveText } from "../logging/redact.js";

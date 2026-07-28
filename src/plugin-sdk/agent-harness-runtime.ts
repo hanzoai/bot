@@ -123,7 +123,7 @@ export type {
   AgentToolResultMiddlewareOptions,
   AgentToolResultMiddlewareResult,
   AgentToolResultMiddlewareRuntime,
-  OpenClawAgentToolResult,
+  BotAgentToolResult,
 } from "../plugins/agent-tool-result-middleware-types.js";
 export type {
   CodexAppServerExtensionContext,
@@ -139,7 +139,7 @@ export type {
   NativeHookRelayRegistrationHandle,
 } from "../agents/harness/native-hook-relay.js";
 
-export { VERSION as OPENCLAW_VERSION } from "../version.js";
+export { VERSION as BOT_VERSION } from "../version.js";
 export { formatErrorMessage } from "../infra/errors.js";
 export { formatApprovalDisplayPath } from "../infra/approval-display-paths.js";
 export { buildAgentHookContextChannelFields } from "../plugins/hook-agent-context.js";
@@ -270,7 +270,7 @@ export async function detectAndLoadAgentHarnessPromptImages(params: {
   existingImages?: ImageContent[];
   imageOrder?: PromptImageOrderEntry[];
   media?: import("../media/media-facts.js").MediaFact[];
-  config?: import("../config/types.openclaw.js").OpenClawConfig;
+  config?: import("../config/types.bot.js").BotConfig;
   workspaceOnly?: boolean;
   localRoots?: readonly string[];
   sandbox?: { root: string; bridge: SandboxFsBridge };
@@ -284,7 +284,7 @@ export async function detectAndLoadAgentHarnessPromptImages(params: {
     await Promise.all([
       import("../agents/image-sanitization.js"),
       import("../agents/embedded-agent-runner/run/images.js"),
-      import("@openclaw/media-core/constants"),
+      import("@hanzo/bot-media-core/constants"),
     ]);
 
   return detectAndLoadPromptImages({
@@ -475,7 +475,7 @@ export {
 } from "../agents/harness/native-hook-relay.js";
 
 /**
- * Derive the same compact user-facing tool detail that embedded OpenClaw uses for progress logs.
+ * Derive the same compact user-facing tool detail that embedded Bot uses for progress logs.
  */
 export type ToolProgressDetailMode = "explain" | "raw";
 
@@ -527,7 +527,7 @@ export type AgentHarnessTerminalOutcomeClassification = NonNullable<
  * should advance fallback. Deliberate silent replies such as NO_REPLY count as
  * intentional output, while whitespace-only text remains fallback-eligible.
  * This is intentionally SDK-level so plugin harness adapters such as Codex
- * preserve the same OpenClaw-owned fallback signals as the built-in OpenClaw path
+ * preserve the same Bot-owned fallback signals as the built-in Bot path
  * without re-implementing terminal-result policy.
  */
 export function classifyAgentHarnessTerminalOutcome(

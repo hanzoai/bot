@@ -1,13 +1,13 @@
 // LLM slug generator tests cover generated hook names and collision behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 const runEmbeddedAgentMock = vi.fn();
 
 vi.mock("../agents/agent-scope.js", () => ({
   resolveDefaultAgentId: vi.fn(() => "main"),
-  resolveAgentWorkspaceDir: vi.fn(() => "/tmp/openclaw-agent"),
-  resolveAgentDir: vi.fn(() => "/tmp/openclaw-agent/.openclaw-agent"),
+  resolveAgentWorkspaceDir: vi.fn(() => "/tmp/bot-agent"),
+  resolveAgentDir: vi.fn(() => "/tmp/bot-agent/.bot-agent"),
 }));
 
 vi.mock("../agents/embedded-agent.js", () => ({
@@ -19,11 +19,11 @@ import { generateSlugViaLLM } from "./llm-slug-generator.js";
 function requireFirstRunOptions(): Record<string, unknown> {
   const [call] = runEmbeddedAgentMock.mock.calls;
   if (!call) {
-    throw new Error("expected embedded OpenClaw agent run");
+    throw new Error("expected embedded Bot agent run");
   }
   const [options] = call;
   if (!options || typeof options !== "object") {
-    throw new Error("expected embedded OpenClaw agent run options");
+    throw new Error("expected embedded Bot agent run options");
   }
   return options as Record<string, unknown>;
 }
@@ -39,7 +39,7 @@ describe("generateSlugViaLLM", () => {
   it("keeps the helper default timeout when no agent timeout is configured", async () => {
     await generateSlugViaLLM({
       sessionContent: "hello",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
     });
 
     expect(runEmbeddedAgentMock).toHaveBeenCalledOnce();
@@ -51,7 +51,7 @@ describe("generateSlugViaLLM", () => {
   it("marks the run lane-local so internal-helper failures do not poison shared profile health (#71709)", async () => {
     await generateSlugViaLLM({
       sessionContent: "hello",
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
     });
 
     expect(runEmbeddedAgentMock).toHaveBeenCalledOnce();
@@ -67,7 +67,7 @@ describe("generateSlugViaLLM", () => {
             timeoutSeconds: 500,
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     expect(runEmbeddedAgentMock).toHaveBeenCalledOnce();
@@ -83,7 +83,7 @@ describe("generateSlugViaLLM", () => {
             model: { primary: "gpt-5.5" },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
     });
 
     expect(runEmbeddedAgentMock).toHaveBeenCalledOnce();
@@ -97,7 +97,7 @@ describe("generateSlugViaLLM", () => {
     async (model) => {
       await generateSlugViaLLM({
         sessionContent: "hello",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         model,
       });
 
@@ -121,7 +121,7 @@ describe("generateSlugViaLLM", () => {
     await expect(
       generateSlugViaLLM({
         sessionContent: "hello",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
       }),
     ).resolves.toBeNull();
   });
@@ -139,7 +139,7 @@ describe("generateSlugViaLLM", () => {
     await expect(
       generateSlugViaLLM({
         sessionContent: "hello",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
       }),
     ).resolves.toBeNull();
   });
@@ -152,7 +152,7 @@ describe("generateSlugViaLLM", () => {
     await expect(
       generateSlugViaLLM({
         sessionContent: "hello",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
       }),
     ).resolves.toBe("auth-refresh");
   });
@@ -165,7 +165,7 @@ describe("generateSlugViaLLM", () => {
     await expect(
       generateSlugViaLLM({
         sessionContent: "hello",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
       }),
     ).resolves.toBe("12345678901234567890123456789");
   });
@@ -175,7 +175,7 @@ describe("generateSlugViaLLM", () => {
 
     await generateSlugViaLLM({
       sessionContent: `${prefix}🚀tail`,
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
     });
 
     const prompt = requireFirstRunOptions().prompt as string;

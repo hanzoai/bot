@@ -1,6 +1,6 @@
 // Covers provider auth input collection and credential handling.
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { WizardPrompter } from "../wizard/prompts.js";
 import {
   ensureApiKeyFromEnvOrPrompt,
@@ -18,7 +18,7 @@ const resolveEnvApiKey = vi.hoisted(() =>
     (
       provider: string,
       env?: NodeJS.ProcessEnv,
-      _options?: { config?: OpenClawConfig; workspaceDir?: string },
+      _options?: { config?: BotConfig; workspaceDir?: string },
     ) => {
       if (provider !== "minimax") {
         return null;
@@ -238,21 +238,21 @@ describe("normalizeApiKeyInput", () => {
 
 describe("validateApiKeyInput", () => {
   it.each([
-    "openclaw onboard --auth-choice zai-coding-global",
-    "openclaw onboard --auth-choice=zai-coding-global",
-    "openclaw onboard --non-interactive --auth-choice zai-coding-global --zai-api-key $ZAI_API_KEY",
-    "openclaw onboard --non-interactive --auth-choice=zai-coding-global --zai-api-key $ZAI_API_KEY",
-  ])("rejects pasted OpenClaw onboarding command %p", (value) => {
+    "bot onboard --auth-choice zai-coding-global",
+    "bot onboard --auth-choice=zai-coding-global",
+    "bot onboard --non-interactive --auth-choice zai-coding-global --zai-api-key $ZAI_API_KEY",
+    "bot onboard --non-interactive --auth-choice=zai-coding-global --zai-api-key $ZAI_API_KEY",
+  ])("rejects pasted Bot onboarding command %p", (value) => {
     expect(validateApiKeyInput(value)).toBe(
-      "Paste the API key value, not an OpenClaw onboarding command.",
+      "Paste the API key value, not an Bot onboarding command.",
     );
   });
 });
 
 describe("ensureApiKeyFromEnvOrPrompt", () => {
   it("resolves environment auth using the same config and workspace as provider runtime", async () => {
-    const workspaceDir = "/tmp/openclaw-provider-workspace";
-    const config: OpenClawConfig = {
+    const workspaceDir = "/tmp/bot-provider-workspace";
+    const config: BotConfig = {
       agents: { defaults: { workspace: workspaceDir } },
       plugins: { entries: { minimax: { enabled: true } } },
     };
@@ -414,7 +414,7 @@ describe("ensureApiKeyFromEnvOrPrompt", () => {
       "Reference check failed",
     );
     expect(note).toHaveBeenCalledWith(
-      "Validated environment variable MINIMAX_API_KEY. OpenClaw will store a reference, not the key value.",
+      "Validated environment variable MINIMAX_API_KEY. Bot will store a reference, not the key value.",
       "Reference validated",
     );
   });

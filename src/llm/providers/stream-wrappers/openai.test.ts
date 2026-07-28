@@ -1,7 +1,7 @@
 // OpenAI stream wrapper tests cover streamed text, tools, and reasoning fields.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { Model } from "openclaw/plugin-sdk/llm";
-import { createAssistantMessageEventStream } from "openclaw/plugin-sdk/llm";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
+import type { Model } from "bot/plugin-sdk/llm";
+import { createAssistantMessageEventStream } from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import {
   createOpenAIAttributionHeadersWrapper,
@@ -265,7 +265,7 @@ describe("createCodexNativeWebSearchWrapper", () => {
       {},
     );
 
-    expect(observedOptions[0]?.openclawCodeModeToolSurface).toBeUndefined();
+    expect(observedOptions[0]?.botCodeModeToolSurface).toBeUndefined();
     expect(payloads[0]).toEqual({ model: "gpt-5.5" });
   });
 
@@ -309,7 +309,7 @@ describe("createCodexNativeWebSearchWrapper", () => {
       {},
     );
 
-    expect(observedOptions[0]?.openclawCodeModeToolSurface).toBe(true);
+    expect(observedOptions[0]?.botCodeModeToolSurface).toBe(true);
     expect(payloads[0]?.tools).toEqual([
       { type: "function", name: "exec" },
       { type: "function", name: "wait" },
@@ -743,7 +743,7 @@ describe("createOpenAIThinkingLevelWrapper", () => {
 });
 
 describe("createOpenAIAttributionHeadersWrapper", () => {
-  it("routes native Codex traffic through the OpenClaw transport so attribution survives OpenClaw defaults", () => {
+  it("routes native Codex traffic through the Bot transport so attribution survives Bot defaults", () => {
     let codexCalls = 0;
     let capturedHeaders: Record<string, string> | undefined;
     const codexTransport: StreamFn = (model, context, options) => {
@@ -763,15 +763,15 @@ describe("createOpenAIAttributionHeadersWrapper", () => {
       { messages: [] },
       {
         headers: {
-          originator: "openclaw",
-          "User-Agent": "openclaw",
+          originator: "bot",
+          "User-Agent": "bot",
         },
       },
     );
 
     expect(codexCalls).toBe(1);
-    expect(capturedHeaders?.originator).toBe("openclaw");
-    expect(capturedHeaders?.["User-Agent"]).toMatch(/^openclaw\//);
+    expect(capturedHeaders?.originator).toBe("bot");
+    expect(capturedHeaders?.["User-Agent"]).toMatch(/^bot\//);
   });
 
   it("keeps existing wrapped Codex streams so runtime OAuth injection is preserved", () => {
@@ -805,8 +805,8 @@ describe("createOpenAIAttributionHeadersWrapper", () => {
       {
         apiKey: "oauth-bearer-token",
         headers: {
-          originator: "openclaw",
-          "User-Agent": "openclaw",
+          originator: "bot",
+          "User-Agent": "bot",
         },
       },
     );
@@ -814,7 +814,7 @@ describe("createOpenAIAttributionHeadersWrapper", () => {
     expect(upstreamCalls).toBe(1);
     expect(codexCalls).toBe(0);
     expect(capturedOptions?.apiKey).toBe("oauth-bearer-token");
-    expect(capturedOptions?.headers?.originator).toBe("openclaw");
-    expect(capturedOptions?.headers?.["User-Agent"]).toMatch(/^openclaw\//);
+    expect(capturedOptions?.headers?.originator).toBe("bot");
+    expect(capturedOptions?.headers?.["User-Agent"]).toMatch(/^bot\//);
   });
 });

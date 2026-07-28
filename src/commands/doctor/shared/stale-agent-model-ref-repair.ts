@@ -1,7 +1,7 @@
 // Doctor-only repair for agent model refs whose provider is no longer available.
 import fs from "node:fs";
 import path from "node:path";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   listAgentEntries,
   resolveAgentDir,
@@ -11,12 +11,12 @@ import {
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "../../../agents/defaults.js";
 import { normalizeProviderId } from "../../../agents/model-selection.js";
 import type { AgentModelConfig } from "../../../config/types.agents-shared.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { resolvePluginMetadataSnapshot } from "../../../plugins/plugin-metadata-snapshot.js";
 import { listMutableCodexRouteAgentEntries } from "./codex-route-agent-entries.js";
 
 type StaleAgentModelRefRepair = {
-  config: OpenClawConfig;
+  config: BotConfig;
   changes: string[];
   warnings: string[];
 };
@@ -42,7 +42,7 @@ function providerFromModelRef(ref: string): string | undefined {
 }
 
 function collectPluginProviderIds(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   options: RepairOptions,
 ): { providerIds?: Set<string>; warnings: string[] } {
   if (options.pluginProviderIds) {
@@ -86,7 +86,7 @@ function collectPluginProviderIds(
 }
 
 function collectPersistedProviderIds(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   env: NodeJS.ProcessEnv;
   injected?: ReadonlyMap<string, ReadonlySet<string>>;
@@ -202,7 +202,7 @@ function filterFallbacks(params: {
   }
 }
 
-function firstExplicitModelRef(cfg: OpenClawConfig): string | undefined {
+function firstExplicitModelRef(cfg: BotConfig): string | undefined {
   if (!isRecord(cfg.models?.providers)) {
     return undefined;
   }
@@ -229,7 +229,7 @@ function modelPrimaryRef(model: unknown): string | undefined {
 }
 
 export function repairStaleAgentModelRefs(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   options: RepairOptions = {},
 ): StaleAgentModelRefRepair {
   const replaceMode = cfg.models?.mode === "replace";

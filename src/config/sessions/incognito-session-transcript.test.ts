@@ -3,13 +3,13 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { SessionManager } from "../../agents/sessions/session-manager.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../../state/bot-agent-db.js";
 import { createSessionEntryWithTranscript, loadSessionEntry } from "./session-accessor.js";
 
 const sessionKey = "agent:main:dashboard:incognito-round-trip";
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
+  closeBotAgentDatabasesForTest();
 });
 
 describe("incognito transcript access", () => {

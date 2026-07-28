@@ -88,7 +88,7 @@ const MARKDOWN_CHAR_LIMIT = 140_000;
 const MARKDOWN_PARSE_LIMIT = 40_000;
 const MARKDOWN_CACHE_LIMIT = 200;
 const MARKDOWN_CACHE_MAX_CHARS = 50_000;
-const DOCS_ORIGIN = "https://docs.openclaw.ai";
+const DOCS_ORIGIN = "https://docs.bot.ai";
 const DOCS_ROOT_SEGMENTS = new Set([
   "agent-runtime-architecture",
   "announcements",
@@ -111,7 +111,7 @@ const DOCS_ROOT_SEGMENTS = new Set([
   "maturity-scorecard",
   "network",
   "nodes",
-  "openclaw-agent-runtime",
+  "bot-agent-runtime",
   "perplexity",
   "plan",
   "platforms",
@@ -289,8 +289,8 @@ const DOCS_SHORTLINK_PATHS = new Set([
   "/zai",
 ]);
 const APP_RESOURCE_ROOT_SEGMENTS = new Set([
-  "__openclaw",
-  "__openclaw__",
+  "__bot",
+  "__bot__",
   "_next",
   "api",
   "apple-touch-icon.png",
@@ -378,7 +378,7 @@ function segmentsStartWith(segments: string[], prefix: string[]): boolean {
 }
 
 function isControlUiResourcePath(segments: string[]): boolean {
-  if (segments.includes("__openclaw__") || segments.includes("__openclaw")) {
+  if (segments.includes("__bot__") || segments.includes("__bot")) {
     return true;
   }
   const segment = segments[0];

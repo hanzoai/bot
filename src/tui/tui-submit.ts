@@ -1,5 +1,5 @@
 // Handles TUI input submission and command dispatch.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import type { TuiChatSubmitAdmission } from "./tui-submit-state.js";
 
 export type TuiSubmitAction = "local shell" | "command" | "message";

@@ -1,5 +1,5 @@
 // Browser tests cover browser tool.schema plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 import { BrowserToolOutputSchema, BrowserToolSchema } from "./browser-tool.schema.js";
 import { ACT_MAX_VIEWPORT_DIMENSION } from "./browser/act-policy.js";

@@ -1,7 +1,7 @@
 ---
-summary: "Use NVIDIA's OpenAI-compatible API in OpenClaw"
+summary: "Use NVIDIA's OpenAI-compatible API in Bot"
 read_when:
-  - You want to use open models in OpenClaw for free
+  - You want to use open models in Bot for free
   - You need NVIDIA_API_KEY setup
   - You want to use Nemotron 3 Ultra through NVIDIA
 title: "NVIDIA"
@@ -9,7 +9,7 @@ title: "NVIDIA"
 
 NVIDIA serves open models for free through an OpenAI-compatible API at
 `https://integrate.api.nvidia.com/v1`, authenticated with an API key from
-[build.nvidia.com](https://build.nvidia.com/settings/api-keys). OpenClaw
+[build.nvidia.com](https://build.nvidia.com/settings/api-keys). Bot
 defaults the NVIDIA provider to Nemotron 3 Ultra, NVIDIA's 550B total / 55B
 active reasoning model for long-context agentic work.
 
@@ -22,12 +22,12 @@ active reasoning model for long-context agentic work.
   <Step title="Export the key and run onboarding">
     ```bash
     export NVIDIA_API_KEY="nvapi-..."
-    openclaw onboard --auth-choice nvidia-api-key
+    bot onboard --auth-choice nvidia-api-key
     ```
   </Step>
   <Step title="Set an NVIDIA model">
     ```bash
-    openclaw models set nvidia/nvidia/nemotron-3-ultra-550b-a55b
+    bot models set nvidia/nvidia/nemotron-3-ultra-550b-a55b
     ```
   </Step>
 </Steps>
@@ -35,7 +35,7 @@ active reasoning model for long-context agentic work.
 For non-interactive setup, pass the key directly:
 
 ```bash
-openclaw onboard --auth-choice nvidia-api-key --nvidia-api-key "nvapi-..."
+bot onboard --auth-choice nvidia-api-key --nvidia-api-key "nvapi-..."
 ```
 
 <Warning>
@@ -71,17 +71,17 @@ NVIDIA's public featured-model catalog from
 `https://assets.ngc.nvidia.com/products/api-catalog/featured-models.json` and
 cache the result for 24 hours (first 32 entries, imported as free text-input
 rows). New featured models from build.nvidia.com therefore appear in setup and
-model-selection surfaces without waiting for an OpenClaw release. When the
+model-selection surfaces without waiting for an Bot release. When the
 live feed is available, the first returned model is the preselected option
 during NVIDIA setup.
 
 The fetch uses a fixed HTTPS host policy for `assets.ngc.nvidia.com`. If no
 NVIDIA API key is configured, or if the feed is unavailable or malformed,
-OpenClaw falls back to the bundled catalog and bundled default below.
+Bot falls back to the bundled catalog and bundled default below.
 
 ## Nemotron 3 Ultra
 
-Nemotron 3 Ultra is the default NVIDIA model in OpenClaw. NVIDIA's build page for
+Nemotron 3 Ultra is the default NVIDIA model in Bot. NVIDIA's build page for
 [`nvidia/nemotron-3-ultra-550b-a55b`](https://build.nvidia.com/nvidia/nemotron-3-ultra-550b-a55b)
 lists it as an available free endpoint with a 1M-token context specification.
 
@@ -125,7 +125,7 @@ by exact reference but never appear in onboarding or model pickers.
   </Accordion>
 
   <Accordion title="Catalog and pricing">
-    OpenClaw prefers NVIDIA's public featured-model catalog when NVIDIA auth is
+    Bot prefers NVIDIA's public featured-model catalog when NVIDIA auth is
     configured and caches it for 24 hours. The bundled selectable fallback is a
     static snapshot of NVIDIA's featured-model catalog; deprecated exact-reference
     compatibility rows are hidden from model pickers. Costs default to `0` in
@@ -133,14 +133,14 @@ by exact reference but never appear in onboarding or model pickers.
   </Accordion>
 
   <Accordion title="OpenAI-compatible endpoint">
-    OpenClaw talks to NVIDIA with the `openai-completions` adapter against the
+    Bot talks to NVIDIA with the `openai-completions` adapter against the
     standard `/v1` chat completions route. Any OpenAI-compatible tooling should
     work out of the box with the NVIDIA base URL.
   </Accordion>
 
   <Accordion title="Nemotron 3 Ultra reasoning params">
     NVIDIA's Ultra sample request uses `chat_template_kwargs.enable_thinking`
-    and `reasoning_budget` for reasoning output. OpenClaw's bundled Ultra row
+    and `reasoning_budget` for reasoning output. Bot's bundled Ultra row
     disables template thinking by default for normal chat use. If you need to
     opt into NVIDIA reasoning output or force other NVIDIA-specific request
     fields, set per-model params and keep provider-specific overrides scoped to

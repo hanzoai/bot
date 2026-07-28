@@ -1,11 +1,11 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 /** Normalizes slash-command text aliases and builds command detection caches. */
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.js";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.js";
 import { escapeRegExp } from "../utils.js";
 import { getChatCommands } from "./commands-registry.data.js";
 import type {
@@ -123,7 +123,7 @@ export function normalizeCommandBody(raw: string, options?: CommandNormalizeOpti
 }
 
 /** Returns cached exact and regex detectors for the current command registry instance. */
-export function getCommandDetection(_cfg?: OpenClawConfig): CommandDetection {
+export function getCommandDetection(_cfg?: BotConfig): CommandDetection {
   const commands = getChatCommands();
   if (cachedDetection && cachedDetectionCommands === commands) {
     return cachedDetection;
@@ -157,7 +157,7 @@ export function getCommandDetection(_cfg?: OpenClawConfig): CommandDetection {
 }
 
 /** Resolves a raw text command to the matching normalized alias when known. */
-export function maybeResolveTextAlias(raw: string, cfg?: OpenClawConfig) {
+export function maybeResolveTextAlias(raw: string, cfg?: BotConfig) {
   const trimmed = normalizeCommandBody(raw).trim();
   if (!trimmed.startsWith("/")) {
     return null;
@@ -181,7 +181,7 @@ export function maybeResolveTextAlias(raw: string, cfg?: OpenClawConfig) {
 /** Resolves a raw text command into its command definition and raw argument tail. */
 export function resolveTextCommand(
   raw: string,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): {
   command: ChatCommandDefinition;
   args?: string;

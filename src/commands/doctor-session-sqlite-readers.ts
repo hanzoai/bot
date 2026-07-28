@@ -2,14 +2,14 @@
 import fs from "node:fs";
 import type { DatabaseSync } from "node:sqlite";
 import { TextDecoder } from "node:util";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { normalizeLoadedFileEntry, type FileEntry } from "../agents/sessions/session-manager.js";
 import type { TranscriptEvent } from "../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../config/sessions/session-sqlite-target.js";
 import type { SessionStoreTarget } from "../config/sessions/targets.js";
 import type { SessionEntry } from "../config/sessions/types.js";
 import { openNodeSqliteDatabase } from "../infra/node-sqlite.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
+import { resolveBotAgentSqlitePath } from "../state/bot-agent-db.js";
 
 type ReadOnlySqliteSessionSummary = {
   entry: SessionEntry;
@@ -291,7 +291,7 @@ export function resolveTargetSqlitePath(target: SessionStoreTarget): string {
   const sqliteTarget = resolveSqliteTargetFromSessionStorePath(target.storePath, {
     agentId: target.agentId,
   });
-  return resolveOpenClawAgentSqlitePath({
+  return resolveBotAgentSqlitePath({
     agentId: sqliteTarget.agentId ?? target.agentId,
     ...(sqliteTarget.path ? { path: sqliteTarget.path } : {}),
   });

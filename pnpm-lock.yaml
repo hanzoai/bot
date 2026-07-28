@@ -66,6 +66,9 @@ importers:
       '@grammyjs/transformer-throttler':
         specifier: 1.2.1
         version: 1.2.1(grammy@1.45.1(supports-color@7.2.0))
+      '@hanzo/bot-ai':
+        specifier: workspace:*
+        version: link:packages/ai
       '@homebridge/ciao':
         specifier: 1.3.10
         version: 1.3.10(supports-color@7.2.0)
@@ -81,9 +84,6 @@ importers:
       '@mozilla/readability':
         specifier: 0.6.0
         version: 0.6.0
-      '@openclaw/ai':
-        specifier: workspace:*
-        version: link:packages/ai
       '@openclaw/fs-safe':
         specifier: 0.4.7
         version: 0.4.7
@@ -365,7 +365,7 @@ importers:
 
   examples/ai-chat:
     dependencies:
-      '@openclaw/ai':
+      '@hanzo/bot-ai':
         specifier: workspace:*
         version: link:../../packages/ai
 
@@ -387,19 +387,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/admin-http-rpc:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/alibaba:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -424,7 +424,7 @@ importers:
         specifier: 4.16.1
         version: 4.16.1
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -437,13 +437,13 @@ importers:
         specifier: 1.1.0
         version: 1.1.0
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/anthropic:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -459,31 +459,31 @@ importers:
         specifier: 8.6.0
         version: 8.6.0
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/arcee:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/azure-speech:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/baseten:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/beam:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -493,13 +493,13 @@ importers:
         specifier: 1.3.10
         version: 1.3.10(supports-color@10.2.2)
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/brave:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -527,10 +527,10 @@ importers:
         specifier: 8.21.1
         version: 8.21.1
     devDependencies:
-      '@openclaw/gateway-client':
+      '@hanzo/bot-gateway-client':
         specifier: workspace:*
         version: link:../../packages/gateway-client
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
       undici:
@@ -546,16 +546,16 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/byteplus:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -580,25 +580,25 @@ importers:
         specifier: 8.21.1
         version: 8.21.1
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/cerebras:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/chutes:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/clawrouter:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -611,16 +611,16 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/cloudflare-ai-gateway:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -645,19 +645,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/cohere:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/comfy:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -667,19 +667,19 @@ importers:
         specifier: 1.0.7
         version: 1.0.7
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/copilot-proxy:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/crabbox:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -695,25 +695,25 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/deepgram:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/deepinfra:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/deepseek:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -753,13 +753,13 @@ importers:
         specifier: 1.43.0
         version: 1.43.0
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/diagnostics-prometheus:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -781,13 +781,13 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/diffs-language-pack:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -824,12 +824,12 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/document-extract:
     dependencies:
@@ -837,37 +837,37 @@ importers:
         specifier: 0.3.0
         version: 0.3.0
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/duckduckgo:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/elevenlabs:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/exa:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/fal:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/featherless:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -892,12 +892,12 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/file-transfer:
     dependencies:
@@ -908,7 +908,7 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -918,13 +918,13 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/fireworks:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -934,13 +934,13 @@ importers:
         specifier: 1.7.0
         version: 1.7.0
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/gmi:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -953,7 +953,7 @@ importers:
         specifier: 10.9.0
         version: 10.9.0(supports-color@10.2.2)
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -969,12 +969,12 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/googlechat:
     dependencies:
@@ -985,34 +985,34 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/gradium:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/groq:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/huggingface:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/image-generation-core:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1025,13 +1025,13 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/inworld:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1041,19 +1041,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/kilocode:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/kimi-coding:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1066,12 +1066,12 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/linux-canvas:
     dependencies:
@@ -1079,7 +1079,7 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1089,19 +1089,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/litellm:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/llama-cpp:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
     optionalDependencies:
@@ -1115,7 +1115,7 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1130,22 +1130,22 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/logbook:
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/longcat:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1176,12 +1176,12 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/mattermost:
     dependencies:
@@ -1192,16 +1192,16 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/media-understanding-core:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1220,12 +1220,12 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/memory-lancedb:
     dependencies:
@@ -1242,7 +1242,7 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1264,16 +1264,16 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/meta:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1283,24 +1283,24 @@ importers:
         specifier: 1.2.10
         version: 1.2.10(supports-color@10.2.2)
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/microsoft-foundry:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/migrate-claude:
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/migrate-hermes:
     dependencies:
@@ -1311,28 +1311,28 @@ importers:
         specifier: 2.9.0
         version: 2.9.0
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/minimax:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/mistral:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/moonshot:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1357,21 +1357,21 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
       '@microsoft/teams.common':
         specifier: 2.0.14
         version: 2.0.14(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
       jose:
         specifier: 6.2.3
         version: 6.2.3
       jwks-rsa:
         specifier: 4.1.0
         version: 4.1.0(supports-color@7.2.0)
-      openclaw:
-        specifier: workspace:*
-        version: link:../..
 
   extensions/mxc:
     dependencies:
@@ -1382,7 +1382,7 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1392,12 +1392,12 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/nostr:
     dependencies:
@@ -1408,22 +1408,22 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/novita:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/nvidia:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1439,12 +1439,12 @@ importers:
         specifier: 2.9.0
         version: 2.9.0
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/ollama:
     dependencies:
@@ -1452,7 +1452,7 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1465,13 +1465,13 @@ importers:
         specifier: 10.0.0
         version: 10.0.0
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/open-prose:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1481,25 +1481,25 @@ importers:
         specifier: 8.21.1
         version: 8.21.1
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/opencode:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/opencode-go:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/openrouter:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1512,30 +1512,30 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/parallel:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/perplexity:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/pixverse:
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/policy:
     dependencies:
@@ -1543,12 +1543,12 @@ importers:
         specifier: 2.2.3
         version: 2.2.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/qa-channel:
     dependencies:
@@ -1559,27 +1559,27 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/qa-lab:
     dependencies:
       '@copilotkit/aimock':
         specifier: 1.37.2
         version: 1.37.2(vitest@4.1.10)
+      '@hanzo/bot-matrix':
+        specifier: workspace:*
+        version: link:../matrix
       '@modelcontextprotocol/sdk':
         specifier: 1.29.0
         version: 1.29.0(supports-color@10.2.2)(zod@4.4.3)
       '@openclaw/crabline':
         specifier: 0.1.11
         version: 0.1.11
-      '@openclaw/matrix':
-        specifier: workspace:*
-        version: link:../matrix
       p-limit:
         specifier: 7.3.0
         version: 7.3.0
@@ -1605,28 +1605,28 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/discord':
-        specifier: workspace:*
-        version: link:../discord
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      '@openclaw/slack':
-        specifier: workspace:*
-        version: link:../slack
-      '@openclaw/whatsapp':
-        specifier: workspace:*
-        version: link:../whatsapp
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-discord':
+        specifier: workspace:*
+        version: link:../discord
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+      '@hanzo/bot-slack':
+        specifier: workspace:*
+        version: link:../slack
+      '@hanzo/bot-whatsapp':
+        specifier: workspace:*
+        version: link:../whatsapp
       vite:
         specifier: 8.1.5
         version: 8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.1)(yaml@2.9.0)
 
   extensions/qianfan:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1654,19 +1654,19 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:../..
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
       '@types/ws':
         specifier: 8.18.1
         version: 8.18.1
-      openclaw:
-        specifier: workspace:*
-        version: link:../..
 
   extensions/qwen:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1676,12 +1676,12 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/reef:
     dependencies:
@@ -1701,31 +1701,31 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/runway:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/searxng:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/senseaudio:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/sglang:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1738,7 +1738,7 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1772,12 +1772,12 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/sms:
     dependencies:
@@ -1785,13 +1785,13 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/stepfun:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1801,13 +1801,13 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/synthetic:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1817,7 +1817,7 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1827,12 +1827,12 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/telegram:
     dependencies:
@@ -1855,13 +1855,13 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/tencent:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1883,16 +1883,16 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/together:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1902,16 +1902,16 @@ importers:
         specifier: 0.8.1
         version: 0.8.1
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/tts-local-cli:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1930,37 +1930,37 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/vault:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/venice:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/vercel-ai-gateway:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/video-generation-core:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/vllm:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -1976,28 +1976,28 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/volcengine:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/voyage:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/vydra:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2010,7 +2010,7 @@ importers:
         specifier: 0.18.13
         version: 0.18.13
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2020,7 +2020,7 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2036,12 +2036,12 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/workboard:
     dependencies:
@@ -2049,15 +2049,15 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      '@openclaw/workboard-contract':
-        specifier: workspace:*
-        version: link:../../packages/workboard-contract
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
+      '@hanzo/bot-workboard-contract':
+        specifier: workspace:*
+        version: link:../../packages/workboard-contract
 
   extensions/xai:
     dependencies:
@@ -2068,19 +2068,19 @@ importers:
         specifier: 8.21.1
         version: 8.21.1
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/xiaomi:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
   extensions/zai:
     devDependencies:
-      '@openclaw/plugin-sdk':
+      '@hanzo/bot-plugin-sdk':
         specifier: workspace:*
         version: link:../../packages/plugin-sdk
 
@@ -2090,12 +2090,12 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/zalouser:
     dependencies:
@@ -2109,12 +2109,12 @@ importers:
         specifier: 4.4.3
         version: 4.4.3
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   extensions/zoom-meetings:
     dependencies:
@@ -2122,28 +2122,28 @@ importers:
         specifier: 1.3.6
         version: 1.3.6
     devDependencies:
-      '@openclaw/plugin-sdk':
-        specifier: workspace:*
-        version: link:../../packages/plugin-sdk
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
+      '@hanzo/bot-plugin-sdk':
+        specifier: workspace:*
+        version: link:../../packages/plugin-sdk
 
   packages/acp-core:
     dependencies:
-      '@openclaw/normalization-core':
+      '@hanzo/bot-normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
   packages/agent-core:
     dependencies:
-      '@openclaw/ai':
+      '@hanzo/bot-ai':
         specifier: workspace:*
         version: link:../ai
-      '@openclaw/llm-core':
+      '@hanzo/bot-llm-core':
         specifier: workspace:*
         version: link:../llm-core
-      '@openclaw/normalization-core':
+      '@hanzo/bot-normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       typebox:
@@ -2173,7 +2173,7 @@ importers:
 
   packages/gateway-client:
     dependencies:
-      '@openclaw/gateway-protocol':
+      '@hanzo/bot-gateway-protocol':
         specifier: workspace:*
         version: link:../gateway-protocol
       ipaddr.js:
@@ -2197,7 +2197,7 @@ importers:
 
   packages/markdown-core:
     dependencies:
-      '@openclaw/normalization-core':
+      '@hanzo/bot-normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       markdown-it:
@@ -2221,7 +2221,7 @@ importers:
 
   packages/media-core:
     dependencies:
-      '@openclaw/normalization-core':
+      '@hanzo/bot-normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       file-type:
@@ -2230,7 +2230,7 @@ importers:
 
   packages/media-generation-core:
     dependencies:
-      '@openclaw/normalization-core':
+      '@hanzo/bot-normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
@@ -2238,23 +2238,23 @@ importers:
 
   packages/memory-host-sdk:
     dependencies:
-      '@openclaw/normalization-core':
+      '@hanzo/bot-normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
-      '@openclaw/retry':
+      '@hanzo/bot-retry':
         specifier: workspace:*
         version: link:../retry
       p-map:
         specifier: 7.0.5
         version: 7.0.5
     devDependencies:
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
   packages/model-catalog-core:
     dependencies:
-      '@openclaw/normalization-core':
+      '@hanzo/bot-normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       zod:
@@ -2279,17 +2279,17 @@ importers:
 
   packages/retry: {}
 
-  packages/session-url-contract: {}
-
   packages/sdk:
     dependencies:
-      '@openclaw/gateway-client':
+      '@hanzo/bot-gateway-client':
         specifier: workspace:*
         version: link:../gateway-client
 
+  packages/session-url-contract: {}
+
   packages/speech-core:
     dependencies:
-      openclaw:
+      '@hanzo/bot':
         specifier: workspace:*
         version: link:../..
 
@@ -2298,7 +2298,7 @@ importers:
       '@clack/prompts':
         specifier: 1.7.0
         version: 1.7.0
-      '@openclaw/normalization-core':
+      '@hanzo/bot-normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
       chalk:
@@ -2307,7 +2307,7 @@ importers:
 
   packages/tool-call-repair:
     dependencies:
-      '@openclaw/normalization-core':
+      '@hanzo/bot-normalization-core':
         specifier: workspace:*
         version: link:../normalization-core
 
@@ -2336,6 +2336,21 @@ importers:
       '@create-markdown/preview':
         specifier: 2.0.3
         version: 2.0.3(shiki@4.3.1)
+      '@hanzo/bot-gateway-client':
+        specifier: workspace:*
+        version: link:../packages/gateway-client
+      '@hanzo/bot-media-core':
+        specifier: workspace:*
+        version: link:../packages/media-core
+      '@hanzo/bot-normalization-core':
+        specifier: workspace:*
+        version: link:../packages/normalization-core
+      '@hanzo/bot-session-url-contract':
+        specifier: workspace:*
+        version: link:../packages/session-url-contract
+      '@hanzo/bot-workboard-contract':
+        specifier: workspace:*
+        version: link:../packages/workboard-contract
       '@lezer/highlight':
         specifier: 1.2.3
         version: 1.2.3
@@ -2351,27 +2366,12 @@ importers:
       '@noble/ed25519':
         specifier: 3.1.0
         version: 3.1.0
-      '@openclaw/gateway-client':
-        specifier: workspace:*
-        version: link:../packages/gateway-client
       '@openclaw/libterminal':
         specifier: 0.3.2
         version: 0.3.2
-      '@openclaw/media-core':
-        specifier: workspace:*
-        version: link:../packages/media-core
-      '@openclaw/normalization-core':
-        specifier: workspace:*
-        version: link:../packages/normalization-core
-      '@openclaw/session-url-contract':
-        specifier: workspace:*
-        version: link:../packages/session-url-contract
       '@openclaw/uirouter':
         specifier: 0.1.0
         version: 0.1.0
-      '@openclaw/workboard-contract':
-        specifier: workspace:*
-        version: link:../packages/workboard-contract
       '@tanstack/lit-virtual':
         specifier: 3.13.33
         version: 3.13.33(lit@3.3.3)
@@ -2406,6 +2406,9 @@ importers:
         specifier: 1.3.0
         version: 1.3.0
     devDependencies:
+      '@hanzo/bot':
+        specifier: workspace:*
+        version: link:..
       '@types/markdown-it':
         specifier: 14.1.2
         version: 14.1.2
@@ -2418,9 +2421,6 @@ importers:
       jsdom:
         specifier: 29.1.1
         version: 29.1.1(@noble/hashes@2.2.0)
-      openclaw:
-        specifier: workspace:*
-        version: link:..
       playwright:
         specifier: 1.61.1
         version: 1.61.1

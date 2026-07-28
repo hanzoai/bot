@@ -1,5 +1,5 @@
 ---
-summary: "Model providers (LLMs) supported by OpenClaw"
+summary: "Model providers (LLMs) supported by Bot"
 read_when:
   - You want to choose a model provider
   - You want quick setup examples for LLM auth + model selection
@@ -10,7 +10,7 @@ Pick a provider, authenticate, then set the default model as `provider/model`.
 
 ## Quick start (two steps)
 
-1. Authenticate with the provider (usually via `openclaw onboard`).
+1. Authenticate with the provider (usually via `bot onboard`).
 2. Set the default model:
 
 ```json5
@@ -55,9 +55,9 @@ For the full provider catalog and advanced configuration, see
 
 ## Additional provider variants
 
-- `anthropic-vertex` - install `@openclaw/anthropic-vertex-provider` for implicit Anthropic on Google Vertex support when Vertex credentials are available; no separate onboarding auth choice
-- `copilot-proxy` - local VS Code Copilot Proxy bridge; use `openclaw onboard --auth-choice copilot-proxy`
-- `google-gemini-cli` - unofficial Gemini CLI OAuth flow; requires a local `gemini` install (`brew install gemini-cli` or `npm install -g @google/gemini-cli`); default model `google-gemini-cli/gemini-3-flash-preview`; use `openclaw onboard --auth-choice google-gemini-cli` or `openclaw models auth login --provider google-gemini-cli --set-default`
+- `anthropic-vertex` - install `@hanzo/bot-anthropic-vertex-provider` for implicit Anthropic on Google Vertex support when Vertex credentials are available; no separate onboarding auth choice
+- `copilot-proxy` - local VS Code Copilot Proxy bridge; use `bot onboard --auth-choice copilot-proxy`
+- `google-gemini-cli` - unofficial Gemini CLI OAuth flow; requires a local `gemini` install (`brew install gemini-cli` or `npm install -g @google/gemini-cli`); default model `google-gemini-cli/gemini-3-flash-preview`; use `bot onboard --auth-choice google-gemini-cli` or `bot models auth login --provider google-gemini-cli --set-default`
 
 ## Related
 

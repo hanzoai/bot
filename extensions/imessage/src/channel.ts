@@ -1,22 +1,22 @@
 // Imessage plugin module implements channel behavior.
-import { buildDmGroupAccountAllowlistAdapter } from "openclaw/plugin-sdk/allowlist-config-edit";
-import { createChatChannelPlugin } from "openclaw/plugin-sdk/channel-core";
+import { buildDmGroupAccountAllowlistAdapter } from "bot/plugin-sdk/allowlist-config-edit";
+import { createChatChannelPlugin } from "bot/plugin-sdk/channel-core";
 import {
   createMessageReceiptFromOutboundResults,
   defineChannelMessageAdapter,
   type ChannelMessageSendResult,
   type MessageReceiptPartKind,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { sanitizeForPlainText } from "openclaw/plugin-sdk/channel-outbound";
-import type { ChannelOutboundAdapter } from "openclaw/plugin-sdk/channel-send-result";
-import { buildPassiveProbedChannelStatusSummary } from "openclaw/plugin-sdk/extension-shared";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { questionGatewayRuntime } from "openclaw/plugin-sdk/question-gateway-runtime";
-import { buildOutboundBaseSessionKey, type RoutePeer } from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/channel-outbound";
+import { sanitizeForPlainText } from "bot/plugin-sdk/channel-outbound";
+import type { ChannelOutboundAdapter } from "bot/plugin-sdk/channel-send-result";
+import { buildPassiveProbedChannelStatusSummary } from "bot/plugin-sdk/extension-shared";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { questionGatewayRuntime } from "bot/plugin-sdk/question-gateway-runtime";
+import { buildOutboundBaseSessionKey, type RoutePeer } from "bot/plugin-sdk/routing";
 import {
   createComputedAccountStatusAdapter,
   createDefaultChannelRuntimeState,
-} from "openclaw/plugin-sdk/status-helpers";
+} from "bot/plugin-sdk/status-helpers";
 import { resolveIMessageAccount, type ResolvedIMessageAccount } from "./accounts.js";
 import { imessageMessageActions } from "./actions.js";
 import {
@@ -396,7 +396,7 @@ export const imessagePlugin: ChannelPlugin<ResolvedIMessageAccount, IMessageProb
     pairing: {
       text: {
         idLabel: "imessageSenderId",
-        message: "OpenClaw: your access has been approved.",
+        message: "Bot: your access has been approved.",
         notify: async ({ id, cfg }) =>
           await (await loadIMessageChannelRuntime()).notifyIMessageApproval({ id, cfg }),
       },

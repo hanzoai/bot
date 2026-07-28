@@ -1,6 +1,6 @@
 // Root help renderer that combines core, sub-CLI, and optional plugin command descriptors.
 import { Command } from "commander";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { getPluginCliCommandDescriptors } from "../../plugins/cli.js";
 import type { PluginLoadOptions } from "../../plugins/loader.js";
 import { VERSION } from "../../version.js";
@@ -14,7 +14,7 @@ import { getSubCliEntries } from "./subcli-descriptors.js";
 
 /** Options for rendering root help without fully registering the live CLI. */
 export type RootHelpRenderOptions = Pick<PluginLoadOptions, "pluginSdkResolution"> & {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
   includePluginDescriptors?: boolean;
 };

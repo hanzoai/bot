@@ -2,7 +2,7 @@
 import {
   readResponseTextPrefix,
   readResponseWithLimit,
-} from "openclaw/plugin-sdk/response-limit-runtime";
+} from "bot/plugin-sdk/response-limit-runtime";
 
 const PROVIDER_JSON_RESPONSE_MAX_BYTES = 1 * 1024 * 1024;
 const PROVIDER_ERROR_RESPONSE_MAX_BYTES = 8 * 1024;

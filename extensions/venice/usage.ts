@@ -1,6 +1,6 @@
-import { readProviderJsonObjectResponse } from "openclaw/plugin-sdk/provider-http";
-import type { ProviderUsageSnapshot } from "openclaw/plugin-sdk/provider-usage";
-import { buildUsageHttpErrorSnapshot } from "openclaw/plugin-sdk/provider-usage";
+import { readProviderJsonObjectResponse } from "bot/plugin-sdk/provider-http";
+import type { ProviderUsageSnapshot } from "bot/plugin-sdk/provider-usage";
+import { buildUsageHttpErrorSnapshot } from "bot/plugin-sdk/provider-usage";
 
 const VENICE_BALANCE_URL = "https://api.venice.ai/api/v1/billing/balance";
 const VENICE_USAGE_RESPONSE_MAX_BYTES = 1024 * 1024;

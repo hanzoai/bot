@@ -1,6 +1,6 @@
 /** Scheduling state and next-run computation for cron jobs. */
 import crypto from "node:crypto";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { isCronJobActive } from "../active-jobs.js";
 import { parseAbsoluteTimeMs } from "../parse.js";
 import {

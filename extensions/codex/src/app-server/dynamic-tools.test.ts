@@ -1,39 +1,39 @@
 // Codex tests cover dynamic tools plugin behavior.
 import { createHash } from "node:crypto";
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import type { AnyAgentTool } from "openclaw/plugin-sdk/agent-harness";
+import type { AgentToolResult } from "bot/plugin-sdk/agent-core";
+import type { AnyAgentTool } from "bot/plugin-sdk/agent-harness";
 import {
   HEARTBEAT_RESPONSE_TOOL_NAME,
   embeddedAgentLog,
   wrapToolWithBeforeToolCallHook,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createTerminalPresentationContractTool } from "openclaw/plugin-sdk/agent-runtime-test-contracts";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { createTerminalPresentationContractTool } from "bot/plugin-sdk/agent-runtime-test-contracts";
 import {
   onInternalDiagnosticEvent,
   waitForDiagnosticEventsDrained,
   type DiagnosticEventPayload,
-} from "openclaw/plugin-sdk/diagnostic-runtime";
+} from "bot/plugin-sdk/diagnostic-runtime";
 import {
   initializeGlobalHookRunner,
   resetGlobalHookRunner,
-} from "openclaw/plugin-sdk/hook-runtime";
+} from "bot/plugin-sdk/hook-runtime";
 import {
   createEmptyPluginRegistry,
   createMockPluginRegistry,
   createTestRegistry,
   setActivePluginRegistry,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCodexDynamicToolBridge } from "./dynamic-tools.js";
 import {
-  CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+  CODEX_BOT_DIRECT_DYNAMIC_TOOL_NAMESPACE,
   type CodexDynamicToolFunctionSpec,
   type CodexDynamicToolSpec,
   type JsonValue,
 } from "./protocol.js";
 import { settleCodexSourceReplyFinality } from "./source-reply-finality.js";
 
-const CODEX_OPENCLAW_DYNAMIC_TOOL_NAMESPACE = "openclaw";
+const CODEX_BOT_DYNAMIC_TOOL_NAMESPACE = "bot";
 
 const COMPUTER_FRAME_IMAGE =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=";
@@ -195,7 +195,7 @@ afterEach(() => {
 });
 
 describe("createCodexDynamicToolBridge", () => {
-  it("keeps OpenClaw control-path tools direct while deferring broad tools", () => {
+  it("keeps Bot control-path tools direct while deferring broad tools", () => {
     const bridge = createCodexDynamicToolBridge({
       tools: [
         createTool({ name: "web_search" }),
@@ -218,17 +218,17 @@ describe("createCodexDynamicToolBridge", () => {
 
     expectDynamicSpec(webSearch, {
       name: "web_search",
-      namespace: CODEX_OPENCLAW_DYNAMIC_TOOL_NAMESPACE,
+      namespace: CODEX_BOT_DYNAMIC_TOOL_NAMESPACE,
       deferLoading: true,
     });
     expectDynamicSpec(message, {
       name: "message",
-      namespace: CODEX_OPENCLAW_DYNAMIC_TOOL_NAMESPACE,
+      namespace: CODEX_BOT_DYNAMIC_TOOL_NAMESPACE,
       deferLoading: true,
     });
     expectDynamicSpec(heartbeat, {
       name: HEARTBEAT_RESPONSE_TOOL_NAME,
-      namespace: CODEX_OPENCLAW_DYNAMIC_TOOL_NAMESPACE,
+      namespace: CODEX_BOT_DYNAMIC_TOOL_NAMESPACE,
       deferLoading: true,
     });
     expectNoNamespace(agentsList);
@@ -253,7 +253,7 @@ describe("createCodexDynamicToolBridge", () => {
       specs.find((tool) => tool.name === "web_search"),
       {
         name: "web_search",
-        namespace: CODEX_OPENCLAW_DYNAMIC_TOOL_NAMESPACE,
+        namespace: CODEX_BOT_DYNAMIC_TOOL_NAMESPACE,
         deferLoading: true,
       },
     );
@@ -275,7 +275,7 @@ describe("createCodexDynamicToolBridge", () => {
       specs.find((tool) => tool.name === "computer"),
       {
         name: "computer",
-        namespace: CODEX_OPENCLAW_DIRECT_DYNAMIC_TOOL_NAMESPACE,
+        namespace: CODEX_BOT_DIRECT_DYNAMIC_TOOL_NAMESPACE,
       },
     );
     expect(specs.find((tool) => tool.name === "computer")).not.toHaveProperty("deferLoading");
@@ -316,7 +316,7 @@ describe("createCodexDynamicToolBridge", () => {
       contentItems: [
         {
           type: "inputText",
-          text: `OpenClaw tool is not available for this turn: ${HEARTBEAT_RESPONSE_TOOL_NAME}`,
+          text: `Bot tool is not available for this turn: ${HEARTBEAT_RESPONSE_TOOL_NAME}`,
         },
       ],
     });
@@ -329,12 +329,12 @@ describe("createCodexDynamicToolBridge", () => {
         content: [
           {
             type: "text",
-            text: `OpenClaw tool is not available for this turn: ${HEARTBEAT_RESPONSE_TOOL_NAME}`,
+            text: `Bot tool is not available for this turn: ${HEARTBEAT_RESPONSE_TOOL_NAME}`,
           },
         ],
         details: {
           status: "failed",
-          error: `OpenClaw tool is not available for this turn: ${HEARTBEAT_RESPONSE_TOOL_NAME}`,
+          error: `Bot tool is not available for this turn: ${HEARTBEAT_RESPONSE_TOOL_NAME}`,
         },
       },
       isError: true,
@@ -389,7 +389,7 @@ describe("createCodexDynamicToolBridge", () => {
     );
   });
 
-  it("retains only MCP App preview details for OpenClaw transcript projection", async () => {
+  it("retains only MCP App preview details for Bot transcript projection", async () => {
     const mcpAppPreview = {
       kind: "canvas",
       view: { id: "mcp-app-view-1", title: "Nearby food" },
@@ -707,7 +707,7 @@ describe("createCodexDynamicToolBridge", () => {
 
     expect(result).toEqual({
       success: false,
-      contentItems: [{ type: "inputText", text: "Unknown OpenClaw tool: fuzzplugin_move_angles" }],
+      contentItems: [{ type: "inputText", text: "Unknown Bot tool: fuzzplugin_move_angles" }],
     });
     expect(result.executionStarted).toBe(false);
     expect(result.executedArguments).toEqual({});
@@ -867,7 +867,7 @@ describe("createCodexDynamicToolBridge", () => {
     }
     const text = firstItem.text;
     expect(text.length).toBeLessThanOrEqual(32_000);
-    expect(text).toContain("OpenClaw truncated dynamic tool result");
+    expect(text).toContain("Bot truncated dynamic tool result");
     expect(text).toContain("original 40000 chars");
     expect(text).toContain("rerun with narrower args");
   });
@@ -897,13 +897,13 @@ describe("createCodexDynamicToolBridge", () => {
       throw new Error("expected inputText tool result");
     }
     expect(firstItem.text.length).toBeLessThanOrEqual(9_600);
-    expect(firstItem.text).toContain("OpenClaw truncated dynamic tool result");
+    expect(firstItem.text).toContain("Bot truncated dynamic tool result");
   });
 
   it("keeps a whole code point when dynamic tool text crosses the automatic boundary", async () => {
     const maxChars = 16_000;
     const totalChars = 20_000;
-    const noticeText = `...(OpenClaw truncated dynamic tool result: original ${totalChars} chars, showing ${maxChars}; rerun with narrower args.)`;
+    const noticeText = `...(Bot truncated dynamic tool result: original ${totalChars} chars, showing ${maxChars}; rerun with narrower args.)`;
     const textBudget = maxChars - noticeText.length - 1;
     const prefix = "a".repeat(textBudget - 1);
     const longText = `${prefix}😀${"z".repeat(totalChars - prefix.length - 2)}`;
@@ -960,7 +960,7 @@ describe("createCodexDynamicToolBridge", () => {
       .map((item) => (item.type === "inputText" && typeof item.text === "string" ? item.text : ""))
       .join("");
     expect(text.length).toBeLessThanOrEqual(16_000);
-    expect(text).toContain("OpenClaw truncated dynamic tool result");
+    expect(text).toContain("Bot truncated dynamic tool result");
     expect(text).toContain("original 20000 chars");
     expect(text).not.toContain("b".repeat(10_000));
   });
@@ -2703,7 +2703,7 @@ describe("createCodexDynamicToolBridge", () => {
       callId: "call-1",
       namespace: null,
       tool: "exec",
-      arguments: { command: "touch /tmp/openclaw-replay-test" },
+      arguments: { command: "touch /tmp/bot-replay-test" },
     });
 
     expect(result).toEqual(expectInputText("done"));
@@ -2726,7 +2726,7 @@ describe("createCodexDynamicToolBridge", () => {
     expect(result.sideEffectEvidence).toBeUndefined();
   });
 
-  it("shares replay-safe classification with OpenClaw for read-only dynamic tools", async () => {
+  it("shares replay-safe classification with Bot for read-only dynamic tools", async () => {
     const bridge = createBridgeWithToolResult("web_search", textToolResult("done"));
 
     const result = await bridge.handleToolCall({
@@ -3017,7 +3017,7 @@ describe("createCodexDynamicToolBridge", () => {
   });
 
   it("keeps config out of Codex tool-result contexts", async () => {
-    const config = { session: { store: "/tmp/openclaw-session-store.json" } };
+    const config = { session: { store: "/tmp/bot-session-store.json" } };
     const registry = createEmptyPluginRegistry();
     const middlewareContexts: Record<string, unknown>[] = [];
     const legacyContexts: Record<string, unknown>[] = [];
@@ -3611,7 +3611,7 @@ describe("createCodexDynamicToolBridge", () => {
     expect(result).toMatchObject({
       success: false,
       diagnosticTerminalReason: "failed",
-      contentItems: [{ type: "inputText", text: "OpenClaw dynamic tool call failed." }],
+      contentItems: [{ type: "inputText", text: "Bot dynamic tool call failed." }],
     });
     expect(onAgentToolResult).toHaveBeenCalledOnce();
   });

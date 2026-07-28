@@ -1,11 +1,11 @@
 // Discord plugin module implements shared behavior.
-import { describeAccountSnapshot } from "openclaw/plugin-sdk/account-helpers";
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { formatAllowFromLowercase } from "openclaw/plugin-sdk/allow-from";
-import { adaptScopedAccountAccessor } from "openclaw/plugin-sdk/channel-config-helpers";
-import { createScopedChannelConfigAdapter } from "openclaw/plugin-sdk/channel-config-helpers";
-import type { ChannelDoctorAdapter } from "openclaw/plugin-sdk/channel-contract";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { describeAccountSnapshot } from "bot/plugin-sdk/account-helpers";
+import { normalizeAccountId } from "bot/plugin-sdk/account-id";
+import { formatAllowFromLowercase } from "bot/plugin-sdk/allow-from";
+import { adaptScopedAccountAccessor } from "bot/plugin-sdk/channel-config-helpers";
+import { createScopedChannelConfigAdapter } from "bot/plugin-sdk/channel-config-helpers";
+import type { ChannelDoctorAdapter } from "bot/plugin-sdk/channel-contract";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import { inspectDiscordAccount } from "./account-inspect.js";
 import {
   isDiscordAccountEnabledForRuntime,
@@ -25,7 +25,7 @@ import {
 import { DiscordChannelConfigSchema } from "./config-schema.js";
 import { normalizeCompatibilityConfig } from "./doctor-contract.js";
 import { DISCORD_LEGACY_CONFIG_RULES } from "./doctor-shared.js";
-import type { OpenClawConfig } from "./runtime-api.js";
+import type { BotConfig } from "./runtime-api.js";
 import {
   collectRuntimeConfigAssignments,
   secretTargetRegistryEntries,
@@ -64,7 +64,7 @@ const discordDoctor: ChannelDoctorAdapter = {
 };
 
 function resolveDiscordConfigAccessorAccount(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
 }): DiscordConfigAccessorAccount {
   const accountId = normalizeAccountId(

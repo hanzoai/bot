@@ -11,16 +11,16 @@ import type { SystemAgentVerifiedInferenceBinding } from "./verified-inference.j
 async function verifiedInference(
   model = "openai/gpt-5.5@openai:p2",
 ): Promise<SystemAgentVerifiedInferenceBinding> {
-  const openClawRuntime = model.startsWith("openai/")
+  const botRuntime = model.startsWith("openai/")
     ? {
         models: {
-          "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } },
+          "openai/gpt-5.5": { agentRuntime: { id: "bot" } },
         },
       }
     : {};
   return (
     await createSystemAgentVerifiedInferenceTestFixture({
-      agents: { defaults: { model, ...openClawRuntime } },
+      agents: { defaults: { model, ...botRuntime } },
       auth: {
         order: { openai: ["openai:p1", "openai:p2"] },
         profiles: {

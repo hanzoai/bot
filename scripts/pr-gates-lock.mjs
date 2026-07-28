@@ -31,9 +31,9 @@ function parseArgs(argv) {
 function main() {
   const { statusFile } = parseArgs(process.argv.slice(2));
   const baseEnv = resolveLocalHeavyCheckEnv(process.env);
-  const env = baseEnv.OPENCLAW_HEAVY_CHECK_LOCK_TIMEOUT_MS
+  const env = baseEnv.BOT_HEAVY_CHECK_LOCK_TIMEOUT_MS
     ? baseEnv
-    : { ...baseEnv, OPENCLAW_HEAVY_CHECK_LOCK_TIMEOUT_MS: String(DEFAULT_GATE_LOCK_TIMEOUT_MS) };
+    : { ...baseEnv, BOT_HEAVY_CHECK_LOCK_TIMEOUT_MS: String(DEFAULT_GATE_LOCK_TIMEOUT_MS) };
 
   const parentPid = process.ppid;
   const release = acquireLocalHeavyCheckLockSync({

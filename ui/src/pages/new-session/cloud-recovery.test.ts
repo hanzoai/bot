@@ -73,13 +73,13 @@ describe("cloud session recovery", () => {
     expect(readCloudSessionRecovery(recovery.gatewayUrl, recovery.recoveryScope)).toEqual(creating);
 
     sessionStorage.setItem(
-      `openclaw.new-session.cloud-recovery.v1:${recovery.gatewayUrl}:${recovery.recoveryScope}`,
+      `bot.new-session.cloud-recovery.v1:${recovery.gatewayUrl}:${recovery.recoveryScope}`,
       JSON.stringify({ ...creating, createParams: { key: "agent:cloud:other" } }),
     );
     expect(readCloudSessionRecovery(recovery.gatewayUrl, recovery.recoveryScope)).toBeNull();
 
     sessionStorage.setItem(
-      `openclaw.new-session.cloud-recovery.v1:${recovery.gatewayUrl}:${recovery.recoveryScope}`,
+      `bot.new-session.cloud-recovery.v1:${recovery.gatewayUrl}:${recovery.recoveryScope}`,
       JSON.stringify({
         ...creating,
         createParams: { ...creating.createParams, message: "run locally" },
@@ -111,7 +111,7 @@ describe("cloud session recovery", () => {
 
   it("rejects malformed records", () => {
     sessionStorage.setItem(
-      `openclaw.new-session.cloud-recovery.v1:${recovery.gatewayUrl}:${recovery.recoveryScope}`,
+      `bot.new-session.cloud-recovery.v1:${recovery.gatewayUrl}:${recovery.recoveryScope}`,
       JSON.stringify({ ...recovery, messageId: "" }),
     );
     expect(readCloudSessionRecovery(recovery.gatewayUrl, recovery.recoveryScope)).toBeNull();

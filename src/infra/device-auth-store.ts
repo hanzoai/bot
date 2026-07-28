@@ -7,18 +7,18 @@ import {
   normalizeDeviceAuthRole,
   normalizeDeviceAuthScopes,
 } from "../shared/device-auth.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "./kysely-sync.js";
 
-type DeviceAuthDatabase = Pick<OpenClawStateKyselyDatabase, "device_auth_tokens">;
+type DeviceAuthDatabase = Pick<BotStateKyselyDatabase, "device_auth_tokens">;
 // The Gateway lock makes state-directory contents process-stable. Cache both
 // outcomes to keep reconnects free of freshness polling; Doctor invalidates
 // the entry after its exclusive legacy import removes the retired file.
@@ -33,7 +33,7 @@ function assertNoLegacyDeviceAuth(env: NodeJS.ProcessEnv | undefined): void {
   }
   if (hasLegacy) {
     throw new Error(
-      "Legacy device auth requires migration; stop the Gateway and run `openclaw doctor --fix`.",
+      "Legacy device auth requires migration; stop the Gateway and run `bot doctor --fix`.",
     );
   }
 }
@@ -72,7 +72,7 @@ export function loadDeviceAuthToken(params: {
   env?: NodeJS.ProcessEnv;
 }): DeviceAuthEntry | null {
   assertNoLegacyDeviceAuth(params.env);
-  const { db } = openOpenClawStateDatabase({ env: params.env });
+  const { db } = openBotStateDatabase({ env: params.env });
   const row = executeSqliteQueryTakeFirstSync(
     db,
     getNodeSqliteKysely<DeviceAuthDatabase>(db)
@@ -90,7 +90,7 @@ export function loadDeviceAuthTokens(params: {
   env?: NodeJS.ProcessEnv;
 }): DeviceAuthEntry[] {
   assertNoLegacyDeviceAuth(params.env);
-  const { db } = openOpenClawStateDatabase({ env: params.env });
+  const { db } = openBotStateDatabase({ env: params.env });
   return executeSqliteQuerySync(
     db,
     getNodeSqliteKysely<DeviceAuthDatabase>(db)
@@ -119,7 +119,7 @@ export function storeDeviceAuthToken(params: {
     scopes: normalizeDeviceAuthScopes(params.scopes),
     updatedAtMs: Date.now(),
   };
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,
@@ -153,7 +153,7 @@ export function clearDeviceAuthToken(params: {
   env?: NodeJS.ProcessEnv;
 }): void {
   assertNoLegacyDeviceAuth(params.env);
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,

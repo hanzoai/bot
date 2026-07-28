@@ -1,7 +1,7 @@
 // Telegram tests cover outbound adapter plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
-import { verifyDurableFinalCapabilityProofs } from "openclaw/plugin-sdk/channel-outbound";
-import { adaptMessagePresentationForChannel } from "openclaw/plugin-sdk/interactive-runtime";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { verifyDurableFinalCapabilityProofs } from "bot/plugin-sdk/channel-outbound";
+import { adaptMessagePresentationForChannel } from "bot/plugin-sdk/interactive-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendMessageTelegramMock = vi.fn();
@@ -486,7 +486,7 @@ describe("telegramOutbound", () => {
               label: "Launch",
               action: {
                 type: "web-app" as const,
-                url: "https://node.tailnet.ts.net/__openclaw__/mcp-app#opaque-ticket",
+                url: "https://node.tailnet.ts.net/__bot__/mcp-app#opaque-ticket",
               },
             },
           ],
@@ -516,7 +516,7 @@ describe("telegramOutbound", () => {
         {
           text: "Launch",
           web_app: {
-            url: "https://node.tailnet.ts.net/__openclaw__/mcp-app#opaque-ticket",
+            url: "https://node.tailnet.ts.net/__bot__/mcp-app#opaque-ticket",
           },
         },
       ],

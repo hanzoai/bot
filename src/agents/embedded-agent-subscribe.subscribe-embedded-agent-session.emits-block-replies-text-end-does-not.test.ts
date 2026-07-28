@@ -1,6 +1,6 @@
 // Text-end block reply tests cover streamed block delivery, message_end
 // de-duplication, and OpenAI Responses phase handling.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import {
   createTextEndBlockReplyHarness,

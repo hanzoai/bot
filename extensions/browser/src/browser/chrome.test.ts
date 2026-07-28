@@ -18,13 +18,13 @@ import {
   isChromeCdpReady,
   isChromeReachable,
   ManagedChromeCleanupError,
-  stopOpenClawChrome,
+  stopBotChrome,
 } from "./chrome.js";
 import { BrowserCdpEndpointBlockedError } from "./errors.js";
 
 const CHROME_TEST_WS_MAX_PAYLOAD_BYTES = 1024 * 1024;
 
-type StopChromeTarget = Parameters<typeof stopOpenClawChrome>[0];
+type StopChromeTarget = Parameters<typeof stopBotChrome>[0];
 type ChromeCdpDiagnostic = Awaited<ReturnType<typeof diagnoseChromeCdp>>;
 
 function expectFailedChromeCdpDiagnostic(
@@ -100,7 +100,7 @@ async function withMockChromeCdpServer(params: {
 }
 
 async function stopChromeWithProc(proc: ReturnType<typeof makeChromeTestProc>, timeoutMs: number) {
-  await stopOpenClawChrome(
+  await stopBotChrome(
     {
       pid: proc.pid,
       proc,
@@ -675,14 +675,14 @@ describe("browser chrome helpers", () => {
     expect(proc.kill).not.toHaveBeenCalled();
   });
 
-  it("stopOpenClawChrome sends SIGTERM and returns once CDP is down", async () => {
+  it("stopBotChrome sends SIGTERM and returns once CDP is down", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("down")));
     const proc = makeChromeTestProc();
     await stopChromeWithProc(proc, 10);
     expect(proc.kill).toHaveBeenCalledWith("SIGTERM");
   });
 
-  it("stopOpenClawChrome asks Chrome to close gracefully before sending a signal", async () => {
+  it("stopBotChrome asks Chrome to close gracefully before sending a signal", async () => {
     let closeRequested = false;
     const proc = makeChromeTestProc({ exitOnSignal: false });
     await withMockChromeCdpServer({
@@ -727,7 +727,7 @@ describe("browser chrome helpers", () => {
     });
   });
 
-  it("stopOpenClawChrome escalates when graceful close leaves CDP reachable", async () => {
+  it("stopBotChrome escalates when graceful close leaves CDP reachable", async () => {
     const proc = makeChromeTestProc({ exitOnSignal: "SIGKILL" });
     await withMockChromeCdpServer({
       wsPath: "/devtools/browser/stuck-stop",

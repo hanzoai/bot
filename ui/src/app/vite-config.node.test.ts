@@ -47,7 +47,7 @@ describe("Control UI Vite config", () => {
       resolveControlUiBuildInfo({
         env: {
           GIT_COMMIT: "0123456789abcdef0123456789abcdef01234567",
-          OPENCLAW_BUILD_TIMESTAMP: "2026-07-10T12:34:56Z",
+          BOT_BUILD_TIMESTAMP: "2026-07-10T12:34:56Z",
         },
         readGitCommit,
         readGitCommitTimestamp,
@@ -213,8 +213,8 @@ describe("Control UI Vite config", () => {
     expect(
       resolveControlUiBuildInfo({
         env: {
-          OPENCLAW_VERSION: "latest",
-          OPENCLAW_BUILD_TIMESTAMP: "2026-07-10T13:14:15.000Z",
+          BOT_VERSION: "latest",
+          BOT_BUILD_TIMESTAMP: "2026-07-10T13:14:15.000Z",
         },
         readGitCommit: () => "a".repeat(40),
         readPackageVersion: () => "2026.7.10",
@@ -226,8 +226,8 @@ describe("Control UI Vite config", () => {
     expect(
       resolveControlUiBuildInfo({
         env: {
-          OPENCLAW_CONTROL_UI_BUILD_ID: "   ",
-          OPENCLAW_BUILD_TIMESTAMP: "2026-07-10T13:14:15.000Z",
+          BOT_CONTROL_UI_BUILD_ID: "   ",
+          BOT_BUILD_TIMESTAMP: "2026-07-10T13:14:15.000Z",
         },
         readGitCommit: () => "a".repeat(40),
         readPackageVersion: () => "2026.7.10",
@@ -248,15 +248,15 @@ describe("Control UI Vite config", () => {
 
     expect(() =>
       resolveControlUiBuildInfo({
-        env: { OPENCLAW_BUILD_TIMESTAMP: "2026-07-10 12:34:56" },
+        env: { BOT_BUILD_TIMESTAMP: "2026-07-10 12:34:56" },
         readGitCommit: () => "a".repeat(40),
         readPackageVersion: () => "2026.7.10",
       }),
-    ).toThrow("OPENCLAW_BUILD_TIMESTAMP must be a valid UTC ISO-8601 timestamp ending in Z");
+    ).toThrow("BOT_BUILD_TIMESTAMP must be a valid UTC ISO-8601 timestamp ending in Z");
   });
 
   it("resolves root tsconfig package aliases for source imports", () => {
-    expect(findStringAlias("@openclaw/net-policy/ip")?.replacement).toBe(
+    expect(findStringAlias("@hanzo/bot-net-policy/ip")?.replacement).toBe(
       path.join(repoRoot, "packages/net-policy/src/ip.ts"),
     );
   });
@@ -264,15 +264,15 @@ describe("Control UI Vite config", () => {
   it("resolves Control UI dev-server source aliases for internal packages", () => {
     const aliases = resolveSourcePackageAliasesForVite();
     expect(
-      aliases.find((alias) => alias.find === "@openclaw/normalization-core/string-coerce"),
+      aliases.find((alias) => alias.find === "@hanzo/bot-normalization-core/string-coerce"),
     )?.toEqual({
-      find: "@openclaw/normalization-core/string-coerce",
+      find: "@hanzo/bot-normalization-core/string-coerce",
       replacement: path.join(repoRoot, "packages/normalization-core/src/string-coerce.ts"),
     });
     expect(
-      aliases.find((alias) => alias.find === "@openclaw/normalization-core/phone-presentation"),
+      aliases.find((alias) => alias.find === "@hanzo/bot-normalization-core/phone-presentation"),
     )?.toEqual({
-      find: "@openclaw/normalization-core/phone-presentation",
+      find: "@hanzo/bot-normalization-core/phone-presentation",
       replacement: path.join(repoRoot, "packages/normalization-core/src/phone-presentation.ts"),
     });
   });
@@ -296,24 +296,24 @@ describe("Control UI Vite config", () => {
 
   it("keeps specific tsconfig aliases ahead of broad package aliases", () => {
     const aliases = resolveTsconfigPathAliasesForVite();
-    const netPolicyIpIndex = aliases.findIndex((alias) => alias.find === "@openclaw/net-policy/ip");
+    const netPolicyIpIndex = aliases.findIndex((alias) => alias.find === "@hanzo/bot-net-policy/ip");
     const netPolicyPackageIndex = aliases.findIndex(
-      (alias) => alias.find === "@openclaw/net-policy",
+      (alias) => alias.find === "@hanzo/bot-net-policy",
     );
     const netPolicyWildcardIndex = aliases.findIndex(
       (alias) =>
         alias.find instanceof RegExp && alias.replacement.includes("packages/net-policy/src/$1"),
     );
-    const broadOpenClawWildcardIndex = aliases.findIndex(
+    const broadBotWildcardIndex = aliases.findIndex(
       (alias) => alias.find instanceof RegExp && alias.replacement.includes("extensions/$1"),
     );
 
     expect(netPolicyIpIndex).toBeGreaterThanOrEqual(0);
     expect(netPolicyWildcardIndex).toBeGreaterThanOrEqual(0);
     expect(netPolicyPackageIndex).toBeGreaterThanOrEqual(0);
-    expect(broadOpenClawWildcardIndex).toBeGreaterThanOrEqual(0);
+    expect(broadBotWildcardIndex).toBeGreaterThanOrEqual(0);
     expect(netPolicyIpIndex).toBeLessThan(netPolicyPackageIndex);
-    expect(netPolicyWildcardIndex).toBeLessThan(broadOpenClawWildcardIndex);
+    expect(netPolicyWildcardIndex).toBeLessThan(broadBotWildcardIndex);
   });
 
   it("uses a browser-safe redactor for shared tool display imports", async () => {

@@ -21,11 +21,11 @@ export function normalizeRecentTranscriptLimit(limit: number | undefined): numbe
 }
 
 export function readPreferredUpstreamUserText(message: {
-  __openclaw?: unknown;
+  __bot?: unknown;
 }): string | null | undefined {
   const meta =
-    message["__openclaw"] && typeof message["__openclaw"] === "object"
-      ? (message["__openclaw"] as Record<string, unknown>)
+    message["__bot"] && typeof message["__bot"] === "object"
+      ? (message["__bot"] as Record<string, unknown>)
       : undefined;
   if (typeof meta?.upstreamUserText === "string") {
     return meta.upstreamUserText.trim();

@@ -2,7 +2,7 @@
 // and agent-to-agent allow rules.
 import { describe, expect, it, vi } from "vitest";
 import { cleanupTempDirs, makeTempDir } from "../../../test/helpers/temp-dir.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import {
   createAgentToAgentPolicy,
   createSessionVisibilityGuard,
@@ -16,17 +16,17 @@ import {
   registerMainSessionGroupWatch,
   registerSessionStateWatch,
 } from "../../sessions/session-state-events.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import { resolveSandboxedSessionToolContext } from "./sessions-access.js";
 import { testing as sessionsResolutionTesting } from "./sessions-resolution.test-support.js";
 
 describe("resolveSessionToolsVisibility", () => {
   it("defaults to tree when unset or invalid", () => {
-    expect(resolveSessionToolsVisibility({} as unknown as OpenClawConfig)).toBe("tree");
+    expect(resolveSessionToolsVisibility({} as unknown as BotConfig)).toBe("tree");
     expect(
       resolveSessionToolsVisibility({
         tools: { sessions: { visibility: "invalid" } },
-      } as unknown as OpenClawConfig),
+      } as unknown as BotConfig),
     ).toBe("tree");
   });
 
@@ -34,7 +34,7 @@ describe("resolveSessionToolsVisibility", () => {
     expect(
       resolveSessionToolsVisibility({
         tools: { sessions: { visibility: "ALL" } },
-      } as unknown as OpenClawConfig),
+      } as unknown as BotConfig),
     ).toBe("all");
   });
 });
@@ -44,7 +44,7 @@ describe("resolveEffectiveSessionToolsVisibility", () => {
     const cfg = {
       tools: { sessions: { visibility: "all" } },
       agents: { defaults: { sandbox: { sessionToolsVisibility: "spawned" } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     expect(resolveEffectiveSessionToolsVisibility({ cfg, sandboxed: true })).toBe("tree");
   });
 
@@ -52,21 +52,21 @@ describe("resolveEffectiveSessionToolsVisibility", () => {
     const cfg = {
       tools: { sessions: { visibility: "all" } },
       agents: { defaults: { sandbox: { sessionToolsVisibility: "all" } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     expect(resolveEffectiveSessionToolsVisibility({ cfg, sandboxed: true })).toBe("all");
   });
 });
 
 describe("sandbox session-tools context", () => {
   it("defaults sandbox visibility clamp to spawned", () => {
-    expect(resolveSandboxSessionToolsVisibility({} as unknown as OpenClawConfig)).toBe("spawned");
+    expect(resolveSandboxSessionToolsVisibility({} as unknown as BotConfig)).toBe("spawned");
   });
 
   it("restricts non-subagent sandboxed sessions to spawned visibility", () => {
     const cfg = {
       tools: { sessions: { visibility: "all" } },
       agents: { defaults: { sandbox: { sessionToolsVisibility: "spawned" } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     const context = resolveSandboxedSessionToolContext({
       cfg,
       agentSessionKey: "agent:main:main",
@@ -82,7 +82,7 @@ describe("sandbox session-tools context", () => {
     const cfg = {
       tools: { sessions: { visibility: "all" } },
       agents: { defaults: { sandbox: { sessionToolsVisibility: "spawned" } } },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     const context = resolveSandboxedSessionToolContext({
       cfg,
       agentSessionKey: "agent:main:subagent:abc",
@@ -96,7 +96,7 @@ describe("sandbox session-tools context", () => {
 
 describe("createAgentToAgentPolicy", () => {
   it("denies cross-agent access when disabled", () => {
-    const policy = createAgentToAgentPolicy({} as unknown as OpenClawConfig);
+    const policy = createAgentToAgentPolicy({} as unknown as BotConfig);
     expect(policy.enabled).toBe(false);
     expect(policy.isAllowed("main", "main")).toBe(true);
     expect(policy.isAllowed("main", "ops")).toBe(false);
@@ -110,7 +110,7 @@ describe("createAgentToAgentPolicy", () => {
           allow: ["ops-*", "main"],
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(policy.isAllowed("ops-a", "ops-b")).toBe(true);
     expect(policy.isAllowed("main", "ops-a")).toBe(true);
@@ -125,7 +125,7 @@ describe("createAgentToAgentPolicy", () => {
           allow: ["Ops-*"],
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(policy.matchesAllow("ops-worker")).toBe(true);
     expect(policy.matchesAllow("OPS-WORKER")).toBe(true);
@@ -140,7 +140,7 @@ describe("createAgentToAgentPolicy", () => {
           allow: ["Ops"],
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(policy.matchesAllow("Ops")).toBe(true);
     expect(policy.matchesAllow("ops")).toBe(false);
@@ -154,7 +154,7 @@ describe("createAgentToAgentPolicy", () => {
           allow: [" "],
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(policy.matchesAllow("ops")).toBe(false);
     expect(policy.isAllowed("main", "ops")).toBe(false);
@@ -168,7 +168,7 @@ describe("createAgentToAgentPolicy", () => {
           allow: ["team-*-prod"],
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(policy.matchesAllow("team-ops-prod")).toBe(true);
     expect(policy.matchesAllow("team-dev-prod")).toBe(true);
@@ -186,7 +186,7 @@ describe("createAgentToAgentPolicy", () => {
           allow: ["*a*b*c*d*e*"],
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     // Positive match
     expect(policy.matchesAllow("xaxbxcxdxe")).toBe(true);
@@ -209,7 +209,7 @@ describe("createAgentToAgentPolicy", () => {
           allow: ["abc*xyz"],
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(policy.matchesAllow("abcxyz")).toBe(true);
     expect(policy.matchesAllow("abc-middle-xyz")).toBe(true);
@@ -224,7 +224,7 @@ describe("createAgentToAgentPolicy", () => {
           allow: ["ops.[prod]*"],
         },
       },
-    } as unknown as OpenClawConfig);
+    } as unknown as BotConfig);
 
     expect(policy.matchesAllow("OPS.[PROD]-worker")).toBe(true);
     expect(policy.matchesAllow("opsXprod-worker")).toBe(false);
@@ -234,9 +234,9 @@ describe("createAgentToAgentPolicy", () => {
 describe("createSessionVisibilityGuard", () => {
   it("allows watched group reads under tree while denying unwatched peers", () => {
     const tempDirs: string[] = [];
-    const stateDir = makeTempDir(tempDirs, "openclaw-session-visibility-");
-    closeOpenClawStateDatabaseForTest();
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = makeTempDir(tempDirs, "bot-session-visibility-");
+    closeBotStateDatabaseForTest();
+    vi.stubEnv("BOT_STATE_DIR", stateDir);
     try {
       const requesterSessionKey = "agent:main:main";
       const watchedSessionKey = "agent:main:telegram:group:watched";
@@ -265,7 +265,7 @@ describe("createSessionVisibilityGuard", () => {
         action: "history",
         requesterSessionKey,
         visibility: "tree",
-        a2aPolicy: createAgentToAgentPolicy({} as OpenClawConfig),
+        a2aPolicy: createAgentToAgentPolicy({} as BotConfig),
       });
 
       expect(guard.check({ key: watchedSessionKey })).toEqual({ allowed: true });
@@ -291,7 +291,7 @@ describe("createSessionVisibilityGuard", () => {
         action: "send",
         requesterSessionKey,
         visibility: "tree",
-        a2aPolicy: createAgentToAgentPolicy({} as OpenClawConfig),
+        a2aPolicy: createAgentToAgentPolicy({} as BotConfig),
       });
       expect(sendGuard.check({ key: watchedSessionKey })).toEqual({
         allowed: false,
@@ -300,7 +300,7 @@ describe("createSessionVisibilityGuard", () => {
           "Session send visibility is restricted to the current session tree (tools.sessions.visibility=tree).",
       });
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
       vi.unstubAllEnvs();
       cleanupTempDirs(tempDirs);
     }
@@ -311,7 +311,7 @@ describe("createSessionVisibilityGuard", () => {
       action: "list",
       requesterSessionKey: "agent:main:main",
       visibility: "tree",
-      a2aPolicy: createAgentToAgentPolicy({} as unknown as OpenClawConfig),
+      a2aPolicy: createAgentToAgentPolicy({} as unknown as BotConfig),
     });
 
     expect(
@@ -329,7 +329,7 @@ describe("createSessionVisibilityGuard", () => {
       visibility: "all",
       a2aPolicy: createAgentToAgentPolicy({
         tools: { agentToAgent: { enabled: false } },
-      } as unknown as OpenClawConfig),
+      } as unknown as BotConfig),
     });
 
     expect(
@@ -347,7 +347,7 @@ describe("createSessionVisibilityGuard", () => {
       visibility: "agent",
       a2aPolicy: createAgentToAgentPolicy({
         tools: { agentToAgent: { enabled: true, allow: ["main", "codex"] } },
-      } as unknown as OpenClawConfig),
+      } as unknown as BotConfig),
     });
 
     expect(
@@ -375,7 +375,7 @@ describe("createSessionVisibilityGuard", () => {
       action: "list",
       requesterSessionKey: "agent:main:main",
       visibility: "tree",
-      a2aPolicy: createAgentToAgentPolicy({} as unknown as OpenClawConfig),
+      a2aPolicy: createAgentToAgentPolicy({} as unknown as BotConfig),
     });
 
     expect(guard.check("agent:codex:acp:child-1").allowed).toBe(false);
@@ -401,7 +401,7 @@ describe("createSessionVisibilityGuard", () => {
       action: "history",
       requesterSessionKey: "agent:main:main",
       visibility: "tree",
-      a2aPolicy: createAgentToAgentPolicy({} as unknown as OpenClawConfig),
+      a2aPolicy: createAgentToAgentPolicy({} as unknown as BotConfig),
     });
 
     expect(guard.check("agent:codex:acp:child-1")).toEqual({ allowed: true });
@@ -414,7 +414,7 @@ describe("createSessionVisibilityGuard", () => {
       action: "history",
       requesterSessionKey: "agent:main:main",
       visibility: "self",
-      a2aPolicy: createAgentToAgentPolicy({} as unknown as OpenClawConfig),
+      a2aPolicy: createAgentToAgentPolicy({} as unknown as BotConfig),
     });
 
     expect(guard.check("agent:codex:acp:child-1")).toEqual({
@@ -442,7 +442,7 @@ describe("createSessionVisibilityGuard", () => {
       action: "send",
       requesterSessionKey: "agent:main:main",
       visibility: "all",
-      a2aPolicy: createAgentToAgentPolicy({} as unknown as OpenClawConfig),
+      a2aPolicy: createAgentToAgentPolicy({} as unknown as BotConfig),
     });
 
     expect(guard.check("agent:codex:acp:child-1")).toEqual({ allowed: true });
@@ -467,7 +467,7 @@ describe("createSessionVisibilityGuard", () => {
       action: "status",
       requesterSessionKey: "agent:main:main",
       visibility: "all",
-      a2aPolicy: createAgentToAgentPolicy({} as unknown as OpenClawConfig),
+      a2aPolicy: createAgentToAgentPolicy({} as unknown as BotConfig),
     });
 
     expect(guard.check("agent:codex:acp:child-1")).toEqual({ allowed: true });
@@ -499,7 +499,7 @@ describe("createSessionVisibilityGuard", () => {
       action: "history",
       requesterSessionKey: "agent:main:main",
       visibility: "tree",
-      a2aPolicy: createAgentToAgentPolicy({} as unknown as OpenClawConfig),
+      a2aPolicy: createAgentToAgentPolicy({} as unknown as BotConfig),
     });
 
     expect(guard.check("agent:main:subagent:worker-999")).toEqual({ allowed: true });
@@ -512,7 +512,7 @@ describe("createSessionVisibilityGuard", () => {
       action: "send",
       requesterSessionKey: "agent:main:main",
       visibility: "all",
-      a2aPolicy: createAgentToAgentPolicy({} as unknown as OpenClawConfig),
+      a2aPolicy: createAgentToAgentPolicy({} as unknown as BotConfig),
     });
 
     expect(guard.check("agent:ops:main")).toEqual({
@@ -528,7 +528,7 @@ describe("createSessionVisibilityGuard", () => {
       action: "history",
       requesterSessionKey: "agent:main:main",
       visibility: "self",
-      a2aPolicy: createAgentToAgentPolicy({} as unknown as OpenClawConfig),
+      a2aPolicy: createAgentToAgentPolicy({} as unknown as BotConfig),
     });
 
     expect(guard.check("agent:main:main")).toEqual({ allowed: true });

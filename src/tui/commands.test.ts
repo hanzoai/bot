@@ -25,7 +25,7 @@ describe("parseCommand", () => {
   it("accepts the hidden retired-name alias", () => {
     const retiredCommand = "/crestodian repair gateway"; // hidden alias
     expect(parseCommand(retiredCommand)).toEqual({
-      name: "openclaw",
+      name: "bot",
       args: "repair gateway",
     });
     expect(getSlashCommands().map((command) => command.name)).not.toContain("crestodian"); // hidden alias
@@ -75,10 +75,10 @@ describe("getSlashCommands", () => {
     const commands = getSlashCommands();
     const status = commands.find((command) => command.name === "status");
     const gatewayStatus = commands.find((command) => command.name === "gateway-status");
-    const openclaw = commands.find((command) => command.name === "openclaw");
+    const bot = commands.find((command) => command.name === "bot");
     expect(status?.description).toBe("Show current status.");
     expect(gatewayStatus?.description).toBe("Show gateway status summary");
-    expect(openclaw?.description).toBe("Return to OpenClaw");
+    expect(bot?.description).toBe("Return to Bot");
   });
 
   it("distinguishes new-session and reset command descriptions", () => {
@@ -129,7 +129,7 @@ describe("getSlashCommands", () => {
     { model: "gpt-5.6-sol", agentRuntime: "codex", supportsUltra: true },
     { model: "gpt-5.6-terra", agentRuntime: "codex", supportsUltra: true },
     { model: "gpt-5.6-luna", agentRuntime: "codex", supportsUltra: false },
-    { model: "gpt-5.6-luna", agentRuntime: "openclaw", supportsUltra: true },
+    { model: "gpt-5.6-luna", agentRuntime: "bot", supportsUltra: true },
   ])(
     "uses the $agentRuntime profile for openai/$model thinking completions",
     ({ model, agentRuntime, supportsUltra }) => {
@@ -199,7 +199,7 @@ describe("helpText", () => {
     expect(output).toContain("/fast <status|auto|on|off>");
     expect(output).toContain("/gateway-status");
     expect(output).toContain("/gwstatus");
-    expect(output).toContain("/openclaw [request]");
+    expect(output).toContain("/bot [request]");
   });
 
   it("does not advertise Gateway-owned commands in local mode", () => {

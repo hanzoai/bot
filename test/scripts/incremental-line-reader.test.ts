@@ -12,7 +12,7 @@ afterEach(() => {
 });
 
 function withTempLog(run: (logPath: string) => void): void {
-  const root = makeTempDir(tempDirs, "openclaw-line-reader-");
+  const root = makeTempDir(tempDirs, "bot-line-reader-");
   run(path.join(root, "output.log"));
 }
 

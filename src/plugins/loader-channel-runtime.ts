@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { openRootFileSync } from "../infra/boundary-file-read.js";
 import type { NormalizedPluginsConfig } from "./config-state.js";
 import {
@@ -19,7 +19,7 @@ import { withProfile } from "./plugin-load-profile.js";
 import { createPluginRegistrationTransaction } from "./plugin-registration-transaction.js";
 import { resolveCanonicalDistRuntimeSource } from "./plugin-runtime-artifact-resolution.js";
 import type { createPluginRegistry, PluginRecord } from "./registry.js";
-import type { OpenClawPluginModule, PluginLogger } from "./types.js";
+import type { BotPluginModule, PluginLogger } from "./types.js";
 
 type PluginRegistryBuilder = ReturnType<typeof createPluginRegistry>;
 
@@ -28,7 +28,7 @@ type PluginRegistryBuilder = ReturnType<typeof createPluginRegistry>;
  * Returns true when the candidate is complete (loaded, disabled, or failed).
  */
 export function loadSetupRuntimeChannelCandidate(params: {
-  mod: OpenClawPluginModule | null;
+  mod: BotPluginModule | null;
   manifestRecord: PluginManifestRecord;
   record: PluginRecord;
   registrationPlan: PluginRegistrationPlan;
@@ -37,7 +37,7 @@ export function loadSetupRuntimeChannelCandidate(params: {
   rejectHardlinks: boolean;
   loadPluginModule: PluginModuleLoader;
   registryBuilder: PluginRegistryBuilder;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: NormalizedPluginsConfig["entries"][string] | undefined;
   env: NodeJS.ProcessEnv;
   preferSetupRuntimeForChannelPlugins: boolean;
@@ -119,12 +119,12 @@ export function loadSetupRuntimeChannelCandidate(params: {
     }
     const safeRuntimeSource = runtimeOpened.path;
     fs.closeSync(runtimeOpened.fd);
-    let runtimeMod: OpenClawPluginModule | null;
+    let runtimeMod: BotPluginModule | null;
     try {
       runtimeMod = withProfile(
         { pluginId: record.id, source: safeRuntimeSource },
         "load-setup-runtime-entry",
-        () => params.loadPluginModule(safeRuntimeSource) as OpenClawPluginModule,
+        () => params.loadPluginModule(safeRuntimeSource) as BotPluginModule,
       );
     } catch (error) {
       recordPluginError({

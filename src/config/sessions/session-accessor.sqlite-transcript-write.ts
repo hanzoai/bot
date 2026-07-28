@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { resolveTimestampMsToIsoString } from "@openclaw/normalization-core/number-coercion";
+import { resolveTimestampMsToIsoString } from "@hanzo/bot-normalization-core/number-coercion";
 import {
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  openBotAgentDatabase,
+  runBotAgentWriteTransaction,
+  type BotAgentDatabase,
+} from "../../state/bot-agent-db.js";
 import { writeSqliteTranscriptArchive } from "./session-accessor.sqlite-archive.js";
 import type {
   SessionTranscriptAccessScope,
@@ -120,7 +120,7 @@ export async function replaceSqliteTranscriptEvents(
 ): Promise<void> {
   const resolved = resolveSqliteTranscriptScope(scope);
   await runExclusiveSqliteSessionWrite(resolved, async () => {
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       replaceSqliteTranscriptEventsInTransaction(database, resolved, events);
     }, toDatabaseOptions(resolved));
   });
@@ -133,7 +133,7 @@ export function replaceSqliteTranscriptEventsSync(
 ): boolean {
   const resolved = resolveSqliteTranscriptScope(scope);
   let replaced = false;
-  runOpenClawAgentWriteTransaction((database) => {
+  runBotAgentWriteTransaction((database) => {
     const fresh = readSessionEntryRow(database, resolved.sessionKey);
     if (!fresh || fresh.entry.sessionId !== resolved.sessionId) {
       return;
@@ -151,7 +151,7 @@ export async function trimSqliteTranscriptForManualCompact(
 ): Promise<{ trimmed: false } | { archivedPath: string; kept: number; trimmed: true }> {
   const resolved = resolveSqliteTranscriptScope(scope);
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openBotAgentDatabase(toDatabaseOptions(resolved));
     const snapshot = readSqliteTranscriptSnapshot(database, resolved.sessionId);
     const sessionSnapshot = readSqliteSessionEntrySelectionSnapshot(
       database,
@@ -179,7 +179,7 @@ export async function trimSqliteTranscriptForManualCompact(
     // Retain them on failure so a sibling operation never loses its durable proof.
     let previousIdentity = new Map<string, SessionEntry>();
     let currentIdentity = new Map<string, SessionEntry>();
-    runOpenClawAgentWriteTransaction((writeDatabase) => {
+    runBotAgentWriteTransaction((writeDatabase) => {
       assertSqliteTranscriptSnapshotUnchanged(writeDatabase, resolved.sessionId, snapshot.rows);
       const freshSessionSnapshot = readSqliteSessionEntrySelectionSnapshot(
         writeDatabase,
@@ -229,7 +229,7 @@ export async function importSqliteSessionRows(
   });
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
     let transcriptEvents = 0;
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       const currentEntry = readSessionEntryRow(database, resolved.sessionKey)?.entry;
       const preservedHarnessId =
         params.entry.agentHarnessId === undefined &&
@@ -300,7 +300,7 @@ export async function appendSqliteTranscriptEvent(
   assertNonMessageTranscriptEvent(event);
   const resolved = resolveSqliteTranscriptScope(scope);
   await runExclusiveSqliteSessionWrite(resolved, async () => {
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       appendTranscriptEventInTransaction(database, resolved, event);
     }, toDatabaseOptions(resolved));
   });
@@ -314,7 +314,7 @@ export function appendSqliteTranscriptEventSync(
   assertNonMessageTranscriptEvent(event);
   const resolved = resolveSqliteTranscriptScope(scope);
   let appended = false;
-  runOpenClawAgentWriteTransaction((database) => {
+  runBotAgentWriteTransaction((database) => {
     const fresh = readSessionEntryRow(database, resolved.sessionKey);
     if (!fresh || fresh.entry.sessionId !== resolved.sessionId) {
       return;
@@ -329,7 +329,7 @@ export async function appendSqliteExpectedSessionTranscriptTurn(
   scope: SessionTranscriptWriteScope,
   options: {
     atomicGroup?: boolean;
-    config?: import("../types.openclaw.js").OpenClawConfig;
+    config?: import("../types.bot.js").BotConfig;
     cwd?: string;
     expectedLifecycleRevision?: string;
     expectedSessionState?: SessionTranscriptTurnExpectedState;
@@ -345,7 +345,7 @@ export async function appendSqliteExpectedSessionTranscriptTurn(
     sessionId: options.expectedSessionId,
   });
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openBotAgentDatabase(toDatabaseOptions(resolved));
     const preparedEntry = readSessionEntryRow(database, resolved.sessionKey);
     if (!sessionMatchesExpectedTranscriptTurn(preparedEntry, options)) {
       return sqliteSessionTranscriptTurnRebound(preparedEntry, options.sessionFile);
@@ -366,7 +366,7 @@ export async function appendSqliteExpectedSessionTranscriptTurn(
     );
     let previousIdentity = new Map<string, SessionEntry>();
     let currentIdentity = new Map<string, SessionEntry>();
-    runOpenClawAgentWriteTransaction((transactionDb) => {
+    runBotAgentWriteTransaction((transactionDb) => {
       const fresh = readSessionEntryRow(transactionDb, resolved.sessionKey);
       if (!sessionMatchesExpectedTranscriptTurn(fresh, options)) {
         result = sqliteSessionTranscriptTurnRebound(fresh, options.sessionFile);
@@ -468,7 +468,7 @@ export async function appendSqliteTranscriptMessage<TMessage>(
   const resolved = resolveSqliteTranscriptScope(scope);
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
     let result: TranscriptMessageAppendResult<TMessage> | undefined;
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       result = appendSqliteTranscriptMessageInTransaction(database, resolved, options);
     }, toDatabaseOptions(resolved));
     return result;
@@ -482,7 +482,7 @@ export function appendSqliteTranscriptMessageSync<TMessage>(
 ): TranscriptMessageAppendResult<TMessage> | undefined {
   const resolved = resolveSqliteTranscriptScope(scope);
   let result: TranscriptMessageAppendResult<TMessage> | undefined;
-  runOpenClawAgentWriteTransaction((database) => {
+  runBotAgentWriteTransaction((database) => {
     const fresh = readSessionEntryRow(database, resolved.sessionKey);
     if (!fresh || fresh.entry.sessionId !== resolved.sessionId) {
       return;
@@ -499,7 +499,7 @@ export async function withSqliteTranscriptWriteLock<T>(
 ): Promise<T> {
   const resolved = resolveSqliteTranscriptScope(scope);
   return await runExclusiveSqliteSessionWrite(resolved, async () => {
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+    const database = openBotAgentDatabase(toDatabaseOptions(resolved));
     let transcriptSnapshot: SqliteTranscriptSnapshotState | undefined;
     return await run({
       readEvents: async () => {
@@ -512,7 +512,7 @@ export async function withSqliteTranscriptWriteLock<T>(
           throw new SqliteTranscriptMutationConflictError(resolved.sessionId);
         }
         const expectedSnapshot = transcriptSnapshot?.rows;
-        const nextSnapshot = runOpenClawAgentWriteTransaction((writeDatabase) => {
+        const nextSnapshot = runBotAgentWriteTransaction((writeDatabase) => {
           if (expectedSnapshot !== undefined) {
             // The writer queue is process-local. Revalidate after BEGIN IMMEDIATE
             // so a committed cross-process append cannot be deleted by the rewrite.
@@ -531,7 +531,7 @@ export async function withSqliteTranscriptWriteLock<T>(
         let result: TranscriptMessageAppendResult<unknown> | undefined;
         const snapshotState = transcriptSnapshot;
         let nextSnapshotState = snapshotState;
-        runOpenClawAgentWriteTransaction((writeDatabase) => {
+        runBotAgentWriteTransaction((writeDatabase) => {
           const snapshotStillCurrent =
             snapshotState?.kind === "current"
               ? isSqliteTranscriptSnapshotUnchanged(
@@ -564,7 +564,7 @@ export async function withSqliteTranscriptWriteTransaction<T>(
 ): Promise<T> {
   const resolved = resolveSqliteTranscriptScope(scope);
   return await runExclusiveSqliteSessionWrite(resolved, async () =>
-    runOpenClawAgentWriteTransaction(
+    runBotAgentWriteTransaction(
       () => run({ sessionFile: formatSqliteSessionMarkerForScope(resolved) }),
       toDatabaseOptions(resolved),
       { operationLabel: "session.transcript.batch" },
@@ -573,7 +573,7 @@ export async function withSqliteTranscriptWriteTransaction<T>(
 }
 
 function isSqliteTranscriptSnapshotUnchanged(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
   expected: readonly SqliteTranscriptSnapshotRow[],
 ): boolean {
@@ -588,7 +588,7 @@ function isSqliteTranscriptSnapshotUnchanged(
 }
 
 function assertSqliteTranscriptSnapshotUnchanged(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   sessionId: string,
   expected: readonly SqliteTranscriptSnapshotRow[],
 ): void {
@@ -598,7 +598,7 @@ function assertSqliteTranscriptSnapshotUnchanged(
 }
 
 function appendSqliteTranscriptMessageInTransaction<TMessage>(
-  database: OpenClawAgentDatabase,
+  database: BotAgentDatabase,
   resolved: ResolvedTranscriptScope,
   options: TranscriptMessageAppendOptions<TMessage> & { messageAlreadyRedacted?: boolean },
 ): TranscriptMessageAppendResult<TMessage> | undefined {

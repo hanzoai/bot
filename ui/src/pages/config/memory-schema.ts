@@ -5,7 +5,7 @@
 // about which `memory.*` children are reachable and where a match lives, so
 // those answers live here rather than in the view module — importing the view
 // from search would pull lit, hub-tabs, and settings-ui into the startup chunk.
-import { asNullableRecord as asConfigRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord as asConfigRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { resolveSlotSelection } from "../../../../src/plugins/slots.ts";
 
 export type MemoryTab = "overview" | "search" | "dreaming";

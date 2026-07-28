@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Internal state and composed-registry view for the global hook runner.
 import { resolveGlobalSingleton } from "../shared/global-singleton.js";
 import type { GlobalHookRunnerRegistry } from "./hook-registry.types.js";
@@ -20,7 +20,7 @@ type HookRunnerGlobalState = {
   registry: TrustedPolicyHookRunnerRegistry | null;
 };
 
-const hookRunnerGlobalStateKey = Symbol.for("openclaw.plugins.hook-runner-global-state");
+const hookRunnerGlobalStateKey = Symbol.for("bot.plugins.hook-runner-global-state");
 
 export function getHookRunnerGlobalState(): HookRunnerGlobalState {
   return resolveGlobalSingleton<HookRunnerGlobalState>(hookRunnerGlobalStateKey, () => ({

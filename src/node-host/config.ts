@@ -9,12 +9,12 @@ import {
   executeSqliteQueryTakeFirstSync,
   getNodeSqliteKysely,
 } from "../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+  type BotStateDatabaseOptions,
+} from "../state/bot-state-db.js";
 
 /** Gateway endpoint metadata persisted with node-host config. */
 export type NodeHostGatewayConfig = {
@@ -22,7 +22,7 @@ export type NodeHostGatewayConfig = {
   port?: number;
   tls?: boolean;
   tlsFingerprint?: string;
-  /** Gateway WebSocket context path (e.g. "/openclaw-gw"). */
+  /** Gateway WebSocket context path (e.g. "/bot-gw"). */
   contextPath?: string;
 };
 
@@ -39,12 +39,12 @@ export const NODE_HOST_CONFIG_KEY = "current";
 export const LEGACY_NODE_HOST_CONFIG_FILE = "node.json";
 export const LEGACY_NODE_HOST_CONFIG_CLAIM_SUFFIX = ".doctor-importing";
 
-type NodeHostConfigDatabase = Pick<OpenClawStateKyselyDatabase, "node_host_config">;
+type NodeHostConfigDatabase = Pick<BotStateKyselyDatabase, "node_host_config">;
 type NodeHostConfigRow = Selectable<NodeHostConfigDatabase["node_host_config"]>;
 type NodeHostConfigRuntimeRow = Omit<NodeHostConfigRow, "token">;
 type NodeHostConfigInsert = Insertable<NodeHostConfigDatabase["node_host_config"]>;
 
-function databaseOptions(env: NodeJS.ProcessEnv): OpenClawStateDatabaseOptions {
+function databaseOptions(env: NodeJS.ProcessEnv): BotStateDatabaseOptions {
   return { env };
 }
 
@@ -78,7 +78,7 @@ function assertNodeHostLegacyStateMigrated(env: NodeJS.ProcessEnv = process.env)
     return;
   }
   throw new Error(
-    `retired node-host state remains at ${sourcePath}; stop the node host and run \`openclaw doctor --fix\``,
+    `retired node-host state remains at ${sourcePath}; stop the node host and run \`bot doctor --fix\``,
   );
 }
 
@@ -175,7 +175,7 @@ function configToRow(params: {
 }
 
 function readNodeHostConfigRow(
-  database: ReturnType<typeof openOpenClawStateDatabase>,
+  database: ReturnType<typeof openBotStateDatabase>,
 ): NodeHostConfigRuntimeRow | undefined {
   return executeSqliteQueryTakeFirstSync(
     database.db,
@@ -203,7 +203,7 @@ export async function loadNodeHostConfig(
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<NodeHostConfig | null> {
   assertNodeHostLegacyStateMigrated(env);
-  const database = openOpenClawStateDatabase(databaseOptions(env));
+  const database = openBotStateDatabase(databaseOptions(env));
   const row = readNodeHostConfigRow(database);
   return row ? rowToNodeHostConfig(row) : null;
 }
@@ -234,7 +234,7 @@ export async function configureNodeHost(params: {
     throw new Error("invalid node-host updatedAtMs: expected a non-negative integer");
   }
 
-  const config = runOpenClawStateWriteTransaction((database) => {
+  const config = runBotStateWriteTransaction((database) => {
     const { db } = database;
     const existingRow = readNodeHostConfigRow(database);
     const existing = existingRow ? rowToNodeHostConfig(existingRow) : null;

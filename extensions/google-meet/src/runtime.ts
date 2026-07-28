@@ -1,7 +1,7 @@
 // Google Meet composes platform strategies with the shared meeting session runtime.
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   createMeetingSession,
   MeetingPlatformAdapter,
@@ -9,10 +9,10 @@ import {
   type MeetingSessionLeaveResult,
   type MeetingSessionRuntimeHandles,
   type MeetingSessionRuntimeJoinContext,
-} from "openclaw/plugin-sdk/meeting-runtime";
-import type { PluginRuntime, RuntimeLogger } from "openclaw/plugin-sdk/plugin-runtime";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/meeting-runtime";
+import type { PluginRuntime, RuntimeLogger } from "bot/plugin-sdk/plugin-runtime";
+import { normalizeAgentId } from "bot/plugin-sdk/routing";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import type {
   GoogleMeetConfig,
   GoogleMeetMode,
@@ -98,7 +98,7 @@ export class GoogleMeetRuntime {
   constructor(
     private readonly params: {
       config: GoogleMeetConfig;
-      fullConfig: OpenClawConfig;
+      fullConfig: BotConfig;
       runtime: PluginRuntime;
       logger: RuntimeLogger;
     },
@@ -131,7 +131,7 @@ export class GoogleMeetRuntime {
           audioBridgeUnavailable: "Realtime speech requires an active Chrome audio bridge.",
           browserUnverified: "Google Meet browser state has not been verified yet.",
           microphoneMuted:
-            "Turn on the OpenClaw Google Meet microphone before asking OpenClaw to speak.",
+            "Turn on the Bot Google Meet microphone before asking Bot to speak.",
           microphoneMutedReason: "meet-microphone-muted",
           notInCall: "Google Meet has not reported that the browser participant is in the call.",
           notInCallReason: "not-in-call",

@@ -1,5 +1,5 @@
 // Gateway event payload constants shared by server broadcasts and UI clients.
-/** Event name emitted when a newer OpenClaw version is available. */
+/** Event name emitted when a newer Bot version is available. */
 export const GATEWAY_EVENT_UPDATE_AVAILABLE = "update.available" as const;
 
 /** Version metadata included in update-available gateway events. */

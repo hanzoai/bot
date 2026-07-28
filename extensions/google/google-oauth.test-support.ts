@@ -34,20 +34,20 @@ function requireTestApi(key: string): unknown {
 
 export function clearGoogleOAuthCredentialsCache(): void {
   (
-    requireTestApi("openclaw.google.oauthCredentialsTestApi") as OAuthCredentialsTestApi
+    requireTestApi("bot.google.oauthCredentialsTestApi") as OAuthCredentialsTestApi
   ).clearCredentialsCache();
 }
 
 export function setGoogleOAuthCredentialsFs(overrides?: Partial<CredentialFs>): void {
-  (requireTestApi("openclaw.google.oauthCredentialsTestApi") as OAuthCredentialsTestApi).setFs(
+  (requireTestApi("bot.google.oauthCredentialsTestApi") as OAuthCredentialsTestApi).setFs(
     overrides,
   );
 }
 
 export function setGoogleOAuthSettingsFs(overrides?: Partial<OAuthSettingsFs>): void {
-  (requireTestApi("openclaw.google.oauthSettingsTestApi") as OAuthSettingsTestApi).setFs(overrides);
+  (requireTestApi("bot.google.oauthSettingsTestApi") as OAuthSettingsTestApi).setFs(overrides);
 }
 
 export function resetGoogleVertexAdcState(): void {
-  (requireTestApi("openclaw.google.vertexAdcTestApi") as VertexAdcTestApi).reset();
+  (requireTestApi("bot.google.vertexAdcTestApi") as VertexAdcTestApi).reset();
 }

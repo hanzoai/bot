@@ -14,7 +14,7 @@ import type {
 } from "../../api/types.ts";
 import { icons } from "../../components/icons.ts";
 import "../../components/modal-dialog.ts";
-import type { OpenClawModalDialog } from "../../components/modal-dialog.ts";
+import type { BotModalDialog } from "../../components/modal-dialog.ts";
 import "../../components/tooltip.ts";
 import {
   renderSettingsEmpty,
@@ -268,7 +268,7 @@ export function renderAgentChannels(params: {
                   ? html`
                       <a
                         class="settings-row__value"
-                        href="https://docs.openclaw.ai/channels"
+                        href="https://docs.bot.ai/channels"
                         target="_blank"
                         rel="noopener"
                         >${t("agents.channels.setupGuide")}</a
@@ -520,7 +520,7 @@ export function renderAgentFiles(params: {
                               const btn = e.currentTarget as HTMLElement;
                               btn
                                 .closest(".settings-group")
-                                ?.querySelector<OpenClawModalDialog>("openclaw-modal-dialog")
+                                ?.querySelector<BotModalDialog>("bot-modal-dialog")
                                 ?.show();
                             }}
                           >
@@ -561,10 +561,10 @@ export function renderAgentFiles(params: {
                             )}
                         ></textarea>
                       </label>
-                      <openclaw-modal-dialog
+                      <bot-modal-dialog
                         manual
                         label=${activeEntry.name}
-                        style="--openclaw-modal-width: min(1040px, calc(100vw - 32px));"
+                        style="--bot-modal-width: min(1040px, calc(100vw - 32px));"
                         @modal-cancel=${(e: Event) => {
                           resetAgentFilePreview(e.currentTarget as HTMLElement);
                         }}
@@ -590,7 +590,7 @@ export function renderAgentFiles(params: {
                               </div>
                             </div>
                             <div class="md-preview-dialog__actions">
-                              <openclaw-tooltip .content=${t("agents.files.expandPreview")}>
+                              <bot-tooltip .content=${t("agents.files.expandPreview")}>
                                 <button
                                   type="button"
                                   class="btn btn--sm md-preview-icon-btn md-preview-expand-btn"
@@ -604,7 +604,7 @@ export function renderAgentFiles(params: {
                                     }
                                     const isFullscreen = panel.classList.toggle("fullscreen");
                                     btn
-                                      .closest("openclaw-modal-dialog")
+                                      .closest("bot-modal-dialog")
                                       ?.classList.toggle("fullscreen", isFullscreen);
                                     setPreviewExpandButtonState(btn, isFullscreen);
                                   }}
@@ -615,16 +615,16 @@ export function renderAgentFiles(params: {
                                     >${icons.minimize}</span
                                   >
                                 </button>
-                              </openclaw-tooltip>
-                              <openclaw-tooltip .content=${t("agents.files.editFile")}>
+                              </bot-tooltip>
+                              <bot-tooltip .content=${t("agents.files.editFile")}>
                                 <button
                                   type="button"
                                   class="btn btn--sm md-preview-icon-btn"
                                   aria-label=${t("agents.files.editFile")}
                                   @click=${(e: Event) => {
                                     const modal = (e.currentTarget as HTMLElement).closest(
-                                      "openclaw-modal-dialog",
-                                    ) as OpenClawModalDialog | null;
+                                      "bot-modal-dialog",
+                                    ) as BotModalDialog | null;
                                     modal?.hide();
                                     if (modal) {
                                       resetAgentFilePreview(modal);
@@ -636,16 +636,16 @@ export function renderAgentFiles(params: {
                                 >
                                   <span aria-hidden="true">${icons.edit}</span>
                                 </button>
-                              </openclaw-tooltip>
-                              <openclaw-tooltip .content=${t("agents.files.closePreview")}>
+                              </bot-tooltip>
+                              <bot-tooltip .content=${t("agents.files.closePreview")}>
                                 <button
                                   type="button"
                                   class="btn btn--sm md-preview-icon-btn"
                                   aria-label=${t("agents.files.closePreview")}
                                   @click=${(e: Event) => {
                                     const modal = (e.currentTarget as HTMLElement).closest(
-                                      "openclaw-modal-dialog",
-                                    ) as OpenClawModalDialog | null;
+                                      "bot-modal-dialog",
+                                    ) as BotModalDialog | null;
                                     modal?.hide();
                                     if (modal) {
                                       resetAgentFilePreview(modal);
@@ -654,7 +654,7 @@ export function renderAgentFiles(params: {
                                 >
                                   <span aria-hidden="true">${icons.x}</span>
                                 </button>
-                              </openclaw-tooltip>
+                              </bot-tooltip>
                             </div>
                           </div>
                           <div class="md-preview-dialog__meta">
@@ -682,7 +682,7 @@ export function renderAgentFiles(params: {
                             </article>
                           </div>
                         </div>
-                      </openclaw-modal-dialog>
+                      </bot-modal-dialog>
                     `}
               </div>
             `,

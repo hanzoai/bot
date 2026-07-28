@@ -1,32 +1,32 @@
 // Memory Core plugin module implements session search visibility behavior.
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/memory-core-host-runtime-core";
-import type { MemorySearchResult } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import { resolveSessionAgentId } from "openclaw/plugin-sdk/memory-host-core";
-import type { OpenClawPluginToolContext } from "openclaw/plugin-sdk/plugin-entry";
-import { sessionDeliveryOrigin } from "openclaw/plugin-sdk/session-store-runtime";
+import type { BotConfig } from "bot/plugin-sdk/memory-core-host-runtime-core";
+import type { MemorySearchResult } from "bot/plugin-sdk/memory-core-host-runtime-files";
+import { resolveSessionAgentId } from "bot/plugin-sdk/memory-host-core";
+import type { BotPluginToolContext } from "bot/plugin-sdk/plugin-entry";
+import { sessionDeliveryOrigin } from "bot/plugin-sdk/session-store-runtime";
 import {
   extractTranscriptIdentityFromSessionsMemoryHit,
   loadCombinedSessionStoreForGateway,
   resolveSessionTranscriptMemoryHitKeyToSessionKeys,
   resolveTranscriptStemToSessionKeys,
-} from "openclaw/plugin-sdk/session-transcript-hit";
+} from "bot/plugin-sdk/session-transcript-hit";
 import {
   createAgentToAgentPolicy,
   createSessionVisibilityGuard,
   resolveEffectiveSessionToolsVisibility,
-} from "openclaw/plugin-sdk/session-visibility";
+} from "bot/plugin-sdk/session-visibility";
 import { readQmdSessionArtifactIdentity } from "./qmd-session-artifacts.js";
 
 function normalizeAgentIdForCompare(value: string | undefined): string | undefined {
   return value?.trim().toLowerCase() || undefined;
 }
 
-function isGlobalSessionKeyForSharedScope(cfg: OpenClawConfig, key: string): boolean {
+function isGlobalSessionKeyForSharedScope(cfg: BotConfig, key: string): boolean {
   return cfg.session?.scope === "global" && key.trim().toLowerCase() === "global";
 }
 
-type ConversationRecallContext = NonNullable<OpenClawPluginToolContext["conversationRecall"]>;
+type ConversationRecallContext = NonNullable<BotPluginToolContext["conversationRecall"]>;
 
 type SessionStore = ReturnType<typeof loadCombinedSessionStoreForGateway>["store"];
 
@@ -135,7 +135,7 @@ function isTrustedRecallRequester(params: {
 }
 
 function filterSessionKeysByScopedAgent(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   keys: string[];
   scopedAgentId: string | undefined;
 }): string[] {
@@ -156,7 +156,7 @@ function filterSessionKeysByScopedAgent(params: {
 }
 
 export async function filterMemorySearchHitsBySessionVisibility(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   requesterSessionKey: string | undefined;
   sandboxed: boolean;

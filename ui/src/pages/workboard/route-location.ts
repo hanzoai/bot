@@ -1,5 +1,5 @@
 import type { RouteLocation } from "@openclaw/uirouter";
-import { isValidWorkboardBoardId } from "@openclaw/workboard-contract";
+import { isValidWorkboardBoardId } from "@hanzo/bot-workboard-contract";
 import {
   pathForRoute,
   pathForWorkboardBoard,

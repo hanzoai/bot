@@ -29,8 +29,8 @@ import {
 } from "../config/sessions/sqlite-marker.js";
 import { selectVisibleTranscriptEvents } from "../config/sessions/transcript-visible-events.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
+import type { BotConfig } from "../config/types.bot.js";
+import { resolveBotAgentSqlitePath } from "../state/bot-agent-db.js";
 import { runTasksWithConcurrency } from "../utils/run-with-concurrency.js";
 import {
   createUsageCostResolver,
@@ -175,7 +175,7 @@ function listUsageCountedSqliteTranscriptStats(
 function formatCanonicalUsageCostSqliteMarker(marker: SqliteSessionFileMarker): string {
   const storePath =
     resolveSqliteTargetFromSessionStorePath(marker.storePath, { agentId: marker.agentId }).path ??
-    resolveOpenClawAgentSqlitePath({ agentId: marker.agentId });
+    resolveBotAgentSqlitePath({ agentId: marker.agentId });
   return formatSqliteSessionFileMarker({ ...marker, storePath });
 }
 
@@ -339,7 +339,7 @@ export async function* readTranscriptRecordsBestEffort(
 
 export async function scanUsageFile(params: {
   filePath: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   resolveCost?: UsageCostResolver;
   startOffset?: number;
   endOffset?: number;

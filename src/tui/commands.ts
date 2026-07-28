@@ -1,6 +1,6 @@
 // Defines TUI slash commands and their help metadata.
 import type { SlashCommand } from "@earendil-works/pi-tui";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import type { CommandEntry } from "../../packages/gateway-protocol/src/index.js";
 import {
   listChatCommands,
@@ -13,7 +13,7 @@ import {
   type ReasoningLevel,
   type VerboseLevel,
 } from "../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 
 const VERBOSE_LEVELS = ["on", "off", "full"] satisfies VerboseLevel[];
 const TRACE_LEVELS = ["on", "off"];
@@ -29,7 +29,7 @@ type ParsedCommand = {
 };
 
 type SlashCommandOptions = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider?: string;
   model?: string;
   agentRuntime?: string;
@@ -39,7 +39,7 @@ type SlashCommandOptions = {
 };
 
 const COMMAND_ALIASES: Record<string, string> = {
-  crestodian: "openclaw", // hidden alias
+  crestodian: "bot", // hidden alias
   gwstatus: "gateway-status",
 };
 
@@ -127,7 +127,7 @@ export function getSlashCommands(options: SlashCommandOptions = {}): SlashComman
     ...(options.local ? [{ name: "auth", description: "Run provider auth/login flow" }] : []),
     { name: "agent", description: "Switch agent (or open picker)" },
     { name: "agents", description: "Open agent picker" },
-    { name: "openclaw", description: "Return to OpenClaw" },
+    { name: "bot", description: "Return to Bot" },
     { name: "session", description: "Switch session (or open picker)" },
     { name: "sessions", description: "Open session picker" },
     {
@@ -255,7 +255,7 @@ export function helpText(options: SlashCommandOptions = {}): string {
     "/gwstatus",
     ...(options.local ? ["/auth [provider]"] : []),
     "/agent <id> (or /agents)",
-    "/openclaw [request]",
+    "/bot [request]",
     "/session <key> (or /sessions)",
     "/model <provider/model> (or /models)",
     `/think <${thinkLevels}>`,

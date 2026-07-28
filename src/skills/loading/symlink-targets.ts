@@ -1,13 +1,13 @@
 // Shared helpers for config-trusted skill symlink targets.
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
+import type { BotConfig } from "../../config/types.bot.js";
 import { isPathInside } from "../../infra/path-guards.js";
 import { resolveUserPath } from "../../utils.js";
 
-export function resolveAllowedSkillSymlinkTargetRealPaths(config?: OpenClawConfig): string[] {
+export function resolveAllowedSkillSymlinkTargetRealPaths(config?: BotConfig): string[] {
   const rawTargets = config?.skills?.load?.allowSymlinkTargets ?? [];
   const targetPaths = rawTargets
     .map((dir) => normalizeOptionalString(dir) ?? "")

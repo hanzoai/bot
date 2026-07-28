@@ -1,7 +1,7 @@
 // Session ids deliberately use per-tab storage: attach is a takeover, so shared
 // local storage could let one Control UI window steal another window's shells.
 
-const TERMINAL_SESSIONS_KEY = "openclaw.terminal.sessions.v1";
+const TERMINAL_SESSIONS_KEY = "bot.terminal.sessions.v1";
 
 export function loadPersistedTerminalSessionIds(): string[] {
   try {

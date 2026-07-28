@@ -5,7 +5,7 @@
  * navigation policy checks, media storage, and screenshot normalization.
  */
 import path from "node:path";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { getImageMetadata } from "../../media/media-services.js";
 import { ensureMediaDir, saveMediaBuffer } from "../../media/store.js";
 import {
@@ -69,7 +69,7 @@ import { readRoutePositiveInteger } from "./route-numeric.js";
 import type { BrowserResponse, BrowserRouteRegistrar } from "./types.js";
 import { jsonError, runProfileRouteOperation, toBoolean, toStringOrEmpty } from "./utils.js";
 
-const CHROME_MCP_OVERLAY_ATTR = "data-openclaw-mcp-overlay";
+const CHROME_MCP_OVERLAY_ATTR = "data-bot-mcp-overlay";
 
 type ChromeMcpSnapshotOperation = ChromeMcpOperationOptions & {
   profileName: string;

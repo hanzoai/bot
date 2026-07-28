@@ -1,4 +1,4 @@
-import type { AgentMessage } from "@openclaw/agent-core";
+import type { AgentMessage } from "@hanzo/bot-agent-core";
 /**
  * Transcript repair helpers for tool-call replay.
  *
@@ -9,7 +9,7 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { isThinkingLikeBlock } from "./thinking-block.js";
 import {
   extractToolCallsFromAssistant,
@@ -183,8 +183,8 @@ function hasSessionsSpawnAttachmentToolCall(content: unknown[]): boolean {
 }
 
 const DEFAULT_MISSING_TOOL_RESULT_TEXT =
-  "[openclaw] missing tool result in session history; inserted synthetic error result for transcript repair.";
-const SYNTHETIC_MISSING_TOOL_RESULT_DETAIL_KEY = "openclawSyntheticMissingToolResult";
+  "[bot] missing tool result in session history; inserted synthetic error result for transcript repair.";
+const SYNTHETIC_MISSING_TOOL_RESULT_DETAIL_KEY = "botSyntheticMissingToolResult";
 
 function makeMissingToolResult(params: {
   toolCallId: string;
@@ -193,7 +193,7 @@ function makeMissingToolResult(params: {
   // function_call_output normalization; live coverage in
   // openai-reasoning-compat.live.test.ts and tool-replay-repair.live.test.ts
   // sends this repaired history to real models. Other providers keep the older,
-  // explicit OpenClaw diagnostic text unless the caller opts in.
+  // explicit Bot diagnostic text unless the caller opts in.
   text?: string;
 }): Extract<AgentMessage, { role: "toolResult" }> {
   return {

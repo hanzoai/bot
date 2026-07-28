@@ -66,7 +66,7 @@ describe("initial user message handoff", () => {
     const persisted = {
       role: "user",
       content: [{ type: "text", text: "show this while the run is active" }],
-      __openclaw: { seq: 1 },
+      __bot: { seq: 1 },
     };
     remountedSession.chatMessages = [persisted];
     expect(
@@ -127,7 +127,7 @@ describe("initial user message handoff", () => {
     const persisted = {
       role: "user",
       content: [{ type: "text", text: "history won the race" }],
-      __openclaw: { seq: 1 },
+      __bot: { seq: 1 },
     };
     const createdSession = { chatMessages: [persisted] as unknown[], client };
 
@@ -183,14 +183,14 @@ describe("initial user message handoff", () => {
           },
         ],
         timestamp: 123,
-        __openclaw: { idempotencyKey: "initial-image-send:user", seq: 1 },
+        __bot: { idempotencyKey: "initial-image-send:user", seq: 1 },
       },
     ]);
     const persisted = {
       role: "user",
       content: "inspect this image",
       idempotencyKey: "initial-image-send:user",
-      __openclaw: {
+      __bot: {
         id: "persisted-image-prompt",
         seq: 1,
         media: [{ path: "/media/image-1", contentType: "image/png" }],
@@ -208,7 +208,7 @@ describe("initial user message handoff", () => {
         content: (projectedMessage as { content: unknown }).content,
         timestamp: 123,
         idempotencyKey: "initial-image-send:user",
-        __openclaw: {
+        __bot: {
           id: "persisted-image-prompt",
           idempotencyKey: "initial-image-send:user",
           seq: 1,

@@ -6,19 +6,19 @@ import {
 } from "../auto-reply/thinking.js";
 /** Resolves the concrete harness runtime that owns the next agent turn. */
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveAgentHarnessPolicy } from "./harness/policy.js";
 import { resolveAutoAgentHarnessId } from "./harness/support.js";
 import { resolveSessionRuntimeOverrideForProvider } from "./session-runtime-compat.js";
 
 /** Convert residual auto policy into the built-in fallback when no registry selection is needed. */
 export function concretizeAgentRuntime(runtime: string): string {
-  return runtime === "auto" ? "openclaw" : runtime;
+  return runtime === "auto" ? "bot" : runtime;
 }
 
 /** Resolves an explicit session override before configured model/provider policy. */
 export function resolveEffectiveAgentRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider: string;
   modelId: string;
   agentId?: string;
@@ -47,7 +47,7 @@ export function resolveEffectiveAgentRuntime(params: {
         provider: params.provider,
         modelId: params.modelId,
         config: params.cfg,
-      }) ?? "openclaw"
+      }) ?? "bot"
     );
   }
   return concretizeAgentRuntime(runtime);
@@ -55,7 +55,7 @@ export function resolveEffectiveAgentRuntime(params: {
 
 /** Revalidates a turn-local thinking level after fallback selects its actual model/runtime. */
 export function resolveCandidateThinkingLevel(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider: string;
   modelId: string;
   level?: ThinkLevel;

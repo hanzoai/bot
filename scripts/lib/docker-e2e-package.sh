@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Shared package helpers for Docker E2E scripts.
-# Builds or resolves one OpenClaw npm tarball and exposes mount/build-context
+# Builds or resolves one Bot npm tarball and exposes mount/build-context
 # helpers so Docker lanes test the package artifact instead of repo sources.
 
 DOCKER_E2E_PACKAGE_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -19,7 +19,7 @@ if ! declare -F docker_e2e_docker_cmd >/dev/null 2>&1; then
 fi
 if ! declare -F docker_e2e_docker_run_resource_args >/dev/null 2>&1; then
   docker_e2e_resource_limits_disabled() {
-    case "${OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS:-}" in
+    case "${BOT_DOCKER_E2E_DISABLE_RESOURCE_LIMITS:-}" in
       1 | true | TRUE | yes | YES | on | ON)
         return 0
         ;;
@@ -37,8 +37,8 @@ if ! declare -F docker_e2e_docker_run_resource_args >/dev/null 2>&1; then
   }
 
   docker_e2e_detect_available_cpus() {
-    if [ -n "${OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS:-}" ]; then
-      printf '%s\n' "$OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS"
+    if [ -n "${BOT_DOCKER_E2E_AVAILABLE_CPUS:-}" ]; then
+      printf '%s\n' "$BOT_DOCKER_E2E_AVAILABLE_CPUS"
       return 0
     fi
     if command -v nproc >/dev/null 2>&1; then
@@ -83,7 +83,7 @@ if ! declare -F docker_e2e_docker_run_resource_args >/dev/null 2>&1; then
   docker_e2e_resolve_pids_limit() {
     local pids_limit="$1"
     if [[ ! "$pids_limit" =~ ^[0-9]+$ ]] || (( 10#$pids_limit < 1 )); then
-      echo "invalid OPENCLAW_DOCKER_E2E_PIDS_LIMIT: $pids_limit" >&2
+      echo "invalid BOT_DOCKER_E2E_PIDS_LIMIT: $pids_limit" >&2
       return 2
     fi
     printf '%s\n' "$((10#$pids_limit))"
@@ -95,9 +95,9 @@ if ! declare -F docker_e2e_docker_run_resource_args >/dev/null 2>&1; then
       return 0
     fi
 
-    local memory="${OPENCLAW_DOCKER_E2E_MEMORY:-8g}"
-    local cpus="${OPENCLAW_DOCKER_E2E_CPUS:-16}"
-    local pids_limit="${OPENCLAW_DOCKER_E2E_PIDS_LIMIT:-2048}"
+    local memory="${BOT_DOCKER_E2E_MEMORY:-8g}"
+    local cpus="${BOT_DOCKER_E2E_CPUS:-16}"
+    local pids_limit="${BOT_DOCKER_E2E_PIDS_LIMIT:-2048}"
     cpus="$(docker_e2e_resolve_cpus "$cpus")"
 
     if ! docker_e2e_resource_value_disabled "$memory" && ! docker_e2e_run_arg_present --memory "$@"; then
@@ -140,11 +140,11 @@ if ! declare -F docker_e2e_docker_run_cmd >/dev/null 2>&1; then
       shift
       docker_e2e_docker_run_resource_args "$@" || return $?
       docker_e2e_docker_run_with_resource_diagnostics \
-        "${DOCKER_COMMAND_TIMEOUT:-${OPENCLAW_DOCKER_E2E_RUN_TIMEOUT:-3600s}}" \
+        "${DOCKER_COMMAND_TIMEOUT:-${BOT_DOCKER_E2E_RUN_TIMEOUT:-3600s}}" \
         "$@"
       return
     fi
-    docker_e2e_timeout_cmd "${DOCKER_COMMAND_TIMEOUT:-${OPENCLAW_DOCKER_E2E_RUN_TIMEOUT:-3600s}}" docker "$@"
+    docker_e2e_timeout_cmd "${DOCKER_COMMAND_TIMEOUT:-${BOT_DOCKER_E2E_RUN_TIMEOUT:-3600s}}" docker "$@"
   }
 fi
 
@@ -245,7 +245,7 @@ docker_e2e_restore_package_dist_from_image() (
   fi
   if [ "$requires_ai_dist" = "1" ] && \
     ! docker_e2e_docker_cmd cp \
-      "${container_id}:/app/node_modules/@openclaw/ai/dist" \
+      "${container_id}:/app/node_modules/@hanzo/bot-ai/dist" \
       "$temp_dir/ai-dist"; then
     cleanup_restore_package_dist
     return 1
@@ -296,11 +296,11 @@ docker_e2e_restore_package_dist_from_image() (
 
 docker_e2e_prepare_package_tgz() {
   local label="$1"
-  local package_tgz="${2:-${OPENCLAW_CURRENT_PACKAGE_TGZ:-}}"
+  local package_tgz="${2:-${BOT_CURRENT_PACKAGE_TGZ:-}}"
 
   if [ -n "$package_tgz" ]; then
     if [ ! -f "$package_tgz" ]; then
-      echo "OpenClaw package tarball does not exist: $package_tgz" >&2
+      echo "Bot package tarball does not exist: $package_tgz" >&2
       return 1
     fi
     docker_e2e_abs_path "$package_tgz"
@@ -308,35 +308,35 @@ docker_e2e_prepare_package_tgz() {
   fi
 
   local pack_dir
-  pack_dir="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-docker-e2e-pack.XXXXXX")"
+  pack_dir="$(mktemp -d "${TMPDIR:-/tmp}/bot-docker-e2e-pack.XXXXXX")"
   local pack_status=0
   package_tgz="$(
-    node "$ROOT_DIR/scripts/package-openclaw-for-docker.mjs" \
+    node "$ROOT_DIR/scripts/package-bot-for-docker.mjs" \
       --allow-unreleased-changelog \
       --output-dir "$pack_dir" \
-      --output-name openclaw-current.tgz
+      --output-name bot-current.tgz
   )" || pack_status="$?"
   if [ "$pack_status" -ne 0 ]; then
     rm -rf "$pack_dir"
     return "$pack_status"
   fi
   if [ -z "$package_tgz" ]; then
-    echo "missing packed OpenClaw tarball" >&2
+    echo "missing packed Bot tarball" >&2
     rm -rf "$pack_dir"
     return 1
   fi
-  touch "$pack_dir/.openclaw-docker-e2e-generated-package"
+  touch "$pack_dir/.bot-docker-e2e-generated-package"
   docker_e2e_abs_path "$package_tgz"
 }
 
 docker_e2e_prepare_package_context() {
   local package_tgz="$1"
   local context_dir
-  context_dir="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-docker-e2e-package-context.XXXXXX")"
+  context_dir="$(mktemp -d "${TMPDIR:-/tmp}/bot-docker-e2e-package-context.XXXXXX")"
   # BuildKit named contexts must be directories, so expose the tarball as a
   # stable filename inside a tiny temporary context.
   local copy_status=0
-  cp "$package_tgz" "$context_dir/openclaw-current.tgz" || copy_status="$?"
+  cp "$package_tgz" "$context_dir/bot-current.tgz" || copy_status="$?"
   if [ "$copy_status" -ne 0 ]; then
     rm -rf "$context_dir"
     return "$copy_status"
@@ -346,24 +346,24 @@ docker_e2e_prepare_package_context() {
 
 docker_e2e_package_mount_args() {
   local package_tgz="$1"
-  local target="${2:-/tmp/openclaw-current.tgz}"
-  DOCKER_E2E_PACKAGE_ARGS=(-v "$package_tgz:$target:ro" -e "OPENCLAW_CURRENT_PACKAGE_TGZ=$target")
-  if [ -n "${OPENCLAW_E2E_NPM_INSTALL_TIMEOUT:-}" ]; then
-    DOCKER_E2E_PACKAGE_ARGS+=(-e "OPENCLAW_E2E_NPM_INSTALL_TIMEOUT=$OPENCLAW_E2E_NPM_INSTALL_TIMEOUT")
+  local target="${2:-/tmp/bot-current.tgz}"
+  DOCKER_E2E_PACKAGE_ARGS=(-v "$package_tgz:$target:ro" -e "BOT_CURRENT_PACKAGE_TGZ=$target")
+  if [ -n "${BOT_E2E_NPM_INSTALL_TIMEOUT:-}" ]; then
+    DOCKER_E2E_PACKAGE_ARGS+=(-e "BOT_E2E_NPM_INSTALL_TIMEOUT=$BOT_E2E_NPM_INSTALL_TIMEOUT")
   fi
-  if [ -n "${OPENCLAW_E2E_COMMAND_TIMEOUT:-}" ]; then
-    DOCKER_E2E_PACKAGE_ARGS+=(-e "OPENCLAW_E2E_COMMAND_TIMEOUT=$OPENCLAW_E2E_COMMAND_TIMEOUT")
+  if [ -n "${BOT_E2E_COMMAND_TIMEOUT:-}" ]; then
+    DOCKER_E2E_PACKAGE_ARGS+=(-e "BOT_E2E_COMMAND_TIMEOUT=$BOT_E2E_COMMAND_TIMEOUT")
   fi
 }
 
 docker_e2e_cleanup_package_tgz() {
   local package_tgz="${1:-}"
   [ -n "$package_tgz" ] || return 0
-  [ "$(basename "$package_tgz")" = "openclaw-current.tgz" ] || return 0
+  [ "$(basename "$package_tgz")" = "bot-current.tgz" ] || return 0
 
   local pack_dir
   pack_dir="$(dirname "$package_tgz")"
-  if [ -f "$pack_dir/.openclaw-docker-e2e-generated-package" ]; then
+  if [ -f "$pack_dir/.bot-docker-e2e-generated-package" ]; then
     rm -rf "$pack_dir"
   fi
 }
@@ -418,7 +418,7 @@ docker_e2e_run_with_harness() {
   local previous_int_trap
   local previous_term_trap
   local previous_hup_trap
-  cid_dir="$(mktemp -d "${TMPDIR:-/tmp}/openclaw-docker-e2e-container.XXXXXX")"
+  cid_dir="$(mktemp -d "${TMPDIR:-/tmp}/bot-docker-e2e-container.XXXXXX")"
   cidfile="$cid_dir/container.cid"
   previous_int_trap="$(trap -p INT || true)"
   previous_term_trap="$(trap -p TERM || true)"
@@ -457,7 +457,7 @@ docker_e2e_run_with_harness() {
       kill -TERM $descendant_pids 2>/dev/null || true
     fi
     kill -TERM "$docker_run_pid" 2>/dev/null || true
-    local grace_seconds="${OPENCLAW_DOCKER_E2E_CONTAINER_TERM_GRACE_SECONDS:-10}"
+    local grace_seconds="${BOT_DOCKER_E2E_CONTAINER_TERM_GRACE_SECONDS:-10}"
     if ! [[ "$grace_seconds" =~ ^[0-9]+$ ]] || [ "$grace_seconds" -lt 1 ]; then
       grace_seconds="10"
     else
@@ -550,7 +550,7 @@ docker_e2e_run_logged_print_with_harness() {
   local label="$1"
   shift
   local heartbeat_seconds
-  heartbeat_seconds="$(docker_e2e_read_positive_int_env OPENCLAW_DOCKER_E2E_LOG_HEARTBEAT_SECONDS 30)" || return $?
+  heartbeat_seconds="$(docker_e2e_read_positive_int_env BOT_DOCKER_E2E_LOG_HEARTBEAT_SECONDS 30)" || return $?
   run_logged_print_heartbeat \
     "$label" \
     "$heartbeat_seconds" \

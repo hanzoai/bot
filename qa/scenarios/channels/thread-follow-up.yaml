@@ -77,7 +77,7 @@ flow:
                     ref: senderId
                   senderName: QA Driver
                   text:
-                    expr: "`@openclaw Reply exactly: ${config.rootMarker}`"
+                    expr: "`@bot Reply exactly: ${config.rootMarker}`"
                 saveAs: rootInbound
               - waitForOutbound:
                   conversation:
@@ -108,7 +108,7 @@ flow:
               ref: senderId
             senderName: QA Driver
             text:
-              expr: "`${transport.id === 'qa-channel' ? '' : '@openclaw '}Reply exactly: ${config.replyMarker}`"
+              expr: "`${transport.id === 'qa-channel' ? '' : '@bot '}Reply exactly: ${config.replyMarker}`"
             threadId:
               ref: threadId
         - waitForOutbound:

@@ -1,7 +1,7 @@
 // Skill search/detail tests cover ClawHub search and detail gateway responses,
 // including validation and external error mapping.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const searchSkillsFromClawHubMock = vi.fn();
@@ -171,8 +171,8 @@ describe("skills.detail handler", () => {
         createdAt: 1700000000,
       },
       owner: {
-        handle: "openclaw",
-        displayName: "OpenClaw",
+        handle: "bot",
+        displayName: "Bot",
       },
     };
     fetchClawHubSkillDetailMock.mockResolvedValue(detail);

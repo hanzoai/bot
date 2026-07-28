@@ -1,5 +1,5 @@
 // OpenCode provider helpers expose auth and model defaults for the OpenCode-compatible plugin.
-import { createProviderApiKeyAuthMethod, type OpenClawConfig } from "./provider-auth-api-key.js";
+import { createProviderApiKeyAuthMethod, type BotConfig } from "./provider-auth-api-key.js";
 
 export { applyOpencodeZenModelDefault, OPENCODE_ZEN_DEFAULT_MODEL } from "./provider-onboard.js";
 
@@ -24,7 +24,7 @@ export function createOpencodeCatalogApiKeyAuthMethod(params: {
   /** Default model written when this catalog is selected. */
   defaultModel: string;
   /** Provider-specific config patch applied after shared API-key auth succeeds. */
-  applyConfig: (cfg: OpenClawConfig) => OpenClawConfig;
+  applyConfig: (cfg: BotConfig) => BotConfig;
   /** Setup note explaining how the shared OpenCode key is reused. */
   noteMessage: string;
   /** Wizard choice id for this catalog. */

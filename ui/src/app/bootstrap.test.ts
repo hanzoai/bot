@@ -360,7 +360,7 @@ describe("normalizeInitialApplicationLocation", () => {
       client,
       hello: {
         auth: { role: "operator", scopes: ["operator.admin"] },
-        features: { methods: ["openclaw.setup.detect"] },
+        features: { methods: ["bot.setup.detect"] },
       },
     } as Parameters<GatewayListener>[0]);
     await vi.waitFor(() => expect(replaceRoute).toHaveBeenCalledOnce());

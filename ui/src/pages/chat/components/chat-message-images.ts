@@ -209,7 +209,7 @@ async function resolveManagedOutgoingImageBlobUrl(
         headers.set("Authorization", `Bearer ${authToken}`);
       }
       if (requesterSessionKey) {
-        headers.set("x-openclaw-requester-session-key", requesterSessionKey);
+        headers.set("x-bot-requester-session-key", requesterSessionKey);
       }
       const controller = new AbortController();
       const timeout = setTimeout(() => {

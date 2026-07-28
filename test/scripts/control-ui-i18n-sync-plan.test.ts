@@ -113,7 +113,7 @@ describe("createControlUiLocaleSyncPlan", () => {
     expect(plan.newFallbackCount).toBe(1);
 
     const artifacts = plan.render({
-      defaultGlossary: [{ source: "OpenClaw", target: "OpenClaw" }],
+      defaultGlossary: [{ source: "Bot", target: "Bot" }],
       generatedAt: "2026-02-02T00:00:00.000Z",
       glossary: [],
       model: "legacy-model",
@@ -156,7 +156,7 @@ describe("createControlUiLocaleSyncPlan", () => {
       )}\n`,
     );
     expect(artifacts.glossary).toBe(
-      `${JSON.stringify([{ source: "OpenClaw", target: "OpenClaw" }], null, 2)}\n`,
+      `${JSON.stringify([{ source: "Bot", target: "Bot" }], null, 2)}\n`,
     );
     const clonedCache = {
       ...sharedCache,

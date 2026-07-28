@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { sortPromptCacheToolsByName } from "../utils/prompt-cache-stability.js";
 import { projectRuntimeToolInputSchema } from "./tool-schema-json-projection.js";
 

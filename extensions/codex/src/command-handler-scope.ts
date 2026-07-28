@@ -1,5 +1,5 @@
-import { resolveAgentDir, resolveSessionAgentIds } from "openclaw/plugin-sdk/agent-runtime";
-import type { PluginCommandContext } from "openclaw/plugin-sdk/plugin-entry";
+import { resolveAgentDir, resolveSessionAgentIds } from "bot/plugin-sdk/agent-runtime";
+import type { PluginCommandContext } from "bot/plugin-sdk/plugin-entry";
 import { resolveCodexAppServerAuthProfileIdForAgent } from "./app-server/auth-bridge.js";
 import { resolveCodexBindingAppServerConnection } from "./app-server/binding-connection.js";
 import {

@@ -2,7 +2,7 @@
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "bot/plugin-sdk/provider-model-shared";
 import { KIMI_K3_MODEL_IDS } from "./provider-policy-api.js";
 
 const KIMI_BASE_URL = "https://api.kimi.com/coding/";

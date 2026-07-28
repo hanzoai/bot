@@ -1,7 +1,7 @@
 // Test environment tests validate shared env setup helpers.
 import fs from "node:fs";
 import path from "node:path";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { deleteTestEnvValue, setTestEnvValue } from "../src/test-utils/env.js";
 import { cleanupTempDirs, makeTempDir } from "./helpers/temp-dir.js";
@@ -33,7 +33,7 @@ function writeFile(targetPath: string, content: string): void {
 }
 
 function createTempHome(): string {
-  return makeTempDir(tempDirs, "openclaw-test-env-real-home-");
+  return makeTempDir(tempDirs, "bot-test-env-real-home-");
 }
 
 function requireRecord(
@@ -73,23 +73,23 @@ afterEach(() => {
 describe("installTestEnv", () => {
   it("keeps live tests on a temp HOME while copying config and auth state", () => {
     const realHome = createTempHome();
-    const openClawHome = createTempHome();
+    const botHome = createTempHome();
     const priorIsolatedHome = createTempHome();
     writeFile(path.join(realHome, ".profile"), "export TEST_PROFILE_ONLY=from-profile\n");
     writeFile(
-      path.join(openClawHome, "custom-openclaw.json5"),
+      path.join(botHome, "custom-bot.json5"),
       `{
         // Preserve provider config, strip host-bound paths.
         agents: {
           defaults: {
             workspace: "/Users/peter/Projects",
-            agentDir: "/Users/peter/.openclaw/agents/main/agent",
+            agentDir: "/Users/peter/.bot/agents/main/agent",
           },
           list: [
             {
               id: "dev",
               workspace: "/Users/peter/dev-workspace",
-              agentDir: "/Users/peter/.openclaw/agents/dev/agent",
+              agentDir: "/Users/peter/.bot/agents/dev/agent",
             },
           ],
         },
@@ -116,13 +116,13 @@ describe("installTestEnv", () => {
         },
       }`,
     );
-    writeFile(path.join(openClawHome, ".openclaw", "credentials", "token.txt"), "secret\n");
+    writeFile(path.join(botHome, ".bot", "credentials", "token.txt"), "secret\n");
     writeFile(
-      path.join(openClawHome, ".openclaw", "external-plugins", "glueclaw", "openclaw.plugin.json"),
+      path.join(botHome, ".bot", "external-plugins", "glueclaw", "bot.plugin.json"),
       '{"id":"glueclaw"}\n',
     );
     writeFile(
-      path.join(openClawHome, ".openclaw", "agents", "main", "agent", "auth-profiles.json"),
+      path.join(botHome, ".bot", "agents", "main", "agent", "auth-profiles.json"),
       JSON.stringify({ version: 1, profiles: { default: { provider: "openai" } } }, null, 2),
     );
     writeFile(path.join(realHome, ".claude", ".credentials.json"), '{"accessToken":"token"}\n');
@@ -166,23 +166,23 @@ describe("installTestEnv", () => {
 
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
-    setTestEnvValue("OPENCLAW_HOME", openClawHome);
-    setTestEnvValue("OPENCLAW_LIVE_TEST", "1");
-    setTestEnvValue("OPENCLAW_LIVE_TEST_QUIET", "1");
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", "~/custom-openclaw.json5");
-    setTestEnvValue("OPENCLAW_TEST_HOME", priorIsolatedHome);
-    setTestEnvValue("OPENCLAW_STATE_DIR", path.join(priorIsolatedHome, ".openclaw"));
+    setTestEnvValue("BOT_HOME", botHome);
+    setTestEnvValue("BOT_LIVE_TEST", "1");
+    setTestEnvValue("BOT_LIVE_TEST_QUIET", "1");
+    setTestEnvValue("BOT_CONFIG_PATH", "~/custom-bot.json5");
+    setTestEnvValue("BOT_TEST_HOME", priorIsolatedHome);
+    setTestEnvValue("BOT_STATE_DIR", path.join(priorIsolatedHome, ".bot"));
 
     const testEnv = installTestEnv();
     cleanupFns.push(testEnv.cleanup);
 
     expect(testEnv.tempHome).not.toBe(realHome);
     expect(process.env.HOME).toBe(testEnv.tempHome);
-    expect(process.env.OPENCLAW_HOME).toBeUndefined();
-    expect(process.env.OPENCLAW_TEST_HOME).toBe(testEnv.tempHome);
+    expect(process.env.BOT_HOME).toBeUndefined();
+    expect(process.env.BOT_TEST_HOME).toBe(testEnv.tempHome);
     expect(process.env.TEST_PROFILE_ONLY).toBe("from-profile");
 
-    const copiedConfigPath = path.join(testEnv.tempHome, ".openclaw", "openclaw.json");
+    const copiedConfigPath = path.join(testEnv.tempHome, ".bot", "bot.json");
     const copiedConfig = JSON.parse(fs.readFileSync(copiedConfigPath, "utf8")) as {
       agents?: {
         defaults?: Record<string, unknown>;
@@ -219,22 +219,22 @@ describe("installTestEnv", () => {
     });
 
     expect(
-      fs.existsSync(path.join(testEnv.tempHome, ".openclaw", "credentials", "token.txt")),
+      fs.existsSync(path.join(testEnv.tempHome, ".bot", "credentials", "token.txt")),
     ).toBe(true);
     expect(
       fs.existsSync(
         path.join(
           testEnv.tempHome,
-          ".openclaw",
+          ".bot",
           "external-plugins",
           "glueclaw",
-          "openclaw.plugin.json",
+          "bot.plugin.json",
         ),
       ),
     ).toBe(true);
     expect(
       fs.existsSync(
-        path.join(testEnv.tempHome, ".openclaw", "agents", "main", "agent", "auth-profiles.json"),
+        path.join(testEnv.tempHome, ".bot", "agents", "main", "agent", "auth-profiles.json"),
       ),
     ).toBe(true);
     expect(fs.existsSync(path.join(testEnv.tempHome, ".claude", ".credentials.json"))).toBe(true);
@@ -274,9 +274,9 @@ describe("installTestEnv", () => {
 
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
-    setTestEnvValue("OPENCLAW_LIVE_TEST", "1");
-    setTestEnvValue("OPENCLAW_LIVE_USE_REAL_HOME", "1");
-    setTestEnvValue("OPENCLAW_LIVE_TEST_QUIET", "1");
+    setTestEnvValue("BOT_LIVE_TEST", "1");
+    setTestEnvValue("BOT_LIVE_USE_REAL_HOME", "1");
+    setTestEnvValue("BOT_LIVE_TEST_QUIET", "1");
 
     const testEnv = installTestEnv();
 
@@ -288,20 +288,20 @@ describe("installTestEnv", () => {
   it("keeps hermetic mode isolated when live flags request the real HOME", () => {
     const realHome = createTempHome();
     writeFile(path.join(realHome, ".profile"), "export TEST_PROFILE_ONLY=from-profile\n");
-    writeFile(path.join(realHome, ".openclaw", "openclaw.json"), '{"live":true}\n');
-    writeFile(path.join(realHome, ".openclaw", "credentials", "token.txt"), "secret\n");
+    writeFile(path.join(realHome, ".bot", "bot.json"), '{"live":true}\n');
+    writeFile(path.join(realHome, ".bot", "credentials", "token.txt"), "secret\n");
 
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
     setTestEnvValue("LIVE", "1");
-    setTestEnvValue("OPENCLAW_LIVE_TEST", "1");
-    setTestEnvValue("OPENCLAW_LIVE_GATEWAY", "1");
-    setTestEnvValue("OPENCLAW_LIVE_USE_REAL_HOME", "1");
+    setTestEnvValue("BOT_LIVE_TEST", "1");
+    setTestEnvValue("BOT_LIVE_GATEWAY", "1");
+    setTestEnvValue("BOT_LIVE_USE_REAL_HOME", "1");
     const callerPluginDir = path.join(realHome, "caller-plugins");
-    setTestEnvValue("OPENCLAW_BUNDLED_PLUGINS_DIR", callerPluginDir);
-    setTestEnvValue("OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
-    setTestEnvValue("OPENCLAW_DISABLE_BUNDLED_PLUGINS", "1");
-    setTestEnvValue("OPENCLAW_HOME", realHome);
+    setTestEnvValue("BOT_BUNDLED_PLUGINS_DIR", callerPluginDir);
+    setTestEnvValue("BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR", "1");
+    setTestEnvValue("BOT_DISABLE_BUNDLED_PLUGINS", "1");
+    setTestEnvValue("BOT_HOME", realHome);
 
     const testEnv = installTestEnv({ mode: "hermetic" });
     cleanupFns.push(testEnv.cleanup);
@@ -310,34 +310,34 @@ describe("installTestEnv", () => {
     expect(process.env.HOME).toBe(testEnv.tempHome);
     expect(process.env.TEST_PROFILE_ONLY).toBeUndefined();
     expect(process.env.LIVE).toBeUndefined();
-    expect(process.env.OPENCLAW_LIVE_TEST).toBeUndefined();
-    expect(process.env.OPENCLAW_LIVE_GATEWAY).toBeUndefined();
-    expect(process.env.OPENCLAW_LIVE_USE_REAL_HOME).toBeUndefined();
-    expect(process.env.OPENCLAW_BUNDLED_PLUGINS_DIR).not.toBe(callerPluginDir);
-    expect(path.basename(process.env.OPENCLAW_BUNDLED_PLUGINS_DIR ?? "")).toBe("extensions");
-    expect(process.env.OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR).toBe("1");
-    expect(process.env.OPENCLAW_DISABLE_BUNDLED_PLUGINS).toBeUndefined();
-    expect(process.env.OPENCLAW_HOME).toBeUndefined();
-    expect(fs.existsSync(path.join(testEnv.tempHome, ".openclaw", "openclaw.json"))).toBe(false);
+    expect(process.env.BOT_LIVE_TEST).toBeUndefined();
+    expect(process.env.BOT_LIVE_GATEWAY).toBeUndefined();
+    expect(process.env.BOT_LIVE_USE_REAL_HOME).toBeUndefined();
+    expect(process.env.BOT_BUNDLED_PLUGINS_DIR).not.toBe(callerPluginDir);
+    expect(path.basename(process.env.BOT_BUNDLED_PLUGINS_DIR ?? "")).toBe("extensions");
+    expect(process.env.BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR).toBe("1");
+    expect(process.env.BOT_DISABLE_BUNDLED_PLUGINS).toBeUndefined();
+    expect(process.env.BOT_HOME).toBeUndefined();
+    expect(fs.existsSync(path.join(testEnv.tempHome, ".bot", "bot.json"))).toBe(false);
     expect(
-      fs.existsSync(path.join(testEnv.tempHome, ".openclaw", "credentials", "token.txt")),
+      fs.existsSync(path.join(testEnv.tempHome, ".bot", "credentials", "token.txt")),
     ).toBe(false);
   });
 
-  it("clears and restores OPENCLAW_HOME for normal isolated test runs", () => {
+  it("clears and restores BOT_HOME for normal isolated test runs", () => {
     const realHome = createTempHome();
-    const configuredOpenClawHome = path.join(realHome, "custom-openclaw-home");
+    const configuredBotHome = path.join(realHome, "custom-bot-home");
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
-    setTestEnvValue("OPENCLAW_HOME", configuredOpenClawHome);
+    setTestEnvValue("BOT_HOME", configuredBotHome);
 
     const testEnv = installTestEnv();
 
     expect(testEnv.tempHome).not.toBe(realHome);
-    expect(process.env.OPENCLAW_HOME).toBeUndefined();
+    expect(process.env.BOT_HOME).toBeUndefined();
 
     testEnv.cleanup();
-    expect(process.env.OPENCLAW_HOME).toBe(configuredOpenClawHome);
+    expect(process.env.BOT_HOME).toBe(configuredBotHome);
   });
 
   it("does not load ~/.profile for normal isolated test runs", () => {
@@ -347,10 +347,10 @@ describe("installTestEnv", () => {
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
     deleteTestEnvValue("LIVE");
-    deleteTestEnvValue("OPENCLAW_LIVE_TEST");
-    deleteTestEnvValue("OPENCLAW_LIVE_GATEWAY");
-    deleteTestEnvValue("OPENCLAW_LIVE_USE_REAL_HOME");
-    deleteTestEnvValue("OPENCLAW_LIVE_TEST_QUIET");
+    deleteTestEnvValue("BOT_LIVE_TEST");
+    deleteTestEnvValue("BOT_LIVE_GATEWAY");
+    deleteTestEnvValue("BOT_LIVE_USE_REAL_HOME");
+    deleteTestEnvValue("BOT_LIVE_TEST_QUIET");
 
     const testEnv = installTestEnv();
     cleanupFns.push(testEnv.cleanup);
@@ -365,9 +365,9 @@ describe("installTestEnv", () => {
 
     setTestEnvValue("HOME", realHome);
     setTestEnvValue("USERPROFILE", realHome);
-    setTestEnvValue("OPENCLAW_LIVE_TEST", "1");
-    setTestEnvValue("OPENCLAW_LIVE_USE_REAL_HOME", "1");
-    setTestEnvValue("OPENCLAW_LIVE_TEST_QUIET", "1");
+    setTestEnvValue("BOT_LIVE_TEST", "1");
+    setTestEnvValue("BOT_LIVE_USE_REAL_HOME", "1");
+    setTestEnvValue("BOT_LIVE_TEST_QUIET", "1");
 
     vi.doMock("node:child_process", () => ({
       execFileSync: () => {

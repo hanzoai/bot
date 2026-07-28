@@ -1,7 +1,7 @@
 /** Redaction-safe projection from live agent events into durable audit metadata. */
 import { createHash } from "node:crypto";
-import { asDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { asDateTimestampMs } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   AGENT_RUN_TERMINAL_RETRY_GRACE_MS,
   buildAgentRunTerminalOutcome,

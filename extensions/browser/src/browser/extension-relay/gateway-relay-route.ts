@@ -1,8 +1,8 @@
 /**
  * Gateway-hosted extension relay upgrade handler.
  *
- * Lets the OpenClaw Chrome extension connect DIRECTLY to a remote gateway over
- * `wss://` — no OpenClaw node host on the browser machine. This is the
+ * Lets the Bot Chrome extension connect DIRECTLY to a remote gateway over
+ * `wss://` — no Bot node host on the browser machine. This is the
  * cross-machine path for #53599: a user installs only the extension and pastes
  * a `wss://gateway/browser/extension#<secret>` pairing string.
  *
@@ -16,7 +16,7 @@
  */
 import type { IncomingMessage } from "node:http";
 import type { Duplex } from "node:stream";
-import { safeEqualSecret } from "openclaw/plugin-sdk/security-runtime";
+import { safeEqualSecret } from "bot/plugin-sdk/security-runtime";
 import { WebSocketServer } from "ws";
 import {
   getBrowserControlState,

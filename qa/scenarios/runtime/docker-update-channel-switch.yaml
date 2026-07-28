@@ -14,7 +14,7 @@ scenario:
   successCriteria:
     - The package install updates to a package-derived git dev fixture.
     - The git install updates back to the package tarball.
-    - "`openclaw update status --json` reports the expected git and package status after each switch."
+    - "`bot update status --json` reports the expected git and package status after each switch."
   docsRefs:
     - docs/cli/update.md
     - docs/install/updating.md

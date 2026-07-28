@@ -1,5 +1,5 @@
 import type { DmPolicy } from "../../config/types.base.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { DEFAULT_ACCOUNT_ID } from "../../routing/session-key.js";
 import type { WizardPrompter } from "../../wizard/prompts.js";
 import { resolveChannelDmAllowFrom, resolveChannelDmPolicy } from "./dm-access.js";
@@ -19,10 +19,10 @@ type AllowFromResolution = {
 };
 
 function patchLegacyChannelConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: string;
   patch: Record<string, unknown>;
-}): OpenClawConfig {
+}): BotConfig {
   const channelConfig =
     (params.cfg.channels?.[params.channel] as Record<string, unknown> | undefined) ?? {};
   const dmConfig = (channelConfig.dm as Record<string, unknown> | undefined) ?? {};
@@ -43,10 +43,10 @@ function patchLegacyChannelConfig(params: {
 }
 
 function setLegacyChannelDmPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: string;
   dmPolicy: DmPolicy;
-}): OpenClawConfig {
+}): BotConfig {
   const channelConfig =
     (params.cfg.channels?.[params.channel] as Record<string, unknown> | undefined) ?? {};
   const existingAllowFrom = resolveChannelDmAllowFrom({ account: channelConfig });
@@ -139,13 +139,13 @@ export function createLegacyCompatChannelDmPolicy(params: {
 
 /** @deprecated Compatibility for plugins published before setup allowlists became plugin-owned. */
 export async function promptLegacyChannelAllowFromForAccount<TAccount>(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: string;
   prompter: WizardPrompter;
   accountId?: string;
   defaultAccountId: string;
-  resolveAccount: (cfg: OpenClawConfig, accountId: string) => TAccount;
-  resolveExisting: (account: TAccount, cfg: OpenClawConfig) => Array<string | number>;
+  resolveAccount: (cfg: BotConfig, accountId: string) => TAccount;
+  resolveExisting: (account: TAccount, cfg: BotConfig) => Array<string | number>;
   resolveToken: (account: TAccount) => string | null | undefined;
   noteTitle: string;
   noteLines: string[];
@@ -154,7 +154,7 @@ export async function promptLegacyChannelAllowFromForAccount<TAccount>(params: {
   parseId: (value: string) => string | null;
   invalidWithoutTokenNote: string;
   resolveEntries: (params: { token: string; entries: string[] }) => Promise<AllowFromResolution[]>;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const accountId = resolveSetupAccountId({
     accountId: params.accountId,
     defaultAccountId: params.defaultAccountId,

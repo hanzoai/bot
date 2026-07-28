@@ -1,14 +1,14 @@
 import type {
   AgentHarnessSessionForkParams,
   AgentHarnessSessionForkResult,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
 import {
   deleteSessionUpstreamLink,
   upsertSessionUpstreamLink,
-} from "openclaw/plugin-sdk/session-catalog";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/session-catalog";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import { isIncognitoSessionKey } from "../incognito-session.js";
 import type { CodexSessionCatalogControl } from "../session-catalog-types.js";
 import { codexLastTerminalTurnId, codexUpstreamBaseline } from "../session-upstream-marker.js";
@@ -41,7 +41,7 @@ export async function forkCodexUpstreamSession(
     bindingStore: CodexAppServerBindingStore;
     control: CodexSessionCatalogControl;
     harnessRuntimeId: string;
-    resolveConfig?: () => OpenClawConfig | undefined;
+    resolveConfig?: () => BotConfig | undefined;
     runtime: PluginRuntime;
   },
 ): Promise<AgentHarnessSessionForkResult> {

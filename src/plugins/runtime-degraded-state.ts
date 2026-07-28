@@ -13,7 +13,7 @@ export type PluginVerificationFailureReason =
   | "invalid-bundle-manifest"
   | "missing-main-entry"
   | "missing-extension-entry"
-  | "missing-openclaw-peer-link";
+  | "missing-bot-peer-link";
 
 type PluginVerificationDiagnostic = {
   kind: "plugin-verification";
@@ -121,8 +121,8 @@ export function toPublicPluginVerificationDiagnostic(
   diagnostic: PluginVerificationDiagnostic,
 ): PublicPluginVerificationDiagnostic {
   const detail =
-    diagnostic.reason === "missing-openclaw-peer-link"
-      ? 'Plugin declares peerDependency "openclaw", but its host peer link is missing or invalid.'
+    diagnostic.reason === "missing-bot-peer-link"
+      ? 'Plugin declares peerDependency "bot", but its host peer link is missing or invalid.'
       : diagnostic.installPath
         ? diagnostic.detail.replaceAll(diagnostic.installPath, "<plugin-install>")
         : diagnostic.detail;

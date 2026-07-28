@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw QA lab plugin with private debugger UI and scenario runner."
+summary: "Bot QA lab plugin with private debugger UI and scenario runner."
 read_when:
   - You are installing, configuring, or auditing the qa-lab plugin
 title: "QA Lab plugin"
@@ -7,11 +7,11 @@ title: "QA Lab plugin"
 
 # QA Lab plugin
 
-OpenClaw QA lab plugin with private debugger UI and scenario runner.
+Bot QA lab plugin with private debugger UI and scenario runner.
 
 ## Distribution
 
-- Package: `@openclaw/qa-lab`
+- Package: `@hanzo/bot-qa-lab`
 - Install route: source checkout only
 
 ## Surface

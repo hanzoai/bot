@@ -2,15 +2,15 @@
 import {
   formatInboundEnvelope,
   implicitMentionKindWhen,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { resolvePinnedMainDmOwnerFromAllowlist } from "openclaw/plugin-sdk/security-runtime";
+} from "bot/plugin-sdk/channel-inbound";
+import { resolvePinnedMainDmOwnerFromAllowlist } from "bot/plugin-sdk/security-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   normalizeTrimmedStringList,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { MattermostPost } from "./client.js";
 import { resolveMattermostInboundMentionDecision } from "./monitor-activation.js";
 import {

@@ -1,11 +1,11 @@
-// Ollama plugin entrypoint registers its OpenClaw integration.
+// Ollama plugin entrypoint registers its Bot integration.
 import { createHash } from "node:crypto";
-import { collectConfiguredModelRefValues } from "@openclaw/model-catalog-core/configured-model-refs";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { resolvePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
+import { collectConfiguredModelRefValues } from "@hanzo/bot-model-catalog-core/configured-model-refs";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { resolvePluginConfigObject } from "bot/plugin-sdk/plugin-config-runtime";
 import {
   definePluginEntry,
-  type OpenClawPluginApi,
+  type BotPluginApi,
   type ProviderAppGuidedSetupContext,
   type ProviderAuthContext,
   type ProviderAuthMethod,
@@ -16,22 +16,22 @@ import {
   type ProviderPlugin,
   type ProviderReplayPolicy,
   type ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "bot/plugin-sdk/plugin-entry";
 import {
   buildApiKeyCredential,
   coerceSecretRef,
   isNonSecretApiKeyMarker,
-} from "openclaw/plugin-sdk/provider-auth";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-auth-api-key";
+} from "bot/plugin-sdk/provider-auth";
+import { createProviderApiKeyAuthMethod } from "bot/plugin-sdk/provider-auth-api-key";
 import type {
   ModelDefinitionConfig,
   ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
+} from "bot/plugin-sdk/provider-model-shared";
 import {
   buildOpenAICompatibleReplayPolicy,
   selectPreferredLocalModelId,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { resolveConfiguredSecretInputString } from "openclaw/plugin-sdk/secret-input-runtime";
+} from "bot/plugin-sdk/provider-model-shared";
+import { resolveConfiguredSecretInputString } from "bot/plugin-sdk/secret-input-runtime";
 import {
   buildOllamaModelDefinition,
   buildOllamaProvider,
@@ -109,7 +109,7 @@ function classifyOllamaFailoverReason(errorMessage: string): "server_error" | un
 }
 
 const dynamicModelCache = new Map<string, ProviderRuntimeModel[]>();
-const dynamicManagedCredentialFingerprints = new WeakMap<OpenClawConfig, Map<string, string>>();
+const dynamicManagedCredentialFingerprints = new WeakMap<BotConfig, Map<string, string>>();
 const OLLAMA_CLOUD_DEFAULT_MODEL_REF = `${OLLAMA_CLOUD_PROVIDER_ID}/${OLLAMA_CLOUD_DEFAULT_MODELS[0].id}`;
 const OLLAMA_CONFIGURED_SHOW_CONCURRENCY = 4;
 const OLLAMA_CONFIGURED_SHOW_MAX_MODELS = 8;
@@ -125,7 +125,7 @@ async function validateOllamaNonInteractive(
   const configuredBaseUrl =
     typeof ctx.opts.customBaseUrl === "string" ? ctx.opts.customBaseUrl.trim() : undefined;
   const dockerSetup = ["1", "true", "yes", "on"].includes(
-    process.env.OPENCLAW_DOCKER_SETUP?.trim().toLowerCase() ?? "",
+    process.env.BOT_DOCKER_SETUP?.trim().toLowerCase() ?? "",
   );
   const baseUrl = resolveOllamaApiBase(
     configuredBaseUrl || (dockerSetup ? OLLAMA_DOCKER_HOST_BASE_URL : OLLAMA_DEFAULT_BASE_URL),
@@ -308,7 +308,7 @@ function buildDynamicCacheKey(
   provider: string,
   baseUrl: string | undefined,
   configuredApiKey: unknown,
-  config?: OpenClawConfig,
+  config?: BotConfig,
 ): string {
   const secretRef = coerceSecretRef(configuredApiKey);
   const managedSecretScope = buildDynamicManagedSecretScope(provider, baseUrl, configuredApiKey);
@@ -500,7 +500,7 @@ function readUsableOllamaShowApiKey(params: {
 }
 
 function collectConfiguredOllamaModelIds(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   provider: string;
   entries?: ProviderAugmentModelCatalogContext["entries"];
 }): Array<{
@@ -638,7 +638,7 @@ async function resolveRequestedDynamicOllamaModel(params: {
 }
 
 async function augmentConfiguredOllamaCatalogModels(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   defaultBaseUrl: string;
   env: NodeJS.ProcessEnv;
   provider: string;
@@ -751,7 +751,7 @@ export default definePluginEntry({
   id: "ollama",
   name: "Ollama Provider",
   description: "Bundled Ollama provider plugin",
-  register(api: OpenClawPluginApi) {
+  register(api: BotPluginApi) {
     const startupPluginConfig = (api.pluginConfig ?? {}) as OllamaPluginConfig;
     if (api.registrationMode === "full") {
       void checkWsl2CrashLoopRisk(api.logger);
@@ -765,7 +765,7 @@ export default definePluginEntry({
     }
     api.registerNodeInvokePolicy(createOllamaNodeInvokePolicy());
     api.registerTool(createOllamaNodeInferenceTool(api));
-    const resolveCurrentPluginConfig = (config?: OpenClawConfig): OllamaPluginConfig => {
+    const resolveCurrentPluginConfig = (config?: BotConfig): OllamaPluginConfig => {
       const runtimePluginConfig = resolvePluginConfigObject(config, "ollama");
       if (runtimePluginConfig) {
         return runtimePluginConfig as OllamaPluginConfig;
@@ -847,8 +847,8 @@ export default definePluginEntry({
         }),
       buildUnknownModelHint: () =>
         "Ollama Cloud requires an API key. " +
-        'Set OLLAMA_API_KEY or run "openclaw onboard --auth-choice ollama-cloud". ' +
-        "See: https://docs.openclaw.ai/providers/ollama",
+        'Set OLLAMA_API_KEY or run "bot onboard --auth-choice ollama-cloud". ' +
+        "See: https://docs.bot.ai/providers/ollama",
     });
     api.registerProvider({
       id: OLLAMA_PROVIDER_ID,
@@ -1148,8 +1148,8 @@ export default definePluginEntry({
       },
       buildUnknownModelHint: () =>
         "Ollama requires authentication to be registered as a provider. " +
-        'Set OLLAMA_API_KEY="ollama-local" (any value works) or run "openclaw configure". ' +
-        "See: https://docs.openclaw.ai/providers/ollama",
+        'Set OLLAMA_API_KEY="ollama-local" (any value works) or run "bot configure". ' +
+        "See: https://docs.bot.ai/providers/ollama",
     });
   },
 });

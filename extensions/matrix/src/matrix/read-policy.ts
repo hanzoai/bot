@@ -1,5 +1,5 @@
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
+import { normalizeAccountId } from "bot/plugin-sdk/account-id";
+import type { ChannelMessageActionContext } from "bot/plugin-sdk/channel-contract";
 import {
   resolveAllowlistProviderRuntimeGroupPolicy,
   resolveDefaultGroupPolicy,

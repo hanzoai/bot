@@ -10,7 +10,7 @@ scenario:
       - plugins.smoke-tests-lifecycle
   objective: Exercise packaged plugin install, inspect, disable, enable, update, downgrade, and uninstall behavior in a clean Docker runtime.
   successCriteria:
-    - A clean container installs the candidate OpenClaw package and fixture plugin package.
+    - A clean container installs the candidate Bot package and fixture plugin package.
     - Runtime inspect reports the installed plugin as enabled and loaded.
     - Disable and enable commands persist the expected plugin state.
     - Update and downgrade commands replace the installed plugin version while preserving the npm project root.

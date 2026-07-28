@@ -2,19 +2,19 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { ChannelType } from "discord-api-types/v10";
-import { getSessionBindingService } from "openclaw/plugin-sdk/conversation-runtime";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import { getSessionBindingService } from "bot/plugin-sdk/conversation-runtime";
+import type { OpenKeyedStoreOptions } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import {
   clearRuntimeConfigSnapshot,
   setRuntimeConfigSnapshot,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
+  type BotConfig,
+} from "bot/plugin-sdk/runtime-config-snapshot";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setDiscordRuntime } from "../runtime.js";
 import { EMPTY_DISCORD_TEST_CONFIG } from "../test-support/config.js";
@@ -79,11 +79,11 @@ const { resolveThreadBindingInactivityExpiresAt, resolveThreadBindingMaxAgeExpir
 const { resolveThreadBindingIntroText } = await import("./thread-bindings.messages.js");
 const discordClientModule = await import("../client.js");
 const discordThreadBindingApi = await import("./thread-bindings.discord-api.js");
-const acpRuntime = await import("openclaw/plugin-sdk/acp-runtime");
+const acpRuntime = await import("bot/plugin-sdk/acp-runtime");
 
 function createTestThreadBindingManager(
   params: Omit<Parameters<typeof createThreadBindingManager>[0], "cfg"> & {
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
   },
 ) {
   return createThreadBindingManager({
@@ -741,9 +741,9 @@ describe("thread binding lifecycle", () => {
 
   it("persists touched activity timestamps across restart when persistence is enabled", async () => {
     vi.useFakeTimers();
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-thread-bindings-"));
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    const previousStateDir = process.env.BOT_STATE_DIR;
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-thread-bindings-"));
+    process.env.BOT_STATE_DIR = stateDir;
     try {
       testing.resetThreadBindingsForTests();
       vi.setSystemTime(new Date("2026-02-20T00:00:00.000Z"));
@@ -789,9 +789,9 @@ describe("thread binding lifecycle", () => {
     } finally {
       testing.resetThreadBindingsForTests();
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.BOT_STATE_DIR = previousStateDir;
       }
       fs.rmSync(stateDir, { recursive: true, force: true });
       vi.useRealTimers();
@@ -963,7 +963,7 @@ describe("thread binding lifecycle", () => {
   it("passes manager token when resolving parent channels for auto-bind", async () => {
     const cfg = {
       channels: { discord: { token: "tok" } },
-    } as OpenClawConfig;
+    } as BotConfig;
     createTestThreadBindingManager({
       accountId: "runtime",
       token: "runtime-token",
@@ -1022,10 +1022,10 @@ describe("thread binding lifecycle", () => {
   it("uses the active runtime snapshot cfg for manager operations", async () => {
     const startupCfg = {
       channels: { discord: { token: "startup-token" } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const refreshedCfg = {
       channels: { discord: { token: "refreshed-token" } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const manager = createTestThreadBindingManager({
       accountId: "runtime",
       token: "runtime-token",
@@ -1262,7 +1262,7 @@ describe("thread binding lifecycle", () => {
     hoisted.restPost.mockClear();
 
     const bound = await getSessionBindingService().bind({
-      targetSessionKey: "plugin-binding:openclaw-codex-app-server:dm",
+      targetSessionKey: "plugin-binding:bot-codex-app-server:dm",
       targetKind: "session",
       conversation: {
         channel: "discord",
@@ -1272,8 +1272,8 @@ describe("thread binding lifecycle", () => {
       placement: "current",
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginId: "bot-codex-app-server",
+        pluginRoot: "/Users/huntharo/github/bot-app-server",
       },
     });
 
@@ -1315,7 +1315,7 @@ describe("thread binding lifecycle", () => {
     });
 
     await getSessionBindingService().bind({
-      targetSessionKey: "plugin-binding:openclaw-codex-app-server:dm",
+      targetSessionKey: "plugin-binding:bot-codex-app-server:dm",
       targetKind: "session",
       conversation: {
         channel: "discord",
@@ -1325,15 +1325,15 @@ describe("thread binding lifecycle", () => {
       placement: "current",
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginId: "bot-codex-app-server",
+        pluginRoot: "/Users/huntharo/github/bot-app-server",
         agentId: "codex",
         boundBy: "system",
       },
     });
 
     await getSessionBindingService().bind({
-      targetSessionKey: "plugin-binding:openclaw-codex-app-server:dm",
+      targetSessionKey: "plugin-binding:bot-codex-app-server:dm",
       targetKind: "session",
       conversation: {
         channel: "discord",
@@ -1356,8 +1356,8 @@ describe("thread binding lifecycle", () => {
     );
     expectFields(requireRecord(resolved.metadata, "resolved metadata"), "resolved metadata", {
       pluginBindingOwner: "plugin",
-      pluginId: "openclaw-codex-app-server",
-      pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+      pluginId: "bot-codex-app-server",
+      pluginRoot: "/Users/huntharo/github/bot-app-server",
       agentId: "codex",
       boundBy: "system",
       label: "codex-dm",
@@ -1551,12 +1551,12 @@ describe("thread binding lifecycle", () => {
       threadId: "user:1177378744822943744",
       channelId: "user:1177378744822943744",
       targetKind: "acp",
-      targetSessionKey: "plugin-binding:openclaw-codex-app-server:dm",
+      targetSessionKey: "plugin-binding:bot-codex-app-server:dm",
       agentId: "codex",
       metadata: {
         pluginBindingOwner: "plugin",
-        pluginId: "openclaw-codex-app-server",
-        pluginRoot: "/Users/huntharo/github/openclaw-app-server",
+        pluginId: "bot-codex-app-server",
+        pluginRoot: "/Users/huntharo/github/bot-app-server",
       },
     });
 
@@ -1579,7 +1579,7 @@ describe("thread binding lifecycle", () => {
     );
     expectFields(requireRecord(binding.metadata, "binding metadata"), "binding metadata", {
       pluginBindingOwner: "plugin",
-      pluginId: "openclaw-codex-app-server",
+      pluginId: "bot-codex-app-server",
     });
   });
 
@@ -1878,9 +1878,9 @@ describe("thread binding lifecycle", () => {
   });
 
   it("persists unbinds even when no manager is active", () => {
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-thread-bindings-"));
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    const previousStateDir = process.env.BOT_STATE_DIR;
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-thread-bindings-"));
+    process.env.BOT_STATE_DIR = stateDir;
     try {
       testing.resetThreadBindingsForTests();
       const now = Date.now();
@@ -1910,9 +1910,9 @@ describe("thread binding lifecycle", () => {
     } finally {
       testing.resetThreadBindingsForTests();
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.BOT_STATE_DIR = previousStateDir;
       }
       fs.rmSync(stateDir, { recursive: true, force: true });
     }

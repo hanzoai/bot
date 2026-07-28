@@ -1,4 +1,4 @@
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import type { SessionObserverDigest } from "../../../packages/gateway-protocol/src/schema/sessions.js";
 import {
   INTERNAL_RUNTIME_CONTEXT_BEGIN,

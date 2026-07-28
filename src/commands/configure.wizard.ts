@@ -1,7 +1,7 @@
 // Main interactive configure/update wizard implementation.
 import fsPromises from "node:fs/promises";
 import nodePath from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { describeCodexNativeWebSearch } from "../agents/codex-native-web-search.shared.js";
 import { formatCliCommand } from "../cli/command-format.js";
@@ -14,7 +14,7 @@ import {
 } from "../config/config.js";
 import { logConfigUpdated } from "../config/logging.js";
 import { ConfigMutationConflictError } from "../config/mutate.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { ensureControlUiAssetsBuilt } from "../infra/control-ui-assets.js";
 import { formatWindowsGatewayFirewallGuidance } from "../infra/windows-gateway-firewall-diagnostics.js";
 import { commitConfigWithPendingPluginInstalls } from "../plugins/install-record-commit.js";
@@ -86,7 +86,7 @@ function loadSetupPluginConfigModule(): Promise<SetupPluginConfigModule> {
 }
 
 async function resolveGatewaySecretInputForWizard(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   value: unknown;
   path: string;
 }): Promise<string | undefined> {
@@ -103,7 +103,7 @@ async function resolveGatewaySecretInputForWizard(params: {
 }
 
 async function runGatewayHealthCheck(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime: RuntimeEnv;
   port: number;
 }): Promise<void> {
@@ -126,8 +126,8 @@ async function runGatewayHealthCheck(params: {
     value: params.cfg.gateway?.auth?.password,
     path: "gateway.auth.password",
   });
-  const token = process.env.OPENCLAW_GATEWAY_TOKEN ?? configuredToken;
-  const password = process.env.OPENCLAW_GATEWAY_PASSWORD ?? configuredPassword;
+  const token = process.env.BOT_GATEWAY_TOKEN ?? configuredToken;
+  const password = process.env.BOT_GATEWAY_PASSWORD ?? configuredPassword;
 
   await waitForGatewayReachable({
     url: wsUrl,
@@ -143,8 +143,8 @@ async function runGatewayHealthCheck(params: {
     note(
       [
         "Docs:",
-        "https://docs.openclaw.ai/gateway/health",
-        "https://docs.openclaw.ai/gateway/troubleshooting",
+        "https://docs.bot.ai/gateway/health",
+        "https://docs.bot.ai/gateway/troubleshooting",
       ].join("\n"),
       "Health check help",
     );
@@ -185,7 +185,7 @@ async function promptChannelMode(runtime: RuntimeEnv): Promise<ChannelsWizardMod
         {
           value: "remove",
           label: "Remove channel config",
-          hint: "Delete channel tokens/settings from openclaw.json",
+          hint: "Delete channel tokens/settings from bot.json",
         },
       ],
       initialValue: "configure",
@@ -196,11 +196,11 @@ async function promptChannelMode(runtime: RuntimeEnv): Promise<ChannelsWizardMod
 }
 
 async function promptWebToolsConfig(
-  nextConfig: OpenClawConfig,
+  nextConfig: BotConfig,
   runtime: RuntimeEnv,
   prompter: ReturnType<typeof createClackPrompter>,
-): Promise<OpenClawConfig> {
-  type WebSearchConfig = NonNullable<NonNullable<OpenClawConfig["tools"]>["web"]>["search"];
+): Promise<BotConfig> {
+  type WebSearchConfig = NonNullable<NonNullable<BotConfig["tools"]>["web"]>["search"];
   const existingSearch = nextConfig.tools?.web?.search;
   const existingFetch = nextConfig.tools?.web?.fetch;
   const { isCodexNativeWebSearchRelevant } = await import("../agents/codex-native-web-search.js");
@@ -216,7 +216,7 @@ async function promptWebToolsConfig(
       "Web search lets your agent look things up online using the `web_search` tool.",
       "Codex-capable models can use native Codex web search.",
       "Other models use a separate web search provider, which you can configure here.",
-      "Docs: https://docs.openclaw.ai/tools/web",
+      "Docs: https://docs.bot.ai/tools/web",
     ].join("\n"),
     "Web search",
   );
@@ -245,7 +245,7 @@ async function promptWebToolsConfig(
         [
           "Codex-capable models can use native Codex web search instead of a separate provider.",
           "Other models need a separate web search provider.",
-          "If you do not choose one, OpenClaw can select a provider from available credentials; otherwise other models may not have web search.",
+          "If you do not choose one, Bot can select a provider from available credentials; otherwise other models may not have web search.",
           ...(describeCodexNativeWebSearch(nextConfig)
             ? [describeCodexNativeWebSearch(nextConfig)!]
             : []),
@@ -321,7 +321,7 @@ async function promptWebToolsConfig(
           [
             "No web search providers are currently available under this plugin policy.",
             "Enable plugins or remove deny rules, then rerun configure.",
-            "Docs: https://docs.openclaw.ai/tools/web",
+            "Docs: https://docs.bot.ai/tools/web",
           ].join("\n"),
           "Web search",
         );
@@ -390,7 +390,7 @@ export async function runConfigureWizard(
   runtime: RuntimeEnv = defaultRuntime,
 ) {
   try {
-    intro(opts.command === "update" ? "OpenClaw update wizard" : "OpenClaw configure");
+    intro(opts.command === "update" ? "Bot update wizard" : "Bot configure");
     const prompter = createClackPrompter();
 
     const prepared = await readConfigFileSnapshotForWrite();
@@ -411,7 +411,7 @@ export async function runConfigureWizard(
         }).readConfigFileSnapshotForWrite()
       ).snapshot;
     let currentBaseHash = snapshot.hash;
-    const baseConfig: OpenClawConfig = snapshot.valid
+    const baseConfig: BotConfig = snapshot.valid
       ? (snapshot.sourceConfig ?? snapshot.config)
       : {};
 
@@ -423,14 +423,14 @@ export async function runConfigureWizard(
           [
             ...snapshot.issues.map((iss) => `- ${iss.path}: ${iss.message}`),
             "",
-            "Docs: https://docs.openclaw.ai/gateway/configuration",
+            "Docs: https://docs.bot.ai/gateway/configuration",
           ].join("\n"),
           "Config issues",
         );
       }
       if (!snapshot.valid) {
         outro(
-          `Config invalid. Run \`${formatCliCommand("openclaw doctor")}\` to repair it, then re-run configure.`,
+          `Config invalid. Run \`${formatCliCommand("bot doctor")}\` to repair it, then re-run configure.`,
         );
         runtime.exit(1);
         return;
@@ -461,8 +461,8 @@ export async function runConfigureWizard(
         ]);
         return probeGatewayReachable({
           url: localUrl,
-          token: process.env.OPENCLAW_GATEWAY_TOKEN ?? baseLocalProbeToken,
-          password: process.env.OPENCLAW_GATEWAY_PASSWORD ?? baseLocalProbePassword,
+          token: process.env.BOT_GATEWAY_TOKEN ?? baseLocalProbeToken,
+          password: process.env.BOT_GATEWAY_PASSWORD ?? baseLocalProbePassword,
           timeoutMs: GATEWAY_HINT_PROBE_TIMEOUT_MS,
         });
       })();
@@ -800,7 +800,7 @@ export async function runConfigureWizard(
       const remoteUrl = normalizeOptionalString(nextConfig.gateway?.remote?.url);
       if (remoteUrl) {
         note(
-          ["Remote Gateway:", remoteUrl, "Docs: https://docs.openclaw.ai/gateway/remote"].join(
+          ["Remote Gateway:", remoteUrl, "Docs: https://docs.bot.ai/gateway/remote"].join(
             "\n",
           ),
           "Gateway",
@@ -831,21 +831,21 @@ export async function runConfigureWizard(
       tlsEnabled: nextConfig.gateway?.tls?.enabled === true,
     });
     const newPassword =
-      process.env.OPENCLAW_GATEWAY_PASSWORD ??
+      process.env.BOT_GATEWAY_PASSWORD ??
       (await resolveGatewaySecretInputForWizard({
         cfg: nextConfig,
         value: nextConfig.gateway?.auth?.password,
         path: "gateway.auth.password",
       }));
     const oldPassword =
-      process.env.OPENCLAW_GATEWAY_PASSWORD ??
+      process.env.BOT_GATEWAY_PASSWORD ??
       (await resolveGatewaySecretInputForWizard({
         cfg: baseConfig,
         value: baseConfig.gateway?.auth?.password,
         path: "gateway.auth.password",
       }));
     const token =
-      process.env.OPENCLAW_GATEWAY_TOKEN ??
+      process.env.BOT_GATEWAY_TOKEN ??
       (await resolveGatewaySecretInputForWizard({
         cfg: nextConfig,
         value: nextConfig.gateway?.auth?.token,
@@ -875,7 +875,7 @@ export async function runConfigureWizard(
         `Gateway WS: ${displayLinks.wsUrl}`,
         gatewayStatusLine,
         ...windowsFirewallLines,
-        "Docs: https://docs.openclaw.ai/web/control-ui",
+        "Docs: https://docs.bot.ai/web/control-ui",
       ].join("\n"),
       "Control UI",
     );

@@ -2,8 +2,8 @@
 import {
   registerSingleProviderPlugin,
   resolveProviderPluginChoice,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { resolveProviderAuthEnvVarCandidates } from "openclaw/plugin-sdk/provider-env-vars";
+} from "bot/plugin-sdk/plugin-test-runtime";
+import { resolveProviderAuthEnvVarCandidates } from "bot/plugin-sdk/provider-env-vars";
 import { describe, expect, it } from "vitest";
 import { runSingleProviderCatalog } from "../test-support/provider-model-test-helpers.js";
 import arceePlugin from "./index.js";

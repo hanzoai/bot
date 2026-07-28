@@ -1,4 +1,4 @@
-import { isValidAgentId, normalizeAgentId } from "@openclaw/normalization-core/agent-id";
+import { isValidAgentId, normalizeAgentId } from "@hanzo/bot-normalization-core/agent-id";
 import { describe, expect, it } from "vitest";
 
 describe("normalization-core/agent-id", () => {

@@ -5,10 +5,10 @@ import os from "node:os";
 import path from "node:path";
 import type * as Lark from "@larksuiteoapi/node-sdk";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeBotStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { createNonExitingRuntimeEnv } from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
+import { createNonExitingRuntimeEnv } from "bot/plugin-sdk/plugin-test-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { feishuDedupeState } from "./dedup-state.js";
 import { claimUnprocessedFeishuMessage } from "./dedup.js";
@@ -101,10 +101,10 @@ function startIngress(params: {
 }
 
 async function withQueue<T>(fn: (queue: FeishuIngressQueue, stateDir: string) => Promise<T>) {
-  const created = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-feishu-ingress-"));
+  const created = await fs.mkdtemp(path.join(os.tmpdir(), "bot-feishu-ingress-"));
   const stateDir = await fs.realpath(created);
-  const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  process.env.OPENCLAW_STATE_DIR = stateDir;
+  const previousStateDir = process.env.BOT_STATE_DIR;
+  process.env.BOT_STATE_DIR = stateDir;
   const queue = createChannelIngressQueueForTests<FeishuIngressPayload>({
     channelId: "feishu",
     accountId: "default",
@@ -114,11 +114,11 @@ async function withQueue<T>(fn: (queue: FeishuIngressQueue, stateDir: string) =>
     return await fn(queue, stateDir);
   } finally {
     feishuDedupeState.reset();
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.BOT_STATE_DIR = previousStateDir;
     }
     await fs.rm(stateDir, { recursive: true, force: true });
   }
@@ -179,7 +179,7 @@ async function postWebhook(url: string, envelope: ReturnType<typeof messageEnvel
 
 afterEach(() => {
   feishuDedupeState.reset();
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   vi.restoreAllMocks();
 });
 

@@ -1,6 +1,6 @@
-import { asOptionalRecord as asMutableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString as normalizeString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import { asOptionalRecord as asMutableRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString as normalizeString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../../../config/types.bot.js";
 import {
   canAutoMigrateLegacyLosslessCompaction,
   collectLegacyLosslessCompactionConfigs,
@@ -31,8 +31,8 @@ import type {
 } from "./codex-route-types.js";
 
 export function rewriteAgentCompactionRefs(params: {
-  cfg: OpenClawConfig;
-  preRepairCfg: OpenClawConfig;
+  cfg: BotConfig;
+  preRepairCfg: BotConfig;
   hits: CodexRouteHit[];
   agent: MutableRecord;
   path: string;
@@ -223,7 +223,7 @@ function removeUnsupportedCodexCompactionOverrides(params: {
 }
 
 export function maybeMigrateLegacyLosslessCompactionConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   ignoreLegacyAgentRuntimePins?: boolean;
   env?: NodeJS.ProcessEnv;
 }): string[] {
@@ -308,7 +308,7 @@ export function maybeMigrateLegacyLosslessCompactionConfig(params: {
 }
 
 function preserveMigratedLosslessCodexRuntimePolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   hits: readonly LegacyLosslessCompactionConfig[];
   summaryModel: string | undefined;
   changes: string[];
@@ -374,7 +374,7 @@ function ensureLosslessLlmPolicy(params: {
 }
 
 function removeMigratedLosslessCompactionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   path: string;
   key: CompactionOverrideKey;
   changes: string[];
@@ -400,7 +400,7 @@ function removeMigratedLosslessCompactionKey(params: {
 }
 
 function readCompactionOwnerForPath(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   ownerPath: string,
 ): MutableRecord | undefined {
   if (ownerPath === "agents.defaults") {

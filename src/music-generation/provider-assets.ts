@@ -1,9 +1,9 @@
 // Validates and normalizes provider asset attachments for music generation.
-import { canonicalizeBase64 } from "@openclaw/media-core/base64";
-import { maxBytesForKind } from "@openclaw/media-core/constants";
-import { extensionForMime } from "@openclaw/media-core/mime";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { canonicalizeBase64 } from "@hanzo/bot-media-core/base64";
+import { maxBytesForKind } from "@hanzo/bot-media-core/constants";
+import { extensionForMime } from "@hanzo/bot-media-core/mime";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { readResponseWithLimit } from "../infra/http-body.js";
 import {
   createProviderOperationDeadline,

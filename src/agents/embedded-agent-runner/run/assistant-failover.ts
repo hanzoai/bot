@@ -2,7 +2,7 @@
  * Handles assistant-stage failover decisions during embedded-agent attempts.
  */
 import { sanitizeForLog } from "../../../../packages/terminal-core/src/ansi.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import type { AssistantMessage } from "../../../llm/types.js";
 import { classifyRateLimitWindow } from "../../../llm/utils/rate-limit-window.js";
 import {
@@ -80,7 +80,7 @@ export async function handleAssistantFailover(params: {
   provider: string;
   activeErrorContext: { provider: string; model: string };
   lastAssistant: AssistantMessage | undefined;
-  config: OpenClawConfig | undefined;
+  config: BotConfig | undefined;
   sessionKey?: string;
   authFailure: boolean;
   rateLimitFailure: boolean;
@@ -324,7 +324,7 @@ export async function handleAssistantFailover(params: {
 
 function resolveAssistantFailoverErrorMessage(params: {
   lastAssistant: AssistantMessage | undefined;
-  config: OpenClawConfig | undefined;
+  config: BotConfig | undefined;
   sessionKey?: string;
   activeErrorContext: { provider: string; model: string };
   terminal: AgentRunAttemptTerminal;

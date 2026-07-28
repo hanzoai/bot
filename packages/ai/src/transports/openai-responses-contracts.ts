@@ -1,4 +1,4 @@
-import type { Api } from "@openclaw/llm-core";
+import type { Api } from "@hanzo/bot-llm-core";
 import type {
   FunctionTool,
   ResponseCreateParamsStreaming,
@@ -14,8 +14,8 @@ export const OPENAI_CODEX_RESPONSES_EMPTY_INPUT_TEXT = " ";
 export const OPENAI_CODEX_RESPONSES_DEFAULT_INSTRUCTIONS = "Follow the user request.";
 export const AZURE_RESPONSES_FIRST_EVENT_TIMEOUT_MS = 30_000;
 export const RESPONSE_FAILED_NO_DETAILS_MESSAGE = "Unknown error (no error details in response)";
-export const OPENAI_RESPONSES_REASONING_REPLAY_META_KEY = "__openclaw_replay";
-export const OPENAI_RESPONSES_REASONING_REPLAY_BLOCK_META_KEY = "openclawReasoningReplay";
+export const OPENAI_RESPONSES_REASONING_REPLAY_META_KEY = "__bot_replay";
+export const OPENAI_RESPONSES_REASONING_REPLAY_BLOCK_META_KEY = "botReasoningReplay";
 export const OPENAI_RESPONSES_REPLAY_ITEM_ID_MAX_LENGTH = 64;
 
 export type ReplayableResponseOutputMessage = Omit<ResponseOutputMessage, "id"> & { id?: string };

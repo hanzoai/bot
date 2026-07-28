@@ -2,13 +2,13 @@
 import {
   createChannelMessageReplyPipeline,
   resolveChannelStreamingBlockEnabled,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { resolveChunkMode } from "openclaw/plugin-sdk/reply-chunking";
-import { createChannelHistoryWindow } from "openclaw/plugin-sdk/reply-history";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-import { readLatestAssistantTextByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import { resolveMarkdownTableMode } from "bot/plugin-sdk/markdown-table-runtime";
+import { resolveChunkMode } from "bot/plugin-sdk/reply-chunking";
+import { createChannelHistoryWindow } from "bot/plugin-sdk/reply-history";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import { getSessionEntry, resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
+import { readLatestAssistantTextByIdentity } from "bot/plugin-sdk/session-transcript-runtime";
 import { resolveDiscordMaxLinesPerMessage } from "../accounts.js";
 import { beginDiscordInboundEventDeliveryCorrelation } from "../inbound-event-delivery.js";
 import type { RequestClient } from "../internal/discord.js";

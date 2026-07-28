@@ -1,7 +1,7 @@
 /** Exercises provider runtime loading, ordering, and manifest-backed discovery paths. */
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-core";
+import type { AgentMessage } from "bot/plugin-sdk/agent-core";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ModelProviderConfig, OpenClawConfig } from "../config/types.js";
+import type { ModelProviderConfig, BotConfig } from "../config/types.js";
 import { captureEnv, deleteTestEnvValue, setTestEnvValue } from "../test-utils/env.js";
 import type { ProviderRuntimeModel } from "./provider-runtime-model.types.js";
 import {
@@ -49,7 +49,7 @@ const resolveBundledProviderPolicySurfaceMock = vi.fn<ResolveBundledProviderPoli
 );
 const providerRuntimeWarnMock = vi.fn();
 
-let getAiTransportHost: typeof import("@openclaw/ai").getAiTransportHost;
+let getAiTransportHost: typeof import("@hanzo/bot-ai").getAiTransportHost;
 let augmentModelCatalogWithProviderPlugins: typeof import("./provider-runtime.js").augmentModelCatalogWithProviderPlugins;
 let buildProviderAuthDoctorHintWithPlugin: typeof import("./provider-runtime.js").buildProviderAuthDoctorHintWithPlugin;
 let buildProviderMissingAuthMessageWithPlugin: typeof import("./provider-runtime.js").buildProviderMissingAuthMessageWithPlugin;
@@ -353,7 +353,7 @@ describe("provider-runtime", () => {
       wrapProviderStreamFn,
     } = await import("./provider-runtime.js"));
     await import("../agents/ai-transport-runtime-host.js");
-    ({ getAiTransportHost } = await import("@openclaw/ai"));
+    ({ getAiTransportHost } = await import("@hanzo/bot-ai"));
     ({ createEmptyPluginRegistry } = await import("./registry.js"));
     ({ resetPluginRuntimeStateForTest, setActivePluginRegistry } = await import("./runtime.js"));
   });
@@ -729,14 +729,14 @@ describe("provider-runtime", () => {
           demo: { enabled: true, config: { endpoint: "https://one.example" } },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const secondConfig = {
       plugins: {
         entries: {
           demo: { enabled: true, config: { endpoint: "https://two.example" } },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(resolveProviderRuntimePlugin({ provider: DEMO_PROVIDER_ID, config: firstConfig })).toBe(
       provider,
@@ -763,7 +763,7 @@ describe("provider-runtime", () => {
           "active-memory": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const secondConfig = {
       plugins: {
         entries: {
@@ -771,7 +771,7 @@ describe("provider-runtime", () => {
           "active-memory": { enabled: true, config: { qmd: { searchMode: "fast" } } },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(resolveProviderRuntimePlugin({ provider: DEMO_PROVIDER_ID, config: firstConfig })).toBe(
       provider,
@@ -794,11 +794,11 @@ describe("provider-runtime", () => {
       label: "Demo two",
       auth: [],
     };
-    const config = {} as OpenClawConfig;
-    const envSnapshot = captureEnv(["HOME", "OPENCLAW_HOME"]);
+    const config = {} as BotConfig;
+    const envSnapshot = captureEnv(["HOME", "BOT_HOME"]);
     try {
       setTestEnvValue("HOME", "/home/one");
-      deleteTestEnvValue("OPENCLAW_HOME");
+      deleteTestEnvValue("BOT_HOME");
       resolvePluginProvidersMock.mockReturnValueOnce([firstProvider]);
       expect(resolveProviderRuntimePlugin({ provider: DEMO_PROVIDER_ID, config })).toBe(
         firstProvider,
@@ -995,15 +995,15 @@ describe("provider-runtime", () => {
           demo: { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const firstConfig = {
       ...baseConfig,
       agents: { defaults: { model: "openai/gpt-5.4" } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const secondConfig = {
       ...baseConfig,
       agents: { defaults: { model: "anthropic/claude-sonnet-4-5" } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const metadataSnapshot = {
       index: {},
       manifestRegistry: {},
@@ -1059,7 +1059,7 @@ describe("provider-runtime", () => {
           "active-memory": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const secondConfig = {
       plugins: {
         entries: {
@@ -1067,7 +1067,7 @@ describe("provider-runtime", () => {
           "active-memory": { enabled: true, config: { qmd: { searchMode: "fast" } } },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     for (const config of [firstConfig, secondConfig]) {
       expect(

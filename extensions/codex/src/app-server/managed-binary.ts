@@ -7,7 +7,7 @@ import { access } from "node:fs/promises";
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
 import type { CodexAppServerStartOptions, CodexManagedCommandOrder } from "./config.js";
 import { MANAGED_CODEX_APP_SERVER_PACKAGE } from "./version.js";
 
@@ -347,8 +347,8 @@ async function findManagedCodexAppServerCommandPaths(params: {
   throw new Error(
     [
       `Managed Codex app-server binary was not found for ${MANAGED_CODEX_APP_SERVER_PACKAGE}.`,
-      "Reinstall or update OpenClaw, or run pnpm install in a source checkout.",
-      "Set plugins.entries.codex.config.appServer.command or OPENCLAW_CODEX_APP_SERVER_BIN to use a custom Codex binary.",
+      "Reinstall or update Bot, or run pnpm install in a source checkout.",
+      "Set plugins.entries.codex.config.appServer.command or BOT_CODEX_APP_SERVER_BIN to use a custom Codex binary.",
     ].join(" "),
   );
 }

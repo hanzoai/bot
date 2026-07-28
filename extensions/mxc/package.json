@@ -1,25 +1,25 @@
 {
-  "name": "@openclaw/mxc-sandbox",
+  "name": "@hanzo/bot-mxc-sandbox",
   "version": "2026.7.2",
-  "description": "OpenClaw MXC sandbox execution plugin for MXC-capable hosts",
+  "description": "Bot MXC sandbox execution plugin for MXC-capable hosts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
   "dependencies": {
     "@microsoft/mxc-sdk": "0.7.0",
     "zod": "4.4.3"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "npmSpec": "@openclaw/mxc-sandbox",
+      "npmSpec": "@hanzo/bot-mxc-sandbox",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.11"
     },
@@ -27,7 +27,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false,
       "staticAssets": [
         {

@@ -45,24 +45,24 @@ const rawSqliteAllowPathGroups = {
     "src/infra/sqlite-transaction.ts",
     "src/infra/sqlite-user-version.ts",
     "src/infra/sqlite-wal.ts",
-    "src/state/openclaw-agent-db-maintenance.ts",
-    "src/state/openclaw-agent-db-registry.ts",
-    "src/state/openclaw-agent-db-registry-listing.ts",
-    "src/state/openclaw-agent-db-schema-helpers.ts",
-    "src/state/openclaw-agent-db-schema.ts",
-    "src/state/openclaw-agent-db-session-nodes-migration.ts",
-    "src/state/openclaw-agent-db-session-migrations.ts",
-    "src/state/openclaw-agent-db-session-provenance.ts",
-    "src/state/openclaw-agent-db.ts",
-    "src/state/openclaw-state-db-audit-migration.ts",
-    "src/state/openclaw-state-db-legacy-backfills.ts",
-    "src/state/openclaw-state-db-maintenance.ts",
-    "src/state/openclaw-state-db-operator-approval-migration.ts",
-    "src/state/openclaw-state-db-schema-additive.ts",
-    "src/state/openclaw-state-db-schema-helpers.ts",
-    "src/state/openclaw-state-db-schema-repair.ts",
-    "src/state/openclaw-state-db-startup-checkpoint.ts",
-    "src/state/openclaw-state-db.ts",
+    "src/state/bot-agent-db-maintenance.ts",
+    "src/state/bot-agent-db-registry.ts",
+    "src/state/bot-agent-db-registry-listing.ts",
+    "src/state/bot-agent-db-schema-helpers.ts",
+    "src/state/bot-agent-db-schema.ts",
+    "src/state/bot-agent-db-session-nodes-migration.ts",
+    "src/state/bot-agent-db-session-migrations.ts",
+    "src/state/bot-agent-db-session-provenance.ts",
+    "src/state/bot-agent-db.ts",
+    "src/state/bot-state-db-audit-migration.ts",
+    "src/state/bot-state-db-legacy-backfills.ts",
+    "src/state/bot-state-db-maintenance.ts",
+    "src/state/bot-state-db-operator-approval-migration.ts",
+    "src/state/bot-state-db-schema-additive.ts",
+    "src/state/bot-state-db-schema-helpers.ts",
+    "src/state/bot-state-db-schema-repair.ts",
+    "src/state/bot-state-db-startup-checkpoint.ts",
+    "src/state/bot-state-db.ts",
     "src/transcripts/sqlite-schema.ts",
     "src/state/sqlite-schema-shape.test-support.ts",
   ],
@@ -74,15 +74,15 @@ const rawSqliteAllowPathGroups = {
   ],
   "agent auth profile read-only bootstrap": ["src/agents/auth-profiles/sqlite.ts"],
   "read-only shared state database access": [
-    "src/state/openclaw-agent-db-readonly.ts",
-    "src/state/openclaw-state-db-readonly.ts",
+    "src/state/bot-agent-db-readonly.ts",
+    "src/state/bot-state-db-readonly.ts",
   ],
   "read-only schema preflight and integrity verification access": [
-    "src/state/openclaw-database-preflight.ts",
-    "src/state/openclaw-database-verify.worker.ts",
+    "src/state/bot-database-preflight.ts",
+    "src/state/bot-database-verify.worker.ts",
   ],
   "quarantine store must work when other databases are damaged": [
-    "src/state/openclaw-quarantine-store.ts",
+    "src/state/bot-quarantine-store.ts",
   ],
   "read-only SQLite status probes": [
     "src/commands/doctor-db-bloat.ts",
@@ -209,7 +209,7 @@ function collectImports(sourceFile) {
       source.endsWith("node-sqlite.js") ||
       source.endsWith("sqlite-transaction.js") ||
       source.endsWith("sqlite-wal.js") ||
-      source.endsWith("openclaw-state-db.js")
+      source.endsWith("bot-state-db.js")
     ) {
       hasSqliteContext = true;
     }

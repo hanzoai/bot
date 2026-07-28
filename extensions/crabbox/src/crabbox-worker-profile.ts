@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { WorkerProviderError, type WorkerProfile } from "openclaw/plugin-sdk/plugin-entry";
+import { WorkerProviderError, type WorkerProfile } from "bot/plugin-sdk/plugin-entry";
 
 const PROFILE_KEYS = new Set(["binary", "class", "idleTimeout", "provider", "setup", "ttl"]);
 const GO_DURATION_PATTERN = /^\+?(?:(?:\d+(?:\.\d*)?|\.\d+)(?:ns|us|µs|μs|ms|s|m|h))+$/u;
@@ -129,7 +129,7 @@ function binaryCandidates(base: string, platform: NodeJS.Platform): string[] {
 export function resolveCrabboxBinary(params: {
   explicit?: string;
   isExecutable?: IsExecutable;
-  openclawRoot: string;
+  botRoot: string;
   pathEnv?: string;
   platform?: NodeJS.Platform;
 }): string {
@@ -139,7 +139,7 @@ export function resolveCrabboxBinary(params: {
   const platform = params.platform ?? process.platform;
   const isExecutable =
     params.isExecutable ?? ((candidate) => defaultIsExecutable(candidate, platform));
-  const siblingBase = path.resolve(params.openclawRoot, "../crabbox/bin/crabbox");
+  const siblingBase = path.resolve(params.botRoot, "../crabbox/bin/crabbox");
   for (const candidate of binaryCandidates(siblingBase, platform)) {
     if (isExecutable(candidate)) {
       return candidate;
@@ -161,7 +161,7 @@ export function resolveCrabboxBinary(params: {
   return "crabbox";
 }
 
-export function resolveOpenClawRoot(pluginRoot: string | undefined): string {
+export function resolveBotRoot(pluginRoot: string | undefined): string {
   if (!pluginRoot) {
     return process.cwd();
   }
@@ -177,7 +177,7 @@ export function resolveOpenClawRoot(pluginRoot: string | undefined): string {
 }
 
 export function operationSlug(operationId: string): string {
-  return `openclaw-${createHash("sha256").update(operationId).digest("hex").slice(0, 32)}`;
+  return `bot-${createHash("sha256").update(operationId).digest("hex").slice(0, 32)}`;
 }
 
 export function identityRefId(leaseId: string): string {

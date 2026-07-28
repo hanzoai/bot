@@ -80,7 +80,7 @@ export function renderWorkspaceConflictNotice(props: {
       </div>
       ${props.onDismiss
         ? html`
-            <openclaw-tooltip .content=${t("chat.workspaceConflict.dismiss")}>
+            <bot-tooltip .content=${t("chat.workspaceConflict.dismiss")}>
               <button
                 class="callout__dismiss"
                 type="button"
@@ -89,7 +89,7 @@ export function renderWorkspaceConflictNotice(props: {
               >
                 ${icons.x}
               </button>
-            </openclaw-tooltip>
+            </bot-tooltip>
           `
         : nothing}
     </div>

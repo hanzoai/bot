@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from "vitest";
 const tempDirs: string[] = [];
 
 function createFakeGh(): string {
-  const dir = mkdtempSync(join(tmpdir(), "openclaw-pr-metadata-"));
+  const dir = mkdtempSync(join(tmpdir(), "bot-pr-metadata-"));
   const gh = join(dir, "gh");
   tempDirs.push(dir);
   writeFileSync(

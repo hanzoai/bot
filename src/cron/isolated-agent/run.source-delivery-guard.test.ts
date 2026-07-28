@@ -411,10 +411,10 @@ describe("executeCronRun sourceDelivery mapping", () => {
     expect(args.messageChannel).toBe("messagechat");
   });
 
-  it("forwards an explicit OpenClaw runtime override to cron execution", async () => {
+  it("forwards an explicit Bot runtime override to cron execution", async () => {
     mockRunCronFallbackPassthrough();
     const cronSession = makeCronSession() as MutableCronSession;
-    cronSession.sessionEntry.agentRuntimeOverride = "openclaw";
+    cronSession.sessionEntry.agentRuntimeOverride = "bot";
     cronSession.sessionEntry.agentHarnessId = "codex";
     const executor = makeExecutor({
       cfgWithAgentDefaults: {
@@ -438,7 +438,7 @@ describe("executeCronRun sourceDelivery mapping", () => {
         provider: "openai",
         model: "gpt-5.6-luna",
         thinkLevel: "ultra",
-        agentHarnessRuntimeOverride: "openclaw",
+        agentHarnessRuntimeOverride: "bot",
       }),
     );
     expect(getEmbeddedRunArg()).not.toHaveProperty("agentHarnessId");

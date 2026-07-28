@@ -10,14 +10,14 @@ import {
   upsertSessionEntry as upsertAccessorSessionEntry,
 } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { createCreateGoalTool, createGetGoalTool } from "./goal-tools.js";
 
-async function createStoreConfig(): Promise<{ config: OpenClawConfig; template: string }> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-goal-tools-"));
+async function createStoreConfig(): Promise<{ config: BotConfig; template: string }> {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-goal-tools-"));
   const template = path.join(dir, "{agentId}", "sessions.json");
   return {
-    config: { session: { store: template } } as OpenClawConfig,
+    config: { session: { store: template } } as BotConfig,
     template,
   };
 }

@@ -1,5 +1,5 @@
 // Qqbot tests cover message gating plugin behavior.
-import { resolveInboundMentionDecision } from "openclaw/plugin-sdk/channel-mention-gating";
+import { resolveInboundMentionDecision } from "bot/plugin-sdk/channel-mention-gating";
 import { describe, expect, it } from "vitest";
 import type { MentionGatePort } from "../adapter/mention-gate.port.js";
 import { resolveGroupMessageGate, type GroupMessageGateResult } from "./message-gating.js";

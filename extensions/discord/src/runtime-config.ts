@@ -3,10 +3,10 @@ import {
   getRuntimeConfigSnapshot,
   getRuntimeConfigSourceSnapshot,
   selectApplicableRuntimeConfig,
-} from "openclaw/plugin-sdk/runtime-config-snapshot";
-import type { OpenClawConfig } from "./runtime-api.js";
+} from "bot/plugin-sdk/runtime-config-snapshot";
+import type { BotConfig } from "./runtime-api.js";
 
-export function selectDiscordRuntimeConfig(inputConfig: OpenClawConfig): OpenClawConfig {
+export function selectDiscordRuntimeConfig(inputConfig: BotConfig): BotConfig {
   return (
     selectApplicableRuntimeConfig({
       inputConfig,

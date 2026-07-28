@@ -16,15 +16,15 @@ afterEach(() => {
 
 describe("temp-dir test helpers", () => {
   it("keeps a non-executed temp warning fixture for CI proof", () => {
-    // openclaw-temp-dir: allow test fixture for the temp warning report
-    const warningFixture = 'tmp.dirSync({ prefix: "openclaw-warning-fixture-" })';
+    // bot-temp-dir: allow test fixture for the temp warning report
+    const warningFixture = 'tmp.dirSync({ prefix: "bot-warning-fixture-" })';
 
     expect(warningFixture).toContain("tmp.dirSync");
   });
 
   it("tracks created temp dirs and removes populated dirs", () => {
     const tracker = createTempDirTracker();
-    const dir = tracker.make("openclaw-temp-dir-helper-");
+    const dir = tracker.make("bot-temp-dir-helper-");
     tempDirs.add(dir);
     fs.writeFileSync(path.join(dir, "artifact.txt"), "artifact\n", "utf8");
 
@@ -36,7 +36,7 @@ describe("temp-dir test helpers", () => {
   });
 
   it("supports existing caller-owned temp dir collections", () => {
-    const dir = makeTempDir(tempDirs, "openclaw-temp-dir-existing-");
+    const dir = makeTempDir(tempDirs, "bot-temp-dir-existing-");
     fs.mkdirSync(path.join(dir, "nested"), { recursive: true });
 
     cleanupTempDirs(tempDirs);
@@ -58,7 +58,7 @@ describe("temp-dir test helpers", () => {
     const autoCleanupTracker = useAutoCleanupTempDirTracker(afterEach);
 
     it("tracks temp dirs with Vitest cleanup", () => {
-      const autoCleanedDir = autoCleanupTracker.make("openclaw-temp-dir-auto-");
+      const autoCleanedDir = autoCleanupTracker.make("bot-temp-dir-auto-");
       createdDirs.push(autoCleanedDir);
       fs.writeFileSync(path.join(autoCleanedDir, "artifact.txt"), "artifact\n", "utf8");
 

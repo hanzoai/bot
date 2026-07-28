@@ -1,8 +1,8 @@
 import type {
   AgentMessage,
   EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { buildCodexMessagesSnapshot } from "./event-projector-snapshot.js";
 

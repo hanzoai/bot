@@ -1,4 +1,4 @@
-// OpenClaw command gate: prove inference before starting conversational setup.
+// Bot command gate: prove inference before starting conversational setup.
 
 import { requestExitAfterOneShotOutput } from "../cli/one-shot-exit.js";
 import { withConsoleSubsystemsSuppressed } from "../logging/console.js";
@@ -53,7 +53,7 @@ function failOneShotExecution(
 }
 
 /**
- * Start OpenClaw only after the configured default model completes a real
+ * Start Bot only after the configured default model completes a real
  * turn. Interactive failures return to inference onboarding; automation fails
  * closed with a stable command operators can run to repair the prerequisite.
  */
@@ -67,13 +67,13 @@ export async function runSystemAgentWithInference(
     failOneShotExecution(
       opts,
       runtime,
-      new Error("OpenClaw --yes requires --message so approval is limited to one request."),
+      new Error("Bot --yes requires --message so approval is limited to one request."),
     );
     return;
   }
   const oneShot = isOneShotRequest(opts);
   if (!oneShot && !hasInteractiveTty(opts)) {
-    runtime.error("OpenClaw needs an interactive TTY. Use --message for one command.");
+    runtime.error("Bot needs an interactive TTY. Use --message for one command.");
     runtime.exit(1);
     return;
   }
@@ -111,17 +111,17 @@ export async function runSystemAgentWithInference(
   }
 
   if (oneShot) {
-    const guidance = "Run `openclaw onboard` to connect and live-test AI first.";
+    const guidance = "Run `bot onboard` to connect and live-test AI first.";
     if (opts.json) {
       writeRuntimeJson(runtime, {
         ok: false,
         status: inference.status,
-        error: `OpenClaw requires working inference: ${inference.error}`,
+        error: `Bot requires working inference: ${inference.error}`,
         guidance,
       });
     } else {
       runtime.error(
-        [`OpenClaw requires working inference: ${inference.error}`, guidance].join("\n"),
+        [`Bot requires working inference: ${inference.error}`, guidance].join("\n"),
       );
     }
     if (!requestExitAfterOneShotOutput(runtime, 1)) {
@@ -130,7 +130,7 @@ export async function runSystemAgentWithInference(
     return;
   }
 
-  runtime.log("OpenClaw requires working inference. Starting guided AI setup…");
+  runtime.log("Bot requires working inference. Starting guided AI setup…");
   const runGuidedOnboarding =
     deps.runGuidedOnboarding ?? (await import("./onboard-guided.js")).runGuidedOnboarding;
   await runGuidedOnboarding(onboardingOptions, runtime);

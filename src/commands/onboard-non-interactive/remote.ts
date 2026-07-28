@@ -4,10 +4,10 @@
  * It writes gateway.remote config without local gateway setup, preserving the
  * same config commit path as local onboarding.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { formatCliCommand } from "../../cli/command-format.js";
 import { logConfigUpdated } from "../../config/logging.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { type RuntimeEnv, writeRuntimeJson } from "../../runtime.js";
 import { applySkipBootstrapConfig } from "../onboard-config.js";
 import { applyWizardMetadata } from "../onboard-helpers.js";
@@ -19,7 +19,7 @@ import { commitNonInteractiveOnboardConfig } from "./config-write.js";
 export async function runNonInteractiveRemoteSetup(params: {
   opts: OnboardOptions;
   runtime: RuntimeEnv;
-  baseConfig: OpenClawConfig;
+  baseConfig: BotConfig;
   baseHash?: string;
 }) {
   const { opts, runtime, baseConfig, baseHash } = params;
@@ -30,7 +30,7 @@ export async function runNonInteractiveRemoteSetup(params: {
     // Remote mode cannot infer a target gateway; fail before writing partial
     // remote config that would leave status/agent commands misconfigured.
     runtime.error(
-      `Missing --remote-url for remote mode. Example: ${formatCliCommand("openclaw onboard --non-interactive --mode remote --remote-url ws://127.0.0.1:3000")}.`,
+      `Missing --remote-url for remote mode. Example: ${formatCliCommand("bot onboard --non-interactive --mode remote --remote-url ws://127.0.0.1:3000")}.`,
     );
     runtime.exit(1);
     return;
@@ -50,7 +50,7 @@ export async function runNonInteractiveRemoteSetup(params: {
     delete preservedRemote.password;
   }
 
-  let nextConfig: OpenClawConfig = {
+  let nextConfig: BotConfig = {
     ...baseConfig,
     gateway: {
       ...baseConfig.gateway,
@@ -92,7 +92,7 @@ export async function runNonInteractiveRemoteSetup(params: {
     runtime.log(`Remote gateway: ${remoteUrl}`);
     runtime.log(`Auth: ${payload.auth}`);
     runtime.log(
-      `Tip: run \`${formatCliCommand("openclaw configure --section web")}\` to store your Brave API key for web_search. Docs: https://docs.openclaw.ai/tools/web`,
+      `Tip: run \`${formatCliCommand("bot configure --section web")}\` to store your Brave API key for web_search. Docs: https://docs.bot.ai/tools/web`,
     );
   }
 }

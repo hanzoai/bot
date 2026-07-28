@@ -1,15 +1,15 @@
 // Irc plugin module implements accounts behavior.
-import { resolveAccountWithDefaultFallback } from "openclaw/plugin-sdk/account-core";
-import { createAccountListHelpers } from "openclaw/plugin-sdk/account-helpers";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { parseOptionalDelimitedEntries } from "openclaw/plugin-sdk/channel-core";
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+import { resolveAccountWithDefaultFallback } from "bot/plugin-sdk/account-core";
+import { createAccountListHelpers } from "bot/plugin-sdk/account-helpers";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
+import { parseOptionalDelimitedEntries } from "bot/plugin-sdk/channel-core";
+import { parseStrictPositiveInteger } from "bot/plugin-sdk/number-runtime";
+import { tryReadSecretFileSync } from "bot/plugin-sdk/secret-file-runtime";
+import { normalizeResolvedSecretInputString } from "bot/plugin-sdk/secret-input";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import type { CoreConfig, IrcAccountConfig, IrcNickServConfig } from "./types.js";
 
 type CredentialUnavailableDiagnostic = Extract<
@@ -192,12 +192,12 @@ export function resolveIrcAccount(params: {
       merged.username?.trim() ||
       (accountId === DEFAULT_ACCOUNT_ID ? process.env.IRC_USERNAME?.trim() : "") ||
       nick ||
-      "openclaw"
+      "bot"
     ).trim();
     const realname = (
       merged.realname?.trim() ||
       (accountId === DEFAULT_ACCOUNT_ID ? process.env.IRC_REALNAME?.trim() : "") ||
-      "OpenClaw"
+      "Bot"
     ).trim();
 
     const passwordResolution = resolvePassword(accountId, merged);

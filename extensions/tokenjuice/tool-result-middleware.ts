@@ -3,25 +3,25 @@ import process from "node:process";
 import type {
   AgentToolResultMiddleware,
   AgentToolResultMiddlewareEvent,
-  OpenClawAgentToolResult,
-} from "openclaw/plugin-sdk/agent-harness";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { createTokenjuiceOpenClawEmbeddedExtension } from "./runtime-api.js";
+  BotAgentToolResult,
+} from "bot/plugin-sdk/agent-harness";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
+import { createTokenjuiceBotEmbeddedExtension } from "./runtime-api.js";
 
 type TokenjuiceToolResultHandler = (
   event: {
     toolName: string;
     input: Record<string, unknown>;
-    content: OpenClawAgentToolResult["content"];
+    content: BotAgentToolResult["content"];
     details: unknown;
     isError?: boolean;
   },
   ctx: { cwd: string },
-) => Promise<Partial<OpenClawAgentToolResult> | void> | Partial<OpenClawAgentToolResult> | void;
+) => Promise<Partial<BotAgentToolResult> | void> | Partial<BotAgentToolResult> | void;
 
 function normalizeDetails(
   event: AgentToolResultMiddlewareEvent,
-  current: OpenClawAgentToolResult,
+  current: BotAgentToolResult,
 ): unknown {
   if (
     (event.toolName !== "exec" && event.toolName !== "bash") ||
@@ -58,7 +58,7 @@ function normalizeDetails(
 
 export function createTokenjuiceAgentToolResultMiddleware(): AgentToolResultMiddleware {
   const handlers: TokenjuiceToolResultHandler[] = [];
-  createTokenjuiceOpenClawEmbeddedExtension()({
+  createTokenjuiceBotEmbeddedExtension()({
     on(event, handler) {
       if (event === "tool_result") {
         handlers.push(handler as TokenjuiceToolResultHandler);

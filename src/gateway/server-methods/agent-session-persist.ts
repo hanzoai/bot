@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import {
   isMainSessionRecoveryExhausted,
@@ -19,7 +19,7 @@ import {
   type SessionEntryPatchOptions,
 } from "../../config/sessions/session-accessor.js";
 import { buildSessionCreationStamp } from "../../config/sessions/session-entry-provenance.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { normalizeCronScheduledToolPolicy } from "../../cron/scheduled-tool-policy.js";
 import { assertAgentRunLifecycleGenerationCurrent } from "../../infra/agent-events.js";
 import { resolveSendPolicy } from "../../sessions/send-policy.js";
@@ -73,7 +73,7 @@ type AgentSessionPersistResult = {
 
 export async function persistAgentSessionPhase(params: {
   request: AgentRunRequest;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   storePath: string;
   storeKeys?: string[];
   entry?: SessionEntry;

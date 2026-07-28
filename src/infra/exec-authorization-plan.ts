@@ -1,4 +1,4 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { explainShellCommand } from "./command-explainer/extract.js";
 import type {
   CommandExplanation,

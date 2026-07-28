@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "bot/plugin-sdk/test-env";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   readConfigFileSnapshot,
@@ -14,7 +14,7 @@ describe("onboarding authored config persistence", () => {
   let envSnapshot: ReturnType<typeof captureEnv>;
 
   beforeEach(() => {
-    envSnapshot = captureEnv(["OPENCLAW_TOKEN"]);
+    envSnapshot = captureEnv(["BOT_TOKEN"]);
   });
 
   afterEach(() => {
@@ -24,8 +24,8 @@ describe("onboarding authored config persistence", () => {
 
   it("retains env references and includes through the real snapshot writer", async () => {
     await withTempHome(async (home) => {
-      const configDir = path.join(home, ".openclaw");
-      const configPath = path.join(configDir, "openclaw.json");
+      const configDir = path.join(home, ".bot");
+      const configPath = path.join(configDir, "bot.json");
       const includePath = path.join(configDir, "channels.json");
       const includeRaw = JSON.stringify({ channels: { telegram: { enabled: true } } });
       await fs.mkdir(configDir, { recursive: true });
@@ -34,10 +34,10 @@ describe("onboarding authored config persistence", () => {
         configPath,
         `{
           $include: "./channels.json",
-          gateway: { auth: { mode: "token", token: "\${OPENCLAW_TOKEN}" } }
+          gateway: { auth: { mode: "token", token: "\${BOT_TOKEN}" } }
         }`,
       );
-      setTestEnvValue("OPENCLAW_TOKEN", "plaintext-secret");
+      setTestEnvValue("BOT_TOKEN", "plaintext-secret");
       resetConfigRuntimeState();
 
       const snapshot = await readConfigFileSnapshot();
@@ -53,7 +53,7 @@ describe("onboarding authored config persistence", () => {
       await replaceConfigFile({ nextConfig: result.config, afterWrite: { mode: "auto" } });
 
       const persistedRaw = await fs.readFile(configPath, "utf8");
-      expect(persistedRaw).toContain("${OPENCLAW_TOKEN}");
+      expect(persistedRaw).toContain("${BOT_TOKEN}");
       expect(persistedRaw).not.toContain("plaintext-secret");
       expect(persistedRaw).toContain("./channels.json");
       expect(await fs.readFile(includePath, "utf8")).toBe(includeRaw);

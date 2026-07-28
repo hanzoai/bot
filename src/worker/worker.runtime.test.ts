@@ -144,7 +144,7 @@ class FakeWorkerGateway {
   }
 
   async start(): Promise<void> {
-    this.rootDir = await mkdtemp(path.join(tmpdir(), "openclaw-worker-gateway-"));
+    this.rootDir = await mkdtemp(path.join(tmpdir(), "bot-worker-gateway-"));
     this.socketPath = path.join(this.rootDir, "gateway.sock");
     await new Promise<void>((resolve, reject) => {
       const onError = (error: Error) => {
@@ -716,7 +716,7 @@ function descriptor(socketPath: string, workspaceDir: string): WorkerLaunchDescr
       rpcSetVersion: WORKER_RPC_SET_VERSION,
       handshake: {
         bundleHash: BUNDLE_HASH,
-        openclawVersion: "worker-test",
+        botVersion: "worker-test",
         protocolFeatures: [...WORKER_PROTOCOL_FEATURES],
       },
     },
@@ -749,7 +749,7 @@ async function setup(options?: FakeGatewayOptions): Promise<{
   const gateway = new FakeWorkerGateway(options);
   gateways.push(gateway);
   await gateway.start();
-  const workspaceDir = await mkdtemp(path.join(tmpdir(), "openclaw-worker-workspace-"));
+  const workspaceDir = await mkdtemp(path.join(tmpdir(), "bot-worker-workspace-"));
   tempDirs.push(workspaceDir);
   return { gateway, workspaceDir, launch: descriptor(gateway.socketPath, workspaceDir) };
 }
@@ -1100,28 +1100,28 @@ describe("worker runtime", () => {
 
   it("executes coding tools locally without reading the preexisting auth profile", async () => {
     const { gateway, workspaceDir, launch } = await setup({ inferencePlans: ["tool", "text"] });
-    const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-    const previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
+    const previousStateDir = process.env.BOT_STATE_DIR;
+    const previousConfigPath = process.env.BOT_CONFIG_PATH;
     const trapStateDir = path.join(workspaceDir, "state-trap");
     const authDir = path.join(trapStateDir, "agents", "main", "agent");
     const configTrap = path.join(workspaceDir, "config-trap");
     await mkdir(authDir, { recursive: true });
     await writeFile(path.join(authDir, "auth-profiles.json"), "not valid json", "utf8");
     await mkdir(configTrap);
-    process.env.OPENCLAW_STATE_DIR = trapStateDir;
-    process.env.OPENCLAW_CONFIG_PATH = configTrap;
+    process.env.BOT_STATE_DIR = trapStateDir;
+    process.env.BOT_CONFIG_PATH = configTrap;
     try {
       await expect(runWorkerDescriptor(launch)).resolves.toMatchObject({ status: "completed" });
     } finally {
       if (previousStateDir === undefined) {
-        delete process.env.OPENCLAW_STATE_DIR;
+        delete process.env.BOT_STATE_DIR;
       } else {
-        process.env.OPENCLAW_STATE_DIR = previousStateDir;
+        process.env.BOT_STATE_DIR = previousStateDir;
       }
       if (previousConfigPath === undefined) {
-        delete process.env.OPENCLAW_CONFIG_PATH;
+        delete process.env.BOT_CONFIG_PATH;
       } else {
-        process.env.OPENCLAW_CONFIG_PATH = previousConfigPath;
+        process.env.BOT_CONFIG_PATH = previousConfigPath;
       }
     }
 

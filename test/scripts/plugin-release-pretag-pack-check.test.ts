@@ -2,7 +2,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { OPENCLAW_PLUGIN_NPM_REPOSITORY_URL } from "../../scripts/lib/plugin-npm-release.ts";
+import { BOT_PLUGIN_NPM_REPOSITORY_URL } from "../../scripts/lib/plugin-npm-release.ts";
 import {
   collectPluginReleasePretagPackTargets,
   runPluginReleasePretagPackCheck,
@@ -35,28 +35,28 @@ afterEach(() => {
 });
 
 function createDualPublishPluginRepo() {
-  const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-pretag-pack-");
+  const repoDir = makeTempRepoRoot(tempDirs, "bot-plugin-pretag-pack-");
   const packageDir = join(repoDir, "extensions", "demo-plugin");
   mkdirSync(packageDir, { recursive: true });
-  writeJsonFile(join(repoDir, "package.json"), { name: "openclaw-test-root", type: "module" });
+  writeJsonFile(join(repoDir, "package.json"), { name: "bot-test-root", type: "module" });
   writeJsonFile(join(packageDir, "package.json"), {
-    name: "@openclaw/demo-plugin",
+    name: "@hanzo/bot-demo-plugin",
     version: "2026.4.10",
     type: "module",
     repository: {
       type: "git",
-      url: OPENCLAW_PLUGIN_NPM_REPOSITORY_URL,
+      url: BOT_PLUGIN_NPM_REPOSITORY_URL,
     },
-    openclaw: {
+    bot: {
       extensions: ["./index.ts"],
       compat: {
         pluginApi: ">=2026.4.10",
       },
       build: {
-        openclawVersion: "2026.4.10",
+        botVersion: "2026.4.10",
       },
       install: {
-        npmSpec: "@openclaw/demo-plugin",
+        npmSpec: "@hanzo/bot-demo-plugin",
       },
       release: {
         publishToClawHub: true,
@@ -81,7 +81,7 @@ describe("scripts/plugin-release-pretag-pack-check.ts", () => {
     expect(collectPluginReleasePretagPackTargets(repoDir)).toEqual([
       {
         packageDir: "extensions/demo-plugin",
-        packageName: "@openclaw/demo-plugin",
+        packageName: "@hanzo/bot-demo-plugin",
         packClawHub: true,
         packNpm: true,
       },
@@ -107,7 +107,7 @@ describe("scripts/plugin-release-pretag-pack-check.ts", () => {
     ]);
     expect(callOptions(1)).toMatchObject({
       cwd: repoDir,
-      env: { OPENCLAW_PLUGIN_NPM_RUNTIME_BUILD: "0" },
+      env: { BOT_PLUGIN_NPM_RUNTIME_BUILD: "0" },
       stdio: ["inherit", "ignore", "inherit"],
     });
 
@@ -117,9 +117,9 @@ describe("scripts/plugin-release-pretag-pack-check.ts", () => {
     ]);
     expect(callOptions(2)).toMatchObject({
       cwd: repoDir,
-      env: { OPENCLAW_PLUGIN_NPM_RUNTIME_BUILD: "0" },
+      env: { BOT_PLUGIN_NPM_RUNTIME_BUILD: "0" },
       stdio: ["inherit", "ignore", "inherit"],
     });
-    expect(callOptions(2).env?.OPENCLAW_CLAWHUB_PACK_OUTPUT_DIR).toContain("clawhub-0");
+    expect(callOptions(2).env?.BOT_CLAWHUB_PACK_OUTPUT_DIR).toContain("clawhub-0");
   });
 });

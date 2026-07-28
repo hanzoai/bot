@@ -2,7 +2,7 @@
 import type {
   ProviderDefaultThinkingPolicyContext,
   ProviderThinkingProfile,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "bot/plugin-sdk/plugin-entry";
 
 const OPENCODE_GO_DEEPSEEK_V4_MODEL_IDS = new Set(["deepseek-v4-flash", "deepseek-v4-pro"]);
 const OPENCODE_GO_DEEPSEEK_V4_THINKING_LEVEL_IDS = [

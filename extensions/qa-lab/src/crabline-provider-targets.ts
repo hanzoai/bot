@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import type {
-  OpenClawCrablineInbound,
-  OpenClawCrablineInboundInput,
-  StartedOpenClawCrablineAdapter,
+  BotCrablineInbound,
+  BotCrablineInboundInput,
+  StartedBotCrablineAdapter,
 } from "@openclaw/crabline";
 import type { QaBusInboundMessageInput } from "./runtime-api.js";
 
@@ -98,15 +98,15 @@ function resolveMatrixQaTarget(target: string) {
 
 function resolveMatrixQaText(text: string, botUserId: string) {
   return text.replace(
-    /(^|[\s([{])@openclaw(?=$|[\s.,!?;)\]}])/gu,
+    /(^|[\s([{])@bot(?=$|[\s.,!?;)\]}])/gu,
     (_match, prefix: string) => `${prefix}${botUserId}`,
   );
 }
 
 export function createCrablineProviderInboundInput(
-  adapter: StartedOpenClawCrablineAdapter,
+  adapter: StartedBotCrablineAdapter,
   input: QaBusInboundMessageInput,
-): OpenClawCrablineInboundInput {
+): BotCrablineInboundInput {
   const kind = input.conversation.kind === "direct" ? "direct" : "group";
   return {
     ...input,
@@ -132,9 +132,9 @@ export function createCrablineProviderInboundInput(
 }
 
 export function resolveCrablineStateConversation(params: {
-  adapter: StartedOpenClawCrablineAdapter;
+  adapter: StartedBotCrablineAdapter;
   input: QaBusInboundMessageInput;
-  providerInbound: OpenClawCrablineInbound;
+  providerInbound: BotCrablineInbound;
 }) {
   return params.adapter.channel === "matrix"
     ? params.input.conversation
@@ -142,7 +142,7 @@ export function resolveCrablineStateConversation(params: {
 }
 
 export function createCrablineProviderDelivery(
-  adapter: StartedOpenClawCrablineAdapter,
+  adapter: StartedBotCrablineAdapter,
   target: string,
 ) {
   const delivery = adapter.createAgentDelivery({

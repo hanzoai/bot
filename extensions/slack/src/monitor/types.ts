@@ -1,7 +1,7 @@
 // Slack type declarations define plugin contracts.
-import type { ChannelRuntimeSurface } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig, SlackSlashCommandConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+import type { ChannelRuntimeSurface } from "bot/plugin-sdk/channel-contract";
+import type { BotConfig, SlackSlashCommandConfig } from "bot/plugin-sdk/config-contracts";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
 import type { SlackAppContext } from "../agent-context.js";
 import type { SlackMessageEvent } from "../types.js";
 
@@ -10,7 +10,7 @@ export type MonitorSlackOpts = {
   appToken?: string;
   accountId?: string;
   mode?: "socket" | "http" | "relay";
-  config?: OpenClawConfig;
+  config?: BotConfig;
   runtime?: RuntimeEnv;
   channelRuntime?: ChannelRuntimeSurface;
   abortSignal?: AbortSignal;

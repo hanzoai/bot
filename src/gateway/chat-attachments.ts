@@ -1,11 +1,11 @@
 // Gateway chat attachment parser.
 // Normalizes image attachments, offloads large media, and reports unsupported payloads.
-import { estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
-import { MAX_IMAGE_BYTES } from "@openclaw/media-core/constants";
-import { extensionForMime, mimeTypeFromFilePath } from "@openclaw/media-core/mime";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { estimateBase64DecodedBytes } from "@hanzo/bot-media-core/base64";
+import { MAX_IMAGE_BYTES } from "@hanzo/bot-media-core/constants";
+import { extensionForMime, mimeTypeFromFilePath } from "@hanzo/bot-media-core/mime";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage, formatUncaughtError } from "../infra/errors.js";
 import type { SubsystemLogger } from "../logging/subsystem.js";
 import type { MediaFact } from "../media/media-facts.js";
@@ -142,7 +142,7 @@ export async function persistInboundImagesForTranscript(params: {
 }
 
 /** Resolve the maximum decoded attachment size accepted for chat image inputs. */
-export function resolveChatAttachmentMaxBytes(cfg: OpenClawConfig): number {
+export function resolveChatAttachmentMaxBytes(cfg: BotConfig): number {
   const configured = cfg.agents?.defaults?.mediaMaxMb;
   const mb =
     typeof configured === "number" && Number.isFinite(configured) && configured > 0

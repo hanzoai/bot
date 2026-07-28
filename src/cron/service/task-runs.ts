@@ -1,6 +1,6 @@
 /** Detached task-ledger integration for cron runs. */
 import { randomUUID } from "node:crypto";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   normalizeAgentId,
   parseAgentSessionKey,

@@ -5,26 +5,26 @@ import path from "node:path";
 import { Command } from "commander";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawStateKyselyDatabase } from "../../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../../state/bot-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../../state/bot-state-db.js";
 import { manualTranscriptSourceProvider } from "../../transcripts/manual-source.js";
 import type { TranscriptSessionDescriptor } from "../../transcripts/provider-types.js";
 import { TranscriptsStore } from "../../transcripts/store.js";
 import { summarizeTranscripts } from "../../transcripts/summary.js";
 import { registerTranscriptsCli } from "./register.transcripts.js";
 
-const originalStateDir = process.env.OPENCLAW_STATE_DIR;
+const originalStateDir = process.env.BOT_STATE_DIR;
 
 async function makeStateDir(): Promise<string> {
-  return await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-transcripts-cli-"));
+  return await fs.mkdtemp(path.join(os.tmpdir(), "bot-transcripts-cli-"));
 }
 
 function storeFor(stateDir: string): TranscriptsStore {
   return new TranscriptsStore(path.join(stateDir, "transcripts"), {
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, BOT_STATE_DIR: stateDir },
   });
 }
 
@@ -59,7 +59,7 @@ async function runTranscriptsCli(args: string[]): Promise<string> {
   }) as typeof process.stdout.write);
   try {
     const program = new Command();
-    program.name("openclaw");
+    program.name("bot");
     registerTranscriptsCli(program);
     await program.parseAsync(["transcripts", ...args], { from: "user" });
     return output;
@@ -73,15 +73,15 @@ describe("transcripts CLI", () => {
 
   beforeEach(async () => {
     stateDir = await makeStateDir();
-    process.env.OPENCLAW_STATE_DIR = stateDir;
+    process.env.BOT_STATE_DIR = stateDir;
   });
 
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     if (originalStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = originalStateDir;
+      process.env.BOT_STATE_DIR = originalStateDir;
     }
   });
 
@@ -140,11 +140,11 @@ describe("transcripts CLI", () => {
 
   it("sanitizes stored summary control bytes at the show boundary", async () => {
     await writeSession(stateDir, "legacy-summary");
-    const database = openOpenClawStateDatabase({
-      env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    const database = openBotStateDatabase({
+      env: { ...process.env, BOT_STATE_DIR: stateDir },
     });
     const db = getNodeSqliteKysely<
-      Pick<OpenClawStateKyselyDatabase, "meeting_transcript_summaries">
+      Pick<BotStateKyselyDatabase, "meeting_transcript_summaries">
     >(database.db);
     executeSqliteQuerySync(
       database.db,

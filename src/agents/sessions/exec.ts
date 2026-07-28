@@ -3,7 +3,7 @@
  */
 
 import { StringDecoder } from "node:string_decoder";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { releaseChildProcessOutputAfterExit } from "../../process/child-process.js";
 import { spawnCommand } from "../../process/exec.js";
 import { killProcessTree } from "../../process/kill-tree.js";

@@ -7,7 +7,7 @@ import { hashConfigRaw, parseConfigJson5, resolveConfigSnapshotHash } from "./io
 import type { ConfigWriteOptions } from "./io.types.js";
 import { ConfigMutationConflictError } from "./mutation-conflict.js";
 import { resolveStateDir } from "./paths.js";
-import type { ConfigFileSnapshot, OpenClawConfig } from "./types.js";
+import type { ConfigFileSnapshot, BotConfig } from "./types.js";
 
 export function assertBaseSnapshotStillCurrent(
   snapshot: ConfigFileSnapshot,
@@ -189,10 +189,10 @@ export function formatConfigArtifactTimestamp(ts: string): string {
 }
 
 export function stampConfigVersion(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   version?: string,
   previousConfig?: unknown,
-): OpenClawConfig {
+): BotConfig {
   return stampConfigWriteMetadata(cfg, new Date().toISOString(), version, previousConfig);
 }
 
@@ -210,7 +210,7 @@ export function resolveConfigSizeBaselineBytes(params: {
     return rawBytes;
   }
   const canonical = JSON.stringify(
-    stampConfigVersion(parsed.parsed as OpenClawConfig, params.lastTouchedVersionOverride),
+    stampConfigVersion(parsed.parsed as BotConfig, params.lastTouchedVersionOverride),
     null,
     2,
   )

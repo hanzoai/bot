@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { runOpenClawStateWriteTransaction } from "../../state/openclaw-state-db.js";
+import { runBotStateWriteTransaction } from "../../state/bot-state-db.js";
 import * as taskExecutor from "../../tasks/task-executor.js";
 import { findTaskByRunId, listTaskRecordsUnsorted } from "../../tasks/task-registry.js";
 import { resetTaskRegistryForTests } from "../../tasks/task-runtime.test-helpers.js";
@@ -123,7 +123,7 @@ async function withStateDirForStorePath<T>(
   const stateRoot = path.dirname(path.dirname(storePath));
   resetTaskRegistryForTests();
   try {
-    return await withEnvAsync({ OPENCLAW_STATE_DIR: stateRoot }, runWithStateDir);
+    return await withEnvAsync({ BOT_STATE_DIR: stateRoot }, runWithStateDir);
   } finally {
     resetTaskRegistryForTests();
   }
@@ -228,7 +228,7 @@ async function writeLegacyCronArraySnapshot(storePath: string, jobs: CronJob[]) 
 }
 
 function insertCronJobRow(storePath: string, job: CronJob) {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runBotStateWriteTransaction(({ db }) => {
     db.prepare(
       `INSERT INTO cron_jobs (
         store_key, job_id, name, enabled, created_at_ms, schedule_kind,

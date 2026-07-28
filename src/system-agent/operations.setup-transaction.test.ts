@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { executeSystemAgentOperation } from "./operations.js";
 import { createSystemAgentTestRuntime } from "./system-agent.test-helpers.js";
 
@@ -27,11 +27,11 @@ describe("system-agent setup transaction", () => {
         defaults: { model: { primary: "openai/gpt-5.5" } },
         list: [{ id: "main", default: true }],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     mocks.readConfigFileSnapshot.mockResolvedValue({
       exists: true,
       valid: true,
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       hash: "before",
       config,
       sourceConfig: config,
@@ -39,7 +39,7 @@ describe("system-agent setup transaction", () => {
       issues: [],
     });
     const applySetup = vi.fn(async () => {
-      throw new Error("OpenClaw config changed while AI access was being tested. Try setup again.");
+      throw new Error("Bot config changed while AI access was being tested. Try setup again.");
     });
     const { runtime } = createSystemAgentTestRuntime();
 

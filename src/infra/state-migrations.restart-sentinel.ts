@@ -3,11 +3,11 @@ import { createHash } from "node:crypto";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { root, type Root } from "@openclaw/fs-safe";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import { formatErrorMessage } from "./errors.js";
 import { acquireGatewayLock, GatewayLockError } from "./gateway-lock.js";
 import {
@@ -40,7 +40,7 @@ const MIGRATION_LOCK_POLL_INTERVAL_MS = 25;
 const utf8Decoder = new TextDecoder("utf-8", { fatal: true });
 
 type RestartSentinelMigrationDatabase = Pick<
-  OpenClawStateKyselyDatabase,
+  BotStateKyselyDatabase,
   "gateway_restart_sentinel" | "migration_runs" | "migration_sources"
 >;
 
@@ -93,7 +93,7 @@ function receiptSourceKey(sourcePath: string): string {
 }
 
 function hasMigrationReceipt(sourcePath: string, env: NodeJS.ProcessEnv): boolean {
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openBotStateDatabase({ env });
   return Boolean(
     executeSqliteQueryTakeFirstSync(
       db,
@@ -114,7 +114,7 @@ function decideAndRecordMigration(params: {
   const sourceKey = receiptSourceKey(params.sourcePath);
   const runId = `${sourceKey}:${params.snapshot.sha256.slice(0, 16)}`;
   const now = Date.now();
-  return runOpenClawStateWriteTransaction(
+  return runBotStateWriteTransaction(
     ({ db }) => {
       const stateDb = getNodeSqliteKysely<RestartSentinelMigrationDatabase>(db);
       const receipt = executeSqliteQueryTakeFirstSync(
@@ -212,7 +212,7 @@ function decideAndRecordMigration(params: {
 }
 
 function markSourceRemoved(sourceKey: string, env: NodeJS.ProcessEnv): void {
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,
@@ -430,7 +430,7 @@ export async function migrateLegacyRestartSentinel(params: {
   if (!detected?.hasLegacy) {
     return { changes: [], warnings: [] };
   }
-  const env = { ...(params.env ?? process.env), OPENCLAW_STATE_DIR: params.stateDir };
+  const env = { ...(params.env ?? process.env), BOT_STATE_DIR: params.stateDir };
   let lock: Awaited<ReturnType<typeof acquireGatewayLock>>;
   try {
     lock = await acquireGatewayLock({
@@ -448,7 +448,7 @@ export async function migrateLegacyRestartSentinel(params: {
     return {
       changes: [],
       warnings: [
-        `Failed migrating the legacy restart sentinel: ${detail}. Stop the Gateway, then run \`openclaw doctor --fix\` again.`,
+        `Failed migrating the legacy restart sentinel: ${detail}. Stop the Gateway, then run \`bot doctor --fix\` again.`,
       ],
     };
   }

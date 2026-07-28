@@ -1,13 +1,13 @@
-# @openclaw/google-meet
+# @hanzo/bot-google-meet
 
-Official Google Meet participant plugin for OpenClaw.
+Official Google Meet participant plugin for Bot.
 
 This plugin registers the `google_meet` tool so agents can join Google Meet calls through supported Chrome or Twilio transports.
 
 ## Install
 
 ```bash
-openclaw plugins install @openclaw/google-meet
+bot plugins install @hanzo/bot-google-meet
 ```
 
 Restart the Gateway after installing or updating the plugin.
@@ -16,11 +16,11 @@ Restart the Gateway after installing or updating the plugin.
 
 Enable the plugin and follow the Google Meet docs for browser profile, transport, and call-join setup:
 
-- https://docs.openclaw.ai/plugins/google-meet
+- https://docs.bot.ai/plugins/google-meet
 
 ## Package
 
 - Plugin id: `google-meet`
 - Tool: `google_meet`
-- Package: `@openclaw/google-meet`
-- Minimum OpenClaw host: `2026.4.20`
+- Package: `@hanzo/bot-google-meet`
+- Minimum Bot host: `2026.4.20`

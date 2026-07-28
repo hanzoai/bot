@@ -1,7 +1,7 @@
 // Resolves persisted session model metadata without loading Gateway projections.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { DEFAULT_MODEL, DEFAULT_PROVIDER } from "./defaults.js";
 import {
   inferUniqueProviderFromConfiguredModels,
@@ -17,7 +17,7 @@ type SessionModelEntry =
   | Pick<SessionEntry, "model" | "modelProvider" | "modelOverride" | "providerOverride">;
 
 export function resolveSessionModelRef(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   entry?: SessionModelEntry,
   agentId?: string,
   options?: { allowPluginNormalization?: boolean },
@@ -65,7 +65,7 @@ export function resolveSessionModelRef(
 }
 
 export function resolveSessionModelIdentityRef(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   entry?: SessionModelEntry,
   agentId?: string,
   fallbackModelRef?: string,

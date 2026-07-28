@@ -1,5 +1,5 @@
 // Qqbot tests cover index plugin behavior.
-import type { ExecApprovalPendingView } from "openclaw/plugin-sdk/approval-handler-runtime";
+import type { ExecApprovalPendingView } from "bot/plugin-sdk/approval-handler-runtime";
 import { describe, expect, it } from "vitest";
 import { buildApprovalKeyboard, buildExecApprovalText, parseApprovalButtonData } from "./index.js";
 

@@ -94,7 +94,7 @@ describe("resolveModelAsync startup retry", () => {
       "/tmp/agent",
       {},
       {
-        agentRuntimeId: "openclaw",
+        agentRuntimeId: "bot",
         retryTransientProviderRuntimeMiss: true,
         runtimeHooks,
       },
@@ -109,7 +109,7 @@ describe("resolveModelAsync startup retry", () => {
     for (const call of [prepareProviderDynamicModelMock, runProviderDynamicModelMock]) {
       expect(call).toHaveBeenCalledWith(
         expect.objectContaining({
-          context: expect.objectContaining({ agentRuntimeId: "openclaw" }),
+          context: expect.objectContaining({ agentRuntimeId: "bot" }),
         }),
       );
     }

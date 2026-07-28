@@ -8,10 +8,10 @@ let authorizeSlackSystemEventSender: typeof import("./auth.js").authorizeSlackSy
 let resolveSlackEffectiveAllowFrom: typeof import("./auth.js").resolveSlackEffectiveAllowFrom;
 let resolveSlackCommandIngress: typeof import("./auth.js").resolveSlackCommandIngress;
 
-vi.mock("openclaw/plugin-sdk/channel-ingress-runtime", async () => {
+vi.mock("bot/plugin-sdk/channel-ingress-runtime", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/channel-ingress-runtime")
-  >("openclaw/plugin-sdk/channel-ingress-runtime");
+    typeof import("bot/plugin-sdk/channel-ingress-runtime")
+  >("bot/plugin-sdk/channel-ingress-runtime");
   return {
     ...actual,
     readChannelIngressStoreAllowFromForDmPolicy: (...args: unknown[]) =>
@@ -112,15 +112,15 @@ describe("authorizeSlackSystemEventSender", () => {
 
   beforeEach(() => {
     readChannelIngressStoreAllowFromForDmPolicyMock.mockReset();
-    delete process.env.OPENCLAW_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS;
+    delete process.env.BOT_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS;
   });
 
   afterEach(() => {
-    delete process.env.OPENCLAW_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS;
+    delete process.env.BOT_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS;
   });
 
   it("ignores non-decimal channel member cache ttl env values", async () => {
-    process.env.OPENCLAW_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS = "0x0";
+    process.env.BOT_SLACK_CHANNEL_MEMBERS_CACHE_TTL_MS = "0x0";
     const conversationsMembers = vi.fn(async () => ({
       members: ["UOWNER"],
       response_metadata: {},

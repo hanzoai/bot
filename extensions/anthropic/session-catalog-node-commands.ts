@@ -5,11 +5,11 @@ import {
   decodeNodePtyResumeParams,
   runNodePtyCommand,
   validateClaudeSessionId,
-} from "openclaw/plugin-sdk/node-host";
+} from "bot/plugin-sdk/node-host";
 import type {
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-} from "openclaw/plugin-sdk/plugin-entry";
+  BotPluginNodeHostCommand,
+  BotPluginNodeInvokePolicy,
+} from "bot/plugin-sdk/plugin-entry";
 import { isExactClaudeSessionCursor } from "./session-catalog-cursor.js";
 import { resolveClaudeTerminalExecutable } from "./session-catalog-executable.js";
 import {
@@ -77,7 +77,7 @@ async function requireLocalResumableClaudeSession(
   throw new Error("Claude session cannot be resumed in a terminal");
 }
 
-export function createClaudeSessionNodeHostCommands(): OpenClawPluginNodeHostCommand[] {
+export function createClaudeSessionNodeHostCommands(): BotPluginNodeHostCommand[] {
   return [
     {
       command: CLAUDE_SESSIONS_LIST_COMMAND,
@@ -130,7 +130,7 @@ export function createClaudeSessionNodeHostCommands(): OpenClawPluginNodeHostCom
   ];
 }
 
-export function createClaudeSessionNodeInvokePolicies(): OpenClawPluginNodeInvokePolicy[] {
+export function createClaudeSessionNodeInvokePolicies(): BotPluginNodeInvokePolicy[] {
   return [
     {
       commands: [

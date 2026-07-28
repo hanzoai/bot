@@ -1,17 +1,17 @@
 {
-  "name": "@openclaw/xai-plugin",
+  "name": "@hanzo/bot-xai-plugin",
   "version": "2026.7.2",
   "private": true,
-  "description": "OpenClaw xAI plugin",
+  "description": "Bot xAI plugin",
   "type": "module",
   "dependencies": {
     "typebox": "1.3.6",
     "ws": "8.21.1"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

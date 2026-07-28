@@ -1,5 +1,5 @@
 // Vydra tests cover speech provider plugin behavior.
-import { installPinnedHostnameTestHooks } from "openclaw/plugin-sdk/test-media-understanding";
+import { installPinnedHostnameTestHooks } from "bot/plugin-sdk/test-media-understanding";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { buildVydraSpeechProvider } from "./speech-provider.js";
 
@@ -59,7 +59,7 @@ describe("vydra speech provider", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     const result = await provider.synthesize({
-      text: "OpenClaw test",
+      text: "Bot test",
       cfg: {} as never,
       providerConfig: { apiKey: "vydra-test-key" },
       target: "audio-file",
@@ -72,7 +72,7 @@ describe("vydra speech provider", () => {
     expect(init.method).toBe("POST");
     expect(init.body).toBe(
       JSON.stringify({
-        text: "OpenClaw test",
+        text: "Bot test",
         voice_id: "21m00Tcm4TlvDq8ikWAM",
       }),
     );
@@ -98,7 +98,7 @@ describe("vydra speech provider", () => {
 
     await expect(
       provider.synthesize({
-        text: "OpenClaw test",
+        text: "Bot test",
         cfg: {} as never,
         providerConfig: {},
         target: "audio-file",
@@ -133,7 +133,7 @@ describe("vydra speech provider", () => {
 
     await expect(
       provider.synthesize({
-        text: "OpenClaw test",
+        text: "Bot test",
         cfg: { agents: { defaults: { mediaMaxMb: 0.000001 } } } as never,
         providerConfig: { apiKey: "vydra-test-key" },
         target: "audio-file",
@@ -147,7 +147,7 @@ describe("vydra speech provider", () => {
 
     await expect(
       provider.synthesize({
-        text: "OpenClaw test",
+        text: "Bot test",
         cfg: {} as never,
         providerConfig: { apiKey: "vydra-test-key" },
         target: "audio-file",

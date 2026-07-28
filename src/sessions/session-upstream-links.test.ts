@@ -1,6 +1,6 @@
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { cleanupTempDirs, makeTempDir } from "../../test/helpers/temp-dir.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { registerSessionStateWatch } from "./session-state-events.js";
 import {
   deleteSessionUpstreamLink,
@@ -12,9 +12,9 @@ import {
 const tempDirs: string[] = [];
 
 function createDatabaseOptions() {
-  const stateDir = makeTempDir(tempDirs, "openclaw-session-upstream-links-");
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
-  return { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } };
+  const stateDir = makeTempDir(tempDirs, "bot-session-upstream-links-");
+  vi.stubEnv("BOT_STATE_DIR", stateDir);
+  return { env: { ...process.env, BOT_STATE_DIR: stateDir } };
 }
 
 function upsertLink(
@@ -38,7 +38,7 @@ function upsertLink(
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   vi.unstubAllEnvs();
 });
 

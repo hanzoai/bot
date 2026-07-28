@@ -75,7 +75,7 @@ flow:
             expr: "`${env.gateway.baseUrl}/api/diagnostics/prometheus`"
         - set: gatewayToken
           value:
-            expr: "String(env.gateway.token ?? env.gateway.runtimeEnv.OPENCLAW_GATEWAY_TOKEN ?? '')"
+            expr: "String(env.gateway.token ?? env.gateway.runtimeEnv.BOT_GATEWAY_TOKEN ?? '')"
         - assert:
             expr: "gatewayToken.length > 0"
             message: "expected QA gateway token to be available for protected scrape"
@@ -117,16 +117,16 @@ flow:
           value:
             expr: "String(authenticatedScrape.text ?? '')"
         - assert:
-            expr: "prometheusText.includes('# TYPE openclaw_run_completed_total counter')"
+            expr: "prometheusText.includes('# TYPE bot_run_completed_total counter')"
             message: "missing run completion counter"
         - assert:
-            expr: "prometheusText.includes('# TYPE openclaw_run_duration_seconds histogram')"
+            expr: "prometheusText.includes('# TYPE bot_run_duration_seconds histogram')"
             message: "missing run duration histogram"
         - assert:
-            expr: "prometheusText.includes('# TYPE openclaw_model_call_total counter')"
+            expr: "prometheusText.includes('# TYPE bot_model_call_total counter')"
             message: "missing model call counter"
         - assert:
-            expr: "prometheusText.includes('# TYPE openclaw_harness_run_total counter')"
+            expr: "prometheusText.includes('# TYPE bot_harness_run_total counter')"
             message: "missing harness run counter"
         - assert:
             expr: "!prometheusText.includes(config.secretNeedle)"
@@ -147,8 +147,8 @@ flow:
             expr: "!/\\/tmp\\/|\\/private\\/tmp\\/|\\/app\\//.test(prometheusText)"
             message: "prometheus output leaked a local file path"
         - assert:
-            expr: "!prometheusText.includes('openclaw.content.')"
+            expr: "!prometheusText.includes('bot.content.')"
             message: "prometheus output leaked content attributes"
         - assert:
-            expr: "!/openclaw_prometheus_series_dropped_total(?:\\{[^}]*\\})?\\s+(?!0(?:\\.0+)?(?:\\s|$))/.test(prometheusText)"
+            expr: "!/bot_prometheus_series_dropped_total(?:\\{[^}]*\\})?\\s+(?!0(?:\\.0+)?(?:\\s|$))/.test(prometheusText)"
             message: "prometheus dropped series during the smoke"

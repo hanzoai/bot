@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { showToast } from "./toast.ts";
 
 async function mountHost() {
-  const host = document.createElement("openclaw-toast-host");
+  const host = document.createElement("bot-toast-host");
   document.body.append(host);
   await host.updateComplete;
   return host;

@@ -1,8 +1,8 @@
 {
-  "name": "@openclaw/browser-plugin",
+  "name": "@hanzo/bot-browser-plugin",
   "version": "2026.7.2",
   "private": true,
-  "description": "OpenClaw browser tool plugin",
+  "description": "Bot browser tool plugin",
   "type": "module",
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.29.0",
@@ -14,11 +14,11 @@
     "ws": "8.21.1"
   },
   "devDependencies": {
-    "@openclaw/gateway-client": "workspace:*",
-    "@openclaw/plugin-sdk": "workspace:*",
+    "@hanzo/bot-gateway-client": "workspace:*",
+    "@hanzo/bot-plugin-sdk": "workspace:*",
     "undici": "8.6.0"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],

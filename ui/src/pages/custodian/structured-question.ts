@@ -1,4 +1,4 @@
-import type { SystemAgentChatQuestion } from "@openclaw/gateway-protocol";
+import type { SystemAgentChatQuestion } from "@hanzo/bot-gateway-protocol";
 
 export type CustodianStructuredQuestion = {
   id: string;
@@ -14,7 +14,7 @@ function nonEmptyString(value: unknown): string | null {
 }
 
 /**
- * Sanitize the typed `question` field from `openclaw.chat`. The gateway owns
+ * Sanitize the typed `question` field from `bot.chat`. The gateway owns
  * the schema, but this state renders buttons that send messages, so the page
  * still enforces the card contract locally: 2-4 unique options, at most one
  * recommended. Anything else degrades to the prose reply.

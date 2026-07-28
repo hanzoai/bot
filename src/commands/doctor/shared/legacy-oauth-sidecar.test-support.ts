@@ -4,7 +4,7 @@ type TestApi = { resetKeychainOnlyMigrationHint(): void };
 
 function getTestApi(): TestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.legacyOAuthSidecarInternalTestApi")
+    Symbol.for("bot.legacyOAuthSidecarInternalTestApi")
   ] as TestApi;
 }
 

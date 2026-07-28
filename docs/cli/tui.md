@@ -1,14 +1,14 @@
 ---
-summary: "CLI reference for `openclaw tui` (Gateway-backed or local embedded terminal UI)"
+summary: "CLI reference for `bot tui` (Gateway-backed or local embedded terminal UI)"
 read_when:
   - You want a terminal UI for the Gateway (remote-friendly)
   - You want to pass url/token/session from scripts
   - You want to run the TUI in local embedded mode without a Gateway
-  - You want to use openclaw chat or openclaw tui --local
+  - You want to use bot chat or bot tui --local
 title: "TUI"
 ---
 
-# `openclaw tui`
+# `bot tui`
 
 Open the terminal UI connected to the Gateway, or run it in local embedded
 mode.
@@ -31,7 +31,7 @@ Related guide: [TUI](/web/tui)
 | `--timeout-ms <ms>`          | `agents.defaults.timeoutSeconds`          | Agent timeout. Invalid values log a warning and are ignored.                       |
 | `--history-limit <n>`        | `200`                                     | History entries to load on attach.                                                 |
 
-Aliases: `openclaw chat` and `openclaw terminal` invoke this command with
+Aliases: `bot chat` and `bot terminal` invoke this command with
 `--local` implied.
 
 ## Notes
@@ -40,8 +40,8 @@ Aliases: `openclaw chat` and `openclaw terminal` invoke this command with
 - `tui` resolves configured Gateway auth SecretRefs for token/password auth
   when possible (`env`/`file`/`exec` providers).
 - With no explicit URL or port, `tui` follows the active local Gateway port
-  recorded by the running Gateway. Explicit `--url`, `OPENCLAW_GATEWAY_URL`,
-  `OPENCLAW_GATEWAY_PORT`, and remote Gateway config keep precedence.
+  recorded by the running Gateway. Explicit `--url`, `BOT_GATEWAY_URL`,
+  `BOT_GATEWAY_PORT`, and remote Gateway config keep precedence.
 - Launched from inside a configured agent workspace directory, TUI auto-selects
   that agent for the session key default (unless `--session` is explicitly
   `agent:<id>:...`).
@@ -56,14 +56,14 @@ Aliases: `openclaw chat` and `openclaw terminal` invoke this command with
 ## Examples
 
 ```bash
-openclaw chat
-openclaw tui --local
-openclaw tui
-openclaw tui --url ws://127.0.0.1:18789 --token <token>
-openclaw tui --session main --deliver
-openclaw chat --message "Compare my config to the docs and tell me what to fix"
+bot chat
+bot tui --local
+bot tui
+bot tui --url ws://127.0.0.1:18789 --token <token>
+bot tui --session main --deliver
+bot chat --message "Compare my config to the docs and tell me what to fix"
 # when run inside an agent workspace, infers that agent automatically
-openclaw tui --session bugfix
+bot tui --session bugfix
 ```
 
 ## Config repair loop
@@ -71,25 +71,25 @@ openclaw tui --session bugfix
 Use local mode to have the embedded agent inspect the current config, compare
 it against the docs, and help repair it from the same terminal.
 
-If `openclaw config validate` is already failing, run `openclaw configure` or
-`openclaw doctor --fix` first; `openclaw chat` does not bypass the
+If `bot config validate` is already failing, run `bot configure` or
+`bot doctor --fix` first; `bot chat` does not bypass the
 invalid-config guard.
 
 ```bash
-openclaw chat
+bot chat
 ```
 
 Then inside the TUI:
 
 ```text
-!openclaw config file
-!openclaw docs gateway auth token secretref
-!openclaw config validate
-!openclaw doctor
+!bot config file
+!bot docs gateway auth token secretref
+!bot config validate
+!bot doctor
 ```
 
-Apply targeted fixes with `openclaw config set` or `openclaw configure`, then
-rerun `openclaw config validate`. See [TUI](/web/tui) and
+Apply targeted fixes with `bot config set` or `bot configure`, then
+rerun `bot config validate`. See [TUI](/web/tui) and
 [Config](/cli/config).
 
 ## Related

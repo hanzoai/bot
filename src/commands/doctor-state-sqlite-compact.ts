@@ -1,14 +1,14 @@
 /** Explicit doctor maintenance for the canonical shared state SQLite database. */
 import fs from "node:fs";
 import { resolveSqliteDatabaseFilePaths } from "../infra/sqlite-files.js";
-import { clearOpenClawDatabaseQuarantine } from "../state/openclaw-quarantine-store.js";
+import { clearBotDatabaseQuarantine } from "../state/bot-quarantine-store.js";
 import {
-  assertOpenClawStateDatabaseForMaintenance,
-  clearOpenClawStateDatabaseOpenFailure,
-  ensureOpenClawStatePermissions,
-  isOpenClawStateDatabaseOpen,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  assertBotStateDatabaseForMaintenance,
+  clearBotStateDatabaseOpenFailure,
+  ensureBotStatePermissions,
+  isBotStateDatabaseOpen,
+} from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import {
   compactDoctorSqliteFile,
   type DoctorSqliteCompactSnapshot,
@@ -47,7 +47,7 @@ export async function runDoctorStateSqliteCompact(
   deps: DoctorStateSqliteCompactDeps = {},
 ): Promise<DoctorStateSqliteCompactReport> {
   const env = options.env ?? process.env;
-  const sqlitePath = resolveOpenClawStateSqlitePath(env);
+  const sqlitePath = resolveBotStateSqlitePath(env);
   const stat = readCanonicalStateDatabaseStat(sqlitePath);
   if (!stat) {
     return {
@@ -58,7 +58,7 @@ export async function runDoctorStateSqliteCompact(
     };
   }
   if (!stat.isFile()) {
-    throw new Error(`Canonical OpenClaw state database is not a regular file: ${sqlitePath}`);
+    throw new Error(`Canonical Bot state database is not a regular file: ${sqlitePath}`);
   }
   const withMaintenanceLock = deps.withMaintenanceLock ?? withDoctorSqliteMaintenanceLock;
   return await withMaintenanceLock({
@@ -66,26 +66,26 @@ export async function runDoctorStateSqliteCompact(
     operation: "state SQLite compaction",
     protectedPaths: resolveSqliteDatabaseFilePaths(sqlitePath),
     run: () => {
-      if (isOpenClawStateDatabaseOpen()) {
+      if (isBotStateDatabaseOpen()) {
         throw new Error(
-          "The shared OpenClaw state database is already open in this process. Stop OpenClaw and retry.",
+          "The shared Bot state database is already open in this process. Stop Bot and retry.",
         );
       }
 
       const compact = compactDoctorSqliteFile({
         afterSuccess: () => {
-          if (!clearOpenClawDatabaseQuarantine(sqlitePath, { env })) {
+          if (!clearBotDatabaseQuarantine(sqlitePath, { env })) {
             throw new Error(
-              `OpenClaw state database ${sqlitePath} was compacted, but its persisted quarantine record could not be cleared. Rerun openclaw doctor --fix so the database is not refused again.`,
+              `Bot state database ${sqlitePath} was compacted, but its persisted quarantine record could not be cleared. Rerun bot doctor --fix so the database is not refused again.`,
             );
           }
-          clearOpenClawStateDatabaseOpenFailure(sqlitePath);
-          ensureOpenClawStatePermissions(sqlitePath, env);
+          clearBotStateDatabaseOpenFailure(sqlitePath);
+          ensureBotStatePermissions(sqlitePath, env);
         },
         ...(deps.busyTimeoutMs !== undefined ? { busyTimeoutMs: deps.busyTimeoutMs } : {}),
         sqlitePath,
         validateBeforeMutation: (database) =>
-          assertOpenClawStateDatabaseForMaintenance(database, { pathname: sqlitePath }),
+          assertBotStateDatabaseForMaintenance(database, { pathname: sqlitePath }),
       });
       return {
         ...compact,

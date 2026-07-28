@@ -9,7 +9,7 @@ import {
   replaceSessionEntry,
 } from "../../config/sessions/session-accessor.js";
 import { replaceSqliteTranscriptEvents } from "../../config/sessions/session-accessor.sqlite.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   forkSessionEntryFromParent,
   forkSessionFromParent,
@@ -53,7 +53,7 @@ describe("forkSessionEntryFromParent", () => {
   });
 
   it("rejects a newer locked parent alias shadowed by a stale canonical row", async () => {
-    const root = makeRoot("openclaw-parent-fork-locked-alias-");
+    const root = makeRoot("bot-parent-fork-locked-alias-");
     const storePath = path.join(root, "sessions.json");
     await replaceSessionEntry(
       { agentId: "main", sessionKey: "agent:main:main", storePath },
@@ -84,7 +84,7 @@ describe("forkSessionEntryFromParent", () => {
   });
 
   it("forks the active parent branch into SQLite and persists the child entry", async () => {
-    const root = makeRoot("openclaw-session-fork-boundary-");
+    const root = makeRoot("bot-session-fork-boundary-");
     const activeStoreDir = path.join(root, "active-store");
     const configStoreDir = path.join(root, "config-store");
     fs.mkdirSync(activeStoreDir, { recursive: true });
@@ -167,7 +167,7 @@ describe("forkSessionEntryFromParent", () => {
 
     const result = await forkSessionEntryFromParent({
       agentId: "main",
-      config: { session: { store: configStorePath } } as OpenClawConfig,
+      config: { session: { store: configStorePath } } as BotConfig,
       fallbackEntry: { sessionId: "", updatedAt: 2 },
       parentSessionKey,
       parentStoreKeys: [parentSessionKey],
@@ -227,7 +227,7 @@ describe("forkSessionEntryFromParent", () => {
   });
 
   it("marks the child as handled when the SQLite parent is over the fork limit", async () => {
-    const root = makeRoot("openclaw-session-fork-large-");
+    const root = makeRoot("bot-session-fork-large-");
     const storePath = path.join(root, "sessions.json");
     const parentSessionKey = "agent:main:main";
     const sessionKey = "agent:main:subagent:child";
@@ -279,7 +279,7 @@ describe("forkSessionEntryFromParent", () => {
   });
 
   it("skips stale-token SQLite parents using transcript usage estimates", async () => {
-    const root = makeRoot("openclaw-session-fork-stale-large-");
+    const root = makeRoot("bot-session-fork-stale-large-");
     const storePath = path.join(root, "sessions.json");
     const parentEntry = {
       sessionId: "parent-session",
@@ -323,7 +323,7 @@ describe("forkSessionEntryFromParent", () => {
   });
 
   it("does not reconstruct SQLite parent context from billing buckets when context is unavailable", async () => {
-    const root = makeRoot("openclaw-session-fork-unavailable-context-");
+    const root = makeRoot("bot-session-fork-unavailable-context-");
     const storePath = path.join(root, "sessions.json");
     const parentEntry = {
       sessionId: "parent-session",
@@ -374,7 +374,7 @@ describe("forkSessionEntryFromParent", () => {
   });
 
   it("uses exact SQLite context usage instead of stale cached totals", async () => {
-    const root = makeRoot("openclaw-session-fork-exact-context-");
+    const root = makeRoot("bot-session-fork-exact-context-");
     const storePath = path.join(root, "sessions.json");
     const parentEntry = {
       sessionId: "parent-session",
@@ -456,7 +456,7 @@ describe("forkSessionEntryFromParent", () => {
   });
 
   it("adds only post-usage SQLite transcript pressure to exact context usage", async () => {
-    const root = makeRoot("openclaw-session-fork-post-usage-tail-");
+    const root = makeRoot("bot-session-fork-post-usage-tail-");
     const storePath = path.join(root, "sessions.json");
     const parentEntry = {
       sessionId: "parent-session",

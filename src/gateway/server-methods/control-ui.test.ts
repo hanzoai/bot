@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import type {
   ControlUiGitHubPreview,
@@ -27,8 +27,8 @@ describe("controlUi.githubPreview", () => {
       kind: "issue",
       login: "octocat",
       number: 99815,
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
       state: "open",
       title: "Keep hover previews compact",
       updatedAt: "2026-07-05T09:55:00Z",
@@ -42,7 +42,7 @@ describe("controlUi.githubPreview", () => {
       'handlers["controlUi.githubPreview"] test invariant',
     )(
       requestOptions(
-        { kind: "issue", number: 99815, owner: "openclaw", repo: "openclaw" },
+        { kind: "issue", number: 99815, owner: "bot", repo: "bot" },
         respond,
       ),
     );
@@ -50,8 +50,8 @@ describe("controlUi.githubPreview", () => {
     expect(loadPreview).toHaveBeenCalledWith({
       kind: "issue",
       number: 99815,
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
     });
     expect(respond).toHaveBeenCalledWith(true, preview, undefined);
   });
@@ -66,7 +66,7 @@ describe("controlUi.githubPreview", () => {
       'handlers["controlUi.githubPreview"] test invariant',
     )(
       requestOptions(
-        { kind: "issue", number: 1, owner: "openclaw/evil", repo: "openclaw" },
+        { kind: "issue", number: 1, owner: "bot/evil", repo: "bot" },
         respond,
       ),
     );
@@ -88,7 +88,7 @@ describe("controlUi.githubPreview", () => {
       handlers["controlUi.githubPreview"],
       'handlers["controlUi.githubPreview"] test invariant',
     )(
-      requestOptions({ kind: "pull", number: 99816, owner: "openclaw", repo: "openclaw" }, respond),
+      requestOptions({ kind: "pull", number: 99816, owner: "bot", repo: "bot" }, respond),
     );
 
     expect(respond).toHaveBeenCalledWith(false, undefined, {
@@ -105,16 +105,16 @@ describe("controlUi.sessionPullRequests", () => {
       pullRequests: [
         {
           number: 103469,
-          owner: "openclaw",
-          repo: "openclaw",
+          owner: "bot",
+          repo: "bot",
           branch: "claude/browser-tabs-tighter-header",
           title: "fix(macos): tighten the link-browser tab header",
-          url: "https://github.com/openclaw/openclaw/pull/103469",
+          url: "https://github.com/hanzoai/bot/pull/103469",
           state: "open",
           additions: 4,
           deletions: 3,
           checks: { state: "passing", passed: 5, failed: 0, skipped: 1, running: 0 },
-          checksUrl: "https://github.com/openclaw/openclaw/pull/103469/checks",
+          checksUrl: "https://github.com/hanzoai/bot/pull/103469/checks",
         },
       ],
       rateLimited: false,

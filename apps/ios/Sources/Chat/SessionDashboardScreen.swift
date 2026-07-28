@@ -1,4 +1,4 @@
-import OpenClawKit
+import BotKit
 import SwiftUI
 
 /// Session-scoped dashboard rendered by the gateway Control UI.
@@ -11,7 +11,7 @@ struct SessionDashboardScreen: View {
         let config = self.appModel.activeGatewayConnectConfig
         let storedOperatorToken = AuthenticatedControlUI.storedOperatorToken(config: config)
         ZStack {
-            OpenClawProBackground()
+            BotProBackground()
             if let url = Self.dashboardURL(config: config, sessionKey: self.sessionKey) {
                 AuthenticatedControlUIWebView(
                     url: url,
@@ -35,7 +35,7 @@ struct SessionDashboardScreen: View {
                     self.dismiss()
                 } label: {
                     Text("Done")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                 }
             }
         }
@@ -43,11 +43,11 @@ struct SessionDashboardScreen: View {
 
     private var unavailableCard: some View {
         VStack(spacing: 12) {
-            ProIconBadge(systemName: "rectangle.grid.2x2", color: OpenClawBrand.accent)
+            ProIconBadge(systemName: "rectangle.grid.2x2", color: BotBrand.accent)
             Text("Dashboard needs a connected gateway")
-                .font(OpenClawType.subheadSemiBold)
+                .font(BotType.subheadSemiBold)
             Text("Connect to your gateway to open this session dashboard.")
-                .font(OpenClawType.caption)
+                .font(BotType.caption)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
         }

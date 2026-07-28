@@ -3,14 +3,14 @@ summary: "Progress drafts: one visible work-in-progress message that updates whi
 read_when:
   - Configuring visible progress updates for long-running chat turns
   - Choosing between partial, block, and progress streaming modes
-  - Explaining how OpenClaw updates one channel message while work is in progress
+  - Explaining how Bot updates one channel message while work is in progress
   - Troubleshooting progress drafts, standalone progress messages, or finalization fallback
 title: "Progress drafts"
 ---
 
 Progress drafts turn one channel message into a live status line while an
 agent works, instead of a stack of temporary "still working" replies. Set
-`channels.<channel>.streaming.mode: "progress"` and OpenClaw creates the
+`channels.<channel>.streaming.mode: "progress"` and Bot creates the
 message once real work starts, edits it as the agent reads, plans, calls
 tools, or waits for approval, then turns it into the final answer.
 
@@ -71,7 +71,7 @@ for example `🛠️ Bash: run tests`, `🔎 Web Search: for "discord edit messa
 or `✍️ Write: to /tmp/file`.
 
 The final answer replaces the draft in place when the channel can safely do
-that; otherwise OpenClaw sends the final answer through normal delivery and
+that; otherwise Bot sends the final answer through normal delivery and
 cleans up or stops updating the draft (see [Finalization](#finalization)).
 
 ## Choose a mode
@@ -177,7 +177,7 @@ empty model content and explicit public channel metadata:
 }
 ```
 
-OpenClaw renders only `progress.text` in the channel progress UI. The normal
+Bot renders only `progress.text` in the channel progress UI. The normal
 tool result still arrives later as `content`/`details` and is the only part
 returned to the model.
 
@@ -207,7 +207,7 @@ fetched content, command output, or page text.
 
 ### Detail mode
 
-OpenClaw uses the same formatter for progress drafts and `/verbose`:
+Bot uses the same formatter for progress drafts and `/verbose`:
 
 ```json5
 {
@@ -335,7 +335,7 @@ Limit how many lines stay visible (default 8):
 ```
 
 Progress lines are compacted automatically to reduce chat-bubble reflow while
-the draft is edited, and OpenClaw truncates long lines so repeated draft edits
+the draft is edited, and Bot truncates long lines so repeated draft edits
 do not wrap differently on every update. The default per-line budget is 120
 characters; prose cuts at a word boundary, while long details such as paths or
 raw commands are shortened with a middle ellipsis so the suffix stays visible.
@@ -400,7 +400,7 @@ Keep the single progress draft but hide tool and task lines:
 }
 ```
 
-With `toolProgress: false`, OpenClaw still suppresses the older standalone
+With `toolProgress: false`, Bot still suppresses the older standalone
 tool-progress messages for that turn — the channel stays visually quiet until
 the final answer, except for the label if one is configured.
 
@@ -421,7 +421,7 @@ full runtime-behavior breakdown per channel.
 
 ## Finalization
 
-When the final answer is ready, OpenClaw tries to keep the chat clean:
+When the final answer is ready, Bot tries to keep the chat clean:
 
 - In `progress` mode on Discord, the final answer is sent as a fresh message
   with a small `-#` activity receipt appended (for example
@@ -430,11 +430,11 @@ When the final answer is ready, OpenClaw tries to keep the chat clean:
   log above the reply; error finals keep the draft as the visible record of
   the failed turn.
 - If the draft can safely become the final answer (`partial`/`block` modes),
-  OpenClaw edits it in place.
-- If the channel uses native progress streaming, OpenClaw finalizes that
+  Bot edits it in place.
+- If the channel uses native progress streaming, Bot finalizes that
   stream when the native transport accepts the final text.
 - Otherwise (media, an approval prompt, an explicit reply target, too many
-  chunks, or a failed edit/send) OpenClaw sends the final answer through the
+  chunks, or a failed edit/send) Bot sends the final answer through the
   normal channel delivery path instead of overwriting the draft.
 
 The fallback is intentional: sending a fresh final answer beats losing text,
@@ -452,7 +452,7 @@ message.
 
 **I see the label but no tool lines.**
 
-Check `streaming.progress.toolProgress`. If it is `false`, OpenClaw keeps the
+Check `streaming.progress.toolProgress`. If it is `false`, Bot keeps the
 single draft behavior but hides tool and task progress lines.
 
 **I see a fresh final message instead of an edited draft.**

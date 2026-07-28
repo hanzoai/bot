@@ -1,15 +1,15 @@
-import { readPositiveIntegerParam } from "openclaw/plugin-sdk/channel-actions";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { readPositiveIntegerParam } from "bot/plugin-sdk/channel-actions";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   callGatewayFromCli,
   ErrorCodes,
   errorShape,
   type GatewayRequestHandlerOptions,
-} from "openclaw/plugin-sdk/gateway-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { MeetingPlatformAdapter } from "openclaw/plugin-sdk/meeting-runtime";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/gateway-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { MeetingPlatformAdapter } from "bot/plugin-sdk/meeting-runtime";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-entry";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   buildGoogleMeetCalendarDayWindow,
   findGoogleMeetCalendarEvent,
@@ -156,7 +156,7 @@ export async function callGoogleMeetGatewayFromTool(params: {
   config: GoogleMeetConfig;
   action: GoogleMeetGatewayToolAction;
   raw: Record<string, unknown>;
-  runtime?: OpenClawPluginApi["runtime"];
+  runtime?: BotPluginApi["runtime"];
 }): Promise<unknown> {
   try {
     if (params.runtime) {
@@ -203,7 +203,7 @@ export function keepTrustedToolAgentId(
 
 export async function createMeetFromParams(params: {
   config: GoogleMeetConfig;
-  runtime: OpenClawPluginApi["runtime"];
+  runtime: BotPluginApi["runtime"];
   raw: Record<string, unknown>;
 }) {
   const create = await loadGoogleMeetCreateModule();
@@ -212,7 +212,7 @@ export async function createMeetFromParams(params: {
 
 export async function createAndJoinMeetFromParams(params: {
   config: GoogleMeetConfig;
-  runtime: OpenClawPluginApi["runtime"];
+  runtime: BotPluginApi["runtime"];
   raw: Record<string, unknown>;
   ensureRuntime: () => Promise<GoogleMeetRuntime>;
 }) {
@@ -388,7 +388,7 @@ export async function exportGoogleMeetBundleFromParams(
   };
 }
 export function createGoogleMeetRuntimeAccessor(params: {
-  api: OpenClawPluginApi;
+  api: BotPluginApi;
   config: GoogleMeetConfig;
 }): () => Promise<GoogleMeetRuntime> {
   let runtime: GoogleMeetRuntime | null = null;

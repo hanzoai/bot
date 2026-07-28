@@ -3,8 +3,8 @@
  *
  * Adapts declarative wizard definitions into imperative setup adapters used by onboarding.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../../config/types.bot.js";
 import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "../../routing/session-key.js";
 import { resolveChannelSetupExecutionAdapter } from "./setup-contract.js";
 import { configureChannelAccessWithAllowlist } from "./setup-group-access-configure.js";
@@ -40,18 +40,18 @@ type ChannelSectionWithAccounts = Record<string, unknown> & {
   defaultAccount?: string;
 };
 
-function getChannelSection(cfg: OpenClawConfig, channelKey: string): ChannelSectionWithAccounts {
+function getChannelSection(cfg: BotConfig, channelKey: string): ChannelSectionWithAccounts {
   const channels = cfg.channels as Record<string, unknown> | undefined;
   const channel = channels?.[channelKey];
   return channel && typeof channel === "object" ? (channel as ChannelSectionWithAccounts) : {};
 }
 
 function createWizardAccountScope(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channelKey: string;
   accountId: string;
   setupSurface?: ChannelSetupAdapter;
-}): { cfg: OpenClawConfig; restore: (cfg: OpenClawConfig) => OpenClawConfig } {
+}): { cfg: BotConfig; restore: (cfg: BotConfig) => BotConfig } {
   const accountId = normalizeAccountId(params.accountId);
   const initialChannel = getChannelSection(params.cfg, params.channelKey);
   // An existing accounts map — even empty — makes legacy plugins write account-scoped
@@ -79,7 +79,7 @@ function createWizardAccountScope(params: {
         defaultAccount: accountId,
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 
   return {
     cfg: scopedCfg,
@@ -95,7 +95,7 @@ function createWizardAccountScope(params: {
           ...currentCfg.channels,
           [params.channelKey]: restoredChannel,
         },
-      } as OpenClawConfig;
+      } as BotConfig;
     },
   };
 }
@@ -139,7 +139,7 @@ async function buildStatus(
 // inputs funnel through them unless a field supplies a narrower writer.
 function applySetupInput(params: {
   plugin: ChannelSetupWizardPlugin;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   input: ChannelSetupInput;
 }) {
@@ -189,7 +189,7 @@ function applySetupInput(params: {
 
 function collectCredentialValues(params: {
   wizard: ChannelSetupWizard;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
 }): ChannelSetupWizardCredentialValues {
   const values: ChannelSetupWizardCredentialValues = {};
@@ -212,7 +212,7 @@ function collectCredentialValues(params: {
 async function applyWizardTextInputValue(params: {
   plugin: ChannelSetupWizardPlugin;
   input: ChannelSetupWizardTextInput;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   value: string;
 }) {
@@ -294,7 +294,7 @@ export function buildChannelSetupWizardAdapterFromSetupWizard(params: {
             accountId,
             setupSurface: plugin.setup,
           })
-        : { cfg, restore: (currentCfg: OpenClawConfig) => currentCfg };
+        : { cfg, restore: (currentCfg: BotConfig) => currentCfg };
       let next = accountScope.cfg;
       let credentialValues = collectCredentialValues({
         wizard,

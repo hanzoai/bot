@@ -3,7 +3,7 @@ import { listAgentEntries } from "../agents/agent-scope.js";
 import { stableStringify } from "../agents/stable-stringify.js";
 import { getRuntimeConfig } from "../config/config.js";
 import type { AgentConfig } from "../config/types.agents.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   AgentConfigPreconditionError,
   deleteAgentConfigEntry,
@@ -15,13 +15,13 @@ import {
   type ClawTrashPath,
 } from "./lifecycle-delete-support.js";
 
-export type ConfigCommit = (transform: (config: OpenClawConfig) => OpenClawConfig) => Promise<void>;
+export type ConfigCommit = (transform: (config: BotConfig) => BotConfig) => Promise<void>;
 
 export function digestClawAgentConfig(agent: AgentConfig): string {
   return `sha256:${createHash("sha256").update(stableStringify(agent)).digest("hex")}`;
 }
 
-export function digestClawAgentRemovalSurface(config: OpenClawConfig, agentId: string): string {
+export function digestClawAgentRemovalSurface(config: BotConfig, agentId: string): string {
   const normalizedId = normalizeAgentId(agentId);
   const surface = {
     bindings: (config.bindings ?? []).filter(
@@ -40,23 +40,23 @@ export async function claimClawAgentConfigRemoval(params: {
   expectedRemovalSurfaceDigest: string;
   expectedState: "present" | "missing";
   fallbackWorkspace: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   commitConfig?: ConfigCommit;
   trashPath?: ClawTrashPath;
   onModified: () => Error;
 }): Promise<{
   agentRemoved: boolean;
   cleanupTargets?: ClawCleanupTargets;
-  configBeforeDelete: OpenClawConfig;
-  nextConfig: OpenClawConfig;
+  configBeforeDelete: BotConfig;
+  nextConfig: BotConfig;
 }> {
   if (params.commitConfig) {
     let result:
       | {
           agentRemoved: boolean;
           cleanupTargets?: ClawCleanupTargets;
-          configBeforeDelete: OpenClawConfig;
-          nextConfig: OpenClawConfig;
+          configBeforeDelete: BotConfig;
+          nextConfig: BotConfig;
         }
       | undefined;
     await params.commitConfig((config) => {

@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   hasLegacyAutoFallbackWithoutOrigin,
   hasSessionAutoModelFallbackProvenance,
@@ -253,7 +253,7 @@ export async function executePreparedReplyRun(state: PreparedReplyRunAdmission) 
           // LLM-boundary stamping site (normalizeMessagesForLlmBoundary) can
           // derive a stable per-message `[DOW YYYY-MM-DD HH:MM TZ]` prefix that
           // is identical whether this turn is sent as the current turn or
-          // replayed as history. See: https://github.com/openclaw/openclaw/issues/3658
+          // replayed as history. See: https://github.com/hanzoai/bot/issues/3658
           ...(userTurnTimestamp ? { timestamp: userTurnTimestamp } : {}),
           // Direct transcripts keep their existing identity-storage boundary.
           sender: persistGroupSender

@@ -1,8 +1,8 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { upsertSessionEntry } from "../config/sessions/session-accessor.js";
 import { addSessionMember } from "../config/sessions/session-sharing-store.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
-import { withOpenClawTestState } from "../test-utils/openclaw-test-state.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
+import { withBotTestState } from "../test-utils/bot-test-state.js";
 import type { GatewayClient } from "./server-methods/types.js";
 import {
   allowedSessionVisibilities,
@@ -14,7 +14,7 @@ import {
   resolveSessionVisibility,
 } from "./session-sharing.js";
 
-afterEach(() => closeOpenClawAgentDatabasesForTest());
+afterEach(() => closeBotAgentDatabasesForTest());
 
 type SharingTarget = Parameters<typeof resolveSessionSharingRole>[0]["target"];
 
@@ -29,7 +29,7 @@ function client(params: {
       minProtocol: 1,
       maxProtocol: 1,
       client: {
-        id: "openclaw-control-ui",
+        id: "bot-control-ui",
         version: "test",
         platform: "test",
         mode: "webchat",
@@ -145,7 +145,7 @@ describe("session sharing policy", () => {
   });
 
   it("keeps incognito admin-only while treating identityless connections as owner-equivalent", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withBotTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:dashboard:incognito-private";
       const entry = {
         sessionId: "session-incognito",
@@ -220,7 +220,7 @@ describe("session sharing policy", () => {
   });
 
   it("keeps agent scope for indirect run and approval authorization", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withBotTestState({ scenario: "minimal" }, async () => {
       await upsertSessionEntry(
         { agentId: "main", sessionKey: "global" },
         { sessionId: "session-main-global", updatedAt: 1, visibility: "shared" },
@@ -302,7 +302,7 @@ describe("session sharing policy", () => {
   });
 
   it("limits suggestion events to participants and the suggestion author", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withBotTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:suggestions";
       await upsertSessionEntry(
         { agentId: "main", sessionKey },
@@ -347,7 +347,7 @@ describe("session sharing policy", () => {
   });
 
   it("keeps draft typing events owner and admin only", async () => {
-    await withOpenClawTestState({ scenario: "minimal" }, async () => {
+    await withBotTestState({ scenario: "minimal" }, async () => {
       const sessionKey = "agent:main:draft-typing";
       await upsertSessionEntry(
         { agentId: "main", sessionKey },

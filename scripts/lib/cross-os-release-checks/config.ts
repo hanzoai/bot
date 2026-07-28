@@ -27,7 +27,7 @@ export type PackageJson = {
   name?: string;
   version?: string;
   scripts?: Record<string, string>;
-  openclaw?: { commit?: string };
+  bot?: { commit?: string };
 };
 export type LaneState = {
   name: string;
@@ -96,7 +96,7 @@ export type SummaryPayload = {
   };
 };
 
-export const PUBLISHED_INSTALLER_BASE_URL = "https://openclaw.ai";
+export const PUBLISHED_INSTALLER_BASE_URL = "https://bot.ai";
 
 const SUPPORTED_MODES = new Set<CrossOsMode>(["fresh", "upgrade", "both"]);
 const SUPPORTED_SUITES = new Set<CrossOsSuite>([
@@ -108,14 +108,14 @@ const SUPPORTED_SUITES = new Set<CrossOsSuite>([
 const SUPPORTED_OS_IDS = new Set<CrossOsOsId>(["ubuntu", "windows", "macos"]);
 
 export const CROSS_OS_AGENT_TURN_TIMEOUT_SECONDS = parsePositiveIntegerEnv(
-  "OPENCLAW_CROSS_OS_AGENT_TURN_TIMEOUT_SECONDS",
+  "BOT_CROSS_OS_AGENT_TURN_TIMEOUT_SECONDS",
   600,
 );
 export const CROSS_OS_COMMAND_CAPTURE_TAIL_BYTES = 16 * 1024 * 1024;
 export const CROSS_OS_AGENT_LOG_FALLBACK_TAIL_BYTES = 2 * 1024 * 1024;
 export const CROSS_OS_NPM_DEBUG_LOG_TAIL_BYTES = 256 * 1024;
 export const CROSS_OS_PROCESS_TREE_KILL_AFTER_MS = parsePositiveIntegerEnv(
-  "OPENCLAW_CROSS_OS_PROCESS_TREE_KILL_AFTER_MS",
+  "BOT_CROSS_OS_PROCESS_TREE_KILL_AFTER_MS",
   15_000,
 );
 export const CROSS_OS_AGENT_TURN_OPTIONAL = resolveCrossOsAgentTurnOptional();
@@ -148,8 +148,8 @@ export function resolveProviderConfig(provider: string, env = process.env): Prov
     return null;
   }
   const config: ProviderConfig = providerConfig[provider as ProviderId];
-  const providerEnvKey = `OPENCLAW_CROSS_OS_${provider.toUpperCase().replace(/[^A-Z0-9]+/gu, "_")}_MODEL`;
-  const model = env[providerEnvKey]?.trim() || env.OPENCLAW_CROSS_OS_MODEL?.trim() || config.model;
+  const providerEnvKey = `BOT_CROSS_OS_${provider.toUpperCase().replace(/[^A-Z0-9]+/gu, "_")}_MODEL`;
+  const model = env[providerEnvKey]?.trim() || env.BOT_CROSS_OS_MODEL?.trim() || config.model;
   return { ...config, model };
 }
 
@@ -184,7 +184,7 @@ export function buildReleaseProviderConfigOverride(providerMeta: ProviderConfig)
   }
   return {
     ...(typeof providerMeta.baseUrl === "string" ? { baseUrl: providerMeta.baseUrl } : {}),
-    ...(providerMeta.extensionId === "openai" ? { agentRuntime: { id: "openclaw" } } : {}),
+    ...(providerMeta.extensionId === "openai" ? { agentRuntime: { id: "bot" } } : {}),
     models: [],
     ...(typeof providerMeta.timeoutSeconds === "number"
       ? { timeoutSeconds: providerMeta.timeoutSeconds }
@@ -193,7 +193,7 @@ export function buildReleaseProviderConfigOverride(providerMeta: ProviderConfig)
 }
 
 export const PACKAGE_DIST_INVENTORY_RELATIVE_PATH = "dist/postinstall-inventory.json";
-export const INSTALL_STAGE_DEBRIS_DIR_PATTERN = /^\.openclaw-install-stage(?:-[^/]+)?$/iu;
+export const INSTALL_STAGE_DEBRIS_DIR_PATTERN = /^\.bot-install-stage(?:-[^/]+)?$/iu;
 export const OMITTED_QA_EXTENSION_PREFIXES = [
   "dist/extensions/qa-channel/",
   "dist/extensions/qa-lab/",
@@ -201,7 +201,7 @@ export const OMITTED_QA_EXTENSION_PREFIXES = [
 export const CROSS_OS_DASHBOARD_SMOKE_TIMEOUT_MS = 120_000;
 export const CROSS_OS_DASHBOARD_FETCH_TIMEOUT_MS = 10_000;
 export const CROSS_OS_DISCORD_FETCH_TIMEOUT_MS = parsePositiveIntegerEnv(
-  "OPENCLAW_CROSS_OS_DISCORD_FETCH_TIMEOUT_MS",
+  "BOT_CROSS_OS_DISCORD_FETCH_TIMEOUT_MS",
   10_000,
 );
 export const CROSS_OS_FETCH_BODY_MAX_CHARS = 1024 * 1024;
@@ -220,7 +220,7 @@ export const CROSS_OS_WINDOWS_PACKAGED_UPGRADE_STEP_TIMEOUT_SECONDS = 10 * 60;
 export const CROSS_OS_WINDOWS_PACKAGED_UPGRADE_WRAPPER_TIMEOUT_MS =
   (CROSS_OS_WINDOWS_PACKAGED_UPGRADE_STEP_TIMEOUT_SECONDS + 2 * 60) * 1000;
 export const CROSS_OS_COMMAND_HEARTBEAT_SECONDS = parsePositiveIntegerEnv(
-  "OPENCLAW_CROSS_OS_COMMAND_HEARTBEAT_SECONDS",
+  "BOT_CROSS_OS_COMMAND_HEARTBEAT_SECONDS",
   60,
 );
 
@@ -316,7 +316,7 @@ function parseBooleanEnv(name: string, fallback: boolean, env = process.env): bo
 }
 
 export function resolveCrossOsAgentTurnOptional(env = process.env) {
-  return parseBooleanEnv("OPENCLAW_CROSS_OS_AGENT_TURN_OPTIONAL", false, env);
+  return parseBooleanEnv("BOT_CROSS_OS_AGENT_TURN_OPTIONAL", false, env);
 }
 
 export function looksLikeReleaseVersionRef(ref: string) {
@@ -488,15 +488,15 @@ export function readRunnerOverrideEnv(env = process.env) {
   return {
     varUbuntuRunner: preferNonEmptyEnv(
       env.VAR_UBUNTU_RUNNER,
-      env.OPENCLAW_RELEASE_CHECKS_UBUNTU_RUNNER,
+      env.BOT_RELEASE_CHECKS_UBUNTU_RUNNER,
     ),
     varWindowsRunner: preferNonEmptyEnv(
       env.VAR_WINDOWS_RUNNER,
-      env.OPENCLAW_RELEASE_CHECKS_WINDOWS_RUNNER,
+      env.BOT_RELEASE_CHECKS_WINDOWS_RUNNER,
     ),
     varMacosRunner: preferNonEmptyEnv(
       env.VAR_MACOS_RUNNER,
-      env.OPENCLAW_RELEASE_CHECKS_MACOS_RUNNER,
+      env.BOT_RELEASE_CHECKS_MACOS_RUNNER,
     ),
   };
 }
@@ -564,10 +564,10 @@ export function shouldSkipInstallerDaemonHealthCheck(platform = process.platform
 export function buildRealUpdateEnv(env: NodeJS.ProcessEnv) {
   const updateEnv: NodeJS.ProcessEnv = {
     ...env,
-    OPENCLAW_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS: "1",
+    BOT_ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS: "1",
     NODE_DISABLE_COMPILE_CACHE: "1",
   };
-  delete updateEnv.OPENCLAW_DISABLE_BUNDLED_PLUGIN_POSTINSTALL;
+  delete updateEnv.BOT_DISABLE_BUNDLED_PLUGIN_POSTINSTALL;
   delete updateEnv.NODE_COMPILE_CACHE;
   return updateEnv;
 }
@@ -612,7 +612,7 @@ export function isRecoverableWindowsPackagedUpgradeSwapCleanupFailure(
     /\bglobal install swap\b/iu.test(output) &&
     /\bEPERM\b/iu.test(output) &&
     /\bunlink\b/iu.test(output) &&
-    /[/\\]\.openclaw-\d+-\d+[/\\]/u.test(output) &&
+    /[/\\]\.bot-\d+-\d+[/\\]/u.test(output) &&
     /\.node['"]?/iu.test(output)
   );
 }
@@ -627,7 +627,7 @@ export function isRecoverableWindowsPackagedUpgradeTimeoutError(
   const message = error instanceof Error ? error.message : String(error);
   return (
     /\bCommand timed out:/u.test(message) &&
-    /[/\\]openclaw\.mjs update --tag http:\/\/127\.0\.0\.1:\d+\/openclaw[^/\s]*\.tgz --yes --json(?: --no-restart)? --timeout \d+/u.test(
+    /[/\\]bot\.mjs update --tag http:\/\/127\.0\.0\.1:\d+\/bot[^/\s]*\.tgz --yes --json(?: --no-restart)? --timeout \d+/u.test(
       message,
     )
   );
@@ -656,11 +656,11 @@ export function verifyWindowsPackagedUpgradeFallbackInstall({
 
 export function resolveExplicitBaselineVersion(baselineSpec: string) {
   const trimmed = baselineSpec.trim();
-  if (!trimmed || trimmed === "openclaw@latest") {
+  if (!trimmed || trimmed === "bot@latest") {
     return "";
   }
-  if (trimmed.startsWith("openclaw@")) {
-    return trimmed.slice("openclaw@".length);
+  if (trimmed.startsWith("bot@")) {
+    return trimmed.slice("bot@".length);
   }
   return trimmed;
 }

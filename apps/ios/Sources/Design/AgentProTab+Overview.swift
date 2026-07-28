@@ -1,22 +1,22 @@
-import OpenClawKit
-import OpenClawProtocol
+import BotKit
+import BotProtocol
 import SwiftUI
 
 extension AgentProTab {
     var rosterHeader: some View {
         VStack(alignment: .leading, spacing: 10) {
-            OpenClawAdaptiveHeaderRow(
+            BotAdaptiveHeaderRow(
                 title: .localized(self.headerTitle),
                 subtitle: .verbatim(self.agentTotalText),
-                titleFont: OpenClawType.title2SemiBold,
-                subtitleFont: OpenClawType.subheadMedium,
+                titleFont: BotType.title2SemiBold,
+                subtitleFont: BotType.subheadMedium,
                 subtitleLineLimit: 1)
             {
                 if let headerSidebarAction {
-                    OpenClawSidebarHeaderLeadingSlot(action: headerSidebarAction)
+                    BotSidebarHeaderLeadingSlot(action: headerSidebarAction)
                 }
             } accessory: {
-                OpenClawGlassControlGroup {
+                BotGlassControlGroup {
                     HStack(spacing: 10) {
                         self.gatewayPillButton
                         self.headerIconButton(
@@ -36,13 +36,13 @@ extension AgentProTab {
                 TextField("Search agents", text: self.$agentSearchText)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
-                    .font(OpenClawType.subhead)
+                    .font(BotType.subhead)
                     .textFieldStyle(.roundedBorder)
                     .frame(height: 38)
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
         .padding(.top, 6)
     }
 
@@ -50,13 +50,13 @@ extension AgentProTab {
     private var gatewayPillButton: some View {
         if let openSettings {
             Button(action: openSettings) {
-                OpenClawGatewayCompactPill()
+                BotGatewayCompactPill()
             }
             .buttonBorderShape(.capsule)
-            .openClawGlassButton()
+            .botGlassButton()
             .accessibilityHint("Opens Settings / Gateway")
         } else {
-            OpenClawGatewayCompactPill()
+            BotGatewayCompactPill()
         }
     }
 
@@ -65,12 +65,12 @@ extension AgentProTab {
             Picker(selection: self.$agentRosterFilter) {
                 ForEach(AgentRosterFilter.allCases) { filter in
                     Text(filter.title)
-                        .font(OpenClawType.captionSemiBold)
+                        .font(BotType.captionSemiBold)
                         .tag(filter)
                 }
             } label: {
                 Text("Agent status")
-                    .font(OpenClawType.captionSemiBold)
+                    .font(BotType.captionSemiBold)
             }
             .pickerStyle(.segmented)
 
@@ -82,7 +82,7 @@ extension AgentProTab {
                     }
                 } label: {
                     Image(systemName: "xmark.circle.fill")
-                        .font(OpenClawType.title3)
+                        .font(BotType.title3)
                         .foregroundStyle(.secondary)
                         .frame(width: 44, height: 44)
                         .contentShape(Circle())
@@ -91,7 +91,7 @@ extension AgentProTab {
                 .accessibilityLabel("Clear filters")
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     var agentFilterMenu: some View {
@@ -99,12 +99,12 @@ extension AgentProTab {
             Picker(selection: self.$agentRosterFilter) {
                 ForEach(AgentRosterFilter.allCases) { filter in
                     Label(filter.title, systemImage: filter.systemImage)
-                        .font(OpenClawType.subhead)
+                        .font(BotType.subhead)
                         .tag(filter)
                 }
             } label: {
                 Text("Agent status")
-                    .font(OpenClawType.subhead)
+                    .font(BotType.subhead)
             }
             if self.agentFiltersActive {
                 Divider()
@@ -113,12 +113,12 @@ extension AgentProTab {
                     self.agentSearchText = ""
                 } label: {
                     Label("Clear Filters", systemImage: "xmark.circle")
-                        .font(OpenClawType.subhead)
+                        .font(BotType.subhead)
                 }
             }
         } label: {
             Label("Filter agents", systemImage: "line.3.horizontal.decrease")
-                .font(OpenClawType.subheadSemiBold)
+                .font(BotType.subheadSemiBold)
                 .labelStyle(.iconOnly)
         }
         .accessibilityIdentifier("agent-status-filter-menu")
@@ -131,7 +131,7 @@ extension AgentProTab {
             Button(action: openSettings) {
                 Image(systemName: self.gatewayConnected ? "antenna.radiowaves.left.and.right" : "wifi.slash")
             }
-            .tint(self.gatewayConnected ? OpenClawBrand.ok : .secondary)
+            .tint(self.gatewayConnected ? BotBrand.ok : .secondary)
             .accessibilityLabel(self.gatewayConnected
                 ? String(localized: "Gateway online")
                 : String(localized: "Gateway offline"))
@@ -160,7 +160,7 @@ extension AgentProTab {
                 }
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     var operationsSection: some View {
@@ -172,7 +172,7 @@ extension AgentProTab {
                     title: "Skills",
                     value: self.skillsValue,
                     detail: .verbatim(self.skillsDetail),
-                    color: self.gatewayConnected ? OpenClawBrand.accent : .secondary,
+                    color: self.gatewayConnected ? BotBrand.accent : .secondary,
                     route: .skills)
                 self.metricTile(
                     icon: "externaldrive.connected.to.line.below",
@@ -193,23 +193,23 @@ extension AgentProTab {
                     title: "Usage",
                     value: self.usageValue,
                     detail: .verbatim(self.usageDetail),
-                    color: self.gatewayConnected ? OpenClawBrand.accent : .secondary,
+                    color: self.gatewayConnected ? BotBrand.accent : .secondary,
                     route: .usage)
                 self.metricTile(
                     icon: "folder",
                     title: "Files",
                     value: self.activeAgentID,
                     detail: "Workspace files",
-                    color: self.gatewayConnected ? OpenClawBrand.accent : .secondary,
+                    color: self.gatewayConnected ? BotBrand.accent : .secondary,
                     route: .files)
             }
-            .padding(.horizontal, OpenClawProMetric.pagePadding)
+            .padding(.horizontal, BotProMetric.pagePadding)
 
             if let overviewErrorText {
                 Text(overviewErrorText)
-                    .font(OpenClawType.caption)
-                    .foregroundStyle(OpenClawBrand.warn)
-                    .padding(.horizontal, OpenClawProMetric.pagePadding)
+                    .font(BotType.caption)
+                    .foregroundStyle(BotBrand.warn)
+                    .padding(.horizontal, BotProMetric.pagePadding)
             }
         }
     }
@@ -229,7 +229,7 @@ extension AgentProTab {
                 }
                 .buttonStyle(.plain)
             }
-            .padding(.horizontal, OpenClawProMetric.pagePadding)
+            .padding(.horizontal, BotProMetric.pagePadding)
         }
     }
 
@@ -258,7 +258,7 @@ extension AgentProTab {
                     }
                 }
             }
-            .padding(.horizontal, OpenClawProMetric.pagePadding)
+            .padding(.horizontal, BotProMetric.pagePadding)
         }
     }
 
@@ -267,9 +267,9 @@ extension AgentProTab {
             ProIconBadge(systemName: "person.2.slash", color: .secondary)
             VStack(alignment: .leading, spacing: 3) {
                 Text(self.emptyAgentsTitle)
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
                 Text(self.emptyAgentsDetail)
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -288,12 +288,12 @@ extension AgentProTab {
 
                 VStack(alignment: .leading, spacing: 3) {
                     Text(self.agentName(for: agent))
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                         .foregroundStyle(.primary)
                         .lineLimit(1)
 
                     Text(self.agentDetail(for: agent))
-                        .font(OpenClawType.footnote)
+                        .font(BotType.footnote)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -303,8 +303,8 @@ extension AgentProTab {
 
                 if isActive {
                     Image(systemName: "checkmark")
-                        .font(OpenClawType.subheadSemiBold)
-                        .foregroundStyle(OpenClawBrand.accent)
+                        .font(BotType.subheadSemiBold)
+                        .foregroundStyle(BotBrand.accent)
                         .frame(width: 24, height: 44)
                         .accessibilityHidden(true)
                 }
@@ -326,18 +326,18 @@ extension AgentProTab {
     {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(OpenClawType.subheadSemiBold)
+                .font(BotType.subheadSemiBold)
                 .frame(width: AgentLayout.filterHeight, height: AgentLayout.filterHeight)
         }
         .buttonBorderShape(.circle)
-        .openClawGlassButton()
+        .botGlassButton()
         .accessibilityLabel(label)
     }
 
     func agentAvatar(_ agent: AgentSummary, state: AgentRosterState) -> some View {
         ZStack(alignment: .bottomTrailing) {
             Text(self.agentBadge(for: agent))
-                .font(OpenClawType.avatar(size: self.agentBadge(for: agent).count > 2 ? 14 : 18))
+                .font(BotType.avatar(size: self.agentBadge(for: agent).count > 2 ? 14 : 18))
                 .foregroundStyle(.white)
                 .minimumScaleFactor(0.62)
                 .lineLimit(1)
@@ -356,8 +356,8 @@ extension AgentProTab {
 
     func agentMenuRow(
         icon: String,
-        title: OpenClawTextValue,
-        detail: OpenClawTextValue,
+        title: BotTextValue,
+        detail: BotTextValue,
         value: String,
         color: Color,
         showsChevron: Bool = false) -> some View
@@ -366,20 +366,20 @@ extension AgentProTab {
             ProIconBadge(systemName: icon, color: color)
             VStack(alignment: .leading, spacing: 3) {
                 title.text
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
                 detail.text
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
             Text(value)
-                .font(OpenClawType.caption2SemiBold)
+                .font(BotType.caption2SemiBold)
                 .foregroundStyle(color)
                 .lineLimit(1)
             if showsChevron {
                 Image(systemName: "chevron.right")
-                    .font(OpenClawType.captionSemiBold)
+                    .font(BotType.captionSemiBold)
                     .foregroundStyle(.secondary)
             }
         }
@@ -388,9 +388,9 @@ extension AgentProTab {
 
     func metricTile(
         icon: String,
-        title: OpenClawTextValue,
+        title: BotTextValue,
         value: String,
-        detail: OpenClawTextValue,
+        detail: BotTextValue,
         color: Color,
         route: AgentRoute? = nil) -> some View
     {
@@ -420,9 +420,9 @@ extension AgentProTab {
 
     func metricTileContent(
         icon: String,
-        title: OpenClawTextValue,
+        title: BotTextValue,
         value: String,
-        detail: OpenClawTextValue,
+        detail: BotTextValue,
         color: Color,
         showsChevron: Bool) -> some View
     {
@@ -434,15 +434,15 @@ extension AgentProTab {
                     ProValuePill(value: value, color: color)
                     if showsChevron {
                         Image(systemName: "chevron.right")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(BotType.captionSemiBold)
                             .foregroundStyle(.secondary)
                     }
                 }
                 VStack(alignment: .leading, spacing: 2) {
                     title.text
-                        .font(OpenClawType.captionSemiBold)
+                        .font(BotType.captionSemiBold)
                     detail.text
-                        .font(OpenClawType.caption2)
+                        .font(BotType.caption2)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
@@ -460,11 +460,11 @@ extension AgentProTab {
                 Text(self.gatewayConnected
                     ? LocalizedStringKey("No automations yet")
                     : LocalizedStringKey("Automations unavailable"))
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
                 Text(self.gatewayConnected
                     ? "Scheduled work created on the gateway will appear here."
                     : "Connect a gateway to load scheduled work.")
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer()
@@ -475,20 +475,20 @@ extension AgentProTab {
         HStack(spacing: 12) {
             ProIconBadge(
                 systemName: job.enabled ? "clock.arrow.circlepath" : "pause.circle",
-                color: job.enabled ? OpenClawBrand.accent : .secondary)
+                color: job.enabled ? BotBrand.accent : .secondary)
             VStack(alignment: .leading, spacing: 3) {
                 Text(job.name)
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
                     .lineLimit(1)
                 Text(self.cronJobDetail(job))
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
             Spacer(minLength: 8)
             Text(self.cronJobState(job))
-                .font(OpenClawType.caption2SemiBold)
-                .foregroundStyle(job.enabled ? OpenClawBrand.accent : .secondary)
+                .font(BotType.caption2SemiBold)
+                .foregroundStyle(job.enabled ? BotBrand.accent : .secondary)
                 .lineLimit(1)
         }
         .padding(.vertical, 10)
@@ -651,7 +651,7 @@ extension AgentProTab {
 
     var instancesColor: Color {
         guard self.gatewayConnected else { return .secondary }
-        return (overview?.presence.isEmpty == false) ? OpenClawBrand.accent : .secondary
+        return (overview?.presence.isEmpty == false) ? BotBrand.accent : .secondary
     }
 
     var cronValue: String {
@@ -683,7 +683,7 @@ extension AgentProTab {
 
     var cronColor: Color {
         guard self.gatewayConnected else { return .secondary }
-        return overview?.cronStatus?.enabled == true ? OpenClawBrand.accent : .secondary
+        return overview?.cronStatus?.enabled == true ? BotBrand.accent : .secondary
     }
 
     var usageValue: String {
@@ -750,7 +750,7 @@ extension AgentProTab {
 
     var dreamingColor: Color {
         guard self.gatewayConnected else { return .secondary }
-        return overview?.dreaming?.enabled == true ? OpenClawBrand.accent : .secondary
+        return overview?.dreaming?.enabled == true ? BotBrand.accent : .secondary
     }
 
     var recentCronJobs: [CronJob] {

@@ -1,4 +1,4 @@
-import { MAX_IMAGE_BYTES } from "@openclaw/media-core/constants";
+import { MAX_IMAGE_BYTES } from "@hanzo/bot-media-core/constants";
 import { isImageMediaFact, readPersistedMediaFacts } from "../../../media/media-facts.js";
 import { resolveImageSanitizationLimits } from "../../image-sanitization.js";
 import { resolveAttemptWorkspaceSandbox } from "./attempt-setup.js";

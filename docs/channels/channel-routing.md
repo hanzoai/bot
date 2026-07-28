@@ -7,7 +7,7 @@ title: "Channel routing"
 
 # Channels & routing
 
-OpenClaw routes replies **back to the channel where a message came from**. The
+Bot routes replies **back to the channel where a message came from**. The
 model does not choose a channel; routing is deterministic and controlled by the
 host configuration. Under the default DM scope, direct messages from every
 channel converge on the agent's [main session](/concepts/main-session).
@@ -62,20 +62,20 @@ Examples:
 
 When `session.dmScope` is `main`, direct messages may share one main session.
 To prevent the session's `lastRoute` from being overwritten by non-owner DMs,
-OpenClaw infers a pinned owner from `allowFrom` when all of these are true:
+Bot infers a pinned owner from `allowFrom` when all of these are true:
 
 - `allowFrom` has exactly one non-wildcard entry.
 - The entry can be normalized to a concrete sender ID for that channel.
 - The inbound DM sender does not match that pinned owner.
 
-In that mismatch case, OpenClaw still records inbound session metadata, but it
+In that mismatch case, Bot still records inbound session metadata, but it
 skips updating the main session `lastRoute`.
 
 ## Guarded inbound recording
 
 Channel plugins can mark an inbound session record as `createIfMissing: false`
-when a guarded path must not create a new OpenClaw session. In that mode,
-OpenClaw may update metadata and `lastRoute` for an existing session, but it
+when a guarded path must not create a new Bot session. In that mode,
+Bot may update metadata and `lastRoute` for an existing session, but it
 does not create a route-only session entry just because a message was observed.
 
 ## Routing rules (how an agent is chosen)
@@ -98,7 +98,7 @@ The matched agent determines which workspace and session store are used.
 
 ## Broadcast groups (run multiple agents)
 
-Broadcast groups let you run **multiple agents** for the same peer **when OpenClaw would normally reply** (for example: in WhatsApp groups, after mention/activation gating).
+Broadcast groups let you run **multiple agents** for the same peer **when Bot would normally reply** (for example: in WhatsApp groups, after mention/activation gating).
 
 Config:
 
@@ -124,7 +124,7 @@ Example:
 ```json5
 {
   agents: {
-    list: [{ id: "support", name: "Support", workspace: "~/.openclaw/workspace-support" }],
+    list: [{ id: "support", name: "Support", workspace: "~/.bot/workspace-support" }],
   },
   bindings: [
     { match: { channel: "slack", teamId: "T123" }, agentId: "support" },
@@ -136,14 +136,14 @@ Example:
 ## Session storage
 
 Runtime session rows live in each agent's SQLite database under the state
-directory (default `~/.openclaw`):
+directory (default `~/.bot`):
 
-- `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`
+- `~/.bot/agents/<agentId>/agent/bot-agent.sqlite`
 
 Older installs may have legacy transcript JSONL files and a `sessions.json` row
-store under `~/.openclaw/agents/<agentId>/sessions/`. Gateway startup and
-`openclaw doctor --fix` import hot legacy rows/history into SQLite
-automatically. Use `openclaw doctor --session-sqlite inspect
+store under `~/.bot/agents/<agentId>/sessions/`. Gateway startup and
+`bot doctor --fix` import hot legacy rows/history into SQLite
+automatically. Use `bot doctor --session-sqlite inspect
 --session-sqlite-all-agents` and the
 [Doctor](/cli/doctor#session-sqlite-migration) validation sequence when you need
 explicit migration evidence.

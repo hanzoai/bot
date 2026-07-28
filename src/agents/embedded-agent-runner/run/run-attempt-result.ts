@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { hasOutboundDeliveryEvidence } from "../delivery-evidence.js";
 import type { ToolSummaryTrace } from "../types.js";
 import { runEmbeddedAttemptWithBackend } from "./backend.js";

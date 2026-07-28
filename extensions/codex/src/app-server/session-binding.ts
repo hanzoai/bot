@@ -4,17 +4,17 @@ import { createHash, randomUUID } from "node:crypto";
 import {
   AgentHarnessSessionSupersededError,
   embeddedAgentLog,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   ensureAuthProfileStore,
   resolveDefaultAgentDir,
   resolveProviderIdForAuth,
   resolveSessionAgentIds,
   type AuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
+import { getSessionEntry, resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import { z } from "zod";
 import {
   CODEX_PLUGINS_MARKETPLACE_NAME,
@@ -57,12 +57,12 @@ export type CodexAppServerBindingIdentity =
   | { kind: "session"; agentId: string; sessionId: string; sessionKey?: string }
   | { kind: "conversation"; bindingId: string };
 
-/** Resolves the same agent scope OpenClaw uses for transcript/session ownership. */
+/** Resolves the same agent scope Bot uses for transcript/session ownership. */
 export function sessionBindingIdentity(params: {
   sessionId: string;
   sessionKey?: string;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): Extract<CodexAppServerBindingIdentity, { kind: "session" }> {
   const { sessionAgentId } = resolveSessionAgentIds(params);
   const sessionKey = params.sessionKey?.trim();
@@ -74,7 +74,7 @@ export function sessionBindingIdentity(params: {
   };
 }
 
-/** Builds the terminal coordination error used when a newer OpenClaw session owns the binding. */
+/** Builds the terminal coordination error used when a newer Bot session owns the binding. */
 export function createCodexSessionGenerationSupersededError(
   sessionId: string,
 ): AgentHarnessSessionSupersededError {
@@ -176,15 +176,15 @@ const threadBindingSchema = z
     clientId: optionalStringSchema,
     cwd: z.string(),
     // Private runtime ownership. Only the supervision catalog creates this
-    // marker; public OpenClaw session metadata must never authorize user-home access.
+    // marker; public Bot session metadata must never authorize user-home access.
     connectionScope: z.literal("supervision").optional(),
     supervisionSourceThreadId: z.string().trim().min(1).optional(),
     authProfileId: optionalStringSchema,
     model: optionalStringSchema,
     // Codex App Server owns selection for supervised and adopted threads. Keep
-    // this marker across resumes so OpenClaw never substitutes a default or fallback.
+    // this marker across resumes so Bot never substitutes a default or fallback.
     preserveNativeModel: z.literal(true).optional().catch(undefined),
-    // Continue creates the OpenClaw Chat before native execution. This closed
+    // Continue creates the Bot Chat before native execution. This closed
     // snapshot state is materialized only inside the fully configured harness.
     pendingSupervisionBranch: pendingSupervisionBranchSchema.optional(),
     modelProvider: z
@@ -533,11 +533,11 @@ export type CodexAppServerBindingStore = {
   withLease<T>(identity: CodexAppServerBindingIdentity, run: () => Promise<T>): Promise<T>;
 };
 
-/** Lets the authoritative OpenClaw session generation claim a stale stable binding row. */
+/** Lets the authoritative Bot session generation claim a stale stable binding row. */
 export async function reclaimCurrentCodexSessionGeneration(params: {
   bindingStore: CodexAppServerBindingStore;
   identity: Extract<CodexAppServerBindingIdentity, { kind: "session" }>;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): Promise<boolean> {
   const sessionKey = params.identity.sessionKey?.trim();
   if (!sessionKey) {
@@ -800,7 +800,7 @@ export function createCodexAppServerBindingStore(
                   current.retired === true &&
                   current.sessionId === mutation.expectedPreviousSessionId
                 ) {
-                  // Reset boundaries now retain the OpenClaw session id. The
+                  // Reset boundaries now retain the Bot session id. The
                   // authoritative session-store check above proves this fence
                   // belongs to the previous in-place lifecycle, not live work.
                   return {
@@ -938,7 +938,7 @@ export function createCodexAppServerBindingStore(
         if (!expectedSessionId) {
           throw new Error("Codex session generation adoption requires the previous session id");
         }
-        // Context-engine compaction rotates the physical OpenClaw session before
+        // Context-engine compaction rotates the physical Bot session before
         // secondary native compaction. Compare both generations so a delayed hook
         // cannot move a newer binding back to its stale predecessor.
         return await transactKey(key, (current) => {

@@ -28,17 +28,17 @@ describe("check-env-var-count", () => {
   });
 
   it("collects each distinct name once", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-env-count-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-env-count-"));
     tempDirs.push(root);
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(
       path.join(root, "src/runtime.ts"),
-      'const a = process.env.OPENCLAW_ALPHA; const b = "OPENCLAW_ALPHA OPENCLAW_BETA";\n',
+      'const a = process.env.BOT_ALPHA; const b = "BOT_ALPHA BOT_BETA";\n',
     );
-    fs.writeFileSync(path.join(root, "src/runtime.test.ts"), "OPENCLAW_TEST_ONLY\n");
+    fs.writeFileSync(path.join(root, "src/runtime.test.ts"), "BOT_TEST_ONLY\n");
     execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
 
-    expect(collectEnvVarNames(root)).toEqual(["OPENCLAW_ALPHA", "OPENCLAW_BETA"]);
+    expect(collectEnvVarNames(root)).toEqual(["BOT_ALPHA", "BOT_BETA"]);
     fs.rmSync(path.join(root, "src/runtime.ts"));
     expect(collectEnvVarNames(root)).toEqual([]);
   });
@@ -50,21 +50,21 @@ describe("check-env-var-count", () => {
   });
 
   it("reads staged source from the index", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-env-count-staged-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-env-count-staged-"));
     tempDirs.push(root);
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     const sourcePath = path.join(root, "src/runtime.ts");
-    fs.writeFileSync(sourcePath, "process.env.OPENCLAW_STAGED;\n");
+    fs.writeFileSync(sourcePath, "process.env.BOT_STAGED;\n");
     execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
     execFileSync("git", ["add", "src/runtime.ts"], { cwd: root, stdio: "ignore" });
-    fs.writeFileSync(sourcePath, "process.env.OPENCLAW_WORKTREE;\n");
+    fs.writeFileSync(sourcePath, "process.env.BOT_WORKTREE;\n");
 
-    expect(collectEnvVarNames(root, { staged: true })).toEqual(["OPENCLAW_STAGED"]);
-    expect(collectEnvVarNames(root)).toEqual(["OPENCLAW_WORKTREE"]);
+    expect(collectEnvVarNames(root, { staged: true })).toEqual(["BOT_STAGED"]);
+    expect(collectEnvVarNames(root)).toEqual(["BOT_WORKTREE"]);
   });
 
   it("fails closed when the base ref cannot be resolved", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-env-count-base-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-env-count-base-"));
     tempDirs.push(root);
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/env-var-count-budget.txt"), "0\n");
@@ -74,20 +74,20 @@ describe("check-env-var-count", () => {
   });
 
   it("rejects growth above the budget", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-env-count-grow-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-env-count-grow-"));
     tempDirs.push(root);
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/env-var-count-budget.txt"), "1\n");
     fs.writeFileSync(
       path.join(root, "src/runtime.ts"),
-      "process.env.OPENCLAW_ONE; process.env.OPENCLAW_TWO;\n",
+      "process.env.BOT_ONE; process.env.BOT_TWO;\n",
     );
     execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
     execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
     execFileSync(
       "git",
-      ["-c", "user.name=OpenClaw", "-c", "user.email=test@openclaw.local", "commit", "-m", "base"],
+      ["-c", "user.name=Bot", "-c", "user.email=test@bot.local", "commit", "-m", "base"],
       { cwd: root, stdio: "ignore" },
     );
 
@@ -95,17 +95,17 @@ describe("check-env-var-count", () => {
   });
 
   it("passes when the count exactly matches the budget", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-env-count-exact-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-env-count-exact-"));
     tempDirs.push(root);
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/env-var-count-budget.txt"), "1\n");
-    fs.writeFileSync(path.join(root, "src/runtime.ts"), "process.env.OPENCLAW_ONLY;\n");
+    fs.writeFileSync(path.join(root, "src/runtime.ts"), "process.env.BOT_ONLY;\n");
     execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
     execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
     execFileSync(
       "git",
-      ["-c", "user.name=OpenClaw", "-c", "user.email=test@openclaw.local", "commit", "-m", "base"],
+      ["-c", "user.name=Bot", "-c", "user.email=test@bot.local", "commit", "-m", "base"],
       { cwd: root, stdio: "ignore" },
     );
 
@@ -113,17 +113,17 @@ describe("check-env-var-count", () => {
   });
 
   it("rejects stale headroom after the count shrinks", () => {
-    const root = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-env-count-tight-"));
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "bot-env-count-tight-"));
     tempDirs.push(root);
     fs.mkdirSync(path.join(root, "config"), { recursive: true });
     fs.mkdirSync(path.join(root, "src"), { recursive: true });
     fs.writeFileSync(path.join(root, "config/env-var-count-budget.txt"), "2\n");
-    fs.writeFileSync(path.join(root, "src/runtime.ts"), "process.env.OPENCLAW_ONLY;\n");
+    fs.writeFileSync(path.join(root, "src/runtime.ts"), "process.env.BOT_ONLY;\n");
     execFileSync("git", ["init"], { cwd: root, stdio: "ignore" });
     execFileSync("git", ["add", "."], { cwd: root, stdio: "ignore" });
     execFileSync(
       "git",
-      ["-c", "user.name=OpenClaw", "-c", "user.email=test@openclaw.local", "commit", "-m", "base"],
+      ["-c", "user.name=Bot", "-c", "user.email=test@bot.local", "commit", "-m", "base"],
       { cwd: root, stdio: "ignore" },
     );
 

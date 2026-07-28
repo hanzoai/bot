@@ -1,8 +1,8 @@
 import fs from "node:fs";
-import { normalizeOptionalLowercaseString as normalizeString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString as normalizeString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveAllAgentSessionStoreTargetsSync } from "../../../config/sessions/targets.js";
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import {
   loadLegacySessionStore,
   updateLegacySessionStore,
@@ -117,11 +117,11 @@ function preserveRepairedSessionRuntimeIntent(entry: SessionEntry): boolean {
   const harnessRuntime = normalizeRuntimeString(entry.agentHarnessId);
   const overrideRuntime = normalizeRuntimeString(entry.agentRuntimeOverride);
   let changed = false;
-  if (entry.agentHarnessId !== undefined && harnessRuntime !== "openclaw") {
+  if (entry.agentHarnessId !== undefined && harnessRuntime !== "bot") {
     delete entry.agentHarnessId;
     changed = true;
   }
-  if (overrideRuntime !== "openclaw" && entry.agentRuntimeOverride !== "codex") {
+  if (overrideRuntime !== "bot" && entry.agentRuntimeOverride !== "codex") {
     entry.agentRuntimeOverride = "codex";
     changed = true;
   }
@@ -221,7 +221,7 @@ function repairCodexSessionStoreRoutes(params: {
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.codexRouteSessionRepairTestApi")
+    Symbol.for("bot.codexRouteSessionRepairTestApi")
   ] = { repairCodexSessionStoreRoutes };
 }
 
@@ -286,7 +286,7 @@ function scanCodexSessionStoreRoutes(
 
 /** Scan or repair all configured agent session stores that still contain legacy Codex routes. */
 export async function maybeRepairCodexSessionRoutes(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   shouldRepair: boolean;
   codexRuntimeReady?: boolean;
@@ -316,7 +316,7 @@ export async function maybeRepairCodexSessionRoutes(params: {
               [
                 "- Legacy `codex/*` or `openai-codex/*` session route state detected.",
                 `- Affected sessions: ${stale.length}.`,
-                "- Run `openclaw doctor --fix` to rewrite stale session model/provider pins across all agent session stores.",
+                "- Run `bot doctor --fix` to rewrite stale session model/provider pins across all agent session stores.",
               ].join("\n"),
             ]
           : [],

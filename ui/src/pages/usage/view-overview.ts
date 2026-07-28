@@ -1,5 +1,5 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 // Control UI view renders usage render overview screen content.
 import { html, nothing } from "lit";
 import { formatDurationCompact } from "../../../../src/infra/format-time/format-duration.ts";
@@ -124,7 +124,7 @@ function renderFilterChips(
         ? html`
             <div class="filter-chip">
               <span class="filter-chip-label">${t("usage.filters.days")}: ${daysLabel}</span>
-              <openclaw-tooltip .content=${t("usage.filters.remove")}>
+              <bot-tooltip .content=${t("usage.filters.remove")}>
                 <button
                   class="filter-chip-remove"
                   @click=${onClearDays}
@@ -132,7 +132,7 @@ function renderFilterChips(
                 >
                   ×
                 </button>
-              </openclaw-tooltip>
+              </bot-tooltip>
             </div>
           `
         : nothing}
@@ -140,7 +140,7 @@ function renderFilterChips(
         ? html`
             <div class="filter-chip">
               <span class="filter-chip-label">${t("usage.filters.hours")}: ${hoursLabel}</span>
-              <openclaw-tooltip .content=${t("usage.filters.remove")}>
+              <bot-tooltip .content=${t("usage.filters.remove")}>
                 <button
                   class="filter-chip-remove"
                   @click=${onClearHours}
@@ -148,7 +148,7 @@ function renderFilterChips(
                 >
                   ×
                 </button>
-              </openclaw-tooltip>
+              </bot-tooltip>
             </div>
           `
         : nothing}
@@ -156,7 +156,7 @@ function renderFilterChips(
         ? html`
             <div class="filter-chip" title="${sessionsFullName}">
               <span class="filter-chip-label">${t("usage.filters.session")}: ${sessionsLabel}</span>
-              <openclaw-tooltip .content=${t("usage.filters.remove")}>
+              <bot-tooltip .content=${t("usage.filters.remove")}>
                 <button
                   class="filter-chip-remove"
                   @click=${onClearSessions}
@@ -164,7 +164,7 @@ function renderFilterChips(
                 >
                   ×
                 </button>
-              </openclaw-tooltip>
+              </bot-tooltip>
             </div>
           `
         : nothing}
@@ -388,7 +388,7 @@ function renderDailyChartCompact(
                 breakdownLines,
               };
               return html`
-                <openclaw-tooltip
+                <bot-tooltip
                   .content=${[
                     tooltipContent.dateLabel,
                     tooltipContent.tokensLabel,
@@ -435,7 +435,7 @@ function renderDailyChartCompact(
                         ></div>`}
                     <div class="${labelClass}">${shortLabel}</div>
                   </div>
-                </openclaw-tooltip>
+                </bot-tooltip>
               `;
             })}
           </div>
@@ -629,7 +629,7 @@ function renderSummaryStat(params: {
     <div class=${classes}>
       <div class="usage-summary-title">
         ${params.title}
-        <openclaw-tooltip open-on-click>
+        <bot-tooltip open-on-click>
           <button
             id=${hintId}
             type="button"
@@ -644,7 +644,7 @@ function renderSummaryStat(params: {
                click-to-open; the click handler still normalizes browsers that do
                not focus buttons on pointer activation. -->
           <span slot="content">${params.hint}</span>
-        </openclaw-tooltip>
+        </bot-tooltip>
       </div>
       <div class=${valueClasses}>${params.value}</div>
       <div class="usage-summary-sub">${params.sub}</div>
@@ -1104,7 +1104,7 @@ function renderSessionsCard(
               </option>
             </select>
           </label>
-          <openclaw-tooltip
+          <bot-tooltip
             .content=${sessionSortDir === "desc"
               ? t("usage.sessions.descending")
               : t("usage.sessions.ascending")}
@@ -1118,7 +1118,7 @@ function renderSessionsCard(
             >
               ${sessionSortDir === "desc" ? "↓" : "↑"}
             </button>
-          </openclaw-tooltip>
+          </bot-tooltip>
           ${selectedCount > 0
             ? html`
                 <button class="btn btn--sm" @click=${onClearSessions}>

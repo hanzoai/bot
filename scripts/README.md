@@ -40,7 +40,7 @@ new directory taxonomy.
 | Live proof      | `pnpm test:live`                                                               | Live checks require the matching environment and credentials.                                                      |
 | Release checks  | `pnpm release:check`, `pnpm release:beta`, `pnpm release:candidate`            | Release scripts are maintainer workflows; read release docs before use.                                            |
 | GitHub reads    | `scripts/gh-read`                                                              | Uses a GitHub App read token when configured, leaving normal `gh` login for writes.                                |
-| Commits         | `scripts/committer "<message>" <files...>`                                     | Preferred scoped commit helper for OpenClaw changes.                                                               |
+| Commits         | `scripts/committer "<message>" <files...>`                                     | Preferred scoped commit helper for Bot changes.                                                               |
 | Remote proof    | `node scripts/crabbox-wrapper.mjs ...`                                         | Agent default for tests and heavy work; pre-warm by source trust, sync each run, reuse the lease.                  |
 
 ## Script Families
@@ -53,7 +53,7 @@ new directory taxonomy.
   checks, and focused validation helpers.
 - `docs-*` and `check-docs-*`: docs listing, link auditing, MDX checks,
   spellcheck, sync, and i18n glossary checks.
-- `release-*`, `openclaw-npm-*`, and `plugin-*-release-*`: release preparation,
+- `release-*`, `bot-npm-*`, and `plugin-*-release-*`: release preparation,
   package verification, and publishing helpers.
 - `docker-*`, `test-docker-*`, and `test-live-*-docker.sh`: Docker E2E planning,
   rerun, timing, and live/package lane helpers.
@@ -72,4 +72,4 @@ new directory taxonomy.
 - Add or update focused tests under `test/scripts/` when changing script
   behavior.
 
-See also [Scripts](https://docs.openclaw.ai/help/scripts) for public-facing script guidance.
+See also [Scripts](https://docs.bot.ai/help/scripts) for public-facing script guidance.

@@ -3,27 +3,27 @@ import {
   listNativeCommandSpecsForConfig,
   listSkillCommandsForAgents,
   type NativeCommandSpec,
-} from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeNamedExport } from "openclaw/plugin-sdk/lazy-runtime";
-import { danger, warn, type RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/command-auth-native";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createLazyRuntimeNamedExport } from "bot/plugin-sdk/lazy-runtime";
+import { danger, warn, type RuntimeEnv } from "bot/plugin-sdk/runtime-env";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeStringEntriesLower,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 
 export type GetPluginCommandSpecs =
-  typeof import("openclaw/plugin-sdk/plugin-runtime").getPluginCommandSpecs;
+  typeof import("bot/plugin-sdk/plugin-runtime").getPluginCommandSpecs;
 
 const loadPluginCommandSpecs = createLazyRuntimeNamedExport(
-  () => import("openclaw/plugin-sdk/plugin-runtime"),
+  () => import("bot/plugin-sdk/plugin-runtime"),
   "getPluginCommandSpecs",
 );
 
 async function appendPluginCommandSpecs(params: {
   commandSpecs: NativeCommandSpec[];
   runtime: RuntimeEnv;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   getPluginCommandSpecs?: GetPluginCommandSpecs;
 }): Promise<NativeCommandSpec[]> {
   const merged = [...params.commandSpecs];
@@ -53,7 +53,7 @@ async function appendPluginCommandSpecs(params: {
 }
 
 export async function resolveDiscordProviderCommandSpecs(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime: RuntimeEnv;
   nativeEnabled: boolean;
   nativeSkillsEnabled: boolean;

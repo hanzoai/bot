@@ -55,33 +55,33 @@ describe("scripts/ios-release-signing.mjs", () => {
   it("emits manual App Store profile settings for every signed target", () => {
     const output = runSigning("xcconfig");
 
-    expect(output).toContain("OPENCLAW_CODE_SIGN_STYLE = Manual");
-    expect(output).toContain("OPENCLAW_CODE_SIGN_IDENTITY = Apple Distribution");
-    expect(output).toContain("OPENCLAW_APP_GROUP_ID = group.ai.openclawfoundation.app.shared");
-    expect(output).toContain("OPENCLAW_APP_PROFILE = OpenClaw App Store ai.openclawfoundation.app");
+    expect(output).toContain("BOT_CODE_SIGN_STYLE = Manual");
+    expect(output).toContain("BOT_CODE_SIGN_IDENTITY = Apple Distribution");
+    expect(output).toContain("BOT_APP_GROUP_ID = group.ai.botfoundation.app.shared");
+    expect(output).toContain("BOT_APP_PROFILE = Bot App Store ai.botfoundation.app");
     expect(output).toContain(
-      "OPENCLAW_SHARE_PROFILE = OpenClaw App Store ai.openclawfoundation.app.share",
+      "BOT_SHARE_PROFILE = Bot App Store ai.botfoundation.app.share",
     );
     expect(output).toContain(
-      "OPENCLAW_ACTIVITY_WIDGET_PROFILE = OpenClaw App Store ai.openclawfoundation.app.activitywidget",
+      "BOT_ACTIVITY_WIDGET_PROFILE = Bot App Store ai.botfoundation.app.activitywidget",
     );
     expect(output).toContain(
-      "OPENCLAW_WATCH_APP_PROFILE = OpenClaw App Store ai.openclawfoundation.app.watchkitapp",
+      "BOT_WATCH_APP_PROFILE = Bot App Store ai.botfoundation.app.watchkitapp",
     );
-    expect(output).not.toContain("OPENCLAW_WATCH_EXTENSION_PROFILE");
+    expect(output).not.toContain("BOT_WATCH_EXTENSION_PROFILE");
   });
 
   it("documents the canonical release signing plan", () => {
     const output = runSigning("plan");
 
     expect(output).toContain("Team ID: FWJYW4S8P8");
-    expect(output).toContain("Signing repo: git@github.com:openclaw/apps-signing.git");
+    expect(output).toContain("Signing repo: git@github.com:bot/apps-signing.git");
     expect(output).toContain("Signing branch: main");
     expect(output).toContain("Signing setup and sync: Fastlane match");
-    expect(output).not.toContain("OpenClawWatchExtension");
+    expect(output).not.toContain("BotWatchExtension");
     expect(output).toContain(
       "capabilities: PUSH_NOTIFICATIONS, APP_GROUPS, APP_ATTEST, HEALTH_KIT",
     );
-    expect(output).toContain("app groups: group.ai.openclawfoundation.app.shared");
+    expect(output).toContain("app groups: group.ai.botfoundation.app.shared");
   });
 });

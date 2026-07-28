@@ -13,8 +13,8 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  vi.doUnmock("openclaw/plugin-sdk/media-store");
-  vi.doUnmock("openclaw/plugin-sdk/process-runtime");
+  vi.doUnmock("bot/plugin-sdk/media-store");
+  vi.doUnmock("bot/plugin-sdk/process-runtime");
   vi.doUnmock("../shared/audit.js");
   vi.doUnmock("./node-tool-invoke.js");
   vi.resetModules();
@@ -69,10 +69,10 @@ async function importToolWithCommandResults(tarBuffer: Buffer, ...results: MockC
   }
   runCommandWithTimeout.mockResolvedValue(commandResult());
   vi.resetModules();
-  vi.doMock("openclaw/plugin-sdk/process-runtime", () => ({
+  vi.doMock("bot/plugin-sdk/process-runtime", () => ({
     runCommandWithTimeout,
   }));
-  vi.doMock("openclaw/plugin-sdk/media-store", () => ({
+  vi.doMock("bot/plugin-sdk/media-store", () => ({
     saveMediaBuffer: vi.fn(async () => ({ path: path.join(tmpRoot, "archive.tar.gz") })),
   }));
   vi.doMock("../shared/audit.js", () => ({

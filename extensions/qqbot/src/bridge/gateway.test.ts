@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CoreGatewayContext } from "../engine/gateway/gateway.js";
 import type { ResolvedQQBotAccount } from "../types.js";
@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   setBridgeLogger: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/cli-runtime", () => ({
+vi.mock("bot/plugin-sdk/cli-runtime", () => ({
   resolveRuntimeServiceVersion: () => "test-version",
 }));
 
@@ -63,7 +63,7 @@ function makeAccount(): ResolvedQQBotAccount {
   } as unknown as ResolvedQQBotAccount;
 }
 
-function makeContext(cfg: OpenClawConfig) {
+function makeContext(cfg: BotConfig) {
   return {
     account: makeAccount(),
     abortSignal: new AbortController().signal,
@@ -81,9 +81,9 @@ describe("QQBot gateway config lifecycle", () => {
   });
 
   it("injects the live runtime config accessor without caching its value", async () => {
-    const startup = { bindings: [] } as OpenClawConfig;
-    const first = { bindings: [{ agentId: "first" }] } as OpenClawConfig;
-    const second = { bindings: [{ agentId: "second" }] } as OpenClawConfig;
+    const startup = { bindings: [] } as BotConfig;
+    const first = { bindings: [{ agentId: "first" }] } as BotConfig;
+    const second = { bindings: [{ agentId: "second" }] } as BotConfig;
     mocks.currentConfig.mockReturnValueOnce(first).mockReturnValueOnce(second);
 
     await startGateway(makeContext(startup));

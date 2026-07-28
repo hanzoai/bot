@@ -1,6 +1,6 @@
 // Telegram plugin module implements approval callback data behavior.
-import { buildApprovalResolutionRef } from "openclaw/plugin-sdk/approval-reference-runtime";
-import type { MessagePresentationAction } from "openclaw/plugin-sdk/interactive-runtime";
+import { buildApprovalResolutionRef } from "bot/plugin-sdk/approval-reference-runtime";
+import type { MessagePresentationAction } from "bot/plugin-sdk/interactive-runtime";
 
 const TELEGRAM_CALLBACK_DATA_MAX_BYTES = 64;
 const TELEGRAM_APPROVAL_CALLBACK_PREFIX = "tga1:";

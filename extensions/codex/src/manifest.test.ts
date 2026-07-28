@@ -6,7 +6,7 @@ import { MAX_CODEX_APP_SERVER_VERSION } from "./app-server/version.js";
 type CodexPackageManifest = {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
-  openclaw?: {
+  bot?: {
     install?: {
       requiredPlatformPackages?: string[];
     };
@@ -22,10 +22,10 @@ describe("codex package manifest", () => {
       fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"),
     ) as CodexPackageManifest;
 
-    expect(packageJson.devDependencies).toHaveProperty("@openclaw/plugin-sdk");
+    expect(packageJson.devDependencies).toHaveProperty("@hanzo/bot-plugin-sdk");
     expect(packageJson.dependencies?.["@openai/codex"]).toBe(MAX_CODEX_APP_SERVER_VERSION);
-    expect(packageJson.openclaw?.release?.requireLatestDependencies).toEqual(["@openai/codex"]);
-    expect(packageJson.openclaw?.install?.requiredPlatformPackages).toEqual([
+    expect(packageJson.bot?.release?.requireLatestDependencies).toEqual(["@openai/codex"]);
+    expect(packageJson.bot?.install?.requiredPlatformPackages).toEqual([
       "@openai/codex-linux-x64",
       "@openai/codex-linux-arm64",
       "@openai/codex-darwin-x64",

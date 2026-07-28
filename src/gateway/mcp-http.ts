@@ -6,7 +6,7 @@ import {
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { resolveToolLoopDetectionConfig } from "../agents/tool-loop-detection-config.js";
 import { getRuntimeConfig } from "../config/io.js";
 import { resolveSessionEntryAccessTarget } from "../config/sessions/session-accessor.js";
@@ -115,8 +115,8 @@ function jsonRpcInternalError(parsed: unknown) {
 
 function shouldLogMcpLoopbackTraffic(): boolean {
   return (
-    isTruthyEnvValue(process.env.OPENCLAW_CLI_BACKEND_LOG_OUTPUT) ||
-    isTruthyEnvValue(process.env.OPENCLAW_LIVE_CLI_BACKEND_DEBUG)
+    isTruthyEnvValue(process.env.BOT_CLI_BACKEND_LOG_OUTPUT) ||
+    isTruthyEnvValue(process.env.BOT_LIVE_CLI_BACKEND_DEBUG)
   );
 }
 

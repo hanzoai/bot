@@ -1,14 +1,14 @@
-import { notifyLlmRequestActivity } from "@openclaw/ai/internal/runtime";
-import { expectDefined } from "@openclaw/normalization-core";
+import { notifyLlmRequestActivity } from "@hanzo/bot-ai/internal/runtime";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // LLM idle-timeout tests cover timeout selection and stream wrapping for
 // embedded provider calls, including local-provider and cron exceptions.
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import {
   createAssistantMessageEventStream,
   type AssistantMessageEventStream,
-} from "openclaw/plugin-sdk/llm";
+} from "bot/plugin-sdk/llm";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../../config/config.js";
+import type { BotConfig } from "../../../config/config.js";
 import type { StreamFn } from "../../runtime/index.js";
 import { resolveAgentTimeoutMs } from "../../timeout.js";
 import {
@@ -30,17 +30,17 @@ describe("resolveLlmIdleTimeoutMs", () => {
   });
 
   it("returns default when agent defaults are missing", () => {
-    const cfg = { agents: {} } as OpenClawConfig;
+    const cfg = { agents: {} } as BotConfig;
     expect(resolveLlmIdleTimeoutMs({ cfg })).toBe(DEFAULT_LLM_IDLE_TIMEOUT_MS);
   });
 
   it("caps agents.defaults.timeoutSeconds fallback at the default idle watchdog", () => {
-    const cfg = { agents: { defaults: { timeoutSeconds: 300 } } } as OpenClawConfig;
+    const cfg = { agents: { defaults: { timeoutSeconds: 300 } } } as BotConfig;
     expect(resolveLlmIdleTimeoutMs({ cfg })).toBe(DEFAULT_LLM_IDLE_TIMEOUT_MS);
   });
 
   it("uses agents.defaults.timeoutSeconds when it is shorter than the default idle watchdog", () => {
-    const cfg = { agents: { defaults: { timeoutSeconds: 30 } } } as OpenClawConfig;
+    const cfg = { agents: { defaults: { timeoutSeconds: 30 } } } as BotConfig;
     expect(resolveLlmIdleTimeoutMs({ cfg })).toBe(30_000);
   });
 
@@ -144,7 +144,7 @@ describe("resolveLlmIdleTimeoutMs", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     expect(
       resolveLlmIdleTimeoutMs({
@@ -179,7 +179,7 @@ describe("resolveLlmIdleTimeoutMs", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     expect(
       resolveLlmIdleTimeoutMs({
@@ -263,7 +263,7 @@ describe("resolveLlmIdleTimeoutMs", () => {
   it("bounds provider request timeout by agents.defaults.timeoutSeconds when shorter", () => {
     const cfg = {
       agents: { defaults: { timeoutSeconds: 45 } },
-    } as OpenClawConfig;
+    } as BotConfig;
     expect(resolveLlmIdleTimeoutMs({ cfg, modelRequestTimeoutMs: 300_000 })).toBe(45_000);
   });
 
@@ -276,7 +276,7 @@ describe("resolveLlmIdleTimeoutMs", () => {
   it("does not bound explicit run timeout by agents.defaults.timeoutSeconds", () => {
     const cfg = {
       agents: { defaults: { timeoutSeconds: 45 } },
-    } as OpenClawConfig;
+    } as BotConfig;
     expect(
       resolveLlmIdleTimeoutMs({
         cfg,
@@ -302,7 +302,7 @@ describe("resolveLlmIdleTimeoutMs", () => {
   it("does not bound provider request timeout by agent default when run timeout is no-timeout", () => {
     const cfg = {
       agents: { defaults: { timeoutSeconds: 45 } },
-    } as OpenClawConfig;
+    } as BotConfig;
     expect(
       resolveLlmIdleTimeoutMs({
         cfg,
@@ -313,7 +313,7 @@ describe("resolveLlmIdleTimeoutMs", () => {
   });
 
   it("keeps the cloud idle watchdog finite when config timeoutSeconds is unlimited", () => {
-    const cfg = { agents: { defaults: { timeoutSeconds: 0 } } } as OpenClawConfig;
+    const cfg = { agents: { defaults: { timeoutSeconds: 0 } } } as BotConfig;
     const runTimeoutMs = resolveAgentTimeoutMs({ cfg });
 
     expect(runTimeoutMs).toBe(MAX_TIMER_TIMEOUT_MS);
@@ -353,12 +353,12 @@ describe("resolveLlmIdleTimeoutMs", () => {
   it("uses the default idle timeout for cron cloud model calls when no timeout is configured", () => {
     expect(resolveLlmIdleTimeoutMs({ trigger: "cron" })).toBe(DEFAULT_LLM_IDLE_TIMEOUT_MS);
 
-    const cfg = { agents: { defaults: {} } } as OpenClawConfig;
+    const cfg = { agents: { defaults: {} } } as BotConfig;
     expect(resolveLlmIdleTimeoutMs({ cfg, trigger: "cron" })).toBe(DEFAULT_LLM_IDLE_TIMEOUT_MS);
   });
 
   it("caps agents.defaults.timeoutSeconds for cron before disabling the default idle timeout", () => {
-    const cfg = { agents: { defaults: { timeoutSeconds: 300 } } } as OpenClawConfig;
+    const cfg = { agents: { defaults: { timeoutSeconds: 300 } } } as BotConfig;
     expect(resolveLlmIdleTimeoutMs({ cfg, trigger: "cron" })).toBe(DEFAULT_LLM_IDLE_TIMEOUT_MS);
   });
 
@@ -512,7 +512,7 @@ describe("resolveLlmIdleTimeoutMs", () => {
   });
 
   it("still applies agents.defaults.timeoutSeconds cap for local providers", () => {
-    const cfg = { agents: { defaults: { timeoutSeconds: 30 } } } as OpenClawConfig;
+    const cfg = { agents: { defaults: { timeoutSeconds: 30 } } } as BotConfig;
     expect(resolveLlmIdleTimeoutMs({ cfg, model: { baseUrl: "http://127.0.0.1:11434" } })).toBe(
       30_000,
     );
@@ -527,7 +527,7 @@ describe("resolveLlmIdleTimeoutMs", () => {
     ],
     ["cloud keeps the 120s default", { provider: "openai" }, 120_000],
   ])("large agents.defaults.timeoutSeconds: %s", (_label, model, expected) => {
-    const cfg = { agents: { defaults: { timeoutSeconds: 3_600 } } } as OpenClawConfig;
+    const cfg = { agents: { defaults: { timeoutSeconds: 3_600 } } } as BotConfig;
     expect(resolveLlmIdleTimeoutMs({ cfg, model })).toBe(expected);
   });
 
@@ -666,7 +666,7 @@ describe("resolveLlmFirstEventTimeoutMs", () => {
   });
 
   it("caps first-event timeout by agents.defaults.timeoutSeconds when no explicit run timeout exists", () => {
-    const cfg = { agents: { defaults: { timeoutSeconds: 20 } } } as OpenClawConfig;
+    const cfg = { agents: { defaults: { timeoutSeconds: 20 } } } as BotConfig;
     expect(
       resolveLlmFirstEventTimeoutMs({
         cfg,

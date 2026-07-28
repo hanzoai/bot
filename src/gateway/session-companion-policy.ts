@@ -1,8 +1,8 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 export const SESSION_COMPANION_TOOLS = ["read", "sessions_history", "sessions_search"] as const;
 
-export function buildSessionCompanionRunConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function buildSessionCompanionRunConfig(cfg: BotConfig): BotConfig {
   const toolSearch = cfg.tools?.toolSearch;
   const codeMode = cfg.tools?.codeMode;
   return {

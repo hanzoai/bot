@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
-/** Formatting helpers for `openclaw health` failures and channel summaries. */
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+/** Formatting helpers for `bot health` failures and channel summaries. */
+import { asNullableRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { colorize, isRich, theme } from "../../packages/terminal-core/src/theme.js";
 import { formatChannelStatusState } from "../channels/plugins/status-state.js";

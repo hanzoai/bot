@@ -9,7 +9,7 @@ export const GITHUB_RELEASE_BODY_MAX_BYTES = 125_000;
 const CONTRIBUTION_RECORD_HEADING = "### Complete contribution record";
 const RELEASE_VERIFICATION_HEADING = "### Release verification";
 const SHIPPED_BASELINE_EXCLUSIONS_PREFIX = "Shipped baseline exclusions:";
-const OPENCLAW_RELEASE_TAG_PATTERN =
+const BOT_RELEASE_TAG_PATTERN =
   /^v[0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*(?:-(?:(?:alpha|beta)\.[1-9][0-9]*|[1-9][0-9]*))?$/u;
 const RELEASE_HEADING_PATTERN =
   /^## (?<version>Unreleased|[0-9]{4}\.[1-9][0-9]*\.[1-9][0-9]*(?:-(?:(?:alpha|beta)\.[1-9][0-9]*|[1-9][0-9]*))?)\r?$/u;
@@ -35,7 +35,7 @@ function validateRepository(repository) {
 }
 
 function validateTag(tag) {
-  if (!OPENCLAW_RELEASE_TAG_PATTERN.test(tag)) {
+  if (!BOT_RELEASE_TAG_PATTERN.test(tag)) {
     fail(`invalid release tag: ${tag}`);
   }
 }
@@ -110,7 +110,7 @@ export function releaseNotesVersionForTag(tag) {
 }
 
 function validateShippedBaselineRef(ref) {
-  if (!OPENCLAW_RELEASE_TAG_PATTERN.test(ref)) {
+  if (!BOT_RELEASE_TAG_PATTERN.test(ref)) {
     fail(`invalid shipped release tag: ${ref}`);
   }
 }

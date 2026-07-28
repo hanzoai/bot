@@ -1,13 +1,13 @@
 /**
  * Engine import boundary test.
  *
- * Ensures that engine/ sources only import from `openclaw/plugin-sdk/*`
- * and never reach into other openclaw internals directly.
+ * Ensures that engine/ sources only import from `bot/plugin-sdk/*`
+ * and never reach into other bot internals directly.
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it } from "vitest";
 
 const ENGINE_DIR = path.resolve(import.meta.dirname);
@@ -35,31 +35,31 @@ function walkSourceFiles(dir: string, files: string[] = []): string[] {
 }
 
 /**
- * Extract all `openclaw/...` import specifiers from source text.
- * Matches: import ... from "openclaw/...", import("openclaw/...")
+ * Extract all `bot/...` import specifiers from source text.
+ * Matches: import ... from "bot/...", import("bot/...")
  */
-function findOpenclawImports(source: string): string[] {
+function findBotImports(source: string): string[] {
   return [
-    ...source.matchAll(/from\s+["'](openclaw\/[^"']+)["']/g),
-    ...source.matchAll(/import\(\s*["'](openclaw\/[^"']+)["']\s*\)/g),
-  ].map((match) => expectDefined(match[1], "OpenClaw import specifier"));
+    ...source.matchAll(/from\s+["'](bot\/[^"']+)["']/g),
+    ...source.matchAll(/import\(\s*["'](bot\/[^"']+)["']\s*\)/g),
+  ].map((match) => expectDefined(match[1], "Bot import specifier"));
 }
 
-/** Check if an import specifier is an allowed openclaw/plugin-sdk subpath. */
-const ALLOWED_PREFIX = ["openclaw", "plugin-sdk"].join("/");
+/** Check if an import specifier is an allowed bot/plugin-sdk subpath. */
+const ALLOWED_PREFIX = ["bot", "plugin-sdk"].join("/");
 function isAllowedImport(specifier: string): boolean {
   return specifier.startsWith(ALLOWED_PREFIX);
 }
 
 describe("engine import boundary", () => {
-  it("only imports from openclaw/plugin-sdk, never from other openclaw internals", () => {
+  it("only imports from bot/plugin-sdk, never from other bot internals", () => {
     const sourceFiles = walkSourceFiles(ENGINE_DIR);
     const offenders: Array<{ file: string; imports: string[] }> = [];
 
     for (const file of sourceFiles) {
       const source = fs.readFileSync(file, "utf8");
-      const openclawImports = findOpenclawImports(source);
-      const forbidden = openclawImports.filter((specifier) => !isAllowedImport(specifier));
+      const botImports = findBotImports(source);
+      const forbidden = botImports.filter((specifier) => !isAllowedImport(specifier));
 
       if (forbidden.length > 0) {
         offenders.push({

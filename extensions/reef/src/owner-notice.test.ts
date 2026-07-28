@@ -1,4 +1,4 @@
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { createPluginRuntimeMock } from "bot/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 import type { ReefPeerIdentity } from "./friend-types.js";
 import {

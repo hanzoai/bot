@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MediaUnderstandingSkipError } from "../../../packages/media-understanding-common/src/errors.js";
 import { AcpRuntimeError } from "../../acp/runtime/errors.js";
 import type { AcpSessionStoreEntry } from "../../acp/runtime/session-meta.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { SessionBindingRecord } from "../../infra/outbound/session-binding-service.js";
 import type { ApplyMediaUnderstandingResult } from "../../media-understanding/apply.js";
 import { withFetchPreconnect } from "../../test-utils/fetch-mock.js";
@@ -42,8 +42,8 @@ const auditMocks = vi.hoisted(() => ({
 }));
 
 const policyMocks = vi.hoisted(() => ({
-  resolveAcpDispatchPolicyError: vi.fn<(cfg: OpenClawConfig) => AcpRuntimeError | null>(() => null),
-  resolveAcpAgentPolicyError: vi.fn<(cfg: OpenClawConfig, agent: string) => AcpRuntimeError | null>(
+  resolveAcpDispatchPolicyError: vi.fn<(cfg: BotConfig) => AcpRuntimeError | null>(() => null),
+  resolveAcpAgentPolicyError: vi.fn<(cfg: BotConfig, agent: string) => AcpRuntimeError | null>(
     () => null,
   ),
 }));
@@ -86,7 +86,7 @@ const ttsMocks = vi.hoisted(() => ({
     const params = paramsUnknown as { payload: unknown };
     return params.payload;
   }),
-  resolveTtsConfig: vi.fn((_cfg: OpenClawConfig) => ({ mode: "final" })),
+  resolveTtsConfig: vi.fn((_cfg: BotConfig) => ({ mode: "final" })),
 }));
 
 const mediaUnderstandingMocks = vi.hoisted(() => ({
@@ -103,7 +103,7 @@ const diagnosticMocks = vi.hoisted(() => ({
 
 const sessionMetaMocks = vi.hoisted(() => ({
   readAcpSessionEntry: vi.fn<
-    (params: { sessionKey: string; cfg?: OpenClawConfig }) => AcpSessionStoreEntry | null
+    (params: { sessionKey: string; cfg?: BotConfig }) => AcpSessionStoreEntry | null
   >(() => null),
 }));
 
@@ -138,9 +138,9 @@ vi.mock("../../agents/command/attempt-execution.runtime.js", () => ({
 }));
 
 vi.mock("../../acp/policy.js", () => ({
-  resolveAcpDispatchPolicyError: (cfg: OpenClawConfig) =>
+  resolveAcpDispatchPolicyError: (cfg: BotConfig) =>
     policyMocks.resolveAcpDispatchPolicyError(cfg),
-  resolveAcpAgentPolicyError: (cfg: OpenClawConfig, agent: string) =>
+  resolveAcpAgentPolicyError: (cfg: BotConfig, agent: string) =>
     policyMocks.resolveAcpAgentPolicyError(cfg, agent),
 }));
 
@@ -215,7 +215,7 @@ vi.mock("./dispatch-acp-media.runtime.js", () => ({
 }));
 
 vi.mock("./dispatch-acp-session.runtime.js", () => ({
-  readAcpSessionEntry: (params: { sessionKey: string; cfg?: OpenClawConfig }) =>
+  readAcpSessionEntry: (params: { sessionKey: string; cfg?: BotConfig }) =>
     sessionMetaMocks.readAcpSessionEntry(params),
 }));
 
@@ -309,7 +309,7 @@ function setReadyAcpResolution() {
   });
 }
 
-function createAcpConfigWithVisibleToolTags(): OpenClawConfig {
+function createAcpConfigWithVisibleToolTags(): BotConfig {
   return createAcpTestConfig({
     acp: {
       enabled: true,
@@ -326,7 +326,7 @@ function createAcpConfigWithVisibleToolTags(): OpenClawConfig {
 async function runDispatch(params: {
   bodyForAgent: string;
   runId?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   dispatcher?: ReplyDispatcher;
   shouldRouteToOriginating?: boolean;
   originatingChannel?: string;
@@ -1574,7 +1574,7 @@ describe("tryDispatchAcpReply", () => {
 
   it("forwards media-understanding PDF page images alongside current image attachments", async () => {
     setReadyAcpResolution();
-    const currentPath = "/tmp/openclaw-current-image.png";
+    const currentPath = "/tmp/bot-current-image.png";
     const currentImage = Buffer.from("current-image");
     const pdfPage = {
       type: "image" as const,
@@ -1618,7 +1618,7 @@ describe("tryDispatchAcpReply", () => {
       mimeType: "image/png",
       data: Buffer.from("inline-image").toString("base64"),
     };
-    const historyPath = "/tmp/openclaw-history-inline.png";
+    const historyPath = "/tmp/bot-history-inline.png";
     acpAttachmentBuffers.set(historyPath, Buffer.from("history-image"));
 
     await runDispatch({
@@ -2008,11 +2008,11 @@ describe("tryDispatchAcpReply", () => {
         : [],
     );
     sessionMetaMocks.readAcpSessionEntry.mockImplementation(
-      (params: { sessionKey: string; cfg?: OpenClawConfig }) =>
+      (params: { sessionKey: string; cfg?: BotConfig }) =>
         params.sessionKey === canonicalSessionKey
           ? {
               cfg: params.cfg ?? createAcpTestConfig(),
-              storePath: "/tmp/openclaw-session-store.json",
+              storePath: "/tmp/bot-session-store.json",
               sessionKey: canonicalSessionKey,
               storeSessionKey: canonicalSessionKey,
               acp: createAcpSessionMeta({
@@ -2075,11 +2075,11 @@ describe("tryDispatchAcpReply", () => {
         : [],
     );
     sessionMetaMocks.readAcpSessionEntry.mockImplementation(
-      (params: { sessionKey: string; cfg?: OpenClawConfig }) =>
+      (params: { sessionKey: string; cfg?: BotConfig }) =>
         params.sessionKey === canonicalSessionKey
           ? {
               cfg: params.cfg ?? createAcpTestConfig(),
-              storePath: "/tmp/openclaw-session-store.json",
+              storePath: "/tmp/bot-session-store.json",
               sessionKey: canonicalSessionKey,
               storeSessionKey: canonicalSessionKey,
               acp: createAcpSessionMeta({
@@ -2314,7 +2314,7 @@ describe("tryDispatchAcpReply", () => {
     setReadyAcpResolution();
     ttsMocks.resolveTtsConfig.mockReturnValue({ mode: "final" });
     queueTtsReplies({
-      mediaUrl: "/tmp/openclaw-media/acp-tts.ogg",
+      mediaUrl: "/tmp/bot-media/acp-tts.ogg",
       audioAsVoice: true,
     } as MockTtsReply);
     mockVisibleTextTurn("WebChat ACP block reply.");
@@ -2339,7 +2339,7 @@ describe("tryDispatchAcpReply", () => {
     });
 
     const finalPayload = dispatcherCall(dispatcher.sendFinalReply);
-    expect(finalPayload.mediaUrl).toBe("/tmp/openclaw-media/acp-tts.ogg");
+    expect(finalPayload.mediaUrl).toBe("/tmp/bot-media/acp-tts.ogg");
     expect(finalPayload.audioAsVoice).toBe(true);
     expect(finalPayload.spokenText).toBe("WebChat ACP block reply.");
     expect(finalPayload.trustedLocalMedia).toBe(true);

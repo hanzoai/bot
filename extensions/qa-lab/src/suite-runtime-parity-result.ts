@@ -45,7 +45,7 @@ function runtimeParityScenarioStepStatus(
 
 function runtimeParityScenarioResultStatus(result: RuntimeParityResult) {
   const cellStatuses = new Set([
-    runtimeParityScenarioStepStatus(result.cells.openclaw),
+    runtimeParityScenarioStepStatus(result.cells.bot),
     runtimeParityScenarioStepStatus(result.cells.codex),
   ]);
   if (isRuntimeParityResultPass(result)) {
@@ -65,7 +65,7 @@ export function buildRuntimeParityScenarioResult(params: {
   result: RuntimeParityResult;
 }): QaSuiteScenarioResult {
   const driftStepStatus = runtimeParityScenarioResultStatus(params.result);
-  const openclawCell = params.result.cells.openclaw;
+  const botCell = params.result.cells.bot;
   const codexCell = params.result.cells.codex;
   return {
     name: params.scenarioName,
@@ -73,9 +73,9 @@ export function buildRuntimeParityScenarioResult(params: {
     details: params.result.driftDetails ?? `runtime drift classified as ${params.result.drift}`,
     steps: [
       {
-        name: openclawCell.runtime,
-        status: runtimeParityScenarioStepStatus(openclawCell),
-        details: formatRuntimeParityScenarioCellDetails(openclawCell),
+        name: botCell.runtime,
+        status: runtimeParityScenarioStepStatus(botCell),
+        details: formatRuntimeParityScenarioCellDetails(botCell),
       },
       {
         name: codexCell.runtime,

@@ -1,6 +1,6 @@
 import CoreLocation
 import Foundation
-import OpenClawKit
+import BotKit
 import UIKit
 
 @MainActor
@@ -49,7 +49,7 @@ final class LocationService: NSObject, CLLocationManagerDelegate, ConcurrentLoca
         self.cachedAuthorizationSnapshot
     }
 
-    func ensureAuthorization(mode: OpenClawLocationMode) async -> CLAuthorizationStatus {
+    func ensureAuthorization(mode: BotLocationMode) async -> CLAuthorizationStatus {
         guard CLLocationManager.locationServicesEnabled() else { return .denied }
 
         let status = self.authorizationStatus()
@@ -74,8 +74,8 @@ final class LocationService: NSObject, CLLocationManagerDelegate, ConcurrentLoca
     }
 
     func currentLocation(
-        params: OpenClawLocationGetParams,
-        desiredAccuracy: OpenClawLocationAccuracy,
+        params: BotLocationGetParams,
+        desiredAccuracy: BotLocationAccuracy,
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
     {

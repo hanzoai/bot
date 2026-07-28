@@ -3,8 +3,8 @@ import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { gzipSync } from "node:zlib";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import type { Model } from "bot/plugin-sdk/llm";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetGoogleVertexAdcState } from "./google-oauth.test-support.js";
 
@@ -27,7 +27,7 @@ const {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/provider-transport-runtime", async (importOriginal) => ({
+vi.mock("bot/plugin-sdk/provider-transport-runtime", async (importOriginal) => ({
   ...(await importOriginal()),
   buildGuardedModelFetch: buildGuardedModelFetchMock,
 }));
@@ -42,7 +42,7 @@ let createGoogleVertexTransportStreamFn: typeof import("./transport-stream.js").
 let resolveGoogleVertexAuthorizedUserHeaders: typeof import("./vertex-adc.js").resolveGoogleVertexAuthorizedUserHeaders;
 
 const MODEL_PROVIDER_REQUEST_TRANSPORT_SYMBOL = Symbol.for(
-  "openclaw.modelProviderRequestTransport",
+  "bot.modelProviderRequestTransport",
 );
 
 function attachModelProviderRequestTransport<TModel extends object>(
@@ -138,7 +138,7 @@ async function runGoogleVertexStreamResult(params: {
 }
 
 async function useGoogleAuthorizedUserCredentials(label: string, refreshToken: string) {
-  const tempDir = await mkdtemp(path.join(os.tmpdir(), `openclaw-google-vertex-${label}-`));
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), `bot-google-vertex-${label}-`));
   const credentialsPath = path.join(tempDir, "application_default_credentials.json");
   await writeFile(
     credentialsPath,
@@ -408,7 +408,7 @@ describe("google transport stream", () => {
   });
 
   afterAll(() => {
-    vi.doUnmock("openclaw/plugin-sdk/provider-transport-runtime");
+    vi.doUnmock("bot/plugin-sdk/provider-transport-runtime");
     vi.doUnmock("google-auth-library");
     vi.resetModules();
   });
@@ -508,7 +508,7 @@ describe("google transport stream", () => {
       "x-goog-api-key": "gemini-api-key",
       "X-Provider": "google",
     });
-    expect(new Headers(init.headers).get("x-goog-api-client")).toMatch(/^openclaw\//u);
+    expect(new Headers(init.headers).get("x-goog-api-client")).toMatch(/^bot\//u);
 
     const payload = parseRequestJsonBody(init);
     expect(payload.cachedContent).toBe("cachedContents/request-cache");
@@ -542,7 +542,7 @@ describe("google transport stream", () => {
   });
 
   it("rotates Gemini LLM API keys when a pre-stream request is rate limited", async () => {
-    vi.stubEnv("OPENCLAW_LIVE_GEMINI_KEY", "");
+    vi.stubEnv("BOT_LIVE_GEMINI_KEY", "");
     vi.stubEnv("GEMINI_API_KEYS", "gemini-key-2");
     guardedFetchMock.mockResolvedValueOnce(buildRateLimitResponse()).mockResolvedValueOnce(
       buildSseResponse([
@@ -615,7 +615,7 @@ describe("google transport stream", () => {
         "http://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:streamGenerateContent?alt=sse",
     },
   ])("$name", async ({ model, options, expectedHeaders, expectedUrl, omitApiKeyHeader }) => {
-    vi.stubEnv("OPENCLAW_LIVE_GEMINI_KEY", "");
+    vi.stubEnv("BOT_LIVE_GEMINI_KEY", "");
     vi.stubEnv("GEMINI_API_KEYS", "gemini-env-key");
     guardedFetchMock.mockResolvedValueOnce(buildRateLimitResponse());
 
@@ -905,7 +905,7 @@ describe("google transport stream", () => {
   });
 
   it("retries Gemini 3 requests with lean thinking when the first attempt has no first response", async () => {
-    vi.stubEnv("OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
+    vi.stubEnv("BOT_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
     guardedFetchMock
       .mockImplementationOnce(
         (_url: string, init?: RequestInit) =>
@@ -975,7 +975,7 @@ describe("google transport stream", () => {
   });
 
   it("keeps streaming after the first Gemini 3 chunk arrives before the retry deadline", async () => {
-    vi.stubEnv("OPENCLAW_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
+    vi.stubEnv("BOT_GOOGLE_GEMINI_FIRST_RESPONSE_RETRY_MS", "10");
     guardedFetchMock.mockResolvedValueOnce(
       buildDelayedSecondSseResponse({
         first: {
@@ -1060,7 +1060,7 @@ describe("google transport stream", () => {
   ])(
     "routes the %s Vertex multi-region through the production stream",
     async (location, origin) => {
-      const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-region-"));
+      const tempDir = await mkdtemp(path.join(os.tmpdir(), "bot-google-vertex-region-"));
       vi.stubEnv("GOOGLE_APPLICATION_CREDENTIALS", "");
       vi.stubEnv("HOME", path.join(tempDir, "home"));
       vi.stubEnv("APPDATA", "");
@@ -1091,7 +1091,7 @@ describe("google transport stream", () => {
   );
 
   it("resolves non-file Vertex ADC through google-auth-library without OAuth refresh fetch", async () => {
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-authlib-"));
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "bot-google-vertex-authlib-"));
     vi.stubEnv("GOOGLE_APPLICATION_CREDENTIALS", "");
     vi.stubEnv("HOME", path.join(tempDir, "home"));
     vi.stubEnv("APPDATA", "");
@@ -1111,7 +1111,7 @@ describe("google transport stream", () => {
   });
 
   it("bounds Google Vertex ADC files before google-auth-library reads them", async () => {
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-adc-file-"));
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "bot-google-vertex-adc-file-"));
     const credentialsPath = path.join(tempDir, "application_default_credentials.json");
     const credentials = {
       type: "service_account",
@@ -1142,7 +1142,7 @@ describe("google transport stream", () => {
 
   it("bounds google-auth-library ADC token resolution at the Vertex owner", async () => {
     const tempDir = await mkdtemp(
-      path.join(os.tmpdir(), "openclaw-google-vertex-authlib-timeout-"),
+      path.join(os.tmpdir(), "bot-google-vertex-authlib-timeout-"),
     );
     vi.stubEnv("GOOGLE_APPLICATION_CREDENTIALS", "");
     vi.stubEnv("HOME", path.join(tempDir, "home"));
@@ -1169,7 +1169,7 @@ describe("google transport stream", () => {
   });
 
   it("does not cache google-auth ADC tokens when fallback expiry would exceed Date range", async () => {
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-authlib-expiry-"));
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "bot-google-vertex-authlib-expiry-"));
     vi.useFakeTimers();
     vi.setSystemTime(new Date(8_640_000_000_000_000));
     vi.stubEnv("GOOGLE_APPLICATION_CREDENTIALS", "");
@@ -1192,7 +1192,7 @@ describe("google transport stream", () => {
   });
 
   it("uses google-auth-library bearer auth for Google Vertex credential marker requests", async () => {
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-authlib-stream-"));
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "bot-google-vertex-authlib-stream-"));
     vi.stubEnv("GOOGLE_APPLICATION_CREDENTIALS", "");
     vi.stubEnv("HOME", path.join(tempDir, "home"));
     vi.stubEnv("APPDATA", "");
@@ -1235,7 +1235,7 @@ describe("google transport stream", () => {
   });
 
   it("strips redundant google provider prefixes from Google Vertex model paths", async () => {
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-prefix-"));
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "bot-google-vertex-prefix-"));
     vi.stubEnv("HOME", path.join(tempDir, "home"));
     vi.stubEnv("APPDATA", "");
     vi.stubEnv("GOOGLE_CLOUD_PROJECT", "vertex-project");
@@ -1442,7 +1442,7 @@ describe("google transport stream", () => {
   });
 
   it("refreshes authorized_user ADC from the Windows APPDATA fallback for Google Vertex requests", async () => {
-    const tempDir = await mkdtemp(path.join(os.tmpdir(), "openclaw-google-vertex-appdata-adc-"));
+    const tempDir = await mkdtemp(path.join(os.tmpdir(), "bot-google-vertex-appdata-adc-"));
     const homeDir = path.join(tempDir, "home");
     const appDataDir = path.join(tempDir, "AppData", "Roaming");
     const fallbackDir = path.join(appDataDir, "gcloud");
@@ -1559,7 +1559,7 @@ describe("google transport stream", () => {
     {
       name: "treats the Google transport alias as the same route for signature replay",
       modelId: "gemini-3.1-pro-preview",
-      api: "openclaw-google-generative-ai-transport",
+      api: "bot-google-generative-ai-transport",
       signature: "Y2FsbF9zaWdfYWxpYXNfMQ==",
       messages: [
         googleToolCallAssistantTurn({ thoughtSignature: "Y2FsbF9zaWdfYWxpYXNfMQ==" }),
@@ -1607,8 +1607,8 @@ describe("google transport stream", () => {
         id: "gemini-3.1-pro-preview",
         name: "Gemini 3.1 Pro Preview",
       }),
-      api: "openclaw-google-generative-ai-transport",
-    } as Model<"openclaw-google-generative-ai-transport">;
+      api: "bot-google-generative-ai-transport",
+    } as Model<"bot-google-generative-ai-transport">;
 
     const params = buildGoogleGenerativeAiParams(model, {
       messages: [

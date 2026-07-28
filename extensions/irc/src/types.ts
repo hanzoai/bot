@@ -1,5 +1,5 @@
 // Irc type declarations define plugin contracts.
-import type { ChannelDeliveryStreamingConfig } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelDeliveryStreamingConfig } from "bot/plugin-sdk/channel-outbound";
 import type {
   DmConfig,
   DmPolicy,
@@ -7,7 +7,7 @@ import type {
   GroupToolPolicyBySenderConfig,
   GroupToolPolicyConfig,
   MarkdownConfig,
-  OpenClawConfig,
+  BotConfig,
   BaseProbeResult,
 } from "./runtime-api.js";
 
@@ -70,8 +70,8 @@ type IrcConfig = IrcAccountConfig & {
   defaultAccount?: string;
 };
 
-export type CoreConfig = OpenClawConfig & {
-  channels?: OpenClawConfig["channels"] & {
+export type CoreConfig = BotConfig & {
+  channels?: BotConfig["channels"] & {
     irc?: IrcConfig;
   };
 };

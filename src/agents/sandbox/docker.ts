@@ -83,7 +83,7 @@ export async function execDockerRaw(
   return { stdout, stderr, code: exitCode };
 }
 
-import { markOpenClawExecEnv } from "../../infra/openclaw-exec-env.js";
+import { markBotExecEnv } from "../../infra/bot-exec-env.js";
 import {
   computeSandboxConfigHash,
   SANDBOX_DOCKER_EXPLICIT_ENV_POLICY_EPOCH,
@@ -246,7 +246,7 @@ export async function ensureDockerImage(image: string) {
   }
   if (image === DEFAULT_SANDBOX_IMAGE) {
     throw new Error(
-      `Sandbox image not found: ${image}. Build it with scripts/sandbox-setup.sh before enabling Docker sandboxing. The default image includes python3 for sandbox write/edit helpers; OpenClaw will not substitute plain debian:bookworm-slim.`,
+      `Sandbox image not found: ${image}. Build it with scripts/sandbox-setup.sh before enabling Docker sandboxing. The default image includes python3 for sandbox write/edit helpers; Bot will not substitute plain debian:bookworm-slim.`,
     );
   }
   throw new Error(`Sandbox image not found: ${image}. Build or pull it first.`);
@@ -339,13 +339,13 @@ export function buildSandboxCreateArgs(params: {
   // Docker's init owns PID 1 so orphaned children from long-running tool and
   // browser workloads are reaped instead of accumulating against pidsLimit.
   args.push("--init");
-  args.push("--label", "openclaw.sandbox=1");
-  args.push("--label", `openclaw.sessionKey=${params.scopeKey}`);
-  args.push("--label", `openclaw.createdAtMs=${createdAtMs}`);
-  args.push("--label", `openclaw.mountFormatVersion=${SANDBOX_MOUNT_FORMAT_VERSION}`);
-  args.push("--label", `openclaw.createArgsEpoch=${SANDBOX_DOCKER_CREATE_ARGS_EPOCH}`);
+  args.push("--label", "bot.sandbox=1");
+  args.push("--label", `bot.sessionKey=${params.scopeKey}`);
+  args.push("--label", `bot.createdAtMs=${createdAtMs}`);
+  args.push("--label", `bot.mountFormatVersion=${SANDBOX_MOUNT_FORMAT_VERSION}`);
+  args.push("--label", `bot.createArgsEpoch=${SANDBOX_DOCKER_CREATE_ARGS_EPOCH}`);
   if (params.configHash) {
-    args.push("--label", `openclaw.configHash=${params.configHash}`);
+    args.push("--label", `bot.configHash=${params.configHash}`);
   }
   for (const [key, value] of Object.entries(params.labels ?? {})) {
     if (key && value) {
@@ -375,7 +375,7 @@ export function buildSandboxCreateArgs(params: {
       `Suspicious configured sandbox environment variables: ${envSanitization.warnings.join(", ")}`,
     );
   }
-  for (const [key, value] of Object.entries(markOpenClawExecEnv(envSanitization.allowed))) {
+  for (const [key, value] of Object.entries(markBotExecEnv(envSanitization.allowed))) {
     args.push("--env", `${key}=${value}`);
   }
   for (const cap of params.cfg.capDrop) {
@@ -490,7 +490,7 @@ async function createSandboxContainer(params: {
 }
 
 async function readContainerConfigHash(containerName: string): Promise<string | null> {
-  return await readDockerContainerLabel(containerName, "openclaw.configHash");
+  return await readDockerContainerLabel(containerName, "bot.configHash");
 }
 
 export async function ensureSandboxContainer(params: {

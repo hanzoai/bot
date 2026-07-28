@@ -1,7 +1,7 @@
 /**
  * Tests plugin runtime mock helpers stay aligned with channel runtime contracts.
  */
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/plugin-test-runtime";
+import { createPluginRuntimeMock } from "bot/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 
 describe("createPluginRuntimeMock", () => {
@@ -96,7 +96,7 @@ describe("createPluginRuntimeMock", () => {
     const runtime = createPluginRuntimeMock({
       channel: {
         session: {
-          resolveStorePath: () => "/tmp/openclaw-test",
+          resolveStorePath: () => "/tmp/bot-test",
           recordInboundSession,
         },
         reply: { dispatchReplyWithBufferedBlockDispatcher },
@@ -136,7 +136,7 @@ describe("createPluginRuntimeMock", () => {
     );
     expect(recordInboundSession).toHaveBeenCalledWith(
       expect.objectContaining({
-        storePath: "/tmp/openclaw-test",
+        storePath: "/tmp/bot-test",
         sessionKey: "agent:main:test:direct:u1",
       }),
     );

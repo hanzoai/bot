@@ -1,6 +1,6 @@
-# @openclaw/llama-cpp-provider
+# @hanzo/bot-llama-cpp-provider
 
-Official llama.cpp text-inference and embedding provider for OpenClaw.
+Official llama.cpp text-inference and embedding provider for Bot.
 
 This plugin runs local GGUF chat and embedding models in-process through
 `node-llama-cpp`.
@@ -8,7 +8,7 @@ This plugin runs local GGUF chat and embedding models in-process through
 ## Install
 
 ```bash
-openclaw plugins install @openclaw/llama-cpp-provider
+bot plugins install @hanzo/bot-llama-cpp-provider
 ```
 
 Restart the Gateway after installing or updating the plugin. Use Node 24 for
@@ -17,16 +17,16 @@ native installs and updates.
 ## Configure text inference
 
 Choose **Local model (llama.cpp)** during onboarding. After explicit consent,
-OpenClaw downloads Gemma 4 E4B IT Q4_K_M (approximately 5.0 GB) as the default.
+Bot downloads Gemma 4 E4B IT Q4_K_M (approximately 5.0 GB) as the default.
 The bundled download is offered only on machines with at least 16 GiB of RAM.
 Discovery never downloads a model.
 
 On smaller machines, use Ollama or LM Studio with a smaller model, use a cloud
 provider, or configure any custom GGUF through `params.modelPath`. The 16 GiB
-gate applies only to OpenClaw's bundled default download; custom GGUF models
+gate applies only to Bot's bundled default download; custom GGUF models
 remain available on any machine.
 
-See the [llama.cpp provider guide](https://docs.openclaw.ai/plugins/llama-cpp)
+See the [llama.cpp provider guide](https://docs.bot.ai/plugins/llama-cpp)
 for custom GGUF model configuration and hardware guidance.
 
 ## Configure embeddings
@@ -39,5 +39,5 @@ Face model URI, or HTTPS model URL.
 ## Package
 
 - Plugin id: `llama-cpp`
-- Package: `@openclaw/llama-cpp-provider`
-- Minimum OpenClaw host: `2026.6.2`
+- Package: `@hanzo/bot-llama-cpp-provider`
+- Minimum Bot host: `2026.6.2`

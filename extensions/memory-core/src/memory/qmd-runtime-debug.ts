@@ -1,4 +1,4 @@
-import type { MemorySearchRuntimeDebug } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import type { MemorySearchRuntimeDebug } from "bot/plugin-sdk/memory-core-host-engine-storage";
 
 export type QmdCollectionValidationDebug = NonNullable<
   NonNullable<MemorySearchRuntimeDebug["qmd"]>["collectionValidation"]

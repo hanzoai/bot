@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/baseten-provider",
+  "name": "@hanzo/bot-baseten-provider",
   "version": "2026.7.2",
-  "description": "OpenClaw Baseten provider plugin.",
+  "description": "Bot Baseten provider plugin.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/baseten-provider",
-      "npmSpec": "@openclaw/baseten-provider",
+      "clawhubSpec": "clawhub:@hanzo/bot-baseten-provider",
+      "npmSpec": "@hanzo/bot-baseten-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.7.2"
     },
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {

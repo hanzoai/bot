@@ -1,4 +1,4 @@
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
+import { asNullableRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { GatewaySessionRow } from "../../api/types.ts";
 
 const CLOUD_WORKSPACE_CONFLICT_TRANSCRIPT_TYPE = "cloud-workspace-conflict";
@@ -57,7 +57,7 @@ function normalizeWorkspaceResultConflict(value: unknown): WorkspaceResultConfli
   if (
     paths.length !== record.paths.length ||
     typeof record.stagedResultRef !== "string" ||
-    !/^refs\/openclaw\/worker-results\/[A-Za-z0-9-]+$/u.test(record.stagedResultRef) ||
+    !/^refs\/bot\/worker-results\/[A-Za-z0-9-]+$/u.test(record.stagedResultRef) ||
     (record.totalCount !== undefined &&
       (!Number.isSafeInteger(record.totalCount) || (record.totalCount as number) < paths.length))
   ) {

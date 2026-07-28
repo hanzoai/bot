@@ -1,5 +1,5 @@
 // Discord plugin module implements components.base behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
 import type { BaseComponentInteraction } from "./interactions.js";
 
 export type ComponentParserResult = {

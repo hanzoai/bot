@@ -76,7 +76,7 @@ export async function resolveEmbeddedRunModelSetup(params: {
     agentHarnessId: runParams.agentHarnessId,
     agentHarnessRuntimeOverride: runParams.agentHarnessRuntimeOverride,
   });
-  const pluginHarnessOwnsTransport = agentHarness.id !== "openclaw";
+  const pluginHarnessOwnsTransport = agentHarness.id !== "bot";
   const expectedHarnessArtifact = runParams.expectedAgentHarnessRuntimeArtifact;
   if (expectedHarnessArtifact && expectedHarnessArtifact.harnessId !== agentHarness.id) {
     throw new Error(

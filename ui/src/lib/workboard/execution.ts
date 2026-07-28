@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import { requestSessionCreate } from "../sessions/index.ts";
 import {
@@ -46,7 +46,7 @@ function engineModel(engine: WorkboardExecutionEngine | null | undefined): strin
 }
 
 function buildCardPrompt(card: WorkboardCard): string {
-  const lines = [`Work on this OpenClaw Workboard card: ${card.title}`];
+  const lines = [`Work on this Bot Workboard card: ${card.title}`];
   if (card.notes?.trim()) {
     lines.push("", card.notes.trim());
   }

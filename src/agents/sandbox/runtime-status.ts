@@ -3,14 +3,14 @@
  *
  * Resolves whether a session is sandboxed and explains policy blocks before tool execution.
  */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe, truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import { sliceUtf16Safe, truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { formatCliCommand } from "../../cli/command-format.js";
 import {
   canonicalizeMainSessionAlias,
   resolveAgentMainSessionKey,
 } from "../../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { resolveSessionAgentId } from "../agent-scope.js";
 import { auditSandboxToolPolicyBlock, escapeControlCharsVisible } from "../tool-policy-audit.js";
 import { resolveSandboxConfigForAgent } from "./config.js";
@@ -31,7 +31,7 @@ function shouldSandboxSession(cfg: SandboxConfig, sessionKey: string, mainSessio
 }
 
 function resolveMainSessionKeyForSandbox(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentId: string;
 }): string {
   if (params.cfg?.session?.scope === "global") {
@@ -44,7 +44,7 @@ function resolveMainSessionKeyForSandbox(params: {
 }
 
 function resolveComparableSessionKeyForSandbox(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentId: string;
   sessionKey: string;
 }): string {
@@ -57,7 +57,7 @@ function resolveComparableSessionKeyForSandbox(params: {
 
 /** Resolves sandbox mode, effective session scope, and tool policy for a session. */
 export function resolveSandboxRuntimeStatus(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   sessionKey?: string;
   agentId?: string;
 }): {
@@ -122,7 +122,7 @@ function shellEscapeSingleArg(value: string): string {
 
 /** Formats the user-facing denial message when sandbox tool policy blocks a tool. */
 export function formatSandboxToolPolicyBlockedMessage(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   sessionKey?: string;
   toolName: string;
   audit?: boolean;
@@ -190,9 +190,9 @@ export function formatSandboxToolPolicyBlockedMessage(params: {
   }
   const explainCommand = runtime.sessionKey
     ? hasUnsafeControlChars(runtime.sessionKey)
-      ? `openclaw sandbox explain --agent ${runtime.agentId}`
-      : `openclaw sandbox explain --session ${shellEscapeSingleArg(runtime.sessionKey)}`
-    : "openclaw sandbox explain";
+      ? `bot sandbox explain --agent ${runtime.agentId}`
+      : `bot sandbox explain --session ${shellEscapeSingleArg(runtime.sessionKey)}`
+    : "bot sandbox explain";
   lines.push(`- See: ${formatCliCommand(explainCommand)}`);
 
   return lines.join("\n");

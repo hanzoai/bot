@@ -1,6 +1,6 @@
 // Irc tests cover send plugin behavior.
-import { verifyChannelMessageAdapterCapabilityProofs } from "openclaw/plugin-sdk/channel-outbound";
-import { createSendCfgThreadingRuntime } from "openclaw/plugin-sdk/channel-test-helpers";
+import { verifyChannelMessageAdapterCapabilityProofs } from "bot/plugin-sdk/channel-outbound";
+import { createSendCfgThreadingRuntime } from "bot/plugin-sdk/channel-test-helpers";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { IrcClient } from "./client.js";
 import { setIrcRuntime } from "./runtime.js";
@@ -42,8 +42,8 @@ vi.mock("./protocol.js", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/plugin-config-runtime", async () => {
-  const original = (await vi.importActual("openclaw/plugin-sdk/plugin-config-runtime")) as Record<
+vi.mock("bot/plugin-sdk/plugin-config-runtime", async () => {
+  const original = (await vi.importActual("bot/plugin-sdk/plugin-config-runtime")) as Record<
     string,
     unknown
   >;
@@ -53,8 +53,8 @@ vi.mock("openclaw/plugin-sdk/plugin-config-runtime", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/text-chunking", async () => {
-  const original = (await vi.importActual("openclaw/plugin-sdk/text-chunking")) as Record<
+vi.mock("bot/plugin-sdk/text-chunking", async () => {
+  const original = (await vi.importActual("bot/plugin-sdk/text-chunking")) as Record<
     string,
     unknown
   >;
@@ -84,8 +84,8 @@ afterAll(() => {
   vi.doUnmock("./client.js");
   vi.doUnmock("./connect-options.js");
   vi.doUnmock("./protocol.js");
-  vi.doUnmock("openclaw/plugin-sdk/plugin-config-runtime");
-  vi.doUnmock("openclaw/plugin-sdk/text-chunking");
+  vi.doUnmock("bot/plugin-sdk/plugin-config-runtime");
+  vi.doUnmock("bot/plugin-sdk/text-chunking");
   vi.resetModules();
 });
 
@@ -100,7 +100,7 @@ describe("sendMessageIrc cfg threading", () => {
       channels: {
         irc: {
           host: "irc.example.com",
-          nick: "openclaw",
+          nick: "bot",
           accounts: {
             work: {
               host: "irc.example.com",
@@ -179,7 +179,7 @@ describe("sendMessageIrc cfg threading", () => {
       channels: {
         irc: {
           host: "irc.example.com",
-          nick: "openclaw",
+          nick: "bot",
         },
       },
     } as unknown as CoreConfig;
@@ -208,7 +208,7 @@ describe("sendMessageIrc cfg threading", () => {
       channels: {
         irc: {
           host: "irc.example.com",
-          nick: "openclaw",
+          nick: "bot",
         },
       },
     } as unknown as CoreConfig;
@@ -259,7 +259,7 @@ describe("sendMessageIrc cfg threading", () => {
       channels: {
         irc: {
           host: "irc.example.com",
-          nick: "openclaw",
+          nick: "bot",
         },
       },
     } as unknown as CoreConfig;

@@ -12,9 +12,9 @@ describe("Telegram QA API boundary", () => {
   it("parses env and leased credential payloads", () => {
     expect(
       resolveTelegramQaRuntimeEnv({
-        OPENCLAW_QA_TELEGRAM_GROUP_ID: "-100123",
-        OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN: "placeholder",
-        OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN: "placeholder",
+        BOT_QA_TELEGRAM_GROUP_ID: "-100123",
+        BOT_QA_TELEGRAM_DRIVER_BOT_TOKEN: "placeholder",
+        BOT_QA_TELEGRAM_SUT_BOT_TOKEN: "placeholder",
       }),
     ).toEqual({
       groupId: "-100123",

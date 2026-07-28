@@ -2,11 +2,11 @@
 // helpers, and numeric argument validation.
 import { Value } from "typebox/value";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { compactToolOutputHint } from "../tool-schema-hints.js";
 import { createSessionsListTool } from "./sessions-list-tool.js";
 
-const VALID_CONFIG: OpenClawConfig = {
+const VALID_CONFIG: BotConfig = {
   agents: { entries: { main: { default: true } } },
 };
 

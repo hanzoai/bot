@@ -2,9 +2,9 @@
  * Resolves subagent thinking-level inheritance and overrides. Spawning uses
  * this helper to patch the child session without leaking invalid caller input.
  */
-import { asOptionalObjectRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalObjectRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { normalizeThinkLevel } from "../auto-reply/thinking.shared.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 function readString(value: Record<string, unknown>, key: string): string | undefined {
   const raw = value[key];
@@ -13,7 +13,7 @@ function readString(value: Record<string, unknown>, key: string): string | undef
 
 /** Resolves subagent thinking override and initial session patch from caller/agent config. */
 export function resolveSubagentThinkingOverride(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   requesterAgentConfig?: unknown;
   targetAgentConfig?: unknown;
   thinkingOverrideRaw?: string;

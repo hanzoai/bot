@@ -50,7 +50,7 @@ function sessionPage(face: BoardFace) {
           }
           return routeData.kind === "ambiguous"
             ? renderAmbiguous(routeData)
-            : html`<openclaw-chat-page .data=${routeData}></openclaw-chat-page>`;
+            : html`<bot-chat-page .data=${routeData}></bot-chat-page>`;
         },
       })),
   });

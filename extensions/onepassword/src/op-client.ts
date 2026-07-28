@@ -2,9 +2,9 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { extractErrorCode } from "openclaw/plugin-sdk/error-runtime";
-import { runExec } from "openclaw/plugin-sdk/process-runtime";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
+import { extractErrorCode } from "bot/plugin-sdk/error-runtime";
+import { runExec } from "bot/plugin-sdk/process-runtime";
+import { tryReadSecretFileSync } from "bot/plugin-sdk/secret-file-runtime";
 import { resolveTrustedOnePasswordCli } from "../onepassword-op-path.js";
 import { OnePasswordError } from "./errors.js";
 

@@ -101,7 +101,7 @@ describe("installUnhandledRejectionHandler - fatal detection", () => {
 
       expectConsoleLogWithMessage(
         consoleErrorSpy,
-        "[openclaw] FATAL unhandled rejection:",
+        "[bot] FATAL unhandled rejection:",
         "Out of memory",
       );
     });
@@ -143,7 +143,7 @@ describe("installUnhandledRejectionHandler - fatal detection", () => {
 
       expectConsoleLogWithMessage(
         consoleErrorSpy,
-        "[openclaw] CONFIGURATION ERROR - requires fix:",
+        "[bot] CONFIGURATION ERROR - requires fix:",
         "Invalid config",
       );
     });
@@ -190,7 +190,7 @@ describe("installUnhandledRejectionHandler - fatal detection", () => {
 
       expectConsoleLogWithMessage(
         consoleWarnSpy,
-        "[openclaw] Non-fatal unhandled rejection (continuing):",
+        "[bot] Non-fatal unhandled rejection (continuing):",
         "fetch failed",
       );
     });
@@ -214,7 +214,7 @@ describe("installUnhandledRejectionHandler - fatal detection", () => {
 
       expectConsoleLogWithMessage(
         consoleWarnSpy,
-        "[openclaw] Non-fatal unhandled rejection (continuing):",
+        "[bot] Non-fatal unhandled rejection (continuing):",
         "unable to open database file",
       );
     });
@@ -225,7 +225,7 @@ describe("installUnhandledRejectionHandler - fatal detection", () => {
       expectExitCodeFromUnhandled(genericErr, [1], "unhandled rejection");
       expectConsoleLogWithMessage(
         consoleErrorSpy,
-        "[openclaw] Unhandled promise rejection:",
+        "[bot] Unhandled promise rejection:",
         "Something went wrong",
       );
     });
@@ -248,7 +248,7 @@ describe("installUnhandledRejectionHandler - fatal detection", () => {
       expectExitCodeFromUnhandled(abortErr, []);
       expectConsoleLogWithMessage(
         consoleWarnSpy,
-        "[openclaw] Suppressed AbortError:",
+        "[bot] Suppressed AbortError:",
         "This operation was aborted",
       );
     });

@@ -8,7 +8,7 @@ import path from "node:path";
 import {
   archiveLegacyStateSource,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/runtime-doctor";
 
 type ActiveMemoryToggleEntry = {
   sessionKey: string;
@@ -59,7 +59,7 @@ async function readLegacyToggleEntries(filePath: string): Promise<ActiveMemoryTo
   }
 }
 
-/** State migrations exposed to OpenClaw doctor for Active Memory. */
+/** State migrations exposed to Bot doctor for Active Memory. */
 export const stateMigrations: PluginDoctorStateMigration[] = [
   {
     id: "active-memory-session-toggles-json-to-plugin-state",

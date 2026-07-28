@@ -1,12 +1,12 @@
 // Openrouter plugin module implements stream behavior.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
-import type { ProviderWrapStreamFnContext } from "openclaw/plugin-sdk/plugin-entry";
-import { buildProviderStreamFamilyHooks } from "openclaw/plugin-sdk/provider-stream-family";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
+import type { ProviderWrapStreamFnContext } from "bot/plugin-sdk/plugin-entry";
+import { buildProviderStreamFamilyHooks } from "bot/plugin-sdk/provider-stream-family";
 import {
   createPayloadPatchStreamWrapper,
   normalizeOpenAICompatibleReasoningReplay,
-} from "openclaw/plugin-sdk/provider-stream-shared";
-import { createSubsystemLogger } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/provider-stream-shared";
+import { createSubsystemLogger } from "bot/plugin-sdk/runtime-env";
 import { isOpenRouterDeepSeekV4ModelId } from "./models.js";
 import {
   isOpenRouterProxyReasoningUnsupportedModel,
@@ -71,10 +71,10 @@ function mergeOpenRouterAuthHeaders(options: Parameters<StreamFn>[2]): Parameter
     headers.set("Authorization", `Bearer ${apiKey}`);
   }
   if (!headers.has("http-referer")) {
-    headers.set("HTTP-Referer", "https://openclaw.ai");
+    headers.set("HTTP-Referer", "https://bot.ai");
   }
   if (!headers.has("x-openrouter-title")) {
-    headers.set("X-OpenRouter-Title", "OpenClaw");
+    headers.set("X-OpenRouter-Title", "Bot");
   }
   return {
     ...options,

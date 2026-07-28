@@ -1,7 +1,7 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import type { ProviderRouteOverridePresence } from "../plugin-sdk/provider-model-types.js";
 import type { ModelDefinitionConfig, ModelProviderConfig } from "./types.models.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { BotConfig } from "./types.bot.js";
 
 type MergedModelProviderEntry = {
   providerKey: string;
@@ -51,7 +51,7 @@ function hasNonEmptyRecord(value: unknown): boolean {
 export function resolveModelProviderRouteOverridePresence(params: {
   provider: string;
   modelId?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   canonicalizeModelId?: (modelId: string) => string;
 }): ProviderRouteOverridePresence {
   const providerConfig = resolveMergedModelProviderConfig(params.config, params.provider);
@@ -91,7 +91,7 @@ export function resolveModelProviderRouteOverridePresence(params: {
 
 /** Resolves the provider entry produced by models-config key normalization. */
 export function resolveMergedModelProviderEntry(
-  config: OpenClawConfig | undefined,
+  config: BotConfig | undefined,
   provider: string,
 ): MergedModelProviderEntry | undefined {
   const requestedProvider = provider.trim();
@@ -130,7 +130,7 @@ export function resolveMergedModelProviderEntry(
 
 /** Resolves only the merged provider config when its canonical key is not needed. */
 export function resolveMergedModelProviderConfig(
-  config: OpenClawConfig | undefined,
+  config: BotConfig | undefined,
   provider: string,
 ): ModelProviderConfig | undefined {
   return resolveMergedModelProviderEntry(config, provider)?.providerConfig;

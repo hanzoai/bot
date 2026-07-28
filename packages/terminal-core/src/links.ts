@@ -2,7 +2,7 @@
 import { formatTerminalLink } from "./terminal-link.js";
 
 function resolveDocsRoot(): string {
-  return "https://docs.openclaw.ai";
+  return "https://docs.bot.ai";
 }
 
 const ABSOLUTE_HTTP_URL_RE = /^https?:\/\//i;

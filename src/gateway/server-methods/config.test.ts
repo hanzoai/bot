@@ -2,10 +2,10 @@
  * Tests for config gateway methods, writes, validation, and auth transitions.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ConfigMutationConflictError } from "../../config/mutation-conflict.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { withEnvAsync } from "../../test-utils/env.js";
 import {
   clearConfigSchemaResponseCacheForTests,
@@ -34,7 +34,7 @@ vi.mock("./config-write-flow.js", async () => {
     ...actual,
     commitGatewayConfigWrite: configWriteMocks.commitGatewayConfigWrite,
     resolveGatewayConfigRestartWriteResult: vi.fn(async () => ({
-      payload: { kind: "config-patch", mode: "config.patch", configPath: "/tmp/openclaw.json" },
+      payload: { kind: "config-patch", mode: "config.patch", configPath: "/tmp/bot.json" },
       sentinelPersisted: false,
       restart: undefined,
     })),
@@ -63,7 +63,7 @@ function mockOpenPathError(error: Error) {
   execOpenPathMock.mockRejectedValue(error);
 }
 
-let storedConfig: OpenClawConfig;
+let storedConfig: BotConfig;
 let storedHash: string;
 let nextHash: number;
 
@@ -107,7 +107,7 @@ beforeEach(() => {
       nextConfig,
     }: {
       snapshot: { hash?: string };
-      nextConfig: OpenClawConfig;
+      nextConfig: BotConfig;
     }) => {
       if (snapshot.hash !== storedHash) {
         throw new ConfigMutationConflictError("config changed since last load", {
@@ -118,7 +118,7 @@ beforeEach(() => {
       storedHash = `next-hash-${nextHash}`;
       nextHash += 1;
       return {
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         config: storedConfig,
         hash: storedHash,
         queueFollowUp: vi.fn(),
@@ -144,7 +144,7 @@ afterEach(() => {
 
 describe("config.openFile", () => {
   it("opens the configured file without shell interpolation", async () => {
-    await withEnvAsync({ OPENCLAW_CONFIG_PATH: "/tmp/config $(touch pwned).json" }, async () => {
+    await withEnvAsync({ BOT_CONFIG_PATH: "/tmp/config $(touch pwned).json" }, async () => {
       execOpenPathMock.mockImplementation(async (command: { command: string; args: string[] }) => {
         expect(["open", "xdg-open", "powershell.exe"]).toContain(command.command);
         expect(command.args).toEqual(["/tmp/config $(touch pwned).json"]);
@@ -165,7 +165,7 @@ describe("config.openFile", () => {
   });
 
   it("returns a detailed error and logs details when the opener fails", async () => {
-    await withEnvAsync({ OPENCLAW_CONFIG_PATH: "/tmp/config.json" }, async () => {
+    await withEnvAsync({ BOT_CONFIG_PATH: "/tmp/config.json" }, async () => {
       mockOpenPathError(Object.assign(new Error("spawn xdg-open ENOENT"), { code: "ENOENT" }));
 
       const { respond, logGateway } = await invokeConfigOpenFile();
@@ -187,7 +187,7 @@ describe("config.openFile", () => {
 
   it("does not split surrogate pairs when truncating the failed config path", async () => {
     const pathPrefix = `/tmp/${"a".repeat(111)}`;
-    await withEnvAsync({ OPENCLAW_CONFIG_PATH: `${pathPrefix}😀tail.json` }, async () => {
+    await withEnvAsync({ BOT_CONFIG_PATH: `${pathPrefix}😀tail.json` }, async () => {
       mockOpenPathError(new Error("open failed"));
 
       const { logGateway } = await invokeConfigOpenFile();
@@ -199,7 +199,7 @@ describe("config.openFile", () => {
   });
 
   it("returns actionable headless environment error when xdg-open reports no method available", async () => {
-    await withEnvAsync({ OPENCLAW_CONFIG_PATH: "/tmp/config.json" }, async () => {
+    await withEnvAsync({ BOT_CONFIG_PATH: "/tmp/config.json" }, async () => {
       mockOpenPathError(new Error("xdg-open: no method available for opening '/tmp/config.json'"));
 
       const { respond, logGateway } = await invokeConfigOpenFile();

@@ -2,10 +2,10 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import {
-  closeOpenClawStateDatabaseForTest,
+  closeBotStateDatabaseForTest,
   createChannelIngressQueueForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
 import { expect, vi } from "vitest";
 import type { createZalouserIngressMonitor } from "./ingress.js";
 import type { ZaloInboundMessage } from "./types.js";
@@ -62,11 +62,11 @@ export async function withZalouserIngressTestQueue<T>(
   fn: (queue: ZalouserTestQueue) => Promise<T>,
 ): Promise<T> {
   const createdDir = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-zalouser-ingress-"),
+    path.join(resolvePreferredBotTmpDir(), "bot-zalouser-ingress-"),
   );
   const stateDir = await fs.realpath(createdDir);
-  const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  process.env.OPENCLAW_STATE_DIR = stateDir;
+  const previousStateDir = process.env.BOT_STATE_DIR;
+  process.env.BOT_STATE_DIR = stateDir;
   const queue = createChannelIngressQueueForTests<ZalouserTestIngressPayload>({
     channelId: "zalouser",
     accountId: "default",
@@ -76,11 +76,11 @@ export async function withZalouserIngressTestQueue<T>(
     return await fn(queue);
   } finally {
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.BOT_STATE_DIR = previousStateDir;
     }
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(stateDir, { recursive: true, force: true });
   }
 }

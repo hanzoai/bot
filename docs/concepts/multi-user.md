@@ -1,13 +1,13 @@
 ---
 summary: "How session ownership and presence work when several people operate one agent"
 read_when:
-  - You share one OpenClaw agent with other operators
+  - You share one Bot agent with other operators
   - You need to understand session owner and presence indicators
   - You are deciding whether one shared agent provides enough isolation
 title: "Multi-user mode"
 ---
 
-Multi-user mode lets several trusted people operate the same OpenClaw agent. It adds session ownership, live presence, and creator filtering so a team can tell who started work and who is currently watching it.
+Multi-user mode lets several trusted people operate the same Bot agent. It adds session ownership, live presence, and creator filtering so a team can tell who started work and who is currently watching it.
 
 ## Trust boundary
 
@@ -19,7 +19,7 @@ If people must not access each other's sessions, tools, credentials, or files, g
 
 New sessions record a write-once `createdActor` when the creation path can prove who caused it. Authenticated people use their durable Gateway profile id; requesting agents and system paths use the same actor field. Sessions created without a proven actor remain unattributed.
 
-Human display names are resolved from the current Gateway profile when session rows are returned. OpenClaw does not store labels on session entries, so changing a profile name updates the ownership UI without rewriting session history.
+Human display names are resolved from the current Gateway profile when session rows are returned. Bot does not store labels on session entries, so changing a profile name updates the ownership UI without rewriting session history.
 
 The web app keeps ownership and presence visually distinct:
 
@@ -27,7 +27,7 @@ The web app keeps ownership and presence visually distinct:
 - Ringed or translucent presence avatars show people who are currently connected or watching.
 - The sidebar's person filter shows sessions created by one identity while preserving the existing custom groups.
 
-When fewer than two distinct creators appear in the loaded session list, OpenClaw hides all ownership and person-filter chrome. A single-user gateway therefore looks unchanged.
+When fewer than two distinct creators appear in the loaded session list, Bot hides all ownership and person-filter chrome. A single-user gateway therefore looks unchanged.
 
 ## Drafts
 

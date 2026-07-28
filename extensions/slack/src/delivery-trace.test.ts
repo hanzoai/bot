@@ -9,7 +9,7 @@
 // @slack/web-api ChatStreamer so the SDK's buffered-ack contract is captured as-is:
 // append() returns null and issues NO network call until its local buffer crosses
 // buffer_size (256 chars), and stop() can be the first network call for short replies.
-// Refresh goldens with OPENCLAW_TRACE_UPDATE=1 (see delivery-trace harness docs).
+// Refresh goldens with BOT_TRACE_UPDATE=1 (see delivery-trace harness docs).
 import { ChatStreamer } from "@slack/web-api/dist/chat-stream.js";
 import {
   expectDeliveryTraceMatchesGolden,
@@ -18,9 +18,9 @@ import {
   type DeliveryTraceStep,
   type TraceEvent,
   type TraceNormalizer,
-} from "openclaw/plugin-sdk/channel-contract-testing";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { ReplyDispatchKind, ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+} from "bot/plugin-sdk/channel-contract-testing";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { ReplyDispatchKind, ReplyPayload } from "bot/plugin-sdk/reply-runtime";
 import { afterAll, afterEach, describe, it, vi } from "vitest";
 import type { PreparedSlackMessage } from "./monitor/message-handler/types.js";
 
@@ -90,8 +90,8 @@ const traceState = vi.hoisted(
 // deliver/typing/replyOptions wiring (dedupe, thread plan, native stream ladder,
 // draft preview, preview finalize, deliverReplies chunking, sendMessageSlack)
 // stays the real production code.
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
+vi.mock("bot/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/channel-inbound")>();
   type DispatchParams = Parameters<typeof actual.dispatchChannelInboundTurn>[0];
   return {
     ...actual,
@@ -140,7 +140,7 @@ vi.mock("./client.js", async (importOriginal) => {
 import { dispatchPreparedSlackMessage } from "./monitor/message-handler/dispatch.js";
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/channel-inbound");
+  vi.doUnmock("bot/plugin-sdk/channel-inbound");
   vi.doUnmock("./client.js");
   vi.resetModules();
 });
@@ -203,7 +203,7 @@ const BLOCKS_FINAL_PRESENTATION = {
       type: "buttons",
       buttons: [
         { label: "Approve release", action: { type: "callback", value: "approve-release" } },
-        { label: "Release notes", url: "https://docs.openclaw.ai/release" },
+        { label: "Release notes", url: "https://docs.bot.ai/release" },
       ],
     },
   ],
@@ -430,7 +430,7 @@ function createRecordingSlackClient(): Record<string, unknown> {
 }
 
 function createPreparedTraceMessage(scenario: SlackTraceScenarioName): PreparedSlackMessage {
-  const cfg = { channels: { slack: { enabled: true } } } as OpenClawConfig;
+  const cfg = { channels: { slack: { enabled: true } } } as BotConfig;
   const client = traceState.client;
   if (!client) {
     throw new Error("trace Slack client not initialized");

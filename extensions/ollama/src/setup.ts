@@ -1,11 +1,11 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 // Ollama setup module handles plugin onboarding behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
 import type {
-  OpenClawConfig,
+  BotConfig,
   SecretInput,
   SecretInputMode,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "bot/plugin-sdk/provider-auth";
 import {
   ensureApiKeyFromOptionEnvOrPrompt,
   isNonSecretApiKeyMarker,
@@ -13,13 +13,13 @@ import {
   normalizeOptionalSecretInput,
   upsertAuthProfileWithLock,
   validateApiKeyInput,
-} from "openclaw/plugin-sdk/provider-auth";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
-import { applyAgentDefaultModelPrimary } from "openclaw/plugin-sdk/provider-onboard";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-import { WizardCancelledError, type WizardPrompter } from "openclaw/plugin-sdk/setup";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-auth";
+import { readProviderJsonResponse } from "bot/plugin-sdk/provider-http";
+import { applyAgentDefaultModelPrimary } from "bot/plugin-sdk/provider-onboard";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime";
+import { WizardCancelledError, type WizardPrompter } from "bot/plugin-sdk/setup";
+import { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   OLLAMA_CLOUD_BASE_URL,
   OLLAMA_CLOUD_DEFAULT_MODELS,
@@ -63,7 +63,7 @@ type OllamaSetupOptions = {
 };
 
 type OllamaSetupResult = {
-  config: OpenClawConfig;
+  config: BotConfig;
   credential: SecretInput;
   credentialMode?: SecretInputMode;
 };
@@ -73,7 +73,7 @@ function isTruthyEnvValue(value: string | undefined): boolean {
 }
 
 function resolveOllamaSetupDefaultBaseUrl(env: NodeJS.ProcessEnv = process.env): string {
-  return isTruthyEnvValue(env.OPENCLAW_DOCKER_SETUP)
+  return isTruthyEnvValue(env.BOT_DOCKER_SETUP)
     ? OLLAMA_DOCKER_HOST_BASE_URL
     : OLLAMA_DEFAULT_BASE_URL;
 }
@@ -379,7 +379,7 @@ async function pullOllamaModelNonInteractive(
 }
 
 async function promptForOllamaCloudCredential(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   opts?: Record<string, unknown>;
   prompter: WizardPrompter;
@@ -497,13 +497,13 @@ function findAvailableOllamaModelName(modelName: string, availableModelNames: It
 }
 
 function applyOllamaProviderConfig(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   baseUrl: string,
   modelNames: string[],
   discoveredModelsByName?: Map<string, OllamaModelWithContext>,
   apiKey: SecretInput = "OLLAMA_API_KEY",
   defaultModels: readonly OllamaCloudDefaultModel[] = [],
-): OpenClawConfig {
+): BotConfig {
   return {
     ...cfg,
     models: {
@@ -657,7 +657,7 @@ async function inspectOllamaModelsForSetup(
 }
 
 async function promptAndConfigureHostBackedOllama(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   mode: HostBackedOllamaInteractiveMode;
   prompter: WizardPrompter;
   env?: NodeJS.ProcessEnv;
@@ -765,7 +765,7 @@ async function promptAndConfigureHostBackedOllama(params: {
 }
 
 export async function promptAndConfigureOllama(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   opts?: Record<string, unknown>;
   prompter: WizardPrompter;
@@ -826,11 +826,11 @@ export async function promptAndConfigureOllama(params: {
 }
 
 export async function configureOllamaNonInteractive(params: {
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   opts: OllamaSetupOptions;
   runtime: RuntimeEnv;
   agentDir?: string;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const baseUrl = resolveOllamaApiBase(
     (params.opts.customBaseUrl?.trim() || resolveOllamaSetupDefaultBaseUrl()).replace(/\/+$/, ""),
   );
@@ -925,7 +925,7 @@ export async function configureOllamaNonInteractive(params: {
 }
 
 export async function ensureOllamaModelPulled(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   model: string;
   prompter: WizardPrompter;
 }): Promise<void> {

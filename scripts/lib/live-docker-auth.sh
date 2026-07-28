@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-OPENCLAW_DOCKER_LIVE_AUTH_ALL=(.factory .gemini .minimax)
-OPENCLAW_DOCKER_LIVE_AUTH_FILES_ALL=(
+BOT_DOCKER_LIVE_AUTH_ALL=(.factory .gemini .minimax)
+BOT_DOCKER_LIVE_AUTH_FILES_ALL=(
   .codex/auth.json
   .codex/config.toml
   .claude.json
@@ -11,14 +11,14 @@ OPENCLAW_DOCKER_LIVE_AUTH_FILES_ALL=(
   .gemini/settings.json
 )
 
-openclaw_live_trim() {
+bot_live_trim() {
   local value="${1:-}"
   value="${value#"${value%%[![:space:]]*}"}"
   value="${value%"${value##*[![:space:]]}"}"
   printf '%s' "$value"
 }
 
-openclaw_live_truthy() {
+bot_live_truthy() {
   case "${1:-}" in
     1 | true | TRUE | yes | YES | on | ON)
       return 0
@@ -29,7 +29,7 @@ openclaw_live_truthy() {
   esac
 }
 
-openclaw_live_read_positive_int_env() {
+bot_live_read_positive_int_env() {
   local name="${1:?missing environment variable name}"
   local fallback="${2:?missing fallback value}"
   local value="${!name-}"
@@ -43,24 +43,24 @@ openclaw_live_read_positive_int_env() {
   printf '%s\n' "$value"
 }
 
-openclaw_live_is_ci() {
-  openclaw_live_truthy "${CI:-}" \
-    || openclaw_live_truthy "${GITHUB_ACTIONS:-}" \
-    || openclaw_live_truthy "${OPENCLAW_TESTBOX:-}"
+bot_live_is_ci() {
+  bot_live_truthy "${CI:-}" \
+    || bot_live_truthy "${GITHUB_ACTIONS:-}" \
+    || bot_live_truthy "${BOT_TESTBOX:-}"
 }
 
-openclaw_live_uses_managed_bind_dirs() {
-  openclaw_live_is_ci \
-    || [[ -n "${OPENCLAW_DOCKER_CACHE_HOME_DIR:-}" ]] \
-    || [[ -n "${OPENCLAW_DOCKER_CLI_TOOLS_DIR:-}" ]]
+bot_live_uses_managed_bind_dirs() {
+  bot_live_is_ci \
+    || [[ -n "${BOT_DOCKER_CACHE_HOME_DIR:-}" ]] \
+    || [[ -n "${BOT_DOCKER_CLI_TOOLS_DIR:-}" ]]
 }
 
-openclaw_live_default_profile_file() {
-  if [[ -n "${OPENCLAW_PROFILE_FILE:-}" ]]; then
-    printf '%s\n' "$OPENCLAW_PROFILE_FILE"
+bot_live_default_profile_file() {
+  if [[ -n "${BOT_PROFILE_FILE:-}" ]]; then
+    printf '%s\n' "$BOT_PROFILE_FILE"
     return 0
   fi
-  local testbox_profile="$HOME/.openclaw-testbox-live.profile"
+  local testbox_profile="$HOME/.bot-testbox-live.profile"
   if [[ -f "$testbox_profile" ]]; then
     printf '%s\n' "$testbox_profile"
     return 0
@@ -68,9 +68,9 @@ openclaw_live_default_profile_file() {
   printf '%s\n' "$HOME/.profile"
 }
 
-openclaw_live_validate_relative_home_path() {
+bot_live_validate_relative_home_path() {
   local value
-  value="$(openclaw_live_trim "${1:-}")"
+  value="$(bot_live_trim "${1:-}")"
   [[ -n "$value" ]] || {
     echo "ERROR: empty auth path." >&2
     return 1
@@ -84,20 +84,20 @@ openclaw_live_validate_relative_home_path() {
   printf '%s' "$value"
 }
 
-openclaw_live_normalize_auth_dir() {
+bot_live_normalize_auth_dir() {
   local value
-  value="$(openclaw_live_trim "${1:-}")"
+  value="$(bot_live_trim "${1:-}")"
   [[ -n "$value" ]] || return 1
   if [[ "$value" != .* ]]; then
     value=".$value"
   fi
-  value="$(openclaw_live_validate_relative_home_path "$value")" || return 1
+  value="$(bot_live_validate_relative_home_path "$value")" || return 1
   printf '%s' "$value"
 }
 
-openclaw_live_should_include_auth_dir_for_provider() {
+bot_live_should_include_auth_dir_for_provider() {
   local provider
-  provider="$(openclaw_live_trim "${1:-}")"
+  provider="$(bot_live_trim "${1:-}")"
   case "$provider" in
     droid | factory | factory-droid)
       printf '%s\n' ".factory"
@@ -111,9 +111,9 @@ openclaw_live_should_include_auth_dir_for_provider() {
   esac
 }
 
-openclaw_live_should_include_auth_file_for_provider() {
+bot_live_should_include_auth_file_for_provider() {
   local provider
-  provider="$(openclaw_live_trim "${1:-}")"
+  provider="$(bot_live_trim "${1:-}")"
   case "$provider" in
     codex-cli | openai)
       printf '%s\n' ".codex/auth.json"
@@ -128,25 +128,25 @@ openclaw_live_should_include_auth_file_for_provider() {
   esac
 }
 
-openclaw_live_collect_auth_dirs_from_csv() {
+bot_live_collect_auth_dirs_from_csv() {
   local raw="${1:-}"
   local token normalized
-  [[ -n "$(openclaw_live_trim "$raw")" ]] || return 0
+  [[ -n "$(bot_live_trim "$raw")" ]] || return 0
   IFS=',' read -r -a tokens <<<"$raw"
   for token in "${tokens[@]}"; do
     while IFS= read -r normalized; do
       printf '%s\n' "$normalized"
-    done < <(openclaw_live_should_include_auth_dir_for_provider "$token")
+    done < <(bot_live_should_include_auth_dir_for_provider "$token")
   done | awk 'NF && !seen[$0]++'
 }
 
-openclaw_live_collect_auth_dirs_from_override() {
+bot_live_collect_auth_dirs_from_override() {
   local raw token normalized
-  raw="$(openclaw_live_trim "${OPENCLAW_DOCKER_AUTH_DIRS:-}")"
+  raw="$(bot_live_trim "${BOT_DOCKER_AUTH_DIRS:-}")"
   [[ -n "$raw" ]] || return 1
   case "$raw" in
     all)
-      printf '%s\n' "${OPENCLAW_DOCKER_LIVE_AUTH_ALL[@]}"
+      printf '%s\n' "${BOT_DOCKER_LIVE_AUTH_ALL[@]}"
       return 0
       ;;
     none)
@@ -155,38 +155,38 @@ openclaw_live_collect_auth_dirs_from_override() {
   esac
   IFS=',' read -r -a tokens <<<"$raw"
   for token in "${tokens[@]}"; do
-    normalized="$(openclaw_live_normalize_auth_dir "$token")" || continue
+    normalized="$(bot_live_normalize_auth_dir "$token")" || continue
     printf '%s\n' "$normalized"
   done | awk '!seen[$0]++'
   return 0
 }
 
-openclaw_live_collect_auth_dirs() {
-  if openclaw_live_collect_auth_dirs_from_override; then
+bot_live_collect_auth_dirs() {
+  if bot_live_collect_auth_dirs_from_override; then
     return 0
   fi
-  printf '%s\n' "${OPENCLAW_DOCKER_LIVE_AUTH_ALL[@]}"
+  printf '%s\n' "${BOT_DOCKER_LIVE_AUTH_ALL[@]}"
 }
 
-openclaw_live_collect_auth_files_from_csv() {
+bot_live_collect_auth_files_from_csv() {
   local raw="${1:-}"
   local token normalized
-  [[ -n "$(openclaw_live_trim "$raw")" ]] || return 0
+  [[ -n "$(bot_live_trim "$raw")" ]] || return 0
   IFS=',' read -r -a tokens <<<"$raw"
   for token in "${tokens[@]}"; do
     while IFS= read -r normalized; do
       printf '%s\n' "$normalized"
-    done < <(openclaw_live_should_include_auth_file_for_provider "$token")
+    done < <(bot_live_should_include_auth_file_for_provider "$token")
   done | awk 'NF && !seen[$0]++'
 }
 
-openclaw_live_collect_auth_files_from_override() {
+bot_live_collect_auth_files_from_override() {
   local raw
-  raw="$(openclaw_live_trim "${OPENCLAW_DOCKER_AUTH_DIRS:-}")"
+  raw="$(bot_live_trim "${BOT_DOCKER_AUTH_DIRS:-}")"
   [[ -n "$raw" ]] || return 1
   case "$raw" in
     all)
-      printf '%s\n' "${OPENCLAW_DOCKER_LIVE_AUTH_FILES_ALL[@]}"
+      printf '%s\n' "${BOT_DOCKER_LIVE_AUTH_FILES_ALL[@]}"
       return 0
       ;;
     none)
@@ -196,14 +196,14 @@ openclaw_live_collect_auth_files_from_override() {
   return 0
 }
 
-openclaw_live_collect_auth_files() {
-  if openclaw_live_collect_auth_files_from_override; then
+bot_live_collect_auth_files() {
+  if bot_live_collect_auth_files_from_override; then
     return 0
   fi
-  printf '%s\n' "${OPENCLAW_DOCKER_LIVE_AUTH_FILES_ALL[@]}"
+  printf '%s\n' "${BOT_DOCKER_LIVE_AUTH_FILES_ALL[@]}"
 }
 
-openclaw_live_join_csv() {
+bot_live_join_csv() {
   local first=1 value
   for value in "$@"; do
     [[ -n "$value" ]] || continue
@@ -216,7 +216,7 @@ openclaw_live_join_csv() {
   done
 }
 
-openclaw_live_append_array() {
+bot_live_append_array() {
   local target_array="${1:?target array required}"
   local source_array="${2:?source array required}"
   local count
@@ -228,7 +228,7 @@ openclaw_live_append_array() {
   eval "${target_array}+=(\"\${${source_array}[@]}\")"
 }
 
-openclaw_live_timeout_bin() {
+bot_live_timeout_bin() {
   if command -v timeout >/dev/null 2>&1; then
     printf '%s\n' timeout
   elif command -v gtimeout >/dev/null 2>&1; then
@@ -238,13 +238,13 @@ openclaw_live_timeout_bin() {
   fi
 }
 
-openclaw_live_timeout_supports_kill_after() {
+bot_live_timeout_supports_kill_after() {
   local timeout_bin="${1:?timeout binary required}"
   "$timeout_bin" --kill-after=1s 1s true >/dev/null 2>&1
 }
 
-openclaw_live_resource_limits_disabled() {
-  case "${OPENCLAW_LIVE_DOCKER_DISABLE_RESOURCE_LIMITS:-${OPENCLAW_DOCKER_E2E_DISABLE_RESOURCE_LIMITS:-}}" in
+bot_live_resource_limits_disabled() {
+  case "${BOT_LIVE_DOCKER_DISABLE_RESOURCE_LIMITS:-${BOT_DOCKER_E2E_DISABLE_RESOURCE_LIMITS:-}}" in
     1 | true | TRUE | yes | YES | on | ON)
       return 0
       ;;
@@ -252,7 +252,7 @@ openclaw_live_resource_limits_disabled() {
   return 1
 }
 
-openclaw_live_resource_value_disabled() {
+bot_live_resource_value_disabled() {
   case "${1:-}" in
     "" | 0 | none | NONE | off | OFF | false | FALSE)
       return 0
@@ -261,7 +261,7 @@ openclaw_live_resource_value_disabled() {
   return 1
 }
 
-openclaw_live_resolve_pids_limit() {
+bot_live_resolve_pids_limit() {
   local env_name="$1"
   local pids_limit="$2"
   if [[ ! "$pids_limit" =~ ^[0-9]+$ ]] || (( 10#$pids_limit < 1 )); then
@@ -271,9 +271,9 @@ openclaw_live_resolve_pids_limit() {
   printf '%s\n' "$((10#$pids_limit))"
 }
 
-openclaw_live_detect_available_cpus() {
-  if [ -n "${OPENCLAW_LIVE_DOCKER_AVAILABLE_CPUS:-${OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS:-}}" ]; then
-    printf '%s\n' "${OPENCLAW_LIVE_DOCKER_AVAILABLE_CPUS:-${OPENCLAW_DOCKER_E2E_AVAILABLE_CPUS:-}}"
+bot_live_detect_available_cpus() {
+  if [ -n "${BOT_LIVE_DOCKER_AVAILABLE_CPUS:-${BOT_DOCKER_E2E_AVAILABLE_CPUS:-}}" ]; then
+    printf '%s\n' "${BOT_LIVE_DOCKER_AVAILABLE_CPUS:-${BOT_DOCKER_E2E_AVAILABLE_CPUS:-}}"
     return 0
   fi
   if command -v nproc >/dev/null 2>&1; then
@@ -287,10 +287,10 @@ openclaw_live_detect_available_cpus() {
   return 1
 }
 
-openclaw_live_resolve_cpus() {
+bot_live_resolve_cpus() {
   local requested="$1"
   local available=""
-  available="$(openclaw_live_detect_available_cpus 2>/dev/null || true)"
+  available="$(bot_live_detect_available_cpus 2>/dev/null || true)"
   if [[ "$requested" =~ ^[0-9]+$ ]] && [[ "$available" =~ ^[0-9]+$ ]] && [ "$requested" -gt "$available" ]; then
     printf '%s\n' "$available"
     return 0
@@ -298,58 +298,58 @@ openclaw_live_resolve_cpus() {
   printf '%s\n' "$requested"
 }
 
-openclaw_live_docker_run_resource_args() {
+bot_live_docker_run_resource_args() {
   local target_array="${1:?target array required}"
   eval "${target_array}=()"
-  if openclaw_live_resource_limits_disabled; then
+  if bot_live_resource_limits_disabled; then
     return 0
   fi
 
-  local memory="${OPENCLAW_LIVE_DOCKER_MEMORY:-${OPENCLAW_DOCKER_E2E_MEMORY:-8g}}"
-  local cpus="${OPENCLAW_LIVE_DOCKER_CPUS:-${OPENCLAW_DOCKER_E2E_CPUS:-16}}"
-  local pids_limit="${OPENCLAW_LIVE_DOCKER_PIDS_LIMIT:-${OPENCLAW_DOCKER_E2E_PIDS_LIMIT:-2048}}"
-  local pids_limit_env="OPENCLAW_LIVE_DOCKER_PIDS_LIMIT"
-  if [ -z "${OPENCLAW_LIVE_DOCKER_PIDS_LIMIT:-}" ]; then
-    pids_limit_env="OPENCLAW_DOCKER_E2E_PIDS_LIMIT"
+  local memory="${BOT_LIVE_DOCKER_MEMORY:-${BOT_DOCKER_E2E_MEMORY:-8g}}"
+  local cpus="${BOT_LIVE_DOCKER_CPUS:-${BOT_DOCKER_E2E_CPUS:-16}}"
+  local pids_limit="${BOT_LIVE_DOCKER_PIDS_LIMIT:-${BOT_DOCKER_E2E_PIDS_LIMIT:-2048}}"
+  local pids_limit_env="BOT_LIVE_DOCKER_PIDS_LIMIT"
+  if [ -z "${BOT_LIVE_DOCKER_PIDS_LIMIT:-}" ]; then
+    pids_limit_env="BOT_DOCKER_E2E_PIDS_LIMIT"
   fi
-  cpus="$(openclaw_live_resolve_cpus "$cpus")"
+  cpus="$(bot_live_resolve_cpus "$cpus")"
 
-  if ! openclaw_live_resource_value_disabled "$memory"; then
+  if ! bot_live_resource_value_disabled "$memory"; then
     eval "${target_array}+=(--memory \"\$memory\")"
   fi
-  if ! openclaw_live_resource_value_disabled "$cpus"; then
+  if ! bot_live_resource_value_disabled "$cpus"; then
     eval "${target_array}+=(--cpus \"\$cpus\")"
   fi
-  if ! openclaw_live_resource_value_disabled "$pids_limit"; then
-    pids_limit="$(openclaw_live_resolve_pids_limit "$pids_limit_env" "$pids_limit")" || return $?
+  if ! bot_live_resource_value_disabled "$pids_limit"; then
+    pids_limit="$(bot_live_resolve_pids_limit "$pids_limit_env" "$pids_limit")" || return $?
     eval "${target_array}+=(--pids-limit \"\$pids_limit\")"
   fi
 }
 
-openclaw_live_init_docker_run_args() {
+bot_live_init_docker_run_args() {
   local target_array="${1:?target array required}"
-  local timeout_value="${2:-${OPENCLAW_LIVE_DOCKER_RUN_TIMEOUT:-2700s}}"
+  local timeout_value="${2:-${BOT_LIVE_DOCKER_RUN_TIMEOUT:-2700s}}"
   local resource_args=()
   local timeout_bin
   local quoted_timeout
 
-  if ! timeout_bin="$(openclaw_live_timeout_bin)"; then
+  if ! timeout_bin="$(bot_live_timeout_bin)"; then
     echo "timeout command not found; cannot bound live Docker run after ${timeout_value}" >&2
     return 127
   fi
   quoted_timeout="$(printf '%q' "$timeout_value")"
-  if openclaw_live_timeout_supports_kill_after "$timeout_bin"; then
+  if bot_live_timeout_supports_kill_after "$timeout_bin"; then
     eval "${target_array}=(${timeout_bin} --kill-after=30s ${quoted_timeout} docker run)"
   else
     eval "${target_array}=(${timeout_bin} ${quoted_timeout} docker run)"
   fi
-  openclaw_live_docker_run_resource_args resource_args || return $?
-  openclaw_live_append_array "$target_array" resource_args
+  bot_live_docker_run_resource_args resource_args || return $?
+  bot_live_append_array "$target_array" resource_args
 }
 
-openclaw_live_container_node_options() {
+bot_live_container_node_options() {
   local value
-  value="$(openclaw_live_trim "${OPENCLAW_DOCKER_NODE_OPTIONS:-${NODE_OPTIONS:-}}")"
+  value="$(bot_live_trim "${BOT_DOCKER_NODE_OPTIONS:-${NODE_OPTIONS:-}}")"
   if [[ -z "$value" ]]; then
     value="--max-old-space-size=4096"
   fi
@@ -373,7 +373,7 @@ openclaw_live_container_node_options() {
   printf '%s\n' "$value"
 }
 
-openclaw_live_stage_auth_into_home() {
+bot_live_stage_auth_into_home() {
   local dest_home="${1:?destination home directory required}"
   shift
 
@@ -392,7 +392,7 @@ openclaw_live_stage_auth_into_home() {
         ;;
     esac
 
-    relative_path="$(openclaw_live_validate_relative_home_path "$1")" || return 1
+    relative_path="$(bot_live_validate_relative_home_path "$1")" || return 1
     source_path="$HOME/$relative_path"
     dest_path="$dest_home/$relative_path"
 
@@ -414,14 +414,14 @@ openclaw_live_stage_auth_into_home() {
   done
 }
 
-openclaw_live_prepare_bind_dir_for_container_user() {
+bot_live_prepare_bind_dir_for_container_user() {
   local dir="${1:?directory required}"
 
   mkdir -p "$dir"
   chmod u+rwx "$dir" || true
 }
 
-openclaw_live_stage_profile_into_home() {
+bot_live_stage_profile_into_home() {
   local dest_home="${1:?destination home directory required}"
   local profile_file="${2:?profile file required}"
 
@@ -431,7 +431,7 @@ openclaw_live_stage_profile_into_home() {
   chmod u+rw "$dest_home/.profile" || true
 }
 
-openclaw_live_chown_bind_dirs_for_container_user() {
+bot_live_chown_bind_dirs_for_container_user() {
   local image_name="${1:?image name required}"
   local container_user="${2:?container user required}"
   shift 2
@@ -442,20 +442,20 @@ openclaw_live_chown_bind_dirs_for_container_user() {
   for dir in "$@"; do
     [[ -n "$dir" ]] || continue
     mkdir -p "$dir"
-    mount_args+=(-v "$dir:/openclaw-bind-dir-$index")
+    mount_args+=(-v "$dir:/bot-bind-dir-$index")
     index=$((index + 1))
   done
   ((index > 0)) || return 0
 
   local resource_args=()
-  openclaw_live_docker_run_resource_args resource_args || return $?
+  bot_live_docker_run_resource_args resource_args || return $?
 
   docker run --rm \
     "${resource_args[@]}" \
     -u 0:0 \
     --entrypoint sh \
-    -e OPENCLAW_BIND_DIR_USER="$container_user" \
+    -e BOT_BIND_DIR_USER="$container_user" \
     "${mount_args[@]}" \
     "$image_name" \
-    -c 'for dir in /openclaw-bind-dir-*; do chown -R "$OPENCLAW_BIND_DIR_USER" "$dir"; done'
+    -c 'for dir in /bot-bind-dir-*; do chown -R "$BOT_BIND_DIR_USER" "$dir"; done'
 }

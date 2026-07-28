@@ -2,7 +2,7 @@
 // Resolves Gateway-visible tools for MCP clients with short-lived schema caching.
 import { applyEmbeddedAttemptToolsAllow } from "../agents/embedded-agent-runner/run/attempt-tool-construction-plan.js";
 import { normalizeToolName } from "../agents/tool-policy.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { getPluginToolMeta } from "../plugins/tools.js";
 import type { McpLoopbackRequestContext } from "./mcp-grant-store.js";
 import {
@@ -24,12 +24,12 @@ type CachedScopedTools = {
   agentId: string | undefined;
   tools: McpLoopbackTool[];
   toolSchema: McpToolSchemaEntry[];
-  configRef: OpenClawConfig;
+  configRef: BotConfig;
   time: number;
 };
 
 type McpLoopbackScopeParams = Omit<McpLoopbackRequestContext, "senderIsOwner"> & {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   senderIsOwner: boolean | undefined;
   yieldContextCacheKey?: string;
   onYield?: (message: string) => Promise<void> | void;
@@ -70,7 +70,7 @@ function resolveMcpLoopbackTools(
   tools: McpLoopbackTool[];
 } {
   const excludeToolNames = new Set(NATIVE_TOOL_EXCLUDE);
-  // Restricted CLI grants use OpenClaw's implementations for coding tools;
+  // Restricted CLI grants use Bot's implementations for coding tools;
   // native CLI tools bypass path, approval, sandbox, and exec policy.
   const mediatedNativeTools = resolveMediatedNativeTools(params.toolsAllow, mode);
   for (const toolName of mediatedNativeTools) {

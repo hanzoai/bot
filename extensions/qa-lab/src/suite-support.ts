@@ -1,4 +1,4 @@
-import type { OpenClawCrablineChannelDriverSelection } from "@openclaw/crabline";
+import type { BotCrablineChannelDriverSelection } from "@openclaw/crabline";
 import { buildQaCodexAppServerArgs } from "./codex-app-server-args.js";
 import type { QaSuiteChannelDriverSelection } from "./crabline-artifacts.js";
 import type { QaProviderMode } from "./model-selection.js";
@@ -49,13 +49,13 @@ export function createQaSuiteReportNotes(params: {
   fastMode: boolean;
   concurrency: number;
   isolatedWorkers?: boolean;
-  createCrablineChannelReportNotes?: QaCrablineRuntime["createOpenClawCrablineChannelReportNotes"];
+  createCrablineChannelReportNotes?: QaCrablineRuntime["createBotCrablineChannelReportNotes"];
 }) {
   return [
     ...params.transport.createReportNotes(params),
     // Crabline reports completed generation paths through this filename-narrowed selection.
     ...(params.createCrablineChannelReportNotes?.(
-      params.channelDriverSelection as OpenClawCrablineChannelDriverSelection | null | undefined,
+      params.channelDriverSelection as BotCrablineChannelDriverSelection | null | undefined,
     ) ?? []),
   ];
 }
@@ -66,7 +66,7 @@ export function buildQaIsolatedScenarioWorkerParams(params: {
   providerMode: QaProviderMode;
   transportId: QaTransportId;
   channelDriver?: QaScorecardChannelDriver;
-  channelDriverSelection?: OpenClawCrablineChannelDriverSelection | null;
+  channelDriverSelection?: BotCrablineChannelDriverSelection | null;
   primaryModel: string;
   alternateModel: string;
   fastMode: boolean;
@@ -79,7 +79,7 @@ export function buildQaIsolatedScenarioWorkerParams(params: {
     adapterOptions: params.input?.adapterOptions,
     channelId: params.input?.channelId,
     repoRoot: params.repoRoot,
-    sutOpenClawCommand: params.input?.sutOpenClawCommand,
+    sutBotCommand: params.input?.sutBotCommand,
     outputDir: params.outputDir,
     providerMode: params.providerMode,
     transportId: params.transportId,
@@ -129,14 +129,14 @@ export function buildQaRuntimeEnvPatch(params: {
 }): NodeJS.ProcessEnv | undefined {
   const patch: NodeJS.ProcessEnv = {};
   if (params.forcedRuntime) {
-    patch.OPENCLAW_BUILD_PRIVATE_QA = "1";
-    patch.OPENCLAW_QA_FORCE_RUNTIME = params.forcedRuntime;
+    patch.BOT_BUILD_PRIVATE_QA = "1";
+    patch.BOT_QA_FORCE_RUNTIME = params.forcedRuntime;
   }
   if (params.forcedRuntime !== "codex") {
     return Object.keys(patch).length > 0 ? patch : undefined;
   }
   if (params.providerMode !== "mock-openai") {
-    patch.OPENCLAW_CODEX_APP_SERVER_ARGS = buildQaCodexAppServerArgs({
+    patch.BOT_CODEX_APP_SERVER_ARGS = buildQaCodexAppServerArgs({
       existingArgs: params.nativeAppServerArgs,
     });
     return patch;
@@ -151,7 +151,7 @@ export function buildQaRuntimeEnvPatch(params: {
   // The forced codex lane uses the Codex app-server's native OpenAI provider
   // path, so pin the managed app-server to the QA mock endpoint instead of
   // leaking to the maintainer's real OpenAI config.
-  patch.OPENCLAW_CODEX_APP_SERVER_ARGS = buildQaCodexAppServerArgs({
+  patch.BOT_CODEX_APP_SERVER_ARGS = buildQaCodexAppServerArgs({
     providerBaseUrl: `${mockBaseUrl}/v1`,
   });
   patch.OPENAI_API_KEY = "qa-mock-openai-key";
@@ -165,7 +165,7 @@ export function appendNodeOption(raw: string | undefined, option: string) {
 }
 
 export function shouldCaptureGatewayHeapCheckpoints(env: NodeJS.ProcessEnv = process.env) {
-  return parseQaSuiteBooleanEnv(env.OPENCLAW_QA_GATEWAY_HEAP_CHECKPOINTS) === true;
+  return parseQaSuiteBooleanEnv(env.BOT_QA_GATEWAY_HEAP_CHECKPOINTS) === true;
 }
 
 export function buildQaGatewayHeapCheckpointRuntimeEnvPatch(

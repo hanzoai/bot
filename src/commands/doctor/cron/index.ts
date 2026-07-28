@@ -1,7 +1,7 @@
 // Doctor cron repair orchestration for legacy stores, run logs, payloads, and warnings.
 import { note } from "../../../../packages/terminal-core/src/note.js";
 import { formatCliCommand } from "../../../cli/command-format.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { loadCronQuarantineFile, resolveCronJobsStorePath } from "../../../cron/store.js";
 import type { HealthFinding } from "../../../flows/health-checks.js";
 import { formatErrorMessage as errorMessage } from "../../../infra/errors.js";
@@ -32,8 +32,8 @@ function pluralize(count: number, noun: string) {
   return `${count} ${noun}${count === 1 ? "" : "s"}`;
 }
 
-function readLegacyCronStorePath(cfg: OpenClawConfig): string | undefined {
-  return (cfg.cron as (NonNullable<OpenClawConfig["cron"]> & { store?: string }) | undefined)
+function readLegacyCronStorePath(cfg: BotConfig): string | undefined {
+  return (cfg.cron as (NonNullable<BotConfig["cron"]> & { store?: string }) | undefined)
     ?.store;
 }
 
@@ -100,12 +100,12 @@ function legacyCronStoreFinding(params: {
     requirement: params.requirement,
     fixHint:
       params.fixHint ??
-      `Run ${formatCliCommand("openclaw doctor --fix")} to normalize legacy cron storage.`,
+      `Run ${formatCliCommand("bot doctor --fix")} to normalize legacy cron storage.`,
   };
 }
 
 export async function collectLegacyCronStoreHealthFindings(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): Promise<readonly HealthFinding[]> {
   let state: LegacyCronRepairState | null;
   try {
@@ -118,7 +118,7 @@ export async function collectLegacyCronStoreHealthFindings(params: {
         path: storePath,
         requirement: "cron-store-readable",
         fixHint: [
-          `Fix the file's permissions or contents and re-run ${formatCliCommand("openclaw doctor")}.`,
+          `Fix the file's permissions or contents and re-run ${formatCliCommand("bot doctor")}.`,
           "Later health checks will continue.",
           `Details: ${errorMessage(err)}`,
         ].join(" "),
@@ -217,7 +217,7 @@ export async function collectLegacyCronStoreHealthFindings(params: {
           message: `${pluralize(names.length, "tool-bearing cron job")} ${description}.`,
           path: storePath,
           requirement,
-          fixHint: `Review with ${formatCliCommand("openclaw cron list")} and reauthorize with ${formatCliCommand("openclaw cron edit <id> --tools <tool,...>")}.`,
+          fixHint: `Review with ${formatCliCommand("bot cron list")} and reauthorize with ${formatCliCommand("bot cron edit <id> --tools <tool,...>")}.`,
         }),
       );
     }
@@ -269,7 +269,7 @@ function noteLegacyCronRepairResult(result: LegacyCronRepairResult): void {
 
 /** Inspect cron storage and optionally repair legacy JSON/SQLite/payload shapes. */
 export async function maybeRepairLegacyCronStore(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   options: DoctorOptions;
   prompter: Pick<DoctorPrompter, "confirm">;
 }) {
@@ -283,7 +283,7 @@ export async function maybeRepairLegacyCronStore(params: {
       [
         `Unable to read cron job store at ${shortenHomePath(storePath)}.`,
         `- ${reason}`,
-        `Fix the file's permissions or contents and re-run ${formatCliCommand("openclaw doctor")}; later health checks will continue.`,
+        `Fix the file's permissions or contents and re-run ${formatCliCommand("bot doctor")}; later health checks will continue.`,
       ].join("\n"),
       "Cron",
     );
@@ -338,7 +338,7 @@ export async function maybeRepairLegacyCronStore(params: {
       [
         `Legacy cron storage detected at ${shortenHomePath(storePath)}.`,
         ...previewLines,
-        `Repair with ${formatCliCommand("openclaw doctor --fix")} to finish the migration.`,
+        `Repair with ${formatCliCommand("bot doctor --fix")} to finish the migration.`,
       ].join("\n"),
       "Cron",
     );
@@ -360,9 +360,9 @@ export async function maybeRepairLegacyCronStore(params: {
     const subject = inFlightCount === 1 ? "it" : "them";
     note(
       [
-        `${pluralize(inFlightCount, "cron job")} ${inFlightCount === 1 ? "is" : "are"} still marked in-flight (\`state.runningAtMs\` is set), so ${formatCliCommand("openclaw cron list")} shows ${subject} as \`running\`.`,
+        `${pluralize(inFlightCount, "cron job")} ${inFlightCount === 1 ? "is" : "are"} still marked in-flight (\`state.runningAtMs\` is set), so ${formatCliCommand("bot cron list")} shows ${subject} as \`running\`.`,
         `- If no gateway is currently executing ${subject}, the marker is left over from an interrupted run; the gateway marks such runs interrupted the next time it starts.`,
-        `- Review with ${formatCliCommand("openclaw cron list")} or ${formatCliCommand("openclaw cron show <id>")}.`,
+        `- Review with ${formatCliCommand("bot cron list")} or ${formatCliCommand("bot cron show <id>")}.`,
       ].join("\n"),
       "Cron",
     );
@@ -374,7 +374,7 @@ export async function maybeRepairLegacyCronStore(params: {
       [
         `${pluralize(chronicFailureCount, "cron job")} ${chronicFailureCount === 1 ? "has" : "have"} failed ${CHRONIC_FAILURE_MIN_CONSECUTIVE_ERRORS}+ runs in a row (\`state.consecutiveErrors\`), so the scheduler only re-fires ${chronicFailureCount === 1 ? "it" : "them"} on error backoff.`,
         `- The count resets on the next successful run and also counts runs interrupted by a gateway restart, so a lasting streak means repeated task failures, repeatedly interrupted runs, or a mix. Failure alerts are opt-in, so this may be the only notice.`,
-        `- Review with ${formatCliCommand("openclaw cron list")} or ${formatCliCommand("openclaw cron show <id>")}.`,
+        `- Review with ${formatCliCommand("bot cron list")} or ${formatCliCommand("bot cron show <id>")}.`,
       ].join("\n"),
       "Cron",
     );
@@ -442,7 +442,7 @@ export async function maybeRepairLegacyCronStore(params: {
     [
       noteHeading,
       ...previewLines,
-      `Repair with ${formatCliCommand("openclaw doctor --fix")} to normalize the store before the next scheduler run.`,
+      `Repair with ${formatCliCommand("bot doctor --fix")} to normalize the store before the next scheduler run.`,
     ].join("\n"),
     "Cron",
   );

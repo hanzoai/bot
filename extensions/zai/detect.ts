@@ -1,10 +1,10 @@
 // Zai plugin module implements detect behavior.
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
+import { resolveTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
 import {
   createProviderOperationDeadline,
   createProviderOperationTimeoutResolver,
-} from "openclaw/plugin-sdk/provider-http";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
+} from "bot/plugin-sdk/provider-http";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
 import {
   ZAI_CN_BASE_URL,
   ZAI_CODING_CN_BASE_URL,

@@ -1,5 +1,5 @@
-import { expectDefined } from "@openclaw/normalization-core";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 // Sanitizes command text before it is displayed in approval prompts.
 import {
   computeSensitiveRedactionBitmap,

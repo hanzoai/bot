@@ -1,8 +1,8 @@
 // Workshop policy helpers validate generated skill drafts against workspace policy.
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { asNullableRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { PLUGIN_APPROVAL_DESCRIPTION_MAX_LENGTH } from "../../infra/plugin-approvals.js";
 import type { PluginHookBeforeToolCallResult } from "../../plugins/hook-before-tool-call-result.js";
 import { resolveSkillWorkshopConfig } from "./config.js";
@@ -137,12 +137,12 @@ function lifecycleApprovalTimeoutReason(proposalId?: string): string {
   return [
     "The Skill Workshop approval request expired without a decision.",
     `This lifecycle call left ${proposal} unchanged and pending; check its current status in case another operator acted on it.`,
-    "Decide in the Skill Workshop UI or run `openclaw skills workshop apply|reject|quarantine <id>`.",
+    "Decide in the Skill Workshop UI or run `bot skills workshop apply|reject|quarantine <id>`.",
     "Do not retry this tool call in a loop.",
   ].join(" ");
 }
 
-function resolveApprovalConfig(config?: OpenClawConfig): OpenClawConfig | undefined {
+function resolveApprovalConfig(config?: BotConfig): BotConfig | undefined {
   if (config) {
     return config;
   }
@@ -159,7 +159,7 @@ function resolveApprovalConfig(config?: OpenClawConfig): OpenClawConfig | undefi
 export async function resolveSkillWorkshopToolApproval(params: {
   toolName: string;
   toolParams: unknown;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir?: string;
 }): Promise<PluginHookBeforeToolCallResult | undefined> {
   if (params.toolName !== "skill_workshop") {

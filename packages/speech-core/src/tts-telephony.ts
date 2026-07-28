@@ -1,12 +1,12 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { TtsDirectiveOverrides } from "openclaw/plugin-sdk/speech-core";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { TtsDirectiveOverrides } from "bot/plugin-sdk/speech-core";
 import { assertSpeechRuntimeAvailable } from "./runtime-availability.js";
 import { executeTtsProviderAttempts, resolveTtsRequestSetup } from "./tts-synthesis-support.js";
 import type { TtsTelephonyResult } from "./tts-types.js";
 
 export async function textToSpeechTelephony(params: {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prefsPath?: string;
   overrides?: TtsDirectiveOverrides;
   timeoutMs?: number;

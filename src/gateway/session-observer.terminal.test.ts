@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SessionObserverDigest } from "../../packages/gateway-protocol/src/schema/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   createHarness,
   event,
@@ -316,7 +316,7 @@ describe("session observer terminal, persistence, synthesis, and races", () => {
     const runtimeCfg = {
       gateway: { controlUi: { sessionObserver: true as boolean } },
       agents: { defaults: { utilityModel: "openai/gpt-test" } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const storedDigest = persistedLiveDigest();
     const readSession = vi.fn(() => ({
       sessionId: "session-id",
@@ -829,7 +829,7 @@ describe("session observer terminal, persistence, synthesis, and races", () => {
     harness.observer.handleEvent(
       event({
         stream: "assistant",
-        data: { delta: "prose before\n<<<BEGIN_OPENCLAW_INTERNAL_CONTEXT>>>\n" },
+        data: { delta: "prose before\n<<<BEGIN_BOT_INTERNAL_CONTEXT>>>\n" },
       }),
     );
     harness.observer.handleEvent(
@@ -847,7 +847,7 @@ describe("session observer terminal, persistence, synthesis, and races", () => {
     harness.observer.handleEvent(
       event({
         stream: "assistant",
-        data: { delta: "\n<<<END_OPENCLAW_INTERNAL_CONTEXT>>>\nvisible prose after" },
+        data: { delta: "\n<<<END_BOT_INTERNAL_CONTEXT>>>\nvisible prose after" },
       }),
     );
     startAndAddToolNotes(harness.observer, { count: 4 });

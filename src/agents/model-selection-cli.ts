@@ -1,13 +1,13 @@
 /**
  * Detects providers whose model selections are backed by CLI runtimes.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveRuntimeCliBackends } from "../plugins/cli-backends.runtime.js";
 import { resolvePluginSetupCliBackendDescriptor } from "../plugins/setup-registry.runtime.js";
 import { normalizeProviderId } from "./model-ref-shared.js";
 
 /** Return true when a provider id resolves to a configured or plugin CLI backend. */
-export function isCliProvider(provider: string, cfg?: OpenClawConfig): boolean {
+export function isCliProvider(provider: string, cfg?: BotConfig): boolean {
   const normalized = normalizeProviderId(provider);
   const cliBackends = resolveRuntimeCliBackends();
   if (cliBackends.some((backend) => normalizeProviderId(backend.id) === normalized)) {

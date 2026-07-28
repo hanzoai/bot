@@ -9,7 +9,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 type BrowserTerminalController = {
@@ -36,7 +36,7 @@ describeControlUiE2e("Control UI terminal runtime isolation", () => {
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     server = await startControlUiE2eServer();
@@ -58,13 +58,13 @@ describeControlUiE2e("Control UI terminal runtime isolation", () => {
       // addScriptTag resolves before the module body runs, so the global is not
       // observable yet; wait for the assignment instead of racing page.evaluate.
       await page.addScriptTag({
-        content: `globalThis.openclawTerminalRuntimeModule = import(${JSON.stringify(moduleUrl)});`,
+        content: `globalThis.botTerminalRuntimeModule = import(${JSON.stringify(moduleUrl)});`,
         type: "module",
       });
       await page.waitForFunction(() =>
         Boolean(
-          (globalThis as unknown as { openclawTerminalRuntimeModule?: unknown })
-            .openclawTerminalRuntimeModule,
+          (globalThis as unknown as { botTerminalRuntimeModule?: unknown })
+            .botTerminalRuntimeModule,
         ),
       );
       const sentinel = "CLOSE_RESET_SENTINEL";
@@ -72,11 +72,11 @@ describeControlUiE2e("Control UI terminal runtime isolation", () => {
         async ({ staleText }) => {
           const runtimeModule = await (
             window as unknown as Window & {
-              openclawTerminalRuntimeModule: Promise<{
+              botTerminalRuntimeModule: Promise<{
                 createIsolatedGhosttyTerminal: BrowserTerminalFactory;
               }>;
             }
-          ).openclawTerminalRuntimeModule;
+          ).botTerminalRuntimeModule;
           const createTerminal = async () => {
             const host = document.createElement("div");
             host.style.height = "400px";

@@ -1,16 +1,16 @@
 // Builds memory flush prompts when conversation context exceeds model budget.
-import { asOptionalRecord as asRecord } from "@openclaw/normalization-core/record-coerce";
+import { asOptionalRecord as asRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { resolveContextTokensForModel } from "../../agents/context.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../../agents/defaults.js";
 import { legacyModelKey, modelKey } from "../../agents/model-ref-shared.js";
 import { parseNonNegativeByteSize } from "../../config/byte-size.js";
 import { resolveFreshSessionTotalTokens, type SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
 export function resolveMemoryFlushContextWindowTokens(params: {
   modelId?: string;
   agentCfgContextTokens?: number;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider?: string;
 }): number {
   return (
@@ -24,7 +24,7 @@ export function resolveMemoryFlushContextWindowTokens(params: {
   );
 }
 
-export function resolveMaxActiveTranscriptBytes(cfg?: OpenClawConfig): number | undefined {
+export function resolveMaxActiveTranscriptBytes(cfg?: BotConfig): number | undefined {
   const compaction = cfg?.agents?.defaults?.compaction;
   if (compaction?.truncateAfterCompaction !== true) {
     return undefined;
@@ -63,7 +63,7 @@ function resolvePositiveIntegerParam(
 }
 
 export function resolveResponsesServerCompactionThreshold(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   provider?: string;
   modelId?: string;
 }): number | undefined {

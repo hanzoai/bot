@@ -1,5 +1,5 @@
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { formatErrorMessage } from "../../../infra/errors.js";
 import { assertNoWindowsNetworkPath, safeFileURLToPath } from "../../../infra/local-file-access.js";
 import type { ImageContent } from "../../../llm/types.js";
@@ -29,7 +29,7 @@ import { log } from "../logger.js";
 import {
   collectIdentitylessMediaImageFactIndexes,
   collectMediaImageRefs,
-  isOpenClawCliImageCachePath,
+  isBotCliImageCachePath,
   selectMediaImageRefs,
   type MediaImageRef,
 } from "./images.media-refs.js";
@@ -218,7 +218,7 @@ export function detectImageReferences(prompt: string): DetectedImageRef[] {
       return;
     }
     const resolved = trimmed.startsWith("~") ? resolveUserPath(trimmed) : trimmed;
-    if (isOpenClawCliImageCachePath(resolved)) {
+    if (isBotCliImageCachePath(resolved)) {
       return;
     }
     seen.add(dedupeKey);
@@ -238,7 +238,7 @@ export function detectImageReferences(prompt: string): DetectedImageRef[] {
     }
     try {
       const resolved = safeFileURLToPath(raw);
-      if (isOpenClawCliImageCachePath(resolved)) {
+      if (isBotCliImageCachePath(resolved)) {
         continue;
       }
       seen.add(dedupeKey);
@@ -606,7 +606,7 @@ export async function hydratePromptMediaMessages(
       continue;
     }
     const runtimeMedia = readRuntimePromptMediaFacts(message);
-    const meta = (message as unknown as Record<string, unknown>)["__openclaw"];
+    const meta = (message as unknown as Record<string, unknown>)["__bot"];
     const resolvedMedia = runtimeMedia ?? readPersistedMediaFacts(message) ?? [];
     const runtimeImageOrder = readRuntimePromptImageOrder(message);
     const mediaImageLayout = readPersistedMediaImageLayout(message);
@@ -662,9 +662,9 @@ export async function hydratePromptMediaMessages(
       content: [...content.filter((block) => block.type !== "image"), ...result.images],
     } as AgentMessage;
     if (Object.keys(nextMeta).length > 0) {
-      (hydratedMessage as unknown as Record<string, unknown>)["__openclaw"] = nextMeta;
+      (hydratedMessage as unknown as Record<string, unknown>)["__bot"] = nextMeta;
     } else {
-      delete (hydratedMessage as unknown as Record<string, unknown>)["__openclaw"];
+      delete (hydratedMessage as unknown as Record<string, unknown>)["__bot"];
     }
     if (runtimeMedia) {
       attachRuntimePromptMediaFacts(hydratedMessage, runtimeMedia, runtimeImageOrder);

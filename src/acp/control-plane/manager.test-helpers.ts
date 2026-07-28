@@ -1,13 +1,13 @@
 /** Shared ACP manager test harness, mocks, fixtures, and assertion helpers. */
-import type { AcpRuntime, AcpRuntimeCapabilities } from "@openclaw/acp-core/runtime/types";
+import type { AcpRuntime, AcpRuntimeCapabilities } from "@hanzo/bot-acp-core/runtime/types";
 import { afterEach, beforeEach, expect, vi } from "vitest";
 import { resetAcpManagerTaskStateForTests } from "../../../test/helpers/acp-manager-task-state.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { AcpSessionRuntimeOptions, SessionAcpMeta } from "../../config/sessions/types.js";
 import { deleteTestEnvValue, setTestEnvValue } from "../../test-utils/env.js";
 import { resetAcpActiveTurnsForTests } from "./active-turns.test-support.js";
 
-export type { AcpRuntime, OpenClawConfig, SessionAcpMeta };
+export type { AcpRuntime, BotConfig, SessionAcpMeta };
 
 const hoistedMocks = vi.hoisted(() => {
   const listAcpSessionEntriesMock = vi.fn();
@@ -52,7 +52,7 @@ export const baseCfg = {
     dispatch: { enabled: true },
   },
 } as const;
-const ORIGINAL_STATE_DIR = process.env.OPENCLAW_STATE_DIR;
+const ORIGINAL_STATE_DIR = process.env.BOT_STATE_DIR;
 
 export async function flushMicrotasks(rounds = 3): Promise<void> {
   for (let index = 0; index < rounds; index += 1) {
@@ -333,9 +333,9 @@ export function installAcpSessionManagerTestLifecycle(): void {
 
   afterEach(() => {
     if (ORIGINAL_STATE_DIR === undefined) {
-      deleteTestEnvValue("OPENCLAW_STATE_DIR");
+      deleteTestEnvValue("BOT_STATE_DIR");
     } else {
-      setTestEnvValue("OPENCLAW_STATE_DIR", ORIGINAL_STATE_DIR);
+      setTestEnvValue("BOT_STATE_DIR", ORIGINAL_STATE_DIR);
     }
     resetAcpManagerTaskStateForTests();
   });

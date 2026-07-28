@@ -1,5 +1,5 @@
 import Foundation
-import OpenClawKit
+import BotKit
 
 extension GatewayConnectionController {
     static func migrateLegacyDeviceAuth() {

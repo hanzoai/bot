@@ -1,10 +1,10 @@
 // Nextcloud Talk tests cover channel.lifecycle plugin behavior.
-import { createStartAccountContext } from "openclaw/plugin-sdk/channel-test-helpers";
+import { createStartAccountContext } from "bot/plugin-sdk/channel-test-helpers";
 import {
   expectStopPendingUntilAbort,
   startAccountAndTrackLifecycle,
   waitForStartedMocks,
-} from "openclaw/plugin-sdk/channel-test-helpers";
+} from "bot/plugin-sdk/channel-test-helpers";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { ResolvedNextcloudTalkAccount } from "./accounts.js";
 

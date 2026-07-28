@@ -13,19 +13,19 @@ import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { resolveTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
+import type { ModelProviderConfig } from "bot/plugin-sdk/provider-model-shared";
+import { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
 import {
   isRecord,
   normalizeOptionalString,
   normalizeStringEntries,
   uniqueStrings,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
-import { sliceUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
+import { sliceUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import {
   createQaBundledPluginsDir,
   resolveQaBundledPluginSourceDir,
@@ -88,12 +88,12 @@ const QA_GATEWAY_CHILD_GRACEFUL_SHUTDOWN_TIMEOUT_MS = 30_000;
 const QA_GATEWAY_CHILD_FORCE_SHUTDOWN_TIMEOUT_MS = 10_000;
 const QA_MOCK_OPENAI_API_KEY = ["qa", "mock", "openai", "key"].join("-");
 const QA_GATEWAY_CHILD_BLOCKED_SECRET_ENV_VARS = Object.freeze([
-  "OPENCLAW_QA_CONVEX_SECRET_CI",
-  "OPENCLAW_QA_CONVEX_SECRET_MAINTAINER",
-  "OPENCLAW_QA_SUT_FORBIDDEN_SENTINEL",
-  "OPENCLAW_QA_TELEGRAM_GROUP_ID",
-  "OPENCLAW_QA_TELEGRAM_DRIVER_BOT_TOKEN",
-  "OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN",
+  "BOT_QA_CONVEX_SECRET_CI",
+  "BOT_QA_CONVEX_SECRET_MAINTAINER",
+  "BOT_QA_SUT_FORBIDDEN_SENTINEL",
+  "BOT_QA_TELEGRAM_GROUP_ID",
+  "BOT_QA_TELEGRAM_DRIVER_BOT_TOKEN",
+  "BOT_QA_TELEGRAM_SUT_BOT_TOKEN",
 ]);
 
 export type QaGatewayChildStateMutationContext = {
@@ -163,7 +163,7 @@ function resolveQaGatewayChildCommand(repoRoot: string): QaGatewayChildCommand {
     };
   }
 
-  throw new Error("OpenClaw CLI entry not found: expected dist/index.(m)js or src/entry.ts");
+  throw new Error("Bot CLI entry not found: expected dist/index.(m)js or src/entry.ts");
 }
 
 async function runQaGatewayCliCommand(params: {
@@ -175,7 +175,7 @@ async function runQaGatewayCliCommand(params: {
 }): Promise<string> {
   const child = spawn(params.executablePath, [...params.argsPrefix, ...params.args], {
     cwd: params.cwd,
-    env: { ...params.env, OPENCLAW_CLI: "1" },
+    env: { ...params.env, BOT_CLI: "1" },
     stdio: ["ignore", "pipe", "pipe"],
   });
   return await readQaGatewayCliCommand(child);
@@ -208,7 +208,7 @@ async function readQaGatewayCliCommand(child: ChildProcess): Promise<string> {
   const exitCode = await new Promise<number>((resolve, reject) => {
     monitorQaChildFailure(child, (failure) => {
       if (failure.source === "process") {
-        reject(toQaErrorObject(failure.error, "OpenClaw CLI process failed"));
+        reject(toQaErrorObject(failure.error, "Bot CLI process failed"));
         return;
       }
       if (!hasChildExited(child) && !child.killed) {
@@ -230,7 +230,7 @@ async function readQaGatewayCliCommand(child: ChildProcess): Promise<string> {
   const stdoutText = readQaChildOutput(stdout);
   if (exitCode !== 0) {
     const stderrText = formatQaChildOutputTail(stderr, "stderr");
-    throw new Error(`OpenClaw CLI exited ${exitCode}: ${stderrText || stdoutText}`);
+    throw new Error(`Bot CLI exited ${exitCode}: ${stderrText || stdoutText}`);
   }
   return stdoutText;
 }
@@ -398,33 +398,33 @@ export function buildQaRuntimeEnv(params: {
           claudeCliAuthMode: params.claudeCliAuthMode,
         })
       : {}),
-    OPENCLAW_HOME: params.homeDir,
-    OPENCLAW_CONFIG_PATH: params.configPath,
-    OPENCLAW_STATE_DIR: params.stateDir,
-    OPENCLAW_OAUTH_DIR: path.join(params.stateDir, "credentials"),
-    OPENCLAW_GATEWAY_TOKEN: params.gatewayToken,
-    OPENCLAW_SKIP_BROWSER_CONTROL_SERVER: "1",
-    OPENCLAW_SKIP_GMAIL_WATCHER: "1",
-    OPENCLAW_SKIP_CANVAS_HOST: "1",
-    OPENCLAW_SKIP_STARTUP_MODEL_PREWARM: "1",
-    OPENCLAW_NO_RESPAWN: "1",
-    OPENCLAW_TEST_FAST: "1",
-    OPENCLAW_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS: "2000",
-    OPENCLAW_QA_PARENT_PID: String(process.pid),
-    OPENCLAW_QA_TEMP_ROOT: params.tempRoot,
+    BOT_HOME: params.homeDir,
+    BOT_CONFIG_PATH: params.configPath,
+    BOT_STATE_DIR: params.stateDir,
+    BOT_OAUTH_DIR: path.join(params.stateDir, "credentials"),
+    BOT_GATEWAY_TOKEN: params.gatewayToken,
+    BOT_SKIP_BROWSER_CONTROL_SERVER: "1",
+    BOT_SKIP_GMAIL_WATCHER: "1",
+    BOT_SKIP_CANVAS_HOST: "1",
+    BOT_SKIP_STARTUP_MODEL_PREWARM: "1",
+    BOT_NO_RESPAWN: "1",
+    BOT_TEST_FAST: "1",
+    BOT_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS: "2000",
+    BOT_QA_PARENT_PID: String(process.pid),
+    BOT_QA_TEMP_ROOT: params.tempRoot,
     ...(params.stagedBundledPluginsRoot
-      ? { OPENCLAW_QA_STAGED_RUNTIME_ROOT: params.stagedBundledPluginsRoot }
+      ? { BOT_QA_STAGED_RUNTIME_ROOT: params.stagedBundledPluginsRoot }
       : {}),
-    OPENCLAW_QA_ALLOW_LOCAL_IMAGE_PROVIDER: "1",
+    BOT_QA_ALLOW_LOCAL_IMAGE_PROVIDER: "1",
     // QA uses the fast runtime envelope for speed, but it still exercises
     // normal config-driven heartbeats and runtime config writes.
-    OPENCLAW_ALLOW_SLOW_REPLY_TESTS: "1",
+    BOT_ALLOW_SLOW_REPLY_TESTS: "1",
     XDG_CONFIG_HOME: params.xdgConfigHome,
     XDG_DATA_HOME: params.xdgDataHome,
     XDG_CACHE_HOME: params.xdgCacheHome,
-    ...(params.bundledPluginsDir ? { OPENCLAW_BUNDLED_PLUGINS_DIR: params.bundledPluginsDir } : {}),
+    ...(params.bundledPluginsDir ? { BOT_BUNDLED_PLUGINS_DIR: params.bundledPluginsDir } : {}),
     ...(params.compatibilityHostVersion
-      ? { OPENCLAW_COMPATIBILITY_HOST_VERSION: params.compatibilityHostVersion }
+      ? { BOT_COMPATIBILITY_HOST_VERSION: params.compatibilityHostVersion }
       : {}),
   };
   const normalizedEnv = normalizeQaProviderModeEnv(env, params.providerMode);
@@ -467,14 +467,14 @@ function buildQaForcedRuntimeEnvPatch(params: {
     return undefined;
   }
   const patch: NodeJS.ProcessEnv = {
-    OPENCLAW_BUILD_PRIVATE_QA: "1",
-    OPENCLAW_QA_FORCE_RUNTIME: params.forcedRuntime,
+    BOT_BUILD_PRIVATE_QA: "1",
+    BOT_QA_FORCE_RUNTIME: params.forcedRuntime,
   };
   if (params.forcedRuntime !== "codex") {
     return patch;
   }
   if (params.providerMode !== "mock-openai") {
-    patch.OPENCLAW_CODEX_APP_SERVER_ARGS = buildQaCodexAppServerArgs({
+    patch.BOT_CODEX_APP_SERVER_ARGS = buildQaCodexAppServerArgs({
       existingArgs: params.nativeAppServerArgs,
     });
     return patch;
@@ -486,7 +486,7 @@ function buildQaForcedRuntimeEnvPatch(params: {
   if (!params.codexModelCatalogPath) {
     throw new Error("forced Codex mock QA requires the staged native model catalog");
   }
-  patch.OPENCLAW_CODEX_APP_SERVER_ARGS = buildQaCodexAppServerArgs({
+  patch.BOT_CODEX_APP_SERVER_ARGS = buildQaCodexAppServerArgs({
     providerBaseUrl,
     modelCatalogPath: params.codexModelCatalogPath,
   });
@@ -1050,13 +1050,13 @@ export async function startQaGatewayChild(params: {
   forwardHostHome?: boolean;
   mockAuthAgentIds?: readonly string[];
   onListening?: (context: QaGatewayChildListeningContext) => Promise<void> | void;
-  mutateConfig?: (cfg: OpenClawConfig) => OpenClawConfig;
+  mutateConfig?: (cfg: BotConfig) => BotConfig;
   runtimeEnvPatch?: NodeJS.ProcessEnv;
 }) {
   // Verified launchers may require every runtime artifact to stay inside their
   // prepared root; carry that root forward instead of rediscovering host temp policy.
-  const tempParentDir = params.command?.tempParentDir ?? resolvePreferredOpenClawTmpDir();
-  const tempRoot = await fs.mkdtemp(path.join(tempParentDir, "openclaw-qa-suite-"));
+  const tempParentDir = params.command?.tempParentDir ?? resolvePreferredBotTmpDir();
+  const tempRoot = await fs.mkdtemp(path.join(tempParentDir, "bot-qa-suite-"));
   const runtimeCwd = tempRoot;
   const distEntryPath = path.join(params.repoRoot, "dist", "index.js");
   const gatewayCommand =
@@ -1072,7 +1072,7 @@ export async function startQaGatewayChild(params: {
   const xdgConfigHome = path.join(tempRoot, "xdg-config");
   const xdgDataHome = path.join(tempRoot, "xdg-data");
   const xdgCacheHome = path.join(tempRoot, "xdg-cache");
-  const configPath = path.join(tempRoot, "openclaw.json");
+  const configPath = path.join(tempRoot, "bot.json");
   const gatewayToken = `qa-suite-${randomUUID()}`;
   const transport = params.transport ?? createQaGatewayEmptyTransport();
   await seedQaAgentWorkspace({
@@ -1173,7 +1173,7 @@ export async function startQaGatewayChild(params: {
   const stderrLog = createWriteStream(stderrLogPath, { flags: "a" });
 
   const logs = () => redactQaGatewayDebugText(output.text());
-  const keepTemp = process.env.OPENCLAW_QA_KEEP_TEMP === "1";
+  const keepTemp = process.env.BOT_QA_KEEP_TEMP === "1";
   let gatewayPort = 0;
   let baseUrl = "";
   let wsUrl = "";
@@ -1182,7 +1182,7 @@ export async function startQaGatewayChild(params: {
   let processBoundaryController: Awaited<
     ReturnType<typeof createQaGatewayProcessBoundaryController>
   > | null = null;
-  let cfg!: OpenClawConfig;
+  let cfg!: BotConfig;
   let rpcClient: Awaited<ReturnType<typeof startQaGatewayRpcClient>> | null = null;
   let getChildFailure: (() => QaChildFailure | null) | null = null;
   let stagedBundledPluginsRoot: string | null = null;
@@ -1358,8 +1358,8 @@ export async function startQaGatewayChild(params: {
               providerBaseUrl: params.providerBaseUrl,
               codexModelCatalogPath,
               nativeAppServerArgs:
-                params.runtimeEnvPatch?.OPENCLAW_CODEX_APP_SERVER_ARGS ??
-                process.env.OPENCLAW_CODEX_APP_SERVER_ARGS,
+                params.runtimeEnvPatch?.BOT_CODEX_APP_SERVER_ARGS ??
+                process.env.BOT_CODEX_APP_SERVER_ARGS,
             }),
           },
           forwardHostHomeForClaudeCli: liveProviderIds.includes("claude-cli"),

@@ -1,6 +1,6 @@
 // Qa Lab plugin module implements suite summary behavior.
 import fs from "node:fs/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import { QaSuiteArtifactError } from "./errors.js";
 import type { QaEvidenceSummaryJson, QaEvidenceTiming } from "./evidence-summary.js";
 import type { QaProviderMode } from "./model-selection.js";

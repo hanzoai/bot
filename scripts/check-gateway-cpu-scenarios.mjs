@@ -252,15 +252,15 @@ function buildPrivateQaEnv(env, qaState) {
       ? {
           HOME: qaState.home,
           USERPROFILE: qaState.home,
-          OPENCLAW_HOME: qaState.home,
-          OPENCLAW_STATE_DIR: qaState.stateDir,
-          OPENCLAW_CONFIG_PATH: qaState.configPath,
+          BOT_HOME: qaState.home,
+          BOT_STATE_DIR: qaState.stateDir,
+          BOT_CONFIG_PATH: qaState.configPath,
         }
       : {}),
-    OPENCLAW_BUILD_PRIVATE_QA: "1",
-    OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1",
-    OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: env.OPENCLAW_RUN_NODE_SKIP_DTS_BUILD ?? "1",
-    OPENCLAW_TEST_DISABLE_UPDATE_CHECK: env.OPENCLAW_TEST_DISABLE_UPDATE_CHECK ?? "1",
+    BOT_BUILD_PRIVATE_QA: "1",
+    BOT_ENABLE_PRIVATE_QA_CLI: "1",
+    BOT_RUN_NODE_SKIP_DTS_BUILD: env.BOT_RUN_NODE_SKIP_DTS_BUILD ?? "1",
+    BOT_TEST_DISABLE_UPDATE_CHECK: env.BOT_TEST_DISABLE_UPDATE_CHECK ?? "1",
     PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false",
   };
 }
@@ -270,7 +270,7 @@ function createQaState(outputDir) {
   const home = path.join(root, "home");
   const stateDir = path.join(root, "state");
   return {
-    configPath: path.join(stateDir, "openclaw.json"),
+    configPath: path.join(stateDir, "bot.json"),
     home,
     root,
     stateDir,
@@ -348,7 +348,7 @@ async function runGatewayCpuScenarios(options, params = {}) {
   if (!options.skipQa) {
     const qaCommand = pnpmCommand(
       [
-        "openclaw",
+        "bot",
         "qa",
         "suite",
         "--provider-mode",

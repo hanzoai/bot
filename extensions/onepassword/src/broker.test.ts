@@ -1,4 +1,4 @@
-import type { PluginHookBeforeToolCallResult } from "openclaw/plugin-sdk/types";
+import type { PluginHookBeforeToolCallResult } from "bot/plugin-sdk/types";
 import { describe, expect, it, vi } from "vitest";
 import {
   OnePasswordBroker,

@@ -5,7 +5,7 @@
 import {
   embeddedAgentLog,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import type { CodexAppServerClient } from "./client.js";
 import { buildCodexUserInput } from "./user-input.js";
 
@@ -111,7 +111,7 @@ export function createCodexSteeringQueue(params: {
       }
       throw unavailableError;
     }
-    const clientUserMessageId = `openclaw:${params.turnId}:steer:${++batchSequence}`;
+    const clientUserMessageId = `bot:${params.turnId}:steer:${++batchSequence}`;
     const batch = { items: liveItems };
     // RPC acceptance is not delivery: interrupt clears accepted pending input.
     // Keep the batch unsettled until Codex echoes this id on userMessage completion.

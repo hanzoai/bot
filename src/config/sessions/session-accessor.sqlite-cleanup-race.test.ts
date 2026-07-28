@@ -3,9 +3,9 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+} from "../../state/bot-agent-db.js";
 import {
   applySessionEntryLifecycleMutation,
   cleanupSessionLifecycleArtifacts,
@@ -26,12 +26,12 @@ describe("SQLite lifecycle cleanup races", () => {
   let storePath: string;
 
   beforeEach(() => {
-    tempDir = tempDirs.make("openclaw-session-cleanup-race-");
+    tempDir = tempDirs.make("bot-session-cleanup-race-");
     storePath = path.join(tempDir, "agents", "main", "sessions", "sessions.json");
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
   });
 
   it("revalidates entries before deleting their transcript state", async () => {
@@ -51,7 +51,7 @@ describe("SQLite lifecycle cleanup races", () => {
     if (!databasePath) {
       throw new Error("expected cleanup-race database path");
     }
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openBotAgentDatabase({ agentId: "main", path: databasePath });
     const cleanupNow = Date.now() + 60_000;
     const planned = planSqliteSessionLifecycleArtifactCleanup(database, {
       archiveRemovedEntryTranscripts: true,
@@ -157,7 +157,7 @@ describe("SQLite lifecycle cleanup races", () => {
     if (!databasePath) {
       throw new Error("expected retention database path");
     }
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openBotAgentDatabase({ agentId: "main", path: databasePath });
     expect(
       database.db
         .prepare("SELECT current_session_id, entry_json FROM session_nodes WHERE session_key = ?")
@@ -208,7 +208,7 @@ describe("SQLite lifecycle cleanup races", () => {
     const databasePath = resolveSqliteTargetFromSessionStorePath(storePath, {
       agentId: "main",
     }).path;
-    const database = openOpenClawAgentDatabase({ agentId: "main", path: databasePath });
+    const database = openBotAgentDatabase({ agentId: "main", path: databasePath });
     expect(
       database.db
         .prepare("SELECT session_key FROM session_windows WHERE session_id = ?")

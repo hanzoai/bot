@@ -1,13 +1,13 @@
 // Verifies Discord channel source-config audit behavior.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { stubAuditChannelPlugin } from "./audit-channel-test-helpers.js";
 import { collectChannelSecurityFindings } from "./audit-channel.js";
 
 function stubDiscordPlugin(params: {
-  resolveAccount: (cfg: OpenClawConfig, accountId: string | null | undefined) => unknown;
-  inspectAccount?: (cfg: OpenClawConfig, accountId: string | null | undefined) => unknown;
-  isConfigured?: (account: unknown, cfg: OpenClawConfig) => boolean;
+  resolveAccount: (cfg: BotConfig, accountId: string | null | undefined) => unknown;
+  inspectAccount?: (cfg: BotConfig, accountId: string | null | undefined) => unknown;
+  isConfigured?: (account: unknown, cfg: BotConfig) => boolean;
 }) {
   return stubAuditChannelPlugin({
     id: "discord",
@@ -40,7 +40,7 @@ function stubDiscordPlugin(params: {
 
 describe("security audit channel source-config fallback discord", () => {
   it("keeps source-configured channel security findings when resolved inspection is incomplete", async () => {
-    const sourceConfig: OpenClawConfig = {
+    const sourceConfig: BotConfig = {
       commands: { native: true },
       channels: {
         discord: {
@@ -57,7 +57,7 @@ describe("security audit channel source-config fallback discord", () => {
         },
       },
     };
-    const resolvedConfig: OpenClawConfig = {
+    const resolvedConfig: BotConfig = {
       commands: { native: true },
       channels: {
         discord: {

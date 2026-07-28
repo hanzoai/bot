@@ -3,14 +3,14 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { parseSqliteSessionFileMarker } from "../config/sessions/sqlite-marker.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveAgentRunSessionTarget } from "./run-session-target.js";
 
 describe("agent run session target", () => {
   let tempDir: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-run-session-target-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-run-session-target-"));
   });
 
   afterEach(() => {
@@ -23,7 +23,7 @@ describe("agent run session target", () => {
 
     const target = await resolveAgentRunSessionTarget({
       agentId: "helper",
-      config: { session: { store: storePath } } as OpenClawConfig,
+      config: { session: { store: storePath } } as BotConfig,
       sessionId: "test-run",
       sessionKey,
     });
@@ -45,7 +45,7 @@ describe("agent run session target", () => {
     const sessionKey = "agent:helper:main";
 
     const target = await resolveAgentRunSessionTarget({
-      config: { session: { store: storeRoot } } as OpenClawConfig,
+      config: { session: { store: storeRoot } } as BotConfig,
       sessionId: "helper-session",
       sessionKey,
     });
@@ -67,7 +67,7 @@ describe("agent run session target", () => {
       agentId: "main",
       config: {
         session: { store: path.join(tempDir, "fallback", "sessions.json") },
-      } as OpenClawConfig,
+      } as BotConfig,
       sessionFile: legacySessionFile,
       sessionId: "legacy-session",
       sessionKey: "agent:main:legacy-session",

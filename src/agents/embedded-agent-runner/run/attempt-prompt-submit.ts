@@ -1,7 +1,7 @@
 /**
  * Submits one prepared prompt while owning provider transforms and cleanup.
  */
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
 import type { ImageContent } from "../../../llm/types.js";
 import type { createTrajectoryRuntimeRecorder } from "../../../trajectory/runtime.js";
 import type { AgentMessage } from "../../runtime/index.js";

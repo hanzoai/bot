@@ -1,4 +1,4 @@
-name: openclaw-codeql-mcp-process-runtime-boundary-critical-quality
+name: bot-codeql-mcp-process-runtime-boundary-critical-quality
 
 disable-default-queries: true
 

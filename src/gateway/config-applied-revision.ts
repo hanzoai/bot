@@ -1,9 +1,9 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { GatewayReloadPlan } from "./config-reload-plan.js";
 
 type AppliedCallback = (
   plan: GatewayReloadPlan,
-  nextConfig: OpenClawConfig,
+  nextConfig: BotConfig,
 ) => void | Promise<void>;
 
 export function createConfigAppliedRevisionTracker(options: {
@@ -11,7 +11,7 @@ export function createConfigAppliedRevisionTracker(options: {
   onRevisionApplied?: (hash: string) => void;
 }) {
   let pending: { plan: GatewayReloadPlan; hash: string } | null = null;
-  const flush = async (currentConfig: OpenClawConfig) => {
+  const flush = async (currentConfig: BotConfig) => {
     const owner = pending;
     if (!owner) {
       return;
@@ -28,7 +28,7 @@ export function createConfigAppliedRevisionTracker(options: {
       pending = { plan, hash };
     },
     flush,
-    apply: async (plan: GatewayReloadPlan, config: OpenClawConfig, hash: string) => {
+    apply: async (plan: GatewayReloadPlan, config: BotConfig, hash: string) => {
       if (pending?.plan === plan) {
         await flush(config);
         return;

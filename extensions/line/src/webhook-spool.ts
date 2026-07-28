@@ -6,9 +6,9 @@ import {
   DEFAULT_INGRESS_ADOPTION_STALL_MS,
   DEFAULT_INGRESS_RETRY_MAX_ATTEMPTS,
   type ChannelIngressQueue,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { danger, type RuntimeEnv, warn } from "openclaw/plugin-sdk/runtime-env";
-import { runDetachedWebhookWork } from "openclaw/plugin-sdk/webhook-request-guards";
+} from "bot/plugin-sdk/channel-outbound";
+import { danger, type RuntimeEnv, warn } from "bot/plugin-sdk/runtime-env";
+import { runDetachedWebhookWork } from "bot/plugin-sdk/webhook-request-guards";
 import { getLineRuntime } from "./runtime.js";
 
 const LINE_WEBHOOK_SPOOL_VERSION = 1;

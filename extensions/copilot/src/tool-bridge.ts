@@ -9,7 +9,7 @@ import type {
   AnyAgentTool,
   EmbeddedRunAttemptParams,
   SandboxContext,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   applyEmbeddedAttemptToolsAllow,
   buildEmbeddedAttemptToolRunContext,
@@ -21,12 +21,12 @@ import {
   resolveEmbeddedAttemptToolConstructionPlan,
   resolveModelAuthMode,
   sanitizeToolResult,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { createAgentHarnessToolSurfaceRuntime } from "openclaw/plugin-sdk/agent-harness-tool-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { createAgentHarnessToolSurfaceRuntime } from "bot/plugin-sdk/agent-harness-tool-runtime";
 
-type CreateOpenClawCodingTools =
-  (typeof import("openclaw/plugin-sdk/agent-harness"))["createOpenClawCodingTools"];
-type OpenClawCodingToolsOptions = NonNullable<Parameters<CreateOpenClawCodingTools>[0]>;
+type CreateBotCodingTools =
+  (typeof import("bot/plugin-sdk/agent-harness"))["createBotCodingTools"];
+type BotCodingToolsOptions = NonNullable<Parameters<CreateBotCodingTools>[0]>;
 type AgentHarnessToolSurfaceRuntime = ReturnType<typeof createAgentHarnessToolSurfaceRuntime>;
 type CatalogExecuteParams = Parameters<
   NonNullable<AgentHarnessToolSurfaceRuntime["toolSearchCatalogExecutor"]>
@@ -48,10 +48,10 @@ interface CopilotSessionHolder {
  * Structural subset of `EmbeddedRunAttemptParams` carried into the tool
  * bridge for PI-parity tool context (see
  * `src/agents/pi-embedded-runner/run/attempt.ts:1029-1117` — the
- * authoritative `createOpenClawCodingTools({...})` call shape).
+ * authoritative `createBotCodingTools({...})` call shape).
  *
  * Declared as `Partial<EmbeddedRunAttemptParams>` (imported from the
- * `openclaw/plugin-sdk/agent-harness-runtime` boundary, *not* from
+ * `bot/plugin-sdk/agent-harness-runtime` boundary, *not* from
  * `attempt.ts` in this extension) to avoid an `attempt.ts` ↔
  * `tool-bridge.ts` import cycle while keeping the field shapes
  * authoritative. Production callers pass the live attempt params; test
@@ -107,7 +107,7 @@ interface CopilotToolBridgeInput {
   /**
    * Full PI-parity attempt parameters. When set, the bridge forwards
    * identity, channel, owner/policy, auth-profile, message-routing,
-   * model, and run-trace fields to `createOpenClawCodingTools` so the
+   * model, and run-trace fields to `createBotCodingTools` so the
    * wrapped-tool enforcement layer
    * (`src/agents/pi-tools.before-tool-call.ts`) receives the same
    * context the in-tree PI runner provides. See
@@ -133,7 +133,7 @@ interface CopilotToolBridgeInput {
    */
   onYieldDetected?: (message?: string) => void;
   onToolCompleted?: (completion: CopilotToolCompletion) => void | Promise<void>;
-  createOpenClawCodingTools?: (opts: unknown) => AnyAgentTool[] | Promise<AnyAgentTool[]>;
+  createBotCodingTools?: (opts: unknown) => AnyAgentTool[] | Promise<AnyAgentTool[]>;
   beforeExecute?: (ctx: {
     toolName: string;
     toolCallId: string;
@@ -177,7 +177,7 @@ export async function createCopilotToolBridge(
         codingToolConstructionPlan: {
           includeBaseCodingTools: true,
           includeChannelTools: true,
-          includeOpenClawTools: true,
+          includeBotTools: true,
           includePluginTools: true,
           includeShellTools: true,
         },
@@ -189,9 +189,9 @@ export async function createCopilotToolBridge(
     return { sdkTools: [], sourceTools: [] };
   }
 
-  const createOpenClawCodingTools =
-    input.createOpenClawCodingTools ??
-    (await import("openclaw/plugin-sdk/agent-harness")).createOpenClawCodingTools;
+  const createBotCodingTools =
+    input.createBotCodingTools ??
+    (await import("bot/plugin-sdk/agent-harness")).createBotCodingTools;
 
   const toolSurfaceRuntime = createAgentHarnessToolSurfaceRuntime({
     abortSignal: input.abortSignal,
@@ -215,7 +215,7 @@ export async function createCopilotToolBridge(
     sourceReplyDeliveryMode: attemptParams.sourceReplyDeliveryMode,
     toolsAllow: attemptParams.toolsAllow,
   });
-  const toolOptions = buildOpenClawCodingToolsOptions(
+  const toolOptions = buildBotCodingToolsOptions(
     input,
     {
       ...effectiveToolPlan,
@@ -226,17 +226,17 @@ export async function createCopilotToolBridge(
 
   let sourceTools: unknown;
   try {
-    sourceTools = await createOpenClawCodingTools(toolOptions);
+    sourceTools = await createBotCodingTools(toolOptions);
   } catch (error: unknown) {
     throw createError(
-      `[copilot-tool-bridge] createOpenClawCodingTools failed: ${toError(error).message}`,
+      `[copilot-tool-bridge] createBotCodingTools failed: ${toError(error).message}`,
       error,
     );
   }
 
   if (!Array.isArray(sourceTools)) {
     throw new Error(
-      "[copilot-tool-bridge] createOpenClawCodingTools must return an array of tools",
+      "[copilot-tool-bridge] createBotCodingTools must return an array of tools",
     );
   }
 
@@ -268,7 +268,7 @@ export async function createCopilotToolBridge(
   return {
     cleanup: toolSurfaceRuntime.cleanup,
     sdkTools: filteredTools.map((sourceTool) =>
-      convertOpenClawToolToSdkTool(sourceTool, {
+      convertBotToolToSdkTool(sourceTool, {
         abortSignal: input.abortSignal,
         beforeExecute: input.beforeExecute,
         onAgentToolResult: input.attemptParams?.onAgentToolResult,
@@ -281,12 +281,12 @@ export async function createCopilotToolBridge(
 }
 
 /**
- * Builds the full `createOpenClawCodingTools` options bag mirroring the
+ * Builds the full `createBotCodingTools` options bag mirroring the
  * PI in-tree call at `src/agents/pi-embedded-runner/run/attempt.ts:1029-1117`.
  *
- * Why PI parity matters: bridged OpenClaw tools register with the SDK
+ * Why PI parity matters: bridged Bot tools register with the SDK
  * as `overridesBuiltInTool: true, skipPermission: true` (see
- * `convertOpenClawToolToSdkTool` below). That means the wrapped-tool
+ * `convertBotToolToSdkTool` below). That means the wrapped-tool
  * enforcement layer
  * (`src/agents/pi-tools.before-tool-call.ts → wrapToolWithBeforeToolCallHook`)
  * is the single gate for permission, owner-only allowlists, loop
@@ -302,11 +302,11 @@ export async function createCopilotToolBridge(
  * {@link CopilotToolBridgeInput}; callers resolve it via
  * `resolveSandboxContext` before constructing the bridge.
  */
-function buildOpenClawCodingToolsOptions(
+function buildBotCodingToolsOptions(
   input: CopilotToolBridgeInput,
   toolPlan: ReturnType<typeof resolveEmbeddedAttemptToolConstructionPlan>,
   toolSurfaceRuntime?: ReturnType<typeof createAgentHarnessToolSurfaceRuntime>,
-): OpenClawCodingToolsOptions {
+): BotCodingToolsOptions {
   const a = input.attemptParams ?? ({} as CopilotToolAttemptParams);
 
   // Mirror PI's `sandboxSessionKey` derivation (attempt.ts:873-874) so
@@ -351,7 +351,7 @@ function buildOpenClawCodingToolsOptions(
     "compat" in model &&
     model.compat &&
     typeof model.compat === "object"
-      ? (model.compat as OpenClawCodingToolsOptions["modelCompat"])
+      ? (model.compat as BotCodingToolsOptions["modelCompat"])
       : undefined;
 
   return {
@@ -459,7 +459,7 @@ function buildOpenClawCodingToolsOptions(
   };
 }
 
-function convertOpenClawToolToSdkTool(
+function convertBotToolToSdkTool(
   sourceTool: AnyAgentTool,
   ctx: {
     abortSignal?: AbortSignal;
@@ -591,7 +591,7 @@ function convertOpenClawToolToSdkTool(
       );
     }
 
-    // OpenClaw tools throw for execution failures. Error-shaped details remain
+    // Bot tools throw for execution failures. Error-shaped details remain
     // lifecycle metadata; successful content uses the SDK's MCP converter.
     const sdkResult = convertMcpCallToolResult({ content: result.content });
     const sanitizedResult = sanitizeToolResult(result);
@@ -636,26 +636,26 @@ function convertOpenClawToolToSdkTool(
     description: sourceTool.description,
     handler,
     name: sourceTool.name,
-    // OpenClaw owns its bridged tools by design (the harness docs:
-    // "OpenClaw still owns ... OpenClaw dynamic tools (bridged)"). The bundled
+    // Bot owns its bridged tools by design (the harness docs:
+    // "Bot still owns ... Bot dynamic tools (bridged)"). The bundled
     // Copilot CLI ships built-in tools whose names (edit, read, write, bash,
-    // ...) collide with OpenClaw's coding-tool set. Mark every bridged tool as
+    // ...) collide with Bot's coding-tool set. Mark every bridged tool as
     // an explicit override so the SDK accepts the registration rather than
     // throwing "External tool 'edit' conflicts with a built-in tool of the
-    // same name." OpenClaw's tool layer is the source of truth for these
+    // same name." Bot's tool layer is the source of truth for these
     // names within a copilot attempt.
     overridesBuiltInTool: true,
     parameters: sourceTool.parameters as Record<string, unknown> | undefined,
-    // Bridged OpenClaw tools enforce their own permission/policy decisions
+    // Bridged Bot tools enforce their own permission/policy decisions
     // inside `wrapToolWithBeforeToolCallHook` (see
     // `src/agents/pi-tools.before-tool-call.ts` — the same hook PI itself
     // uses, providing loop detection, trusted plugin policies,
     // before-tool-call hooks, and two-phase plugin approvals via the
     // gateway). Asking the SDK to fire `onPermissionRequest` for
-    // `kind: "custom-tool"` would either short-circuit OpenClaw's richer
+    // `kind: "custom-tool"` would either short-circuit Bot's richer
     // enforcement (if we allow-all) or block every call (if we
     // reject-all) — neither matches PI parity. The in-tree codex harness
-    // takes the same approach: bridged OpenClaw tools are wrapped with
+    // takes the same approach: bridged Bot tools are wrapped with
     // `wrapToolWithBeforeToolCallHook` and the SDK gate is bypassed
     // (see `extensions/codex/src/app-server/dynamic-tools.ts`).
     skipPermission: true,

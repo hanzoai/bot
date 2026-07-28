@@ -1,5 +1,5 @@
 // Zalo plugin module implements proxy behavior.
-import { makeProxyFetch } from "openclaw/plugin-sdk/fetch-runtime";
+import { makeProxyFetch } from "bot/plugin-sdk/fetch-runtime";
 import type { ZaloFetch } from "./api.js";
 
 const proxyCache = new Map<string, ZaloFetch>();

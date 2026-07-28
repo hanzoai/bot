@@ -1,6 +1,6 @@
 // Msteams tests cover send plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import { deleteMessageMSTeams, editMessageMSTeams, sendMessageMSTeams } from "./send.js";
 
 const mockState = vi.hoisted(() => ({
@@ -25,18 +25,18 @@ const mockState = vi.hoisted(() => ({
 }));
 
 // `loadOutboundMediaFromUrl` is re-exported from msteams's runtime-api which
-// pulls from `openclaw/plugin-sdk/outbound-media` (post-migration). Mock the
+// pulls from `bot/plugin-sdk/outbound-media` (post-migration). Mock the
 // canonical source so the re-export carries our stub through.
-vi.mock("openclaw/plugin-sdk/outbound-media", () => ({
+vi.mock("bot/plugin-sdk/outbound-media", () => ({
   loadOutboundMediaFromUrl: mockState.loadOutboundMediaFromUrl,
 }));
 
-vi.mock("openclaw/plugin-sdk/markdown-table-runtime", () => ({
+vi.mock("bot/plugin-sdk/markdown-table-runtime", () => ({
   resolveMarkdownTableMode: mockState.resolveMarkdownTableMode,
 }));
 
-vi.mock("openclaw/plugin-sdk/text-chunking", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/text-chunking")>();
+vi.mock("bot/plugin-sdk/text-chunking", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/text-chunking")>();
   return {
     ...actual,
     convertMarkdownTables: mockState.convertMarkdownTables,
@@ -269,7 +269,7 @@ describe("sendMessageMSTeams", () => {
     });
 
     const result = await sendMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       to: "conversation:19:conversation@thread.tacv2",
       text: "hello",
       mediaUrl: "file:///tmp/agent-workspace/inline.png",
@@ -312,7 +312,7 @@ describe("sendMessageMSTeams", () => {
     mockState.convertMarkdownTables.mockReturnValue("hello");
 
     const result = await sendMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       to: "conversation:19:conversation@thread.tacv2",
       text: "hello",
     });
@@ -351,7 +351,7 @@ describe("sendMessageMSTeams", () => {
     });
 
     await sendMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       to: "conversation:19:channel@thread.tacv2",
       text: "threaded reply",
     });
@@ -378,7 +378,7 @@ describe("sendMessageMSTeams", () => {
     });
 
     await sendMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       to: "conversation:19:channel@thread.tacv2",
       text: "top-level reply",
     });
@@ -403,7 +403,7 @@ describe("sendMessageMSTeams", () => {
     });
 
     await sendMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       to: `conversation:${graphConversationId}`,
       text: "report",
       mediaUrl: "https://example.com/report.pdf",
@@ -431,7 +431,7 @@ describe("sendMessageMSTeams", () => {
 
     await expect(
       sendMessageMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         to: "conversation:19:group-id@thread.v2",
         text: "report",
         mediaUrl: "https://example.com/report.pdf",
@@ -474,7 +474,7 @@ describe("editMessageMSTeams", () => {
     });
 
     const result = await editMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       to: "conversation:19:conversation@thread.tacv2",
       activityId: "activity-123",
       text: "Updated message text",
@@ -503,7 +503,7 @@ describe("editMessageMSTeams", () => {
 
     await expect(
       editMessageMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         to: "conversation:19:conversation@thread.tacv2",
         activityId: "activity-123",
         text: "Updated text",
@@ -539,7 +539,7 @@ describe("deleteMessageMSTeams", () => {
     });
 
     const result = await deleteMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       to: "conversation:19:conversation@thread.tacv2",
       activityId: "activity-456",
     });
@@ -562,7 +562,7 @@ describe("deleteMessageMSTeams", () => {
 
     await expect(
       deleteMessageMSTeams({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         to: "conversation:19:conversation@thread.tacv2",
         activityId: "activity-456",
       }),
@@ -590,7 +590,7 @@ describe("deleteMessageMSTeams", () => {
     });
 
     await deleteMessageMSTeams({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       to: "conversation:19:conv@thread.tacv2",
       activityId: "activity-789",
     });

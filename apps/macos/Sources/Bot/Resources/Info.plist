@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>Bot</string>
+    <key>CFBundleIdentifier</key>
+    <string>ai.bot.mac</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>Bot</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>2026.7.2</string>
+    <key>CFBundleVersion</key>
+    <string>2026070200</string>
+    <key>CFBundleIconFile</key>
+    <string>Bot</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>ai.bot.mac.deeplink</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>bot</string>
+            </array>
+        </dict>
+    </array>
+    <key>LSMinimumSystemVersion</key>
+    <string>15.0</string>
+    <key>LSUIElement</key>
+    <true/>
+
+    <key>BotBuildTimestamp</key>
+    <string></string>
+    <key>BotGitCommit</key>
+    <string></string>
+    <key>BotPortGuardianStorageVersion</key>
+    <integer>2</integer>
+
+    <key>NSUserNotificationUsageDescription</key>
+    <string>Bot needs notification permission to show alerts for agent actions.</string>
+    <key>NSScreenCaptureDescription</key>
+    <string>Bot captures the screen when the agent needs screenshots for context.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Bot can capture photos or short video clips when requested by the agent.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Bot can share your location when requested by the agent.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Bot can share your location when requested by the agent.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Bot can share your location when requested by the agent.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Bot uses the local network to connect to your remote Bot gateway over LAN, Tailnet, or SSH.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Bot uses the microphone for Voice Wake, push-to-talk, Talk Mode, Quick Chat dictation, and agent audio capture.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Bot uses Apple Speech for Voice Wake, push-to-talk, Talk Mode, and Quick Chat dictation. Voice Wake stays on-device.</string>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Bot needs Automation (AppleScript) permission to drive Terminal and other apps for agent actions.</string>
+    <key>NSRemindersUsageDescription</key>
+    <string>Bot can access Reminders when requested by the agent for the apple-reminders skill.</string>
+
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoadsInWebContent</key>
+        <true/>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>100.100.100.100</key>
+            <dict>
+                <key>NSExceptionAllowsInsecureHTTPLoads</key>
+                <true/>
+                <key>NSIncludesSubdomains</key>
+                <true/>
+            </dict>
+        </dict>
+    </dict>
+</dict>
+</plist>

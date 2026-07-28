@@ -1,5 +1,5 @@
-import OpenClawKit
-import OpenClawProtocol
+import BotKit
+import BotProtocol
 import SwiftUI
 
 extension AgentProTab {
@@ -8,11 +8,11 @@ extension AgentProTab {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Totals")
-                        .font(OpenClawType.headline)
+                        .font(BotType.headline)
                     Spacer()
                     ProValuePill(
                         value: "\(self.overview?.usage?.days ?? 31)d",
-                        color: OpenClawBrand.accentForeground)
+                        color: BotBrand.accentForeground)
                 }
                 HStack(spacing: 10) {
                     self.detailMetric(label: "Cost", value: self.usageValue)
@@ -21,7 +21,7 @@ extension AgentProTab {
                 }
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     var usageTokenValue: String {
@@ -58,24 +58,24 @@ extension AgentProTab {
                     }
                 }
             }
-            .padding(.horizontal, OpenClawProMetric.pagePadding)
+            .padding(.horizontal, BotProMetric.pagePadding)
         }
     }
 
     func usageDayRow(_ day: CostUsageDailyEntryLite) -> some View {
         HStack(spacing: 12) {
-            ProIconBadge(systemName: "calendar", color: OpenClawBrand.accent)
+            ProIconBadge(systemName: "calendar", color: BotBrand.accent)
             VStack(alignment: .leading, spacing: 3) {
                 Text(day.date)
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
                 Text(verbatim: Self.tokenCountText(day.totalTokens ?? 0))
-                    .font(OpenClawType.caption)
+                    .font(BotType.caption)
                     .foregroundStyle(.secondary)
             }
             Spacer(minLength: 8)
             Text(Self.currency(day.totalCost ?? 0))
-                .font(OpenClawType.caption2SemiBold)
-                .foregroundStyle(OpenClawBrand.accent)
+                .font(BotType.caption2SemiBold)
+                .foregroundStyle(BotBrand.accent)
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 14)

@@ -3,15 +3,15 @@ import { createHash } from "node:crypto";
 import {
   resolveStoredModelOverride,
   type ModelsProviderData,
-} from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/core";
-import { parseStrictInteger } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/command-auth-native";
+import type { BotConfig } from "bot/plugin-sdk/core";
+import { parseStrictInteger } from "bot/plugin-sdk/number-runtime";
+import { normalizeProviderId } from "bot/plugin-sdk/provider-model-shared";
+import { getSessionEntry, resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import {
   normalizeOptionalString,
   normalizeStringifiedOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import type { MattermostInteractiveButtonInput } from "./interactions.js";
 
 const MATTERMOST_MODEL_PICKER_CONTEXT_KEY = "oc_model_picker";
@@ -238,7 +238,7 @@ export function buildMattermostAllowedModelRefs(data: ModelsProviderData): Set<s
 }
 
 export function resolveMattermostModelPickerCurrentModel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   route: { agentId: string; sessionKey: string };
   data: ModelsProviderData;
   readConsistency?: "latest";

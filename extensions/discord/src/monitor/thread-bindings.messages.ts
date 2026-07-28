@@ -4,4 +4,4 @@ export {
   resolveThreadBindingIntroText,
   resolveThreadBindingThreadName,
   formatThreadBindingDurationLabel,
-} from "openclaw/plugin-sdk/conversation-runtime";
+} from "bot/plugin-sdk/conversation-runtime";

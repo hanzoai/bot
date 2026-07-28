@@ -2,12 +2,12 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   isSupportedRealtimeVoiceActivationName,
   normalizeRealtimeVoiceActivationNamePrefix,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "bot/plugin-sdk/realtime-voice";
 import {
   asObjectRecord,
   defineChannelAliasMigration,
@@ -15,7 +15,7 @@ import {
   hasLegacyAccountStreamingAliases,
   normalizeChannelAccounts,
   stripRetiredChannelKeys,
-} from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/runtime-doctor";
 
 const LEGACY_TTS_PROVIDER_KEYS = ["openai", "elevenlabs", "microsoft", "edge"] as const;
 const RETIRED_TUNING_KEYS = new Set([
@@ -25,7 +25,7 @@ const RETIRED_TUNING_KEYS = new Set([
   "eventQueue",
   "retry",
 ]);
-type AgentBindingConfig = NonNullable<OpenClawConfig["bindings"]>[number];
+type AgentBindingConfig = NonNullable<BotConfig["bindings"]>[number];
 
 const streamingAliasMigration = defineChannelAliasMigration({
   channelId: "discord",
@@ -205,7 +205,7 @@ function normalizeUnsupportedRealtimeWakeNames(
     const nextRealtime = { ...realtime };
     delete nextRealtime.wakeNames;
     changes.push(
-      `Removed empty ${pathPrefix}.voice.realtime.wakeNames; unset wake names use the default agent/OpenClaw fallback.`,
+      `Removed empty ${pathPrefix}.voice.realtime.wakeNames; unset wake names use the default agent/Bot fallback.`,
     );
     return {
       entry: {
@@ -286,7 +286,7 @@ function isDiscordChannelAgentBinding(
 }
 
 function normalizeDiscordGuildChannelAgentIds(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: Record<string, unknown>;
   pathPrefix: string;
   accountId?: string;
@@ -372,13 +372,13 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "discord", "voice", "tts"],
     message:
-      'channels.discord.voice.tts.<provider> keys (openai/elevenlabs/microsoft/edge) are legacy; use channels.discord.voice.tts.providers.<provider>. Run "openclaw doctor --fix".',
+      'channels.discord.voice.tts.<provider> keys (openai/elevenlabs/microsoft/edge) are legacy; use channels.discord.voice.tts.providers.<provider>. Run "bot doctor --fix".',
     match: hasLegacyTtsProviderKeys,
   },
   {
     path: ["channels", "discord", "accounts"],
     message:
-      'channels.discord.accounts.<id>.voice.tts.<provider> keys (openai/elevenlabs/microsoft/edge) are legacy; use channels.discord.accounts.<id>.voice.tts.providers.<provider>. Run "openclaw doctor --fix".',
+      'channels.discord.accounts.<id>.voice.tts.<provider> keys (openai/elevenlabs/microsoft/edge) are legacy; use channels.discord.accounts.<id>.voice.tts.providers.<provider>. Run "bot doctor --fix".',
     match: (value) =>
       hasLegacyAccountStreamingAliases(value, (accountValue) => {
         const account = asObjectRecord(accountValue);
@@ -388,37 +388,37 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "discord"],
     message:
-      'channels.discord.guilds.<id>.channels.<id>.allow is legacy; use channels.discord.guilds.<id>.channels.<id>.enabled instead. Run "openclaw doctor --fix".',
+      'channels.discord.guilds.<id>.channels.<id>.allow is legacy; use channels.discord.guilds.<id>.channels.<id>.enabled instead. Run "bot doctor --fix".',
     match: guildChannelAllowMigration.hasLegacy,
   },
   {
     path: ["channels", "discord", "accounts"],
     message:
-      'channels.discord.accounts.<id>.guilds.<id>.channels.<id>.allow is legacy; use channels.discord.accounts.<id>.guilds.<id>.channels.<id>.enabled instead. Run "openclaw doctor --fix".',
+      'channels.discord.accounts.<id>.guilds.<id>.channels.<id>.allow is legacy; use channels.discord.accounts.<id>.guilds.<id>.channels.<id>.enabled instead. Run "bot doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, guildChannelAllowMigration.hasLegacy),
   },
   {
     path: ["channels", "discord"],
     message:
-      'channels.discord.guilds.<id>.channels.<id>.agentId is legacy; use top-level bindings[] for per-channel Discord agent routing. Run "openclaw doctor --fix".',
+      'channels.discord.guilds.<id>.channels.<id>.agentId is legacy; use top-level bindings[] for per-channel Discord agent routing. Run "bot doctor --fix".',
     match: hasLegacyDiscordGuildChannelAgentId,
   },
   {
     path: ["channels", "discord", "accounts"],
     message:
-      'channels.discord.accounts.<id>.guilds.<id>.channels.<id>.agentId is legacy; use top-level bindings[] with match.accountId for per-channel Discord agent routing. Run "openclaw doctor --fix".',
+      'channels.discord.accounts.<id>.guilds.<id>.channels.<id>.agentId is legacy; use top-level bindings[] with match.accountId for per-channel Discord agent routing. Run "bot doctor --fix".',
     match: (value) => hasLegacyAccountStreamingAliases(value, hasLegacyDiscordGuildChannelAgentId),
   },
   {
     path: ["channels", "discord"],
     message:
-      'channels.discord.voice.realtime.wakeNames entries longer than two words are unsupported; use one- or two-word activation names. Run "openclaw doctor --fix".',
+      'channels.discord.voice.realtime.wakeNames entries longer than two words are unsupported; use one- or two-word activation names. Run "bot doctor --fix".',
     match: hasUnsupportedDiscordRealtimeWakeNames,
   },
   {
     path: ["channels", "discord", "accounts"],
     message:
-      'channels.discord.accounts.<id>.voice.realtime.wakeNames entries longer than two words are unsupported; use one- or two-word activation names. Run "openclaw doctor --fix".',
+      'channels.discord.accounts.<id>.voice.realtime.wakeNames entries longer than two words are unsupported; use one- or two-word activation names. Run "bot doctor --fix".',
     match: (value) =>
       hasLegacyAccountStreamingAliases(value, hasUnsupportedDiscordRealtimeWakeNames),
   },
@@ -428,7 +428,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): ChannelDoctorConfigMutation {
   const changes: string[] = [];
   const bindingsToAdd: AgentBindingConfig[] = [];
@@ -527,7 +527,7 @@ export function normalizeCompatibilityConfig({
       channels: {
         ...tuningKnobs.config.channels,
         discord: updated,
-      } as OpenClawConfig["channels"],
+      } as BotConfig["channels"],
       bindings:
         bindingsToAdd.length > 0 ? [...(cfg.bindings ?? []), ...bindingsToAdd] : cfg.bindings,
     },

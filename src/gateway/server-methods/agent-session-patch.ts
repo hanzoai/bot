@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveTrustedGroupId } from "../../agents/agent-tools.policy.js";
 import { clearAllCliSessions } from "../../agents/cli-session.js";
 import { buildMainSessionRecoveryClearPatch } from "../../agents/main-session-recovery-clear.js";
@@ -11,7 +11,7 @@ import {
 } from "../../config/sessions.js";
 import { hasProviderOwnedSession } from "../../config/sessions/entry-freshness.js";
 import { isRecoverableTerminalSessionStatus } from "../../config/sessions/terminal-status.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   deliveryContextFromSession,
   mergeDeliveryContext,
@@ -44,7 +44,7 @@ export type AgentSessionPatchBuild = {
 export function buildAgentSessionPatch(params: {
   freshEntry: SessionEntry | undefined;
   initialEntry: SessionEntry | undefined;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionAgentId: string;
   canonicalSessionKey: string;
   storePath: string;

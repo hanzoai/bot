@@ -7,7 +7,7 @@ export {
   PAIRING_APPROVED_MESSAGE,
   type ChannelMessageActionAdapter,
   type ChannelStatusIssue,
-  type OpenClawConfig,
+  type BotConfig,
 } from "../runtime-api.js";
 export {
   listGoogleChatAccountIds,

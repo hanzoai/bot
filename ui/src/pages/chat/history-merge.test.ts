@@ -13,7 +13,7 @@ function createHistoryMessage(
     role,
     content: [{ type: "text", text }],
     ...(timestamp === undefined ? {} : { timestamp }),
-    ...(metadata === undefined ? {} : { __openclaw: metadata }),
+    ...(metadata === undefined ? {} : { __bot: metadata }),
   };
 }
 
@@ -251,11 +251,11 @@ describe("preserveOptimisticTailMessages", () => {
   it("does not cross visible history markers with no display signature", () => {
     const firstMarker = {
       content: [{ type: "status", value: "first marker" }],
-      __openclaw: { id: "first-marker", seq: 1 },
+      __bot: { id: "first-marker", seq: 1 },
     };
     const laterMarker = {
       content: [{ type: "status", value: "different marker" }],
-      __openclaw: { id: "later-marker", seq: 2 },
+      __bot: { id: "later-marker", seq: 2 },
     };
     const optimisticUser = createHistoryMessage("user", "unmatched pending turn", {
       idempotencyKey: "pending-run:user",

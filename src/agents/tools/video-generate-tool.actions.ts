@@ -3,7 +3,7 @@
  *
  * Formats provider listing, active-task status, and duplicate-guard responses for the tool.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { listSupportedVideoGenerationModes } from "../../video-generation/capabilities.js";
 import { listRuntimeVideoGenerationProviders } from "../../video-generation/runtime.js";
 import type { AuthProfileStore } from "../auth-profiles/types.js";
@@ -112,7 +112,7 @@ function summarizeVideoGenerationCapabilities(
 }
 
 export function createVideoGenerateListActionResult(
-  config?: OpenClawConfig,
+  config?: BotConfig,
   options?: { workspaceDir?: string; agentDir?: string; authStore?: AuthProfileStore },
 ): VideoGenerateActionResult {
   const providers = listRuntimeVideoGenerationProviders({ config });

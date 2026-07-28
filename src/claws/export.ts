@@ -6,16 +6,16 @@ import { stringify as stringifyYaml } from "yaml";
 import { listAgentEntries, resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { openLocalAgentAvatarFile } from "../agents/identity-avatar-file.js";
 import { normalizeConfiguredMcpServers } from "../config/mcp-config-normalize.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { readFileDescriptorBoundedSync } from "../infra/boundary-file-read.js";
 import { root as fsSafeRoot } from "../infra/fs-safe.js";
 import { AVATAR_MAX_BYTES, isAvatarDataUrl, isAvatarHttpUrl } from "../shared/avatar-policy.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { BotStateDatabaseOptions } from "../state/bot-state-db.js";
 import { resolveUserPath } from "../utils.js";
 import { readClawStatus } from "./lifecycle-state.js";
 import type { PackageRemovalDeps } from "./package-remove.js";
 import { isPortableClawAvatar } from "./schema-portability.js";
-import { parseClawManifest, parseClawOpenClawProfile } from "./schema.js";
+import { parseClawManifest, parseClawBotProfile } from "./schema.js";
 import { MAX_CLAW_MANIFEST_BYTES, MAX_MANAGED_WORKSPACE_BYTES } from "./source-limits.js";
 import {
   CLAW_BOOTSTRAP_FILE_NAMES,
@@ -23,13 +23,13 @@ import {
   CLAW_SCHEMA_VERSION,
   type ClawManifest,
   type ClawMcpServer,
-  type ClawOpenClawProfile,
+  type ClawBotProfile,
 } from "./types.js";
 
-export const CLAW_EXPORT_RESULT_SCHEMA_VERSION = "openclaw.clawExportResult.v1" as const;
+export const CLAW_EXPORT_RESULT_SCHEMA_VERSION = "bot.clawExportResult.v1" as const;
 const MAX_EXPORT_FILE_BYTES = 1024 * 1024;
 
-type AgentConfig = NonNullable<NonNullable<OpenClawConfig["agents"]>["list"]>[number];
+type AgentConfig = NonNullable<NonNullable<BotConfig["agents"]>["list"]>[number];
 type ClawBootstrapFileName = (typeof CLAW_BOOTSTRAP_FILE_NAMES)[number];
 
 function decodeUtf8(content: Buffer): string | undefined {
@@ -46,7 +46,7 @@ type ClawExportResult = {
   agentId: string;
   outputDirectory: string;
   manifest: ClawManifest;
-  openClawProfile?: ClawOpenClawProfile;
+  botProfile?: ClawBotProfile;
   filesWritten: string[];
 };
 
@@ -75,7 +75,7 @@ function portableAgent(agent: AgentConfig, avatar: string | undefined): ClawMani
   };
 }
 
-function portableOpenClawProfile(agent: AgentConfig): ClawOpenClawProfile | undefined {
+function portableBotProfile(agent: AgentConfig): ClawBotProfile | undefined {
   const tools = {
     ...(agent.tools?.profile ? { profile: agent.tools.profile } : {}),
     ...(agent.tools?.allow?.length ? { allow: agent.tools.allow } : {}),
@@ -174,7 +174,7 @@ function isClawBootstrapFileName(value: string): value is ClawBootstrapFileName 
   return (CLAW_BOOTSTRAP_FILE_NAMES as readonly string[]).includes(value);
 }
 function readPortableAvatar(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   agent: AgentConfig;
   workspace: string;
 }): { source?: string; sidecar?: { path: string; content: Buffer } } {
@@ -255,8 +255,8 @@ function portableMcpServer(server: Record<string, unknown>): ClawMcpServer {
 export async function exportClawAgent(
   agentId: string,
   outputDirectory: string,
-  options: OpenClawStateDatabaseOptions & {
-    config: OpenClawConfig;
+  options: BotStateDatabaseOptions & {
+    config: BotConfig;
     packageDeps?: PackageRemovalDeps;
     sourceMcpServers?: Record<string, Record<string, unknown>>;
   },
@@ -370,15 +370,15 @@ export async function exportClawAgent(
   const configuredMcpServers = normalizeConfiguredMcpServers(
     options.sourceMcpServers ?? options.config.mcp?.servers,
   );
-  const openClawProfile = portableOpenClawProfile(agent);
-  const openClawProfilePath = "profiles/openclaw.yml";
-  const openClawProfileRaw = openClawProfile
-    ? Buffer.from(stringifyYaml(openClawProfile))
+  const botProfile = portableBotProfile(agent);
+  const botProfilePath = "profiles/bot.yml";
+  const botProfileRaw = botProfile
+    ? Buffer.from(stringifyYaml(botProfile))
     : undefined;
   const manifest: ClawManifest = {
     schemaVersion: CLAW_SCHEMA_VERSION,
     agent: portableAgent(agent, avatar.source),
-    ...(openClawProfile ? { metadata: { "openclaw.config": openClawProfilePath } } : {}),
+    ...(botProfile ? { metadata: { "bot.config": botProfilePath } } : {}),
     workspace: { bootstrapFiles, files },
     packages: record.packages
       .map((pkg) => ({
@@ -433,11 +433,11 @@ export async function exportClawAgent(
       parsed.diagnostics.map((diagnostic) => diagnostic.message).join("; "),
     );
   }
-  if (openClawProfile) {
-    const parsedProfile = parseClawOpenClawProfile(openClawProfile);
+  if (botProfile) {
+    const parsedProfile = parseClawBotProfile(botProfile);
     if (!parsedProfile.ok) {
       throw new ClawExportError(
-        "export_openclaw_profile_invalid",
+        "export_bot_profile_invalid",
         parsedProfile.diagnostics.map((diagnostic) => diagnostic.message).join("; "),
       );
     }
@@ -464,22 +464,22 @@ export async function exportClawAgent(
       await output.write(path, file.content, { mkdir: true, overwrite: false });
       filesWritten.push(path);
     }
-    if (openClawProfileRaw) {
-      await output.write(openClawProfilePath, openClawProfileRaw, {
+    if (botProfileRaw) {
+      await output.write(botProfilePath, botProfileRaw, {
         mkdir: true,
         overwrite: false,
       });
-      filesWritten.push(openClawProfilePath);
+      filesWritten.push(botProfilePath);
     }
     const packageJson = {
-      name: `openclaw-claw-${record.install.agentId}`,
+      name: `bot-claw-${record.install.agentId}`,
       version: derivativePackageVersion(manifest, [
         ...contents,
         ...(clawMarkdownBody ? [{ path: "CLAW.md#body", content: clawMarkdownBody }] : []),
-        ...(openClawProfileRaw ? [{ path: openClawProfilePath, content: openClawProfileRaw }] : []),
+        ...(botProfileRaw ? [{ path: botProfilePath, content: botProfileRaw }] : []),
       ]),
       type: "module",
-      openclaw: { claw: "CLAW.md" },
+      bot: { claw: "CLAW.md" },
     };
     await output.write("package.json", Buffer.from(`${JSON.stringify(packageJson, null, 2)}\n`), {
       overwrite: false,
@@ -500,7 +500,7 @@ export async function exportClawAgent(
     agentId,
     outputDirectory: target,
     manifest,
-    ...(openClawProfile ? { openClawProfile } : {}),
+    ...(botProfile ? { botProfile } : {}),
     filesWritten,
   };
 }

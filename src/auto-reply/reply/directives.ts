@@ -1,5 +1,5 @@
 // Defines reply directive parsing constants and text-matching helpers.
-import type { FastMode } from "@openclaw/normalization-core/string-coerce";
+import type { FastMode } from "@hanzo/bot-normalization-core/string-coerce";
 import { escapeRegExp } from "../../utils.js";
 import type { ReasoningLevel, TraceLevel } from "../thinking.js";
 import {

@@ -1,7 +1,7 @@
-import type { parseExecApprovalCommandText } from "openclaw/plugin-sdk/approval-reply-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { isApprovalNotFoundError } from "openclaw/plugin-sdk/error-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import type { parseExecApprovalCommandText } from "bot/plugin-sdk/approval-reply-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { isApprovalNotFoundError } from "bot/plugin-sdk/error-runtime";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import type { TelegramApprovalCallback } from "./approval-callback-data.js";
 import {
   buildTelegramCanonicalApprovalTerminalText,
@@ -28,7 +28,7 @@ type LegacyApprovalCallback = NonNullable<ReturnType<typeof parseExecApprovalCom
 export function createTelegramCallbackApprovalRuntime(params: {
   accountId: RegisterTelegramHandlerParams["accountId"];
   telegramDeps: RegisterTelegramHandlerParams["telegramDeps"];
-  runtimeCfg: OpenClawConfig;
+  runtimeCfg: BotConfig;
   senderId: string;
   actions: TelegramCallbackMessageActions;
 }) {

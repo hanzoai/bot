@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 /**
  * Installs context guards for oversized tool-result histories.
  */
@@ -28,7 +28,7 @@ import {
 } from "./tool-result-text-budget.js";
 
 const SINGLE_TOOL_RESULT_CONTEXT_SHARE = 0.5;
-const TRANSCRIPT_PROMPT_TEXT_KEY = "__openclawTranscriptPromptText";
+const TRANSCRIPT_PROMPT_TEXT_KEY = "__botTranscriptPromptText";
 
 type GuardableTransformContext = (
   messages: AgentMessage[],

@@ -2,16 +2,16 @@
 // token-exchange/identity calls.
 import http from "node:http";
 import type { AddressInfo } from "node:net";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TOKEN_URL } from "./oauth.shared.js";
 
 const fetchWithSsrFGuardMock = vi.fn();
 const releaseMock = vi.fn(async () => undefined);
 
-vi.mock("openclaw/plugin-sdk/ssrf-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/ssrf-runtime")>(
-    "openclaw/plugin-sdk/ssrf-runtime",
+vi.mock("bot/plugin-sdk/ssrf-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/ssrf-runtime")>(
+    "bot/plugin-sdk/ssrf-runtime",
   );
   return {
     ...actual,

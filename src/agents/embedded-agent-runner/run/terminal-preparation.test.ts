@@ -1,4 +1,4 @@
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import { createUsageAccumulator } from "../usage-accumulator.js";
 import { createEmbeddedRunContextRecoveryState } from "./context-recovery-state.js";
@@ -75,7 +75,7 @@ describe("prepareEmbeddedRunTerminal", () => {
         runParams: {
           sessionId: "session-1",
           runId: "run-1",
-          workspaceDir: "/tmp/openclaw-test",
+          workspaceDir: "/tmp/bot-test",
           prompt: "hi",
           trigger: "user",
           timeoutMs: 60_000,

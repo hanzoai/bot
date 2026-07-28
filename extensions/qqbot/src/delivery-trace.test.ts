@@ -22,7 +22,7 @@
 //   that re-sends the accumulated partial text unchanged (abortStreaming only
 //   runs when finalization throws, and performFlush/finalize have no dirty
 //   check against the last sent chunk).
-// Refresh goldens with OPENCLAW_TRACE_UPDATE=1 (see delivery-trace harness docs).
+// Refresh goldens with BOT_TRACE_UPDATE=1 (see delivery-trace harness docs).
 import {
   deliveryTraceScenarios,
   expectDeliveryTraceMatchesGolden,
@@ -30,8 +30,8 @@ import {
   type DeliveryTraceInStep,
   type DeliveryTraceScenario,
   type WireRecorder,
-} from "openclaw/plugin-sdk/channel-contract-testing";
-import { chunkMarkdownText } from "openclaw/plugin-sdk/reply-runtime";
+} from "bot/plugin-sdk/channel-contract-testing";
+import { chunkMarkdownText } from "bot/plugin-sdk/reply-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { TYPING_INPUT_SECOND, TypingKeepAlive } from "./engine/gateway/typing-keepalive.js";
 import { createQQBotMarkdownChunker } from "./engine/messaging/markdown-table-chunking.js";

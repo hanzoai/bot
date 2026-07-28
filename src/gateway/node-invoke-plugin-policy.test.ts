@@ -18,8 +18,8 @@ import {
   resetPluginRuntimeStateForTest,
   setActivePluginRegistry,
 } from "../plugins/runtime.js";
-import type { OpenClawPluginNodeInvokePolicyContext } from "../plugins/types.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import type { BotPluginNodeInvokePolicyContext } from "../plugins/types.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { ExecApprovalManager } from "./exec-approval-manager.js";
 import { applyPluginNodeInvokePolicy } from "./node-invoke-plugin-policy.js";
 import type { NodeSession } from "./node-registry.js";
@@ -154,7 +154,7 @@ function createApprovalRequestPolicy(params?: {
   title?: string;
   description?: string;
 }): NodeInvokePolicyRegistration {
-  return createDemoPolicy(async (ctx: OpenClawPluginNodeInvokePolicyContext) => {
+  return createDemoPolicy(async (ctx: BotPluginNodeInvokePolicyContext) => {
     const approval = await ctx.approvals?.request({
       title: params?.title ?? "Sensitive action",
       description: params?.description ?? "Needs approval",
@@ -232,7 +232,7 @@ describe("applyPluginNodeInvokePolicy", () => {
 
   afterEach(() => {
     resetPluginRuntimeStateForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     for (const dir of tempDirs.splice(0)) {
       fs.rmSync(dir, { force: true, recursive: true });
     }
@@ -258,7 +258,7 @@ describe("applyPluginNodeInvokePolicy", () => {
 
   it("uses a matching plugin policy when one is registered", async () => {
     setDangerousDemoCommandRegistry([
-      createDemoPolicy((ctx: OpenClawPluginNodeInvokePolicyContext) => ctx.invokeNode()),
+      createDemoPolicy((ctx: BotPluginNodeInvokePolicyContext) => ctx.invokeNode()),
     ]);
     const { context, invoke } = createContext();
 
@@ -309,7 +309,7 @@ describe("applyPluginNodeInvokePolicy", () => {
 
   it("rejects plugin transport dispatch after invocation ownership changes", async () => {
     setDangerousDemoCommandRegistry([
-      createDemoPolicy((ctx: OpenClawPluginNodeInvokePolicyContext) => ctx.invokeNode()),
+      createDemoPolicy((ctx: BotPluginNodeInvokePolicyContext) => ctx.invokeNode()),
     ]);
     const { context, invoke } = createContext();
 
@@ -332,7 +332,7 @@ describe("applyPluginNodeInvokePolicy", () => {
 
   it("rejects plugin transport dispatch through an invalidated node session", async () => {
     setDangerousDemoCommandRegistry([
-      createDemoPolicy((ctx: OpenClawPluginNodeInvokePolicyContext) => ctx.invokeNode()),
+      createDemoPolicy((ctx: BotPluginNodeInvokePolicyContext) => ctx.invokeNode()),
     ]);
     const nodeSession = createNodeSession();
     nodeSession.client.invalidated = true;
@@ -668,7 +668,7 @@ describe("applyPluginNodeInvokePolicy", () => {
   });
 
   it("fails closed before routing an unrenderable persistent policy approval", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-node-policy-approval-"));
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-node-policy-approval-"));
     tempDirs.push(stateDir);
     const databaseOptions = { path: path.join(stateDir, "state.sqlite") };
     const manager = new ExecApprovalManager<PluginApprovalRequestPayload>({

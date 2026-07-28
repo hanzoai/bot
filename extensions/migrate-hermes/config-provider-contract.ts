@@ -7,7 +7,7 @@ import {
 import { childRecord, isRecord, readString, readStringArray } from "./helpers.js";
 import { normalizeHermesCustomProviderId, normalizeHermesProviderId } from "./model.js";
 
-type OpenClawModelApi =
+type BotModelApi =
   | "anthropic-messages"
   | "openai-completions"
   | "openai-responses"
@@ -23,14 +23,14 @@ type HermesModelConfig = {
 export type HermesProviderConfig = {
   id: string;
   baseUrl: string;
-  api: OpenClawModelApi;
+  api: BotModelApi;
   apiKeyEnv?: string;
   headers?: Record<string, unknown>;
   models: HermesModelConfig[];
   sensitive?: boolean;
 };
 
-export const HERMES_TRANSPORTS: Record<string, OpenClawModelApi> = {
+export const HERMES_TRANSPORTS: Record<string, BotModelApi> = {
   anthropic_messages: "anthropic-messages",
   chat_completions: "openai-completions",
   codex_responses: "openai-responses",
@@ -153,7 +153,7 @@ export function resolveHermesImplicitBaseUrl(providerId: string | undefined): st
   if (provider && ["alibaba", "alibaba-cloud", "aliyun", "dashscope"].includes(provider)) {
     return HERMES_ALIBABA_BASE_URL;
   }
-  // OpenClaw's qwen default is already Hermes' coding-plan endpoint; no override needed.
+  // Bot's qwen default is already Hermes' coding-plan endpoint; no override needed.
   if (provider && ["kimi-coding-cn", "kimi-cn", "moonshot-cn"].includes(provider)) {
     return HERMES_MOONSHOT_CN_BASE_URL;
   }
@@ -169,7 +169,7 @@ export function readPositiveNumber(value: unknown): number | undefined {
 export function resolveProviderApi(
   raw: Record<string, unknown>,
   providerId?: string,
-): OpenClawModelApi | undefined {
+): BotModelApi | undefined {
   const transport = readString(raw.transport) ?? readString(raw.api_mode);
   const sourceProvider = providerId?.trim().toLowerCase() ?? "";
   if (sourceProvider === "openai-codex") {
@@ -222,7 +222,7 @@ export function resolveProviderApi(
   return "openai-completions";
 }
 
-function normalizeProviderBaseUrl(baseUrl: string, api: OpenClawModelApi): string {
+function normalizeProviderBaseUrl(baseUrl: string, api: BotModelApi): string {
   if (api !== "anthropic-messages") {
     return baseUrl;
   }

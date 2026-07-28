@@ -1,9 +1,9 @@
-import { DEFAULT_EMOJIS } from "openclaw/plugin-sdk/channel-feedback";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { DEFAULT_EMOJIS } from "bot/plugin-sdk/channel-feedback";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalStringifiedId,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 
 export const RUNNING_EMOJIS = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
 export const FAILURE_EMOJI = "🔴";
@@ -41,7 +41,7 @@ export function resolveDiscordProgressTarget(requester?: DiscordProgressRequeste
   return { channelId, messageId };
 }
 
-export function reservedReactionEmojis(config: OpenClawConfig, ackReaction?: string): Set<string> {
+export function reservedReactionEmojis(config: BotConfig, ackReaction?: string): Set<string> {
   const reserved = new Set<string>(Object.values(DEFAULT_EMOJIS));
   for (const emoji of [config.messages?.ackReaction, ackReaction]) {
     if (emoji?.trim()) {
@@ -57,7 +57,7 @@ export function reservedReactionEmojis(config: OpenClawConfig, ackReaction?: str
   return reserved;
 }
 
-export function reactionsAreAvailable(config: OpenClawConfig, ackReaction?: string): boolean {
+export function reactionsAreAvailable(config: BotConfig, ackReaction?: string): boolean {
   const reserved = reservedReactionEmojis(config, ackReaction);
   return !RUNNING_EMOJIS.some((emoji) => reserved.has(emoji)) && !reserved.has(FAILURE_EMOJI);
 }

@@ -1,14 +1,14 @@
 import { createHash } from "node:crypto";
 import path from "node:path";
 import { resolveStorePath } from "../../config/sessions/paths.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   createCorePluginStateSyncKeyedStore,
   MAX_PLUGIN_STATE_ENTRIES_PER_PLUGIN,
 } from "../../plugin-state/plugin-state-store.js";
 import type { SkillWorkshopProposalReviewProgress } from "./types.js";
 
-const HISTORY_SCAN_SCHEMA = "openclaw.skill-workshop.history-scan.v1";
+const HISTORY_SCAN_SCHEMA = "bot.skill-workshop.history-scan.v1";
 
 export type SkillHistoryScanDirection = "older" | "newer";
 
@@ -48,7 +48,7 @@ export type StoredSkillHistoryScanState = StoredSkillHistoryScanSnapshot & {
 
 export type SkillHistoryScanScope = {
   agentId: string;
-  config: OpenClawConfig;
+  config: BotConfig;
   direction?: SkillHistoryScanDirection;
   env?: NodeJS.ProcessEnv;
   workspaceDir: string;

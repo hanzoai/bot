@@ -1,17 +1,17 @@
 // Collects configured model, generation, voice, and memory provider ownership.
-import { listModelRefsFromConfigValue } from "@openclaw/model-catalog-core/configured-model-refs";
+import { listModelRefsFromConfigValue } from "@hanzo/bot-model-catalog-core/configured-model-refs";
 import {
   buildModelCatalogMergeKey,
   parseModelCatalogRef,
-} from "@openclaw/model-catalog-core/model-catalog-refs";
+} from "@hanzo/bot-model-catalog-core/model-catalog-refs";
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-model-catalog-core/provider-id";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import { listAgentEntries } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { planEffectiveModelCatalogRows } from "../model-catalog/index.js";
 import { resolveConfiguredGenericEmbeddingProviderId } from "./embedding-provider-config.js";
 import { listRegisteredEmbeddingProviders } from "./embedding-providers.js";
@@ -37,7 +37,7 @@ export function manifestOwnsConfiguredSpeechProvider(params: {
   });
 }
 
-export function collectConfiguredWebSearchProviderIds(config: OpenClawConfig): ReadonlySet<string> {
+export function collectConfiguredWebSearchProviderIds(config: BotConfig): ReadonlySet<string> {
   const search = config.tools?.web?.search;
   if (search?.enabled === false || typeof search?.provider !== "string") {
     return new Set();
@@ -84,7 +84,7 @@ type ManifestModelProviderLookup = {
 
 function buildManifestModelProviderLookup(
   manifestRegistry: PluginManifestRegistry,
-  config: OpenClawConfig,
+  config: BotConfig,
 ): ManifestModelProviderLookup {
   const modelApis = new Map(
     planEffectiveModelCatalogRows({ registry: manifestRegistry, config }).rows.flatMap((row) =>
@@ -100,7 +100,7 @@ function buildManifestModelProviderLookup(
 }
 
 export function collectConfiguredAgentModelProviderIds(
-  config: OpenClawConfig,
+  config: BotConfig,
   manifestRegistry: PluginManifestRegistry,
 ): ReadonlySet<string> {
   const modelIdsByProvider = new Map<string, Set<string>>();
@@ -152,7 +152,7 @@ export function collectConfiguredAgentModelProviderIds(
 }
 
 function configuredModelProviderNeedsRuntimePlugin(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   manifestModelProviders: ManifestModelProviderLookup;
   providerId: string;
   modelId: string;
@@ -184,7 +184,7 @@ export function manifestOwnsConfiguredModelProvider(params: {
 }
 
 export function collectConfiguredGenerationProviderIds(
-  config: OpenClawConfig,
+  config: BotConfig,
 ): ConfiguredGenerationProviderIds {
   const defaults = config.agents?.defaults;
   return {
@@ -195,7 +195,7 @@ export function collectConfiguredGenerationProviderIds(
 }
 
 export function collectConfiguredVoiceProviderIds(
-  config: OpenClawConfig,
+  config: BotConfig,
 ): ConfiguredVoiceProviderIds {
   const providerIds = collectModelProviderIds(config.agents?.defaults?.voiceModel);
   return {
@@ -231,7 +231,7 @@ function readMemorySearchEnabled(
   return typeof enabled === "boolean" ? enabled : undefined;
 }
 
-function isMemorySlotExplicitlyDisabled(config: OpenClawConfig): boolean {
+function isMemorySlotExplicitlyDisabled(config: BotConfig): boolean {
   return normalizeOptionalLowercaseString(config.plugins?.slots?.memory) === "none";
 }
 
@@ -259,7 +259,7 @@ type ConfiguredMemoryEmbeddingStartupProviderOwner = {
  */
 function resolveMemoryEmbeddingProviderOwnerIds(
   providerId: string,
-  config: OpenClawConfig,
+  config: BotConfig,
 ): string[] {
   const ownerIds = [providerId];
   const genericOwnerId = normalizeOptionalLowercaseString(
@@ -322,7 +322,7 @@ function resolveEffectiveMemoryEmbeddingProviderEntries(
  * their API-owner adapter ids.
  */
 export function collectConfiguredMemoryEmbeddingStartupProviderOwners(
-  config: OpenClawConfig,
+  config: BotConfig,
 ): ConfiguredMemoryEmbeddingStartupProviderOwner[] {
   if (isMemorySlotExplicitlyDisabled(config)) {
     return [];
@@ -364,7 +364,7 @@ export function collectConfiguredMemoryEmbeddingStartupProviderOwners(
  * custom `models.providers` ids so the owning plugin loads at startup.
  */
 export function collectConfiguredMemoryEmbeddingProviderIds(
-  config: OpenClawConfig,
+  config: BotConfig,
 ): ReadonlySet<string> {
   const providerIds = new Set<string>();
   for (const provider of collectConfiguredMemoryEmbeddingStartupProviderOwners(config)) {
@@ -383,7 +383,7 @@ export function collectConfiguredMemoryEmbeddingProviderIds(
  * once that plugin loads.
  */
 export function collectUnregisteredConfiguredMemoryEmbeddingProviders(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   registeredProviderIds: ReadonlySet<string>;
 }): Array<{ configuredId: string; source: MemoryEmbeddingStartupProviderSource }> {
   const configured = collectConfiguredMemoryEmbeddingStartupProviderOwners(params.config);

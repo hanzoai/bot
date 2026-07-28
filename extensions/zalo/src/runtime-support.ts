@@ -1,19 +1,19 @@
 // Zalo plugin module implements runtime support behavior.
-export type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-export type { OpenClawConfig, GroupPolicy } from "openclaw/plugin-sdk/config-contracts";
-export type { MarkdownTableMode } from "openclaw/plugin-sdk/config-contracts";
-export type { BaseTokenResolution } from "openclaw/plugin-sdk/channel-contract";
+export type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
+export type { BotConfig, GroupPolicy } from "bot/plugin-sdk/config-contracts";
+export type { MarkdownTableMode } from "bot/plugin-sdk/config-contracts";
+export type { BaseTokenResolution } from "bot/plugin-sdk/channel-contract";
 export type {
   BaseProbeResult,
   ChannelAccountSnapshot,
   ChannelMessageActionAdapter,
   ChannelMessageActionName,
   ChannelStatusIssue,
-} from "openclaw/plugin-sdk/channel-contract";
-export type { SecretInput } from "openclaw/plugin-sdk/secret-input";
-export type { ChannelPlugin, PluginRuntime, WizardPrompter } from "openclaw/plugin-sdk/core";
-export type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-export type { OutboundReplyPayload } from "openclaw/plugin-sdk/reply-payload";
+} from "bot/plugin-sdk/channel-contract";
+export type { SecretInput } from "bot/plugin-sdk/secret-input";
+export type { ChannelPlugin, PluginRuntime, WizardPrompter } from "bot/plugin-sdk/core";
+export type { RuntimeEnv } from "bot/plugin-sdk/runtime";
+export type { OutboundReplyPayload } from "bot/plugin-sdk/reply-payload";
 export {
   DEFAULT_ACCOUNT_ID,
   buildChannelConfigSchema,
@@ -23,7 +23,7 @@ export {
   normalizeAccountId,
   readStringParam,
   resolveClientIp,
-} from "openclaw/plugin-sdk/core";
+} from "bot/plugin-sdk/core";
 export {
   applyAccountNameToChannelSection,
   applySetupAccountConfigPatch,
@@ -33,38 +33,38 @@ export {
   promptSingleChannelSecretInput,
   runSingleChannelSecretStep,
   setTopLevelChannelDmPolicyWithAllowFrom,
-} from "openclaw/plugin-sdk/setup";
+} from "bot/plugin-sdk/setup";
 export {
   buildSecretInputSchema,
   hasConfiguredSecretInput,
   normalizeResolvedSecretInputString,
   normalizeSecretInputString,
-} from "openclaw/plugin-sdk/secret-input";
+} from "bot/plugin-sdk/secret-input";
 export {
   buildTokenChannelStatusSummary,
   PAIRING_APPROVED_MESSAGE,
-} from "openclaw/plugin-sdk/channel-status";
-export { buildBaseAccountStatusSnapshot } from "openclaw/plugin-sdk/status-helpers";
-export { chunkTextForOutbound } from "openclaw/plugin-sdk/text-chunking";
+} from "bot/plugin-sdk/channel-status";
+export { buildBaseAccountStatusSnapshot } from "bot/plugin-sdk/status-helpers";
+export { chunkTextForOutbound } from "bot/plugin-sdk/text-chunking";
 export {
   formatAllowFromLowercase,
   isNormalizedSenderAllowed,
-} from "openclaw/plugin-sdk/allow-from";
-export { addWildcardAllowFrom } from "openclaw/plugin-sdk/setup";
-export { resolveOpenProviderRuntimeGroupPolicy } from "openclaw/plugin-sdk/runtime-group-policy";
+} from "bot/plugin-sdk/allow-from";
+export { addWildcardAllowFrom } from "bot/plugin-sdk/setup";
+export { resolveOpenProviderRuntimeGroupPolicy } from "bot/plugin-sdk/runtime-group-policy";
 export {
   warnMissingProviderGroupPolicyFallbackOnce,
   resolveDefaultGroupPolicy,
-} from "openclaw/plugin-sdk/runtime-group-policy";
-export { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
-export { createChannelMessageReplyPipeline } from "openclaw/plugin-sdk/channel-outbound";
-export { logTypingFailure } from "openclaw/plugin-sdk/channel-feedback";
+} from "bot/plugin-sdk/runtime-group-policy";
+export { createChannelPairingController } from "bot/plugin-sdk/channel-pairing";
+export { createChannelMessageReplyPipeline } from "bot/plugin-sdk/channel-outbound";
+export { logTypingFailure } from "bot/plugin-sdk/channel-feedback";
 export {
   deliverTextOrMediaReply,
   isNumericTargetId,
   sendPayloadWithChunkedTextAndMedia,
-} from "openclaw/plugin-sdk/reply-payload";
-export { waitForAbortSignal } from "openclaw/plugin-sdk/runtime";
+} from "bot/plugin-sdk/reply-payload";
+export { waitForAbortSignal } from "bot/plugin-sdk/runtime";
 export {
   applyBasicWebhookRequestGuards,
   createFixedWindowRateLimiter,
@@ -78,8 +78,8 @@ export {
   WEBHOOK_ANOMALY_COUNTER_DEFAULTS,
   WEBHOOK_RATE_LIMIT_DEFAULTS,
   withResolvedWebhookRequestPipeline,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "bot/plugin-sdk/webhook-ingress";
 export type {
   RegisterWebhookPluginRouteOptions,
   RegisterWebhookTargetOptions,
-} from "openclaw/plugin-sdk/webhook-ingress";
+} from "bot/plugin-sdk/webhook-ingress";

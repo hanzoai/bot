@@ -1,6 +1,6 @@
 /** Session update helpers for skill snapshots, compaction, and lifecycle hooks. */
 import crypto from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveDefaultAgentId, resolveSessionAgentId } from "../../agents/agent-scope.js";
 import {
   type ExecPolicyOverrides,
@@ -8,7 +8,7 @@ import {
 } from "../../agents/exec-defaults.js";
 import { resolveCompactionSessionFile, type SessionEntry } from "../../config/sessions.js";
 import { patchSessionEntry, updateSessionEntry } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   forgetActiveSessionForShutdown,
   noteActiveSessionForShutdown,
@@ -70,7 +70,7 @@ async function persistSessionEntryUpdate(params: {
 }
 
 function emitCompactionSessionLifecycleHooks(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   storePath?: string;
   previousEntry: SessionEntry;
@@ -148,7 +148,7 @@ export async function ensureSkillSnapshot(params: {
   sessionId?: string;
   isFirstTurnInSession: boolean;
   workspaceDir: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   execOverrides?: ExecPolicyOverrides;
   /** If provided, only load skills with these names (for per-channel skill filtering) */
   skillFilter?: string[];
@@ -292,7 +292,7 @@ export async function incrementCompactionCount(params: {
   sessionStore?: Record<string, SessionEntry>;
   sessionKey?: string;
   storePath?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   now?: number;
   amount?: number;
   /** Token count after compaction - if provided, updates session token counts */

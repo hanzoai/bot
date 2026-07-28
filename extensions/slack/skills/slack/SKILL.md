@@ -1,7 +1,7 @@
 ---
 name: slack
 description: "Slack tool actions: send/read/edit/delete messages, react, pin/unpin, list pins/reactions/emoji, member info."
-metadata: { "openclaw": { "emoji": "💬", "requires": { "config": ["channels.slack"] } } }
+metadata: { "bot": { "emoji": "💬", "requires": { "config": ["channels.slack"] } } }
 ---
 
 # Slack

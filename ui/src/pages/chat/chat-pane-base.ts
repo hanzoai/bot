@@ -19,7 +19,7 @@ import {
   SubscriptionsController,
   ChatStateController,
   ChatTranscriptController,
-  OpenClawLightDomElement,
+  BotLightDomElement,
   ObserverDigestHistory,
   SessionParticipationTracker,
   SessionUnreadPatchGuard,
@@ -58,7 +58,7 @@ import {
   type VisibleBoardDock,
 } from "./chat-pane-shared.ts";
 
-export abstract class ChatPaneBase extends OpenClawLightDomElement {
+export abstract class ChatPaneBase extends BotLightDomElement {
   // One lifecycle-owned minute tick refreshes both relative labels and external PR state.
   readonly minutePoll = new PollController(this, 60_000, () => {
     this.requestUpdate();
@@ -125,7 +125,7 @@ export abstract class ChatPaneBase extends OpenClawLightDomElement {
   } | null = null;
   @litState() protected boardChatDockSize: BoardChatDockSize = boardChatDockLayout.load();
   @litState() protected resetConfirmationOpen = false;
-  @litState() protected sessionRailReady = customElements.get("openclaw-chat-session-rail") != null;
+  @litState() protected sessionRailReady = customElements.get("bot-chat-session-rail") != null;
   @litState() protected sessionRailMode: SessionRailMode = "hidden";
   protected sessionRailModeSessionKey = "";
   protected sessionRailLoad: Promise<void> | null = null;

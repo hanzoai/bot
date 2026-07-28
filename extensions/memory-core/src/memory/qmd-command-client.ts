@@ -1,25 +1,25 @@
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   createSubsystemLogger,
   resolveGlobalSingleton,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import {
   parseQmdQueryJson,
   resolveCliSpawnInvocation,
   runCliCommand,
   type QmdQueryResult,
-} from "openclaw/plugin-sdk/memory-core-host-engine-qmd";
+} from "bot/plugin-sdk/memory-core-host-engine-qmd";
 import type {
   ResolvedQmdConfig,
   ResolvedQmdMcporterConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { addTimerTimeoutGraceMs } from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { addTimerTimeoutGraceMs } from "bot/plugin-sdk/number-runtime";
 import { asRecord } from "../dreaming-shared.js";
 import { asQmdAbortError, parseFailedQmdSearchJson } from "./qmd-command-errors.js";
 import type { MemorySearchDeadlineAction } from "./search-deadline.js";
 
 const log = createSubsystemLogger("memory");
-const MCPORTER_STATE_KEY = Symbol.for("openclaw.mcporterState");
+const MCPORTER_STATE_KEY = Symbol.for("bot.mcporterState");
 
 type McporterState = {
   coldStartWarned: boolean;

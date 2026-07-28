@@ -1,11 +1,11 @@
 // Qa Lab plugin module implements WhatsApp live transport adapter behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { WhatsAppQaDriverSession } from "@openclaw/whatsapp/api.js";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { buildQaTarget } from "openclaw/plugin-sdk/qa-channel-protocol";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import type { WhatsAppQaDriverSession } from "@hanzo/bot-whatsapp/api.js";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { buildQaTarget } from "bot/plugin-sdk/qa-channel-protocol";
+import type { QaRunnerCliRegistration } from "bot/plugin-sdk/qa-runner-runtime";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
 import {
   acquireQaCredentialLease,
   startQaCredentialLeaseHeartbeat,
@@ -46,7 +46,7 @@ export async function createWhatsAppQaTransportAdapter(
   let sutAuthDir: string;
   try {
     authRoot = await fs.mkdtemp(
-      path.join(resolvePreferredOpenClawTmpDir(), "openclaw-whatsapp-qa-adapter-"),
+      path.join(resolvePreferredBotTmpDir(), "bot-whatsapp-qa-adapter-"),
     );
     const [unpackedDriverAuthDir, unpackedSutAuthDir] = await Promise.all([
       unpackWhatsAppAuthArchive({
@@ -188,7 +188,7 @@ export async function createWhatsAppQaTransportAdapter(
       busMessageIds.clear();
     },
     createGatewayConfig: () =>
-      buildWhatsAppQaConfig({} as OpenClawConfig, {
+      buildWhatsAppQaConfig({} as BotConfig, {
         allowFrom: [runtimeEnv.driverPhoneE164],
         authDir: sutAuthDir,
         dmPolicy: "allowlist",

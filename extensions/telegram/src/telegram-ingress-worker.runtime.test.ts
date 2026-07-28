@@ -1,5 +1,5 @@
 // Telegram tests cover ingress worker runtime behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type {
   TelegramIngressWorkerCommand,
@@ -72,7 +72,7 @@ function createRuntime(
       token: "test-auth-token",
       accountId: "acct",
       initialUpdateId: null,
-      spoolDir: "/tmp/openclaw-telegram-ingress-worker-test",
+      spoolDir: "/tmp/bot-telegram-ingress-worker-test",
       apiRoot: "https://api.telegram.test",
       timeoutSeconds: 1,
     },
@@ -200,7 +200,7 @@ describe("telegram ingress worker durable-before-offset", () => {
         token: "test-auth-token",
         accountId: "acct",
         initialUpdateId: null,
-        spoolDir: "/tmp/openclaw-telegram-ingress-worker-offset-test",
+        spoolDir: "/tmp/bot-telegram-ingress-worker-offset-test",
         apiRoot: "https://api.telegram.test",
         timeoutSeconds: 1,
       },

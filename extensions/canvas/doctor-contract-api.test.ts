@@ -2,8 +2,8 @@ import fs from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { PluginDoctorStateMigration } from "openclaw/plugin-sdk/runtime-doctor";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { PluginDoctorStateMigration } from "bot/plugin-sdk/runtime-doctor";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { stateMigrations } from "./doctor-contract-api.js";
 
@@ -32,8 +32,8 @@ function migrationParams(params: {
             canvas: { config: { host: { root: params.customRoot } } },
           },
         },
-      } as OpenClawConfig)
-    : ({} as OpenClawConfig);
+      } as BotConfig)
+    : ({} as BotConfig);
   return {
     config,
     env: process.env,
@@ -45,7 +45,7 @@ function migrationParams(params: {
 
 describe("Canvas doctor state migration", () => {
   it("ignores the default core document root", async () => {
-    const stateDir = await createTempDir("openclaw-canvas-doctor-state-");
+    const stateDir = await createTempDir("bot-canvas-doctor-state-");
     await fs.mkdir(path.join(stateDir, "canvas", "documents", "cv_default"), {
       recursive: true,
     });
@@ -54,8 +54,8 @@ describe("Canvas doctor state migration", () => {
   });
 
   it("moves custom-root documents into the stable core layout", async () => {
-    const stateDir = await createTempDir("openclaw-canvas-doctor-state-");
-    const customRoot = await createTempDir("openclaw-canvas-doctor-custom-");
+    const stateDir = await createTempDir("bot-canvas-doctor-state-");
+    const customRoot = await createTempDir("bot-canvas-doctor-custom-");
     const legacyDocumentDir = path.join(customRoot, "documents", "cv_existing");
     await fs.mkdir(path.join(legacyDocumentDir, "collection.media"), { recursive: true });
     await fs.writeFile(path.join(legacyDocumentDir, "index.html"), "<p>existing</p>", "utf8");
@@ -90,8 +90,8 @@ describe("Canvas doctor state migration", () => {
   });
 
   it("leaves a conflicting legacy document in place", async () => {
-    const stateDir = await createTempDir("openclaw-canvas-doctor-state-");
-    const customRoot = await createTempDir("openclaw-canvas-doctor-custom-");
+    const stateDir = await createTempDir("bot-canvas-doctor-state-");
+    const customRoot = await createTempDir("bot-canvas-doctor-custom-");
     const legacyDocumentDir = path.join(customRoot, "documents", "cv_conflict");
     const coreDocumentDir = path.join(stateDir, "canvas", "documents", "cv_conflict");
     await fs.mkdir(legacyDocumentDir, { recursive: true });
@@ -112,8 +112,8 @@ describe("Canvas doctor state migration", () => {
   });
 
   it("cleans partial copies and retries the migration", async () => {
-    const stateDir = await createTempDir("openclaw-canvas-doctor-state-");
-    const customRoot = await createTempDir("openclaw-canvas-doctor-custom-");
+    const stateDir = await createTempDir("bot-canvas-doctor-state-");
+    const customRoot = await createTempDir("bot-canvas-doctor-custom-");
     const legacyDocumentDir = path.join(customRoot, "documents", "cv_retry");
     const coreDocumentsDir = path.join(stateDir, "canvas", "documents");
     const coreDocumentDir = path.join(coreDocumentsDir, "cv_retry");

@@ -3,7 +3,7 @@
 import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { vi } from "vitest";
 import type { ChannelMessageActionName } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { CrossContextDecoration } from "./outbound-policy.js";
 
 let applyCrossContextDecoration: typeof import("./outbound-policy.js").applyCrossContextDecoration;
@@ -96,16 +96,16 @@ const workspaceConfig = {
       appToken: "workspace-app-test",
     },
   },
-} as OpenClawConfig;
+} as BotConfig;
 
 const richChatConfig = {
   channels: {
     richchat: {},
   },
-} as OpenClawConfig;
+} as BotConfig;
 
 function expectCrossContextPolicyResult(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: string;
   action: ChannelMessageActionName;
   to: string;
@@ -154,7 +154,7 @@ describe("outbound policy helpers", () => {
         tools: {
           message: { crossContext: { allowAcrossProviders: true } },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       channel: "forum",
       action: "send" as const,
       to: "forum:@ops",
@@ -177,7 +177,7 @@ describe("outbound policy helpers", () => {
         tools: {
           message: { crossContext: { allowWithinProvider: false } },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       channel: "workspace",
       action: "send" as const,
       to: "C999",
@@ -191,7 +191,7 @@ describe("outbound policy helpers", () => {
         tools: {
           message: { crossContext: { allowWithinProvider: false } },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       channel: "workspace",
       action: "upload-file" as const,
       to: "C999",
@@ -216,7 +216,7 @@ describe("outbound policy helpers", () => {
             },
           ],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       channel: "workspace",
       action: "send" as const,
       to: "C999",
@@ -253,7 +253,7 @@ describe("outbound policy helpers", () => {
           tools: {
             message: { crossContext: { allowAcrossProviders: true } },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         channel: "forum",
         action,
         to: "forum:@ops",

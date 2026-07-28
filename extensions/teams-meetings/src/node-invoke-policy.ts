@@ -1,4 +1,4 @@
-import { createMeetingBrowserNodeInvokePolicy } from "openclaw/plugin-sdk/meeting-runtime";
+import { createMeetingBrowserNodeInvokePolicy } from "bot/plugin-sdk/meeting-runtime";
 import type { TeamsMeetingsConfig } from "./config.js";
 import { TEAMS_MEETINGS_PLATFORM_ADAPTER } from "./transports/teams-meetings-platform-adapter.js";
 import { TEAMS_MEETINGS_NODE_COMMAND } from "./transports/teams-meetings-platform-constants.js";

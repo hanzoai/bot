@@ -1,19 +1,19 @@
 // Qa Lab plugin module implements suite runtime agent session behavior.
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   formatSqliteSessionFileMarker,
   listSessionEntries,
   loadTranscriptEventsSync,
   resolveStorePath,
   upsertSessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { appendSessionTranscriptMessageByIdentity } from "openclaw/plugin-sdk/session-transcript-runtime";
+} from "bot/plugin-sdk/session-store-runtime";
+import { appendSessionTranscriptMessageByIdentity } from "bot/plugin-sdk/session-transcript-runtime";
 import {
   isRecord,
   normalizeOptionalString as readNonEmptyString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import {
   createDirectReplyTranscriptSentinelScanner,
   extractGatewayMessageText,
@@ -68,8 +68,8 @@ type QaSessionTranscriptSummaryOptions = {
 function isSessionStoreLockTimeout(error: unknown) {
   const text = formatErrorMessage(error);
   return (
-    text.includes("OPENCLAW_SESSION_WRITE_LOCK_TIMEOUT") ||
-    text.includes("OPENCLAW_SESSION_WRITE_LOCK_STALE") ||
+    text.includes("BOT_SESSION_WRITE_LOCK_TIMEOUT") ||
+    text.includes("BOT_SESSION_WRITE_LOCK_STALE") ||
     text.includes("SessionWriteLockTimeoutError") ||
     text.includes("SessionWriteLockStaleError") ||
     text.includes("session file locked") ||
@@ -167,8 +167,8 @@ function summarizeSessionTranscriptEvents(
     if (text) {
       finalText = text;
     }
-    const openClawMeta = isRecord(message["__openclaw"]) ? message["__openclaw"] : undefined;
-    const mirrorIdentity = readNonEmptyString(openClawMeta?.mirrorIdentity);
+    const botMeta = isRecord(message["__bot"]) ? message["__bot"] : undefined;
+    const mirrorIdentity = readNonEmptyString(botMeta?.mirrorIdentity);
     if (mirrorIdentity && text) {
       assistantMirrors.push({ identity: mirrorIdentity, text });
     }
@@ -304,7 +304,7 @@ async function readSkillStatus(env: QaGatewayCallEnv, agentId = "qa") {
 function qaSessionRuntimeEnv(tempRoot: string): NodeJS.ProcessEnv {
   return {
     ...process.env,
-    OPENCLAW_STATE_DIR: path.join(tempRoot, "state"),
+    BOT_STATE_DIR: path.join(tempRoot, "state"),
   };
 }
 

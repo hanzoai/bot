@@ -340,7 +340,7 @@ export const pl: TranslationMap = {
     errorTitle: "Nie udało się załadować panelu",
     genericSubtitle: "Coś poszło nie tak podczas ładowania tego panelu.",
     staleTitle: "Dostępna jest nowa wersja",
-    staleSubtitle: "OpenClaw został zaktualizowany w tle. Odśwież, aby pobrać najnowszy panel.",
+    staleSubtitle: "Bot został zaktualizowany w tle. Odśwież, aby pobrać najnowszy panel.",
     reloading: "Ponowne ładowanie…",
     retry: "Spróbuj ponownie",
   },
@@ -348,7 +348,7 @@ export const pl: TranslationMap = {
     pairing: {
       button: "Sparuj urządzenie mobilne",
       adminRequired: "Do utworzenia kodów konfiguracji wymagany jest dostęp administratora.",
-      title: "OpenClaw mobile",
+      title: "Bot mobile",
       subtitle: "Zeskanuj ten kod QR w aplikacji mobilnej, aby połączyć nowy telefon.",
       noApp: "Nie masz jeszcze aplikacji?",
       getApps: "Pobierz aplikacje",
@@ -363,14 +363,14 @@ export const pl: TranslationMap = {
       transportLimitedHint:
         "Ten adres URL Gateway używa nieszyfrowanego protokołu ws://. Użyj wss:// lub Tailscale Serve, a następnie utwórz nowy kod, aby uzyskać pełny dostęp.",
       failed: "Nie udało się utworzyć kodu konfiguracji.",
-      qrAlt: "Kod QR parowania OpenClaw mobile",
+      qrAlt: "Kod QR parowania Bot mobile",
       qrUnavailable: "Kod QR jest niedostępny. Zamiast tego skopiuj kod konfiguracji.",
       copySetupCode: "Kopiuj kod konfiguracji",
       newCode: "Nowy kod",
       showSetupCode: "Pokaż kod konfiguracji",
       pending: "Prośby o dodanie urządzeń oczekujące na sprawdzenie: {count}",
       review: "Do przeglądu",
-      waiting: "Oficjalne aplikacje mobilne OpenClaw łączą się automatycznie po zeskanowaniu.",
+      waiting: "Oficjalne aplikacje mobilne Bot łączą się automatycznie po zeskanowaniu.",
       help: "Pomoc dotycząca parowania",
       manageDevices: "Zarządzaj urządzeniami",
     },
@@ -517,11 +517,11 @@ export const pl: TranslationMap = {
     ownerSession: "Sesja",
     ownerWorkboard: "Workboard",
     title: "Zarządzane worktree",
-    subtitle: "Izolowane kopie robocze repozytoriów należące do OpenClaw.",
+    subtitle: "Izolowane kopie robocze repozytoriów należące do Bot.",
     cleanNow: "Wyczyść teraz",
     cleanupTitle: "Czyszczenie",
     cleanupSubtitle:
-      "OpenClaw okresowo usuwa stare drzewa robocze, aby zwolnić miejsce na dysku. Dostosuj intensywność czyszczenia.",
+      "Bot okresowo usuwa stare drzewa robocze, aby zwolnić miejsce na dysku. Dostosuj intensywność czyszczenia.",
     cleanupMaxCount: "Maksymalna liczba drzew roboczych",
     cleanupMaxCountHelp:
       "Maksymalna liczba zarządzanych drzew roboczych przechowywanych we wszystkich repozytoriach. Starsze drzewa robocze są najpierw zapisywane jako migawki, a następnie usuwane. Ustaw 0, aby wyłączyć limit liczby.",
@@ -572,8 +572,8 @@ export const pl: TranslationMap = {
     cloudWorker: "Chmura · {profile}",
     cloudWorkerProvider: "Dostawca workera chmurowego: {provider}",
     cloudRequiresWorktree: "Workery chmurowe wymagają zarządzanego drzewa roboczego",
-    cloudRequiresOpenClawRuntime:
-      "Procesy w chmurze wymagają środowiska OpenClaw; wybrano {runtime}.",
+    cloudRequiresBotRuntime:
+      "Procesy w chmurze wymagają środowiska Bot; wybrano {runtime}.",
     cloudSecureContextRequired:
       "Workery chmurowe wymagają bezpiecznego kontekstu przeglądarki, aby mechanizm odzyskiwania mógł chronić Twoje zadanie.",
     cloudStartFailed:
@@ -1366,7 +1366,7 @@ export const pl: TranslationMap = {
       title: "Powiadomienia push",
       nativeTitle: "Powiadomienia",
       hint: "Odbieraj powiadomienia push w przeglądarce z Twojego gatewaya.",
-      nativeHint: "Powiadomienia są wyświetlane natywnie przez aplikację OpenClaw na tym Macu.",
+      nativeHint: "Powiadomienia są wyświetlane natywnie przez aplikację Bot na tym Macu.",
       unavailableHint: "Niedostępne w tej przeglądarce.",
       unavailable: "Niedostępne",
       checking: "Sprawdzanie...",
@@ -1391,7 +1391,7 @@ export const pl: TranslationMap = {
       blockedHint:
         "Powiadomienia są zablokowane. Zaktualizuj uprawnienia witryny w przeglądarce, aby zezwolić na powiadomienia.",
       nativeBlockedHint:
-        "Powiadomienia dla OpenClaw są wyłączone w systemie macOS. Zezwól na nie w Ustawienia systemowe > Powiadomienia.",
+        "Powiadomienia dla Bot są wyłączone w systemie macOS. Zezwól na nie w Ustawienia systemowe > Powiadomienia.",
     },
     appearance: {
       theme: "Motyw",
@@ -1469,7 +1469,7 @@ export const pl: TranslationMap = {
     autoSaveFailed: "Nie udało się zapisać",
     autoSaveConflict: "Ustawienia zostały zmienione gdzie indziej",
     retry: "Ponów",
-    applyBannerText: "Zapisano do openclaw.json — zrestartuj gateway, aby zastosować.",
+    applyBannerText: "Zapisano do bot.json — zrestartuj gateway, aby zastosować.",
     applyBannerAction: "Zrestartuj i zastosuj",
     rawDiscard: "Odrzuć",
     rawDraftBlocksApply:
@@ -1532,7 +1532,7 @@ export const pl: TranslationMap = {
     },
   },
   approvalPage: {
-    brandName: "OpenClaw",
+    brandName: "Bot",
     eyebrow: "Operator approval",
     loadingTitle: "Loading approval",
     loadingDescription: "Checking the current approval state with the Gateway.",
@@ -1541,7 +1541,7 @@ export const pl: TranslationMap = {
       "This approval could not be found or this device is not authorized to review it.",
     connectionErrorTitle: "Connection interrupted",
     connectionErrorDescription:
-      "OpenClaw cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
+      "Bot cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
     retry: "Retry",
     execTitle: "Command approval",
     pending: "Waiting for your decision",
@@ -1720,7 +1720,7 @@ export const pl: TranslationMap = {
     chat: "Czat",
     settings: "Ustawienia",
     settingsGeneral: "Ogólne",
-    askOpenClaw: "Zapytaj OpenClaw",
+    askBot: "Zapytaj Bot",
     settingsGroupConnections: "Połączenia",
     settingsGroupAgents: "Agenci i narzędzia",
     settingsGroupSecurity: "Prywatność i bezpieczeństwo",
@@ -1848,7 +1848,7 @@ export const pl: TranslationMap = {
     skillWorkshop: "Warsztat Skills",
     nodes: "Węzły",
     chat: "Czat",
-    custodian: "OpenClaw",
+    custodian: "Bot",
     config: "Konfiguracja",
     profile: "Profil",
     communications: "Komunikacja",
@@ -1885,7 +1885,7 @@ export const pl: TranslationMap = {
     nodes: "Sparowane urządzenia i polecenia.",
     chat: "Czat Gateway do szybkich interwencji.",
     custodian: "Konfiguracja i utrzymanie systemu.",
-    config: "Edytuj openclaw.json.",
+    config: "Edytuj bot.json.",
     profile: "Statystyki, serie i życie Twojego agenta na rafie.",
     communications: "Kanały, wiadomości i ustawienia audio.",
     appearance: "Motyw, UI i ustawienia kreatora konfiguracji.",
@@ -1908,7 +1908,7 @@ export const pl: TranslationMap = {
   modelSetup: {
     heading: "Połącz swoją AI",
     intro:
-      "OpenClaw korzysta z dostępu do AI, który już masz — logowania w CLI, klucza API lub logowania u dostawcy.",
+      "Bot korzysta z dostępu do AI, który już masz — logowania w CLI, klucza API lub logowania u dostawcy.",
     loading: "Sprawdzanie dostępnego dostępu do AI w tym Gateway…",
     retry: "Ponów",
     checkAgain: "Sprawdź ponownie",
@@ -1921,7 +1921,7 @@ export const pl: TranslationMap = {
     },
     access: {
       adminRequired: "Konfiguracja modelu wymaga uprawnienia operator.admin.",
-      gatewayTooOld: "Gateway korzysta ze starszej wersji OpenClaw",
+      gatewayTooOld: "Gateway korzysta ze starszej wersji Bot",
     },
     candidates: {
       title: "Znaleziono w tym Gateway",
@@ -2038,12 +2038,12 @@ export const pl: TranslationMap = {
     confirmReplace:
       "Istniejące pliki docelowe zostaną uwzględnione w kopii zapasowej w raporcie migracji przed ich zastąpieniem.",
     confirmBackup:
-      "OpenClaw tworzy zweryfikowaną kopię zapasową przed importem, zanim rozpocznie kopiowanie pamięci.",
+      "Bot tworzy zweryfikowaną kopię zapasową przed importem, zanim rozpocznie kopiowanie pamięci.",
     confirmImport: "Importuj pamięć",
     disconnected: "Połącz się z Gateway, aby zaimportować pamięć.",
     title: "Importuj pamięć asystenta",
     subtitle:
-      "Przejrzyj skonsolidowaną pamięć Codex i automatyczną pamięć Claude Code przed skopiowaniem ich do OpenClaw.",
+      "Przejrzyj skonsolidowaną pamięć Codex i automatyczną pamięć Claude Code przed skopiowaniem ich do Bot.",
     agent: "Agent docelowy",
     replaceExisting: "Zastąp istniejące importy",
     replaceHint:
@@ -2052,7 +2052,7 @@ export const pl: TranslationMap = {
   onboarding: {
     memoryImport: {
       title: "Zabierz ze sobą pamięć swojego asystenta",
-      body: "OpenClaw znalazł pamięć z innych asystentów programowania. Zaimportować ją do obszaru roboczego agenta?",
+      body: "Bot znalazł pamięć z innych asystentów programowania. Zaimportować ją do obszaru roboczego agenta?",
       plannedCount: "{count} gotowych do zaimportowania",
       alreadyImported: "Już zaimportowano: {count}",
       sourceUnavailable: "Ścieżka źródłowa jest niedostępna",
@@ -2068,35 +2068,35 @@ export const pl: TranslationMap = {
       unknownError: "Żądanie nie powiodło się",
       doneTitle: "Import pamięci zakończony",
       doneBody:
-        "Przeniesiono: {migrated}, pominięto: {skipped}. Możesz kontynuować konfigurację OpenClaw.",
+        "Przeniesiono: {migrated}, pominięto: {skipped}. Możesz kontynuować konfigurację Bot.",
     },
   },
   custodian: {
-    title: "OpenClaw",
+    title: "Bot",
     subtitle: "Twój przewodnik po konfiguracji systemu",
     subtitleCaretaker: "Konfiguracja i utrzymanie systemu.",
     exitSetup: "Zakończ konfigurację",
     newAgent: "Nowy agent",
     hatchDraft: "Obudź się, przyjacielu!",
-    placeholder: "Napisz do OpenClaw…",
+    placeholder: "Napisz do Bot…",
     sensitivePlaceholder: "Wprowadź wrażliwą wartość…",
     sensitiveReply: "Wysłano wrażliwą odpowiedź",
     send: "Wyślij",
-    thinking: "OpenClaw myśli",
+    thinking: "Bot myśli",
     earlier: "Wcześniej",
-    requestFailed: "OpenClaw nie mógł odpowiedzieć. Spróbuj ponownie.",
+    requestFailed: "Bot nie mógł odpowiedzieć. Spróbuj ponownie.",
     connectionChanged:
       "Połączenie z Gateway zmieniło się. Ponów próbę, aby kontynuować tę konfigurację.",
     sessionRestarted:
-      "{error} OpenClaw rozpoczął nową sesję; wcześniejsze wiadomości pozostają jako kontekst.",
-    unsupportedGateway: "Zaktualizuj Gateway, aby kontynuować konfigurację z OpenClaw.",
+      "{error} Bot rozpoczął nową sesję; wcześniejsze wiadomości pozostają jako kontekst.",
+    unsupportedGateway: "Zaktualizuj Gateway, aby kontynuować konfigurację z Bot.",
     history: {
       button: "Historia",
       title: "Ostatnie zmiany",
       description: "Co zmieniło się w tym systemie, od najnowszych.",
       loading: "Wczytywanie ostatnich zmian…",
       empty: "Brak zarejestrowanych zmian.",
-      requestFailed: "OpenClaw nie mógł wczytać historii zmian.",
+      requestFailed: "Bot nie mógł wczytać historii zmian.",
       loadMore: "Wczytaj więcej",
       loadingMore: "Wczytywanie kolejnych…",
       changedPaths: "Zmienione ścieżki ({count})",
@@ -2242,7 +2242,7 @@ export const pl: TranslationMap = {
       notes: "Zapisuj notatki do Markdown, Obsidian, Notion lub Bear.",
     },
     noInstalledTitle: "Nie zainstalowano opcjonalnych wtyczek",
-    noInstalledBody: "Odkryj polecaną wtyczkę lub przeszukaj ClawHub, aby rozszerzyć OpenClaw.",
+    noInstalledBody: "Odkryj polecaną wtyczkę lub przeszukaj ClawHub, aby rozszerzyć Bot.",
     noInstalledMatchTitle: "Żadne zainstalowane wtyczki nie pasują",
     noMatchBody: "Spróbuj innego wyszukiwania.",
     filterAll: "Wszystkie",
@@ -2278,7 +2278,7 @@ export const pl: TranslationMap = {
     detailPluginId: "Identyfikator wtyczki",
     offlineTitle: "Gateway offline",
     offlineBody: "Połącz, aby przeglądać zainstalowane i polecane wtyczki.",
-    optionalCapability: "Opcjonalna funkcja OpenClaw.",
+    optionalCapability: "Opcjonalna funkcja Bot.",
     enabled: "Włączone",
     disabled: "Wyłączone",
     available: "Dostępne",
@@ -2335,7 +2335,7 @@ export const pl: TranslationMap = {
     },
   },
   aboutPage: {
-    productName: "OpenClaw",
+    productName: "Bot",
     tagline: "Twój osobisty asystent AI działający na Twoich urządzeniach.",
     waveHello: "Pomachaj Clawdowi na powitanie",
     linksLabel: "Społeczność i zasoby",
@@ -2345,7 +2345,7 @@ export const pl: TranslationMap = {
     linkDiscord: "Discord",
     linkX: "X (Twitter)",
     linkChangelog: "Historia zmian",
-    license: "© 2026 OpenClaw Foundation — licencja MIT.",
+    license: "© 2026 Bot Foundation — licencja MIT.",
     artifactTitle: "Control UI",
     artifactSubtitle: "Tożsamość osadzona podczas tworzenia tego artefaktu przeglądarki.",
     artifactDetails: "Szczegóły kompilacji Control UI",
@@ -2363,7 +2363,7 @@ export const pl: TranslationMap = {
       "Zgłaszana przez aktywne połączenie Gateway; niezależna od tej kompilacji Control UI.",
   },
   appsPage: {
-    heroTitle: "Zabierz OpenClaw wszędzie",
+    heroTitle: "Zabierz Bot wszędzie",
     heroTagline:
       "Aplikacje towarzyszące na telefon, zegarek, komputer i przeglądarkę — plus wtyczki rozszerzające możliwości Twojego agenta.",
     sectionMobile: "Na telefonie",
@@ -2387,11 +2387,11 @@ export const pl: TranslationMap = {
     cards: {
       ios: {
         title: "iPhone",
-        desc: "Czatuj, rozmawiaj, zatwierdzaj działania i udostępniaj do OpenClaw z iOS.",
+        desc: "Czatuj, rozmawiaj, zatwierdzaj działania i udostępniaj do Bot z iOS.",
       },
       android: {
         title: "Android",
-        desc: "Twój telefon z Androidem jako pełnoprawny węzeł OpenClaw — czat, aparat i Canvas.",
+        desc: "Twój telefon z Androidem jako pełnoprawny węzeł Bot — czat, aparat i Canvas.",
       },
       appleWatch: {
         title: "Apple Watch",
@@ -2399,7 +2399,7 @@ export const pl: TranslationMap = {
       },
       wearOs: {
         title: "Wear OS",
-        desc: "Aplikacja towarzysząca na Androida rozszerza OpenClaw na zegarek.",
+        desc: "Aplikacja towarzysząca na Androida rozszerza Bot na zegarek.",
       },
       macos: {
         title: "macOS",
@@ -2407,7 +2407,7 @@ export const pl: TranslationMap = {
       },
       windows: {
         title: "Windows",
-        desc: "Aplikacja towarzysząca dla Windows łączy Twój komputer jako węzeł OpenClaw.",
+        desc: "Aplikacja towarzysząca dla Windows łączy Twój komputer jako węzeł Bot.",
       },
       linux: {
         title: "Linux",
@@ -2415,11 +2415,11 @@ export const pl: TranslationMap = {
       },
       chrome: {
         title: "Rozszerzenie Chrome",
-        desc: "Pozwól OpenClaw sterować istniejącym Chrome — kartami, stronami i formularzami.",
+        desc: "Pozwól Bot sterować istniejącym Chrome — kartami, stronami i formularzami.",
       },
       plugins: {
         title: "Wtyczki i ClawHub",
-        desc: "Rozszerz OpenClaw o kanały, narzędzia i Skills od społeczności.",
+        desc: "Rozszerz Bot o kanały, narzędzia i Skills od społeczności.",
       },
     },
   },
@@ -2616,7 +2616,7 @@ export const pl: TranslationMap = {
     selfLearning: {
       pitchTitle: "Włącz samouczenie",
       pitchBody:
-        "OpenClaw analizuje poprawki i istotne ukończone zadania, a następnie tworzy propozycje umiejętności dla tej tablicy. Zużywa dodatkowe tokeny w tle, a wersje robocze trafiają tu jako oczekujące propozycje.",
+        "Bot analizuje poprawki i istotne ukończone zadania, a następnie tworzy propozycje umiejętności dla tej tablicy. Zużywa dodatkowe tokeny w tle, a wersje robocze trafiają tu jako oczekujące propozycje.",
       enable: "Włącz samouczenie",
       enabling: "Włączanie…",
       updateError: "Nie udało się zaktualizować ustawienia samouczenia.",
@@ -3790,9 +3790,9 @@ export const pl: TranslationMap = {
         title: "Wymagane uwierzytelnienie",
         summary:
           "Gateway jest osiągalny, ale wymaga pasującego tokenu lub hasła, zanim ta przeglądarka będzie mogła się połączyć.",
-        stepPaste: "Wklej token z openclaw dashboard --no-open albo wpisz skonfigurowane hasło.",
+        stepPaste: "Wklej token z bot dashboard --no-open albo wpisz skonfigurowane hasło.",
         stepGenerate:
-          "Jeśli token nie jest skonfigurowany, uruchom openclaw doctor --generate-gateway-token na hoście Gateway.",
+          "Jeśli token nie jest skonfigurowany, uruchom bot doctor --generate-gateway-token na hoście Gateway.",
         stepConnect: "Kliknij ponownie Connect po zaktualizowaniu poświadczeń.",
       },
       authFailed: {
@@ -3800,7 +3800,7 @@ export const pl: TranslationMap = {
         summary:
           "Podane poświadczenia zostały odrzucone. Najczęstsza przyczyna to nieaktualny token lub token skopiowany z innego URL Gateway.",
         stepDashboard:
-          "Uruchom openclaw dashboard --no-open i otwórz świeży URL albo wklej jego token.",
+          "Uruchom bot dashboard --no-open i otwórz świeży URL albo wklej jego token.",
         stepReplace:
           "Zastąp nieaktualne wartości tokenu/hasła; nie używaj ponownie tokenu z innego URL Gateway.",
         stepMode:
@@ -3824,8 +3824,8 @@ export const pl: TranslationMap = {
           "Ta przeglądarka wymaga jednorazowej zgody z hosta Gateway, zanim będzie mogła używać Control UI.",
         upgradeSummary:
           "Ta przeglądarka jest już znana, ale żądany dostęp się zmienił i wymaga nowej zgody.",
-        stepList: "Uruchom openclaw devices list na hoście Gateway.",
-        stepApproveId: "Zatwierdź to żądanie: openclaw devices approve {requestId}.",
+        stepList: "Uruchom bot devices list na hoście Gateway.",
+        stepApproveId: "Zatwierdź to żądanie: bot devices approve {requestId}.",
         stepApprove: "Zatwierdź oczekujące żądanie przeglądarki/urządzenia z tej listy.",
         stepReconnect: "Po zakończeniu zatwierdzania połącz się ponownie.",
       },
@@ -3853,21 +3853,21 @@ export const pl: TranslationMap = {
           "Udostępniana Control UI i działający Gateway nie zgadzają się co do obsługiwanego protokołu połączenia.",
         refresh: "Odśwież stronę",
         stepDashboard:
-          "Otwórz ponownie udostępniany dashboard poleceniem openclaw dashboard, aby UI i Gateway pochodziły z tej samej instalacji.",
+          "Otwórz ponownie udostępniany dashboard poleceniem bot dashboard, aby UI i Gateway pochodziły z tej samej instalacji.",
         stepDevUi:
           "Jeśli używasz pnpm ui:dev, przebuduj lub uruchom ponownie UI dev względem bieżącego checkoutu.",
         stepRestart:
-          "Zrestartuj Gateway po aktualizacji OpenClaw, aby udostępniał bieżący protokół.",
+          "Zrestartuj Gateway po aktualizacji Bot, aby udostępniał bieżący protokół.",
       },
       network: {
         title: "Nie udało się połączyć",
         summary:
           "Przeglądarka nie mogła dokończyć połączenia z Gateway. Sprawdź cel i transport przed ponowną próbą z poświadczeniami.",
         stepGateway:
-          "Potwierdź, że Gateway działa, używając openclaw status lub openclaw gateway run.",
+          "Potwierdź, że Gateway działa, używając bot status lub bot gateway run.",
         stepUrl: "Sprawdź URL WebSocket i użyj wss://, gdy Gateway jest za HTTPS/Tailscale Serve.",
         stepDashboard:
-          "Otwórz ponownie dashboard przez openclaw dashboard --no-open, aby skopiować bieżący URL i szczegóły auth.",
+          "Otwórz ponownie dashboard przez bot dashboard --no-open, aby skopiować bieżący URL i szczegóły auth.",
       },
     },
   },
@@ -3963,7 +3963,7 @@ export const pl: TranslationMap = {
       remoteViewOnly: "Ta sesja znajduje się na sparowanym węźle i jest tylko do odczytu.",
       unsupportedViewOnly: "To zewnętrzne źródło sesji jest tylko do odczytu.",
       sessionMenu: "External session actions",
-      openInOpenClaw: "Open in OpenClaw",
+      openInBot: "Open in Bot",
       openInTerminal: "Open in terminal",
       terminalUnavailable: "Terminal opening is unavailable for this session.",
     },
@@ -4019,7 +4019,7 @@ export const pl: TranslationMap = {
     followUpModeOverriding: "Zastępowanie domyślnego ustawienia serwera ({mode})",
     followUpModeReset: "Przywróć domyślne ustawienie serwera",
     catalogOpenTarget: "Otwieraj sesje zewnętrzne w",
-    catalogOpenTargetViewer: "OpenClaw viewer",
+    catalogOpenTargetViewer: "Bot viewer",
     catalogOpenTargetTerminal: "Terminal",
     onboardingDisabled: "Wyłączone podczas konfiguracji",
     commandPaletteTitle: "Wyszukaj lub przejdź do… (⌘K)",
@@ -4037,7 +4037,7 @@ export const pl: TranslationMap = {
       titleOne: "1 konflikt obszaru roboczego w chmurze",
       titleMany: "{count} konfliktów obszaru roboczego w chmurze",
       description:
-        "OpenClaw zachował Twoje lokalne wersje i zastosował pozostałe zmiany z chmury. Sprawdź wynik przygotowany do scalenia lub przejmij wersję z chmury dla konfliktowej ścieżki.",
+        "Bot zachował Twoje lokalne wersje i zastosował pozostałe zmiany z chmury. Sprawdź wynik przygotowany do scalenia lub przejmij wersję z chmury dla konfliktowej ścieżki.",
       morePaths: "+{count} dodatkowych ścieżek",
       stagedResult: "Przygotowany wynik z chmury",
       copyStagedResult: "Kopiuj referencję przygotowanego wyniku",
@@ -4048,7 +4048,7 @@ export const pl: TranslationMap = {
       commandHelp:
         "Uruchom je w Bash lub zsh (Git Bash w systemie Windows). Jeśli inspekcja informuje, że ścieżka nie istnieje, chmura ją usunęła; zweryfikuj i usuń ścieżkę lokalną ręcznie. Jeśli checkout zgłasza konflikt pliku/katalogu, przenieś lub usuń blokującą ścieżkę lokalną, a następnie spróbuj ponownie. Jeśli brakuje przygotowanej referencji, powiadomienie jest nieaktualne; nie zmieniaj ścieżki lokalnej.",
       commandsUnavailable:
-        "Ta nazwa pliku zawiera znaki sterujące terminala, więc OpenClaw nie utworzy dla niej możliwego do skopiowania polecenia powłoki. Sprawdź przygotowaną referencję bezpośrednio i wprowadź ścieżkę ręcznie z zachowaniem ostrożności.",
+        "Ta nazwa pliku zawiera znaki sterujące terminala, więc Bot nie utworzy dla niej możliwego do skopiowania polecenia powłoki. Sprawdź przygotowaną referencję bezpośrednio i wprowadź ścieżkę ręcznie z zachowaniem ostrożności.",
       dismiss: "Odrzuć powiadomienie o konflikcie obszaru roboczego",
       eventSender: "Obszar roboczy w chmurze",
       eventTitleOne: "Zastosowano wynik z chmury z 1 konfliktem",
@@ -4630,7 +4630,7 @@ export const pl: TranslationMap = {
       filters: "Filtry",
       shownOf: "{shown} z {total}",
       emptyTitle: "Brak zaplanowanych zadań",
-      emptyHint: "Opisz, co i kiedy ma zrobić OpenClaw — uruchomi się zgodnie z harmonogramem.",
+      emptyHint: "Opisz, co i kiedy ma zrobić Bot — uruchomi się zgodnie z harmonogramem.",
       noMatching: "Żadne zadanie nie pasuje do bieżących filtrów.",
       loadMore: "Wczytaj więcej",
       loading: "Ładowanie...",
@@ -4697,7 +4697,7 @@ export const pl: TranslationMap = {
     detail: {
       tabsLabel: "Szczegóły automatyzacji",
       newTitle: "Nowe zaplanowane zadanie",
-      newSubtitle: "Opisz, co ma zrobić OpenClaw, a następnie wybierz, kiedy się uruchomi.",
+      newSubtitle: "Opisz, co ma zrobić Bot, a następnie wybierz, kiedy się uruchomi.",
       back: "Wszystkie automatyzacje",
       settingsTab: "Ustawienia",
       historyTitle: "Historia uruchomień",
@@ -4770,7 +4770,7 @@ export const pl: TranslationMap = {
       descriptionPlaceholder: "Opcjonalny kontekst dla tego zadania",
       agentPlaceholder: "main lub ops",
       agentHelp: "Zacznij pisać, aby wybrać znanego agenta, albo wprowadź własnego.",
-      promptPlaceholder: "Opisz, co ma zrobić OpenClaw...",
+      promptPlaceholder: "Opisz, co ma zrobić Bot...",
       repeat: "Powtarzaj",
       repeatInterval: "Interwał",
       repeatOnce: "Jednokrotnie",

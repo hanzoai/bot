@@ -1,14 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
 import { afterEach, describe, expect, it } from "vitest";
 import { writeQrDataUrlToTempFile } from "./qr-temp-file.js";
 
 describe("writeQrDataUrlToTempFile", () => {
   const profile = `test/profile-${process.pid}`;
   const expectedPath = path.join(
-    resolvePreferredOpenClawTmpDir(),
-    `openclaw-zalouser-qr-test-profile-${process.pid}.png`,
+    resolvePreferredBotTmpDir(),
+    `bot-zalouser-qr-test-profile-${process.pid}.png`,
   );
 
   afterEach(async () => {

@@ -2,7 +2,7 @@
 export type { AssistantMessageDiagnostic, DiagnosticErrorInfo } from "./utils/diagnostics.js";
 import type { AssistantMessageDiagnostic } from "./utils/diagnostics.js";
 
-/** Provider API families with first-class request/stream adapters in OpenClaw. */
+/** Provider API families with first-class request/stream adapters in Bot. */
 export type KnownApi =
   | "openai-completions"
   | "mistral-conversations"
@@ -17,7 +17,7 @@ export type KnownApi =
 /** Provider API id; custom providers can use ids outside the built-in set. */
 export type Api = KnownApi | (string & {});
 
-/** Image-generation API families with first-class adapters in OpenClaw. */
+/** Image-generation API families with first-class adapters in Bot. */
 export type KnownImagesApi = "openrouter-images";
 
 /** Image API id; custom image providers can use ids outside the built-in set. */
@@ -26,7 +26,7 @@ export type ImagesApi = KnownImagesApi | (string & {});
 /** Provider id used for routing, diagnostics, and config lookups. */
 export type Provider = string;
 
-/** Image provider ids with first-class adapters in OpenClaw. */
+/** Image provider ids with first-class adapters in Bot. */
 export type KnownImagesProvider = "openrouter";
 
 /** Image provider id used for routing, diagnostics, and config lookups. */
@@ -301,7 +301,7 @@ export interface UserMessage {
   timestamp: number; // Unix timestamp in milliseconds
   /**
    * Marks a user message that carries transient current-turn runtime context
-   * (e.g. an OpenClaw runtime-context carrier appended after the active user
+   * (e.g. an Bot runtime-context carrier appended after the active user
    * turn). Such messages are volatile — present only on the turn they belong to
    * and stripped on replay — so providers must NOT anchor a prompt-cache
    * breakpoint on them, or the breakpoint would land on bytes that change every
@@ -623,7 +623,7 @@ export interface Model<TApi extends Api = Api> {
   baseUrl: string;
   reasoning: boolean;
   /**
-   * Maps OpenClaw thinking levels to provider/model-specific values.
+   * Maps Bot thinking levels to provider/model-specific values.
    * Missing keys use provider defaults. null marks a level as unsupported.
    */
   thinkingLevelMap?: ThinkingLevelMap;

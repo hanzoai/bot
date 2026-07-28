@@ -1,14 +1,14 @@
 // Google provider module implements model/runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import {
   createWebSearchProviderContractFields,
   mergeScopedSearchConfig,
   resolveProviderWebSearchPluginConfig,
   type WebSearchProviderPlugin,
   type WebSearchProviderToolDefinition,
-} from "openclaw/plugin-sdk/provider-web-search-config-contract";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-web-search-config-contract";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 
 const GEMINI_CREDENTIAL_PATH = "plugins.entries.google.config.webSearch.apiKey";
 const GOOGLE_PROVIDER_CREDENTIAL_PATH = "models.providers.google.apiKey";
@@ -61,14 +61,14 @@ function createGeminiToolDefinition(
 }
 
 function resolveGoogleModelProviderConfig(
-  config?: OpenClawConfig,
+  config?: BotConfig,
 ): Record<string, unknown> | undefined {
   const provider = config?.models?.providers?.google;
   return isRecord(provider) ? provider : undefined;
 }
 
 function getGoogleModelProviderCredentialFallback(
-  config?: OpenClawConfig,
+  config?: BotConfig,
 ): { path: string; value: unknown } | undefined {
   const provider = resolveGoogleModelProviderConfig(config);
   return provider && provider.apiKey !== undefined
@@ -78,7 +78,7 @@ function getGoogleModelProviderCredentialFallback(
 
 function withGoogleModelProviderFallbacks(
   searchConfig: Record<string, unknown> | undefined,
-  config?: OpenClawConfig,
+  config?: BotConfig,
 ): Record<string, unknown> | undefined {
   const provider = resolveGoogleModelProviderConfig(config);
   if (!provider || (provider.apiKey === undefined && provider.baseUrl === undefined)) {
@@ -122,7 +122,7 @@ export function createGeminiWebSearchProvider(): WebSearchProviderPlugin {
     envVars: ["GEMINI_API_KEY"],
     placeholder: "AIza...",
     signupUrl: "https://aistudio.google.com/apikey",
-    docsUrl: "https://docs.openclaw.ai/tools/web",
+    docsUrl: "https://docs.bot.ai/tools/web",
     autoDetectOrder: 20,
     credentialPath: GEMINI_CREDENTIAL_PATH,
     ...contractFields,

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bot Release CI"
+  short_description: "Verify and debug Bot release validation runs"
+  default_prompt: "Use $release-bot-ci to validate one frozen release SHA with one active parent run, recover only the smallest failed lane, and stop on a precise external blocker."

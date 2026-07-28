@@ -9,14 +9,14 @@ title: "Linux app"
 ---
 
 The Gateway is fully supported on Linux and requires Node. Bun can still be used
-as a dependency installer or package-script runner, but it cannot run OpenClaw
+as a dependency installer or package-script runner, but it cannot run Bot
 because it does not provide `node:sqlite`.
 
 ## Desktop companion
 
-The OpenClaw Linux companion is a Tauri desktop app for a local Gateway. It:
+The Bot Linux companion is a Tauri desktop app for a local Gateway. It:
 
-- installs the OpenClaw CLI and managed Node runtime when they are missing; release builds install the stable channel automatically, while development builds ask for the channel first
+- installs the Bot CLI and managed Node runtime when they are missing; release builds install the stable channel automatically, while development builds ask for the channel first
 - attaches to a healthy Gateway before attempting service changes
 - delegates install, start, stop, and restart operations to the CLI-managed systemd user service
 - discovers nearby Bonjour Gateways and opens each Control UI in a route-scoped window, so several
@@ -30,10 +30,10 @@ The OpenClaw Linux companion is a Tauri desktop app for a local Gateway. It:
 - remains available from the system tray when its window is closed
 
 Stable releases built from `main` ship `.deb` and AppImage bundles as assets on the
-[GitHub release](https://github.com/openclaw/openclaw/releases) for the tag,
-named `OpenClaw-<version>-amd64.deb` and `OpenClaw-<version>-amd64.AppImage`,
+[GitHub release](https://github.com/hanzoai/bot/releases) for the tag,
+named `Bot-<version>-amd64.deb` and `Bot-<version>-amd64.AppImage`,
 with a `SHA256SUMS.linux-app.txt` checksum file next to them. Download the
-`.deb` and install it with `sudo apt install ./OpenClaw-<version>-amd64.deb`,
+`.deb` and install it with `sudo apt install ./Bot-<version>-amd64.deb`,
 or mark the AppImage executable and run it directly. The AppImage runtime
 needs FUSE 2 (`sudo apt install libfuse2`, or `libfuse2t64` on Ubuntu 24.04+);
 without it, run the AppImage with `APPIMAGE_EXTRACT_AND_RUN=1`.
@@ -46,7 +46,7 @@ pnpm dlx @tauri-apps/cli@2.11.4 build --bundles deb,appimage
 ```
 
 The `Linux App` CI workflow uploads the same bundles as the
-`openclaw-linux-companion` artifact for pull requests touching the app and for
+`bot-linux-companion` artifact for pull requests touching the app and for
 manual runs. See `apps/linux/README.md` in the repository for Linux build
 dependencies and development commands.
 
@@ -89,9 +89,9 @@ plain-text reply below the composer. Press `Esc` to dismiss the bar and its repl
 
 ### Canvas
 
-Linux Canvas uses two cooperating processes. `openclaw node run` remains the single Gateway node connection; the bundled `linux-canvas` plugin forwards `canvas.*` calls to the running desktop app over a user-only Unix socket. The app owns one on-demand WebView window, including the bundled A2UI renderer and action bridge back to the agent.
+Linux Canvas uses two cooperating processes. `bot node run` remains the single Gateway node connection; the bundled `linux-canvas` plugin forwards `canvas.*` calls to the running desktop app over a user-only Unix socket. The app owns one on-demand WebView window, including the bundled A2UI renderer and action bridge back to the agent.
 
-The plugin is enabled by default. It advertises Canvas only when the desktop socket exists at `$XDG_RUNTIME_DIR/openclaw-canvas.sock`, or `/tmp/openclaw-canvas-$UID.sock` when `XDG_RUNTIME_DIR` is unavailable. Disable it with `plugins.entries.linux-canvas.enabled: false`. On a headless Linux server without the desktop app, Canvas is not advertised.
+The plugin is enabled by default. It advertises Canvas only when the desktop socket exists at `$XDG_RUNTIME_DIR/bot-canvas.sock`, or `/tmp/bot-canvas-$UID.sock` when `XDG_RUNTIME_DIR` is unavailable. Disable it with `plugins.entries.linux-canvas.enabled: false`. On a headless Linux server without the desktop app, Canvas is not advertised.
 
 Linux v1 uses one Canvas window. HTTP and HTTPS pages are renderable, but A2UI actions are accepted only from the bundled renderer.
 
@@ -100,8 +100,8 @@ Linux v1 uses one Canvas window. HTTP and HTTPS pages are renderable, but A2UI a
 The CLI remains the simplest option for a headless server, a VPS, or a remote Gateway:
 
 1. Install Node 24.15+ (recommended), Node 22.22.3+ (LTS), or Node 25.9+.
-2. `npm i -g openclaw@latest`
-3. `openclaw onboard --install-daemon`
+2. `npm i -g bot@latest`
+3. `bot onboard --install-daemon`
 4. From your laptop: `ssh -N -L 18789:127.0.0.1:18789 <user>@<host>`
 5. Open `http://127.0.0.1:18789/` and authenticate with the configured shared
    secret (token by default; password if `gateway.auth.mode` is `"password"`).
@@ -111,7 +111,7 @@ Full server guide: [Linux Server](/vps). Step-by-step VPS example:
 
 ## Node capabilities
 
-The bundled Linux Node plugin gives the CLI `openclaw node` service device capabilities without requiring the desktop app. Commands are advertised to the Gateway only when their capability is enabled and the required local tool exists.
+The bundled Linux Node plugin gives the CLI `bot node` service device capabilities without requiring the desktop app. Commands are advertised to the Gateway only when their capability is enabled and the required local tool exists.
 
 | Capability                              | Default | Requirement                                                           |
 | --------------------------------------- | ------- | --------------------------------------------------------------------- |
@@ -119,7 +119,7 @@ The bundled Linux Node plugin gives the CLI `openclaw node` service device capab
 | Camera photos and clips (`camera.*`)    | Off     | FFmpeg, V4L2 camera access, and PulseAudio or PipeWire for clip audio |
 | Location (`location.get`)               | Off     | GeoClue2 and its `where-am-i` demo                                    |
 
-Configure the plugin in `openclaw.json`:
+Configure the plugin in `bot.json`:
 
 ```json5
 {
@@ -142,8 +142,8 @@ Restart the node service after changing these settings. Availability is determin
 The Gateway approves the node's command and capability surface separately from device pairing. On first start, or after enabling more capabilities, approve the pending surface:
 
 ```bash
-openclaw nodes pending
-openclaw nodes approve <requestId>
+bot nodes pending
+bot nodes approve <requestId>
 ```
 
 A node can be connected and device-paired while its effective `caps` and `commands` remain empty until this approval completes.
@@ -163,34 +163,34 @@ Camera devices must be readable by the service user, commonly through the `video
 Install with one of:
 
 ```bash
-openclaw onboard --install-daemon
-openclaw gateway install
-openclaw configure   # select "Gateway service" when prompted
+bot onboard --install-daemon
+bot gateway install
+bot configure   # select "Gateway service" when prompted
 ```
 
 Repair or migrate an existing install:
 
 ```bash
-openclaw doctor
+bot doctor
 ```
 
-`openclaw gateway install` renders a systemd **user** unit by default. Full
+`bot gateway install` renders a systemd **user** unit by default. Full
 service guidance, including the **system**-level unit variant for shared or
 always-on hosts, lives in the [Gateway runbook](/gateway#supervision-and-service-lifecycle).
 
 Write a unit by hand only for a custom setup. Minimal user-unit example
-(`~/.config/systemd/user/openclaw-gateway[-<profile>].service`):
+(`~/.config/systemd/user/bot-gateway[-<profile>].service`):
 
 ```ini
 [Unit]
-Description=OpenClaw Gateway (profile: <profile>, v<version>)
+Description=Bot Gateway (profile: <profile>, v<version>)
 After=network-online.target
 Wants=network-online.target
 StartLimitBurst=5
 StartLimitIntervalSec=60
 
 [Service]
-ExecStart=/usr/local/bin/openclaw gateway --port 18789
+ExecStart=/usr/local/bin/bot gateway --port 18789
 Restart=always
 RestartSec=5
 RestartPreventExitStatus=78
@@ -204,22 +204,22 @@ KillMode=control-group
 WantedBy=default.target
 ```
 
-Hand-written units do not inherit the adaptive heap sizing that `openclaw gateway install` writes for managed Gateway services. Prefer the managed installer, or set an explicit heap limit in the custom supervisor after accounting for native-memory headroom.
+Hand-written units do not inherit the adaptive heap sizing that `bot gateway install` writes for managed Gateway services. Prefer the managed installer, or set an explicit heap limit in the custom supervisor after accounting for native-memory headroom.
 
 Enable it:
 
 ```bash
-systemctl --user enable --now openclaw-gateway[-<profile>].service
+systemctl --user enable --now bot-gateway[-<profile>].service
 ```
 
 ## Memory pressure and OOM kills
 
 On Linux, the kernel picks an OOM victim when a host, VM, or container cgroup
 runs out of memory. The Gateway is a poor victim because it owns long-lived
-sessions and channel connections, so OpenClaw biases transient child
+sessions and channel connections, so Bot biases transient child
 processes to be killed first when possible.
 
-For eligible Linux child spawns, OpenClaw wraps the command in a short
+For eligible Linux child spawns, Bot wraps the command in a short
 `/bin/sh` shim that raises the child's own `oom_score_adj` to `1000`, then
 `exec`s the real command. This is unprivileged: a process may always raise
 its own OOM score.
@@ -229,10 +229,10 @@ Covered child process surfaces:
 - Supervisor-managed command children
 - PTY shell children
 - MCP stdio server children
-- OpenClaw-launched browser/Chrome processes (via the plugin SDK process runtime)
+- Bot-launched browser/Chrome processes (via the plugin SDK process runtime)
 
 The wrapper is Linux-only and skipped when `/bin/sh` is unavailable, or when
-the child env sets `OPENCLAW_CHILD_OOM_SCORE_ADJ` to `0`, `false`, `no`, or
+the child env sets `BOT_CHILD_OOM_SCORE_ADJ` to `0`, `false`, `no`, or
 `off`.
 
 Verify a child process:

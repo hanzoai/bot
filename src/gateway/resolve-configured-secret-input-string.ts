@@ -1,7 +1,7 @@
 // SecretRef-aware Gateway config string resolver.
 // Resolves configured secret inputs and fallback values without leaking values.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveSecretInputRef } from "../config/types.secrets.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { secretRefKey } from "../secrets/ref-contract.js";
@@ -32,7 +32,7 @@ function buildUnresolvedReason(params: {
 }
 
 export async function resolveConfiguredSecretInputString(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
   value: unknown;
   path: string;
@@ -91,7 +91,7 @@ export async function resolveConfiguredSecretInputString(params: {
 }
 
 async function resolveConfiguredSecretRefOnlyInputString(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
   value: unknown;
   path: string;
@@ -119,7 +119,7 @@ async function resolveConfiguredSecretRefOnlyInputString(params: {
 }
 
 export async function resolveConfiguredSecretInputWithFallback(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
   value: unknown;
   path: string;
@@ -182,7 +182,7 @@ export async function resolveConfiguredSecretInputWithFallback(params: {
 }
 
 export async function resolveRequiredConfiguredSecretRefInputString(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
   value: unknown;
   path: string;

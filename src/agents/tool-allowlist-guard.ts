@@ -3,7 +3,7 @@
  *
  * Collects operator/user allowlist sources and explains when no callable tools remain.
  */
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import { normalizeToolList, normalizeToolName } from "./tool-policy.js";
 
 type ExplicitToolAllowlistSource = {

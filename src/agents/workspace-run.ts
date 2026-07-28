@@ -3,7 +3,7 @@
  *
  * Selects per-run workspace directories and redacts run identifiers for logs/prompts.
  */
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { logWarn } from "../logger.js";
 import { redactIdentifier } from "../logging/redact-identifier.js";
 import {
@@ -57,7 +57,7 @@ class RunWorkspaceAgentNotConfiguredError extends Error {
 function resolveRunAgentId(params: {
   sessionKey?: string;
   agentId?: string;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): {
   agentId: string;
   agentIdSource: AgentIdSource;
@@ -105,7 +105,7 @@ export function resolveRunWorkspaceDir(params: {
   workspaceDir: unknown;
   sessionKey?: string;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): ResolveRunWorkspaceResult {
   const rawSessionKey = params.sessionKey?.trim() ?? "";

@@ -9,7 +9,7 @@ export namespace testing {
 }
 declare const DEFAULT_GATEWAY_SCHEMA_ERROR: "provider rejected the request schema or tool payload";
 declare const DEFAULT_RAW_SCHEMA_ERROR: "400 The following tools cannot be used with reasoning.effort 'minimal': web_search.";
-declare const SUCCESS_MARKER: "OPENCLAW_SCHEMA_E2E_OK";
+declare const SUCCESS_MARKER: "BOT_SCHEMA_E2E_OK";
 declare function extractSuccessReplyTexts(value: unknown): unknown[];
 declare function resolveGatewayPort(env?: NodeJS.ProcessEnv): number;
 declare function validateSuccessResult(result: unknown, marker?: string): void;

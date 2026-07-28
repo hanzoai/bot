@@ -1,5 +1,5 @@
 // Matrix plugin module implements events behavior.
-import { normalizeOptionalString, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeOptionalString, uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import type { PluginRuntime, RuntimeLogger } from "../../runtime-api.js";
 import type { CoreConfig } from "../../types.js";
 import type { MatrixAuth } from "../client.js";
@@ -26,7 +26,7 @@ function formatMatrixPostHealthySyncDecryptionHint(accountId: string): string {
   return (
     "matrix: repeated fresh encrypted messages are still failing to decrypt after Matrix resumed healthy sync. " +
     "This device may still be missing new room keys. " +
-    `Check 'openclaw matrix verify status --verbose --account ${accountId}' and 'openclaw matrix devices list --account ${accountId}'.`
+    `Check 'bot matrix verify status --verbose --account ${accountId}' and 'bot matrix devices list --account ${accountId}'.`
   );
 }
 
@@ -147,8 +147,8 @@ function createMatrixPostHealthySyncDecryptFailureTracker(params: {
 function formatMatrixSelfDecryptionHint(accountId: string): string {
   return (
     "matrix: failed to decrypt a message from this same Matrix user. " +
-    "This usually means another Matrix device did not share the room key, or another OpenClaw runtime is using the same account. " +
-    `Check 'openclaw matrix verify status --verbose --account ${accountId}' and 'openclaw matrix devices list --account ${accountId}'.`
+    "This usually means another Matrix device did not share the room key, or another Bot runtime is using the same account. " +
+    `Check 'bot matrix verify status --verbose --account ${accountId}' and 'bot matrix devices list --account ${accountId}'.`
   );
 }
 

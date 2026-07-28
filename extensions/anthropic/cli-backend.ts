@@ -6,11 +6,11 @@ import { createHmac, randomBytes } from "node:crypto";
 import type {
   CliBackendPlugin,
   CliBackendPreparedExecution,
-} from "openclaw/plugin-sdk/cli-backend";
+} from "bot/plugin-sdk/cli-backend";
 import {
   CLI_FRESH_WATCHDOG_DEFAULTS,
   CLI_RESUME_WATCHDOG_DEFAULTS,
-} from "openclaw/plugin-sdk/cli-backend";
+} from "bot/plugin-sdk/cli-backend";
 import {
   CLAUDE_CLI_BACKEND_ID,
   CLAUDE_CLI_DEFAULT_MODEL_REF,
@@ -146,7 +146,7 @@ export function buildAnthropicCliBackend(): CliBackendPlugin {
         "--setting-sources",
         "user",
         "--allowedTools",
-        "mcp__openclaw__*",
+        "mcp__bot__*",
         "--disallowedTools",
         "ScheduleWakeup,CronCreate,Bash(run_in_background:true),Monitor",
       ],
@@ -159,7 +159,7 @@ export function buildAnthropicCliBackend(): CliBackendPlugin {
         "--setting-sources",
         "user",
         "--allowedTools",
-        "mcp__openclaw__*",
+        "mcp__bot__*",
         "--disallowedTools",
         "ScheduleWakeup,CronCreate,Bash(run_in_background:true),Monitor",
         "--resume",

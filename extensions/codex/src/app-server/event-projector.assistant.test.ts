@@ -388,7 +388,7 @@ describe("CodexAppServerEventProjector assistant projection", () => {
 
     const result = projector.buildResult(buildEmptyToolTelemetry());
     const userMessage = requireRecord(result.messagesSnapshot[0], "user message");
-    expect(userMessage["__openclaw"]).toMatchObject({
+    expect(userMessage["__bot"]).toMatchObject({
       upstreamUserText: "decorated upstream prompt",
     });
   });

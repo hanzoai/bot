@@ -3,7 +3,7 @@ import type {
   ProviderAuthContext,
   ProviderAuthMethod,
   ProviderAuthResult,
-} from "openclaw/plugin-sdk/core";
+} from "bot/plugin-sdk/core";
 import {
   ensureApiKeyFromOptionEnvOrPrompt,
   ensureAuthProfileStore,
@@ -11,7 +11,7 @@ import {
   normalizeOptionalSecretInput,
   type SecretInput,
   validateApiKeyInput,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "bot/plugin-sdk/provider-auth";
 import { getLoggedInAccount, isAzCliInstalled } from "./cli.js";
 import {
   loginWithTenantFallback,
@@ -45,7 +45,7 @@ function shouldTestFoundryTextConnection(params: {
 }
 
 if (process.env.VITEST === "true") {
-  const key = Symbol.for("openclaw.microsoftFoundryTestApi");
+  const key = Symbol.for("bot.microsoftFoundryTestApi");
   const api = (Reflect.get(globalThis, key) as Record<string, unknown> | undefined) ?? {};
   Reflect.set(globalThis, key, { ...api, shouldTestFoundryTextConnection });
 }

@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import { resolvePluginCapabilityProviders } from "../plugins/capability-provider-runtime.js";
 import { resolveImageCapableConfigProviderIds } from "./config-provider-models.js";
 import { describeImageWithModel, describeImagesWithModel } from "./image-runtime.js";
@@ -49,7 +49,7 @@ export { normalizeMediaExecutionProviderId, normalizeMediaProviderId } from "./p
 /** Builds the media-understanding provider registry from plugin capabilities and config providers. */
 export function buildMediaUnderstandingRegistry(
   overrides?: Record<string, MediaUnderstandingProvider>,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
   preparedProviders?: readonly MediaUnderstandingProvider[],
 ): Map<string, MediaUnderstandingProvider> {
   const registry = new Map<string, MediaUnderstandingProvider>();

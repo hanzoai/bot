@@ -1,12 +1,12 @@
 /** Shared ACP manager normalization, resolution, and error helpers. */
-import { ACP_ERROR_CODES, AcpRuntimeError } from "@openclaw/acp-core/runtime/errors";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { ACP_ERROR_CODES, AcpRuntimeError } from "@hanzo/bot-acp-core/runtime/errors";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   canonicalizeMainSessionAlias,
   resolveMainSessionKey,
 } from "../../config/sessions/main-session.js";
 import type { SessionAcpMeta } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { toErrorObject } from "../../infra/errors.js";
 import {
   normalizeAgentId,
@@ -59,7 +59,7 @@ function normalizeSessionKey(sessionKey: string): string {
 
 /** Canonicalizes aliases and main-session keys before ACP metadata lookup. */
 export function canonicalizeAcpSessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
 }): string {
   const normalized = normalizeSessionKey(params.sessionKey);

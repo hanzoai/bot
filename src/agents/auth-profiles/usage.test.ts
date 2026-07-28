@@ -4,7 +4,7 @@
  * persistence hooks without contacting real providers.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { MAX_DATE_TIMESTAMP_MS } from "../../shared/number-coercion.js";
 import type { AuthProfileStore, ProfileUsageStats } from "./types.js";
 import { resolveProfileUnusableUntil } from "./usage-state.js";
@@ -767,7 +767,7 @@ describe("clearAuthProfileCooldown", () => {
 });
 
 describe("markAuthProfileFailure — active windows do not extend on retry", () => {
-  // Regression for https://github.com/openclaw/openclaw/issues/23516
+  // Regression for https://github.com/hanzoai/bot/issues/23516
   // When all providers are at saturation backoff (60 min) and retries fire every 30 min,
   // each retry was resetting cooldownUntil to now+60m, preventing recovery.
   type WindowStats = ProfileUsageStats;
@@ -776,7 +776,7 @@ describe("markAuthProfileFailure — active windows do not extend on retry", () 
     store: ReturnType<typeof makeStore>;
     now: number;
     reason: "rate_limit" | "billing" | "auth_permanent";
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
   }): Promise<void> {
     const dateNowSpy = vi.spyOn(Date, "now").mockReturnValue(params.now);
     mockLockedUpdateForStore(params.store);
@@ -1109,11 +1109,11 @@ describe("markAuthProfileFailure — locked update failure", () => {
   it("drops bookkeeping without an unlocked full-store save", async () => {
     const store = makeStore(undefined);
     const consoleWarn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    const previousTestConsole = process.env.OPENCLAW_TEST_CONSOLE;
-    const previousLogLevel = process.env.OPENCLAW_LOG_LEVEL;
+    const previousTestConsole = process.env.BOT_TEST_CONSOLE;
+    const previousLogLevel = process.env.BOT_LOG_LEVEL;
     storeMocks.updateAuthProfileStoreWithLock.mockResolvedValueOnce(null);
-    process.env.OPENCLAW_TEST_CONSOLE = "1";
-    process.env.OPENCLAW_LOG_LEVEL = "warn";
+    process.env.BOT_TEST_CONSOLE = "1";
+    process.env.BOT_LOG_LEVEL = "warn";
     try {
       await markAuthProfileFailure({
         store,
@@ -1131,14 +1131,14 @@ describe("markAuthProfileFailure — locked update failure", () => {
       ).toBe(true);
     } finally {
       if (previousTestConsole === undefined) {
-        delete process.env.OPENCLAW_TEST_CONSOLE;
+        delete process.env.BOT_TEST_CONSOLE;
       } else {
-        process.env.OPENCLAW_TEST_CONSOLE = previousTestConsole;
+        process.env.BOT_TEST_CONSOLE = previousTestConsole;
       }
       if (previousLogLevel === undefined) {
-        delete process.env.OPENCLAW_LOG_LEVEL;
+        delete process.env.BOT_LOG_LEVEL;
       } else {
-        process.env.OPENCLAW_LOG_LEVEL = previousLogLevel;
+        process.env.BOT_LOG_LEVEL = previousLogLevel;
       }
       consoleWarn.mockRestore();
     }
@@ -1386,8 +1386,8 @@ describe("markAuthProfileFailure — WHAM-aware Codex cooldowns", () => {
     const headers = init.headers as Record<string, string>;
     expect(headers.Authorization).toBe("Bearer codex-access-token");
     expect(headers["ChatGPT-Account-Id"]).toBe("acct_test_123");
-    expect(headers.originator).toBe("openclaw");
-    expect(headers["User-Agent"]).toMatch(/^openclaw\//);
+    expect(headers.originator).toBe("bot");
+    expect(headers["User-Agent"]).toMatch(/^bot\//);
     const stats = store.usageStats?.["openai:default"];
     expect(stats?.lastProbeAt).toBe(now);
     if (exactBlocked) {

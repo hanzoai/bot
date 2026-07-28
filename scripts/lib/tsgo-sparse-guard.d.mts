@@ -6,7 +6,7 @@ export function shouldSkipSparseTsgoGuardError(env?: NodeJS.ProcessEnv): boolean
  * Creates an environment that suppresses recursive sparse tsgo guard checks.
  */
 export function createSparseTsgoSkipEnv(baseEnv?: NodeJS.ProcessEnv): {
-  OPENCLAW_TSGO_SPARSE_SKIP: string;
+  BOT_TSGO_SPARSE_SKIP: string;
 };
 /**
  * Builds the sparse-checkout diagnostic for core tsgo projects, when needed.

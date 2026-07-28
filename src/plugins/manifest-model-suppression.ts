@@ -1,7 +1,7 @@
 // Resolves model suppression metadata declared by plugin manifests.
-import { buildModelCatalogMergeKey } from "@openclaw/model-catalog-core/model-catalog-refs";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { buildModelCatalogMergeKey } from "@hanzo/bot-model-catalog-core/model-catalog-refs";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   planManifestModelCatalogSuppressions,
   type ManifestModelCatalogSuppressionEntry,
@@ -12,7 +12,7 @@ import {
 } from "./manifest-contract-eligibility.js";
 
 function listManifestModelCatalogSuppressions(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir?: string;
   env: NodeJS.ProcessEnv;
 }): readonly ManifestModelCatalogSuppressionEntry[] {
@@ -62,7 +62,7 @@ function normalizeSuppressionHost(host: string): string {
 
 function resolveConfiguredProviderValue(params: {
   provider: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): { api?: string; baseUrl?: string } | undefined {
   const providers = params.config?.models?.providers;
   if (!providers) {
@@ -84,7 +84,7 @@ function manifestSuppressionMatchesConditions(params: {
   suppression: ManifestModelCatalogSuppressionEntry;
   provider: string;
   baseUrl?: string | null;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): boolean {
   const when = params.suppression.when;
   if (!when) {
@@ -120,7 +120,7 @@ function manifestSuppressionMatchesConditions(params: {
 }
 
 export function buildManifestBuiltInModelSuppressionResolver(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir?: string;
   env?: NodeJS.ProcessEnv;
 }) {

@@ -3,7 +3,7 @@ import {
   claimPendingAgentQuestionAnswer,
   embeddedAgentLog,
   setActiveEmbeddedRun,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   interruptCodexTurnBestEffort,
   retireCodexAppServerClientAfterTimedOutTurn,

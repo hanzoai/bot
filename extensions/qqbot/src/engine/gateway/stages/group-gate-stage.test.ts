@@ -1,9 +1,9 @@
 // Qqbot tests cover group gate command-level enforcement.
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("openclaw/plugin-sdk/session-store-runtime", () => ({
+vi.mock("bot/plugin-sdk/session-store-runtime", () => ({
   getSessionEntry: vi.fn(() => undefined),
-  resolveStorePath: vi.fn(() => "/state/agents/default/openclaw-agent.sqlite"),
+  resolveStorePath: vi.fn(() => "/state/agents/default/bot-agent.sqlite"),
 }));
 
 import type { QQBotInboundAccess } from "../../adapter/index.js";
@@ -98,7 +98,7 @@ describe("runGroupGateStage", () => {
     event.mentions = [
       {
         member_openid: "BOT_OPENID",
-        username: "OpenClaw",
+        username: "Bot",
       },
     ];
 

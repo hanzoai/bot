@@ -1,9 +1,9 @@
-import { createAssistantMessageEventStream } from "@openclaw/llm-core";
-import type { Api, Model, StreamFn } from "@openclaw/llm-core";
+import { createAssistantMessageEventStream } from "@hanzo/bot-llm-core";
+import type { Api, Model, StreamFn } from "@hanzo/bot-llm-core";
 import { afterAll, describe, expect, it, vi } from "vitest";
 import { createApiRegistry, type ApiRegistry } from "./api-registry.js";
 
-const CUSTOM_API = "openclaw-openai-chatgpt-responses-transport";
+const CUSTOM_API = "bot-openai-chatgpt-responses-transport";
 
 function registerCustomApi(registry: ApiRegistry, api: Api, _streamFn: StreamFn): boolean {
   if (registry.getApiProvider(api)) {

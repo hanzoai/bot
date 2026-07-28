@@ -1,6 +1,6 @@
 // Mattermost tests cover monitor plugin behavior.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../runtime-api.js";
+import type { BotConfig } from "../../runtime-api.js";
 import { resolveMattermostAccount } from "./accounts.js";
 import * as clientModule from "./client.js";
 import type { MattermostClient } from "./client.js";
@@ -216,7 +216,7 @@ describe("canFinalizeMattermostPreviewInPlace", () => {
 });
 
 describe("shouldUpdateMattermostDraftToolProgress", () => {
-  type MattermostConfig = NonNullable<NonNullable<OpenClawConfig["channels"]>["mattermost"]>;
+  type MattermostConfig = NonNullable<NonNullable<BotConfig["channels"]>["mattermost"]>;
 
   function resolveToolProgressEnabled(mattermostConfig: MattermostConfig) {
     const account = resolveMattermostAccount({
@@ -263,7 +263,7 @@ describe("shouldUpdateMattermostDraftToolProgress", () => {
 });
 
 describe("shouldSuppressMattermostDefaultToolProgressMessages", () => {
-  type MattermostConfig = NonNullable<NonNullable<OpenClawConfig["channels"]>["mattermost"]>;
+  type MattermostConfig = NonNullable<NonNullable<BotConfig["channels"]>["mattermost"]>;
 
   function resolveSuppressDefaultProgress(mattermostConfig: MattermostConfig) {
     const account = resolveMattermostAccount({

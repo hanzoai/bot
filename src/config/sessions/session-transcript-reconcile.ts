@@ -6,11 +6,11 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { Worker } from "node:worker_threads";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import {
-  resolveOpenClawAgentSqlitePath,
-  runOpenClawAgentWriteTransaction,
-  type OpenClawAgentDatabase,
-  type OpenClawAgentDatabaseOptions,
-} from "../../state/openclaw-agent-db.js";
+  resolveBotAgentSqlitePath,
+  runBotAgentWriteTransaction,
+  type BotAgentDatabase,
+  type BotAgentDatabaseOptions,
+} from "../../state/bot-agent-db.js";
 import { runExclusiveSqliteSessionWrite } from "./session-accessor.sqlite-scope.js";
 import { deleteOrphanedTranscriptIndexRowsInTransaction } from "./session-transcript-index.js";
 import {
@@ -41,7 +41,7 @@ export type SessionTranscriptReconcileResult = {
   reconciledSessions: number;
 };
 
-type SessionTranscriptReconcileParams = OpenClawAgentDatabaseOptions & {
+type SessionTranscriptReconcileParams = BotAgentDatabaseOptions & {
   preferredSessionId?: string;
 };
 
@@ -50,8 +50,8 @@ type ActivePreparedProjection = {
   plan: PreparedSessionTranscriptProjectionMetadata;
 };
 
-function reconcileKey(params: OpenClawAgentDatabaseOptions): string {
-  return resolveOpenClawAgentSqlitePath(params);
+function reconcileKey(params: BotAgentDatabaseOptions): string {
+  return resolveBotAgentSqlitePath(params);
 }
 
 function resolveSessionTranscriptReconcileWorkerUrl(currentModuleUrl = import.meta.url): URL {
@@ -90,17 +90,17 @@ function continueProjectionWorker(worker: Worker, accepted: boolean): void {
 }
 
 async function runProjectionWrite<T>(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: BotAgentDatabaseOptions,
   operationLabel: string,
-  operation: (database: OpenClawAgentDatabase) => T,
+  operation: (database: BotAgentDatabase) => T,
 ): Promise<T> {
   return await runExclusiveSqliteSessionWrite(databaseOptions, async () =>
-    runOpenClawAgentWriteTransaction(operation, databaseOptions, { operationLabel }),
+    runBotAgentWriteTransaction(operation, databaseOptions, { operationLabel }),
   );
 }
 
 async function claimPreparedSessionTranscriptProjection(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: BotAgentDatabaseOptions,
   plan: PreparedSessionTranscriptProjectionMetadata,
 ): Promise<ActivePreparedProjection | undefined> {
   const claimId = nextProjectionClaimId();
@@ -146,7 +146,7 @@ function decodeFtsChunk(chunk: EncodedTranscriptFtsChunk) {
 }
 
 async function appendPreparedProjectionChunk(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: BotAgentDatabaseOptions,
   active: ActivePreparedProjection,
   rows:
     | {
@@ -177,7 +177,7 @@ async function appendPreparedProjectionChunk(
 }
 
 async function finalizePreparedProjection(
-  databaseOptions: OpenClawAgentDatabaseOptions,
+  databaseOptions: BotAgentDatabaseOptions,
   active: ActivePreparedProjection,
 ): Promise<boolean> {
   return await runProjectionWrite(
@@ -196,8 +196,8 @@ async function finalizePreparedProjection(
 export function reconcileSessionTranscriptIndexes(
   params: SessionTranscriptReconcileParams,
 ): Promise<SessionTranscriptReconcileResult> {
-  const databasePath = resolveOpenClawAgentSqlitePath(params);
-  const databaseOptions: OpenClawAgentDatabaseOptions = {
+  const databasePath = resolveBotAgentSqlitePath(params);
+  const databaseOptions: BotAgentDatabaseOptions = {
     agentId: params.agentId,
     ...(params.env ? { env: params.env } : {}),
     path: databasePath,
@@ -376,14 +376,14 @@ export function startSessionTranscriptIndexReconcile(
 }
 
 export function isSessionTranscriptIndexReconcileRunning(
-  params: OpenClawAgentDatabaseOptions,
+  params: BotAgentDatabaseOptions,
 ): boolean {
   return runningReconciles.has(reconcileKey(params));
 }
 
 /** Test and maintenance wait hook for an already-scheduled reconcile. */
 export async function waitForSessionTranscriptIndexReconcile(
-  params: OpenClawAgentDatabaseOptions,
+  params: BotAgentDatabaseOptions,
 ): Promise<void> {
   await runningReconciles.get(reconcileKey(params))?.promise;
 }

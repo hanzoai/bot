@@ -130,7 +130,7 @@ describe("I18nManager pending locale retry", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     const persistedLocalesAtHook: Array<string | null> = [];
     const onUnrecoverableLocaleLoad = vi.fn(() => {
-      persistedLocalesAtHook.push(localStorage.getItem("openclaw.i18n.locale"));
+      persistedLocalesAtHook.push(localStorage.getItem("bot.i18n.locale"));
     });
     manager.setLocaleLoadRecovery({
       isUnrecoverableError: (error) =>
@@ -150,7 +150,7 @@ describe("I18nManager pending locale retry", () => {
 
     expect(onUnrecoverableLocaleLoad).toHaveBeenCalledExactlyOnceWith("fr");
     expect(persistedLocalesAtHook).toEqual(["fr"]);
-    expect(localStorage.getItem("openclaw.i18n.locale")).toBe("fr");
+    expect(localStorage.getItem("bot.i18n.locale")).toBe("fr");
     expect(internals.pendingLocale).toBe("fr");
   });
 

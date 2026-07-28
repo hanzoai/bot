@@ -1,15 +1,15 @@
 /** Tests ACP session manager resolution, turn execution, state transitions, and cleanup. */
 import { setTimeout as scheduleNativeTimeout } from "node:timers";
 import { setTimeout as sleep } from "node:timers/promises";
-import { expectDefined } from "@openclaw/normalization-core";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import { describe, expect, it, vi } from "vitest";
 import {
   requireTaskByRunId,
   withAcpManagerTaskStateDir,
 } from "../../../test/helpers/acp-manager-task-state.js";
 import { listSessionStateEventsSince } from "../../sessions/session-state-events.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import { isAcpTurnActive } from "./active-turns.js";
 import {
   AcpRuntimeError,
@@ -27,7 +27,7 @@ import {
   mockCallArg,
   mockParentedAcpSessionEntries,
   readySessionMeta,
-  type OpenClawConfig,
+  type BotConfig,
   resetAcpSessionManagerForTests,
   type SessionAcpMeta,
 } from "./manager.test-helpers.js";
@@ -83,7 +83,7 @@ describe("AcpSessionManager", () => {
       ...baseCfg,
       session: { mainKey: "main" },
       agents: { list: [{ id: "main", default: true }] },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await manager.runTurn({
       provenance: "system",
@@ -161,7 +161,7 @@ describe("AcpSessionManager", () => {
           payload: { outcome: "cancelled" },
         },
       ]);
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
     });
   });
 
@@ -339,7 +339,7 @@ describe("AcpSessionManager", () => {
         label: "Korean path",
         task: "Print the current directory in Korean",
         status: "succeeded",
-        progressSummary: "현재 작업 디렉토리는 /home/bykim0119/.openclaw/workspace 입니다",
+        progressSummary: "현재 작업 디렉토리는 /home/bykim0119/.bot/workspace 입니다",
       });
     });
   }, 300_000);
@@ -727,7 +727,7 @@ describe("AcpSessionManager", () => {
             timeoutSeconds: 1,
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
 
       const first = manager.runTurn({
         provenance: "system",
@@ -911,7 +911,7 @@ describe("AcpSessionManager", () => {
         enabled: true,
         dispatch: { enabled: true },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const manager = new AcpSessionManager();
     await expect(
@@ -1042,17 +1042,17 @@ describe("AcpSessionManager", () => {
       runtime: runtimeState.runtime,
     });
     hoisted.readAcpSessionEntryMock.mockReturnValue({
-      sessionKey: "agent:openclaw:acp:session-1",
-      storeSessionKey: "agent:openclaw:acp:session-1",
+      sessionKey: "agent:bot:acp:session-1",
+      storeSessionKey: "agent:bot:acp:session-1",
       acp: readySessionMeta({
-        agent: "openclaw",
+        agent: "bot",
       }),
     });
 
     const manager = new AcpSessionManager();
     const closeResult = await manager.closeSession({
       cfg: baseCfg,
-      sessionKey: "agent:openclaw:acp:session-1",
+      sessionKey: "agent:bot:acp:session-1",
       reason: "terminal-task-cleanup",
       allowBackendUnavailable: true,
       discardPersistentState: true,
@@ -1063,7 +1063,7 @@ describe("AcpSessionManager", () => {
     expect(closeResult.runtimeNotice).toContain("does not support session/close");
     expect(closeResult.metaCleared).toBe(true);
     expect(runtimeState.prepareFreshSession).toHaveBeenCalledWith({
-      sessionKey: "agent:openclaw:acp:session-1",
+      sessionKey: "agent:bot:acp:session-1",
     });
   });
 

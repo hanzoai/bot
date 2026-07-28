@@ -26,7 +26,7 @@ function sendUnauthorized(res: ServerResponse): void {
 }
 
 function parseBoardWidgetPath(pathname: string): { sessionKey: string; name: string } | undefined {
-  const match = /^\/__openclaw__\/board\/([^/]+)\/([^/]+)\/index\.html$/.exec(pathname);
+  const match = /^\/__bot__\/board\/([^/]+)\/([^/]+)\/index\.html$/.exec(pathname);
   if (!match) {
     return undefined;
   }

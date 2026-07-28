@@ -1,30 +1,30 @@
 // Matrix tests cover device health plugin behavior.
 import { describe, expect, it } from "vitest";
-import { isOpenClawManagedMatrixDevice, summarizeMatrixDeviceHealth } from "./device-health.js";
+import { isBotManagedMatrixDevice, summarizeMatrixDeviceHealth } from "./device-health.js";
 
 describe("matrix device health", () => {
-  it("detects OpenClaw-managed device names", () => {
-    expect(isOpenClawManagedMatrixDevice("OpenClaw Gateway")).toBe(true);
-    expect(isOpenClawManagedMatrixDevice("OpenClaw Debug")).toBe(true);
-    expect(isOpenClawManagedMatrixDevice("Element iPhone")).toBe(false);
-    expect(isOpenClawManagedMatrixDevice(null)).toBe(false);
+  it("detects Bot-managed device names", () => {
+    expect(isBotManagedMatrixDevice("Bot Gateway")).toBe(true);
+    expect(isBotManagedMatrixDevice("Bot Debug")).toBe(true);
+    expect(isBotManagedMatrixDevice("Element iPhone")).toBe(false);
+    expect(isBotManagedMatrixDevice(null)).toBe(false);
   });
 
-  it("summarizes stale OpenClaw-managed devices separately from the current device", () => {
+  it("summarizes stale Bot-managed devices separately from the current device", () => {
     const summary = summarizeMatrixDeviceHealth([
       {
         deviceId: "du314Zpw3A",
-        displayName: "OpenClaw Gateway",
+        displayName: "Bot Gateway",
         current: true,
       },
       {
         deviceId: "BritdXC6iL",
-        displayName: "OpenClaw Gateway",
+        displayName: "Bot Gateway",
         current: false,
       },
       {
         deviceId: "G6NJU9cTgs",
-        displayName: "OpenClaw Debug",
+        displayName: "Bot Debug",
         current: false,
       },
       {
@@ -36,22 +36,22 @@ describe("matrix device health", () => {
 
     expect(summary).toEqual({
       currentDeviceId: "du314Zpw3A",
-      currentOpenClawDevices: [
+      currentBotDevices: [
         {
           deviceId: "du314Zpw3A",
-          displayName: "OpenClaw Gateway",
+          displayName: "Bot Gateway",
           current: true,
         },
       ],
-      staleOpenClawDevices: [
+      staleBotDevices: [
         {
           deviceId: "BritdXC6iL",
-          displayName: "OpenClaw Gateway",
+          displayName: "Bot Gateway",
           current: false,
         },
         {
           deviceId: "G6NJU9cTgs",
-          displayName: "OpenClaw Debug",
+          displayName: "Bot Debug",
           current: false,
         },
       ],

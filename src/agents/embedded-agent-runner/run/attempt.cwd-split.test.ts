@@ -33,7 +33,7 @@ describe("runEmbeddedAttempt cwd/workspace split", () => {
     // Bootstrap still reads the agent workspace, while coding tools execute in
     // the task repo cwd when a subagent targets a separate checkout.
     const bootstrap = createContextEngineBootstrapAndAssemble();
-    const taskRepo = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-task-repo-"));
+    const taskRepo = await fs.mkdtemp(path.join(os.tmpdir(), "bot-task-repo-"));
     tempPaths.push(taskRepo);
 
     await createContextEngineAttemptRunner({
@@ -52,7 +52,7 @@ describe("runEmbeddedAttempt cwd/workspace split", () => {
     expect(bootstrapCall?.workspaceDir).not.toBe("/tmp/task-repo");
     expect(bootstrapCall?.agentId).toBe("main");
 
-    const toolsCall = hoisted.createOpenClawCodingToolsMock.mock.calls[0]?.[0] as
+    const toolsCall = hoisted.createBotCodingToolsMock.mock.calls[0]?.[0] as
       | { cwd?: string; workspaceDir?: string; spawnWorkspaceDir?: string }
       | undefined;
     expect(toolsCall?.cwd).toBe(taskRepo);
@@ -78,7 +78,7 @@ describe("runEmbeddedAttempt cwd/workspace split", () => {
       },
     });
 
-    const toolsCall = hoisted.createOpenClawCodingToolsMock.mock.calls[0]?.[0] as
+    const toolsCall = hoisted.createBotCodingToolsMock.mock.calls[0]?.[0] as
       | {
           currentChannelId?: string;
           currentMessagingTarget?: string;
@@ -104,7 +104,7 @@ describe("runEmbeddedAttempt cwd/workspace split", () => {
       },
     });
 
-    expect(hoisted.createOpenClawCodingToolsMock).not.toHaveBeenCalled();
+    expect(hoisted.createBotCodingToolsMock).not.toHaveBeenCalled();
   });
 
   it("rejects cwd overrides for sandboxed runs instead of silently ignoring them", async () => {
@@ -113,7 +113,7 @@ describe("runEmbeddedAttempt cwd/workspace split", () => {
     hoisted.resolveSandboxContextMock.mockResolvedValueOnce({
       enabled: true,
       workspaceAccess: "ro",
-      workspaceDir: "/tmp/openclaw-sandbox-copy",
+      workspaceDir: "/tmp/bot-sandbox-copy",
     });
 
     await expect(
@@ -126,11 +126,11 @@ describe("runEmbeddedAttempt cwd/workspace split", () => {
         },
       }),
     ).rejects.toThrow("cwd override is not supported");
-    expect(hoisted.createOpenClawCodingToolsMock).not.toHaveBeenCalled();
+    expect(hoisted.createBotCodingToolsMock).not.toHaveBeenCalled();
   });
 
   it("runs a managed worktree when sandbox workspace and cwd match", async () => {
-    const worktree = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-sandbox-worktree-"));
+    const worktree = await fs.mkdtemp(path.join(os.tmpdir(), "bot-sandbox-worktree-"));
     tempPaths.push(worktree);
     hoisted.resolveSandboxContextMock.mockResolvedValueOnce({
       enabled: true,
@@ -149,7 +149,7 @@ describe("runEmbeddedAttempt cwd/workspace split", () => {
       },
     });
 
-    expect(hoisted.createOpenClawCodingToolsMock).toHaveBeenCalledWith(
+    expect(hoisted.createBotCodingToolsMock).toHaveBeenCalledWith(
       expect.objectContaining({ cwd: worktree, workspaceDir: worktree }),
     );
   });

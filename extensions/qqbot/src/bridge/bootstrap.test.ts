@@ -1,5 +1,5 @@
 // Qqbot tests cover the built-in platform adapter boundary.
-import type { ApprovalResolveResult } from "openclaw/plugin-sdk/approval-gateway-runtime";
+import type { ApprovalResolveResult } from "bot/plugin-sdk/approval-gateway-runtime";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getPlatformAdapter } from "../engine/adapter/index.js";
 import { ensurePlatformAdapter } from "./bootstrap.js";
@@ -10,15 +10,15 @@ const mocks = vi.hoisted(() => ({
   resolveApprovalOverGateway: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/media-runtime", () => ({
+vi.mock("bot/plugin-sdk/media-runtime", () => ({
   readRemoteMediaBuffer: (...args: unknown[]) => mocks.readRemoteMediaBuffer(...args),
 }));
 
-vi.mock("openclaw/plugin-sdk/runtime-config-snapshot", () => ({
+vi.mock("bot/plugin-sdk/runtime-config-snapshot", () => ({
   getRuntimeConfig: mocks.getRuntimeConfig,
 }));
 
-vi.mock("openclaw/plugin-sdk/approval-gateway-runtime", () => ({
+vi.mock("bot/plugin-sdk/approval-gateway-runtime", () => ({
   resolveApprovalOverGateway: mocks.resolveApprovalOverGateway,
 }));
 

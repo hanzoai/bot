@@ -3,10 +3,10 @@ import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  resolveOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeBotAgentDatabasesForTest,
+  resolveBotAgentSqlitePath,
+} from "../../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import {
   hasTerminalMainSessionTranscriptNewerThanRegistry,
   hasTerminalMainSessionTranscriptNewerThanRegistrySync,
@@ -19,13 +19,13 @@ describe("terminal main session transcript freshness", () => {
   let storePath: string;
 
   beforeEach(() => {
-    stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-session-lifecycle-"));
+    stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-session-lifecycle-"));
     storePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
     fs.rmSync(stateDir, { recursive: true, force: true });
   });
 
@@ -41,9 +41,9 @@ describe("terminal main session transcript freshness", () => {
     const sessionEntry = {
       sessionFile:
         params.sessionFile ??
-        `sqlite:main:${sessionId}:${resolveOpenClawAgentSqlitePath({
+        `sqlite:main:${sessionId}:${resolveBotAgentSqlitePath({
           agentId: "main",
-          env: { OPENCLAW_STATE_DIR: stateDir },
+          env: { BOT_STATE_DIR: stateDir },
         })}`,
       sessionId,
       updatedAt: params.updatedAt,

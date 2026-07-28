@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 // Zalouser plugin module implements zalo js behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { extensionForMime } from "openclaw/plugin-sdk/media-mime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { extensionForMime } from "bot/plugin-sdk/media-mime";
 import {
   asDateTimestampMs,
   asFiniteNumberInRange,
@@ -11,15 +11,15 @@ import {
   parseStrictNonNegativeInteger,
   resolveExpiresAtMsFromDurationMs,
   resolveTimerTimeoutMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { loadOutboundMediaFromUrl } from "openclaw/plugin-sdk/outbound-media";
-import { withTimeout } from "openclaw/plugin-sdk/security-runtime";
+} from "bot/plugin-sdk/number-runtime";
+import { loadOutboundMediaFromUrl } from "bot/plugin-sdk/outbound-media";
+import { withTimeout } from "bot/plugin-sdk/security-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { sleep, truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import { sleep, truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { normalizeZaloReactionIcon } from "./reaction.js";
 import { createZalouserSendReceipt } from "./send-receipt.js";
 import {

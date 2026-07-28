@@ -1,5 +1,5 @@
 // Voice model catalog helpers shared by TTS and realtime voice plugins.
-import { parseModelCatalogRef } from "@openclaw/model-catalog-core/model-catalog-refs";
+import { parseModelCatalogRef } from "@hanzo/bot-model-catalog-core/model-catalog-refs";
 
 export type VoiceModelCapability = "tts" | "realtime_transcription" | "realtime_voice";
 

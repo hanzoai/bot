@@ -3,11 +3,11 @@ import {
   logAckFailure,
   removeAckReactionHandleAfterReply,
   type AckReactionHandle,
-} from "openclaw/plugin-sdk/channel-feedback";
+} from "bot/plugin-sdk/channel-feedback";
 import {
   formatMediaPlaceholderText,
   runChannelInboundEvent,
-} from "openclaw/plugin-sdk/channel-inbound";
+} from "bot/plugin-sdk/channel-inbound";
 import {
   createInternalHookEvent,
   deriveInboundMessageHookContext,
@@ -16,9 +16,9 @@ import {
   toPluginMessageContext,
   toPluginMessageReceivedEvent,
   triggerInternalHook,
-} from "openclaw/plugin-sdk/hook-runtime";
-import { getGlobalHookRunner } from "openclaw/plugin-sdk/plugin-runtime";
-import { resolveBatchedReplyThreadingPolicy } from "openclaw/plugin-sdk/reply-reference";
+} from "bot/plugin-sdk/hook-runtime";
+import { getGlobalHookRunner } from "bot/plugin-sdk/plugin-runtime";
+import { resolveBatchedReplyThreadingPolicy } from "bot/plugin-sdk/reply-reference";
 import { getPrimaryIdentityId, getSelfIdentity, getSenderIdentity } from "../../identity.js";
 import {
   resolveWhatsAppCommandAuthorized,

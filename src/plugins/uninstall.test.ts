@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { toRepoRelativePath } from "../test-utils/repo-files.js";
 import { resolvePluginNpmProjectDir } from "./install-paths.js";
 import { resolvePluginInstallDir } from "./install.js";
@@ -23,7 +23,7 @@ vi.mock("../process/exec.js", () => ({
   runCommandWithTimeout: runCommandWithTimeoutMock,
 }));
 
-type PluginConfig = NonNullable<OpenClawConfig["plugins"]>;
+type PluginConfig = NonNullable<BotConfig["plugins"]>;
 type PluginInstallRecord = NonNullable<PluginConfig["installs"]>[string];
 
 async function uninstallPlugin(params: Parameters<typeof planPluginUninstall>[0]) {
@@ -48,7 +48,7 @@ async function createInstalledNpmPluginFixture(params: {
   pluginId: string;
   extensionsDir: string;
   pluginDir: string;
-  config: OpenClawConfig;
+  config: BotConfig;
 }> {
   const pluginId = params.pluginId ?? "my-plugin";
   const extensionsDir = path.join(params.baseDir, "extensions");
@@ -165,8 +165,8 @@ function createPluginConfig(params: {
   enabled?: boolean;
   slots?: PluginConfig["slots"];
   loadPaths?: string[];
-  channels?: OpenClawConfig["channels"];
-}): OpenClawConfig {
+  channels?: BotConfig["channels"];
+}): BotConfig {
   const plugins: PluginConfig = {};
   if (params.entries) {
     plugins.entries = params.entries;
@@ -196,14 +196,14 @@ function createPluginConfig(params: {
 }
 
 function expectRemainingChannels(
-  channels: OpenClawConfig["channels"],
+  channels: BotConfig["channels"],
   expected: Record<string, unknown> | undefined,
 ) {
   expect(channels as Record<string, unknown> | undefined).toEqual(expected);
 }
 
 function expectChannelCleanupResult(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   pluginId: string;
   expectedChannels: Record<string, unknown> | undefined;
   expectedChanged: boolean;
@@ -222,14 +222,14 @@ function expectChannelCleanupResult(params: {
   expect(actions.channelConfig).toBe(params.expectedChanged);
 }
 
-function createSinglePluginWithEmptySlotsConfig(): OpenClawConfig {
+function createSinglePluginWithEmptySlotsConfig(): BotConfig {
   return createPluginConfig({
     entries: createSinglePluginEntries(),
     slots: {},
   });
 }
 
-function createSingleNpmInstallConfig(installPath: string): OpenClawConfig {
+function createSingleNpmInstallConfig(installPath: string): BotConfig {
   return createPluginConfig({
     entries: createSinglePluginEntries(),
     installs: {
@@ -385,7 +385,7 @@ describe("removePluginFromConfig", () => {
   it("removes absolute load path for a workspace-relative install source path", async () => {
     const tempRoot = path.join(process.cwd(), ".tmp");
     await fs.mkdir(tempRoot, { recursive: true });
-    const tempDir = await fs.mkdtemp(path.join(tempRoot, "openclaw-uninstall-portable-source-"));
+    const tempDir = await fs.mkdtemp(path.join(tempRoot, "bot-uninstall-portable-source-"));
     try {
       const pluginDir = path.join(tempDir, "plugins", "demo");
       await fs.mkdir(pluginDir, { recursive: true });
@@ -652,7 +652,7 @@ describe("removePluginFromConfig", () => {
           defaults: { groupPolicy: "opt-in" },
           modelByChannel: { timbot: "gpt-3.5" } as Record<string, string>,
           timbot: { sdkAppId: "123" },
-        } as unknown as OpenClawConfig["channels"],
+        } as unknown as BotConfig["channels"],
       }),
       pluginId: "timbot",
       expectedChannels: {
@@ -672,7 +672,7 @@ describe("removePluginFromConfig", () => {
         },
         channels: {
           defaults: { groupPolicy: "opt-in" },
-        } as unknown as OpenClawConfig["channels"],
+        } as unknown as BotConfig["channels"],
       }),
       pluginId: "bad-plugin",
       options: {
@@ -873,11 +873,11 @@ describe("uninstallPlugin", () => {
       config: createPluginConfig({
         installs: {
           "missing-linked-plugin": createPathInstallRecord(
-            "/missing/openclaw/plugin",
-            "/missing/openclaw/plugin",
+            "/missing/bot/plugin",
+            "/missing/bot/plugin",
           ),
         },
-        loadPaths: ["/missing/openclaw/plugin", "/keep/this/plugin"],
+        loadPaths: ["/missing/bot/plugin", "/keep/this/plugin"],
       }),
       expectedActions: {
         entry: false,
@@ -1011,7 +1011,7 @@ describe("uninstallPlugin", () => {
     const stateDir = path.join(tempDir, "state");
     const extensionsDir = path.join(stateDir, "extensions");
     const npmRoot = path.join(stateDir, "npm");
-    const pluginDir = path.join(npmRoot, "node_modules", "@openclaw", "kitchen-sink");
+    const pluginDir = path.join(npmRoot, "node_modules", "@bot", "kitchen-sink");
     const hoistedDir = path.join(npmRoot, "node_modules", "is-number");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.mkdir(hoistedDir, { recursive: true });
@@ -1021,7 +1021,7 @@ describe("uninstallPlugin", () => {
         {
           private: true,
           dependencies: {
-            "@openclaw/kitchen-sink": "1.0.0",
+            "@hanzo/bot-kitchen-sink": "1.0.0",
             "is-number": "7.0.0",
           },
         },
@@ -1034,16 +1034,16 @@ describe("uninstallPlugin", () => {
 
     const plan = planPluginUninstall({
       config: createPluginConfig({
-        entries: createSinglePluginEntries("openclaw-kitchen-sink-fixture"),
+        entries: createSinglePluginEntries("bot-kitchen-sink-fixture"),
         installs: {
-          "openclaw-kitchen-sink-fixture": {
+          "bot-kitchen-sink-fixture": {
             source: "npm",
-            spec: "@openclaw/kitchen-sink@1.0.0",
+            spec: "@hanzo/bot-kitchen-sink@1.0.0",
             installPath: pluginDir,
           },
         },
       }),
-      pluginId: "openclaw-kitchen-sink-fixture",
+      pluginId: "bot-kitchen-sink-fixture",
       deleteFiles: true,
       extensionsDir,
     });
@@ -1057,14 +1057,14 @@ describe("uninstallPlugin", () => {
       cleanup: {
         kind: "npm",
         npmRoot,
-        packageName: "@openclaw/kitchen-sink",
+        packageName: "@hanzo/bot-kitchen-sink",
       },
     });
 
     const applied = await applyPluginUninstallDirectoryRemoval(plan.directoryRemoval);
 
     expect(applied).toEqual({ directoryRemoved: true, warnings: [] });
-    expectNpmUninstallCommand({ packageName: "@openclaw/kitchen-sink", npmRoot });
+    expectNpmUninstallCommand({ packageName: "@hanzo/bot-kitchen-sink", npmRoot });
     await expectPathAccessState(pluginDir, "missing");
   });
 
@@ -1074,9 +1074,9 @@ describe("uninstallPlugin", () => {
     const npmBaseDir = path.join(stateDir, "npm");
     const npmRoot = resolvePluginNpmProjectDir({
       npmDir: npmBaseDir,
-      packageName: "@openclaw/kitchen-sink",
+      packageName: "@hanzo/bot-kitchen-sink",
     });
-    const pluginDir = path.join(npmRoot, "node_modules", "@openclaw", "kitchen-sink");
+    const pluginDir = path.join(npmRoot, "node_modules", "@bot", "kitchen-sink");
     const hoistedDir = path.join(npmRoot, "node_modules", "is-number");
     await fs.mkdir(pluginDir, { recursive: true });
     await fs.mkdir(hoistedDir, { recursive: true });
@@ -1086,7 +1086,7 @@ describe("uninstallPlugin", () => {
         {
           private: true,
           dependencies: {
-            "@openclaw/kitchen-sink": "1.0.0",
+            "@hanzo/bot-kitchen-sink": "1.0.0",
             "is-number": "7.0.0",
           },
         },
@@ -1099,16 +1099,16 @@ describe("uninstallPlugin", () => {
 
     const plan = planPluginUninstall({
       config: createPluginConfig({
-        entries: createSinglePluginEntries("openclaw-kitchen-sink-fixture"),
+        entries: createSinglePluginEntries("bot-kitchen-sink-fixture"),
         installs: {
-          "openclaw-kitchen-sink-fixture": {
+          "bot-kitchen-sink-fixture": {
             source: "npm",
-            spec: "@openclaw/kitchen-sink@1.0.0",
+            spec: "@hanzo/bot-kitchen-sink@1.0.0",
             installPath: pluginDir,
           },
         },
       }),
-      pluginId: "openclaw-kitchen-sink-fixture",
+      pluginId: "bot-kitchen-sink-fixture",
       deleteFiles: true,
       extensionsDir,
     });
@@ -1122,23 +1122,23 @@ describe("uninstallPlugin", () => {
       cleanup: {
         kind: "npm",
         npmRoot,
-        packageName: "@openclaw/kitchen-sink",
+        packageName: "@hanzo/bot-kitchen-sink",
       },
     });
 
     const applied = await applyPluginUninstallDirectoryRemoval(plan.directoryRemoval);
 
     expect(applied).toEqual({ directoryRemoved: true, warnings: [] });
-    expectNpmUninstallCommand({ packageName: "@openclaw/kitchen-sink", npmRoot });
+    expectNpmUninstallCommand({ packageName: "@hanzo/bot-kitchen-sink", npmRoot });
     await expectPathAccessState(pluginDir, "missing");
   });
 
-  it("repairs remaining npm plugin openclaw peer links after npm uninstall prunes them", async () => {
+  it("repairs remaining npm plugin bot peer links after npm uninstall prunes them", async () => {
     const stateDir = path.join(tempDir, "state");
     const npmRoot = path.join(stateDir, "npm");
     const removedPluginDir = path.join(npmRoot, "node_modules", "removed-plugin");
     const peerPluginDir = path.join(npmRoot, "node_modules", "peer-plugin");
-    const peerLink = path.join(peerPluginDir, "node_modules", "openclaw");
+    const peerLink = path.join(peerPluginDir, "node_modules", "bot");
     await fs.mkdir(removedPluginDir, { recursive: true });
     await fs.mkdir(path.dirname(peerLink), { recursive: true });
     await fs.writeFile(
@@ -1162,7 +1162,7 @@ describe("uninstallPlugin", () => {
         {
           name: "peer-plugin",
           version: "1.0.0",
-          peerDependencies: { openclaw: ">=2026.0.0" },
+          peerDependencies: { bot: ">=2026.0.0" },
         },
         null,
         2,
@@ -1172,7 +1172,7 @@ describe("uninstallPlugin", () => {
     runCommandWithTimeoutMock.mockImplementationOnce(async (argv: string[]) => {
       await fs.rm(peerLink, { recursive: true, force: true });
       if (!argv.includes("--legacy-peer-deps")) {
-        await fs.mkdir(path.join(npmRoot, "node_modules", "openclaw"), { recursive: true });
+        await fs.mkdir(path.join(npmRoot, "node_modules", "bot"), { recursive: true });
       }
       return {
         code: 0,
@@ -1195,7 +1195,7 @@ describe("uninstallPlugin", () => {
 
     expect(applied).toEqual({ directoryRemoved: true, warnings: [] });
     await expectPathAccessState(removedPluginDir, "missing");
-    await expectPathAccessState(path.join(npmRoot, "node_modules", "openclaw"), "missing");
+    await expectPathAccessState(path.join(npmRoot, "node_modules", "bot"), "missing");
     await expect(fs.lstat(peerLink).then((stat) => stat.isSymbolicLink())).resolves.toBe(true);
   });
 
@@ -1215,7 +1215,7 @@ describe("uninstallPlugin", () => {
             "removed-plugin": "1.0.0",
             "runtime-peer": "1.0.0",
           },
-          openclaw: {
+          bot: {
             managedPeerDependencies: ["runtime-peer"],
           },
         },
@@ -1308,11 +1308,11 @@ describe("uninstallPlugin", () => {
       await fs.readFile(path.join(npmRoot, "package.json"), "utf8"),
     ) as {
       dependencies?: Record<string, string>;
-      openclaw?: { managedPeerDependencies?: string[] };
+      bot?: { managedPeerDependencies?: string[] };
     };
     expect(rootManifest.dependencies?.["removed-plugin"]).toBeUndefined();
     expect(rootManifest.dependencies?.["runtime-peer"]).toBeUndefined();
-    expect(rootManifest.openclaw?.managedPeerDependencies ?? []).not.toContain("runtime-peer");
+    expect(rootManifest.bot?.managedPeerDependencies ?? []).not.toContain("runtime-peer");
     expect(runCommandWithTimeoutMock).toHaveBeenCalledTimes(3);
   });
 
@@ -1321,7 +1321,7 @@ describe("uninstallPlugin", () => {
     const npmRoot = path.join(stateDir, "npm");
     const pluginDir = path.join(npmRoot, "node_modules", "missing-plugin");
     const peerPluginDir = path.join(npmRoot, "node_modules", "peer-plugin");
-    const peerLink = path.join(peerPluginDir, "node_modules", "openclaw");
+    const peerLink = path.join(peerPluginDir, "node_modules", "bot");
     await fs.mkdir(path.dirname(peerLink), { recursive: true });
     await fs.writeFile(
       path.join(npmRoot, "package.json"),
@@ -1343,7 +1343,7 @@ describe("uninstallPlugin", () => {
         {
           name: "peer-plugin",
           version: "1.0.0",
-          peerDependencies: { openclaw: ">=2026.0.0" },
+          peerDependencies: { bot: ">=2026.0.0" },
         },
         null,
         2,

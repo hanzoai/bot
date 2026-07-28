@@ -2,8 +2,8 @@
 import {
   installChannelSetupContractSuite,
   installChannelStatusContractSuite,
-} from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-test-helpers";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect } from "vitest";
 import { linePlugin, lineSetupPlugin } from "../api.js";
 
@@ -13,7 +13,7 @@ describe("line setup contract", () => {
     cases: [
       {
         name: "default account stores token and secret",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         input: {
           channelAccessToken: "line-token",
           channelSecret: "line-secret",
@@ -27,7 +27,7 @@ describe("line setup contract", () => {
       },
       {
         name: "non-default env setup is rejected",
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: "ops",
         input: {
           useEnv: true,
@@ -53,7 +53,7 @@ describe("line status contract", () => {
               channelSecret: "line-secret",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         runtime: {
           accountId: "default",
           running: true,

@@ -1,5 +1,5 @@
 // Provider stream tests cover shared stream-wrapper families and payload compatibility.
-import type { StreamFn } from "openclaw/plugin-sdk/agent-core";
+import type { StreamFn } from "bot/plugin-sdk/agent-core";
 import { describe, expect, it } from "vitest";
 import { createAssistantMessageEventStream } from "../llm/utils/event-stream.js";
 import { VERSION } from "../version.js";
@@ -433,8 +433,8 @@ describe("buildProviderStreamFamilyHooks", () => {
     expect(openAiPayload.reasoning).toEqual({ effort: "max", summary: "auto" });
     expect(openAiPayload.service_tier).toBe("flex");
     expect(capturedHeaders).toEqual({
-      "User-Agent": `openclaw/${VERSION}`,
-      originator: "openclaw",
+      "User-Agent": `bot/${VERSION}`,
+      originator: "bot",
       version: VERSION,
     });
 

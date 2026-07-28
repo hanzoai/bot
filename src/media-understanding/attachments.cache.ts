@@ -6,8 +6,8 @@ import path from "node:path";
 import {
   isInboundPathAllowed,
   mergeInboundPathRoots,
-} from "@openclaw/media-core/inbound-path-policy";
-import { detectMime } from "@openclaw/media-core/mime";
+} from "@hanzo/bot-media-core/inbound-path-policy";
+import { detectMime } from "@hanzo/bot-media-core/mime";
 import { MediaUnderstandingSkipError } from "../../packages/media-understanding-common/src/errors.js";
 import { resolveStateDir } from "../config/paths.js";
 import { logVerbose, shouldLogVerbose } from "../globals.js";
@@ -300,7 +300,7 @@ export class MediaAttachmentCache {
     });
     const extension = path.extname(bufferResult.fileName || "") || "";
     const tmpPath = buildRandomTempFilePath({
-      prefix: "openclaw-media",
+      prefix: "bot-media",
       extension,
     });
     await fs.writeFile(tmpPath, bufferResult.buffer);

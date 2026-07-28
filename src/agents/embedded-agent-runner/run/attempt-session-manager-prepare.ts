@@ -2,7 +2,7 @@
  * Prepares the durable session manager before embedded-agent session creation.
  */
 import { parseSqliteSessionFileMarker } from "../../../config/sessions/sqlite-marker.js";
-import { OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../../context-engine/host-compat.js";
+import { BOT_EMBEDDED_CONTEXT_ENGINE_HOST } from "../../../context-engine/host-compat.js";
 import type { AgentMessage } from "../../runtime/index.js";
 import {
   invalidateSessionFileRepairCache,
@@ -186,7 +186,7 @@ export async function prepareEmbeddedAttemptSessionManager(input: {
         activeAgentId: input.sessionAgentId,
         contextEnginePluginId: input.resolveActiveContextEnginePluginId(),
       }),
-      contextEngineHostSupport: OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+      contextEngineHostSupport: BOT_EMBEDDED_CONTEXT_ENGINE_HOST,
       providerId: attempt.provider,
       requestedModelId: attempt.requestedModelId,
       modelId: attempt.modelId,

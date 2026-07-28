@@ -1,4 +1,4 @@
-import { getRootOptionAwareCommandPath } from "openclaw/plugin-sdk/cli-argv";
+import { getRootOptionAwareCommandPath } from "bot/plugin-sdk/cli-argv";
 
 const MACHINE_OUTPUT_COMMANDS = new Set([
   "call",

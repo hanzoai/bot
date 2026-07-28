@@ -8,14 +8,14 @@ import { encodePluginInstallDirName, validatePluginId } from "./install-paths.js
 import {
   defaultLogger,
   emitSuccessfulPluginInstallSecurityEvent,
-  ensureOpenClawExtensions,
+  ensureBotExtensions,
   installPluginDirectoryIntoExtensions,
   loadPluginInstallRuntime,
   readOptionalPackageManifest,
   resolvePreparedDirectoryInstallTarget,
   runInstallSourceScan,
   sourceFamilyForInstallPolicyKind,
-  validateOpenClawPackageInstallCompatibility,
+  validateBotPackageInstallCompatibility,
   type PreparedInstallTarget,
 } from "./install-shared.js";
 import {
@@ -29,7 +29,7 @@ import {
 
 const PLUGIN_ARCHIVE_ROOT_MARKERS = [
   "package.json",
-  "openclaw.plugin.json",
+  "bot.plugin.json",
   ".codex-plugin/plugin.json",
   ".claude-plugin/plugin.json",
   ".cursor-plugin/plugin.json",
@@ -127,7 +127,7 @@ async function installBundleFromSourceDir(
   const packageMetadata = packageManifestResult.manifest
     ? runtime.getPackageManifestMetadata(packageManifestResult.manifest)
     : undefined;
-  const compatibilityError = validateOpenClawPackageInstallCompatibility({
+  const compatibilityError = validateBotPackageInstallCompatibility({
     runtime,
     pluginId,
     packageMetadata,
@@ -220,7 +220,7 @@ async function detectNativePackageInstallSource(
   const runtime = await loadPluginInstallRuntime();
   const result = await readOptionalPackageManifest({ runtime, packageDir });
   const manifest = result.ok ? result.manifest : undefined;
-  return manifest && ensureOpenClawExtensions({ manifest }).ok ? manifest : undefined;
+  return manifest && ensureBotExtensions({ manifest }).ok ? manifest : undefined;
 }
 
 async function installPluginFromPackageDir(
@@ -343,7 +343,7 @@ export async function installPluginFromArchive(
 
   const result = await runtime.withExtractedArchiveRoot({
     archivePath,
-    tempDirPrefix: "openclaw-plugin-",
+    tempDirPrefix: "bot-plugin-",
     timeoutMs,
     logger,
     rootMarkers: PLUGIN_ARCHIVE_ROOT_MARKERS,
@@ -451,6 +451,6 @@ export async function installPluginFromPath(
     ok: false,
     code: PLUGIN_INSTALL_ERROR_CODE.UNSUPPORTED_PLAIN_FILE_PLUGIN,
     error:
-      "Plain file plugin installs are not supported. Install a plugin directory or archive that contains openclaw.plugin.json, or list standalone plugin files in plugins.load.paths.",
+      "Plain file plugin installs are not supported. Install a plugin directory or archive that contains bot.plugin.json, or list standalone plugin files in plugins.load.paths.",
   };
 }

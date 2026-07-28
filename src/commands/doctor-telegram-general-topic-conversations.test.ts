@@ -8,38 +8,38 @@ import {
   resolveSqliteReadScope,
   toDatabaseOptions,
 } from "../config/sessions/session-accessor.sqlite-scope.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveDoctorContributionHealthChecks } from "../flows/doctor-health-contributions.js";
 import { runDoctorHealthRepairs } from "../flows/doctor-repair-flow.js";
 import { executeSqliteQuerySync } from "../infra/kysely-sync.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db-contract.js";
+import { BOT_AGENT_SCHEMA_VERSION } from "../state/bot-agent-db-contract.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+} from "../state/bot-agent-db.js";
 import { normalizeSessionDeliveryState } from "../utils/delivery-context.shared.js";
 
 const CHECK_ID = "core/doctor/telegram-general-topic-conversations";
 
 describe("doctor Telegram General-topic conversation repair", () => {
   const tempDirs = useAutoCleanupTempDirTracker(afterEach);
-  let cfg: OpenClawConfig;
+  let cfg: BotConfig;
   let env: NodeJS.ProcessEnv;
   let storePath: string;
 
   beforeEach(() => {
-    const root = tempDirs.make("openclaw-doctor-telegram-topic-");
+    const root = tempDirs.make("bot-doctor-telegram-topic-");
     storePath = path.join(root, "sessions.json");
     cfg = { session: { store: storePath } };
     env = {
       ...process.env,
-      OPENCLAW_CONFIG_PATH: path.join(root, "missing-openclaw.json"),
-      OPENCLAW_STATE_DIR: path.join(root, "state"),
+      BOT_CONFIG_PATH: path.join(root, "missing-bot.json"),
+      BOT_STATE_DIR: path.join(root, "state"),
     };
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
   });
 
   it("merges an upgraded General-topic related binding exactly once", async () => {
@@ -76,7 +76,7 @@ describe("doctor Telegram General-topic conversation repair", () => {
     expect(legacy).toBeDefined();
     expect(canonical).toBeDefined();
 
-    const database = openOpenClawAgentDatabase(toDatabaseOptions(resolveSqliteReadScope(scope)));
+    const database = openBotAgentDatabase(toDatabaseOptions(resolveSqliteReadScope(scope)));
     const db = getSessionKysely(database.db);
     executeSqliteQuerySync(
       database.db,
@@ -101,7 +101,7 @@ describe("doctor Telegram General-topic conversation repair", () => {
       }),
     );
     expect(database.db.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_AGENT_SCHEMA_VERSION,
+      user_version: BOT_AGENT_SCHEMA_VERSION,
     });
 
     const check = (await resolveDoctorContributionHealthChecks()).find(
@@ -137,7 +137,7 @@ describe("doctor Telegram General-topic conversation repair", () => {
       ).rows,
     ).toEqual([{ conversation_id: canonical!.conversationRef }]);
     expect(database.db.prepare("PRAGMA user_version").get()).toEqual({
-      user_version: OPENCLAW_AGENT_SCHEMA_VERSION,
+      user_version: BOT_AGENT_SCHEMA_VERSION,
     });
 
     const repeated = await runDoctorHealthRepairs(

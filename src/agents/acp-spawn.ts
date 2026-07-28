@@ -1,6 +1,6 @@
 /** Implements ACP subagent/session spawning, binding, limits, and parent-stream setup. */
 import crypto from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { AcpTurnAttachment } from "../acp/control-plane/manager.types.js";
 import {
   cleanupFailedAcpSpawn,
@@ -15,7 +15,7 @@ import {
 } from "../config/sessions/session-accessor.js";
 import { buildSessionCreationStamp } from "../config/sessions/session-entry-provenance.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { callGateway } from "../gateway/call.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { resolveEventSessionRoutingPolicy } from "../infra/event-session-routing.js";
@@ -193,7 +193,7 @@ const ACP_SPAWN_SESSION_ACCEPTED_NOTE =
   "thread-bound ACP session stays active after this task; continue in-thread for follow-ups.";
 
 export function resolveAcpSpawnRuntimePolicyError(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   requesterSessionKey?: string;
   requesterSandboxed?: boolean;
   sandbox?: SpawnAcpSandboxMode;

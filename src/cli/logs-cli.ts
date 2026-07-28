@@ -1,7 +1,7 @@
 // Gateway logs CLI with RPC tailing, local file fallback, and systemd journal fallback.
 import { setTimeout as delay } from "node:timers/promises";
-import { resolveIntegerOption } from "@openclaw/normalization-core/number-coercion";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { resolveIntegerOption } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import type { Command } from "commander";
 import {
   GATEWAY_CLIENT_MODES,
@@ -365,11 +365,11 @@ function parseJournalctlOutput(output: string): { lines: string[]; cursor?: stri
 }
 
 function resolveLogsSystemdUnitName(runtime: LogsCliRuntimeModule, env: NodeJS.ProcessEnv): string {
-  const override = env.OPENCLAW_SYSTEMD_UNIT?.trim();
+  const override = env.BOT_SYSTEMD_UNIT?.trim();
   if (override) {
     return override.endsWith(".service") ? override : `${override}.service`;
   }
-  return `${runtime.resolveGatewaySystemdServiceName(env.OPENCLAW_PROFILE)}.service`;
+  return `${runtime.resolveGatewaySystemdServiceName(env.BOT_PROFILE)}.service`;
 }
 
 const MAX_FOLLOW_RETRIES = 8;
@@ -466,7 +466,7 @@ function createLogWriters(onOutputClosed?: () => void) {
       onOutputClosed?.();
       const code = err.code ?? "EPIPE";
       const target = stream === process.stdout ? "stdout" : "stderr";
-      const message = `openclaw logs: output ${target} closed (${code}). Stopping tail.`;
+      const message = `bot logs: output ${target} closed (${code}). Stopping tail.`;
       try {
         clearActiveProgressLine();
         process.stderr.write(`${message}\n`);
@@ -493,7 +493,7 @@ async function emitGatewayError(
   errorLine: (text: string) => boolean,
 ) {
   const message = "Gateway not reachable. Is it running and accessible?";
-  const hint = `Hint: run \`${formatCliCommand("openclaw doctor")}\`.`;
+  const hint = `Hint: run \`${formatCliCommand("bot doctor")}\`.`;
   const errorText = formatErrorMessage(err);
 
   const details = buildGatewayConnectionDetails({ url: opts.url });
@@ -540,7 +540,7 @@ export function registerLogsCli(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/logs", "docs.openclaw.ai/cli/logs")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/logs", "docs.bot.ai/cli/logs")}\n`,
     );
 
   addGatewayClientOptions(logs);

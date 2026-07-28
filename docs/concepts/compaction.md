@@ -1,12 +1,12 @@
 ---
-summary: "How OpenClaw summarizes long conversations to stay within model limits"
+summary: "How Bot summarizes long conversations to stay within model limits"
 read_when:
   - You want to understand auto-compaction and /compact
   - You are debugging long sessions hitting context limits
 title: "Compaction"
 ---
 
-Every model has a context window: the maximum number of tokens it can process. When a conversation approaches that limit, OpenClaw **compacts** older messages into a summary so the chat can continue.
+Every model has a context window: the maximum number of tokens it can process. When a conversation approaches that limit, Bot **compacts** older messages into a summary so the chat can continue.
 
 ## How it works
 
@@ -14,7 +14,7 @@ Every model has a context window: the maximum number of tokens it can process. W
 2. The summary is saved in the session transcript.
 3. Recent messages are kept intact.
 
-OpenClaw keeps assistant tool calls paired with their matching `toolResult` entries when it picks a compaction split point. If the point lands inside a tool block, OpenClaw moves the boundary so the pair stays together and the current unsummarized tail is preserved.
+Bot keeps assistant tool calls paired with their matching `toolResult` entries when it picks a compaction split point. If the point lands inside a tool block, Bot moves the boundary so the pair stays together and the current unsummarized tail is preserved.
 
 The full conversation history stays on disk. Compaction only changes what the model sees on the next turn.
 
@@ -24,9 +24,9 @@ New configs default `agents.defaults.compaction.mode` to `"safeguard"` (stricter
 
 ## Auto-compaction
 
-Auto-compaction is on by default. It runs when the session nears the context limit, or when the model returns a context-overflow error (in which case OpenClaw compacts and retries).
+Auto-compaction is on by default. It runs when the session nears the context limit, or when the model returns a context-overflow error (in which case Bot compacts and retries).
 
-Set `agents.defaults.compaction.enabled: false` to disable the embedded runtime's proactive threshold compaction. OpenClaw's preflight and overflow-recovery compaction paths remain available, as does manual `/compact`.
+Set `agents.defaults.compaction.enabled: false` to disable the embedded runtime's proactive threshold compaction. Bot's preflight and overflow-recovery compaction paths remain available, as does manual `/compact`.
 
 You will see:
 
@@ -35,12 +35,12 @@ You will see:
 - `/status` showing `🧹 Compactions: <count>`.
 
 <Info>
-Before compacting, OpenClaw automatically reminds the agent to save important notes to [memory](/concepts/memory) files. This prevents context loss.
+Before compacting, Bot automatically reminds the agent to save important notes to [memory](/concepts/memory) files. This prevents context loss.
 </Info>
 
 <AccordionGroup>
-  <Accordion title="Overflow error patterns OpenClaw recognizes">
-    OpenClaw matches dozens of provider-specific overflow error strings (Anthropic, OpenAI, Bedrock, Gemini, Ollama, OpenRouter, and more). Common examples:
+  <Accordion title="Overflow error patterns Bot recognizes">
+    Bot matches dozens of provider-specific overflow error strings (Anthropic, OpenAI, Bedrock, Gemini, Ollama, OpenRouter, and more). Common examples:
 
     - `request_too_large`
     - `context length exceeded`
@@ -64,7 +64,7 @@ When `agents.defaults.compaction.keepRecentTokens` is set (default: 20,000), man
 
 ## Configuration
 
-Configure compaction under `agents.defaults.compaction` in your `openclaw.json`. The most common knobs are listed below; for the full reference, see [Session management deep dive](/reference/session-management-compaction).
+Configure compaction under `agents.defaults.compaction` in your `bot.json`. The most common knobs are listed below; for the full reference, see [Session management deep dive](/reference/session-management-compaction).
 
 ### Using a different model
 
@@ -98,7 +98,7 @@ This works with local models too, for example a second Ollama model dedicated to
 }
 ```
 
-When unset, compaction starts with the active session model. If summarization fails with a model-fallback-eligible provider error, OpenClaw retries that compaction attempt through the session's existing model fallback chain. The fallback choice is temporary and is not written back to session state. An explicit `agents.defaults.compaction.model` override remains exact and does not inherit the session fallback chain.
+When unset, compaction starts with the active session model. If summarization fails with a model-fallback-eligible provider error, Bot retries that compaction attempt through the session's existing model fallback chain. The fallback choice is temporary and is not written back to session state. An explicit `agents.defaults.compaction.model` override remains exact and does not inherit the session fallback chain.
 
 ### Identifier preservation
 
@@ -106,7 +106,7 @@ Compaction summarization preserves opaque identifiers by default (`identifierPol
 
 ### Active transcript byte guard
 
-When `agents.defaults.compaction.maxActiveTranscriptBytes` is set, OpenClaw
+When `agents.defaults.compaction.maxActiveTranscriptBytes` is set, Bot
 triggers normal local compaction before a run if transcript history reaches
 that size. This is useful for long-running sessions where provider-side context
 management may keep model context healthy while persisted transcript history
@@ -120,12 +120,12 @@ checkpoint artifacts are not the active compaction target.
 
 ### Successor transcripts
 
-When `agents.defaults.compaction.truncateAfterCompaction` is enabled, OpenClaw does not rewrite the existing transcript in place. It creates a new active successor transcript from the compaction summary, preserved state, and unsummarized tail, then records checkpoint metadata that points branch/restore flows at that compacted successor.
+When `agents.defaults.compaction.truncateAfterCompaction` is enabled, Bot does not rewrite the existing transcript in place. It creates a new active successor transcript from the compaction summary, preserved state, and unsummarized tail, then records checkpoint metadata that points branch/restore flows at that compacted successor.
 Successor transcripts also drop exact duplicate long user turns that arrive
 inside a short retry window, so channel retry storms are not carried into the
 next active transcript after compaction.
 
-OpenClaw no longer writes separate `.checkpoint.*.jsonl` copies for new
+Bot no longer writes separate `.checkpoint.*.jsonl` copies for new
 compactions. Existing legacy checkpoint files can still be used while referenced
 and are pruned by normal session cleanup.
 
@@ -147,7 +147,7 @@ By default, compaction runs silently. Set `notifyUser` to show brief status mess
 
 ### Memory flush
 
-Before compaction, OpenClaw can run a **silent memory flush** turn to store durable notes to disk. Set `agents.defaults.compaction.memoryFlush.model` when this housekeeping turn should use a local model instead of the active conversation model:
+Before compaction, Bot can run a **silent memory flush** turn to store durable notes to disk. Set `agents.defaults.compaction.memoryFlush.model` when this housekeeping turn should use a local model instead of the active conversation model:
 
 ```json
 {
@@ -167,7 +167,7 @@ The memory-flush model override is exact and does not inherit the active session
 
 ## Pluggable compaction providers
 
-Plugins can register a custom compaction provider via `registerCompactionProvider()` on the plugin API. When a provider is registered and configured, OpenClaw delegates summarization to it instead of the built-in LLM pipeline.
+Plugins can register a custom compaction provider via `registerCompactionProvider()` on the plugin API. When a provider is registered and configured, Bot delegates summarization to it instead of the built-in LLM pipeline.
 
 To use a registered provider, set its id in your config:
 
@@ -183,10 +183,10 @@ To use a registered provider, set its id in your config:
 }
 ```
 
-Setting a `provider` automatically forces `mode: "safeguard"`. Providers receive the same compaction instructions and identifier-preservation policy as the built-in path, and OpenClaw still preserves recent-turn and split-turn suffix context after provider output.
+Setting a `provider` automatically forces `mode: "safeguard"`. Providers receive the same compaction instructions and identifier-preservation policy as the built-in path, and Bot still preserves recent-turn and split-turn suffix context after provider output.
 
 <Note>
-If the provider fails or returns an empty result, OpenClaw falls back to built-in LLM summarization.
+If the provider fails or returns an empty result, Bot falls back to built-in LLM summarization.
 </Note>
 
 ## Compaction vs pruning

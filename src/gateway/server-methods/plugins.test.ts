@@ -1,6 +1,6 @@
 // Plugin management Gateway handler tests cover DTO mapping, trust errors, and reload planning.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const managementMocks = vi.hoisted(() => {
@@ -131,7 +131,7 @@ describe("plugin management Gateway handlers", () => {
       {
         score: 0.91,
         package: {
-          name: "@openclaw/diffs",
+          name: "@hanzo/bot-diffs",
           displayName: "Diffs",
           family: "code-plugin",
           channel: "official",
@@ -139,7 +139,7 @@ describe("plugin management Gateway handlers", () => {
           summary: "Readable diffs",
           latestVersion: "1.2.3",
           runtimeId: "diffs",
-          ownerHandle: "openclaw",
+          ownerHandle: "bot",
           verificationTier: "source-linked",
           stats: { downloads: 149263, installs: 280, stars: 0, versions: 83 },
         },
@@ -154,7 +154,7 @@ describe("plugin management Gateway handlers", () => {
         {
           score: 0.91,
           package: {
-            name: "@openclaw/diffs",
+            name: "@hanzo/bot-diffs",
             displayName: "Diffs",
             family: "code-plugin",
             channel: "official",
@@ -285,7 +285,7 @@ describe("plugin management Gateway handlers", () => {
 
     await callHandler("plugins.install", {
       source: "clawhub",
-      packageName: "@openclaw/diffs",
+      packageName: "@hanzo/bot-diffs",
       version: "1.2.3",
       acknowledgeClawHubRisk: true,
     });
@@ -293,7 +293,7 @@ describe("plugin management Gateway handlers", () => {
     expect(managementMocks.install).toHaveBeenCalledWith({
       request: {
         source: "clawhub",
-        packageName: "@openclaw/diffs",
+        packageName: "@hanzo/bot-diffs",
         version: "1.2.3",
         acknowledgeClawHubRisk: true,
       },

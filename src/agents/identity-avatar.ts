@@ -2,8 +2,8 @@
  * Resolves public avatar sources for configured agent identities.
  */
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import {
   hasAvatarUriScheme,
@@ -34,7 +34,7 @@ const PUBLIC_AVATAR_SOURCE_MAX_CHARS = 256;
 const PUBLIC_DATA_AVATAR_HEADER_MAX_CHARS = 64;
 
 function resolveAvatarSource(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string,
   opts?: { includeUiOverride?: boolean },
 ): string | null {
@@ -102,7 +102,7 @@ export function resolvePublicAgentAvatarSource(
 
 /** Resolve the effective avatar for an agent, including config and IDENTITY.md. */
 export function resolveAgentAvatar(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string,
   opts?: { includeUiOverride?: boolean },
 ): AgentAvatarResolution {

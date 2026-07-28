@@ -1,5 +1,5 @@
 // Qa Lab plugin module owns canonical taxonomy profile membership planning.
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import type { QaCliBackendAuthMode } from "./gateway-child.js";
 import type { QaProviderMode } from "./model-selection.js";
 import { readQaScenarioPack, type QaSeedScenarioWithSource } from "./scenario-catalog.js";

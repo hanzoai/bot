@@ -2,9 +2,9 @@ import {
   shouldSuppressBuiltInModel,
   shouldSuppressBuiltInModelFromManifest,
 } from "../../agents/model-suppression.js";
-/** Model registry access helpers for `openclaw models list`. */
+/** Model registry access helpers for `bot models list`. */
 import { loadPreparedAgentModelRegistry as loadAgentModelRegistry } from "../../agents/prepared-model-registry.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { ModelRegistry } from "../../llm/model-registry.js";
 import type { Model } from "../../llm/types.js";
 import {
@@ -54,7 +54,7 @@ function validateAvailableModels(availableModels: unknown): Model[] {
 
 function loadAvailableModels(
   registry: ModelRegistry,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   opts?: { runtimeSuppression?: boolean },
 ): Model[] {
   let availableModels: unknown;
@@ -86,7 +86,7 @@ function loadAvailableModels(
 
 /** Loads registry models and optional availability keys with suppression applied. */
 export async function loadModelRegistry(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   opts?: {
     agentId?: string;
     agentDir?: string;

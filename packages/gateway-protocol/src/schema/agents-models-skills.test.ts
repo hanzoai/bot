@@ -163,7 +163,7 @@ describe("ModelsListResultSchema", () => {
       id: "gpt-image",
       name: "GPT Image",
       provider: "openai",
-      agentRuntime: { id: "codex", fallback: "openclaw", source: "model" },
+      agentRuntime: { id: "codex", fallback: "bot", source: "model" },
       input: ["text", "image", "audio", "video", "document"],
     };
 
@@ -263,7 +263,7 @@ describe("SkillsProposalInspectResultSchema", () => {
         status: "pending",
         title: "weather-helper",
         description: "Improve weather checks",
-        schema: "openclaw.skill-workshop.proposal.v1",
+        schema: "bot.skill-workshop.proposal.v1",
         createdAt: "2026-05-30T00:00:00.000Z",
         updatedAt: "2026-05-30T00:00:00.000Z",
         createdBy: "skill-workshop",

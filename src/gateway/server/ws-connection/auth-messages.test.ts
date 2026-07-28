@@ -32,7 +32,7 @@ describe("formatGatewayAuthFailureMessage", () => {
     });
 
     expect(message).toBe(
-      "unauthorized: gateway token missing (paste in Control UI settings or openclaw doctor --generate-gateway-token; restart)",
+      "unauthorized: gateway token missing (paste in Control UI settings or bot doctor --generate-gateway-token; restart)",
     );
     expect(truncateCloseReason(message)).toBe(message);
   });

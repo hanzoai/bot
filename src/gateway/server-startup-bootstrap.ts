@@ -18,7 +18,7 @@ import { normalizeStateDirEnv } from "../config/paths.js";
 import { captureConfigOverrideApplier } from "../config/runtime-overrides.js";
 import { resolveMainSessionKey } from "../config/sessions.js";
 import type { GatewayAuthConfig } from "../config/types.gateway.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isSecretRef } from "../config/types.secrets.js";
 import { getActiveCronJobCount } from "../cron/active-jobs.js";
 import {
@@ -74,22 +74,22 @@ export async function prepareGatewayServerBootstrap(input: {
   normalizeStateDirEnv(process.env);
   const [
     {
-      OPENCLAW_DATABASE_SCHEMA_DOCS_URL,
-      OpenClawDatabaseSchemaPreflightError,
-      preflightOpenClawDatabaseSchemas,
+      BOT_DATABASE_SCHEMA_DOCS_URL,
+      BotDatabaseSchemaPreflightError,
+      preflightBotDatabaseSchemas,
     },
     agentDatabase,
     stateDatabase,
   ] = await Promise.all([
-    import("../state/openclaw-database-preflight.js"),
-    import("../state/openclaw-agent-db.js"),
-    import("../state/openclaw-state-db.js"),
+    import("../state/bot-database-preflight.js"),
+    import("../state/bot-agent-db.js"),
+    import("../state/bot-state-db.js"),
   ]);
-  const databaseSchemas = preflightOpenClawDatabaseSchemas({
+  const databaseSchemas = preflightBotDatabaseSchemas({
     env: process.env,
     supportedVersions: {
-      state: stateDatabase.OPENCLAW_STATE_SCHEMA_VERSION,
-      agent: agentDatabase.OPENCLAW_AGENT_SCHEMA_VERSION,
+      state: stateDatabase.BOT_STATE_SCHEMA_VERSION,
+      agent: agentDatabase.BOT_AGENT_SCHEMA_VERSION,
     },
   });
   if (databaseSchemas.incompatible.length > 0) {
@@ -101,34 +101,34 @@ export async function prepareGatewayServerBootstrap(input: {
         foundVersion: database.foundVersion,
         supportedVersion: database.supportedVersion,
         writerAppVersion: database.writerAppVersion ?? "unknown",
-        docsUrl: OPENCLAW_DATABASE_SCHEMA_DOCS_URL,
+        docsUrl: BOT_DATABASE_SCHEMA_DOCS_URL,
       });
     }
-    throw new OpenClawDatabaseSchemaPreflightError(databaseSchemas.incompatible);
+    throw new BotDatabaseSchemaPreflightError(databaseSchemas.incompatible);
   }
   for (const database of databaseSchemas.indeterminate) {
     log.warn("database schema preflight could not inspect database; continuing to real open", {
       kind: database.kind,
       path: database.path,
       reason: database.reason,
-      docsUrl: OPENCLAW_DATABASE_SCHEMA_DOCS_URL,
+      docsUrl: BOT_DATABASE_SCHEMA_DOCS_URL,
     });
   }
   const { bootstrapGatewayNetworkRuntime } = await import("./server-network-runtime.js");
   bootstrapGatewayNetworkRuntime();
 
   const minimalTestGateway =
-    isVitestRuntimeEnv() && process.env.OPENCLAW_TEST_MINIMAL_GATEWAY === "1";
+    isVitestRuntimeEnv() && process.env.BOT_TEST_MINIMAL_GATEWAY === "1";
   const ambientEnvTriggers = opts.ambientEnvTriggers ?? "allow";
 
   // Ensure all default port derivations (browser/canvas) see the actual runtime port.
-  process.env.OPENCLAW_GATEWAY_PORT = String(port);
+  process.env.BOT_GATEWAY_PORT = String(port);
   logAcceptedEnvOption({
-    key: "OPENCLAW_RAW_STREAM",
+    key: "BOT_RAW_STREAM",
     description: "raw stream logging enabled",
   });
   logAcceptedEnvOption({
-    key: "OPENCLAW_RAW_STREAM_PATH",
+    key: "BOT_RAW_STREAM_PATH",
     description: "raw stream log path override",
   });
   if (!resumeGatewayRestartTraceFromEnv(process.env, [["source", "env"]])) {
@@ -183,7 +183,7 @@ export async function prepareGatewayServerBootstrap(input: {
   const emitSecretsStateEvent = (
     code: "SECRETS_RELOADER_DEGRADED" | "SECRETS_RELOADER_RECOVERED",
     message: string,
-    cfg: OpenClawConfig,
+    cfg: BotConfig,
   ) => {
     enqueueSystemEvent(`[${code}] ${message}`, {
       sessionKey: resolveMainSessionKey(cfg),
@@ -352,7 +352,7 @@ export async function prepareGatewayServerBootstrap(input: {
   const seededControlUiAllowedOrigins = controlUiSeed.seededAllowedOrigins
     ? cfgAtStart.gateway?.controlUi?.allowedOrigins
     : undefined;
-  const applyFixedGatewayOverlays = (config: OpenClawConfig): OpenClawConfig => {
+  const applyFixedGatewayOverlays = (config: BotConfig): BotConfig => {
     let runtimeConfig = config;
     if (reloadAuthOverride || startupTailscaleOverride) {
       runtimeConfig = {
@@ -390,7 +390,7 @@ export async function prepareGatewayServerBootstrap(input: {
     }
     return runtimeConfig;
   };
-  const applyReloadableGatewayAuthRefs = (config: OpenClawConfig): OpenClawConfig => {
+  const applyReloadableGatewayAuthRefs = (config: BotConfig): BotConfig => {
     if (!startupAuthSecretRefOverride?.token && !startupAuthSecretRefOverride?.password) {
       return config;
     }
@@ -403,9 +403,9 @@ export async function prepareGatewayServerBootstrap(input: {
     };
   };
   const prepareReloadCandidate = (params: {
-    runtimeConfig: OpenClawConfig;
-    sourceConfig: OpenClawConfig;
-    previousSourceConfig?: OpenClawConfig;
+    runtimeConfig: BotConfig;
+    sourceConfig: BotConfig;
+    previousSourceConfig?: BotConfig;
   }) => {
     const previousSourceConfig =
       params.previousSourceConfig ??
@@ -427,14 +427,14 @@ export async function prepareGatewayServerBootstrap(input: {
           ambientEnvTriggers,
         });
     const applyCandidateOverrides = captureConfigOverrideApplier();
-    const reapplyCompareOverlays = (config: OpenClawConfig): OpenClawConfig =>
+    const reapplyCompareOverlays = (config: BotConfig): BotConfig =>
       applyCandidateOverrides(
         mergeActivationSectionsIntoRuntimeConfig({
           runtimeConfig: config,
           activationConfig: pluginCandidate.compareConfig,
         }),
       );
-    const reapplyRuntimeOverlays = (config: OpenClawConfig): OpenClawConfig =>
+    const reapplyRuntimeOverlays = (config: BotConfig): BotConfig =>
       applyFixedGatewayOverlays(applyReloadableGatewayAuthRefs(reapplyCompareOverlays(config)));
     return {
       runtimeConfig: reapplyRuntimeOverlays(params.runtimeConfig),

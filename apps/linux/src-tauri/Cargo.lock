@@ -2781,7 +2781,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "openclaw-desktop-linux"
+name = "bot-desktop-linux"
 version = "0.1.0"
 dependencies = [
  "base64 0.22.1",

@@ -1,6 +1,6 @@
 // Slack plugin module implements probe behavior.
-import type { BaseProbeResult } from "openclaw/plugin-sdk/channel-contract";
-import { runChannelProbe } from "openclaw/plugin-sdk/text-utility-runtime";
+import type { BaseProbeResult } from "bot/plugin-sdk/channel-contract";
+import { runChannelProbe } from "bot/plugin-sdk/text-utility-runtime";
 import { createSlackWebClient } from "./client.js";
 import { formatSlackError } from "./errors.js";
 import { formatSlackBotTokenIdentityWarning } from "./token.js";

@@ -3,7 +3,7 @@ import fsSync from "node:fs";
 import path from "node:path";
 import type { GroupMetadata, WAMessageKey } from "baileys";
 import "./monitor-inbox.test-harness.js";
-import { defaultRuntime } from "openclaw/plugin-sdk/runtime-env";
+import { defaultRuntime } from "bot/plugin-sdk/runtime-env";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   readWhatsAppBaileysCacheEntry,
@@ -45,9 +45,9 @@ vi.mock("./connection-controller-runtime-context.js", () => ({
   getWhatsAppConnectionController: (accountId: string) => controllerContexts.get(accountId) ?? null,
 }));
 
-vi.mock("openclaw/plugin-sdk/media-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/media-runtime")>(
-    "openclaw/plugin-sdk/media-runtime",
+vi.mock("bot/plugin-sdk/media-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/media-runtime")>(
+    "bot/plugin-sdk/media-runtime",
   );
   return {
     ...actual,

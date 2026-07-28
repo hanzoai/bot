@@ -8,7 +8,7 @@ import { repoRoot } from "./vitest.shared.config.ts";
 export function loadIncludePatternsFromEnv(
   env: Record<string, string | undefined> = process.env,
 ): string[] | null {
-  return loadPatternListFromEnv("OPENCLAW_VITEST_INCLUDE_FILE", env);
+  return loadPatternListFromEnv("BOT_VITEST_INCLUDE_FILE", env);
 }
 
 export function createExtensionProviderOpenAiVitestConfig(

@@ -1,23 +1,23 @@
 {
-  "name": "@openclaw/gateway-protocol",
+  "name": "@hanzo/bot-gateway-protocol",
   "version": "2026.7.2",
-  "description": "Typed schemas and runtime validators for the OpenClaw Gateway WebSocket protocol",
+  "description": "Typed schemas and runtime validators for the Bot Gateway WebSocket protocol",
   "keywords": [
     "gateway",
-    "openclaw",
+    "bot",
     "protocol",
     "typebox",
     "websocket"
   ],
-  "homepage": "https://github.com/openclaw/openclaw#readme",
+  "homepage": "https://github.com/hanzoai/bot#readme",
   "bugs": {
-    "url": "https://github.com/openclaw/openclaw/issues"
+    "url": "https://github.com/hanzoai/bot/issues"
   },
   "license": "MIT",
-  "author": "OpenClaw Foundation (https://openclaw.org)",
+  "author": "Bot Foundation (https://bot.org)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/openclaw/openclaw.git",
+    "url": "git+https://github.com/hanzoai/bot.git",
     "directory": "packages/gateway-protocol"
   },
   "files": [
@@ -86,7 +86,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "openclaw": {
+  "bot": {
     "release": {
       "publishToNpm": true
     }

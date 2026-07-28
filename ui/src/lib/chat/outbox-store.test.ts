@@ -29,17 +29,17 @@ describe("stored outbox summaries", () => {
     expect(addEventListener).toHaveBeenCalledWith("storage", expect.any(Function));
 
     window.dispatchEvent(
-      new StorageEvent("storage", { key: "openclaw.control.chatComposer.v2:gateway" }),
+      new StorageEvent("storage", { key: "bot.control.chatComposer.v2:gateway" }),
     );
     expect(firstListener).toHaveBeenCalledTimes(1);
     expect(secondListener).toHaveBeenCalledTimes(1);
 
-    window.dispatchEvent(new StorageEvent("storage", { key: "openclaw.control.settings.v1" }));
+    window.dispatchEvent(new StorageEvent("storage", { key: "bot.control.settings.v1" }));
     expect(firstListener).toHaveBeenCalledTimes(1);
     expect(secondListener).toHaveBeenCalledTimes(1);
 
     window.dispatchEvent(
-      new StorageEvent("storage", { key: "openclaw.control.chatComposer.v1:gateway" }),
+      new StorageEvent("storage", { key: "bot.control.chatComposer.v1:gateway" }),
     );
     expect(firstListener).toHaveBeenCalledTimes(2);
     expect(secondListener).toHaveBeenCalledTimes(2);
@@ -53,7 +53,7 @@ describe("stored outbox summaries", () => {
 
   it("routes shipped bare-main rows to the known default agent", () => {
     const gatewayUrl = "ws://gateway.test/control";
-    const legacyKey = `openclaw.control.chatComposer.v1:${encodeURIComponent(gatewayUrl)}`;
+    const legacyKey = `bot.control.chatComposer.v1:${encodeURIComponent(gatewayUrl)}`;
     sessionStorage.setItem(
       legacyKey,
       JSON.stringify({
@@ -88,7 +88,7 @@ describe("stored outbox summaries", () => {
 
   it("refreshes custom-main ownership for a later offline reload", () => {
     const gatewayUrl = "ws://gateway.test/control";
-    const storageKey = `openclaw.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`;
+    const storageKey = `bot.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`;
     sessionStorage.setItem(
       storageKey,
       JSON.stringify({
@@ -118,7 +118,7 @@ describe("stored outbox summaries", () => {
 
   it("resolves legacy bare-main rows through the persisted alias on an offline reload", () => {
     const gatewayUrl = "ws://gateway.test/control";
-    const storageKey = `openclaw.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`;
+    const storageKey = `bot.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`;
     sessionStorage.setItem(
       storageKey,
       JSON.stringify({
@@ -147,7 +147,7 @@ describe("stored outbox summaries", () => {
 
   it("rejects a v2 store owned by another gateway", () => {
     const gatewayUrl = "ws://gateway.test/control";
-    const storageKey = `openclaw.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`;
+    const storageKey = `bot.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`;
     sessionStorage.setItem(
       storageKey,
       JSON.stringify({
@@ -179,7 +179,7 @@ describe("stored outbox summaries", () => {
       ["ws://b.test/control", "workspace-b", "beta"],
     ] as const) {
       sessionStorage.setItem(
-        `openclaw.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`,
+        `bot.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`,
         JSON.stringify({
           version: 2,
           gatewayOwner: gatewayUrl,
@@ -207,7 +207,7 @@ describe("stored outbox summaries", () => {
   it("deduplicates item ids within a scope, not across scopes", () => {
     const gatewayUrl = "ws://gateway.test/control";
     sessionStorage.setItem(
-      `openclaw.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`,
+      `bot.control.chatComposer.v2:${encodeURIComponent(gatewayUrl)}`,
       JSON.stringify({
         version: 2,
         gatewayOwner: gatewayUrl,

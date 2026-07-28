@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { isFutureDateTimestampMs } from "@openclaw/normalization-core/number-coercion";
+import { isFutureDateTimestampMs } from "@hanzo/bot-normalization-core/number-coercion";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import { createAgentRunRestartAbortError } from "../../agents/run-termination.js";
 import { isReplyRunAbortableForSignal } from "../../auto-reply/reply/reply-run-registry.js";

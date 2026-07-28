@@ -14,9 +14,9 @@ afterEach(async () => {
 
 describe("default role materialization authored writes", () => {
   it("preserves env references and includes and is idempotent after persistence", async () => {
-    const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-default-roles-"));
+    const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-default-roles-"));
     roots.push(root);
-    const configPath = path.join(root, "openclaw.json");
+    const configPath = path.join(root, "bot.json");
     const channelsPath = path.join(root, "channels.json5");
     const includeRaw = `${JSON.stringify({ telegram: { enabled: true } }, null, 2)}\n`;
     await fs.writeFile(channelsPath, includeRaw, "utf-8");
@@ -43,7 +43,7 @@ describe("default role materialization authored writes", () => {
       configPath,
       env: {
         HOME: root,
-        OPENCLAW_TEST_FAST: "1",
+        BOT_TEST_FAST: "1",
         DEFAULT_MODEL: "openai/default-model",
         RESEARCH_MODEL: "openai/research-model",
       } as NodeJS.ProcessEnv,

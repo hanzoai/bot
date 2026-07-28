@@ -48,10 +48,10 @@ describe("plugin npm runtime build planning", () => {
       expectDistRelativePaths(plan.runtimeExtensions);
       expectDistRelativePaths(plan.runtimeBuildOutputs);
       expect(plan.packageFiles).toContain("dist/**");
-      expect(plan.packagePeerMetadata.peerDependencies.openclaw).toBe(
-        plan.packageJson.openclaw.compat.pluginApi,
+      expect(plan.packagePeerMetadata.peerDependencies.bot).toBe(
+        plan.packageJson.bot.compat.pluginApi,
       );
-      expect(plan.packagePeerMetadata.peerDependenciesMeta.openclaw.optional).toBe(true);
+      expect(plan.packagePeerMetadata.peerDependenciesMeta.bot.optional).toBe(true);
     }
   });
 
@@ -88,7 +88,7 @@ describe("plugin npm runtime build planning", () => {
     });
     expect(diffsRuntimePlan.packageFiles).toEqual([
       "dist/**",
-      "openclaw.plugin.json",
+      "bot.plugin.json",
       "README.md",
       "skills/**",
     ]);
@@ -208,12 +208,12 @@ describe("plugin npm runtime build planning", () => {
   });
 
   it("detects unresolved side-effect host imports in built plugin runtimes", () => {
-    const outDir = tempDirs.make("openclaw-plugin-runtime-host-import-");
+    const outDir = tempDirs.make("bot-plugin-runtime-host-import-");
     writeFileSync(
       path.join(outDir, "index.js"),
       [
-        'import "openclaw/plugin-sdk/not-exported";',
-        'const runtime = __require("openclaw/plugin-sdk/not-exported-from-require");',
+        'import "bot/plugin-sdk/not-exported";',
+        'const runtime = __require("bot/plugin-sdk/not-exported-from-require");',
         "void runtime;",
         "",
       ].join("\n"),
@@ -226,14 +226,14 @@ describe("plugin npm runtime build planning", () => {
     );
 
     expect(listMissingPluginNpmRuntimeHostExports({ ...plan, outDir })).toEqual([
-      "openclaw/plugin-sdk/not-exported",
-      "openclaw/plugin-sdk/not-exported-from-require",
+      "bot/plugin-sdk/not-exported",
+      "bot/plugin-sdk/not-exported-from-require",
     ]);
   });
 
   it("does not require host metadata when the runtime has no host imports", () => {
-    const syntheticRepoRoot = tempDirs.make("openclaw-plugin-runtime-synthetic-repo-");
-    const outDir = tempDirs.make("openclaw-plugin-runtime-no-host-import-");
+    const syntheticRepoRoot = tempDirs.make("bot-plugin-runtime-synthetic-repo-");
+    const outDir = tempDirs.make("bot-plugin-runtime-no-host-import-");
     writeFileSync(path.join(outDir, "index.js"), "export default {};\n");
     const plan = expectPluginNpmRuntimeBuildPlan(
       resolvePluginNpmRuntimeBuildPlan({

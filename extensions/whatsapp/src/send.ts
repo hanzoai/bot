@@ -1,15 +1,15 @@
 // Whatsapp plugin module implements send behavior.
-import { formatCliCommand } from "openclaw/plugin-sdk/cli-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { generateSecureUuid } from "openclaw/plugin-sdk/core";
-import { PlatformMessageNotDispatchedError } from "openclaw/plugin-sdk/error-runtime";
-import { redactIdentifier } from "openclaw/plugin-sdk/logging-core";
-import { resolveMarkdownTableMode } from "openclaw/plugin-sdk/markdown-table-runtime";
-import { loadOutboundMediaFromUrl } from "openclaw/plugin-sdk/outbound-media";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { normalizePollInput, type PollInput } from "openclaw/plugin-sdk/poll-runtime";
-import { resolveChunkMode, resolveTextChunkLimit } from "openclaw/plugin-sdk/reply-chunking";
-import { createSubsystemLogger, getChildLogger } from "openclaw/plugin-sdk/runtime-env";
+import { formatCliCommand } from "bot/plugin-sdk/cli-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { generateSecureUuid } from "bot/plugin-sdk/core";
+import { PlatformMessageNotDispatchedError } from "bot/plugin-sdk/error-runtime";
+import { redactIdentifier } from "bot/plugin-sdk/logging-core";
+import { resolveMarkdownTableMode } from "bot/plugin-sdk/markdown-table-runtime";
+import { loadOutboundMediaFromUrl } from "bot/plugin-sdk/outbound-media";
+import { requireRuntimeConfig } from "bot/plugin-sdk/plugin-config-runtime";
+import { normalizePollInput, type PollInput } from "bot/plugin-sdk/poll-runtime";
+import { resolveChunkMode, resolveTextChunkLimit } from "bot/plugin-sdk/reply-chunking";
+import { createSubsystemLogger, getChildLogger } from "bot/plugin-sdk/runtime-env";
 import {
   resolveDefaultWhatsAppAccountId,
   resolveWhatsAppAccount,
@@ -76,7 +76,7 @@ function buildWhatsAppMediaSendState(params: {
 }
 
 function resolveOutboundWhatsAppAccountId(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string;
 }): string | undefined {
   const explicitAccountId = params.accountId?.trim();
@@ -86,7 +86,7 @@ function resolveOutboundWhatsAppAccountId(params: {
   return resolveDefaultWhatsAppAccountId(params.cfg);
 }
 
-function requireOutboundActiveWebListener(params: { cfg: OpenClawConfig; accountId?: string }): {
+function requireOutboundActiveWebListener(params: { cfg: BotConfig; accountId?: string }): {
   accountId: string;
   listener: ActiveWebListener;
 } {
@@ -95,7 +95,7 @@ function requireOutboundActiveWebListener(params: { cfg: OpenClawConfig; account
   const listener = getWhatsAppConnectionController(resolvedAccountId)?.getActiveListener() ?? null;
   if (!listener) {
     const cause = new Error(
-      `No active WhatsApp Web listener (account: ${resolvedAccountId}). Start the gateway, then link WhatsApp with: ${formatCliCommand(`openclaw channels login --channel whatsapp --account ${resolvedAccountId}`)}.`,
+      `No active WhatsApp Web listener (account: ${resolvedAccountId}). Start the gateway, then link WhatsApp with: ${formatCliCommand(`bot channels login --channel whatsapp --account ${resolvedAccountId}`)}.`,
     );
     throw new PlatformMessageNotDispatchedError(cause.message, { cause });
   }
@@ -121,7 +121,7 @@ export async function sendMessageWhatsApp(
   body: string,
   options: {
     verbose: boolean;
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     mediaUrl?: string;
     mediaUrls?: readonly string[];
     mediaAccess?: {
@@ -146,7 +146,7 @@ export async function sendMessageWhatsApp(
       fromMe: boolean;
       participant?: string;
       messageText?: string;
-      media?: import("openclaw/plugin-sdk/channel-inbound").MediaPlaceholderTextFact;
+      media?: import("bot/plugin-sdk/channel-inbound").MediaPlaceholderTextFact;
     };
     preserveLeadingWhitespace?: boolean;
     /** Report each accepted internal platform send before the next fallible send. */
@@ -295,7 +295,7 @@ export async function sendMessageWhatsApp(
 export async function sendTypingWhatsApp(
   to: string,
   options: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     accountId?: string;
   },
 ): Promise<void> {
@@ -319,7 +319,7 @@ export async function sendReactionWhatsApp(
     fromMe?: boolean;
     participant?: string;
     accountId?: string;
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
   },
 ): Promise<void> {
   const correlationId = generateSecureUuid();
@@ -361,7 +361,7 @@ export async function sendReactionWhatsApp(
 export async function sendPollWhatsApp(
   to: string,
   poll: PollInput,
-  options: { verbose: boolean; accountId?: string; cfg: OpenClawConfig },
+  options: { verbose: boolean; accountId?: string; cfg: BotConfig },
 ): Promise<{ messageId: string; toJid: string }> {
   const correlationId = generateSecureUuid();
   const startedAt = Date.now();

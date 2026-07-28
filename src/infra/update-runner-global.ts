@@ -24,10 +24,10 @@ import {
 } from "./update-runner-doctor.js";
 import type { CommandRunner, UpdateRunResult, UpdateRunnerOptions } from "./update-runner-types.js";
 
-const DEFAULT_PACKAGE_NAME = "openclaw";
+const DEFAULT_PACKAGE_NAME = "bot";
 
 function normalizeTag(tag?: string) {
-  return normalizePackageTagInput(tag, ["openclaw", DEFAULT_PACKAGE_NAME]) ?? "latest";
+  return normalizePackageTagInput(tag, ["bot", DEFAULT_PACKAGE_NAME]) ?? "latest";
 }
 
 export async function runGlobalUpdate(params: {
@@ -132,7 +132,7 @@ export async function runGlobalUpdate(params: {
       });
       return await runStep({
         runCommand,
-        name: "openclaw doctor",
+        name: "bot doctor",
         argv: [
           doctorNodePath,
           doctorEntry,

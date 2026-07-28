@@ -6,7 +6,7 @@ import {
   resolveAgentMainSessionKey,
   resolveSessionRoutingContract,
 } from "../../config/sessions/main-session.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { measureDiagnosticsTimelineSpanSync } from "../../infra/diagnostics-timeline.js";
 import { isIncognitoSessionKey } from "../../routing/session-key.js";
 import { resolveMissingAgentHarnessSessionError } from "../../sessions/agent-harness-session-key.js";
@@ -76,7 +76,7 @@ function loadChatSendSessionContext(params: {
   );
   const expectedLeafEntryId =
     p.expectedLeafEntryId === null ? null : normalizeOptionalChatText(p.expectedLeafEntryId);
-  const sessionRoutingChanged = (candidateConfig: OpenClawConfig) =>
+  const sessionRoutingChanged = (candidateConfig: BotConfig) =>
     expectedSessionRoutingContract !== undefined &&
     expectedSessionRoutingContract.toLowerCase() !== resolveSessionRoutingContract(candidateConfig);
   return {

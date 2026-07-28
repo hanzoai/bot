@@ -85,7 +85,7 @@ describe("ClickClack discussion service contracts", () => {
           name: "managed",
           kind: "public",
           external_managed: true,
-          external_ref: "openclaw:discussion:example",
+          external_ref: "bot:discussion:example",
           sidebar_section: "Sessions",
           created_at: "2026-07-19T00:00:00.000Z",
         },

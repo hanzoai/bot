@@ -7,9 +7,9 @@ import path from "node:path";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import * as preparedModelCatalog from "../agents/prepared-model-catalog.js";
 import type { CliDeps } from "../cli/deps.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { getPluginRuntimeGatewayRequestScope } from "../plugins/runtime/gateway-request-scope.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { withLocalGatewayRequestScope } from "./local-request-context.js";
 import { dispatchGatewayMethodInProcessRaw } from "./server-plugins.js";
 
@@ -21,7 +21,7 @@ describe("local gateway request context", () => {
       agents: {
         defaults: {},
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     response = await withLocalGatewayRequestScope(
       {
@@ -52,7 +52,7 @@ describe("local gateway request context", () => {
           },
         ],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const loadOwner = vi
       .spyOn(preparedModelCatalog, "loadResolvedPublishedModelCatalogOwner")
       .mockResolvedValue({
@@ -86,12 +86,12 @@ describe("local gateway request context", () => {
   });
 
   it("commits agent deletion through the canonical cron store", async () => {
-    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-local-cron-delete-"));
-    vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+    const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-local-cron-delete-"));
+    vi.stubEnv("BOT_STATE_DIR", stateDir);
     const cfg = {
       cron: { store: path.join(stateDir, "cron", "jobs.json") },
       agents: { list: [{ id: "main", default: true }, { id: "worker" }] },
-    } as OpenClawConfig;
+    } as BotConfig;
     try {
       await withLocalGatewayRequestScope(
         { deps: {} as CliDeps, getRuntimeConfig: () => cfg },
@@ -106,7 +106,7 @@ describe("local gateway request context", () => {
         },
       );
     } finally {
-      closeOpenClawStateDatabaseForTest();
+      closeBotStateDatabaseForTest();
       vi.unstubAllEnvs();
       fs.rmSync(stateDir, { recursive: true, force: true });
     }

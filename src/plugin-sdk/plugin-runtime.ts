@@ -19,7 +19,7 @@ export {
 export { startLazyPluginServiceModule } from "../plugins/lazy-service-module.js";
 export type { LazyPluginServiceHandle } from "../plugins/lazy-service-module.js";
 export type {
-  OpenClawPluginApi,
+  BotPluginApi,
   PluginConversationBinding,
   PluginConversationBindingRequestParams,
   PluginConversationBindingRequestResult,
@@ -31,4 +31,4 @@ export type { PluginRuntime, RuntimeLogger } from "../plugins/runtime/types.js";
 export { dispatchPluginInteractiveHandler } from "../plugins/interactive.js";
 export { getGlobalHookRunner } from "../plugins/hook-runner-global.js";
 export { getPluginCommandSpecs } from "../plugins/command-specs.js";
-export type { OpenClawPluginConfigSchema } from "../plugins/types.js";
+export type { BotPluginConfigSchema } from "../plugins/types.js";

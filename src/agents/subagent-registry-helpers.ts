@@ -5,12 +5,12 @@
  */
 import fsSync, { promises as fs } from "node:fs";
 import path from "node:path";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { DEFAULT_SUBAGENT_ARCHIVE_AFTER_MINUTES } from "../config/agent-limits.js";
 import { getRuntimeConfig } from "../config/config.js";
 import { resolveAgentIdFromSessionKey, resolveStorePath } from "../config/sessions.js";
 import { patchSessionEntry } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { defaultRuntime } from "../runtime.js";
 import { truncateUtf8Prefix } from "../utils/utf8-truncate.js";
 import { withSubagentOutcomeTiming } from "./subagent-announce-output.js";
@@ -355,7 +355,7 @@ export function reconcileOrphanedRestoredRuns(params: {
 }
 
 /** Resolves the completed subagent archive delay from config. */
-function resolveArchiveAfterMs(cfg?: OpenClawConfig) {
+function resolveArchiveAfterMs(cfg?: BotConfig) {
   const config = cfg ?? getRuntimeConfig();
   const minutes =
     config.agents?.defaults?.subagents?.archiveAfterMinutes ??
@@ -371,7 +371,7 @@ function resolveArchiveAfterMs(cfg?: OpenClawConfig) {
 
 /** Resolves the archive deadline for one newly registered run. */
 export function resolveSubagentArchiveAtMs(params: {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   now: number;
   spawnMode: "run" | "session";
   cleanup: "keep" | "delete";
@@ -387,7 +387,7 @@ export function resolveSubagentArchiveAtMs(params: {
 /** Backfills the retention deadline added after collector groups first shipped. */
 export function backfillCollectorArchiveAtMs(
   entry: SubagentRunRecord,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): boolean {
   if (!entry.collect) {
     return false;

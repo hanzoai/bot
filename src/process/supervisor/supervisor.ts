@@ -1,9 +1,9 @@
 // Process supervisor manages long-running child and PTY process lifecycles.
 import crypto from "node:crypto";
 import { performance } from "node:perf_hooks";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { sliceUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { sliceUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { getShellConfig } from "../../agents/shell-utils.js";
 import { createLazyRuntimeModule } from "../../shared/lazy-runtime.js";
 import { createChildAdapter } from "./adapters/child.js";
@@ -59,7 +59,7 @@ function appendCapturedOutput(
   if (next.length <= maxChars) {
     return next;
   }
-  const marker = `[openclaw: captured ${stream} truncated to last ${maxChars} chars]\n`;
+  const marker = `[bot: captured ${stream} truncated to last ${maxChars} chars]\n`;
   const tailChars = Math.max(0, maxChars - marker.length);
   return `${marker}${sliceUtf16Safe(next, -tailChars)}`;
 }

@@ -1,5 +1,5 @@
 // Whatsapp plugin module implements security contract behavior.
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 
 type UnsupportedSecretRefConfigCandidate = {
   path: string;

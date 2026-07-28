@@ -1,18 +1,18 @@
 {
-  "name": "@openclaw/moonshot-provider",
+  "name": "@hanzo/bot-moonshot-provider",
   "version": "2026.7.2",
-  "description": "OpenClaw Moonshot provider plugin",
+  "description": "Bot Moonshot provider plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/moonshot-provider",
-      "npmSpec": "@openclaw/moonshot-provider",
+      "clawhubSpec": "clawhub:@hanzo/bot-moonshot-provider",
+      "npmSpec": "@hanzo/bot-moonshot-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.9"
     },
@@ -20,7 +20,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {
@@ -30,6 +30,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   }
 }

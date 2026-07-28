@@ -1,5 +1,5 @@
 // User turn transcript helpers extract user-turn text from session transcripts.
-import { mimeTypeFromFilePath } from "@openclaw/media-core/mime";
+import { mimeTypeFromFilePath } from "@hanzo/bot-media-core/mime";
 import type { AgentMessage } from "../../packages/agent-core/src/types.js";
 import {
   persistSessionTranscriptTurn,
@@ -102,7 +102,7 @@ export function buildLateMediaAttachedProjection(message: AgentMessage): {
   text?: string;
   media: MediaFact[];
 } {
-  const isLateMedia = readOpenClawMessageMeta(message)?.lateMedia === true;
+  const isLateMedia = readBotMessageMeta(message)?.lateMedia === true;
   const media = isLateMedia ? (readPersistedMediaFacts(message) ?? []) : [];
   const text = media
     .flatMap((fact) => {
@@ -129,8 +129,8 @@ function buildUserTurnSenderMeta(
   };
 }
 
-function readOpenClawMessageMeta(message: AgentMessage): Record<string, unknown> | undefined {
-  const meta = (message as unknown as Record<string, unknown>)["__openclaw"];
+function readBotMessageMeta(message: AgentMessage): Record<string, unknown> | undefined {
+  const meta = (message as unknown as Record<string, unknown>)["__bot"];
   return meta && typeof meta === "object" && !Array.isArray(meta)
     ? (meta as Record<string, unknown>)
     : undefined;
@@ -144,9 +144,9 @@ export function buildPersistedUserTurnMessage(params: UserTurnInput): PersistedU
   // derived from each message's own `timestamp` field, so the current turn and
   // every historical turn serialize identically on the wire. Persisting a stamp
   // here would NOT match the bare-current arrival (the gateway no longer stamps
-  // the live turn) — see https://github.com/openclaw/openclaw/issues/3658.
+  // the live turn) — see https://github.com/hanzoai/bot/issues/3658.
   const senderMeta = buildUserTurnSenderMeta(params.sender);
-  const openClawMeta = {
+  const botMeta = {
     ...(params.senderIsOwner === undefined ? {} : { senderIsOwner: params.senderIsOwner }),
     ...senderMeta,
     ...(params.transport ? { transport: params.transport } : {}),
@@ -169,7 +169,7 @@ export function buildPersistedUserTurnMessage(params: UserTurnInput): PersistedU
     content: text,
     timestamp: params.timestamp ?? Date.now(),
     ...(params.idempotencyKey ? { idempotencyKey: params.idempotencyKey } : {}),
-    ...(Object.keys(openClawMeta).length > 0 ? { __openclaw: openClawMeta } : {}),
+    ...(Object.keys(botMeta).length > 0 ? { __bot: botMeta } : {}),
   } as PersistedUserTurnMessage;
   return applyInputProvenanceToUserMessage(message, params.provenance) as PersistedUserTurnMessage;
 }
@@ -223,12 +223,12 @@ function buildLateResolvedMediaMessage(params: {
     ...resolved,
     content,
     idempotencyKey,
-    __openclaw: { ...readOpenClawMessageMeta(params.resolvedMessage), lateMedia: true },
+    __bot: { ...readBotMessageMeta(params.resolvedMessage), lateMedia: true },
   } as unknown as PersistedUserTurnMessage;
 }
 
 function isBeforeAgentRunBlockedMessage(message: AgentMessage): boolean {
-  const marker = (message as { __openclaw?: { beforeAgentRunBlocked?: unknown } })["__openclaw"]
+  const marker = (message as { __bot?: { beforeAgentRunBlocked?: unknown } })["__bot"]
     ?.beforeAgentRunBlocked;
   return marker !== undefined;
 }
@@ -261,12 +261,12 @@ export function mergePreparedUserTurnMessageForRuntime(params: {
   }
   const runtimeMessage = params.runtimeMessage as unknown as Record<string, unknown>;
   const preparedMessage = params.preparedMessage as unknown as Record<string, unknown>;
-  const runtimeMeta = readOpenClawMessageMeta(params.runtimeMessage);
-  const preparedMeta = readOpenClawMessageMeta(params.preparedMessage);
+  const runtimeMeta = readBotMessageMeta(params.runtimeMessage);
+  const preparedMeta = readBotMessageMeta(params.preparedMessage);
   return {
     ...runtimeMessage,
     ...preparedMessage,
-    ...(preparedMeta ? { __openclaw: { ...runtimeMeta, ...preparedMeta } } : {}),
+    ...(preparedMeta ? { __bot: { ...runtimeMeta, ...preparedMeta } } : {}),
     ...(userMessageHasImageContent(params.runtimeMessage)
       ? { content: params.runtimeMessage.content }
       : {}),
@@ -281,14 +281,14 @@ export function restorePreparedUserTurnOperationalMetaForRuntime(params: {
   if (!params.preparedMessage || !isUserMessage(params.runtimeMessage)) {
     return params.runtimeMessage;
   }
-  const preparedMeta = readOpenClawMessageMeta(params.preparedMessage);
+  const preparedMeta = readBotMessageMeta(params.preparedMessage);
   const senderIsOwner = preparedMeta?.senderIsOwner;
   if (typeof senderIsOwner !== "boolean") {
     return params.runtimeMessage;
   }
   return {
     ...(params.runtimeMessage as unknown as Record<string, unknown>),
-    __openclaw: { ...readOpenClawMessageMeta(params.runtimeMessage), senderIsOwner },
+    __bot: { ...readBotMessageMeta(params.runtimeMessage), senderIsOwner },
   } as unknown as AgentMessage;
 }
 
@@ -306,12 +306,12 @@ export function preparePersistedUserTurnMessageForTranscriptWrite(
   const provenance = normalizeInputProvenance(
     (message as unknown as { provenance?: unknown }).provenance,
   );
-  const senderIsOwner = readOpenClawMessageMeta(message)?.senderIsOwner;
-  const originalTransport = readOpenClawMessageMeta(message)?.transport;
-  const lateMedia = readOpenClawMessageMeta(message)?.lateMedia === true;
-  const originalMedia = readOpenClawMessageMeta(message)?.media;
+  const senderIsOwner = readBotMessageMeta(message)?.senderIsOwner;
+  const originalTransport = readBotMessageMeta(message)?.transport;
+  const lateMedia = readBotMessageMeta(message)?.lateMedia === true;
+  const originalMedia = readBotMessageMeta(message)?.media;
   const media = Array.isArray(originalMedia) ? structuredClone(originalMedia) : undefined;
-  const originalMediaImageLayout = readOpenClawMessageMeta(message)?.mediaImageLayout;
+  const originalMediaImageLayout = readBotMessageMeta(message)?.mediaImageLayout;
   const mediaImageLayout =
     originalMediaImageLayout === undefined ? undefined : structuredClone(originalMediaImageLayout);
   // Hooks receive the original message object and may mutate nested metadata in
@@ -342,7 +342,7 @@ export function preparePersistedUserTurnMessageForTranscriptWrite(
     return nextUserMessage;
   }
   const protectedMeta = {
-    ...readOpenClawMessageMeta(nextUserMessage),
+    ...readBotMessageMeta(nextUserMessage),
     ...(typeof senderIsOwner === "boolean" ? { senderIsOwner } : {}),
     ...(transport ? { transport } : {}),
     ...(lateMedia ? { lateMedia: true } : {}),
@@ -352,7 +352,7 @@ export function preparePersistedUserTurnMessageForTranscriptWrite(
   return {
     ...(nextUserMessage as unknown as Record<string, unknown>),
     ...(idempotencyKey ? { idempotencyKey } : {}),
-    ...(Object.keys(protectedMeta).length > 0 ? { __openclaw: protectedMeta } : {}),
+    ...(Object.keys(protectedMeta).length > 0 ? { __bot: protectedMeta } : {}),
   } as unknown as PersistedUserTurnMessage;
 }
 
@@ -688,7 +688,7 @@ export function createUserTurnTranscriptRecorder(
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.userTurnTranscriptTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.userTurnTranscriptTestApi")] = {
     persistUserTurnTranscript,
   };
 }

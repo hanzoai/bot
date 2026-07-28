@@ -1,15 +1,15 @@
 // Imessage tests cover test plugin plugin behavior.
-import { buildTypedExecApprovalPendingReplyPayload } from "openclaw/plugin-sdk/approval-reply-runtime";
+import { buildTypedExecApprovalPendingReplyPayload } from "bot/plugin-sdk/approval-reply-runtime";
 import {
   createMessageReceiptFromOutboundResults,
   verifyChannelMessageAdapterCapabilityProofs,
   verifyDurableFinalCapabilityProofs,
-} from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-outbound";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   listImportedBundledPluginFacadeIds,
   resetFacadeRuntimeStateForTest,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   clearIMessageApprovalReactionTargetsForTest,
@@ -161,7 +161,7 @@ describe("createIMessageTestPlugin", () => {
               enabled: true,
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         accountId: "default",
         payload: {
           text: "Approval required.",
@@ -191,7 +191,7 @@ describe("createIMessageTestPlugin", () => {
     }
     const cfg = {
       channels: { imessage: { enabled: true } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const payload = buildTypedExecApprovalPendingReplyPayload({
       approvalId: "exec-shared-hook",
       approvalSlug: "shared-hook",

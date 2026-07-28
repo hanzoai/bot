@@ -4,7 +4,7 @@ import path from "node:path";
 import { resolveAgentDir } from "../agents/agent-scope-config.js";
 import { resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { clearRuntimeAuthProfileStoreSnapshot } from "../agents/auth-profiles/store.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isNotFoundPathError } from "../infra/path-guards.js";
 import { summarizeMigrationItems } from "../plugin-sdk/migration.js";
 import type {
@@ -13,13 +13,13 @@ import type {
   MigrationItem,
   MigrationPlan,
 } from "../plugins/types.js";
-import { registerOpenClawAgentDatabase } from "../state/openclaw-agent-db-registry.js";
+import { registerBotAgentDatabase } from "../state/bot-agent-db-registry.js";
 import {
-  disposeOpenClawAgentDatabaseByPath,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseByPath } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  disposeBotAgentDatabaseByPath,
+  openBotAgentDatabase,
+} from "../state/bot-agent-db.js";
+import { closeBotStateDatabaseByPath } from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import { hashSetupMigrationConfig } from "./setup.migration-canonical.js";
 import {
   assertDisjointPromotionTargets,
@@ -56,23 +56,23 @@ type SetupMigrationStage = {
   staged: SetupMigrationStagePaths;
   final: SetupMigrationStagePaths;
   configRuntime: MigrationConfigRuntime;
-  getFinalConfig: () => OpenClawConfig;
-  getStagedConfig: () => OpenClawConfig;
-  replaceStagedConfig: (config: OpenClawConfig) => void;
+  getFinalConfig: () => BotConfig;
+  getStagedConfig: () => BotConfig;
+  replaceStagedConfig: (config: BotConfig) => void;
   projectPlanToStage: (plan: MigrationPlan) => MigrationPlan;
   projectResultToFinal: (result: MigrationApplyResult) => MigrationApplyResult;
   promote: (params: {
-    expectedConfig: OpenClawConfig;
+    expectedConfig: BotConfig;
     continuation: Omit<
       SetupMigrationPromotionContinuation,
       "stagedReportDir" | "stagedRoots" | "workspaceDir"
     >;
-    readConfigFile: () => Promise<OpenClawConfig>;
+    readConfigFile: () => Promise<BotConfig>;
     commitConfigFile: (
-      config: OpenClawConfig,
-      expectedConfig: OpenClawConfig,
-    ) => Promise<OpenClawConfig>;
-  }) => Promise<{ config: OpenClawConfig; resume: SetupMigrationPromotionResume }>;
+      config: BotConfig,
+      expectedConfig: BotConfig,
+    ) => Promise<BotConfig>;
+  }) => Promise<{ config: BotConfig; resume: SetupMigrationPromotionResume }>;
   cleanup: () => Promise<void>;
 };
 
@@ -102,7 +102,7 @@ async function findExistingAncestor(candidate: string): Promise<string> {
 
 async function makePrivateStageNear(target: string, label: string): Promise<string> {
   const ancestor = await findExistingAncestor(path.dirname(path.resolve(target)));
-  const staged = await fs.mkdtemp(path.join(ancestor, `.openclaw-${label}-`));
+  const staged = await fs.mkdtemp(path.join(ancestor, `.bot-${label}-`));
   await fs.chmod(staged, 0o700);
   return staged;
 }
@@ -155,14 +155,14 @@ function projectPlanTargets(
 }
 
 function createInMemoryConfigRuntime(params: {
-  finalConfig: OpenClawConfig;
-  stagedConfig: OpenClawConfig;
-  projectToFinal: (config: OpenClawConfig) => OpenClawConfig;
+  finalConfig: BotConfig;
+  stagedConfig: BotConfig;
+  projectToFinal: (config: BotConfig) => BotConfig;
 }): {
   runtime: MigrationConfigRuntime;
-  getFinalConfig: () => OpenClawConfig;
-  getStagedConfig: () => OpenClawConfig;
-  replaceConfigs: (next: { finalConfig: OpenClawConfig; stagedConfig: OpenClawConfig }) => void;
+  getFinalConfig: () => BotConfig;
+  getStagedConfig: () => BotConfig;
+  replaceConfigs: (next: { finalConfig: BotConfig; stagedConfig: BotConfig }) => void;
 } {
   let finalConfig = structuredClone(params.finalConfig);
   let stagedConfig = structuredClone(params.stagedConfig);
@@ -265,10 +265,10 @@ export async function createSetupMigrationStage(params: {
   stateDir: string;
   workspaceDir: string;
   reportDir: string;
-  targetConfig: OpenClawConfig;
+  targetConfig: BotConfig;
 }): Promise<SetupMigrationStage> {
   const agentId = resolveDefaultAgentId(params.targetConfig);
-  const finalEnv = { ...process.env, OPENCLAW_STATE_DIR: params.stateDir };
+  const finalEnv = { ...process.env, BOT_STATE_DIR: params.stateDir };
   const finalAgentDir = resolveAgentDir(params.targetConfig, agentId, finalEnv);
   const stagedStateDir = await makePrivateStageNear(params.stateDir, "migration-state");
   const stagedWorkspaceDir = await makePrivateStageNear(params.workspaceDir, "migration-workspace");
@@ -279,8 +279,8 @@ export async function createSetupMigrationStage(params: {
     params.providerId,
     path.basename(params.reportDir),
   );
-  const stageEnv = { ...process.env, OPENCLAW_STATE_DIR: stagedStateDir };
-  const stagedConfig: OpenClawConfig = {
+  const stageEnv = { ...process.env, BOT_STATE_DIR: stagedStateDir };
+  const stagedConfig: BotConfig = {
     ...structuredClone(params.targetConfig),
     agents: {
       ...structuredClone(params.targetConfig.agents),
@@ -309,14 +309,14 @@ export async function createSetupMigrationStage(params: {
     [finalPaths.reportDir, stagedPaths.reportDir],
   ] as const;
   const toFinal = toStage.map(([finalPath, stagedPath]) => [stagedPath, finalPath] as const);
-  const projectConfigToFinal = (config: OpenClawConfig) =>
-    projectValue(config, toFinal) as OpenClawConfig;
+  const projectConfigToFinal = (config: BotConfig) =>
+    projectValue(config, toFinal) as BotConfig;
   const configs = createInMemoryConfigRuntime({
     finalConfig: params.targetConfig,
     stagedConfig,
     projectToFinal: projectConfigToFinal,
   });
-  openOpenClawAgentDatabase({ agentId, env: stageEnv });
+  openBotAgentDatabase({ agentId, env: stageEnv });
   let databasesDisposed = false;
   let retainForRecovery = false;
 
@@ -325,16 +325,16 @@ export async function createSetupMigrationStage(params: {
       return;
     }
     clearRuntimeAuthProfileStoreSnapshot(stagedAgentDir);
-    const stagedAgentDatabasePath = path.join(stagedAgentDir, "openclaw-agent.sqlite");
-    disposeOpenClawAgentDatabaseByPath(stagedAgentDatabasePath, { env: stageEnv });
+    const stagedAgentDatabasePath = path.join(stagedAgentDir, "bot-agent.sqlite");
+    disposeBotAgentDatabaseByPath(stagedAgentDatabasePath, { env: stageEnv });
     // Verification may already close this handle. The staged registry still must
     // publish the final path before its shared database is promoted.
-    registerOpenClawAgentDatabase({
+    registerBotAgentDatabase({
       agentId,
-      path: path.join(finalAgentDir, "openclaw-agent.sqlite"),
+      path: path.join(finalAgentDir, "bot-agent.sqlite"),
       env: stageEnv,
     });
-    closeOpenClawStateDatabaseByPath(resolveOpenClawStateSqlitePath(stageEnv));
+    closeBotStateDatabaseByPath(resolveBotStateSqlitePath(stageEnv));
     databasesDisposed = true;
   };
 
@@ -433,7 +433,7 @@ export async function createSetupMigrationStage(params: {
           component.status = "promoted";
           await writePromotionJournal(journalPath, journal);
         }
-        let committed: OpenClawConfig;
+        let committed: BotConfig;
         try {
           committed = await commitConfigFile(configTarget, expectedConfig);
         } catch (error) {
@@ -447,7 +447,7 @@ export async function createSetupMigrationStage(params: {
             retainForRecovery = true;
             await writePromotionJournal(journalPath, journal);
             throw new Error(
-              `Migration config commit is indeterminate. Review ${journalPath} and run openclaw doctor before retrying.`,
+              `Migration config commit is indeterminate. Review ${journalPath} and run bot doctor before retrying.`,
               { cause: error },
             );
           }
@@ -470,7 +470,7 @@ export async function createSetupMigrationStage(params: {
         retainForRecovery = true;
         await writePromotionJournal(journalPath, journal);
         throw new Error(
-          `Migration promotion could not be rolled back. Review ${journalPath} and run openclaw doctor before retrying.`,
+          `Migration promotion could not be rolled back. Review ${journalPath} and run bot doctor before retrying.`,
           { cause: error },
         );
       }

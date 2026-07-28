@@ -105,7 +105,7 @@ export AUTOREVIEW_HARNESS=".claude/skills/autoreview/scripts/test-review-harness
 ```
 
 ```bash
-# Source checkout of openclaw/agent-skills:
+# Source checkout of bot/agent-skills:
 export AUTOREVIEW="skills/autoreview/scripts/autoreview"
 export AUTOREVIEW_HARNESS="skills/autoreview/scripts/test-review-harness"
 ```
@@ -134,7 +134,7 @@ $AUTOREVIEW_HARNESS = ".claude\skills\autoreview\scripts\test-review-harness.ps1
 ```
 
 ```powershell
-# Source checkout of openclaw/agent-skills:
+# Source checkout of bot/agent-skills:
 $AUTOREVIEW = "skills\autoreview\scripts\autoreview"
 $AUTOREVIEW_HARNESS = "skills\autoreview\scripts\test-review-harness.ps1"
 ```
@@ -229,12 +229,12 @@ Parallel tests inherit only a small allowlist of ordinary OS, CI, and toolchain
 variables. Put additional non-secret project controls directly in the test command.
 Home and standard config directories point to a temporary isolated root that is
 removed after the command exits. Do not put secrets in the command because it is
-printed before execution. Set `OPENCLAW_TESTBOX=1` on the autoreview process, not
+printed before execution. Set `BOT_TESTBOX=1` on the autoreview process, not
 inside the test command, because the environment snapshot and credential staging
 happen before the test shell starts:
 
 ```bash
-OPENCLAW_TESTBOX=1 "$AUTOREVIEW" --parallel-tests "pnpm check:changed"
+BOT_TESTBOX=1 "$AUTOREVIEW" --parallel-tests "pnpm check:changed"
 ```
 
 On POSIX, the helper puts this isolated Testbox home under the short, sticky
@@ -294,7 +294,7 @@ Recommended model defaults:
 
 | Engine              | Default model                                      | Source note                                           |
 | ------------------- | -------------------------------------------------- | ----------------------------------------------------- |
-| **codex** (default) | `gpt-5.6-sol` -> `gpt-5.6-terra` on access failure | OpenClaw org review default                           |
+| **codex** (default) | `gpt-5.6-sol` -> `gpt-5.6-terra` on access failure | Bot org review default                           |
 | **claude**          | `claude-fable-5`                                   | Anthropic's most capable widely released Claude model |
 
 CLI flags and environment variables override these defaults. Pi does not get a built-in model default because its provider catalog may vary by installation. Droid, Copilot, Cursor, and OpenCode are currently refused.

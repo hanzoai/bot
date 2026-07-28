@@ -1,9 +1,9 @@
 // Whatsapp tests cover doctor contract plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { legacyConfigRules, normalizeCompatibilityConfig } from "./doctor-contract.js";
 
-function whatsappConfig(entry: Record<string, unknown>): OpenClawConfig {
+function whatsappConfig(entry: Record<string, unknown>): BotConfig {
   return { channels: { whatsapp: entry } } as never;
 }
 

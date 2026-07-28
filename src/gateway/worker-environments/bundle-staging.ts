@@ -84,7 +84,7 @@ function pruneVendoredPackageManifest(contents: Buffer): Buffer {
 }
 
 function normalizePortableMode(mode: number, relativePath: string): number {
-  return relativePath === "openclaw.mjs" || (mode & 0o111) !== 0 ? 0o700 : 0o600;
+  return relativePath === "bot.mjs" || (mode & 0o111) !== 0 ? 0o700 : 0o600;
 }
 
 type StagedFileSource = {
@@ -162,13 +162,13 @@ async function stageManifestEntry(
   });
 }
 
-// tsdown keeps some @openclaw workspace packages external of dist (never-bundle list),
+// tsdown keeps some @bot workspace packages external of dist (never-bundle list),
 // so shipped dist imports them at runtime; scan staged bytes for those specifiers to
 // know which workspace builds must ride along in the bundle.
-const OPENCLAW_IMPORT_SPECIFIER_PATTERN =
-  /["'`](@openclaw\/[a-z0-9-]+)(?:\/[A-Za-z0-9./_-]+)?["'`]/gu;
+const BOT_IMPORT_SPECIFIER_PATTERN =
+  /["'`](@bot\/[a-z0-9-]+)(?:\/[A-Za-z0-9./_-]+)?["'`]/gu;
 
-function collectOpenclawImportSpecifiers(
+function collectBotImportSpecifiers(
   relativePath: string,
   contents: Buffer,
   into: Set<string>,
@@ -176,7 +176,7 @@ function collectOpenclawImportSpecifiers(
   if (!/\.(?:cjs|js|mjs)$/u.test(relativePath)) {
     return;
   }
-  for (const match of contents.toString("utf8").matchAll(OPENCLAW_IMPORT_SPECIFIER_PATTERN)) {
+  for (const match of contents.toString("utf8").matchAll(BOT_IMPORT_SPECIFIER_PATTERN)) {
     const packageName = match[1];
     if (packageName) {
       into.add(packageName);
@@ -274,19 +274,19 @@ export async function collectWorkerBundleManifest(
   );
   if (distFiles.length === 0) {
     throw new Error(
-      `OpenClaw worker bundle has no packaged dist files; build the running package at ${sourceRoot}`,
+      `Bot worker bundle has no packaged dist files; build the running package at ${sourceRoot}`,
     );
   }
   const referencedPackages = new Set<string>();
   const entries: WorkerBundleManifestEntry[] = [];
-  for (const relativePath of ["openclaw.mjs", ...distFiles].toSorted(comparePaths)) {
+  for (const relativePath of ["bot.mjs", ...distFiles].toSorted(comparePaths)) {
     const { entry, contents } = await stageManifestEntry(
       sourceRoot,
       sourceRootRealPath,
       stagingRoot,
       relativePath,
     );
-    collectOpenclawImportSpecifiers(relativePath, contents, referencedPackages);
+    collectBotImportSpecifiers(relativePath, contents, referencedPackages);
     entries.push(entry);
   }
   const workspaceDependencyNames = await readWorkspaceDependencyNames(sourceRoot);

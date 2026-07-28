@@ -1,5 +1,5 @@
 // Imessage plugin module implements channel behavior.
-import { resolveOutboundSendDep } from "openclaw/plugin-sdk/channel-outbound";
+import { resolveOutboundSendDep } from "bot/plugin-sdk/channel-outbound";
 import { resolveIMessageDuplicateSourceOwner, type ResolvedIMessageAccount } from "./accounts.js";
 import { PAIRING_APPROVED_MESSAGE, resolveChannelMediaMaxBytes } from "./channel-api.js";
 import type { ChannelPlugin } from "./channel-api.js";
@@ -86,7 +86,7 @@ export async function startIMessageGatewayAccount(
   });
   const ownerAccountId = resolveIMessageDuplicateSourceOwner({ cfg: ctx.cfg, account });
   if (ownerAccountId) {
-    // openclaw/openclaw#65141: this account shares a local Messages source with
+    // hanzoai/bot#65141: this account shares a local Messages source with
     // an already-owning account, so spawning a second `imsg rpc` would deliver
     // every inbound twice. Keep the account enabled for outbound sends, status,
     // and capability surfaces; just park the watcher slot until shutdown.

@@ -33,7 +33,7 @@ describe("session transcript runtime SDK", () => {
   let storePath: string;
 
   beforeEach(() => {
-    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sdk-transcript-"));
+    tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-sdk-transcript-"));
     storePath = path.join(tempDir, "sessions.json");
   });
 

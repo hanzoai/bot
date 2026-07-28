@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { installedPluginRoot } from "openclaw/plugin-sdk/test-fixtures";
+import { installedPluginRoot } from "bot/plugin-sdk/test-fixtures";
 import { describe, expect, it, vi } from "vitest";
 import { PLUGIN_INSTALL_ERROR_CODE } from "../plugins/install.js";
 import {
@@ -19,13 +19,13 @@ function createSourceCheckoutPlugin(pluginId: string): {
   packageRoot: string;
   pluginRoot: string;
 } {
-  const packageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-plan-"));
+  const packageRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-plugin-plan-"));
   fs.mkdirSync(path.join(packageRoot, ".git"));
   fs.mkdirSync(path.join(packageRoot, "src"));
   fs.mkdirSync(path.join(packageRoot, "extensions"));
   const pluginRoot = path.join(packageRoot, "dist", "extensions", pluginId);
   fs.mkdirSync(pluginRoot, { recursive: true });
-  fs.writeFileSync(path.join(packageRoot, "package.json"), JSON.stringify({ name: "openclaw" }));
+  fs.writeFileSync(path.join(packageRoot, "package.json"), JSON.stringify({ name: "bot" }));
   fs.writeFileSync(path.join(packageRoot, "pnpm-workspace.yaml"), "packages: []\n");
   return { packageRoot, pluginRoot };
 }
@@ -41,30 +41,30 @@ describe("plugin install plan helpers", () => {
   });
 
   it("resolves exact official external plugin ids before npm fallback", () => {
-    const result = resolveCatalogOfficialExternalInstallPlan("wecom-openclaw-plugin");
+    const result = resolveCatalogOfficialExternalInstallPlan("wecom-bot-plugin");
 
     expect(result).toEqual({
-      pluginId: "wecom-openclaw-plugin",
-      npmSpec: "@wecom/wecom-openclaw-plugin@2026.5.7",
+      pluginId: "wecom-bot-plugin",
+      npmSpec: "@wecom/wecom-bot-plugin@2026.5.7",
       expectedIntegrity:
         "sha512-TCkP9as00WfEhgFWG8YL/rcmaWGIshAki2HQh83nTRccGfVBCoGjrEboTTqq3yDmK9koWTV11zi8u8A4dNtvug==",
     });
   });
 
   it("skips official external plan for explicit npm selectors", () => {
-    expect(resolveCatalogOfficialExternalInstallPlan("wecom-openclaw-plugin@beta")).toBeNull();
+    expect(resolveCatalogOfficialExternalInstallPlan("wecom-bot-plugin@beta")).toBeNull();
     expect(
-      resolveCatalogOfficialExternalInstallPlan("@wecom/wecom-openclaw-plugin@2026.5.7"),
+      resolveCatalogOfficialExternalInstallPlan("@wecom/wecom-bot-plugin@2026.5.7"),
     ).toBeNull();
   });
 
   it("trusts exact official external npm packages without remapping the spec", () => {
     const result = resolveCatalogOfficialExternalNpmPackageTrust(
-      "@wecom/wecom-openclaw-plugin@2026.5.7",
+      "@wecom/wecom-bot-plugin@2026.5.7",
     );
 
     expect(result).toEqual({
-      pluginId: "wecom-openclaw-plugin",
+      pluginId: "wecom-bot-plugin",
       expectedIntegrity:
         "sha512-TCkP9as00WfEhgFWG8YL/rcmaWGIshAki2HQh83nTRccGfVBCoGjrEboTTqq3yDmK9koWTV11zi8u8A4dNtvug==",
       trustedSourceLinkedOfficialInstall: true,
@@ -85,7 +85,7 @@ describe("plugin install plan helpers", () => {
           return {
             pluginId: "voice-call",
             localPath: installedPluginRoot("/tmp", "voice-call"),
-            npmSpec: "@openclaw/voice-call",
+            npmSpec: "@hanzo/bot-voice-call",
           };
         }
         return undefined;
@@ -93,7 +93,7 @@ describe("plugin install plan helpers", () => {
 
     const result = resolveBundledInstallPlanForCatalogEntry({
       pluginId: "voice-call",
-      npmSpec: "@openclaw/voice-call",
+      npmSpec: "@hanzo/bot-voice-call",
       findBundledSource,
     });
 
@@ -109,7 +109,7 @@ describe("plugin install plan helpers", () => {
           return {
             pluginId: "not-voice-call",
             localPath: installedPluginRoot("/tmp", "not-voice-call"),
-            npmSpec: "@openclaw/voice-call",
+            npmSpec: "@hanzo/bot-voice-call",
           };
         }
         return undefined;
@@ -117,7 +117,7 @@ describe("plugin install plan helpers", () => {
 
     const result = resolveBundledInstallPlanForCatalogEntry({
       pluginId: "voice-call",
-      npmSpec: "@openclaw/voice-call",
+      npmSpec: "@hanzo/bot-voice-call",
       findBundledSource,
     });
 
@@ -132,7 +132,7 @@ describe("plugin install plan helpers", () => {
           return {
             pluginId: "whatsapp",
             localPath: installedPluginRoot("/tmp", "whatsapp"),
-            npmSpec: "@openclaw/whatsapp",
+            npmSpec: "@hanzo/bot-whatsapp",
           };
         }
         return undefined;
@@ -151,17 +151,17 @@ describe("plugin install plan helpers", () => {
     const findBundledSource = vi.fn().mockReturnValue({
       pluginId: "voice-call",
       localPath: installedPluginRoot("/tmp", "voice-call"),
-      npmSpec: "@openclaw/voice-call",
+      npmSpec: "@hanzo/bot-voice-call",
     });
     const result = resolveBundledInstallPlanForNpmFailure({
-      rawSpec: "@openclaw/voice-call",
+      rawSpec: "@hanzo/bot-voice-call",
       code: PLUGIN_INSTALL_ERROR_CODE.NPM_PACKAGE_NOT_FOUND,
       findBundledSource,
     });
 
     expect(findBundledSource).toHaveBeenCalledWith({
       kind: "npmSpec",
-      value: "@openclaw/voice-call",
+      value: "@hanzo/bot-voice-call",
     });
     expect(result?.warning).toContain("npm package unavailable");
   });
@@ -172,11 +172,11 @@ describe("plugin install plan helpers", () => {
       const findBundledSource = vi.fn().mockReturnValue({
         pluginId: "codex",
         localPath: pluginRoot,
-        npmSpec: "@openclaw/codex",
+        npmSpec: "@hanzo/bot-codex",
       });
 
       const result = resolveBundledInstallPlanForNpmFailure({
-        rawSpec: "@openclaw/codex",
+        rawSpec: "@hanzo/bot-codex",
         code: PLUGIN_INSTALL_ERROR_CODE.NPM_PACKAGE_NOT_FOUND,
         findBundledSource,
       });
@@ -193,7 +193,7 @@ describe("plugin install plan helpers", () => {
       const findBundledSource = vi.fn().mockReturnValue({
         pluginId: "codex",
         localPath: pluginRoot,
-        npmSpec: "@openclaw/codex",
+        npmSpec: "@hanzo/bot-codex",
       });
 
       const result = resolveBundledInstallPlanForNpmFailure({
@@ -211,7 +211,7 @@ describe("plugin install plan helpers", () => {
   it("skips fallback for non-not-found npm failures", () => {
     const findBundledSource = vi.fn();
     const result = resolveBundledInstallPlanForNpmFailure({
-      rawSpec: "@openclaw/voice-call",
+      rawSpec: "@hanzo/bot-voice-call",
       code: "INSTALL_FAILED",
       findBundledSource,
     });

@@ -1,6 +1,6 @@
 const PAGE_SHARE_TIMEOUT_MS = 10_000;
 const PAGE_SHARE_DISCONNECTED_ERROR =
-  "Browser relay disconnected before OpenClaw acknowledged the page share.";
+  "Browser relay disconnected before Bot acknowledged the page share.";
 
 export function createPageShareRelay() {
   let nextRequestId = 1;
@@ -39,7 +39,7 @@ export function createPageShareRelay() {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         pending.delete(requestId);
-        reject(new Error("Timed out waiting for OpenClaw."));
+        reject(new Error("Timed out waiting for Bot."));
       }, PAGE_SHARE_TIMEOUT_MS);
       pending.set(requestId, { socket, resolve, reject, timer });
       try {

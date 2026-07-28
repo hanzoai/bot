@@ -1,14 +1,14 @@
-// Keep the runtime class on the public package specifier so OpenClaw and
+// Keep the runtime class on the public package specifier so Bot and
 // external consumers share one constructor identity.
-import { EventStream as LlmEventStream } from "@openclaw/ai/event-stream";
+import { EventStream as LlmEventStream } from "@hanzo/bot-ai/event-stream";
 import type {
   AssistantMessage,
   AssistantMessageEvent,
   Context,
   EventStream,
   ToolResultMessage,
-} from "@openclaw/llm-core";
-import type { EventStream as SourceEventStream } from "@openclaw/llm-core";
+} from "@hanzo/bot-llm-core";
+import type { EventStream as SourceEventStream } from "@hanzo/bot-llm-core";
 import { TranscriptNotContinuableError } from "./errors.js";
 import { uuidv7 } from "./harness/session/uuid.js";
 import { resolveAgentReasoningOption } from "./reasoning.js";

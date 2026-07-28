@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizePluginsConfig } from "../plugins/config-state.js";
 import { getCurrentPluginMetadataSnapshot } from "../plugins/current-plugin-metadata-snapshot.js";
 import type { PluginRegistry } from "../plugins/registry-types.js";
@@ -15,7 +15,7 @@ type StartupScopedPluginSnapshot = NonNullable<
 };
 
 function resolveStartupPluginIdsFromCurrentSnapshot(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir?: string;
 }): string[] | undefined {
   const snapshot = getCurrentPluginMetadataSnapshot({
@@ -31,7 +31,7 @@ function resolveStartupPluginIdsFromCurrentSnapshot(params: {
 
 /** Ensure standalone runtime plugins are loaded for the current agent context. */
 export function ensureRuntimePluginsLoaded(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir?: string | null;
   allowGatewaySubagentBinding?: boolean;
 }): PluginRegistry | undefined {

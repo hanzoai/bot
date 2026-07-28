@@ -1,9 +1,9 @@
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@hanzo/bot-ai/internal/shared";
 import "./ai-transport-runtime-host.js";
 import {
   applyAnthropicPayloadPolicyToParams,
   resolveAnthropicPayloadPolicy,
-} from "@openclaw/ai/transports";
+} from "@hanzo/bot-ai/transports";
 /**
  * Tests Anthropic payload policy mutation.
  * Covers service tier, cache-control retention, prompt cache boundaries, and
@@ -318,8 +318,8 @@ describe("anthropic payload policy", () => {
   });
 
   it("keeps implicit env-driven long retention conservative for custom hosts", () => {
-    const previous = process.env.OPENCLAW_CACHE_RETENTION;
-    process.env.OPENCLAW_CACHE_RETENTION = "long";
+    const previous = process.env.BOT_CACHE_RETENTION;
+    process.env.BOT_CACHE_RETENTION = "long";
     try {
       const policy = resolveAnthropicPayloadPolicy({
         provider: "anthropic",
@@ -334,9 +334,9 @@ describe("anthropic payload policy", () => {
       expectShortEphemeralTextPayload(payload);
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_CACHE_RETENTION;
+        delete process.env.BOT_CACHE_RETENTION;
       } else {
-        process.env.OPENCLAW_CACHE_RETENTION = previous;
+        process.env.BOT_CACHE_RETENTION = previous;
       }
     }
   });

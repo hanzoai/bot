@@ -10,7 +10,7 @@
     }
   },
   "metadata": {
-    "openclaw.config": "profiles/incident-response.openclaw.yml"
+    "bot.config": "profiles/incident-response.bot.yml"
   },
   "workspace": {
     "bootstrapFiles": {
@@ -32,7 +32,7 @@
     {
       "kind": "plugin",
       "source": "clawhub",
-      "ref": "@openclaw/plugin-pager-duty",
+      "ref": "@hanzo/bot-plugin-pager-duty",
       "version": "2.4.0"
     }
   ],

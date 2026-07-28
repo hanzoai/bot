@@ -1,7 +1,7 @@
 // Memory Core tests cover metadata-only CLI host propagation.
 import { Command } from "commander";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/core";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import type { BotPluginApi } from "bot/plugin-sdk/core";
+import { createTestPluginApi } from "bot/plugin-sdk/plugin-test-api";
 import { describe, expect, it, vi } from "vitest";
 
 const registerMemoryCliMock = vi.hoisted(() => vi.fn());
@@ -14,7 +14,7 @@ import plugin from "./cli-metadata.js";
 
 describe("memory-core CLI metadata", () => {
   it("passes the bound SQLite lease host to the lazy CLI registrar", async () => {
-    let registrar: Parameters<OpenClawPluginApi["registerCli"]>[0] | undefined;
+    let registrar: Parameters<BotPluginApi["registerCli"]>[0] | undefined;
     const hostWithLease = vi.fn();
     const acquireLocalService = vi.fn(async () => undefined);
     plugin.register(
@@ -22,7 +22,7 @@ describe("memory-core CLI metadata", () => {
         runtime: {
           llm: { acquireLocalService },
           state: { withLease: hostWithLease },
-        } as unknown as OpenClawPluginApi["runtime"],
+        } as unknown as BotPluginApi["runtime"],
         registerCli(nextRegistrar) {
           registrar = nextRegistrar;
         },

@@ -222,7 +222,7 @@ describe("createSlackBoltApp", () => {
     }
   });
 
-  it("applies OpenClaw self-event filtering through installed Bolt middleware", async () => {
+  it("applies Bot self-event filtering through installed Bolt middleware", async () => {
     const { app } = createSlackBoltApp({
       interop: {
         App: FakeApp as never,

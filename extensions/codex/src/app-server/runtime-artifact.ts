@@ -3,17 +3,17 @@ import { createHash } from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { AgentHarnessRuntimeArtifactBinding } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentHarnessRuntimeArtifactBinding } from "bot/plugin-sdk/agent-harness-runtime";
 import {
   resolveWindowsExecutablePath,
   resolveWindowsSpawnProgram,
-} from "openclaw/plugin-sdk/windows-spawn";
+} from "bot/plugin-sdk/windows-spawn";
 import type { CodexAppServerClient, CodexAppServerRuntimeIdentity } from "./client.js";
 import type { CodexAppServerStartOptions } from "./config.js";
 import { resolveCodexAppServerSpawnEnv } from "./transport-stdio.js";
 
 const ARTIFACT_ID_PREFIX = "codex-app-server:v1:";
-const ARTIFACT_HASH_DOMAIN = "openclaw-codex-app-server-runtime-artifact-v1\0";
+const ARTIFACT_HASH_DOMAIN = "bot-codex-app-server-runtime-artifact-v1\0";
 const MAX_ARTIFACT_ID_BYTES = 32 * 1024;
 const MAX_ARTIFACT_PATH_BYTES = 4096;
 const MAX_ARTIFACT_INVOCATION_PATHS = 8;
@@ -34,7 +34,7 @@ const RUNTIME_INJECTION_ENV_KEYS = new Set([
   "DYLD_INSERT_LIBRARIES",
   "DYLD_LIBRARY_PATH",
 ]);
-const ARTIFACT_BINDINGS_SYMBOL = Symbol.for("openclaw.codexAppServerRuntimeArtifactBindings");
+const ARTIFACT_BINDINGS_SYMBOL = Symbol.for("bot.codexAppServerRuntimeArtifactBindings");
 
 type CodexRuntimeArtifactSpawnIdentity = Readonly<{
   command: string;

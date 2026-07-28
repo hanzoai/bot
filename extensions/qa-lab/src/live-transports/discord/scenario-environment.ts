@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { QaRunnerCliRegistration } from "bot/plugin-sdk/qa-runner-runtime";
 import {
   patchLiveQaGatewayConfig,
   readLiveQaGatewayConfig,
@@ -20,7 +20,7 @@ type DiscordObservedMessage = Parameters<
 >[0]["observedMessages"][number];
 
 export type DiscordQaScenarioEnvironment = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   driverIdentity: DiscordIdentity;
   observedMessages: DiscordObservedMessage[];
   outputDir: string;
@@ -59,7 +59,7 @@ export function createDiscordQaScenarioEnvironment(params: {
         : undefined;
     const snapshot = await readLiveQaGatewayConfig(input.gateway);
     const cfg = discordQaScenarioSupport.testing.buildDiscordQaConfig(
-      snapshot.config as OpenClawConfig,
+      snapshot.config as BotConfig,
       {
         guildId: params.runtimeEnv.guildId,
         channelId: params.runtimeEnv.channelId,

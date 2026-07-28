@@ -1,13 +1,13 @@
-# OpenClaw LongCat Provider
+# Bot LongCat Provider
 
-Official OpenClaw provider plugin for LongCat-2.0 through LongCat's hosted
+Official Bot provider plugin for LongCat-2.0 through LongCat's hosted
 OpenAI-compatible API.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/longcat-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-longcat-provider
+bot gateway restart
 ```
 
 Configure `LONGCAT_API_KEY`, then select `longcat/LongCat-2.0`.

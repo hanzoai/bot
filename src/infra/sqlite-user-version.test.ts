@@ -54,6 +54,6 @@ describe("createNewerSqliteSchemaVersionError", () => {
     const error = createNewerSqliteSchemaVersionError("test database", "/tmp/test.sqlite", 12, 11);
 
     expect(error.name).toBe("SqliteSchemaVersionError");
-    expect(error.message).toContain("https://docs.openclaw.ai/reference/database-schemas");
+    expect(error.message).toContain("https://docs.bot.ai/reference/database-schemas");
   });
 });

@@ -6,7 +6,7 @@ import {
   sleepWithAbort,
   type BackoffPolicy,
   type RuntimeEnv,
-} from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/runtime-env";
 import {
   type SignalSseEvent,
   type SignalTransportKind,

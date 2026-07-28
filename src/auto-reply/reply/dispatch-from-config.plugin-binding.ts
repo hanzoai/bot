@@ -1,5 +1,5 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../../config/types.bot.js";
 import { matchPluginCommand } from "../../plugins/commands.js";
 import { isNativeCommandTurn, resolveCommandTurnContext } from "../command-turn-context.js";
 import {
@@ -14,7 +14,7 @@ import { isExplicitSourceReplyCommand } from "./source-reply-delivery-mode.js";
 
 export function shouldBypassPluginOwnedBindingForCommand(
   ctx: FinalizedRuntimeMsgContext,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): boolean {
   // Command authorization is a trust boundary. Reject malformed runtime context
   // before command-turn normalization can coerce a truthy value.

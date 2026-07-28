@@ -6,7 +6,7 @@
 import type { TSchema } from "typebox";
 import { isSilentReplyPayloadText, SILENT_REPLY_TOKEN } from "../../auto-reply/tokens.js";
 import { projectConfigOntoRuntimeSourceSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { hasReplyPayloadContent } from "../../interactive/payload.js";
 import {
   isPluginMetadataSnapshotCompatible,
@@ -45,9 +45,9 @@ function formatResolvedRef(params: { provider: string; modelId: string }): strin
   return `${params.provider}/${params.modelId}`;
 }
 
-function asOpenClawConfig(value: unknown): OpenClawConfig | undefined {
+function asBotConfig(value: unknown): BotConfig | undefined {
   return value !== null && typeof value === "object" && !Array.isArray(value)
-    ? (value as OpenClawConfig)
+    ? (value as BotConfig)
     : undefined;
 }
 
@@ -63,7 +63,7 @@ type RuntimePlanMetadataParams = BuildAgentRuntimeDeliveryPlanParams & {
 
 function resolveCompatibleMetadataSnapshot(
   params: RuntimePlanMetadataParams,
-  config: OpenClawConfig | undefined = asOpenClawConfig(params.config),
+  config: BotConfig | undefined = asBotConfig(params.config),
 ): PluginMetadataSnapshot | undefined {
   const metadataSnapshot = params.metadataSnapshot as PluginMetadataSnapshot | undefined;
   return metadataSnapshot &&
@@ -97,7 +97,7 @@ function resolvePreparedProviderRuntimeHandle(
     ...resolveProviderRuntimePluginHandle({
       provider: params.provider,
       modelId: params.modelId,
-      config: asOpenClawConfig(params.config),
+      config: asBotConfig(params.config),
       workspaceDir: params.workspaceDir,
       env: process.env,
       ...(compatibleMetadataSnapshot ? { pluginMetadataSnapshot: compatibleMetadataSnapshot } : {}),
@@ -111,7 +111,7 @@ function resolvePreparedProviderRuntimeHandle(
 export function buildAgentRuntimeDeliveryPlan(
   params: BuildAgentRuntimeDeliveryPlanParams,
 ): AgentRuntimeDeliveryPlan {
-  const config = asOpenClawConfig(params.config);
+  const config = asBotConfig(params.config);
   const providerRuntimeHandle = resolvePreparedProviderRuntimeHandle(params);
   return {
     isSilentPayload(payload): boolean {
@@ -152,7 +152,7 @@ function buildAgentRuntimeOutcomePlan(): AgentRuntimeOutcomePlan {
 
 /** Build the complete runtime plan for an embedded agent attempt. */
 export function buildAgentRuntimePlan(params: BuildAgentRuntimePlanParams): AgentRuntimePlan {
-  const config = asOpenClawConfig(params.config);
+  const config = asBotConfig(params.config);
   const model = asProviderRuntimeModel(params.model);
   const modelApi = params.modelApi ?? params.model?.api ?? undefined;
   const transport = params.resolvedTransport;
@@ -283,7 +283,7 @@ export function buildAgentRuntimePlan(params: BuildAgentRuntimePlanParams): Agen
           runtimeHandle: providerRuntimeHandleForPlugins,
           context: {
             ...context,
-            config: asOpenClawConfig(context.config),
+            config: asBotConfig(context.config),
           },
         });
       },
@@ -295,7 +295,7 @@ export function buildAgentRuntimePlan(params: BuildAgentRuntimePlanParams): Agen
           runtimeHandle: providerRuntimeHandleForPlugins,
           context: {
             ...context,
-            config: asOpenClawConfig(context.config),
+            config: asBotConfig(context.config),
           },
         });
       },

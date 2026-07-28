@@ -169,7 +169,7 @@ describe("runStartupSessionMigration", () => {
   it("imports legacy session metadata and transcripts into SQLite during startup", async () => {
     const log = makeLog();
     const cfg = makeCfg();
-    const env = { OPENCLAW_STATE_DIR: "/tmp/openclaw-state" };
+    const env = { BOT_STATE_DIR: "/tmp/bot-state" };
     const migrate = vi.fn<MigrateSessionKeys>().mockResolvedValue({ changes: [], warnings: [] });
     const runDoctorSessionSqlite = makeSessionSqliteImport({
       totals: {
@@ -257,7 +257,7 @@ describe("runStartupSessionMigration", () => {
           legacyEntries: 1,
           referencedTranscriptFiles: 1,
           sqliteEntries: 0,
-          sqlitePath: "/tmp/openclaw-agent.sqlite",
+          sqlitePath: "/tmp/bot-agent.sqlite",
           storePath: "/tmp/sessions.json",
           unreferencedJsonlFiles: [],
           validatedEntries: 0,
@@ -301,7 +301,7 @@ describe("runStartupSessionMigration", () => {
         log,
         deps: makeDeps(migrate, 0, runDoctorSessionSqlite),
       }),
-    ).rejects.toThrow("openclaw doctor --session-sqlite recover --session-sqlite-all-agents");
+    ).rejects.toThrow("bot doctor --session-sqlite recover --session-sqlite-all-agents");
   });
 
   it("auto-restores the current failed session SQLite migration run after files moved", async () => {
@@ -339,7 +339,7 @@ describe("runStartupSessionMigration", () => {
           legacyEntries: 1,
           referencedTranscriptFiles: 1,
           sqliteEntries: 1,
-          sqlitePath: "/tmp/openclaw-agent.sqlite",
+          sqlitePath: "/tmp/bot-agent.sqlite",
           storePath: "/tmp/sessions.json",
           unreferencedJsonlFiles: [],
           validatedEntries: 1,
@@ -378,7 +378,7 @@ describe("runStartupSessionMigration", () => {
       trustedTargets: [
         {
           agentId: "main",
-          sqlitePath: "/tmp/openclaw-agent.sqlite",
+          sqlitePath: "/tmp/bot-agent.sqlite",
           storePath: "/tmp/sessions.json",
         },
       ],
@@ -410,7 +410,7 @@ describe("runStartupSessionMigration", () => {
           legacyEntries: 1,
           referencedTranscriptFiles: 1,
           sqliteEntries: 1,
-          sqlitePath: "/tmp/openclaw-agent.sqlite",
+          sqlitePath: "/tmp/bot-agent.sqlite",
           storePath: "/tmp/sessions.json",
           unreferencedJsonlFiles: [],
           validatedEntries: 0,
@@ -463,7 +463,7 @@ describe("runStartupSessionMigration", () => {
           legacyEntries: 1,
           referencedTranscriptFiles: 1,
           sqliteEntries: 1,
-          sqlitePath: "/tmp/openclaw-agent.sqlite",
+          sqlitePath: "/tmp/bot-agent.sqlite",
           storePath: "/tmp/sessions.json",
           unreferencedJsonlFiles: ["/tmp/orphan.jsonl"],
           validatedEntries: 0,

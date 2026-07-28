@@ -1,10 +1,10 @@
 /**
- * Claude CLI argument helpers for OpenClaw-managed bundle MCP config.
+ * Claude CLI argument helpers for Bot-managed bundle MCP config.
  */
 import fs from "node:fs/promises";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { withOpenClawMcpCaptureHeader } from "./bundle-mcp-runtime.js";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { withBotMcpCaptureHeader } from "./bundle-mcp-runtime.js";
 
 /** Find existing Claude `--mcp-config` argument values. */
 export function findClaudeMcpConfigPaths(args?: string[]): string[] {
@@ -17,7 +17,7 @@ export function findClaudeMcpConfigPaths(args?: string[]): string[] {
     if (arg === "--mcp-config") {
       // Claude treats --mcp-config as variadic. Keep this scan aligned with
       // extensions/anthropic/cli-shared.ts so user config files are not leaked
-      // as positional prompts after OpenClaw injects its strict overlay.
+      // as positional prompts after Bot injects its strict overlay.
       while (typeof args[i + 1] === "string" && !args[i + 1]?.startsWith("-")) {
         i += 1;
         const path = normalizeOptionalString(args[i]);
@@ -37,7 +37,7 @@ export function findClaudeMcpConfigPaths(args?: string[]): string[] {
   return paths;
 }
 
-/** Return Claude args with OpenClaw's strict MCP config path injected. */
+/** Return Claude args with Bot's strict MCP config path injected. */
 export function injectClaudeMcpConfigArgs(
   args: string[] | undefined,
   mcpConfigPath: string,
@@ -63,7 +63,7 @@ export function injectClaudeMcpConfigArgs(
   return next;
 }
 
-/** Writes the active per-attempt capture token into OpenClaw's generated Claude MCP config. */
+/** Writes the active per-attempt capture token into Bot's generated Claude MCP config. */
 export async function writeClaudeMcpCaptureConfig(params: {
   mcpConfigPath: string;
   captureKey: string;
@@ -75,10 +75,10 @@ export async function writeClaudeMcpCaptureConfig(params: {
   await fs.writeFile(
     params.mcpConfigPath,
     `${JSON.stringify(
-      withOpenClawMcpCaptureHeader(
+      withBotMcpCaptureHeader(
         raw,
         params.captureKey,
-        "Claude MCP capture requires an openclaw server config",
+        "Claude MCP capture requires an bot server config",
       ),
       null,
       2,

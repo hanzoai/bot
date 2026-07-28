@@ -9,8 +9,8 @@ import path from "node:path";
 import {
   normalizeOptionalString,
   normalizeOptionalTrimmedStringList,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import type { BrowserConfig, BrowserProfileConfig, OpenClawConfig } from "../config/config.js";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import type { BrowserConfig, BrowserProfileConfig, BotConfig } from "../config/config.js";
 import { resolveGatewayPort } from "../config/paths.js";
 import {
   DEFAULT_BROWSER_CONTROL_PORT,
@@ -31,9 +31,9 @@ import {
   DEFAULT_BROWSER_TAB_CLEANUP_IDLE_MINUTES,
   DEFAULT_BROWSER_TAB_CLEANUP_MAX_TABS_PER_SESSION,
   DEFAULT_BROWSER_TAB_CLEANUP_SWEEP_MINUTES,
-  DEFAULT_OPENCLAW_BROWSER_COLOR,
-  DEFAULT_OPENCLAW_BROWSER_ENABLED,
-  DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+  DEFAULT_BOT_BROWSER_COLOR,
+  DEFAULT_BOT_BROWSER_ENABLED,
+  DEFAULT_BOT_BROWSER_PROFILE_NAME,
 } from "./constants.js";
 import { resolveExtensionRelayToken } from "./extension-relay/relay-auth.js";
 import { DEFAULT_UPLOAD_DIR } from "./paths.js";
@@ -43,9 +43,9 @@ export {
   DEFAULT_BROWSER_ACTION_TIMEOUT_MS,
   DEFAULT_BROWSER_DEFAULT_PROFILE_NAME,
   DEFAULT_BROWSER_EVALUATE_ENABLED,
-  DEFAULT_OPENCLAW_BROWSER_COLOR,
-  DEFAULT_OPENCLAW_BROWSER_ENABLED,
-  DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME,
+  DEFAULT_BOT_BROWSER_COLOR,
+  DEFAULT_BOT_BROWSER_ENABLED,
+  DEFAULT_BOT_BROWSER_PROFILE_NAME,
   DEFAULT_UPLOAD_DIR,
   parseBrowserHttpUrl,
   redactCdpUrl,
@@ -113,7 +113,7 @@ export type ResolvedBrowserProfile = {
   mcpCommand?: string;
   mcpArgs?: string[];
   color: string;
-  driver: "openclaw" | "existing-session" | "extension";
+  driver: "bot" | "existing-session" | "extension";
   executablePath?: string;
   headless: boolean;
   headlessSource?: "profile" | "config" | "default";
@@ -138,9 +138,9 @@ const DEFAULT_BROWSER_REMOTE_CDP_HANDSHAKE_TIMEOUT_MS = 3_000;
  */
 const EXTENSION_RELAY_PORT_OFFSET = 8;
 /** Username half of the relay's Basic credential; the password is the derived token. */
-const EXTENSION_RELAY_CDP_USER = "openclaw";
+const EXTENSION_RELAY_CDP_USER = "bot";
 /** Environment variable that overrides managed Chrome headless mode. */
-const BROWSER_HEADLESS_ENV_KEY = "OPENCLAW_BROWSER_HEADLESS";
+const BROWSER_HEADLESS_ENV_KEY = "BOT_BROWSER_HEADLESS";
 
 /** Source that determined managed Chrome headless mode. */
 export type ManagedBrowserHeadlessSource =
@@ -215,7 +215,7 @@ function hasLinuxDisplay(env: NodeJS.ProcessEnv): boolean {
 }
 
 function isLocalManagedProfile(profile: ResolvedBrowserProfile): boolean {
-  return profile.driver === "openclaw" && profile.cdpIsLoopback && !profile.attachOnly;
+  return profile.driver === "bot" && profile.cdpIsLoopback && !profile.attachOnly;
 }
 
 function resolveBrowserTabCleanupConfig(
@@ -265,8 +265,8 @@ function ensureDefaultProfile(
   legacyCdpUrl?: string,
 ): Record<string, BrowserProfileConfig> {
   const result = { ...profiles };
-  if (!result[DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME]) {
-    result[DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME] = {
+  if (!result[DEFAULT_BOT_BROWSER_PROFILE_NAME]) {
+    result[DEFAULT_BOT_BROWSER_PROFILE_NAME] = {
       cdpPort: legacyCdpPort ?? derivedDefaultCdpPort ?? DEFAULT_BROWSER_CDP_PORT_RANGE_START,
       ...(legacyCdpUrl ? { cdpUrl: legacyCdpUrl } : {}),
     };
@@ -352,9 +352,9 @@ function applyLegacyCdpUrlToExistingSessionDefaultProfile(
 /** Resolve raw browser config into runtime browser defaults. */
 export function resolveBrowserConfig(
   cfg: BrowserConfig | undefined,
-  rootConfig?: OpenClawConfig,
+  rootConfig?: BotConfig,
 ): ResolvedBrowserConfig {
-  const enabled = cfg?.enabled ?? DEFAULT_OPENCLAW_BROWSER_ENABLED;
+  const enabled = cfg?.enabled ?? DEFAULT_BOT_BROWSER_ENABLED;
   const evaluateEnabled = cfg?.evaluateEnabled ?? DEFAULT_BROWSER_EVALUATE_ENABLED;
   const gatewayPort = resolveGatewayPort(rootConfig);
   const controlPort = deriveDefaultBrowserControlPort(gatewayPort ?? DEFAULT_BROWSER_CONTROL_PORT);
@@ -417,8 +417,8 @@ export function resolveBrowserConfig(
     defaultProfileFromConfig ??
     (profiles[DEFAULT_BROWSER_DEFAULT_PROFILE_NAME]
       ? DEFAULT_BROWSER_DEFAULT_PROFILE_NAME
-      : profiles[DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME]
-        ? DEFAULT_OPENCLAW_BROWSER_PROFILE_NAME
+      : profiles[DEFAULT_BOT_BROWSER_PROFILE_NAME]
+        ? DEFAULT_BOT_BROWSER_PROFILE_NAME
         : "user");
   profiles = applyLegacyCdpUrlToExistingSessionDefaultProfile(
     profiles,
@@ -446,7 +446,7 @@ export function resolveBrowserConfig(
     localLaunchTimeoutMs,
     localCdpReadyTimeoutMs,
     actionTimeoutMs,
-    color: DEFAULT_OPENCLAW_BROWSER_COLOR,
+    color: DEFAULT_BOT_BROWSER_COLOR,
     executablePath,
     headless,
     headlessSource,
@@ -483,7 +483,7 @@ export function resolveProfile(
   const driver =
     profile.driver === "existing-session" || profile.driver === "extension"
       ? profile.driver
-      : "openclaw";
+      : "bot";
   const headless = profile.headless ?? resolved.headless;
   const headlessSource =
     typeof profile.headless === "boolean" ? "profile" : resolved.headlessSource;
@@ -510,7 +510,7 @@ export function resolveProfile(
       cdpUrl: relayCdpUrl,
       cdpHost: "127.0.0.1",
       cdpIsLoopback: true,
-      color: DEFAULT_OPENCLAW_BROWSER_COLOR,
+      color: DEFAULT_BOT_BROWSER_COLOR,
       driver,
       executablePath,
       headless: false,
@@ -530,7 +530,7 @@ export function resolveProfile(
       userDataDir: resolveUserPath(profile.userDataDir?.trim() || "") || undefined,
       mcpCommand: normalizeOptionalString(profile.mcpCommand),
       mcpArgs: normalizeStringList(profile.mcpArgs) ?? undefined,
-      color: DEFAULT_OPENCLAW_BROWSER_COLOR,
+      color: DEFAULT_BOT_BROWSER_COLOR,
       driver,
       executablePath,
       headless,
@@ -578,7 +578,7 @@ export function resolveProfile(
     cdpUrl,
     cdpHost,
     cdpIsLoopback: isLoopbackHost(cdpHost),
-    color: DEFAULT_OPENCLAW_BROWSER_COLOR,
+    color: DEFAULT_BOT_BROWSER_COLOR,
     driver,
     executablePath,
     headless,

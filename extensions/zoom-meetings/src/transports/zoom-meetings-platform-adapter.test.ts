@@ -1,5 +1,5 @@
 import { runInNewContext } from "node:vm";
-import { MeetingPlatformAdapter } from "openclaw/plugin-sdk/meeting-runtime";
+import { MeetingPlatformAdapter } from "bot/plugin-sdk/meeting-runtime";
 import { describe, expect, it, vi } from "vitest";
 import { zoomMeetingLeaveScript, zoomMeetingStatusScript } from "./zoom-meetings-page-scripts.js";
 import { ZOOM_MEETINGS_PLATFORM_ADAPTER } from "./zoom-meetings-platform-adapter.js";
@@ -119,7 +119,7 @@ async function runStatusFixture(params: {
       allowSessionAdoption: true,
       autoJoin: true,
       captureCaptions: false,
-      guestName: "OpenClaw Agent",
+      guestName: "Bot Agent",
       meetingSessionId: "session-1",
       meetingUrl: URL,
       readOnly: params.readOnly,
@@ -204,7 +204,7 @@ describe("Zoom meeting platform adapter", () => {
       allowSessionAdoption: true,
       autoJoin: true,
       captureCaptions: true,
-      guestName: "OpenClaw Agent",
+      guestName: "Bot Agent",
       meetingSessionId: "session-1",
       meetingUrl: URL,
       waitForInCallMs: 60_000,
@@ -269,7 +269,7 @@ describe("Zoom meeting platform adapter", () => {
         URL: globalThis.URL,
         document,
         location: new globalThis.URL("https://app.zoom.us/wc?ref_from=waffle_zwa"),
-        window: { __openclawZoomMeeting: state },
+        window: { __botZoomMeeting: state },
       },
     );
 
@@ -304,7 +304,7 @@ describe("Zoom meeting platform adapter", () => {
         document,
         location: new globalThis.URL("https://app.zoom.us/wc"),
         window: {
-          __openclawZoomMeeting: {
+          __botZoomMeeting: {
             identity: "zoom:12345678901",
             inCallControl: leave,
             inCallUrl: "https://app.zoom.us/wc",
@@ -353,7 +353,7 @@ describe("Zoom meeting platform adapter", () => {
     expect(JSON.parse(result)).toMatchObject({ leaveAction: "leave", urlMatched: true });
     expect(leave.click).toHaveBeenCalledOnce();
     expect(window).toMatchObject({
-      __openclawZoomMeeting: { identity: "zoom:12345678901", sessionId: "session-1" },
+      __botZoomMeeting: { identity: "zoom:12345678901", sessionId: "session-1" },
     });
   });
 
@@ -394,7 +394,7 @@ describe("Zoom meeting platform adapter", () => {
       }),
     });
 
-    expect(guest.value).toBe("OpenClaw Agent");
+    expect(guest.value).toBe("Bot Agent");
     expect(guest.dispatchEvent).toHaveBeenCalledTimes(2);
     expect(join.click).toHaveBeenCalledOnce();
     expect(result.clickedJoin).toBe(true);
@@ -432,7 +432,7 @@ describe("Zoom meeting platform adapter", () => {
       cameraOff: true,
       micMuted: true,
     });
-    expect(window["__openclawZoomMeeting"]).toMatchObject({ devicesDisabled: true });
+    expect(window["__botZoomMeeting"]).toMatchObject({ devicesDisabled: true });
   });
 
   it("re-mutes an observe-only session after admission", async () => {
@@ -514,7 +514,7 @@ describe("Zoom meeting platform adapter", () => {
       currentUrl: "https://app.zoom.us/wc",
       document: statusDocument({ bodyText: "" }),
       window: {
-        __openclawZoomMeeting: {
+        __botZoomMeeting: {
           identity: "zoom:12345678901",
           inCallControl: { isConnected: false },
           inCallControlLostAt: Date.now() - 6_000,
@@ -539,7 +539,7 @@ describe("Zoom meeting platform adapter", () => {
       }),
       readOnly: true,
       window: {
-        __openclawZoomMeeting: {
+        __botZoomMeeting: {
           identity: "zoom:12345678901",
           inCallControl: { isConnected: false },
           inCallUrl: "https://app.zoom.us/wc/12345678901/join",
@@ -574,7 +574,7 @@ describe("Zoom meeting platform adapter", () => {
         },
       },
       readOnly: true,
-      window: { __openclawZoomMeeting: meetingState },
+      window: { __botZoomMeeting: meetingState },
     });
 
     expect(result).toMatchObject({
@@ -590,7 +590,7 @@ describe("Zoom meeting platform adapter", () => {
       document: statusDocument({ bodyText: "The host will let you in soon" }),
       window,
     });
-    const marker = window["__openclawZoomMeeting"] as Record<string, unknown>;
+    const marker = window["__botZoomMeeting"] as Record<string, unknown>;
     marker.verifiedAt = 0;
 
     const admitted = await runStatusFixture({
@@ -608,7 +608,7 @@ describe("Zoom meeting platform adapter", () => {
       manualAction: { reason: "zoom-admission-required" },
     });
     expect(admitted).toMatchObject({ inCall: true, micMuted: true });
-    expect(window["__openclawZoomMeeting"]).toMatchObject({
+    expect(window["__botZoomMeeting"]).toMatchObject({
       awaitingAdmission: false,
       identity: "zoom:12345678901",
       sessionId: "session-1",

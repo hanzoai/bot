@@ -11,7 +11,7 @@
 /* Every visit variant shares this zero-layout overlay strip above the footer.
    Its bottom edge sits 3px inside the bar so feet dangle over the divider, and
    overflow: hidden makes duck/peek/enter moves read as "behind the ledge". */
-openclaw-lobster-pet {
+bot-lobster-pet {
   position: absolute;
   left: 0;
   right: 0;
@@ -63,7 +63,7 @@ openclaw-lobster-pet {
 
 /* Completed Lobsterdex: a quiet golden trim along the ledge, earned once
    every palette has visited this browser. */
-openclaw-lobster-pet[data-dex-complete]::after {
+bot-lobster-pet[data-dex-complete]::after {
   content: "";
   position: absolute;
   left: 8%;
@@ -184,7 +184,7 @@ openclaw-lobster-pet[data-dex-complete]::after {
   }
 }
 
-/* Retro: homage to the classic OpenClaw logo — white sticker outline around
+/* Retro: homage to the classic Bot logo — white sticker outline around
    the whole sprite (the halo is two stacked 1px drop-shadows). */
 .lobster-pet--palette-retro .lobster-pet__svg {
   filter: drop-shadow(0 0 1.2px #f5f7fa) drop-shadow(0 0 1.2px #f5f7fa)
@@ -912,10 +912,10 @@ openclaw-lobster-pet[data-dex-complete]::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  openclaw-lobster-pet .lobster-pet,
-  openclaw-lobster-pet .lobster-pet *,
-  openclaw-lobster-pet .lobster-bottle,
-  openclaw-lobster-pet .lobster-bottle * {
+  bot-lobster-pet .lobster-pet,
+  bot-lobster-pet .lobster-pet *,
+  bot-lobster-pet .lobster-bottle,
+  bot-lobster-pet .lobster-bottle * {
     animation: none !important;
     transition: none !important;
   }

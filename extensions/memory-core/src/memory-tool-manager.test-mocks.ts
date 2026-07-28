@@ -1,7 +1,7 @@
 // Memory Core plugin module implements memory tool manager mock behavior.
-import type { MemorySource } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import type { MemorySearchRuntimeDebug } from "openclaw/plugin-sdk/memory-core-host-runtime-files";
-import type { PluginStateLeaseRunner } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { MemorySource } from "bot/plugin-sdk/memory-core-host-engine-storage";
+import type { MemorySearchRuntimeDebug } from "bot/plugin-sdk/memory-core-host-runtime-files";
+import type { PluginStateLeaseRunner } from "bot/plugin-sdk/plugin-state-runtime";
 import { vi } from "vitest";
 import type { getMemorySearchManager } from "./tools.runtime.js";
 

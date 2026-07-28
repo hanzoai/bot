@@ -58,13 +58,13 @@ export async function resolveInstallerTargetVersion(params: {
   if (resolvedVersion) {
     return resolvedVersion;
   }
-  const latestResult = await runCommand(npmCommand(), ["view", "openclaw@latest", "version"], {
+  const latestResult = await runCommand(npmCommand(), ["view", "bot@latest", "version"], {
     logPath: join(params.logsDir, `${params.suiteName}-latest-version.log`),
     timeoutMs: 2 * 60 * 1000,
   });
   const latestVersion = latestResult.stdout.trim();
   if (!latestVersion) {
-    throw new Error("npm view openclaw@latest version did not return a version.");
+    throw new Error("npm view bot@latest version did not return a version.");
   }
   return latestVersion;
 }
@@ -140,11 +140,11 @@ export function buildInstallerSmokeScript(
   const requestTimeoutSeconds = options.requestTimeoutSeconds ?? INSTALLER_REQUEST_TIMEOUT_SECONDS;
   if ((params.platform ?? process.platform) === "win32") {
     return `
-$installerPath = Join-Path ([System.IO.Path]::GetTempPath()) ("openclaw-installer-" + [guid]::NewGuid().ToString("N") + ".ps1")
+$installerPath = Join-Path ([System.IO.Path]::GetTempPath()) ("bot-installer-" + [guid]::NewGuid().ToString("N") + ".ps1")
 try {
   & curl.exe -fsSL --connect-timeout ${connectTimeoutSeconds} --max-time ${requestTimeoutSeconds} -o $installerPath '${powerShellSingleQuote(params.installerUrl)}'
   if ($LASTEXITCODE -ne 0) {
-    throw "curl.exe failed to download the OpenClaw installer (exit $LASTEXITCODE)"
+    throw "curl.exe failed to download the Bot installer (exit $LASTEXITCODE)"
   }
   $content = [System.IO.File]::ReadAllText($installerPath, [System.Text.Encoding]::UTF8)
   & ([scriptblock]::Create($content)) -Tag '${powerShellSingleQuote(params.installTarget)}' -NoOnboard
@@ -157,7 +157,7 @@ try {
   // Execute only a complete installer: a timed-out response may still contain an executable prefix.
   return [
     "set -euo pipefail",
-    'installer_path="$(mktemp "${TMPDIR:-/tmp}/openclaw-installer-XXXXXX")"',
+    'installer_path="$(mktemp "${TMPDIR:-/tmp}/bot-installer-XXXXXX")"',
     "trap 'rm -f \"$installer_path\"' EXIT",
     `curl -fsSL --connect-timeout ${connectTimeoutSeconds} --max-time ${requestTimeoutSeconds} -o "$installer_path" '${shellEscapeForSh(params.installerUrl)}'`,
     `bash -- "$installer_path" --version '${shellEscapeForSh(params.installTarget)}' --no-onboard`,
@@ -229,8 +229,8 @@ if ($null -ne $npmCommand) {
   if (-not [string]::IsNullOrWhiteSpace($npmPrefix)) {
     $env:Path = "$npmPrefix;$env:Path"
     foreach ($candidate in @(
-      (Join-Path $npmPrefix 'openclaw.cmd'),
-      (Join-Path $npmPrefix 'openclaw.ps1')
+      (Join-Path $npmPrefix 'bot.cmd'),
+      (Join-Path $npmPrefix 'bot.ps1')
     )) {
       if (Test-Path -LiteralPath $candidate) {
         $commandPath = $candidate
@@ -240,7 +240,7 @@ if ($null -ne $npmCommand) {
   }
 }
 if ([string]::IsNullOrWhiteSpace($commandPath)) {
-  $cmd = Get-Command openclaw -ErrorAction Stop
+  $cmd = Get-Command bot -ErrorAction Stop
   $commandPath = $cmd.Source
 }
 if ($commandPath -match '(?i)\\.ps1$') {
@@ -250,7 +250,7 @@ if ($commandPath -match '(?i)\\.ps1$') {
   }
 }
 $version = (& $commandPath --version 2>&1 | Out-String).Trim()
-Write-Output "__OPENCLAW_PATH__=$commandPath"
+Write-Output "__BOT_PATH__=$commandPath"
 Write-Output $version
 if ('${expectedNeedle}'.Length -gt 0 -and $version -notmatch [regex]::Escape('${expectedNeedle}')) {
   throw "version mismatch: expected substring ${expectedNeedle}"
@@ -317,10 +317,10 @@ export async function verifyFreshShellCommand(params: {
       timeoutMs: 2 * 60 * 1000,
     });
     const cliPath = normalizeWindowsInstalledCliPath(
-      parseMarkerLine(result.stdout, "__OPENCLAW_PATH__=") ?? "",
+      parseMarkerLine(result.stdout, "__BOT_PATH__=") ?? "",
     );
     if (!cliPath) {
-      throw new Error("Failed to resolve installed openclaw path from fresh Windows shell.");
+      throw new Error("Failed to resolve installed bot path from fresh Windows shell.");
     }
     return {
       cliPath,
@@ -331,9 +331,9 @@ export async function verifyFreshShellCommand(params: {
   const script = [
     "set -euo pipefail",
     'if [ -f "$HOME/.bashrc" ]; then . "$HOME/.bashrc"; fi',
-    "command -v openclaw >/dev/null 2>&1",
-    'printf "__OPENCLAW_PATH__=%s\\n" "$(command -v openclaw)"',
-    "openclaw --version",
+    "command -v bot >/dev/null 2>&1",
+    'printf "__BOT_PATH__=%s\\n" "$(command -v bot)"',
+    "bot --version",
   ].join("\n");
   const result = await runPosixShellScript(script, {
     cwd: params.lane.homeDir,
@@ -341,10 +341,10 @@ export async function verifyFreshShellCommand(params: {
     logPath: params.logPath,
     timeoutMs: 2 * 60 * 1000,
   });
-  const cliPath = parseMarkerLine(result.stdout, "__OPENCLAW_PATH__=");
+  const cliPath = parseMarkerLine(result.stdout, "__BOT_PATH__=");
   const versionOutput = `${result.stdout}\n${result.stderr}`.trim();
   if (!cliPath) {
-    throw new Error("Failed to resolve installed openclaw path from fresh POSIX shell.");
+    throw new Error("Failed to resolve installed bot path from fresh POSIX shell.");
   }
   if (params.expectedNeedle && !versionOutput.includes(params.expectedNeedle)) {
     throw new Error(
@@ -422,7 +422,7 @@ export async function ensureDevUpdateGitInstall(params: {
     env: params.env,
     logPath: join(params.logsDir, "dev-update-status.log"),
   });
-  // The dev-update lane must prove that `openclaw update --channel dev` landed on
+  // The dev-update lane must prove that `bot update --channel dev` landed on
   // the expected git checkout. Falling back to a manual repair here would hide
   // updater regressions and turn the suite into a false green.
   verifyDevUpdateStatus(updateStatus.stdout, { ref: params.requestedRef });

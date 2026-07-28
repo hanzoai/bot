@@ -7,7 +7,7 @@ import type {
   WorkerLiveEventParams as Params,
 } from "../../../packages/gateway-protocol/src/schema/worker-admission.js";
 import * as sessions from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig as Config } from "../../config/types.openclaw.js";
+import type { BotConfig as Config } from "../../config/types.bot.js";
 import {
   claimAgentRunContext,
   clearAgentRunContext,
@@ -19,7 +19,7 @@ import {
   sweepStaleRunContexts,
   type AgentEventRuntimePayload as Event,
 } from "../../infra/agent-events.js";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../../state/bot-agent-db.js";
 import { loadSqliteTrajectoryRuntimeEventRowsSync } from "../../trajectory/runtime-store.sqlite.js";
 import type { WorkerConnectionIdentity as Identity } from "./connection-identity.js";
 import {
@@ -111,7 +111,7 @@ describe("worker live events", () => {
   const deltas = () => events.map((event) => event.data.delta);
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-live-"));
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "bot-worker-live-"));
     store = path.join(root, "agents", "main", "sessions", "sessions.json");
     cfg = {
       agents: { list: [{ id: "main", default: true }] },
@@ -129,7 +129,7 @@ describe("worker live events", () => {
   afterEach(async () => {
     unsubscribe?.();
     rx.clear();
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 

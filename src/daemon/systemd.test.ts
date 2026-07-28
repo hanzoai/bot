@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 // Systemd tests cover Linux service install, start, stop, and status behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 type ExecFileError = Error & {
@@ -28,7 +28,7 @@ const findSystemGatewayServicesMock = vi.hoisted(() =>
         label: string;
         detail: string;
         scope: "user" | "system";
-        marker?: "openclaw" | "clawdbot";
+        marker?: "bot" | "clawdbot";
         legacy?: boolean;
       }>
     >
@@ -95,9 +95,9 @@ import {
 } from "./systemd.js";
 
 const TEST_SERVICE_HOME = "/home/test";
-const TEST_MANAGED_HOME = "/tmp/openclaw-test-home";
-const GATEWAY_SERVICE = "openclaw-gateway.service";
-const NODE_SERVICE = "openclaw-node.service";
+const TEST_MANAGED_HOME = "/tmp/bot-test-home";
+const GATEWAY_SERVICE = "bot-gateway.service";
+const NODE_SERVICE = "bot-node.service";
 
 const createExecFileError = (
   message: string,
@@ -182,10 +182,10 @@ function mockReadGatewayServiceFile(
 }
 
 async function expectExecStartWithoutEnvironment(envFileLine: string) {
-  mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/openclaw gateway run", envFileLine]);
+  mockReadGatewayServiceFile(["[Service]", "ExecStart=/usr/bin/bot gateway run", envFileLine]);
 
   const command = await readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME });
-  expect(command?.programArguments).toEqual(["/usr/bin/openclaw", "gateway", "run"]);
+  expect(command?.programArguments).toEqual(["/usr/bin/bot", "gateway", "run"]);
   expect(command?.environment).toBeUndefined();
 }
 
@@ -354,7 +354,7 @@ describe("systemd availability", () => {
     });
 
     await expect(
-      isSystemdUserServiceAvailable({ USER: "openclaw", SUDO_USER: "admin" }),
+      isSystemdUserServiceAvailable({ USER: "bot", SUDO_USER: "admin" }),
     ).resolves.toBe(true);
     expect(execFileMock).toHaveBeenCalledTimes(1);
   });
@@ -381,7 +381,7 @@ describe("isSystemdServiceEnabled", () => {
     err.code = "ENOENT";
     vi.spyOn(fs, "access").mockRejectedValueOnce(err);
 
-    const result = await isSystemdServiceEnabled({ env: { HOME: "/tmp/openclaw-test-home" } });
+    const result = await isSystemdServiceEnabled({ env: { HOME: "/tmp/bot-test-home" } });
 
     expect(result).toBe(false);
     expect(execFileMock).not.toHaveBeenCalled();
@@ -485,7 +485,7 @@ describe("isSystemdServiceEnabled", () => {
     vi.spyOn(fs, "access").mockResolvedValue(undefined);
     execFileMock
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
-        expect(args).toEqual(["--user", "is-enabled", "openclaw-gateway.service"]);
+        expect(args).toEqual(["--user", "is-enabled", "bot-gateway.service"]);
         const err = new Error("Failed to connect to bus") as Error & { code?: number };
         err.code = 1;
         cb(err, "", "Failed to connect to bus");
@@ -493,13 +493,13 @@ describe("isSystemdServiceEnabled", () => {
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
         expect(args[0]).toBe("--machine");
         expect(args[1]).toMatch(/^[^@]+@$/);
-        expect(args.slice(2)).toEqual(["--user", "is-enabled", "openclaw-gateway.service"]);
+        expect(args.slice(2)).toEqual(["--user", "is-enabled", "bot-gateway.service"]);
         const err = new Error("permission denied") as Error & { code?: number };
         err.code = 1;
         cb(err, "", "permission denied");
       });
     await expect(
-      isSystemdServiceEnabled({ env: { HOME: "/tmp/openclaw-test-home" } }),
+      isSystemdServiceEnabled({ env: { HOME: "/tmp/bot-test-home" } }),
     ).rejects.toThrow("systemctl is-enabled unavailable: permission denied");
   });
 
@@ -509,12 +509,12 @@ describe("isSystemdServiceEnabled", () => {
       // On Ubuntu 24.04, `systemctl --user is-enabled <unit>` exits with
       // code 4 and prints "not-found" to stdout when the unit doesn't exist.
       const err = new Error(
-        "Command failed: systemctl --user is-enabled openclaw-gateway.service",
+        "Command failed: systemctl --user is-enabled bot-gateway.service",
       ) as Error & { code?: number };
       err.code = 4;
       cb(err, "not-found\n", "");
     });
-    const result = await isSystemdServiceEnabled({ env: { HOME: "/tmp/openclaw-test-home" } });
+    const result = await isSystemdServiceEnabled({ env: { HOME: "/tmp/bot-test-home" } });
     expect(result).toBe(false);
   });
 });
@@ -548,7 +548,7 @@ describe("isSystemdUnitActive", () => {
   });
 });
 
-describe("system-scope gateway unit detection (openclaw#87577)", () => {
+describe("system-scope gateway unit detection (bot#87577)", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     execFileMock.mockReset();
@@ -575,29 +575,29 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   it("findInstalledSystemdGatewayScope prefers user scope when both exist", async () => {
     mockUnitFileLayout({
       user: true,
-      system: "/etc/systemd/system/openclaw-gateway.service",
+      system: "/etc/systemd/system/bot-gateway.service",
     });
     const result = await findInstalledSystemdGatewayScope({ HOME: TEST_MANAGED_HOME });
     expect(result?.scope).toBe("user");
     expect(result?.unitName).toBe(GATEWAY_SERVICE);
-    expect(result?.unitPath).toContain("/.config/systemd/user/openclaw-gateway.service");
+    expect(result?.unitPath).toContain("/.config/systemd/user/bot-gateway.service");
   });
 
   it("findInstalledSystemdGatewayScope detects system-scope unit in /etc/systemd/system", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/bot-gateway.service" });
     const result = await findInstalledSystemdGatewayScope({ HOME: TEST_MANAGED_HOME });
     expect(result).toEqual({
       scope: "system",
       unitName: GATEWAY_SERVICE,
-      unitPath: "/etc/systemd/system/openclaw-gateway.service",
+      unitPath: "/etc/systemd/system/bot-gateway.service",
     });
   });
 
   it("findInstalledSystemdGatewayScope falls back to /usr/lib/systemd/system", async () => {
-    mockUnitFileLayout({ system: "/usr/lib/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/usr/lib/systemd/system/bot-gateway.service" });
     const result = await findInstalledSystemdGatewayScope({ HOME: TEST_MANAGED_HOME });
     expect(result?.scope).toBe("system");
-    expect(result?.unitPath).toBe("/usr/lib/systemd/system/openclaw-gateway.service");
+    expect(result?.unitPath).toBe("/usr/lib/systemd/system/bot-gateway.service");
   });
 
   it("findInstalledSystemdGatewayScope returns null when no unit file exists", async () => {
@@ -612,17 +612,17 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     findSystemGatewayServicesMock.mockResolvedValueOnce([
       {
         platform: "linux",
-        label: "openclaw.service",
-        detail: "unit: /etc/systemd/system/openclaw.service",
+        label: "bot.service",
+        detail: "unit: /etc/systemd/system/bot.service",
         scope: "system",
-        marker: "openclaw",
+        marker: "bot",
       },
     ]);
     const result = await findInstalledSystemdGatewayScope({ HOME: TEST_MANAGED_HOME });
     expect(result).toEqual({
       scope: "system",
-      unitName: "openclaw.service",
-      unitPath: "/etc/systemd/system/openclaw.service",
+      unitName: "bot.service",
+      unitPath: "/etc/systemd/system/bot.service",
     });
   });
 
@@ -647,14 +647,14 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     findSystemGatewayServicesMock.mockResolvedValueOnce([
       {
         platform: "linux",
-        label: "openclaw.service",
-        detail: "unit: /etc/systemd/system/openclaw.service",
+        label: "bot.service",
+        detail: "unit: /etc/systemd/system/bot.service",
         scope: "system",
-        marker: "openclaw",
+        marker: "bot",
       },
     ]);
     execFileMock.mockImplementationOnce((_cmd, args, _opts, cb) => {
-      expect(args).toEqual(["is-enabled", "openclaw.service"]);
+      expect(args).toEqual(["is-enabled", "bot.service"]);
       cb(null, "enabled\n", "");
     });
     await expect(isSystemdServiceEnabled({ env: { HOME: TEST_MANAGED_HOME } })).resolves.toBe(true);
@@ -665,10 +665,10 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     findSystemGatewayServicesMock.mockResolvedValueOnce([
       {
         platform: "linux",
-        label: "openclaw.service",
-        detail: "unit: /etc/systemd/system/openclaw.service",
+        label: "bot.service",
+        detail: "unit: /etc/systemd/system/bot.service",
         scope: "system",
-        marker: "openclaw",
+        marker: "bot",
       },
     ]);
     mockEffectiveUid(1000);
@@ -676,14 +676,14 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     await expect(
       restartSystemdService({ stdout, env: { HOME: TEST_MANAGED_HOME } }),
     ).rejects.toThrow(
-      /openclaw\.service is a system-scope unit \(\/etc\/systemd\/system\/openclaw\.service\); run `sudo systemctl restart openclaw\.service`/,
+      /bot\.service is a system-scope unit \(\/etc\/systemd\/system\/bot\.service\); run `sudo systemctl restart bot\.service`/,
     );
     expect(execFileMock).not.toHaveBeenCalled();
     expect(write).not.toHaveBeenCalled();
   });
 
   it("isSystemdServiceEnabled reports true for an enabled system-scope unit", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/bot-gateway.service" });
     execFileMock.mockImplementationOnce((_cmd, args, _opts, cb) => {
       expect(args).toEqual(["is-enabled", GATEWAY_SERVICE]);
       cb(null, "enabled\n", "");
@@ -692,7 +692,7 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   });
 
   it("isSystemdServiceEnabled reports false for a disabled system-scope unit", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/bot-gateway.service" });
     execFileMock.mockImplementationOnce((_cmd, args, _opts, cb) => {
       expect(args).toEqual(["is-enabled", GATEWAY_SERVICE]);
       cb(createExecFileError("disabled", { code: 1 }), "disabled\n", "");
@@ -703,14 +703,14 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   });
 
   it("readSystemdServiceRuntime queries the system manager for system-scope units", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/bot-gateway.service" });
     execFileMock.mockImplementationOnce((_cmd, args, _opts, cb) => {
       expect(args[0]).toBe("show");
       expect(args).not.toContain("--user");
       cb(
         null,
         [
-          "Id=openclaw-gateway.service",
+          "Id=bot-gateway.service",
           "ActiveState=active",
           "SubState=running",
           "MainPID=4242",
@@ -721,24 +721,24 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
     const runtime = await readSystemdServiceRuntime({ HOME: TEST_MANAGED_HOME });
     expect(runtime.status).toBe("running");
     expect(runtime.pid).toBe(4242);
-    expect(runtime.systemd?.unit).toBe("openclaw-gateway.service");
+    expect(runtime.systemd?.unit).toBe("bot-gateway.service");
   });
 
   it("restartSystemdService refuses to use the user manager when the unit is system-scope and the caller is not root", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/bot-gateway.service" });
     mockEffectiveUid(1000);
     const { stdout, write } = createWritableStreamMock();
     await expect(
       restartSystemdService({ stdout, env: { HOME: TEST_MANAGED_HOME } }),
     ).rejects.toThrow(
-      /system-scope unit .* run `sudo systemctl restart openclaw-gateway\.service`/,
+      /system-scope unit .* run `sudo systemctl restart bot-gateway\.service`/,
     );
     expect(execFileMock).not.toHaveBeenCalled();
     expect(write).not.toHaveBeenCalled();
   });
 
   it("restartSystemdService restarts the system unit directly when running as root", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/bot-gateway.service" });
     mockEffectiveUid(0);
     execFileMock
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
@@ -756,11 +756,11 @@ describe("system-scope gateway unit detection (openclaw#87577)", () => {
   });
 
   it("stopSystemdService surfaces sudo guidance for system-scope units without root", async () => {
-    mockUnitFileLayout({ system: "/etc/systemd/system/openclaw-gateway.service" });
+    mockUnitFileLayout({ system: "/etc/systemd/system/bot-gateway.service" });
     mockEffectiveUid(1000);
     const { stdout } = createWritableStreamMock();
     await expect(stopSystemdService({ stdout, env: { HOME: TEST_MANAGED_HOME } })).rejects.toThrow(
-      /sudo systemctl stop openclaw-gateway\.service/,
+      /sudo systemctl stop bot-gateway\.service/,
     );
     expect(execFileMock).not.toHaveBeenCalled();
   });
@@ -770,7 +770,7 @@ describe("isNonFatalSystemdInstallProbeError", () => {
   it("matches wrapper-only WSL install probe failures", () => {
     expect(
       isNonFatalSystemdInstallProbeError(
-        new Error("Command failed: systemctl --user is-enabled openclaw-gateway.service"),
+        new Error("Command failed: systemctl --user is-enabled bot-gateway.service"),
       ),
     ).toBe(true);
   });
@@ -910,7 +910,7 @@ describe("readSystemdServiceRuntime", () => {
         cb(
           null,
           [
-            "Id=openclaw-gateway.service",
+            "Id=bot-gateway.service",
             "ActiveState=active",
             "SubState=running",
             "MainPID=1234",
@@ -932,7 +932,7 @@ describe("readSystemdServiceRuntime", () => {
       lastExitStatus: 0,
       lastExitReason: "running",
       systemd: {
-        unit: "openclaw-gateway.service",
+        unit: "bot-gateway.service",
         killMode: "process",
         tasksCurrent: 807,
         memoryCurrent: 11_918_534_246,
@@ -941,7 +941,7 @@ describe("readSystemdServiceRuntime", () => {
   });
 
   // Regression for #84698: status probes must bound the systemctl subprocess so a
-  // wedged systemd socket cannot hang `openclaw status` (which advertises --timeout).
+  // wedged systemd socket cannot hang `bot status` (which advertises --timeout).
   it("passes a kill-backed timeout to systemctl when a read deadline is set", async () => {
     execFileMock.mockReset();
     execFileMock.mockImplementation((_cmd, _args, _opts, cb) => cb(null, "", ""));
@@ -976,7 +976,7 @@ describe("readSystemdServiceRuntime", () => {
         cb(
           null,
           [
-            "Id=openclaw-gateway.service",
+            "Id=bot-gateway.service",
             "ActiveState=failed",
             "SubState=failed",
             "Result=exit-code",
@@ -1005,37 +1005,37 @@ describe("readSystemdServiceRuntime", () => {
 describe("resolveSystemdUserUnitPath", () => {
   it.each([
     {
-      name: "uses default service name when OPENCLAW_PROFILE is unset",
+      name: "uses default service name when BOT_PROFILE is unset",
       env: { HOME: "/home/test" },
-      expected: "/home/test/.config/systemd/user/openclaw-gateway.service",
+      expected: "/home/test/.config/systemd/user/bot-gateway.service",
     },
     {
-      name: "uses profile-specific service name when OPENCLAW_PROFILE is set to a custom value",
-      env: { HOME: "/home/test", OPENCLAW_PROFILE: "jbphoenix" },
-      expected: "/home/test/.config/systemd/user/openclaw-gateway-jbphoenix.service",
+      name: "uses profile-specific service name when BOT_PROFILE is set to a custom value",
+      env: { HOME: "/home/test", BOT_PROFILE: "jbphoenix" },
+      expected: "/home/test/.config/systemd/user/bot-gateway-jbphoenix.service",
     },
     {
-      name: "prefers OPENCLAW_SYSTEMD_UNIT over OPENCLAW_PROFILE",
+      name: "prefers BOT_SYSTEMD_UNIT over BOT_PROFILE",
       env: {
         HOME: "/home/test",
-        OPENCLAW_PROFILE: "jbphoenix",
-        OPENCLAW_SYSTEMD_UNIT: "custom-unit",
+        BOT_PROFILE: "jbphoenix",
+        BOT_SYSTEMD_UNIT: "custom-unit",
       },
       expected: "/home/test/.config/systemd/user/custom-unit.service",
     },
     {
-      name: "handles OPENCLAW_SYSTEMD_UNIT with .service suffix",
+      name: "handles BOT_SYSTEMD_UNIT with .service suffix",
       env: {
         HOME: "/home/test",
-        OPENCLAW_SYSTEMD_UNIT: "custom-unit.service",
+        BOT_SYSTEMD_UNIT: "custom-unit.service",
       },
       expected: "/home/test/.config/systemd/user/custom-unit.service",
     },
     {
-      name: "trims whitespace from OPENCLAW_SYSTEMD_UNIT",
+      name: "trims whitespace from BOT_SYSTEMD_UNIT",
       env: {
         HOME: "/home/test",
-        OPENCLAW_SYSTEMD_UNIT: "  custom-unit  ",
+        BOT_SYSTEMD_UNIT: "  custom-unit  ",
       },
       expected: "/home/test/.config/systemd/user/custom-unit.service",
     },
@@ -1046,8 +1046,8 @@ describe("resolveSystemdUserUnitPath", () => {
 
 describe("splitArgsPreservingQuotes", () => {
   it("splits on whitespace outside quotes", () => {
-    expect(splitArgsPreservingQuotes('/usr/bin/openclaw gateway start --name "My Bot"')).toEqual([
-      "/usr/bin/openclaw",
+    expect(splitArgsPreservingQuotes('/usr/bin/bot gateway start --name "My Bot"')).toEqual([
+      "/usr/bin/bot",
       "gateway",
       "start",
       "--name",
@@ -1057,50 +1057,50 @@ describe("splitArgsPreservingQuotes", () => {
 
   it("supports systemd-style backslash escaping", () => {
     expect(
-      splitArgsPreservingQuotes('openclaw --name "My \\"Bot\\"" --foo bar', {
+      splitArgsPreservingQuotes('bot --name "My \\"Bot\\"" --foo bar', {
         escapeMode: "backslash",
       }),
-    ).toEqual(["openclaw", "--name", 'My "Bot"', "--foo", "bar"]);
+    ).toEqual(["bot", "--name", 'My "Bot"', "--foo", "bar"]);
   });
 
   it("supports schtasks-style escaped quotes while preserving other backslashes", () => {
     expect(
-      splitArgsPreservingQuotes('openclaw --path "C:\\\\Program Files\\\\OpenClaw"', {
+      splitArgsPreservingQuotes('bot --path "C:\\\\Program Files\\\\Bot"', {
         escapeMode: "backslash-quote-only",
       }),
-    ).toEqual(["openclaw", "--path", "C:\\\\Program Files\\\\OpenClaw"]);
+    ).toEqual(["bot", "--path", "C:\\\\Program Files\\\\Bot"]);
 
     expect(
-      splitArgsPreservingQuotes('openclaw --label "My \\"Quoted\\" Name"', {
+      splitArgsPreservingQuotes('bot --label "My \\"Quoted\\" Name"', {
         escapeMode: "backslash-quote-only",
       }),
-    ).toEqual(["openclaw", "--label", 'My "Quoted" Name']);
+    ).toEqual(["bot", "--label", 'My "Quoted" Name']);
   });
 });
 
 describe("parseSystemdEnvAssignments", () => {
   it("parses single-quoted whole assignments", () => {
     expect(
-      parseSystemdEnvAssignments("'OPENCLAW_GATEWAY_TOKEN=single quoted token' FOO=bar"),
+      parseSystemdEnvAssignments("'BOT_GATEWAY_TOKEN=single quoted token' FOO=bar"),
     ).toEqual([
-      { key: "OPENCLAW_GATEWAY_TOKEN", value: "single quoted token" },
+      { key: "BOT_GATEWAY_TOKEN", value: "single quoted token" },
       { key: "FOO", value: "bar" },
     ]);
   });
 
   it("keeps apostrophes inside unquoted assignment values literal", () => {
-    expect(parseSystemdEnvAssignments("FOO=can't OPENCLAW_GATEWAY_TOKEN=token")).toEqual([
+    expect(parseSystemdEnvAssignments("FOO=can't BOT_GATEWAY_TOKEN=token")).toEqual([
       { key: "FOO", value: "can't" },
-      { key: "OPENCLAW_GATEWAY_TOKEN", value: "token" },
+      { key: "BOT_GATEWAY_TOKEN", value: "token" },
     ]);
   });
 });
 
 describe("parseSystemdExecStart", () => {
   it("preserves quoted arguments", () => {
-    const execStart = '/usr/bin/openclaw gateway start --name "My Bot"';
+    const execStart = '/usr/bin/bot gateway start --name "My Bot"';
     expect(parseSystemdExecStart(execStart)).toEqual([
-      "/usr/bin/openclaw",
+      "/usr/bin/bot",
       "gateway",
       "start",
       "--name",
@@ -1114,14 +1114,14 @@ describe("readSystemdServiceExecStart", () => {
     vi.restoreAllMocks();
   });
 
-  it("loads OPENCLAW_GATEWAY_TOKEN from EnvironmentFile", async () => {
+  it("loads BOT_GATEWAY_TOKEN from EnvironmentFile", async () => {
     const readFileSpy = mockReadGatewayServiceFile(
-      ["[Service]", "ExecStart=/usr/bin/openclaw gateway run", "EnvironmentFile=%h/.openclaw/.env"],
-      { [`${TEST_SERVICE_HOME}/.openclaw/.env`]: "OPENCLAW_GATEWAY_TOKEN=env-file-token\n" },
+      ["[Service]", "ExecStart=/usr/bin/bot gateway run", "EnvironmentFile=%h/.bot/.env"],
+      { [`${TEST_SERVICE_HOME}/.bot/.env`]: "BOT_GATEWAY_TOKEN=env-file-token\n" },
     );
 
     const command = await readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME });
-    expect(command?.environment?.OPENCLAW_GATEWAY_TOKEN).toBe("env-file-token");
+    expect(command?.environment?.BOT_GATEWAY_TOKEN).toBe("env-file-token");
     expect(readFileSpy).toHaveBeenCalledTimes(2);
   });
 
@@ -1129,97 +1129,97 @@ describe("readSystemdServiceExecStart", () => {
     mockReadGatewayServiceFile(
       [
         "[Service]",
-        "ExecStart=/usr/bin/openclaw gateway run",
-        "EnvironmentFile=%h/.openclaw/.env",
-        'Environment="OPENCLAW_GATEWAY_TOKEN=inline-token"',
+        "ExecStart=/usr/bin/bot gateway run",
+        "EnvironmentFile=%h/.bot/.env",
+        'Environment="BOT_GATEWAY_TOKEN=inline-token"',
       ],
-      { [`${TEST_SERVICE_HOME}/.openclaw/.env`]: "OPENCLAW_GATEWAY_TOKEN=env-file-token\n" },
+      { [`${TEST_SERVICE_HOME}/.bot/.env`]: "BOT_GATEWAY_TOKEN=env-file-token\n" },
     );
 
     const command = await readSystemdServiceExecStart({ HOME: TEST_SERVICE_HOME });
-    expect(command?.environment?.OPENCLAW_GATEWAY_TOKEN).toBe("env-file-token");
-    expect(command?.environmentValueSources?.OPENCLAW_GATEWAY_TOKEN).toBe("inline-and-file");
+    expect(command?.environment?.BOT_GATEWAY_TOKEN).toBe("env-file-token");
+    expect(command?.environmentValueSources?.BOT_GATEWAY_TOKEN).toBe("inline-and-file");
   });
 
   it("ignores missing optional EnvironmentFile entries", async () => {
-    await expectExecStartWithoutEnvironment("EnvironmentFile=-%h/.openclaw/missing.env");
+    await expectExecStartWithoutEnvironment("EnvironmentFile=-%h/.bot/missing.env");
   });
 
   it("keeps parsing when non-optional EnvironmentFile entries are missing", async () => {
-    await expectExecStartWithoutEnvironment("EnvironmentFile=%h/.openclaw/missing.env");
+    await expectExecStartWithoutEnvironment("EnvironmentFile=%h/.bot/missing.env");
   });
 
   it("supports multiple EnvironmentFile entries and quoted paths", async () => {
     vi.spyOn(fs, "readFile").mockImplementation(async (pathname) => {
       const pathValue = pathLikeToString(pathname);
-      if (pathValue.endsWith("/openclaw-gateway.service")) {
+      if (pathValue.endsWith("/bot-gateway.service")) {
         return [
           "[Service]",
-          "ExecStart=/usr/bin/openclaw gateway run",
-          'EnvironmentFile=%h/.openclaw/first.env "%h/.openclaw/second env.env"',
+          "ExecStart=/usr/bin/bot gateway run",
+          'EnvironmentFile=%h/.bot/first.env "%h/.bot/second env.env"',
         ].join("\n");
       }
-      if (pathValue === "/home/test/.openclaw/first.env") {
-        return "OPENCLAW_GATEWAY_TOKEN=first-token\n"; // pragma: allowlist secret
+      if (pathValue === "/home/test/.bot/first.env") {
+        return "BOT_GATEWAY_TOKEN=first-token\n"; // pragma: allowlist secret
       }
-      if (pathValue === "/home/test/.openclaw/second env.env") {
-        return 'OPENCLAW_GATEWAY_PASSWORD="second password"\n'; // pragma: allowlist secret
+      if (pathValue === "/home/test/.bot/second env.env") {
+        return 'BOT_GATEWAY_PASSWORD="second password"\n'; // pragma: allowlist secret
       }
       throw new Error(`unexpected readFile path: ${pathValue}`);
     });
 
     const command = await readSystemdServiceExecStart({ HOME: "/home/test" });
     expect(command?.environment).toEqual({
-      OPENCLAW_GATEWAY_TOKEN: "first-token",
-      OPENCLAW_GATEWAY_PASSWORD: "second password", // pragma: allowlist secret
+      BOT_GATEWAY_TOKEN: "first-token",
+      BOT_GATEWAY_PASSWORD: "second password", // pragma: allowlist secret
     });
   });
 
   it("resolves relative EnvironmentFile paths from the unit directory", async () => {
     vi.spyOn(fs, "readFile").mockImplementation(async (pathname) => {
       const pathValue = pathLikeToString(pathname);
-      if (pathValue.endsWith("/openclaw-gateway.service")) {
+      if (pathValue.endsWith("/bot-gateway.service")) {
         return [
           "[Service]",
-          "ExecStart=/usr/bin/openclaw gateway run",
+          "ExecStart=/usr/bin/bot gateway run",
           "EnvironmentFile=./gateway.env ./override.env",
         ].join("\n");
       }
       if (pathValue.endsWith("/.config/systemd/user/gateway.env")) {
         return [
-          "OPENCLAW_GATEWAY_TOKEN=relative-token", // pragma: allowlist secret
-          "OPENCLAW_GATEWAY_PASSWORD=relative-password", // pragma: allowlist secret
+          "BOT_GATEWAY_TOKEN=relative-token", // pragma: allowlist secret
+          "BOT_GATEWAY_PASSWORD=relative-password", // pragma: allowlist secret
         ].join("\n");
       }
       if (pathValue.endsWith("/.config/systemd/user/override.env")) {
-        return "OPENCLAW_GATEWAY_TOKEN=override-token\n"; // pragma: allowlist secret
+        return "BOT_GATEWAY_TOKEN=override-token\n"; // pragma: allowlist secret
       }
       throw new Error(`unexpected readFile path: ${pathValue}`);
     });
 
     const command = await readSystemdServiceExecStart({ HOME: "/home/test" });
     expect(command?.environment).toEqual({
-      OPENCLAW_GATEWAY_TOKEN: "override-token",
-      OPENCLAW_GATEWAY_PASSWORD: "relative-password", // pragma: allowlist secret
+      BOT_GATEWAY_TOKEN: "override-token",
+      BOT_GATEWAY_PASSWORD: "relative-password", // pragma: allowlist secret
     });
   });
 
   it("parses EnvironmentFile content with comments and quoted values", async () => {
     vi.spyOn(fs, "readFile").mockImplementation(async (pathname) => {
       const pathValue = pathLikeToString(pathname);
-      if (pathValue.endsWith("/openclaw-gateway.service")) {
+      if (pathValue.endsWith("/bot-gateway.service")) {
         return [
           "[Service]",
-          "ExecStart=/usr/bin/openclaw gateway run",
-          "EnvironmentFile=%h/.openclaw/gateway.env",
+          "ExecStart=/usr/bin/bot gateway run",
+          "EnvironmentFile=%h/.bot/gateway.env",
         ].join("\n");
       }
-      if (pathValue === "/home/test/.openclaw/gateway.env") {
+      if (pathValue === "/home/test/.bot/gateway.env") {
         return [
           "# comment",
           "; another comment",
-          'OPENCLAW_GATEWAY_TOKEN="quoted token"', // pragma: allowlist secret
-          'OPENCLAW_GATEWAY_PASSWORD="symbol \\" \\\\ \\$ \\`"', // pragma: allowlist secret
+          'BOT_GATEWAY_TOKEN="quoted token"', // pragma: allowlist secret
+          'BOT_GATEWAY_PASSWORD="symbol \\" \\\\ \\$ \\`"', // pragma: allowlist secret
           'MIXED_API_KEY="55\\"55" "FIVE" cinco',
           'UNQUOTED_QUOTES_API_KEY=foo"bar"',
         ].join("\n");
@@ -1229,14 +1229,14 @@ describe("readSystemdServiceExecStart", () => {
 
     const command = await readSystemdServiceExecStart({ HOME: "/home/test" });
     expect(command?.environment).toEqual({
-      OPENCLAW_GATEWAY_TOKEN: "quoted token",
-      OPENCLAW_GATEWAY_PASSWORD: 'symbol " \\ $ `', // pragma: allowlist secret
+      BOT_GATEWAY_TOKEN: "quoted token",
+      BOT_GATEWAY_PASSWORD: 'symbol " \\ $ `', // pragma: allowlist secret
       MIXED_API_KEY: '55"55FIVEcinco',
       UNQUOTED_QUOTES_API_KEY: 'foo"bar"',
     });
     expect(command?.environmentValueSources).toEqual({
-      OPENCLAW_GATEWAY_TOKEN: "file",
-      OPENCLAW_GATEWAY_PASSWORD: "file", // pragma: allowlist secret
+      BOT_GATEWAY_TOKEN: "file",
+      BOT_GATEWAY_PASSWORD: "file", // pragma: allowlist secret
       MIXED_API_KEY: "file",
       UNQUOTED_QUOTES_API_KEY: "file",
     });
@@ -1253,13 +1253,13 @@ describe("stageSystemdService", () => {
       nodeEnvFilePath: string;
     }) => Promise<void>,
   ): Promise<void> {
-    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-systemd-stage-"));
+    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-systemd-stage-"));
     const home = path.join(tempHomeRoot, "home");
-    const stateDir = path.join(home, ".openclaw");
+    const stateDir = path.join(home, ".bot");
     const env = {
       HOME: home,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_SYSTEMD_UNIT: "openclaw-gateway-stage-test",
+      BOT_STATE_DIR: stateDir,
+      BOT_SYSTEMD_UNIT: "bot-gateway-stage-test",
     };
     const unitPath = resolveSystemdUserUnitPath(env);
     const envFilePath = path.join(stateDir, "gateway.systemd.env");
@@ -1289,7 +1289,7 @@ describe("stageSystemdService", () => {
     await withStageFixture(async ({ env, stateDir, unitPath, envFilePath }) => {
       await fs.writeFile(
         path.join(stateDir, ".env"),
-        ["OPENCLAW_GATEWAY_TOKEN=dotenv-token", "LLM_API_KEY=dotenv-key"].join("\n"),
+        ["BOT_GATEWAY_TOKEN=dotenv-token", "LLM_API_KEY=dotenv-key"].join("\n"),
         "utf8",
       );
 
@@ -1298,12 +1298,12 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/bot", "gateway", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_GATEWAY_TOKEN: "dotenv-token",
+          BOT_GATEWAY_TOKEN: "dotenv-token",
           LLM_API_KEY: "dotenv-key",
-          OPENCLAW_GATEWAY_PORT: "18789",
+          BOT_GATEWAY_PORT: "18789",
         },
       });
 
@@ -1314,10 +1314,10 @@ describe("stageSystemdService", () => {
       ]);
 
       expect(unit).toContain(`EnvironmentFile=-${envFilePath}`);
-      expect(unit).toContain("Environment=OPENCLAW_GATEWAY_PORT=18789");
-      expect(unit).not.toContain("Environment=OPENCLAW_GATEWAY_TOKEN=dotenv-token");
+      expect(unit).toContain("Environment=BOT_GATEWAY_PORT=18789");
+      expect(unit).not.toContain("Environment=BOT_GATEWAY_TOKEN=dotenv-token");
       expect(unit).not.toContain("Environment=LLM_API_KEY=dotenv-key");
-      expect(envFile).toBe("OPENCLAW_GATEWAY_TOKEN=dotenv-token\nLLM_API_KEY=dotenv-key\n");
+      expect(envFile).toBe("BOT_GATEWAY_TOKEN=dotenv-token\nLLM_API_KEY=dotenv-key\n");
       expect(envFileStat.mode & 0o777).toBe(0o600);
     });
   });
@@ -1332,19 +1332,19 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "node", "run"],
+        programArguments: ["/usr/bin/bot", "node", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_GATEWAY_TOKEN: "file-backed-token",
-          OPENCLAW_GATEWAY_PASSWORD: gatewayPassword,
-          OPENCLAW_GATEWAY_PORT: "18789",
-          OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "OPENCLAW_GATEWAY_PASSWORD,OPENCLAW_GATEWAY_TOKEN", // pragma: allowlist secret
-          OPENCLAW_SERVICE_KIND: "node",
+          BOT_GATEWAY_TOKEN: "file-backed-token",
+          BOT_GATEWAY_PASSWORD: gatewayPassword,
+          BOT_GATEWAY_PORT: "18789",
+          BOT_SERVICE_MANAGED_ENV_KEYS: "BOT_GATEWAY_PASSWORD,BOT_GATEWAY_TOKEN", // pragma: allowlist secret
+          BOT_SERVICE_KIND: "node",
         },
         environmentValueSources: {
-          openclaw_gateway_token: "file",
-          openclaw_gateway_password: "file", // pragma: allowlist secret
-          openclaw_service_managed_env_keys: "inline",
+          bot_gateway_token: "file",
+          bot_gateway_password: "file", // pragma: allowlist secret
+          bot_service_managed_env_keys: "inline",
         },
       });
 
@@ -1355,16 +1355,16 @@ describe("stageSystemdService", () => {
       ]);
 
       expect(unit).toContain(`EnvironmentFile=-${nodeEnvFilePath}`);
-      expect(unit).toContain("Environment=OPENCLAW_GATEWAY_PORT=18789");
-      expect(unit).not.toContain("Environment=OPENCLAW_GATEWAY_TOKEN=file-backed-token");
-      expect(unit).not.toContain("Environment=OPENCLAW_GATEWAY_PASSWORD=");
+      expect(unit).toContain("Environment=BOT_GATEWAY_PORT=18789");
+      expect(unit).not.toContain("Environment=BOT_GATEWAY_TOKEN=file-backed-token");
+      expect(unit).not.toContain("Environment=BOT_GATEWAY_PASSWORD=");
       expect(envFile).toBe(
-        'OPENCLAW_GATEWAY_TOKEN=file-backed-token\nOPENCLAW_GATEWAY_PASSWORD="symbol \\" \\\\ \\$ \\`"\n',
+        'BOT_GATEWAY_TOKEN=file-backed-token\nBOT_GATEWAY_PASSWORD="symbol \\" \\\\ \\$ \\`"\n',
       );
       expect(envFileStat.mode & 0o777).toBe(0o600);
       await expect(readSystemdServiceExecStart(env)).resolves.toMatchObject({
         environment: {
-          OPENCLAW_GATEWAY_PASSWORD: gatewayPassword,
+          BOT_GATEWAY_PASSWORD: gatewayPassword,
         },
       });
       await expect(fs.access(envFilePath)).rejects.toThrow();
@@ -1374,7 +1374,7 @@ describe("stageSystemdService", () => {
   it("migrates operator entries from the legacy gateway env file when writing node env files", async () => {
     await withStageFixture(async ({ env, unitPath, envFilePath, nodeEnvFilePath }) => {
       const legacyGatewayEnvFile =
-        ["OPENCLAW_GATEWAY_TOKEN=legacy-node-token", "OPENROUTER_API_KEY=operator-key"].join("\n") +
+        ["BOT_GATEWAY_TOKEN=legacy-node-token", "OPENROUTER_API_KEY=operator-key"].join("\n") +
         "\n";
       await fs.writeFile(envFilePath, legacyGatewayEnvFile, {
         encoding: "utf8",
@@ -1386,15 +1386,15 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "node", "run"],
+        programArguments: ["/usr/bin/bot", "node", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_GATEWAY_TOKEN: "fresh-file-token",
-          OPENCLAW_GATEWAY_PORT: "18789",
-          OPENCLAW_SERVICE_KIND: "node",
+          BOT_GATEWAY_TOKEN: "fresh-file-token",
+          BOT_GATEWAY_PORT: "18789",
+          BOT_SERVICE_KIND: "node",
         },
         environmentValueSources: {
-          OPENCLAW_GATEWAY_TOKEN: "file",
+          BOT_GATEWAY_TOKEN: "file",
         },
       });
 
@@ -1405,9 +1405,9 @@ describe("stageSystemdService", () => {
       ]);
 
       expect(unit).toContain(`EnvironmentFile=-${nodeEnvFilePath}`);
-      expect(unit).not.toContain("OPENCLAW_GATEWAY_TOKEN=fresh-file-token");
+      expect(unit).not.toContain("BOT_GATEWAY_TOKEN=fresh-file-token");
       expect(nodeEnvFile).toBe(
-        "OPENROUTER_API_KEY=operator-key\nOPENCLAW_GATEWAY_TOKEN=fresh-file-token\n",
+        "OPENROUTER_API_KEY=operator-key\nBOT_GATEWAY_TOKEN=fresh-file-token\n",
       );
       expect(gatewayEnvFile).toBe(legacyGatewayEnvFile);
     });
@@ -1415,11 +1415,11 @@ describe("stageSystemdService", () => {
 
   it("clears stale node file-backed managed keys without touching the gateway env file", async () => {
     await withStageFixture(async ({ env, unitPath, envFilePath, nodeEnvFilePath }) => {
-      await fs.writeFile(envFilePath, "OPENCLAW_GATEWAY_TOKEN=stale-token\n", {
+      await fs.writeFile(envFilePath, "BOT_GATEWAY_TOKEN=stale-token\n", {
         encoding: "utf8",
         mode: 0o600,
       });
-      await fs.writeFile(nodeEnvFilePath, "OPENCLAW_GATEWAY_TOKEN=stale-node-token\n", {
+      await fs.writeFile(nodeEnvFilePath, "BOT_GATEWAY_TOKEN=stale-node-token\n", {
         encoding: "utf8",
         mode: 0o600,
       });
@@ -1429,14 +1429,14 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "node", "run"],
+        programArguments: ["/usr/bin/bot", "node", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_GATEWAY_PORT: "18789",
-          OPENCLAW_SERVICE_KIND: "node",
+          BOT_GATEWAY_PORT: "18789",
+          BOT_SERVICE_KIND: "node",
         },
         environmentValueSources: {
-          OPENCLAW_GATEWAY_TOKEN: "file",
+          BOT_GATEWAY_TOKEN: "file",
         },
       });
 
@@ -1445,7 +1445,7 @@ describe("stageSystemdService", () => {
       expect(unit).not.toContain("EnvironmentFile=");
       await expect(fs.access(nodeEnvFilePath)).rejects.toThrow();
       await expect(fs.readFile(envFilePath, "utf8")).resolves.toBe(
-        "OPENCLAW_GATEWAY_TOKEN=stale-token\n",
+        "BOT_GATEWAY_TOKEN=stale-token\n",
       );
     });
   });
@@ -1462,11 +1462,11 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/bot", "gateway", "run"],
         workingDirectory: "/tmp",
         environment: {
           LLM_API_KEY: "$SECRET_FROM_SHELL",
-          OPENCLAW_GATEWAY_PORT: "18789",
+          BOT_GATEWAY_PORT: "18789",
         },
         environmentValueSources: {
           LLM_API_KEY: "inline-and-file",
@@ -1488,11 +1488,11 @@ describe("stageSystemdService", () => {
         unitPath,
         [
           "[Service]",
-          "ExecStart=/usr/bin/openclaw node run",
-          "Environment=FOO=bar OPENCLAW_GATEWAY_TOKEN=inline-token BAZ=qux",
-          "Environment=OPENCLAW_GATEWAY_TOKEN=token-only-line",
-          "Environment='OPENCLAW_GATEWAY_TOKEN=single-quoted-token' FROM_SINGLE=kept",
-          "Environment=OPENCLAW_GATEWAY_PORT=18789",
+          "ExecStart=/usr/bin/bot node run",
+          "Environment=FOO=bar BOT_GATEWAY_TOKEN=inline-token BAZ=qux",
+          "Environment=BOT_GATEWAY_TOKEN=token-only-line",
+          "Environment='BOT_GATEWAY_TOKEN=single-quoted-token' FROM_SINGLE=kept",
+          "Environment=BOT_GATEWAY_PORT=18789",
         ].join("\n"),
         { encoding: "utf8", mode: 0o600 },
       );
@@ -1503,15 +1503,15 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "node", "run"],
+        programArguments: ["/usr/bin/bot", "node", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_GATEWAY_TOKEN: "fresh-token",
-          OPENCLAW_GATEWAY_PORT: "18789",
-          OPENCLAW_SERVICE_KIND: "node",
+          BOT_GATEWAY_TOKEN: "fresh-token",
+          BOT_GATEWAY_PORT: "18789",
+          BOT_SERVICE_KIND: "node",
         },
         environmentValueSources: {
-          OPENCLAW_GATEWAY_TOKEN: "file",
+          BOT_GATEWAY_TOKEN: "file",
         },
       });
 
@@ -1521,13 +1521,13 @@ describe("stageSystemdService", () => {
         fs.stat(`${unitPath}.bak`),
       ]);
 
-      expect(unit).not.toContain("Environment=OPENCLAW_GATEWAY_TOKEN=fresh-token");
-      expect(backupUnit).not.toContain("Environment=OPENCLAW_GATEWAY_TOKEN=inline-token");
-      expect(backupUnit).not.toContain("Environment=OPENCLAW_GATEWAY_TOKEN=token-only-line");
+      expect(unit).not.toContain("Environment=BOT_GATEWAY_TOKEN=fresh-token");
+      expect(backupUnit).not.toContain("Environment=BOT_GATEWAY_TOKEN=inline-token");
+      expect(backupUnit).not.toContain("Environment=BOT_GATEWAY_TOKEN=token-only-line");
       expect(backupUnit).not.toContain("single-quoted-token");
       expect(backupUnit).toContain("Environment=FOO=bar BAZ=qux");
       expect(backupUnit).toContain("Environment=FROM_SINGLE=kept");
-      expect(backupUnit).toContain("Environment=OPENCLAW_GATEWAY_PORT=18789");
+      expect(backupUnit).toContain("Environment=BOT_GATEWAY_PORT=18789");
       expect(backupStat.mode & 0o777).toBe(0o600);
     });
   });
@@ -1536,7 +1536,7 @@ describe("stageSystemdService", () => {
     await withStageFixture(async ({ env, stateDir, unitPath, envFilePath }) => {
       await fs.writeFile(
         path.join(stateDir, ".env"),
-        ["OPENCLAW_GATEWAY_TOKEN=stale-token", "LLM_API_KEY=dotenv-key"].join("\n"),
+        ["BOT_GATEWAY_TOKEN=stale-token", "LLM_API_KEY=dotenv-key"].join("\n"),
         "utf8",
       );
 
@@ -1545,10 +1545,10 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/bot", "gateway", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_GATEWAY_TOKEN: "fresh-token",
+          BOT_GATEWAY_TOKEN: "fresh-token",
           LLM_API_KEY: "dotenv-key",
         },
       });
@@ -1559,18 +1559,18 @@ describe("stageSystemdService", () => {
       ]);
 
       expect(unit).toContain(`EnvironmentFile=-${envFilePath}`);
-      expect(unit).toContain("Environment=OPENCLAW_GATEWAY_TOKEN=fresh-token");
+      expect(unit).toContain("Environment=BOT_GATEWAY_TOKEN=fresh-token");
       expect(envFile).toBe("LLM_API_KEY=dotenv-key\n");
     });
   });
 
   it("clears stale inline-managed keys from env file on re-stage (#76860)", async () => {
     await withStageFixture(async ({ env, stateDir, unitPath, envFilePath }) => {
-      // Existing env file carries a stale OPENCLAW_GATEWAY_TOKEN that the
+      // Existing env file carries a stale BOT_GATEWAY_TOKEN that the
       // operator previously wrote there but staging now supplies inline.
       await fs.writeFile(
         envFilePath,
-        ["OPENCLAW_GATEWAY_TOKEN=stale-gateway-token", "OPENROUTER_API_KEY=or-operator-key"].join(
+        ["BOT_GATEWAY_TOKEN=stale-gateway-token", "OPENROUTER_API_KEY=or-operator-key"].join(
           "\n",
         ) + "\n",
         { encoding: "utf8", mode: 0o600 },
@@ -1583,21 +1583,21 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/bot", "gateway", "run"],
         workingDirectory: "/tmp",
-        // Staging manages OPENCLAW_GATEWAY_TOKEN inline; OPENCLAW_SERVICE_MANAGED_ENV_KEYS
-        // marks it as an OpenClaw-managed key so the stale env-file copy is cleared.
+        // Staging manages BOT_GATEWAY_TOKEN inline; BOT_SERVICE_MANAGED_ENV_KEYS
+        // marks it as an Bot-managed key so the stale env-file copy is cleared.
         environment: {
-          OPENCLAW_GATEWAY_TOKEN: "fresh-gateway-token",
+          BOT_GATEWAY_TOKEN: "fresh-gateway-token",
           LLM_API_KEY: "dotenv-key",
           OPENROUTER_API_KEY: "or-operator-key",
-          OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "OPENCLAW_GATEWAY_TOKEN",
+          BOT_SERVICE_MANAGED_ENV_KEYS: "BOT_GATEWAY_TOKEN",
         },
         environmentValueSources: {
-          OPENCLAW_GATEWAY_TOKEN: "inline-and-file",
+          BOT_GATEWAY_TOKEN: "inline-and-file",
           LLM_API_KEY: "inline",
           OPENROUTER_API_KEY: "file",
-          OPENCLAW_SERVICE_MANAGED_ENV_KEYS: "inline",
+          BOT_SERVICE_MANAGED_ENV_KEYS: "inline",
         },
       });
 
@@ -1607,11 +1607,11 @@ describe("stageSystemdService", () => {
       ]);
       // Stale inline-managed key must be removed from the env file so the
       // fresh inline Environment= value wins (EnvironmentFile would override it).
-      expect(envFile).not.toContain("OPENCLAW_GATEWAY_TOKEN");
+      expect(envFile).not.toContain("BOT_GATEWAY_TOKEN");
       // Operator-added key not managed inline must survive.
       expect(envFile).toContain("OPENROUTER_API_KEY=or-operator-key");
       expect(envFile).toContain("LLM_API_KEY=dotenv-key");
-      expect(unit).toContain("Environment=OPENCLAW_GATEWAY_TOKEN=fresh-gateway-token");
+      expect(unit).toContain("Environment=BOT_GATEWAY_TOKEN=fresh-gateway-token");
       expect(unit).not.toContain("Environment=OPENROUTER_API_KEY=or-operator-key");
       expect(unit).not.toContain("Environment=LLM_API_KEY=dotenv-key");
     });
@@ -1630,9 +1630,9 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/bot", "gateway", "run"],
         workingDirectory: "/tmp",
-        environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+        environment: { BOT_GATEWAY_PORT: "18789" },
       });
 
       const envFile = await fs.readFile(envFilePath, "utf8");
@@ -1662,7 +1662,7 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/bot", "gateway", "run"],
         workingDirectory: "/tmp",
         environment: { LLM_API_KEY: "new-value" },
       });
@@ -1693,9 +1693,9 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/bot", "gateway", "run"],
         workingDirectory: "/tmp",
-        environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+        environment: { BOT_GATEWAY_PORT: "18789" },
       });
 
       const envFile = await fs.readFile(envFilePath, "utf8");
@@ -1725,9 +1725,9 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/bot", "gateway", "run"],
         workingDirectory: "/tmp",
-        environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+        environment: { BOT_GATEWAY_PORT: "18789" },
       });
 
       const envFile = await fs.readFile(envFilePath, "utf8");
@@ -1752,9 +1752,9 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/bot", "gateway", "run"],
         workingDirectory: "/tmp",
-        environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+        environment: { BOT_GATEWAY_PORT: "18789" },
       });
 
       const envFile = await fs.readFile(envFilePath, "utf8");
@@ -1786,9 +1786,9 @@ describe("stageSystemdService", () => {
       await stageSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "gateway", "run"],
+        programArguments: ["/usr/bin/bot", "gateway", "run"],
         workingDirectory: "/tmp",
-        environment: { OPENCLAW_GATEWAY_PORT: "18789" },
+        environment: { BOT_GATEWAY_PORT: "18789" },
       });
 
       const envFile = await fs.readFile(envFilePath, "utf8");
@@ -1808,14 +1808,14 @@ describe("systemd service install and uninstall", () => {
       nodeEnvFilePath: string;
     }) => Promise<void>,
   ): Promise<void> {
-    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-node-systemd-"));
+    const tempHomeRoot = await fs.mkdtemp(path.join(os.tmpdir(), "bot-node-systemd-"));
     const home = path.join(tempHomeRoot, "home");
-    const stateDir = path.join(home, ".openclaw");
+    const stateDir = path.join(home, ".bot");
     const env = {
       HOME: home,
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
-      OPENCLAW_SERVICE_KIND: "node",
+      BOT_STATE_DIR: stateDir,
+      BOT_SYSTEMD_UNIT: "bot-node",
+      BOT_SERVICE_KIND: "node",
     };
     const unitPath = resolveSystemdUserUnitPath(env);
     const nodeEnvFilePath = path.join(stateDir, "node.systemd.env");
@@ -1833,7 +1833,7 @@ describe("systemd service install and uninstall", () => {
     execFileMock.mockReset();
   });
 
-  it("activates the OPENCLAW_SYSTEMD_UNIT override during install", async () => {
+  it("activates the BOT_SYSTEMD_UNIT override during install", async () => {
     await withNodeSystemdFixture(async ({ env, unitPath }) => {
       execFileMock
         .mockImplementationOnce((_cmd, args, _opts, cb) => {
@@ -1856,16 +1856,16 @@ describe("systemd service install and uninstall", () => {
       await installSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "node", "run"],
+        programArguments: ["/usr/bin/bot", "node", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
+          BOT_SYSTEMD_UNIT: "bot-node",
         },
       });
 
       const unit = await fs.readFile(unitPath, "utf8");
-      expect(unitPath).toMatch(/openclaw-node\.service$/);
-      expect(unit).toContain("openclaw node run");
+      expect(unitPath).toMatch(/bot-node\.service$/);
+      expect(unit).toContain("bot node run");
       expect(execFileMock).toHaveBeenCalledTimes(4);
     });
   });
@@ -1886,7 +1886,7 @@ describe("systemd service install and uninstall", () => {
           cb(
             createExecFileError("enable failed"),
             "",
-            "Unit file openclaw-node.service does not exist.",
+            "Unit file bot-node.service does not exist.",
           );
         })
         .mockImplementationOnce((_cmd, args, _opts, cb) => {
@@ -1905,10 +1905,10 @@ describe("systemd service install and uninstall", () => {
       await installSystemdService({
         env,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "node", "run"],
+        programArguments: ["/usr/bin/bot", "node", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
+          BOT_SYSTEMD_UNIT: "bot-node",
         },
       });
 
@@ -1950,10 +1950,10 @@ describe("systemd service install and uninstall", () => {
       await installSystemdService({
         env: installEnv,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "node", "run"],
+        programArguments: ["/usr/bin/bot", "node", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
+          BOT_SYSTEMD_UNIT: "bot-node",
         },
       });
 
@@ -1964,7 +1964,7 @@ describe("systemd service install and uninstall", () => {
   it("uses the sudo-u target user for install activation machine-scope retry", async () => {
     await withNodeSystemdFixture(async ({ env }) => {
       mockEffectiveUid(1000);
-      const installEnv = { ...env, USER: "openclaw", SUDO_USER: "admin" };
+      const installEnv = { ...env, USER: "bot", SUDO_USER: "admin" };
       execFileMock
         .mockImplementationOnce((_cmd, args, _opts, cb) => {
           assertUserSystemctlArgs(args, "status");
@@ -1985,7 +1985,7 @@ describe("systemd service install and uninstall", () => {
           );
         })
         .mockImplementationOnce((_cmd, args, _opts, cb) => {
-          assertMachineUserSystemctlArgs(args, "openclaw", "enable", NODE_SERVICE);
+          assertMachineUserSystemctlArgs(args, "bot", "enable", NODE_SERVICE);
           cb(null, "", "");
         })
         .mockImplementationOnce((_cmd, args, _opts, cb) => {
@@ -1996,10 +1996,10 @@ describe("systemd service install and uninstall", () => {
       await installSystemdService({
         env: installEnv,
         stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-        programArguments: ["/usr/bin/openclaw", "node", "run"],
+        programArguments: ["/usr/bin/bot", "node", "run"],
         workingDirectory: "/tmp",
         environment: {
-          OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
+          BOT_SYSTEMD_UNIT: "bot-node",
         },
       });
 
@@ -2036,10 +2036,10 @@ describe("systemd service install and uninstall", () => {
         installSystemdService({
           env,
           stdout: { write: vi.fn() } as unknown as NodeJS.WritableStream,
-          programArguments: ["/usr/bin/openclaw", "node", "run"],
+          programArguments: ["/usr/bin/bot", "node", "run"],
           workingDirectory: "/tmp",
           environment: {
-            OPENCLAW_SYSTEMD_UNIT: "openclaw-node",
+            BOT_SYSTEMD_UNIT: "bot-node",
           },
         }),
       ).rejects.toThrow("systemctl --user unavailable: Failed to connect to bus: No medium found");
@@ -2048,15 +2048,15 @@ describe("systemd service install and uninstall", () => {
     });
   });
 
-  it("disables the OPENCLAW_SYSTEMD_UNIT override during uninstall", async () => {
+  it("disables the BOT_SYSTEMD_UNIT override during uninstall", async () => {
     await withNodeSystemdFixture(async ({ env, unitPath, nodeEnvFilePath }) => {
       await fs.mkdir(path.dirname(unitPath), { recursive: true });
-      await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Node\n", "utf8");
+      await fs.writeFile(unitPath, "[Unit]\nDescription=Bot Node\n", "utf8");
       await fs.writeFile(
         nodeEnvFilePath,
         [
-          "OPENCLAW_GATEWAY_TOKEN=stale-node-token",
-          "OPENCLAW_GATEWAY_PASSWORD=stale-password",
+          "BOT_GATEWAY_TOKEN=stale-node-token",
+          "BOT_GATEWAY_PASSWORD=stale-password",
           "OPENROUTER_API_KEY=operator-key",
           "LLM_API_KEY=$SECRET_FROM_SHELL",
           "LITERAL_API_KEY=\\$SECRET_FROM_SHELL",
@@ -2102,8 +2102,8 @@ describe("systemd service install and uninstall", () => {
   it("removes a password-only node environment file during uninstall", async () => {
     await withNodeSystemdFixture(async ({ env, unitPath, nodeEnvFilePath }) => {
       await fs.mkdir(path.dirname(unitPath), { recursive: true });
-      await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Node\n", "utf8");
-      await fs.writeFile(nodeEnvFilePath, "OPENCLAW_GATEWAY_PASSWORD=stale-password\n", {
+      await fs.writeFile(unitPath, "[Unit]\nDescription=Bot Node\n", "utf8");
+      await fs.writeFile(nodeEnvFilePath, "BOT_GATEWAY_PASSWORD=stale-password\n", {
         encoding: "utf8",
         mode: 0o600,
       });
@@ -2129,10 +2129,10 @@ describe("systemd service install and uninstall", () => {
   it("preserves node env file values when unit removal fails during uninstall", async () => {
     await withNodeSystemdFixture(async ({ env, unitPath, nodeEnvFilePath }) => {
       await fs.mkdir(path.dirname(unitPath), { recursive: true });
-      await fs.writeFile(unitPath, "[Unit]\nDescription=OpenClaw Node\n", "utf8");
+      await fs.writeFile(unitPath, "[Unit]\nDescription=Bot Node\n", "utf8");
       await fs.writeFile(
         nodeEnvFilePath,
-        "OPENCLAW_GATEWAY_TOKEN=stale-node-token\nOPENROUTER_API_KEY=operator-key\n",
+        "BOT_GATEWAY_TOKEN=stale-node-token\nOPENROUTER_API_KEY=operator-key\n",
         { encoding: "utf8", mode: 0o600 },
       );
 
@@ -2155,9 +2155,9 @@ describe("systemd service install and uninstall", () => {
         "EACCES: permission denied",
       );
 
-      await expect(fs.readFile(unitPath, "utf8")).resolves.toContain("OpenClaw Node");
+      await expect(fs.readFile(unitPath, "utf8")).resolves.toContain("Bot Node");
       await expect(fs.readFile(nodeEnvFilePath, "utf8")).resolves.toBe(
-        "OPENCLAW_GATEWAY_TOKEN=stale-node-token\nOPENROUTER_API_KEY=operator-key\n",
+        "BOT_GATEWAY_TOKEN=stale-node-token\nOPENROUTER_API_KEY=operator-key\n",
       );
       expect(execFileMock).toHaveBeenCalledTimes(2);
     });
@@ -2270,17 +2270,17 @@ describe("systemd service control", () => {
     execFileMock
       .mockImplementationOnce((_cmd, _args, _opts, cb) => cb(null, "", ""))
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
-        assertUserSystemctlArgs(args, "reset-failed", "openclaw-gateway-work.service");
+        assertUserSystemctlArgs(args, "reset-failed", "bot-gateway-work.service");
         // args[0] is the "--user" scope flag; the systemctl verb is args[1].
         restartSequence.push(args[1] ?? "");
         cb(null, "", "");
       })
       .mockImplementationOnce((_cmd, args, _opts, cb) => {
-        assertUserSystemctlArgs(args, "restart", "openclaw-gateway-work.service");
+        assertUserSystemctlArgs(args, "restart", "bot-gateway-work.service");
         restartSequence.push(args[1] ?? "");
         cb(null, "", "");
       });
-    await assertRestartSuccess({ OPENCLAW_PROFILE: "work" });
+    await assertRestartSuccess({ BOT_PROFILE: "work" });
     // reset-failed must clear any start-limit-hit latch before the restart so a
     // crash-looped unit can recover.
     expect(restartSequence).toEqual(["reset-failed", "restart"]);

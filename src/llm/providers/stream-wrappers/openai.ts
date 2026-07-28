@@ -1,23 +1,23 @@
 import {
   resolveOpenAIReasoningEffortForModel,
   supportsOpenAIReasoningEffort,
-} from "@openclaw/ai/internal/openai";
-import { emitModelTransportDebug, isCodeModeModelVisibleToolName } from "@openclaw/ai/transports";
+} from "@hanzo/bot-ai/internal/openai";
+import { emitModelTransportDebug, isCodeModeModelVisibleToolName } from "@hanzo/bot-ai/transports";
 import {
   flattenCompletionMessagesToStringContent,
   stripCompletionMessagesToRoleContent,
-} from "@openclaw/ai/transports";
+} from "@hanzo/bot-ai/transports";
 import {
   applyOpenAIResponsesPayloadPolicy,
   resolveOpenAIResponsesPayloadPolicy,
-} from "@openclaw/ai/transports";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+} from "@hanzo/bot-ai/transports";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 // OpenAI stream wrapper normalizes OpenAI-compatible streamed tool and text events.
 import {
   normalizeFastMode,
   normalizeOptionalLowercaseString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import {
   patchCodexNativeWebSearchPayload,
   resolveCodexNativeSearchActivation,
@@ -31,7 +31,7 @@ import { resolveProviderRequestPolicyConfig } from "../../../agents/provider-req
 import type { StreamFn } from "../../../agents/runtime/index.js";
 import type { SandboxToolPolicy } from "../../../agents/sandbox.js";
 import type { ThinkLevel } from "../../../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { createSubsystemLogger } from "../../../logging/subsystem.js";
 import { streamSimple } from "../../stream.js";
 import type { SimpleStreamOptions } from "../../types.js";
@@ -42,8 +42,8 @@ const log = createSubsystemLogger("llm/providers/stream-wrappers");
 
 type OpenAIServiceTier = "auto" | "default" | "flex" | "priority";
 type DynamicFastMode = boolean | (() => boolean | undefined);
-type OpenClawSimpleStreamOptions = SimpleStreamOptions & {
-  openclawCodeModeToolSurface?: boolean;
+type BotSimpleStreamOptions = SimpleStreamOptions & {
+  botCodeModeToolSurface?: boolean;
 };
 type OpenAIResponsesReplayOptions = Parameters<StreamFn>[2] & {
   replayResponsesItemIds?: boolean;
@@ -113,7 +113,7 @@ function shouldApplyOpenAIServiceTier(model: {
   return resolveOpenAIResponsesPayloadPolicy(model, { storeMode: "disable" }).allowsServiceTier;
 }
 
-function isCodeModeEnabled(config?: OpenClawConfig): boolean {
+function isCodeModeEnabled(config?: BotConfig): boolean {
   const tools = config?.tools;
   if (!tools || typeof tools !== "object") {
     return false;
@@ -677,7 +677,7 @@ export function createOpenAITextVerbosityWrapper(
 export function createCodexNativeWebSearchWrapper(
   baseStreamFn: StreamFn | undefined,
   params: {
-    config?: OpenClawConfig;
+    config?: BotConfig;
     agentDir?: string;
     agentId?: string;
     sessionKey?: string;
@@ -702,7 +702,7 @@ export function createCodexNativeWebSearchWrapper(
     // surface; the run-level wrapper passes it down via stream options so the
     // provider-family wrapper stays aligned for the same request.
     const codeModeSurfaceFromOptions =
-      (options as OpenClawSimpleStreamOptions | undefined)?.openclawCodeModeToolSurface === true;
+      (options as BotSimpleStreamOptions | undefined)?.botCodeModeToolSurface === true;
     if (
       (params.codeModeToolSurfaceEnabled === true ||
         codeModeSurfaceFromOptions ||
@@ -716,9 +716,9 @@ export function createCodexNativeWebSearchWrapper(
         }/${model.id ?? "unknown"}`,
       );
       const originalOnPayload = options?.onPayload;
-      const codeModeOptions: OpenClawSimpleStreamOptions = {
+      const codeModeOptions: BotSimpleStreamOptions = {
         ...options,
-        openclawCodeModeToolSurface: true,
+        botCodeModeToolSurface: true,
         onPayload: (payload) => {
           filterCodeModePayloadTools(payload);
           const nextPayload = originalOnPayload?.(payload, model);

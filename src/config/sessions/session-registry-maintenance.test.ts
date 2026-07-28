@@ -10,7 +10,7 @@ import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target
 import type { SessionEntry } from "./types.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const fixtureSuite = createFixtureSuite("openclaw-session-registry-maintenance-");
+const fixtureSuite = createFixtureSuite("bot-session-registry-maintenance-");
 
 beforeAll(async () => {
   await fixtureSuite.setup();

@@ -1,11 +1,11 @@
 // Discord plugin module implements model picker.state behavior.
 import { createHash } from "node:crypto";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import type { ModelsProviderData } from "openclaw/plugin-sdk/models-provider-runtime";
-import { parseStrictInteger, parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeProviderId } from "openclaw/plugin-sdk/provider-model-shared";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import type { ModelsProviderData } from "bot/plugin-sdk/models-provider-runtime";
+import { parseStrictInteger, parseStrictPositiveInteger } from "bot/plugin-sdk/number-runtime";
+import { normalizeProviderId } from "bot/plugin-sdk/provider-model-shared";
 import { decodeCustomIdComponent, encodeCustomIdComponent } from "../custom-id-codec.js";
 import type { ComponentData } from "../internal/discord.js";
 
@@ -116,7 +116,7 @@ export type DiscordModelPickerModelPage = DiscordModelPickerPage<string> & {
 };
 
 const loadModelsProviderRuntime = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/models-provider-runtime"),
+  () => import("bot/plugin-sdk/models-provider-runtime"),
 );
 
 function isValidCommandContext(value: string): value is DiscordModelPickerCommandContext {
@@ -190,7 +190,7 @@ function paginateItems<T>(params: {
 }
 
 export async function loadDiscordModelPickerData(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId?: string,
 ): Promise<ModelsProviderData> {
   const { buildModelsProviderData } = await loadModelsProviderRuntime();

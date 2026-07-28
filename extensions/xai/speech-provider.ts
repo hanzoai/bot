@@ -1,11 +1,11 @@
 // Xai provider module implements model/runtime integration.
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
+import { resolveGeneratedMediaMaxBytes } from "bot/plugin-sdk/media-generation-runtime";
 import {
   isProviderAuthProfileConfigured,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveApiKeyForProvider } from "openclaw/plugin-sdk/provider-auth-runtime";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+  type BotConfig,
+} from "bot/plugin-sdk/provider-auth";
+import { resolveApiKeyForProvider } from "bot/plugin-sdk/provider-auth-runtime";
+import { normalizeResolvedSecretInputString } from "bot/plugin-sdk/secret-input";
 import {
   trimToUndefined,
   type SpeechDirectiveTokenParseContext,
@@ -13,12 +13,12 @@ import {
   type SpeechProviderOverrides,
   type SpeechProviderPlugin,
   type SpeechSynthesisTarget,
-} from "openclaw/plugin-sdk/speech";
-import { resolveSpeechProviderApiKey } from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/speech";
+import { resolveSpeechProviderApiKey } from "bot/plugin-sdk/speech-core";
 import {
   asFiniteNumberInRange,
   normalizeLowercaseStringOrEmpty,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import {
   isValidXaiTtsVoice,
   listXaiTtsVoices,
@@ -312,7 +312,7 @@ export function buildXaiSpeechProvider(): SpeechProviderPlugin {
 // 3. xAI OAuth auth profile (cfg-scoped)
 async function resolveOptionalXaiAudioApiKey(
   configApiKey: string | undefined,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
 ): Promise<string | undefined> {
   const direct = resolveDirectXaiAudioApiKey(configApiKey);
   if (direct) {
@@ -327,13 +327,13 @@ async function resolveOptionalXaiAudioApiKey(
 
 async function resolveXaiAudioApiKey(
   configApiKey: string | undefined,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): Promise<string> {
   const apiKey = await resolveOptionalXaiAudioApiKey(configApiKey, cfg);
   if (apiKey) {
     return apiKey;
   }
   throw new Error(
-    "xAI credentials missing for TTS. Sign in with `openclaw onboard --auth-choice xai-oauth`, or run `openclaw onboard --auth-choice xai-api-key`, or set XAI_API_KEY.",
+    "xAI credentials missing for TTS. Sign in with `bot onboard --auth-choice xai-oauth`, or run `bot onboard --auth-choice xai-api-key`, or set XAI_API_KEY.",
   );
 }

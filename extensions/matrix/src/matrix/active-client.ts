@@ -1,5 +1,5 @@
 // Matrix plugin module implements active client behavior.
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
 import type { MatrixClient } from "./sdk.js";
 
 const activeClients = new Map<string, MatrixClient>();

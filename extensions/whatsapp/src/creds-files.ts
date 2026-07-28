@@ -7,7 +7,7 @@ import {
   readRegularFileSync,
   statRegularFile,
   statRegularFileSync,
-} from "openclaw/plugin-sdk/security-runtime";
+} from "bot/plugin-sdk/security-runtime";
 
 export function resolveWebCredsPath(authDir: string): string {
   return path.join(authDir, "creds.json");

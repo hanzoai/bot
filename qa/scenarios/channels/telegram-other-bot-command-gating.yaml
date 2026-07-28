@@ -7,7 +7,7 @@ scenario:
   coverage:
     primary:
       - channels.channel-native-commands
-  objective: Verify a command addressed to another Telegram bot does not wake OpenClaw.
+  objective: Verify a command addressed to another Telegram bot does not wake Bot.
   successCriteria:
     - The driver sends a native status command addressed to another bot.
     - The Telegram group remains quiet for the observation window.
@@ -24,7 +24,7 @@ scenario:
       }
     kind: flow
     channel: telegram
-    summary: Address a command to another bot and verify OpenClaw ignores it.
+    summary: Address a command to another bot and verify Bot ignores it.
 
 flow:
   steps:
@@ -38,7 +38,7 @@ flow:
             conversation: { id: telegram-command-room, kind: channel }
             senderId: qa-command-operator
             senderName: QA Command Operator
-            text: /status@OpenClawQaOtherBot
+            text: /status@BotQaOtherBot
         - waitForNoOutbound:
             quietMs: 8000
             sinceIndex: { ref: outboundStartIndex }

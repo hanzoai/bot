@@ -8,7 +8,7 @@ const { openLocalFileMock, resolveLocalPathFromRootsSyncMock, sendMediaMock, sen
     sendTextMock: vi.fn(),
   }));
 
-vi.mock("openclaw/plugin-sdk/security-runtime", () => ({
+vi.mock("bot/plugin-sdk/security-runtime", () => ({
   resolveLocalPathFromRootsSync: resolveLocalPathFromRootsSyncMock,
 }));
 

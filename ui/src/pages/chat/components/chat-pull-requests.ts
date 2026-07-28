@@ -9,7 +9,7 @@ import "../../../components/tooltip.ts";
 import { t } from "../../../i18n/index.ts";
 import { getSafeLocalStorage } from "../../../local-storage.ts";
 
-const DISMISSED_STORAGE_KEY = "openclaw.chat.dismissedPullRequests";
+const DISMISSED_STORAGE_KEY = "bot.chat.dismissedPullRequests";
 // Bounds localStorage growth: dismissals for the oldest sessions fall off
 // once this many sessions have dismissed chips.
 const DISMISSED_SESSION_LIMIT = 20;
@@ -201,11 +201,11 @@ function renderDiffStats(item: { additions?: number; deletions?: number }) {
 
 function renderRateLimitWarning() {
   return html`
-    <openclaw-tooltip content=${t("chat.pullRequests.rateLimited")}>
+    <bot-tooltip content=${t("chat.pullRequests.rateLimited")}>
       <span class="chat-pr__warning" role="img" aria-label=${t("chat.pullRequests.rateLimited")}>
         ${icons.alertTriangle}
       </span>
-    </openclaw-tooltip>
+    </bot-tooltip>
   `;
 }
 

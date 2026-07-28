@@ -334,7 +334,7 @@ export const ko: TranslationMap = {
     genericSubtitle: "이 패널을 불러오는 중에 문제가 발생했습니다.",
     staleTitle: "새 버전을 사용할 수 있습니다",
     staleSubtitle:
-      "OpenClaw가 백그라운드에서 업데이트되었습니다. 최신 패널을 사용하려면 새로고침하세요.",
+      "Bot가 백그라운드에서 업데이트되었습니다. 최신 패널을 사용하려면 새로고침하세요.",
     reloading: "다시 불러오는 중…",
     retry: "다시 시도",
   },
@@ -342,7 +342,7 @@ export const ko: TranslationMap = {
     pairing: {
       button: "모바일 기기 페어링",
       adminRequired: "설정 코드를 생성하려면 관리자 권한이 필요합니다.",
-      title: "OpenClaw 모바일",
+      title: "Bot 모바일",
       subtitle: "새 휴대폰을 연결하려면 모바일 앱에서 이 QR 코드를 스캔하세요.",
       noApp: "아직 앱이 없으신가요?",
       getApps: "앱 받기",
@@ -357,14 +357,14 @@ export const ko: TranslationMap = {
       transportLimitedHint:
         "이 Gateway URL은 암호화되지 않은 ws://를 사용합니다. wss:// 또는 Tailscale Serve를 사용한 다음, 전체 액세스를 위한 새 코드를 생성하세요.",
       failed: "설정 코드를 생성할 수 없습니다.",
-      qrAlt: "OpenClaw 모바일 페어링 QR 코드",
+      qrAlt: "Bot 모바일 페어링 QR 코드",
       qrUnavailable: "QR을 사용할 수 없습니다. 대신 설정 코드를 복사하세요.",
       copySetupCode: "설정 코드 복사",
       newCode: "새 코드",
       showSetupCode: "설정 코드 표시",
       pending: "검토 대기 중인 기기 요청: {count}",
       review: "검토",
-      waiting: "공식 OpenClaw 모바일 앱은 스캔 후 자동으로 연결됩니다.",
+      waiting: "공식 Bot 모바일 앱은 스캔 후 자동으로 연결됩니다.",
       help: "페어링 도움말",
       manageDevices: "기기 관리",
     },
@@ -509,11 +509,11 @@ export const ko: TranslationMap = {
     ownerSession: "세션",
     ownerWorkboard: "Workboard",
     title: "관리되는 Worktree",
-    subtitle: "OpenClaw가 소유한 격리된 저장소 체크아웃입니다.",
+    subtitle: "Bot가 소유한 격리된 저장소 체크아웃입니다.",
     cleanNow: "지금 정리",
     cleanupTitle: "정리",
     cleanupSubtitle:
-      "OpenClaw는 디스크 공간을 확보하기 위해 오래된 worktree를 주기적으로 제거합니다. 정리 수준을 조정하세요.",
+      "Bot는 디스크 공간을 확보하기 위해 오래된 worktree를 주기적으로 제거합니다. 정리 수준을 조정하세요.",
     cleanupMaxCount: "최대 worktree 수",
     cleanupMaxCountHelp:
       "모든 저장소에서 유지할 관리 대상 worktree의 최대 개수입니다. 오래된 worktree부터 스냅샷을 생성한 후 제거합니다. 개수 제한을 비활성화하려면 0으로 설정하세요.",
@@ -564,8 +564,8 @@ export const ko: TranslationMap = {
     cloudWorker: "Cloud · {profile}",
     cloudWorkerProvider: "Cloud 작업자 제공업체: {provider}",
     cloudRequiresWorktree: "Cloud 작업자를 사용하려면 관리형 worktree가 필요합니다",
-    cloudRequiresOpenClawRuntime:
-      "클라우드 워커에는 OpenClaw 런타임이 필요합니다. {runtime}이(가) 선택되어 있습니다.",
+    cloudRequiresBotRuntime:
+      "클라우드 워커에는 Bot 런타임이 필요합니다. {runtime}이(가) 선택되어 있습니다.",
     cloudSecureContextRequired:
       "복구 기능이 작업을 보호할 수 있도록 Cloud 작업자에는 안전한 브라우저 컨텍스트가 필요합니다.",
     cloudStartFailed: "세션은 로컬에 생성되었지만 Cloud 시작에 실패했습니다: {error}",
@@ -1350,7 +1350,7 @@ export const ko: TranslationMap = {
       title: "푸시 알림",
       nativeTitle: "알림",
       hint: "Gateway에서 브라우저 푸시 알림을 받습니다.",
-      nativeHint: "이 Mac의 OpenClaw 앱에서 알림이 기본 방식으로 표시됩니다.",
+      nativeHint: "이 Mac의 Bot 앱에서 알림이 기본 방식으로 표시됩니다.",
       unavailableHint: "이 브라우저에서는 사용할 수 없습니다.",
       unavailable: "사용 불가",
       checking: "확인 중...",
@@ -1375,7 +1375,7 @@ export const ko: TranslationMap = {
       blockedHint:
         "알림이 차단되었습니다. 알림을 허용하려면 브라우저 사이트 권한을 업데이트하세요.",
       nativeBlockedHint:
-        "macOS에서 OpenClaw 알림이 비활성화되어 있습니다. 시스템 설정 > 알림에서 허용하세요.",
+        "macOS에서 Bot 알림이 비활성화되어 있습니다. 시스템 설정 > 알림에서 허용하세요.",
     },
     appearance: {
       theme: "테마",
@@ -1452,7 +1452,7 @@ export const ko: TranslationMap = {
     autoSaveFailed: "저장 실패",
     autoSaveConflict: "다른 곳에서 설정이 변경됨",
     retry: "재시도",
-    applyBannerText: "openclaw.json에 저장됨 — Gateway를 재시작하여 적용하세요.",
+    applyBannerText: "bot.json에 저장됨 — Gateway를 재시작하여 적용하세요.",
     applyBannerAction: "재시작 및 적용",
     rawDiscard: "변경 사항 버리기",
     rawDraftBlocksApply:
@@ -1513,7 +1513,7 @@ export const ko: TranslationMap = {
     },
   },
   approvalPage: {
-    brandName: "OpenClaw",
+    brandName: "Bot",
     eyebrow: "Operator approval",
     loadingTitle: "Loading approval",
     loadingDescription: "Checking the current approval state with the Gateway.",
@@ -1522,7 +1522,7 @@ export const ko: TranslationMap = {
       "This approval could not be found or this device is not authorized to review it.",
     connectionErrorTitle: "Connection interrupted",
     connectionErrorDescription:
-      "OpenClaw cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
+      "Bot cannot confirm or record a decision while disconnected. Reconnect to check the current status.",
     retry: "Retry",
     execTitle: "Command approval",
     pending: "Waiting for your decision",
@@ -1700,7 +1700,7 @@ export const ko: TranslationMap = {
     chat: "채팅",
     settings: "설정",
     settingsGeneral: "일반",
-    askOpenClaw: "OpenClaw에게 물어보기",
+    askBot: "Bot에게 물어보기",
     settingsGroupConnections: "연결",
     settingsGroupAgents: "에이전트 및 도구",
     settingsGroupSecurity: "개인정보 및 보안",
@@ -1827,7 +1827,7 @@ export const ko: TranslationMap = {
     skillWorkshop: "Skill Workshop",
     nodes: "노드",
     chat: "채팅",
-    custodian: "OpenClaw",
+    custodian: "Bot",
     config: "구성",
     profile: "프로필",
     communications: "커뮤니케이션",
@@ -1864,7 +1864,7 @@ export const ko: TranslationMap = {
     nodes: "페어링된 디바이스 및 명령.",
     chat: "빠른 개입을 위한 Gateway 채팅.",
     custodian: "시스템 설정 및 관리.",
-    config: "openclaw.json 편집.",
+    config: "bot.json 편집.",
     profile: "에이전트의 통계, 연속 기록, 산호초에서의 활동을 확인하세요.",
     communications: "채널, 메시지, 오디오 설정.",
     appearance: "테마, UI, 설정 마법사 설정.",
@@ -1887,7 +1887,7 @@ export const ko: TranslationMap = {
   modelSetup: {
     heading: "AI 연결",
     intro:
-      "OpenClaw는 CLI 로그인, API 키 또는 제공업체 로그인 등 이미 보유한 AI 액세스를 재사용합니다.",
+      "Bot는 CLI 로그인, API 키 또는 제공업체 로그인 등 이미 보유한 AI 액세스를 재사용합니다.",
     loading: "이 Gateway에서 사용 가능한 AI 액세스를 확인하는 중…",
     retry: "재시도",
     checkAgain: "다시 확인",
@@ -1900,7 +1900,7 @@ export const ko: TranslationMap = {
     },
     access: {
       adminRequired: "모델을 설정하려면 operator.admin 액세스가 필요합니다.",
-      gatewayTooOld: "Gateway에서 이전 버전의 OpenClaw가 실행 중입니다",
+      gatewayTooOld: "Gateway에서 이전 버전의 Bot가 실행 중입니다",
     },
     candidates: {
       title: "이 Gateway에서 발견됨",
@@ -2012,11 +2012,11 @@ export const ko: TranslationMap = {
     confirmTitle: "{provider}에서 가져오시겠습니까?",
     confirmDescription: "선택한 메모리 파일 {count}개를 이 에이전트 작업 공간으로 복사합니다.",
     confirmReplace: "기존 대상 파일은 교체 전에 마이그레이션 보고서에 백업됩니다.",
-    confirmBackup: "OpenClaw는 메모리를 복사하기 전에 검증된 가져오기 전 백업을 생성합니다.",
+    confirmBackup: "Bot는 메모리를 복사하기 전에 검증된 가져오기 전 백업을 생성합니다.",
     confirmImport: "메모리 가져오기",
     disconnected: "메모리를 가져오려면 Gateway에 연결하세요.",
     title: "어시스턴트 메모리 가져오기",
-    subtitle: "Codex 통합 메모리와 Claude Code 자동 메모리를 OpenClaw로 복사하기 전에 검토하세요.",
+    subtitle: "Codex 통합 메모리와 Claude Code 자동 메모리를 Bot로 복사하기 전에 검토하세요.",
     agent: "대상 에이전트",
     replaceExisting: "기존 가져오기 항목 교체",
     replaceHint: "충돌을 다시 미리 보고 교체 전에 항목 백업을 보존합니다.",
@@ -2024,7 +2024,7 @@ export const ko: TranslationMap = {
   onboarding: {
     memoryImport: {
       title: "어시스턴트 메모리 가져오기",
-      body: "OpenClaw에서 다른 코딩 어시스턴트의 메모리를 찾았습니다. 에이전트 작업 공간으로 가져오시겠습니까?",
+      body: "Bot에서 다른 코딩 어시스턴트의 메모리를 찾았습니다. 에이전트 작업 공간으로 가져오시겠습니까?",
       plannedCount: "{count}개 가져오기 준비 완료",
       alreadyImported: "이미 가져옴: {count}개",
       sourceUnavailable: "소스 경로를 사용할 수 없음",
@@ -2040,34 +2040,34 @@ export const ko: TranslationMap = {
       unknownError: "요청 실패",
       doneTitle: "메모리 가져오기 완료",
       doneBody:
-        "{migrated}개 마이그레이션됨, {skipped}개 건너뜀. OpenClaw 설정을 계속할 수 있습니다.",
+        "{migrated}개 마이그레이션됨, {skipped}개 건너뜀. Bot 설정을 계속할 수 있습니다.",
     },
   },
   custodian: {
-    title: "OpenClaw",
+    title: "Bot",
     subtitle: "시스템 설정 가이드",
     subtitleCaretaker: "시스템 설정 및 관리.",
     exitSetup: "설정 종료",
     newAgent: "새 에이전트",
     hatchDraft: "일어나, 친구!",
-    placeholder: "OpenClaw에 메시지…",
+    placeholder: "Bot에 메시지…",
     sensitivePlaceholder: "민감한 값 입력…",
     sensitiveReply: "민감한 답장이 전송됨",
     send: "보내기",
-    thinking: "OpenClaw가 생각 중입니다",
+    thinking: "Bot가 생각 중입니다",
     earlier: "이전",
-    requestFailed: "OpenClaw가 답장할 수 없습니다. 다시 시도하세요.",
+    requestFailed: "Bot가 답장할 수 없습니다. 다시 시도하세요.",
     connectionChanged: "Gateway 연결이 변경되었습니다. 이 설정을 계속하려면 다시 시도하세요.",
     sessionRestarted:
-      "{error} OpenClaw가 새 세션을 시작했습니다. 이전 메시지는 컨텍스트로 유지됩니다.",
-    unsupportedGateway: "OpenClaw로 설정을 계속하려면 Gateway를 업데이트하세요.",
+      "{error} Bot가 새 세션을 시작했습니다. 이전 메시지는 컨텍스트로 유지됩니다.",
+    unsupportedGateway: "Bot로 설정을 계속하려면 Gateway를 업데이트하세요.",
     history: {
       button: "기록",
       title: "최근 변경 사항",
       description: "이 시스템에서 변경된 내용, 최신순.",
       loading: "최근 변경 사항 로드 중…",
       empty: "아직 기록된 변경 사항이 없습니다.",
-      requestFailed: "OpenClaw가 변경 기록을 로드할 수 없습니다.",
+      requestFailed: "Bot가 변경 기록을 로드할 수 없습니다.",
       loadMore: "더 보기",
       loadingMore: "더 로드하는 중…",
       changedPaths: "변경된 경로 ({count})",
@@ -2205,7 +2205,7 @@ export const ko: TranslationMap = {
       notes: "Markdown, Obsidian, Notion 또는 Bear에 노트를 캡처하세요.",
     },
     noInstalledTitle: "설치된 선택적 플러그인이 없습니다",
-    noInstalledBody: "추천 플러그인을 살펴보거나 ClawHub를 검색해 OpenClaw를 확장하세요.",
+    noInstalledBody: "추천 플러그인을 살펴보거나 ClawHub를 검색해 Bot를 확장하세요.",
     noInstalledMatchTitle: "일치하는 설치된 플러그인이 없습니다",
     noMatchBody: "다른 검색어를 시도해 보세요.",
     filterAll: "전체",
@@ -2241,7 +2241,7 @@ export const ko: TranslationMap = {
     detailPluginId: "플러그인 ID",
     offlineTitle: "Gateway 오프라인",
     offlineBody: "설치된 플러그인과 추천 플러그인을 찾아보려면 연결하세요.",
-    optionalCapability: "선택적 OpenClaw 기능입니다.",
+    optionalCapability: "선택적 Bot 기능입니다.",
     enabled: "사용 설정됨",
     disabled: "사용 중지됨",
     available: "사용 가능",
@@ -2296,7 +2296,7 @@ export const ko: TranslationMap = {
     },
   },
   aboutPage: {
-    productName: "OpenClaw",
+    productName: "Bot",
     tagline: "내 기기에서 실행되는 나만의 AI 어시스턴트.",
     waveHello: "Clawd에게 손을 흔들어 인사하세요",
     linksLabel: "커뮤니티 및 리소스",
@@ -2306,7 +2306,7 @@ export const ko: TranslationMap = {
     linkDiscord: "Discord",
     linkX: "X (Twitter)",
     linkChangelog: "변경 내역",
-    license: "© 2026 OpenClaw Foundation — MIT 라이선스.",
+    license: "© 2026 Bot Foundation — MIT 라이선스.",
     artifactTitle: "Control UI",
     artifactSubtitle: "이 브라우저 아티팩트가 빌드될 때 포함된 ID입니다.",
     artifactDetails: "Control UI 빌드 세부 정보",
@@ -2323,7 +2323,7 @@ export const ko: TranslationMap = {
     gatewayVersionHint: "활성 Gateway 연결에서 보고됨; 이 Control UI 빌드와는 별개입니다.",
   },
   appsPage: {
-    heroTitle: "OpenClaw를 어디서나 사용하세요",
+    heroTitle: "Bot를 어디서나 사용하세요",
     heroTagline:
       "휴대폰, 시계, 데스크톱, 브라우저용 컴패니언 앱과 에이전트의 기능을 확장하는 플러그인.",
     sectionMobile: "휴대폰에서",
@@ -2347,11 +2347,11 @@ export const ko: TranslationMap = {
     cards: {
       ios: {
         title: "iPhone",
-        desc: "iOS에서 채팅하고, 대화하고, 작업을 승인하고, OpenClaw로 공유하세요.",
+        desc: "iOS에서 채팅하고, 대화하고, 작업을 승인하고, Bot로 공유하세요.",
       },
       android: {
         title: "Android",
-        desc: "Android 휴대폰을 완전한 OpenClaw 노드로 — 채팅, 카메라, Canvas.",
+        desc: "Android 휴대폰을 완전한 Bot 노드로 — 채팅, 카메라, Canvas.",
       },
       appleWatch: {
         title: "Apple Watch",
@@ -2359,7 +2359,7 @@ export const ko: TranslationMap = {
       },
       wearOs: {
         title: "Wear OS",
-        desc: "Android 컴패니언이 OpenClaw를 시계로 확장합니다.",
+        desc: "Android 컴패니언이 Bot를 시계로 확장합니다.",
       },
       macos: {
         title: "macOS",
@@ -2367,7 +2367,7 @@ export const ko: TranslationMap = {
       },
       windows: {
         title: "Windows",
-        desc: "Windows 컴패니언이 PC를 OpenClaw 노드로 연결합니다.",
+        desc: "Windows 컴패니언이 PC를 Bot 노드로 연결합니다.",
       },
       linux: {
         title: "Linux",
@@ -2375,11 +2375,11 @@ export const ko: TranslationMap = {
       },
       chrome: {
         title: "Chrome 확장 프로그램",
-        desc: "OpenClaw가 기존 Chrome을 제어하도록 하세요 — 탭, 페이지, 양식.",
+        desc: "Bot가 기존 Chrome을 제어하도록 하세요 — 탭, 페이지, 양식.",
       },
       plugins: {
         title: "플러그인 및 ClawHub",
-        desc: "커뮤니티의 채널, 도구, Skills로 OpenClaw를 확장하세요.",
+        desc: "커뮤니티의 채널, 도구, Skills로 Bot를 확장하세요.",
       },
     },
   },
@@ -2574,7 +2574,7 @@ export const ko: TranslationMap = {
     selfLearning: {
       pitchTitle: "자기 학습 켜기",
       pitchBody:
-        "OpenClaw는 수정 사항과 완료된 주요 실행을 검토한 후 이 보드에 게시할 Skill 제안 초안을 작성합니다. 추가 백그라운드 토큰을 사용하며, 초안은 보류 중인 제안으로 등록됩니다.",
+        "Bot는 수정 사항과 완료된 주요 실행을 검토한 후 이 보드에 게시할 Skill 제안 초안을 작성합니다. 추가 백그라운드 토큰을 사용하며, 초안은 보류 중인 제안으로 등록됩니다.",
       enable: "자기 학습 활성화",
       enabling: "활성화 중…",
       updateError: "자기 학습 설정을 업데이트할 수 없습니다.",
@@ -3734,9 +3734,9 @@ export const ko: TranslationMap = {
         title: "인증 필요",
         summary:
           "Gateway에 연결할 수 있지만 이 브라우저가 연결되기 전에 일치하는 토큰 또는 비밀번호가 필요합니다.",
-        stepPaste: "openclaw dashboard --no-open의 토큰을 붙여넣거나 구성된 비밀번호를 입력하세요.",
+        stepPaste: "bot dashboard --no-open의 토큰을 붙여넣거나 구성된 비밀번호를 입력하세요.",
         stepGenerate:
-          "토큰이 구성되어 있지 않으면 Gateway 호스트에서 openclaw doctor --generate-gateway-token을 실행하세요.",
+          "토큰이 구성되어 있지 않으면 Gateway 호스트에서 bot doctor --generate-gateway-token을 실행하세요.",
         stepConnect: "자격 증명을 업데이트한 뒤 Connect를 다시 클릭하세요.",
       },
       authFailed: {
@@ -3744,7 +3744,7 @@ export const ko: TranslationMap = {
         summary:
           "제공한 자격 증명이 거부되었습니다. 가장 흔한 원인은 오래된 토큰이거나 다른 Gateway URL에서 복사한 토큰입니다.",
         stepDashboard:
-          "openclaw dashboard --no-open을 실행하고 새 URL을 열거나 해당 토큰을 붙여넣으세요.",
+          "bot dashboard --no-open을 실행하고 새 URL을 열거나 해당 토큰을 붙여넣으세요.",
         stepReplace:
           "오래된 토큰/비밀번호 값을 교체하세요. 다른 Gateway URL의 토큰을 재사용하지 마세요.",
         stepMode:
@@ -3766,8 +3766,8 @@ export const ko: TranslationMap = {
         summary: "이 브라우저가 Control UI를 사용하려면 Gateway 호스트의 일회성 승인이 필요합니다.",
         upgradeSummary:
           "이 브라우저는 이미 알려져 있지만 요청한 액세스가 변경되어 새 승인이 필요합니다.",
-        stepList: "Gateway 호스트에서 openclaw devices list를 실행하세요.",
-        stepApproveId: "이 요청을 승인하세요: openclaw devices approve {requestId}.",
+        stepList: "Gateway 호스트에서 bot devices list를 실행하세요.",
+        stepApproveId: "이 요청을 승인하세요: bot devices approve {requestId}.",
         stepApprove: "해당 목록에서 대기 중인 브라우저/장치 요청을 승인하세요.",
         stepReconnect: "승인이 완료된 뒤 다시 연결하세요.",
       },
@@ -3795,22 +3795,22 @@ export const ko: TranslationMap = {
           "제공된 Control UI와 실행 중인 Gateway가 지원되는 연결 프로토콜에 동의하지 않습니다.",
         refresh: "페이지 새로 고침",
         stepDashboard:
-          "UI와 Gateway가 같은 설치에서 오도록 openclaw dashboard로 제공된 dashboard를 다시 여세요.",
+          "UI와 Gateway가 같은 설치에서 오도록 bot dashboard로 제공된 dashboard를 다시 여세요.",
         stepDevUi:
           "pnpm ui:dev를 사용하는 경우 현재 checkout 기준으로 개발 UI를 다시 빌드하거나 다시 시작하세요.",
         stepRestart:
-          "OpenClaw를 업데이트한 뒤 Gateway를 다시 시작하여 현재 프로토콜을 제공하게 하세요.",
+          "Bot를 업데이트한 뒤 Gateway를 다시 시작하여 현재 프로토콜을 제공하게 하세요.",
       },
       network: {
         title: "연결할 수 없음",
         summary:
           "브라우저가 Gateway 연결을 완료할 수 없습니다. 자격 증명을 다시 시도하기 전에 대상과 전송 방식을 확인하세요.",
         stepGateway:
-          "openclaw status 또는 openclaw gateway run으로 Gateway가 실행 중인지 확인하세요.",
+          "bot status 또는 bot gateway run으로 Gateway가 실행 중인지 확인하세요.",
         stepUrl:
           "WebSocket URL을 확인하고 Gateway가 HTTPS/Tailscale Serve 뒤에 있으면 wss://를 사용하세요.",
         stepDashboard:
-          "openclaw dashboard --no-open으로 dashboard를 다시 열어 현재 URL과 인증 세부 정보를 다시 복사하세요.",
+          "bot dashboard --no-open으로 dashboard를 다시 열어 현재 URL과 인증 세부 정보를 다시 복사하세요.",
       },
     },
   },
@@ -3906,7 +3906,7 @@ export const ko: TranslationMap = {
       remoteViewOnly: "이 세션은 페어링된 노드에 있으며 보기 전용입니다.",
       unsupportedViewOnly: "이 외부 세션 소스는 보기 전용입니다.",
       sessionMenu: "External session actions",
-      openInOpenClaw: "Open in OpenClaw",
+      openInBot: "Open in Bot",
       openInTerminal: "Open in terminal",
       terminalUnavailable: "Terminal opening is unavailable for this session.",
     },
@@ -3961,7 +3961,7 @@ export const ko: TranslationMap = {
     followUpModeOverriding: "서버 기본값 재정의 중 ({mode})",
     followUpModeReset: "서버 기본값으로 재설정",
     catalogOpenTarget: "외부 세션을 열 위치",
-    catalogOpenTargetViewer: "OpenClaw viewer",
+    catalogOpenTargetViewer: "Bot viewer",
     catalogOpenTargetTerminal: "Terminal",
     onboardingDisabled: "설정 중에는 비활성화됨",
     commandPaletteTitle: "검색하거나 이동… (⌘K)",
@@ -3979,7 +3979,7 @@ export const ko: TranslationMap = {
       titleOne: "클라우드 워크스페이스 충돌 1건",
       titleMany: "클라우드 워크스페이스 충돌 {count}건",
       description:
-        "OpenClaw가 로컬 버전을 유지하고 다른 클라우드 변경 사항을 적용했습니다. 스테이징된 결과를 확인하거나 충돌한 경로에 대해 클라우드 버전을 선택하세요.",
+        "Bot가 로컬 버전을 유지하고 다른 클라우드 변경 사항을 적용했습니다. 스테이징된 결과를 확인하거나 충돌한 경로에 대해 클라우드 버전을 선택하세요.",
       morePaths: "+{count}개 경로 더 보기",
       stagedResult: "스테이징된 클라우드 결과",
       copyStagedResult: "스테이징된 결과 ref 복사",
@@ -3990,7 +3990,7 @@ export const ko: TranslationMap = {
       commandHelp:
         "이 명령을 Bash 또는 zsh(Windows에서는 Git Bash)에서 실행하세요. 검사 결과 경로가 존재하지 않는다고 나오면 클라우드에서 삭제된 것입니다. 확인 후 로컬 경로를 수동으로 제거하세요. checkout이 파일/디렉터리 충돌을 보고하면 방해가 되는 로컬 경로를 이동하거나 제거한 후 다시 시도하세요. 스테이징된 ref가 없으면 알림이 오래된 것이므로 로컬 경로를 변경하지 마세요.",
       commandsUnavailable:
-        "이 파일 이름에는 터미널 제어 문자가 포함되어 있어 OpenClaw가 복사 가능한 셸 명령을 생성하지 않습니다. 스테이징된 ref를 직접 검사하고 경로를 주의해서 수동으로 입력하세요.",
+        "이 파일 이름에는 터미널 제어 문자가 포함되어 있어 Bot가 복사 가능한 셸 명령을 생성하지 않습니다. 스테이징된 ref를 직접 검사하고 경로를 주의해서 수동으로 입력하세요.",
       dismiss: "워크스페이스 충돌 알림 닫기",
       eventSender: "클라우드 워크스페이스",
       eventTitleOne: "충돌 1건과 함께 클라우드 결과 적용됨",
@@ -4567,7 +4567,7 @@ export const ko: TranslationMap = {
       filters: "필터",
       shownOf: "{total}개 중 {shown}개",
       emptyTitle: "아직 예약된 작업이 없습니다",
-      emptyHint: "OpenClaw가 무엇을 언제 해야 하는지 설명하면 일정에 따라 실행됩니다.",
+      emptyHint: "Bot가 무엇을 언제 해야 하는지 설명하면 일정에 따라 실행됩니다.",
       noMatching: "현재 필터와 일치하는 작업이 없습니다.",
       loadMore: "더 보기",
       loading: "로드 중...",
@@ -4634,7 +4634,7 @@ export const ko: TranslationMap = {
     detail: {
       tabsLabel: "자동화 세부 정보",
       newTitle: "새 예약 작업",
-      newSubtitle: "OpenClaw가 수행할 작업을 설명한 후 실행 시점을 선택하세요.",
+      newSubtitle: "Bot가 수행할 작업을 설명한 후 실행 시점을 선택하세요.",
       back: "모든 자동화",
       settingsTab: "설정",
       historyTitle: "실행 기록",
@@ -4707,7 +4707,7 @@ export const ko: TranslationMap = {
       descriptionPlaceholder: "이 작업에 대한 선택적 컨텍스트",
       agentPlaceholder: "main 또는 ops",
       agentHelp: "입력하여 알려진 에이전트를 선택하거나 사용자 지정 값을 입력하세요.",
-      promptPlaceholder: "OpenClaw가 수행할 작업을 설명하세요...",
+      promptPlaceholder: "Bot가 수행할 작업을 설명하세요...",
       repeat: "반복",
       repeatInterval: "간격",
       repeatOnce: "한 번",

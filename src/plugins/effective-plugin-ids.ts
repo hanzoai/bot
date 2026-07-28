@@ -1,12 +1,12 @@
 /** Resolves effective plugin ids from config, installed records, and activation metadata. */
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { sortUniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import { sortUniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import {
   listExplicitlyDisabledChannelIdsForConfig,
   listPotentialConfiguredChannelIds,
 } from "../channels/config-presence.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isVitestRuntimeEnv } from "../infra/env.js";
 import {
   listExplicitConfiguredChannelIdsForConfig,
@@ -19,8 +19,8 @@ import { passesManifestOwnerBasePolicy } from "./manifest-owner-policy.js";
 import { defaultSlotIdForKey } from "./slots.js";
 
 function collectConfiguredChannelIds(
-  config: OpenClawConfig,
-  activationSourceConfig: OpenClawConfig,
+  config: BotConfig,
+  activationSourceConfig: BotConfig,
   env: NodeJS.ProcessEnv,
 ): string[] {
   const disabled = new Set([
@@ -43,7 +43,7 @@ function collectConfiguredChannelIds(
 }
 
 function collectBundledChannelOwnerPluginIds(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   channelIds: readonly string[];
   env: NodeJS.ProcessEnv;
   workspaceDir?: string;
@@ -61,9 +61,9 @@ function collectBundledChannelOwnerPluginIds(params: {
   const env = params.bundledPluginsDir
     ? {
         ...params.env,
-        OPENCLAW_BUNDLED_PLUGINS_DIR: params.bundledPluginsDir,
+        BOT_BUNDLED_PLUGINS_DIR: params.bundledPluginsDir,
         ...(isVitestRuntimeEnv(params.env) || isVitestRuntimeEnv()
-          ? { OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1" }
+          ? { BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1" }
           : {}),
       }
     : params.env;
@@ -98,7 +98,7 @@ function collectBundledChannelOwnerPluginIds(params: {
   return sortUniqueStrings(pluginIds);
 }
 
-function collectExplicitEffectivePluginIds(config: OpenClawConfig): string[] {
+function collectExplicitEffectivePluginIds(config: BotConfig): string[] {
   const plugins = normalizePluginsConfig(config.plugins);
   if (!plugins.enabled) {
     return [];
@@ -124,7 +124,7 @@ function collectExplicitEffectivePluginIds(config: OpenClawConfig): string[] {
   return sortUniqueStrings(ids);
 }
 
-function collectSelectedContextEnginePluginIds(config: OpenClawConfig): string[] {
+function collectSelectedContextEnginePluginIds(config: BotConfig): string[] {
   const plugins = normalizePluginsConfig(config.plugins);
   if (!plugins.enabled) {
     return [];
@@ -144,7 +144,7 @@ function collectSelectedContextEnginePluginIds(config: OpenClawConfig): string[]
 
 /** Lists plugin ids that are effectively enabled for a config/discovery context. */
 export function resolveEffectivePluginIds(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   env: NodeJS.ProcessEnv;
   workspaceDir?: string;
   bundledPluginsDir?: string;

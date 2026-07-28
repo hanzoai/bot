@@ -1,5 +1,5 @@
 // Normalizes silent-reply config for channel response suppression.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   classifySilentReplyConversationType,
   resolveSilentReplyPolicyFromPolicies,
@@ -7,10 +7,10 @@ import {
   type SilentReplyPolicy,
   type SilentReplyPolicyShape,
 } from "../shared/silent-reply-policy.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { BotConfig } from "./types.bot.js";
 
 type ResolveSilentReplyParams = {
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   sessionKey?: string;
   surface?: string;
   conversationType?: SilentReplyConversationType;

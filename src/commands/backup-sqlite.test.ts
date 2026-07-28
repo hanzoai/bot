@@ -5,12 +5,12 @@ import { useAutoCleanupTempDirTracker } from "../../test/helpers/temp-dir.js";
 import { requireNodeSqlite } from "../infra/node-sqlite.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { createLocalSqliteSnapshotProvider } from "../snapshot/local-repository.js";
-import { OPENCLAW_AGENT_SCHEMA_VERSION } from "../state/openclaw-agent-db.js";
-import { resolveOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.paths.js";
-import { OPENCLAW_AGENT_SCHEMA_SQL } from "../state/openclaw-agent-schema.generated.js";
-import { OPENCLAW_STATE_SCHEMA_VERSION } from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
-import { OPENCLAW_STATE_SCHEMA_SQL } from "../state/openclaw-state-schema.generated.js";
+import { BOT_AGENT_SCHEMA_VERSION } from "../state/bot-agent-db.js";
+import { resolveBotAgentSqlitePath } from "../state/bot-agent-db.paths.js";
+import { BOT_AGENT_SCHEMA_SQL } from "../state/bot-agent-schema.generated.js";
+import { BOT_STATE_SCHEMA_VERSION } from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
+import { BOT_STATE_SCHEMA_SQL } from "../state/bot-state-schema.generated.js";
 import {
   backupSqliteCreateCommand,
   backupSqliteListCommand,
@@ -22,14 +22,14 @@ const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 let previousStateDir: string | undefined;
 
 beforeEach(() => {
-  previousStateDir = process.env.OPENCLAW_STATE_DIR;
+  previousStateDir = process.env.BOT_STATE_DIR;
 });
 
 afterEach(() => {
   if (previousStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.BOT_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = previousStateDir;
+    process.env.BOT_STATE_DIR = previousStateDir;
   }
 });
 
@@ -40,8 +40,8 @@ function createGlobalDatabase(databasePath: string): void {
     database.exec(`
       PRAGMA journal_mode = WAL;
       PRAGMA wal_autocheckpoint = 0;
-      ${OPENCLAW_STATE_SCHEMA_SQL}
-      PRAGMA user_version = ${OPENCLAW_STATE_SCHEMA_VERSION};
+      ${BOT_STATE_SCHEMA_SQL}
+      PRAGMA user_version = ${BOT_STATE_SCHEMA_VERSION};
       CREATE TABLE durable_entries (
         id INTEGER PRIMARY KEY,
         value TEXT NOT NULL
@@ -61,7 +61,7 @@ function createGlobalDatabase(databasePath: string): void {
           ) VALUES ('primary', 'global', ?, NULL, NULL, 1, 1)
         `,
       )
-      .run(OPENCLAW_STATE_SCHEMA_VERSION);
+      .run(BOT_STATE_SCHEMA_VERSION);
     database
       .prepare(
         `
@@ -89,8 +89,8 @@ function createAgentDatabase(databasePath: string, agentId: string): void {
   const database = new sqlite.DatabaseSync(databasePath);
   try {
     database.exec(`
-      ${OPENCLAW_AGENT_SCHEMA_SQL}
-      PRAGMA user_version = ${OPENCLAW_AGENT_SCHEMA_VERSION};
+      ${BOT_AGENT_SCHEMA_SQL}
+      PRAGMA user_version = ${BOT_AGENT_SCHEMA_VERSION};
       CREATE TABLE durable_entries (
         id INTEGER PRIMARY KEY,
         value TEXT NOT NULL
@@ -110,7 +110,7 @@ function createAgentDatabase(databasePath: string, agentId: string): void {
           ) VALUES ('primary', 'agent', ?, ?, NULL, 1, 1)
         `,
       )
-      .run(OPENCLAW_AGENT_SCHEMA_VERSION, agentId);
+      .run(BOT_AGENT_SCHEMA_VERSION, agentId);
     database.prepare("INSERT INTO durable_entries (value) VALUES (?)").run("agent-state");
   } finally {
     database.close();
@@ -119,13 +119,13 @@ function createAgentDatabase(databasePath: string, agentId: string): void {
 
 describe("SQLite backup commands", () => {
   it("creates, lists, verifies, and fresh-restores the global database", async () => {
-    const tempDir = tempDirs.make("openclaw-backup-sqlite-");
+    const tempDir = tempDirs.make("bot-backup-sqlite-");
     const stateDir = path.join(tempDir, "state");
     const repositoryPath = path.join(tempDir, "snapshots");
     const scratchPath = path.join(tempDir, "scratch");
-    const restorePath = path.join(tempDir, "restore", "openclaw.sqlite");
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    const databasePath = resolveOpenClawStateSqlitePath();
+    const restorePath = path.join(tempDir, "restore", "bot.sqlite");
+    process.env.BOT_STATE_DIR = stateDir;
+    const databasePath = resolveBotStateSqlitePath();
     await fs.mkdir(path.dirname(databasePath), { recursive: true });
     await fs.mkdir(scratchPath, { mode: 0o700 });
     await fs.chmod(scratchPath, 0o700);
@@ -139,8 +139,8 @@ describe("SQLite backup commands", () => {
     });
     expect(created.manifest.database).toMatchObject({
       role: "global",
-      basename: "openclaw.sqlite",
-      userVersion: OPENCLAW_STATE_SCHEMA_VERSION,
+      basename: "bot.sqlite",
+      userVersion: BOT_STATE_SCHEMA_VERSION,
     });
     expect(JSON.parse(runtime.logs.shift() ?? "{}")).toEqual(created);
 
@@ -184,11 +184,11 @@ describe("SQLite backup commands", () => {
   });
 
   it("creates a snapshot for a normalized per-agent database", async () => {
-    const tempDir = tempDirs.make("openclaw-backup-sqlite-");
+    const tempDir = tempDirs.make("bot-backup-sqlite-");
     const stateDir = path.join(tempDir, "state");
     const repositoryPath = path.join(tempDir, "snapshots");
-    process.env.OPENCLAW_STATE_DIR = stateDir;
-    const databasePath = resolveOpenClawAgentSqlitePath({ agentId: "ops-team" });
+    process.env.BOT_STATE_DIR = stateDir;
+    const databasePath = resolveBotAgentSqlitePath({ agentId: "ops-team" });
     await fs.mkdir(path.dirname(databasePath), { recursive: true });
     createAgentDatabase(databasePath, "ops-team");
     const runtime = createRuntimeCapture();
@@ -201,14 +201,14 @@ describe("SQLite backup commands", () => {
     expect(created.manifest.database).toEqual({
       role: "agent",
       agentId: "ops-team",
-      basename: "openclaw-agent.sqlite",
-      userVersion: OPENCLAW_AGENT_SCHEMA_VERSION,
+      basename: "bot-agent.sqlite",
+      userVersion: BOT_AGENT_SCHEMA_VERSION,
     });
     expect(runtime.logs).toEqual([expect.stringContaining("Database: agent:ops-team")]);
     expect(runtime.errors).toEqual([]);
   });
 
-  it("requires exactly one named OpenClaw database source", async () => {
+  it("requires exactly one named Bot database source", async () => {
     const runtime = createRuntimeCapture();
 
     await expect(
@@ -238,7 +238,7 @@ describe("SQLite backup commands", () => {
   });
 
   it("rejects generic provider artifacts before verify or restore", async () => {
-    const tempDir = tempDirs.make("openclaw-backup-sqlite-");
+    const tempDir = tempDirs.make("bot-backup-sqlite-");
     const databasePath = path.join(tempDir, "generic.sqlite");
     const repositoryPath = path.join(tempDir, "snapshots");
     const restorePath = path.join(tempDir, "restore", "generic.sqlite");

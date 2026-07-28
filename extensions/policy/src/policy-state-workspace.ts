@@ -2,7 +2,7 @@
 import {
   isRecord,
   normalizeOptionalString as readString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { AGENT_WORKSPACE_POLICY_TOOLS, readStringArray } from "./policy-state-tool-posture.js";
 import type { PolicyAgentWorkspaceEvidence } from "./policy-state-types.js";
 import { toolListCoversTool } from "./tool-policy-conformance.js";
@@ -22,10 +22,10 @@ export function scanPolicyAgentWorkspace(
     inheritedSandbox: {},
     tools: defaultTools,
     inheritedTools: {},
-    workspaceSourceBase: "oc://openclaw.config/agents/defaults",
-    inheritedWorkspaceSourceBase: "oc://openclaw.config/agents/defaults",
-    toolsSourceBase: "oc://openclaw.config/tools",
-    inheritedToolsSourceBase: "oc://openclaw.config/tools",
+    workspaceSourceBase: "oc://bot.config/agents/defaults",
+    inheritedWorkspaceSourceBase: "oc://bot.config/agents/defaults",
+    toolsSourceBase: "oc://bot.config/tools",
+    inheritedToolsSourceBase: "oc://bot.config/tools",
   });
 
   const list = Array.isArray(agents.list) ? agents.list : [];
@@ -45,10 +45,10 @@ export function scanPolicyAgentWorkspace(
       inheritedSandbox: defaultSandbox,
       tools,
       inheritedTools: defaultTools,
-      workspaceSourceBase: `oc://openclaw.config/agents/list/#${index}`,
-      inheritedWorkspaceSourceBase: "oc://openclaw.config/agents/defaults",
-      toolsSourceBase: `oc://openclaw.config/agents/list/#${index}/tools`,
-      inheritedToolsSourceBase: "oc://openclaw.config/tools",
+      workspaceSourceBase: `oc://bot.config/agents/list/#${index}`,
+      inheritedWorkspaceSourceBase: "oc://bot.config/agents/defaults",
+      toolsSourceBase: `oc://bot.config/agents/list/#${index}/tools`,
+      inheritedToolsSourceBase: "oc://bot.config/tools",
     });
   });
   return entries.toSorted((a, b) => a.source.localeCompare(b.source) || a.id.localeCompare(b.id));
@@ -79,7 +79,7 @@ function pushAgentWorkspaceEvidence(
       ? `${params.workspaceSourceBase}/sandbox/mode`
       : inheritedSandboxMode !== undefined
         ? `${params.inheritedWorkspaceSourceBase}/sandbox/mode`
-        : "oc://openclaw.config/agents/defaults/sandbox/mode";
+        : "oc://bot.config/agents/defaults/sandbox/mode";
   const explicitWorkspaceAccess = readString(params.sandbox.workspaceAccess);
   const inheritedWorkspaceAccess = readString(params.inheritedSandbox.workspaceAccess);
   entries.push({
@@ -90,7 +90,7 @@ function pushAgentWorkspaceEvidence(
         ? `${params.workspaceSourceBase}/sandbox/workspaceAccess`
         : inheritedWorkspaceAccess !== undefined
           ? `${params.inheritedWorkspaceSourceBase}/sandbox/workspaceAccess`
-          : "oc://openclaw.config/agents/defaults/sandbox/workspaceAccess",
+          : "oc://bot.config/agents/defaults/sandbox/workspaceAccess",
     scope: params.scope,
     ...(params.agentId === undefined ? {} : { agentId: params.agentId }),
     value: explicitWorkspaceAccess ?? inheritedWorkspaceAccess ?? "none",

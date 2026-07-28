@@ -1,7 +1,7 @@
 import { html } from "lit";
 import { property } from "lit/decorators.js";
 import { t } from "../i18n/index.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../lit/bot-element.ts";
 import { DropdownMenuController } from "./dropdown-menu-controller.ts";
 import { icons } from "./icons.ts";
 import { activateMenuShortcut, menuShortcutHint } from "./menu-shortcuts.ts";
@@ -9,7 +9,7 @@ import "./web-awesome.ts";
 
 export type NativeLinkMenuAction = "inline" | "external" | "copy";
 
-export class NativeLinkMenu extends OpenClawLightDomElement {
+export class NativeLinkMenu extends BotLightDomElement {
   @property({ attribute: false }) x = 0;
   @property({ attribute: false }) y = 0;
   @property({ attribute: false }) trigger: HTMLAnchorElement | null = null;
@@ -99,6 +99,6 @@ export class NativeLinkMenu extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-native-link-menu")) {
-  customElements.define("openclaw-native-link-menu", NativeLinkMenu);
+if (!customElements.get("bot-native-link-menu")) {
+  customElements.define("bot-native-link-menu", NativeLinkMenu);
 }

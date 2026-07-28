@@ -126,7 +126,7 @@ describe("createEmbeddedLobsterRunner", () => {
   });
 
   it("detects workflow files and parses argsJson", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-lobster-runner-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-lobster-runner-"));
     const workflowPath = path.join(tempDir, "workflow.lobster");
     await fs.writeFile(workflowPath, "steps: []\n", "utf8");
 
@@ -169,7 +169,7 @@ describe("createEmbeddedLobsterRunner", () => {
   });
 
   it("detects existing workflow file paths that contain spaces", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-lobster-runner-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-lobster-runner-"));
     const workflowPath = path.join(tempDir, "daily inbox.lobster");
     await fs.writeFile(workflowPath, "steps: []\n", "utf8");
 
@@ -213,7 +213,7 @@ describe("createEmbeddedLobsterRunner", () => {
     ["missing.lobster", "missing.lobster"],
     ["nested/missing.yaml", path.join("nested", "missing.yaml")],
   ])("surfaces missing workflow path errors for %s", async (pipeline, expectedRelativePath) => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-lobster-runner-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-lobster-runner-"));
 
     try {
       const runtime = {
@@ -243,7 +243,7 @@ describe("createEmbeddedLobsterRunner", () => {
   });
 
   it("returns a parse error when workflow args are invalid JSON", async () => {
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-lobster-runner-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-lobster-runner-"));
     const workflowPath = path.join(tempDir, "workflow.lobster");
     await fs.writeFile(workflowPath, "steps: []\n", "utf8");
 
@@ -328,7 +328,7 @@ describe("createEmbeddedLobsterRunner", () => {
         timeoutMs: 2000,
         maxStdoutBytes: 4096,
       }),
-    ).rejects.toThrow("Lobster input requests are not supported by the OpenClaw Lobster tool yet");
+    ).rejects.toThrow("Lobster input requests are not supported by the Bot Lobster tool yet");
   });
 
   it("routes resume through the embedded runtime", async () => {

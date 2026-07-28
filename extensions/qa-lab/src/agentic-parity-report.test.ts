@@ -125,8 +125,8 @@ describe("qa agentic parity report", () => {
             scenarioId: "approval-turn-tool-followthrough",
             drift: "none",
             cells: {
-              openclaw: {
-                runtime: "openclaw",
+              bot: {
+                runtime: "bot",
                 status: "pass",
                 transcriptBytes: '{"role":"assistant"}\n',
                 toolCalls: [],
@@ -786,7 +786,7 @@ status=done`,
     const report = renderQaAgenticParityMarkdownReport(comparison);
 
     expect(report).toContain(
-      "# OpenClaw Agentic Parity Report — openai/gpt-5.6-luna vs anthropic/claude-opus-4-8",
+      "# Bot Agentic Parity Report — openai/gpt-5.6-luna vs anthropic/claude-opus-4-8",
     );
     expect(report).toContain("| Completion rate | 100.0% | 100.0% |");
     expect(report).toContain("### Approval turn tool followthrough");
@@ -808,7 +808,7 @@ status=done`,
     });
     const report = renderQaAgenticParityMarkdownReport(comparison);
     expect(report).toContain(
-      "# OpenClaw Agentic Parity Report — openai/gpt-5.6-luna-alt vs openai/gpt-5.6-luna",
+      "# Bot Agentic Parity Report — openai/gpt-5.6-luna-alt vs openai/gpt-5.6-luna",
     );
   });
 
@@ -818,19 +818,19 @@ status=done`,
       comparedAt: "2026-05-10T00:00:00.000Z",
     });
 
-    expect(report.runtimePair).toEqual(["openclaw", "codex"]);
+    expect(report.runtimePair).toEqual(["bot", "codex"]);
     expect(report.pass).toBe(true);
     expect(report.driftCounts.none).toBe(1);
     expect(report.driftCounts["tool-call-shape"]).toBe(1);
     expect(report.failures).toEqual([]);
     expect(report.scenarios[0]).toMatchObject({
-      openclawWallClockMs: 20,
+      botWallClockMs: 20,
       codexWallClockMs: 18,
       fasterRuntime: "codex",
       speedupPercent: (2 / 18) * 100,
     });
     expect(report.timing).toEqual({
-      openclaw: {
+      bot: {
         totalWallClockMs: 40,
         p50WallClockMs: 20,
         p90WallClockMs: 20,
@@ -849,7 +849,7 @@ status=done`,
     const summary = makeRuntimeParitySummary();
     for (const scenario of summary.scenarios) {
       if (scenario.runtimeParity) {
-        scenario.runtimeParity.cells.openclaw.wallClockMs = 0;
+        scenario.runtimeParity.cells.bot.wallClockMs = 0;
         scenario.runtimeParity.cells.codex.wallClockMs = 0;
       }
     }
@@ -858,7 +858,7 @@ status=done`,
 
     expect(report.pass).toBe(true);
     expect(report.timing).toEqual({
-      openclaw: { totalWallClockMs: 0, p50WallClockMs: 0, p90WallClockMs: 0 },
+      bot: { totalWallClockMs: 0, p50WallClockMs: 0, p90WallClockMs: 0 },
       codex: { totalWallClockMs: 0, p50WallClockMs: 0, p90WallClockMs: 0 },
       fasterRuntime: "tie",
       speedupPercent: 0,
@@ -876,10 +876,10 @@ status=done`,
     const report = buildQaRuntimeParityReport({ summary });
 
     expect(report.pass).toBe(false);
-    expect(report.timing.openclaw.totalWallClockMs).toBe(40);
+    expect(report.timing.bot.totalWallClockMs).toBe(40);
     expect(report.timing.codex.totalWallClockMs).toBe(37);
     expect(report.scenarios[2]).toMatchObject({
-      openclawWallClockMs: null,
+      botWallClockMs: null,
       codexWallClockMs: null,
       fasterRuntime: null,
       speedupPercent: null,
@@ -891,19 +891,19 @@ status=done`,
       summary: {
         scenarios: [{ name: "Missing runtime capture", status: "fail" }],
         counts: { total: 1, passed: 0, failed: 1 },
-        run: { providerMode: "live-frontier", runtimePair: ["openclaw", "codex"] },
+        run: { providerMode: "live-frontier", runtimePair: ["bot", "codex"] },
       },
     });
 
     expect(report.timing).toEqual({
-      openclaw: { totalWallClockMs: null, p50WallClockMs: null, p90WallClockMs: null },
+      bot: { totalWallClockMs: null, p50WallClockMs: null, p90WallClockMs: null },
       codex: { totalWallClockMs: null, p50WallClockMs: null, p90WallClockMs: null },
       fasterRuntime: null,
       speedupPercent: null,
     });
 
     const markdown = renderQaRuntimeParityMarkdownReport(report);
-    expect(markdown).toContain("| openclaw | N/A | N/A | N/A |");
+    expect(markdown).toContain("| bot | N/A | N/A | N/A |");
     expect(markdown).toContain("| codex | N/A | N/A | N/A |");
     expect(markdown).toContain("- Faster runtime: N/A");
   });
@@ -957,7 +957,7 @@ status=done`,
     if (!scenario?.runtimeParity) {
       throw new Error("runtime parity fixture missing");
     }
-    scenario.runtimeParity.cells.openclaw.usage = {
+    scenario.runtimeParity.cells.bot.usage = {
       inputTokens: 0,
       outputTokens: 0,
       totalTokens: 0,
@@ -976,7 +976,7 @@ status=done`,
     expect(report.pass).toBe(false);
     expect(report.failedScenarios).toBe(1);
     expect(report.failures).toContain(
-      "Approval turn tool followthrough missing live assistant-message usage (openclaw=0, codex=0).",
+      "Approval turn tool followthrough missing live assistant-message usage (bot=0, codex=0).",
     );
     expect(report.scenarios[0]?.status).toBe("fail");
   });
@@ -995,7 +995,7 @@ status=done`,
       expectation: "not-applicable",
       reason: "Local fixture only; no assistant turn runs.",
     };
-    scenario.runtimeParity.cells.openclaw.usage = {
+    scenario.runtimeParity.cells.bot.usage = {
       inputTokens: 0,
       outputTokens: 0,
       totalTokens: 0,
@@ -1012,7 +1012,7 @@ status=done`,
     expect(report.pass).toBe(true);
     expect(report.failures).toEqual([]);
     expect(report.scenarios[0]?.status).toBe("pass");
-    expect(markdown).toContain("- openclaw: pass (1 tool calls, N/A tokens)");
+    expect(markdown).toContain("- bot: pass (1 tool calls, N/A tokens)");
     expect(markdown).toContain(
       "- assistant-message usage: N/A (Local fixture only; no assistant turn runs.)",
     );
@@ -1032,7 +1032,7 @@ status=done`,
       expectation: "not-applicable",
       reason: "Local fixture only; no assistant turn runs.",
     };
-    scenario.runtimeParity.cells.openclaw.usage.totalTokens = 0;
+    scenario.runtimeParity.cells.bot.usage.totalTokens = 0;
     scenario.runtimeParity.cells.codex.usage.totalTokens = 0;
     scenario.runtimeParity.cells.codex.runtimeErrorClass = "auth";
 
@@ -1054,7 +1054,7 @@ status=done`,
         },
         run: {
           providerMode: "live-frontier",
-          runtimePair: ["openclaw", "codex"],
+          runtimePair: ["bot", "codex"],
         },
       },
       comparedAt: "2026-05-10T00:00:00.000Z",
@@ -1072,14 +1072,14 @@ status=done`,
       }),
     );
 
-    expect(report).toContain("# OpenClaw Runtime Parity Report — openclaw vs codex");
+    expect(report).toContain("# Bot Runtime Parity Report — bot vs codex");
     expect(report).toContain("| Tool-call-shape drift | 1 |");
     expect(report).toContain("## Runtime Timing");
-    expect(report).toContain("| openclaw | 40 ms | 20 ms | 20 ms |");
+    expect(report).toContain("| bot | 40 ms | 20 ms | 20 ms |");
     expect(report).toContain("| codex | 37 ms | 18 ms | 19 ms |");
     expect(report).toContain("- Faster runtime: codex 8.1% faster");
     expect(report).toContain("### Compaction retry after mutating tool");
     expect(report).toContain("- drift: tool-call-shape");
-    expect(report).toContain("- wall time: openclaw 20 ms; codex 19 ms; codex 5.3% faster");
+    expect(report).toContain("- wall time: bot 20 ms; codex 19 ms; codex 5.3% faster");
   });
 });

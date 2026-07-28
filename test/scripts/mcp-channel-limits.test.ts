@@ -14,9 +14,9 @@ describe("MCP channel E2E limits", () => {
   it("accepts strict positive integer overrides", () => {
     expect(
       readMcpChannelLimits({
-        OPENCLAW_MCP_CHANNELS_CONNECT_TIMEOUT_MS: "120000",
-        OPENCLAW_MCP_CHANNELS_GATEWAY_EVENT_RETAIN_LIMIT: "500",
-        OPENCLAW_MCP_CHANNELS_RAW_MESSAGE_RETAIN_LIMIT: "25",
+        BOT_MCP_CHANNELS_CONNECT_TIMEOUT_MS: "120000",
+        BOT_MCP_CHANNELS_GATEWAY_EVENT_RETAIN_LIMIT: "500",
+        BOT_MCP_CHANNELS_RAW_MESSAGE_RETAIN_LIMIT: "25",
       }),
     ).toEqual({
       connectTimeoutMs: 120_000,
@@ -28,13 +28,13 @@ describe("MCP channel E2E limits", () => {
   it("rejects loose numeric env values instead of parsing prefixes", () => {
     expect(() =>
       readMcpChannelLimits({
-        OPENCLAW_MCP_CHANNELS_CONNECT_TIMEOUT_MS: "1e3",
+        BOT_MCP_CHANNELS_CONNECT_TIMEOUT_MS: "1e3",
       }),
-    ).toThrow("invalid OPENCLAW_MCP_CHANNELS_CONNECT_TIMEOUT_MS: 1e3");
+    ).toThrow("invalid BOT_MCP_CHANNELS_CONNECT_TIMEOUT_MS: 1e3");
     expect(() =>
       readMcpChannelLimits({
-        OPENCLAW_MCP_CHANNELS_RAW_MESSAGE_RETAIN_LIMIT: "1000ms",
+        BOT_MCP_CHANNELS_RAW_MESSAGE_RETAIN_LIMIT: "1000ms",
       }),
-    ).toThrow("invalid OPENCLAW_MCP_CHANNELS_RAW_MESSAGE_RETAIN_LIMIT: 1000ms");
+    ).toThrow("invalid BOT_MCP_CHANNELS_RAW_MESSAGE_RETAIN_LIMIT: 1000ms");
   });
 });

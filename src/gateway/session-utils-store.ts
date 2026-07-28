@@ -1,7 +1,7 @@
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import {
   readAcpSessionMeta,
   readAcpSessionMetaForEntry,
@@ -28,7 +28,7 @@ import {
   type SessionEntry,
   type SessionScope,
 } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 import { isAcpSessionKey } from "../sessions/session-key-utils.js";
 import { listGatewayAgentsBasic } from "./agent-list.js";
@@ -46,7 +46,7 @@ import type { GatewayAgentRow, GatewaySessionRow } from "./session-utils.types.j
  * exists (#65524).
  */
 export function resolveDeletedAgentIdFromSessionKey(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   sessionKey: string,
   entry?: SessionEntry | null,
   options?: { acpMetadataSessionKey?: string | null },
@@ -77,7 +77,7 @@ export function resolveDeletedAgentIdFromSessionKey(
 }
 
 function readAcpMetaForDeletedAgentCheck(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   entry?: Pick<SessionEntry, "acp" | "lifecycleRevision"> | null;
   acpMetadataSessionKey?: string | null;
@@ -210,7 +210,7 @@ function pruneLegacyStoreKeys(params: {
 }
 
 export function migrateAndPruneGatewaySessionStoreKey(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   key: string;
   store: Record<string, SessionEntry>;
   agentId?: string;
@@ -315,7 +315,7 @@ function normalizeFallbackList(values: readonly string[]): string[] {
 }
 
 function resolveGatewayAgentModel(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string,
 ): GatewayAgentRow["model"] | undefined {
   const primary = resolveAgentEffectiveModelPrimary(cfg, agentId)?.trim();
@@ -332,7 +332,7 @@ function resolveGatewayAgentModel(
 }
 
 export function listAgentsForGateway(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   modelCatalog?: ModelCatalogEntry[],
   options?: {
     modelCatalogByAgentId?: ReadonlyMap<string, ModelCatalogEntry[]>;

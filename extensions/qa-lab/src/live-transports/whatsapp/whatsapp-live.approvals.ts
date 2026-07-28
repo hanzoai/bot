@@ -3,8 +3,8 @@ import { randomUUID } from "node:crypto";
 import type {
   WhatsAppQaDriverObservedMessage,
   WhatsAppQaDriverSession,
-} from "@openclaw/whatsapp/api.js";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+} from "@hanzo/bot-whatsapp/api.js";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   assertApprovalDecisionResult,
   formatApprovalResultValue,

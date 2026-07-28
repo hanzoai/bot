@@ -3,7 +3,7 @@
  * app-server sessions.
  */
 import { existsSync } from "node:fs";
-import { runExec } from "openclaw/plugin-sdk/process-runtime";
+import { runExec } from "bot/plugin-sdk/process-runtime";
 import { describeControlFailure } from "./capabilities.js";
 import {
   isCodexAppServerConnectionClosedError,
@@ -189,7 +189,7 @@ type PluginInspection =
 const CURATED_MARKETPLACE_POLL_INTERVAL_MS = 2_000;
 const COMPUTER_USE_MARKETPLACE_NAME_PRIORITY = ["openai-bundled", "openai-curated", "local"];
 const COMPUTER_USE_LIVE_TEST_RETRY_COUNT = 1;
-const COMPUTER_USE_LIVE_TEST_THREAD_NAME = "OpenClaw Computer Use readiness probe";
+const COMPUTER_USE_LIVE_TEST_THREAD_NAME = "Bot Computer Use readiness probe";
 
 /** Reads Computer Use readiness without installing or mutating app-server state. */
 export async function readCodexComputerUseStatus(

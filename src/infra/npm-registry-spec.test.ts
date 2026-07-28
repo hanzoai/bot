@@ -1,10 +1,10 @@
 // Tests npm registry spec parsing for packages, tags, and versions.
 import { describe, expect, it } from "vitest";
 import {
-  compareOpenClawReleaseVersions,
+  compareBotReleaseVersions,
   formatPrereleaseResolutionError,
   isExactSemverVersion,
-  isOpenClawOrgNpmSpec,
+  isBotOrgNpmSpec,
   isPrereleaseSemverVersion,
   isPrereleaseResolutionAllowed,
   parseRegistryNpmSpec,
@@ -22,22 +22,22 @@ function parseSpecOrThrow(spec: string) {
 
 describe("npm registry spec validation", () => {
   it.each([
-    "@openclaw/voice-call",
-    "@openclaw/voice-call@1.2.3",
-    "@openclaw/voice-call@1.2.3-beta.4",
-    "@openclaw/voice-call@latest",
-    "@openclaw/voice-call@beta",
+    "@hanzo/bot-voice-call",
+    "@hanzo/bot-voice-call@1.2.3",
+    "@hanzo/bot-voice-call@1.2.3-beta.4",
+    "@hanzo/bot-voice-call@latest",
+    "@hanzo/bot-voice-call@beta",
   ])("accepts %s", (spec) => {
     expect(validateRegistryNpmSpec(spec)).toBeNull();
   });
 
   it.each([
     {
-      spec: "@openclaw/voice-call@^1.2.3",
+      spec: "@hanzo/bot-voice-call@^1.2.3",
       expected: "exact version or dist-tag",
     },
     {
-      spec: "@openclaw/voice-call@~1.2.3",
+      spec: "@hanzo/bot-voice-call@~1.2.3",
       expected: "exact version or dist-tag",
     },
     {
@@ -45,15 +45,15 @@ describe("npm registry spec validation", () => {
       expected: "URLs are not allowed",
     },
     {
-      spec: "git+ssh://github.com/openclaw/openclaw",
+      spec: "git+ssh://github.com/hanzoai/bot",
       expected: "URLs are not allowed",
     },
     {
-      spec: "@openclaw/voice-call@",
+      spec: "@hanzo/bot-voice-call@",
       expected: "missing version/tag after @",
     },
     {
-      spec: "@openclaw/voice-call@../beta",
+      spec: "@hanzo/bot-voice-call@../beta",
       expected: "invalid version/tag",
     },
   ])("rejects %s", ({ spec, expected }) => {
@@ -64,39 +64,39 @@ describe("npm registry spec validation", () => {
 describe("npm registry spec parsing helpers", () => {
   it.each([
     {
-      spec: "@openclaw/voice-call",
+      spec: "@hanzo/bot-voice-call",
       expected: {
-        name: "@openclaw/voice-call",
-        raw: "@openclaw/voice-call",
+        name: "@hanzo/bot-voice-call",
+        raw: "@hanzo/bot-voice-call",
         selectorKind: "none",
         selectorIsPrerelease: false,
       },
     },
     {
-      spec: "@openclaw/voice-call@beta",
+      spec: "@hanzo/bot-voice-call@beta",
       expected: {
-        name: "@openclaw/voice-call",
-        raw: "@openclaw/voice-call@beta",
+        name: "@hanzo/bot-voice-call",
+        raw: "@hanzo/bot-voice-call@beta",
         selector: "beta",
         selectorKind: "tag",
         selectorIsPrerelease: false,
       },
     },
     {
-      spec: "@openclaw/voice-call@2026.5.3-1",
+      spec: "@hanzo/bot-voice-call@2026.5.3-1",
       expected: {
-        name: "@openclaw/voice-call",
-        raw: "@openclaw/voice-call@2026.5.3-1",
+        name: "@hanzo/bot-voice-call",
+        raw: "@hanzo/bot-voice-call@2026.5.3-1",
         selector: "2026.5.3-1",
         selectorKind: "exact-version",
         selectorIsPrerelease: false,
       },
     },
     {
-      spec: "@openclaw/voice-call@1.2.3-beta.1",
+      spec: "@hanzo/bot-voice-call@1.2.3-beta.1",
       expected: {
-        name: "@openclaw/voice-call",
-        raw: "@openclaw/voice-call@1.2.3-beta.1",
+        name: "@hanzo/bot-voice-call",
+        raw: "@hanzo/bot-voice-call@1.2.3-beta.1",
         selector: "1.2.3-beta.1",
         selectorKind: "exact-version",
         selectorIsPrerelease: true,
@@ -107,14 +107,14 @@ describe("npm registry spec parsing helpers", () => {
   });
 
   it.each([
-    { spec: "@openclaw/voice-call", expected: true },
-    { spec: "@openclaw/voice-call@1.2.3", expected: true },
+    { spec: "@hanzo/bot-voice-call", expected: true },
+    { spec: "@hanzo/bot-voice-call@1.2.3", expected: true },
     { spec: "@other/voice-call", expected: false },
     { spec: "voice-call", expected: false },
-    { spec: "npm:@openclaw/voice-call", expected: false },
+    { spec: "npm:@hanzo/bot-voice-call", expected: false },
     { spec: undefined, expected: false },
-  ])("detects OpenClaw-org npm specs for %s", ({ spec, expected }) => {
-    expect(isOpenClawOrgNpmSpec(spec)).toBe(expected);
+  ])("detects Bot-org npm specs for %s", ({ spec, expected }) => {
+    expect(isBotOrgNpmSpec(spec)).toBe(expected);
   });
 
   it.each([
@@ -144,45 +144,45 @@ describe("npm registry spec parsing helpers", () => {
     { left: "2026.5.3-0", right: "2026.5.3", expected: null },
     { left: "2026.5.3+build", right: "2026.5.3", expected: null },
     { left: "1.2.3-1", right: "1.2.3", expected: null },
-  ])("compares OpenClaw release versions for %s and %s", ({ left, right, expected }) => {
-    expect(compareOpenClawReleaseVersions(left, right)).toBe(expected);
+  ])("compares Bot release versions for %s and %s", ({ left, right, expected }) => {
+    expect(compareBotReleaseVersions(left, right)).toBe(expected);
   });
 });
 
 describe("npm prerelease resolution policy", () => {
   it.each([
     {
-      spec: "@openclaw/voice-call",
+      spec: "@hanzo/bot-voice-call",
       resolvedVersion: "1.2.3-beta.1",
       expected: false,
     },
     {
-      spec: "@openclaw/voice-call@latest",
+      spec: "@hanzo/bot-voice-call@latest",
       resolvedVersion: "1.2.3-rc.1",
       expected: false,
     },
     {
-      spec: "@openclaw/voice-call@latest",
+      spec: "@hanzo/bot-voice-call@latest",
       resolvedVersion: "2026.5.3-1",
       expected: true,
     },
     {
-      spec: "@openclaw/voice-call@beta",
+      spec: "@hanzo/bot-voice-call@beta",
       resolvedVersion: "1.2.3-beta.4",
       expected: true,
     },
     {
-      spec: "@openclaw/voice-call@1.2.3-beta.1",
+      spec: "@hanzo/bot-voice-call@1.2.3-beta.1",
       resolvedVersion: "1.2.3-beta.1",
       expected: true,
     },
     {
-      spec: "@openclaw/voice-call",
+      spec: "@hanzo/bot-voice-call",
       resolvedVersion: "1.2.3",
       expected: true,
     },
     {
-      spec: "@openclaw/voice-call@latest",
+      spec: "@hanzo/bot-voice-call@latest",
       resolvedVersion: undefined,
       expected: true,
     },
@@ -197,12 +197,12 @@ describe("npm prerelease resolution policy", () => {
 
   it.each([
     {
-      spec: "@openclaw/voice-call",
+      spec: "@hanzo/bot-voice-call",
       resolvedVersion: "1.2.3-beta.1",
-      expected: `Use "@openclaw/voice-call@beta"`,
+      expected: `Use "@hanzo/bot-voice-call@beta"`,
     },
     {
-      spec: "@openclaw/voice-call@beta",
+      spec: "@hanzo/bot-voice-call@beta",
       resolvedVersion: "1.2.3-rc.1",
       expected: "Use an explicit prerelease tag or exact prerelease version",
     },
@@ -218,33 +218,33 @@ describe("npm prerelease resolution policy", () => {
 
 describe("resolveNpmJsonEntries", () => {
   it("passes entry arrays through (npm <=11 pack shape)", () => {
-    const entries = [{ name: "openclaw", version: "2026.7.1", filename: "openclaw-2026.7.1.tgz" }];
+    const entries = [{ name: "bot", version: "2026.7.1", filename: "bot-2026.7.1.tgz" }];
     expect(resolveNpmJsonEntries(entries)).toBe(entries);
   });
 
   it("keeps a bare entry object as a single entry (npm <=11 view shape)", () => {
-    const entry = { name: "openclaw", version: "2026.7.1", "dist.integrity": "sha512-x" };
+    const entry = { name: "bot", version: "2026.7.1", "dist.integrity": "sha512-x" };
     expect(resolveNpmJsonEntries(entry)).toEqual([entry]);
   });
 
   it("unwraps the npm 12 singleton view array", () => {
-    const entry = { name: "openclaw", version: "2026.7.1", "dist.integrity": "sha512-x" };
+    const entry = { name: "bot", version: "2026.7.1", "dist.integrity": "sha512-x" };
     expect(resolveNpmJsonEntries([entry])).toEqual([entry]);
   });
 
   it("unwraps the npm 12 name-keyed pack object", () => {
     const entry = {
-      id: "openclaw@2026.7.1",
-      name: "openclaw",
+      id: "bot@2026.7.1",
+      name: "bot",
       version: "2026.7.1",
-      filename: "openclaw-2026.7.1.tgz",
+      filename: "bot-2026.7.1.tgz",
     };
-    expect(resolveNpmJsonEntries({ openclaw: entry })).toEqual([entry]);
+    expect(resolveNpmJsonEntries({ bot: entry })).toEqual([entry]);
   });
 
   it("unwraps scoped name keys in the npm 12 pack object", () => {
-    const entry = { id: "@openclaw/voice-call@1.2.3", name: "@openclaw/voice-call" };
-    expect(resolveNpmJsonEntries({ "@openclaw/voice-call": entry })).toEqual([entry]);
+    const entry = { id: "@hanzo/bot-voice-call@1.2.3", name: "@hanzo/bot-voice-call" };
+    expect(resolveNpmJsonEntries({ "@hanzo/bot-voice-call": entry })).toEqual([entry]);
   });
 
   it("falls back to the raw value when no entries are recognizable", () => {

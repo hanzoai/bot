@@ -1,10 +1,10 @@
 // Qa Lab plugin module implements suite runtime gateway behavior.
 import fs from "node:fs/promises";
 import { setTimeout as sleep } from "node:timers/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { isRecord as isPlainObject } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { readProviderJsonResponse } from "bot/plugin-sdk/provider-http";
+import { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
+import { isRecord as isPlainObject } from "bot/plugin-sdk/string-coerce-runtime";
 import { QaSuiteInfraError, toQaErrorObject } from "./errors.js";
 import { discardIgnoredResponseBody } from "./ignored-response-body.js";
 import { applyQaMergePatch } from "./suite-merge-patch.js";

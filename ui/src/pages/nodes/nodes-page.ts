@@ -35,7 +35,7 @@ import {
   type ExecApprovalsTarget,
   type NodesPageDataState,
 } from "../../lib/nodes/index.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { PollController } from "../../lit/poll-controller.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import { renderNodes } from "./view.ts";
@@ -68,7 +68,7 @@ function presenceConnectivitySignature(entries: PresenceEntry[]): string {
   return JSON.stringify([...states].toSorted(([left], [right]) => left.localeCompare(right)));
 }
 
-class NodesPage extends OpenClawLightDomElement implements NodesPageDataState {
+class NodesPage extends BotLightDomElement implements NodesPageDataState {
   @consume({ context: applicationContext, subscribe: true })
   private context!: ApplicationContext;
 
@@ -476,6 +476,6 @@ class NodesPage extends OpenClawLightDomElement implements NodesPageDataState {
   }
 }
 
-if (!customElements.get("openclaw-nodes-page")) {
-  customElements.define("openclaw-nodes-page", NodesPage);
+if (!customElements.get("bot-nodes-page")) {
+  customElements.define("bot-nodes-page", NodesPage);
 }

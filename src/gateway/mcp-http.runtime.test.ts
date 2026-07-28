@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { setPluginToolMeta } from "../plugins/tools.js";
 import {
   McpLoopbackToolCache,
@@ -22,7 +22,7 @@ function scopedToolFixture(names: string[]) {
 
 function scopeParams(overrides: Record<string, unknown> = {}) {
   return {
-    cfg: {} as OpenClawConfig,
+    cfg: {} as BotConfig,
     sessionKey: "agent:main:recall",
     messageProvider: undefined,
     currentChannelId: undefined,
@@ -161,7 +161,7 @@ describe("resolveMcpLoopbackScopedTools", () => {
 describe("McpLoopbackToolCache", () => {
   it("does not share cache rows across different grant allowlists", () => {
     const cache = new McpLoopbackToolCache();
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
 
     const unrestricted = cache.resolve(scopeParams({ cfg }));
     const restricted = cache.resolve(scopeParams({ cfg, toolsAllow: ["memory_search"] }));

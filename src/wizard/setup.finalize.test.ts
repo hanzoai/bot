@@ -1,10 +1,10 @@
 // Setup finalize tests cover writing final onboarding config and artifacts.
 import fs from "node:fs/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createWizardPrompter as buildWizardPrompter } from "../../test/helpers/wizard-prompter.js";
 import type * as AuthChoiceModelCheck from "../commands/auth-choice.model-check.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { PluginWebSearchProviderEntry } from "../plugins/types.js";
 import type { RuntimeEnv } from "../runtime.js";
 
@@ -80,16 +80,16 @@ const resolveSetupSecretInputString = vi.hoisted(() =>
   vi.fn<() => Promise<string | undefined>>(async () => undefined),
 );
 const resolveExistingKey = vi.hoisted(() =>
-  vi.fn<(config: OpenClawConfig, provider: string) => string | undefined>(() => undefined),
+  vi.fn<(config: BotConfig, provider: string) => string | undefined>(() => undefined),
 );
 const hasExistingKey = vi.hoisted(() =>
-  vi.fn<(config: OpenClawConfig, provider: string) => boolean>(() => false),
+  vi.fn<(config: BotConfig, provider: string) => boolean>(() => false),
 );
 const hasKeyInEnv = vi.hoisted(() =>
   vi.fn<(entry: Pick<PluginWebSearchProviderEntry, "envVars">) => boolean>(() => false),
 );
 const listConfiguredWebSearchProviders = vi.hoisted(() =>
-  vi.fn<(params?: { config?: OpenClawConfig }) => PluginWebSearchProviderEntry[]>(() => []),
+  vi.fn<(params?: { config?: BotConfig }) => PluginWebSearchProviderEntry[]>(() => []),
 );
 const hasAuthProfileForProvider = vi.hoisted(() =>
   vi.fn<
@@ -145,7 +145,7 @@ vi.mock("../infra/windows-gateway-firewall-diagnostics.js", () => ({
   formatWindowsGatewayFirewallGuidance: (params: { bind?: string }) =>
     params.bind === "lan"
       ? [
-          "Windows firewall: if another device cannot connect to the LAN URL, run `openclaw gateway status --deep` from this Windows host.",
+          "Windows firewall: if another device cannot connect to the LAN URL, run `bot gateway status --deep` from this Windows host.",
         ]
       : [],
 }));
@@ -304,7 +304,7 @@ function expectFirstOnboardingInstallPlanCallOmitsToken() {
 }
 
 type AdvancedFinalizeArgs = {
-  nextConfig?: OpenClawConfig;
+  nextConfig?: BotConfig;
   prompter?: ReturnType<typeof buildWizardPrompter>;
   runtime?: RuntimeEnv;
   installDaemon?: boolean;
@@ -312,7 +312,7 @@ type AdvancedFinalizeArgs = {
 
 function createModelAuthFinalizeArgs(params: {
   prompter: ReturnType<typeof buildWizardPrompter>;
-  nextConfig?: OpenClawConfig;
+  nextConfig?: BotConfig;
 }) {
   return {
     flow: "quickstart" as const,
@@ -346,7 +346,7 @@ function createLaterPrompter() {
   });
 }
 
-function createEnabledFirecrawlSearchConfig(): OpenClawConfig {
+function createEnabledFirecrawlSearchConfig(): BotConfig {
   return {
     tools: {
       web: {
@@ -502,8 +502,8 @@ describe("finalizeSetupWizard", () => {
   });
 
   it("resolves gateway password SecretRef for probe but omits auth from TUI hatch", async () => {
-    const previous = process.env.OPENCLAW_GATEWAY_PASSWORD;
-    process.env.OPENCLAW_GATEWAY_PASSWORD = "resolved-gateway-password"; // pragma: allowlist secret
+    const previous = process.env.BOT_GATEWAY_PASSWORD;
+    process.env.BOT_GATEWAY_PASSWORD = "resolved-gateway-password"; // pragma: allowlist secret
     resolveSetupSecretInputString.mockResolvedValueOnce("resolved-gateway-password");
     const select = vi.fn(async (params: { message: string }) => {
       if (params.message === "How do you want to hatch your agent?") {
@@ -535,7 +535,7 @@ describe("finalizeSetupWizard", () => {
               password: {
                 source: "env",
                 provider: "default",
-                id: "OPENCLAW_GATEWAY_PASSWORD",
+                id: "BOT_GATEWAY_PASSWORD",
               },
             },
           },
@@ -554,9 +554,9 @@ describe("finalizeSetupWizard", () => {
       });
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_GATEWAY_PASSWORD;
+        delete process.env.BOT_GATEWAY_PASSWORD;
       } else {
-        process.env.OPENCLAW_GATEWAY_PASSWORD = previous;
+        process.env.BOT_GATEWAY_PASSWORD = previous;
       }
     }
 
@@ -725,7 +725,7 @@ describe("finalizeSetupWizard", () => {
         defaults: { model: "openai/gpt-5.4-nano" },
         list: [{ id: "main", agentDir: "/tmp/custom-agent" }],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     await finalizeSetupWizard(createModelAuthFinalizeArgs({ prompter, nextConfig }));
 
@@ -795,7 +795,7 @@ describe("finalizeSetupWizard", () => {
     expect(launchTuiCli).toHaveBeenCalledWith(expect.objectContaining({ message: undefined }), {});
     expectNoteTitleNotCalled(prompter, "Model auth missing");
     expectNoteNotContains(prompter, "No credentials are configured");
-    expectNoteNotContains(prompter, "openclaw configure --section model");
+    expectNoteNotContains(prompter, "bot configure --section model");
   });
 
   it("hatches without a seed and omits setup advice for an incompatible model route", async () => {
@@ -817,7 +817,7 @@ describe("finalizeSetupWizard", () => {
     expect(launchTuiCli).toHaveBeenCalledWith(expect.objectContaining({ message: undefined }), {});
     expectNoteTitleNotCalled(prompter, "Model auth missing");
     expectNoteNotContains(prompter, "No credentials are configured");
-    expectNoteNotContains(prompter, "openclaw configure --section model");
+    expectNoteNotContains(prompter, "bot configure --section model");
   });
 
   it("does not resend the bootstrap hatch message on setup reruns", async () => {
@@ -863,8 +863,8 @@ describe("finalizeSetupWizard", () => {
   });
 
   it("localizes the bootstrap hatch TUI seed message", async () => {
-    const previousLocale = process.env.OPENCLAW_LOCALE;
-    process.env.OPENCLAW_LOCALE = "zh-CN";
+    const previousLocale = process.env.BOT_LOCALE;
+    process.env.BOT_LOCALE = "zh-CN";
     vi.spyOn(fs, "access").mockResolvedValueOnce(undefined);
     const select = vi.fn(async (params: { message: string }) => {
       if (params.message === "你想如何启动 agent？") {
@@ -913,9 +913,9 @@ describe("finalizeSetupWizard", () => {
       );
     } finally {
       if (previousLocale === undefined) {
-        delete process.env.OPENCLAW_LOCALE;
+        delete process.env.BOT_LOCALE;
       } else {
-        process.env.OPENCLAW_LOCALE = previousLocale;
+        process.env.BOT_LOCALE = previousLocale;
       }
     }
   });
@@ -948,7 +948,7 @@ describe("finalizeSetupWizard", () => {
     });
 
     expect(prompter.outro).toHaveBeenCalledWith(
-      "Onboarding complete. Use the dashboard link above to control OpenClaw.",
+      "Onboarding complete. Use the dashboard link above to control Bot.",
     );
     expect(launchTuiCli).toHaveBeenCalledOnce();
     expect(vi.mocked(prompter.outro).mock.invocationCallOrder[0]).toBeLessThan(
@@ -1037,7 +1037,7 @@ describe("finalizeSetupWizard", () => {
             token: {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_GATEWAY_TOKEN",
+              id: "BOT_GATEWAY_TOKEN",
             },
           },
         },
@@ -1204,17 +1204,17 @@ describe("finalizeSetupWizard", () => {
   });
 
   it("localizes finalize non-prompt notes", async () => {
-    const previousLocale = process.env.OPENCLAW_LOCALE;
-    process.env.OPENCLAW_LOCALE = "zh-CN";
+    const previousLocale = process.env.BOT_LOCALE;
+    process.env.BOT_LOCALE = "zh-CN";
     const prompter = createLaterPrompter();
 
     try {
       await finalizeSetupWizard(createAdvancedFinalizeArgs({ prompter }));
     } finally {
       if (previousLocale === undefined) {
-        delete process.env.OPENCLAW_LOCALE;
+        delete process.env.BOT_LOCALE;
       } else {
-        process.env.OPENCLAW_LOCALE = previousLocale;
+        process.env.BOT_LOCALE = previousLocale;
       }
     }
 
@@ -1407,7 +1407,7 @@ describe("finalizeSetupWizard", () => {
   });
 
   it("uses the setup token for health checks to avoid local env token drift", async () => {
-    vi.stubEnv("OPENCLAW_GATEWAY_TOKEN", "env-token");
+    vi.stubEnv("BOT_GATEWAY_TOKEN", "env-token");
     const prompter = createLaterPrompter();
 
     await finalizeSetupWizard({
@@ -1445,7 +1445,7 @@ describe("finalizeSetupWizard", () => {
       json?: boolean;
       timeoutMs?: number;
       token?: string;
-      config?: OpenClawConfig;
+      config?: BotConfig;
     };
     expect(healthArgs.json).toBe(false);
     expect(healthArgs.timeoutMs).toBe(10_000);
@@ -1584,7 +1584,7 @@ describe("finalizeSetupWizard", () => {
   });
 
   it("uses the resolved setup password for health checks", async () => {
-    vi.stubEnv("OPENCLAW_GATEWAY_PASSWORD", "env-password");
+    vi.stubEnv("BOT_GATEWAY_PASSWORD", "env-password");
     resolveSetupSecretInputString.mockResolvedValueOnce("session-password");
     const prompter = createLaterPrompter();
 
@@ -1605,7 +1605,7 @@ describe("finalizeSetupWizard", () => {
             password: {
               source: "env",
               provider: "default",
-              id: "OPENCLAW_GATEWAY_PASSWORD",
+              id: "BOT_GATEWAY_PASSWORD",
             },
           },
         },
@@ -1636,7 +1636,7 @@ describe("finalizeSetupWizard", () => {
       timeoutMs?: number;
       token?: string;
       password?: string;
-      config?: OpenClawConfig;
+      config?: BotConfig;
     };
     expect(healthArgs.json).toBe(false);
     expect(healthArgs.timeoutMs).toBe(10_000);

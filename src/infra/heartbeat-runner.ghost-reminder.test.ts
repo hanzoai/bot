@@ -1,6 +1,6 @@
 // Covers heartbeat handling of queued reminder system events.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { resolveMainSessionKey } from "../config/sessions/main-session.js";
 import { clearCronJobActive, markCronJobActive, resetCronActiveJobs } from "../cron/active-jobs.js";
 import { enqueueCommandInLane, type CommandLaneTaskMarker } from "../process/command-queue.js";
@@ -42,8 +42,8 @@ describe("Ghost reminder bug (issue #13317)", () => {
     target?: "telegram" | "none";
     isolatedSession?: boolean;
     activeHours?: boolean;
-  }): Promise<{ cfg: OpenClawConfig; sessionKey: string }> => {
-    const cfg: OpenClawConfig = {
+  }): Promise<{ cfg: BotConfig; sessionKey: string }> => {
+    const cfg: BotConfig = {
       agents: {
         defaults: {
           workspace: params.tmpDir,
@@ -73,7 +73,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
     tmpDir: string;
     storePath: string;
     isolatedSession?: boolean;
-  }): OpenClawConfig => ({
+  }): BotConfig => ({
     agents: {
       defaults: {
         workspace: params.tmpDir,
@@ -291,7 +291,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("does not use CRON_EVENT_PROMPT when only a HEARTBEAT_OK event is present", async () => {
     const { result, sendTelegram, calledCtx, replyCallCount } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-ghost-",
+      tmpPrefix: "bot-ghost-",
       replyText: "Heartbeat check-in",
       reason: "cron:test-job",
       enqueue: (sessionKey) => {
@@ -308,7 +308,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("uses CRON_EVENT_PROMPT when an actionable cron event exists", async () => {
     const { result, sendTelegram, calledCtx } = await runCronReminderCase(
-      "openclaw-cron-",
+      "bot-cron-",
       (sessionKey) => {
         enqueueSystemEvent("Reminder: Check Base Scout results", { sessionKey });
       },
@@ -321,7 +321,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
   it("runs the tagged cron payload outside heartbeat active hours", async () => {
     const reminderText = "Reminder: Send the overnight report";
     const { result, sendTelegram, calledCtx, replyCallCount } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-cron-quiet-hours-",
+      tmpPrefix: "bot-cron-quiet-hours-",
       replyText: "Overnight report sent",
       reason: "cron:overnight-report",
       source: "cron",
@@ -344,7 +344,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("uses CRON_EVENT_PROMPT when cron events are mixed with heartbeat noise", async () => {
     const { result, sendTelegram, calledCtx } = await runCronReminderCase(
-      "openclaw-cron-mixed-",
+      "bot-cron-mixed-",
       (sessionKey) => {
         enqueueSystemEvent("HEARTBEAT_OK", { sessionKey });
         enqueueSystemEvent("Reminder: Check Base Scout results", { sessionKey });
@@ -357,7 +357,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("uses CRON_EVENT_PROMPT for tagged cron events on interval wake", async () => {
     const { result, sendTelegram, calledCtx, replyCallCount } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-cron-interval-",
+      tmpPrefix: "bot-cron-interval-",
       replyText: "Relay this cron update now",
       reason: "interval",
       enqueue: (sessionKey) => {
@@ -378,7 +378,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("delivers a targeted cron event while its owning job is active", async () => {
     const { result, calledCtx, sessionKey } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-cron-active-job-",
+      tmpPrefix: "bot-cron-active-job-",
       replyText: "Handled the reminder",
       reason: "cron:nightly-report",
       source: "cron",
@@ -400,7 +400,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("still blocks an owning cron wake while the nested cron lane is busy", async () => {
     const { result, replyCallCount } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-cron-owner-nested-lane-",
+      tmpPrefix: "bot-cron-owner-nested-lane-",
       replyText: "must not run",
       reason: "cron:nightly-report",
       source: "cron",
@@ -421,7 +421,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("still blocks an owning cron wake while unrelated cron lane work is queued", async () => {
     const { result, replyCallCount } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-cron-owner-unrelated-lane-",
+      tmpPrefix: "bot-cron-owner-unrelated-lane-",
       replyText: "must not run",
       reason: "cron:nightly-report",
       source: "cron",
@@ -443,7 +443,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
   it("ignores only the exact command lane task that owns the cron wake", async () => {
     await enqueueCommandInLane(CommandLane.Cron, async (owningCronLaneTaskMarker) => {
       const ownTaskOnly = await runHeartbeatCase({
-        tmpPrefix: "openclaw-cron-owner-exact-lane-",
+        tmpPrefix: "bot-cron-owner-exact-lane-",
         replyText: "Handled the reminder",
         reason: "cron:nightly-report",
         source: "cron",
@@ -461,7 +461,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
       expect(ownTaskOnly.result.status).toBe("ran");
 
       const unrelatedTaskQueued = await runHeartbeatCase({
-        tmpPrefix: "openclaw-cron-owner-second-lane-",
+        tmpPrefix: "bot-cron-owner-second-lane-",
         replyText: "must not run",
         reason: "cron:nightly-report",
         source: "cron",
@@ -494,7 +494,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
     }
 
     const { result, replyCallCount } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-cron-owner-stale-lane-",
+      tmpPrefix: "bot-cron-owner-stale-lane-",
       replyText: "must not run",
       reason: "cron:nightly-report",
       source: "cron",
@@ -516,7 +516,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("does not let a stale owner marker bypass its replacement", async () => {
     const { result, replyCallCount } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-cron-replaced-owner-",
+      tmpPrefix: "bot-cron-replaced-owner-",
       replyText: "must not run",
       reason: "cron:nightly-report",
       source: "cron",
@@ -537,7 +537,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("still blocks an owning cron wake while an unrelated job is active", async () => {
     const { result, replyCallCount } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-cron-unrelated-active-job-",
+      tmpPrefix: "bot-cron-unrelated-active-job-",
       replyText: "must not run",
       reason: "cron:nightly-report",
       source: "cron",
@@ -558,7 +558,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("still blocks a cron wake that claims no owning job while a job is active", async () => {
     const { result, replyCallCount } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-cron-unowned-wake-",
+      tmpPrefix: "bot-cron-unowned-wake-",
       replyText: "must not run",
       reason: "cron:nightly-report",
       source: "cron",
@@ -634,7 +634,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("uses an internal-only cron prompt when delivery target is none", async () => {
     const { result, sendTelegram, calledCtx } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-cron-internal-",
+      tmpPrefix: "bot-cron-internal-",
       replyText: "Handled internally",
       reason: "cron:reminder-job",
       target: "none",
@@ -651,7 +651,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("uses an internal-only exec prompt when delivery target is none", async () => {
     const { result, sendTelegram, calledCtx } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-exec-internal-",
+      tmpPrefix: "bot-exec-internal-",
       replyText: "Handled internally",
       reason: "exec-event",
       target: "none",
@@ -668,7 +668,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("includes untrusted exec completion details in user-relay prompts", async () => {
     const { result, sendTelegram, calledCtx } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-exec-untrusted-relay-",
+      tmpPrefix: "bot-exec-untrusted-relay-",
       replyText: "Deploy succeeded",
       reason: "exec-event",
       enqueue: (sessionKey) => {
@@ -684,7 +684,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("consumes exec completion entries without dropping later generic events", async () => {
     const { result, calledCtx, sessionKey } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-exec-preserve-generic-",
+      tmpPrefix: "bot-exec-preserve-generic-",
       replyText: "Deploy succeeded",
       reason: "exec-event",
       enqueue: (key) => {
@@ -704,7 +704,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("classifies hook:wake exec completions as exec-event prompts", async () => {
     const { result, sendTelegram, calledCtx } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-hook-exec-",
+      tmpPrefix: "bot-hook-exec-",
       replyText: "Handled internally",
       reason: "hook:wake",
       target: "none",
@@ -721,7 +721,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("does not classify base-session hook:wake exec completions as exec-event prompts when isolated sessions are enabled", async () => {
     const { result, sendTelegram, calledCtx } = await runHeartbeatCase({
-      tmpPrefix: "openclaw-hook-exec-isolated-",
+      tmpPrefix: "bot-hook-exec-isolated-",
       replyText: "Handled internally",
       reason: "hook:wake",
       target: "none",
@@ -739,7 +739,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("routes wake-triggered heartbeat replies using queued system-event delivery context", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath, replySpy }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -832,7 +832,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
   });
   it("keeps output-bearing exec-event delivery pinned to the original Telegram topic when session route drifts", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,
@@ -889,7 +889,7 @@ describe("Ghost reminder bug (issue #13317)", () => {
 
   it("suppresses metadata-only successful exec completions", async () => {
     await withTempHeartbeatSandbox(async ({ tmpDir, storePath }) => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: {
             workspace: tmpDir,

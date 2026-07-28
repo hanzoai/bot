@@ -366,14 +366,14 @@ function renderExecApprovalsScope(state: ExecApprovalsState) {
     title: t("nodes.execApprovals.scope"),
     stacked: true,
     control: html`
-      <openclaw-agent-select
+      <bot-agent-select
         class="agent-select--settings"
         .options=${options}
         .value=${state.selectedScope}
         .accessibleLabel=${t("nodes.execApprovals.scope")}
         .disabled=${state.disabled}
         .onSelect=${state.onSelectScope}
-      ></openclaw-agent-select>
+      ></bot-agent-select>
     `,
   });
 }

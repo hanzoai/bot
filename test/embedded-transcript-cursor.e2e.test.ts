@@ -2,15 +2,15 @@
 import { randomUUID } from "node:crypto";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import path from "node:path";
-import { readSessionTranscriptRawDelta } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { readSessionTranscriptRawDelta } from "bot/plugin-sdk/session-transcript-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { listSessionEntries, loadSessionEntry } from "../src/config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { BotConfig } from "../src/config/types.bot.js";
 import { connectGatewayClient, disconnectGatewayClient } from "../src/gateway/test-helpers.e2e.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createBotTestInstance,
+  type BotTestInstance,
+} from "./helpers/bot-test-instance.js";
 
 const TEST_TIMEOUT_MS = 180_000;
 const MODEL_REF = "cursor-settlement/cursor-settlement";
@@ -22,7 +22,7 @@ type MockModelServer = {
   close: () => Promise<void>;
 };
 
-const instances: OpenClawTestInstance[] = [];
+const instances: BotTestInstance[] = [];
 const modelServers: MockModelServer[] = [];
 
 afterEach(async () => {
@@ -37,10 +37,10 @@ describe("embedded transcript cursor settlement", () => {
     async () => {
       const modelServer = await startMockModelServer();
       modelServers.push(modelServer);
-      const instance = await createOpenClawTestInstance({
+      const instance = await createBotTestInstance({
         name: "embedded-transcript-cursor",
         config: createTestConfig(modelServer.baseUrl),
-        env: { OPENCLAW_SKIP_PROVIDERS: undefined },
+        env: { BOT_SKIP_PROVIDERS: undefined },
       });
       instances.push(instance);
       await instance.startGateway();
@@ -111,14 +111,14 @@ describe("embedded transcript cursor settlement", () => {
   );
 });
 
-function createTestConfig(baseUrl: string): OpenClawConfig {
+function createTestConfig(baseUrl: string): BotConfig {
   return {
     plugins: { slots: { memory: "none" } },
     agents: {
       defaults: {
         heartbeat: { every: "0m" },
         model: { primary: MODEL_REF },
-        models: { [MODEL_REF]: { agentRuntime: { id: "openclaw" } } },
+        models: { [MODEL_REF]: { agentRuntime: { id: "bot" } } },
         skipBootstrap: true,
         skills: [],
       },
@@ -152,7 +152,7 @@ function createTestConfig(baseUrl: string): OpenClawConfig {
 
 async function runAgentTurn(
   client: Awaited<ReturnType<typeof connectGatewayClient>>,
-  instance: OpenClawTestInstance,
+  instance: BotTestInstance,
   message: string,
 ): Promise<{ runId?: string; status?: string }> {
   const requestedRunId = randomUUID();

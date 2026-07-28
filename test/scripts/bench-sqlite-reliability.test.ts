@@ -23,7 +23,7 @@ function reliabilitySmokeTest(name: string, test: () => void): void {
 }
 
 function makeTempDir(): string {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-sqlite-reliability-test-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-sqlite-reliability-test-"));
   tempDirs.push(tempDir);
   return tempDir;
 }
@@ -219,7 +219,7 @@ describe("scripts/bench-sqlite-reliability", () => {
     ).toBe(true);
     expect(firstReport.indexRepairInterruptionProof.rollbackJournal).toMatchObject({
       recoveryVerified: true,
-      repairedIndexes: ["idx_openclaw_reliability_records_identity"],
+      repairedIndexes: ["idx_bot_reliability_records_identity"],
       rowsPreserved: 32_768,
     });
     expect(
@@ -231,7 +231,7 @@ describe("scripts/bench-sqlite-reliability", () => {
     ).toBe(true);
     expect(firstReport.indexRepairInterruptionProof.wal).toMatchObject({
       recoveryVerified: true,
-      repairedIndexes: ["idx_openclaw_reliability_records_identity"],
+      repairedIndexes: ["idx_bot_reliability_records_identity"],
       rowsPreserved: 32_768,
     });
     expect(firstReport.indexRepairInterruptionProof.wal.walBytesObserved).toBeGreaterThan(0);
@@ -386,7 +386,7 @@ describe("scripts/bench-sqlite-reliability", () => {
     try {
       database
         .prepare(
-          "INSERT INTO openclaw_reliability_entries (batch, ordinal, payload) VALUES (?, ?, ?)",
+          "INSERT INTO bot_reliability_entries (batch, ordinal, payload) VALUES (?, ?, ?)",
         )
         .run(999_999, 0, "stale-profile-row");
     } finally {

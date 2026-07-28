@@ -1,20 +1,20 @@
 /**
  * Meta onboarding config helpers.
  */
-import { readManifestProviderDefaultModelRef } from "openclaw/plugin-sdk/provider-catalog-shared";
+import { readManifestProviderDefaultModelRef } from "bot/plugin-sdk/provider-catalog-shared";
 import {
   createModelCatalogPresetAppliers,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-onboard";
+  type BotConfig,
+} from "bot/plugin-sdk/provider-onboard";
 import { buildMetaCatalogModels, META_BASE_URL } from "./models.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 
 /** Default Meta model reference used after onboarding. */
 export const META_DEFAULT_MODEL_REF = readManifestProviderDefaultModelRef(manifest, "meta")!;
 
 const metaPresetAppliers = createModelCatalogPresetAppliers({
   primaryModelRef: META_DEFAULT_MODEL_REF,
-  resolveParams: (_cfg: OpenClawConfig) => ({
+  resolveParams: (_cfg: BotConfig) => ({
     providerId: "meta",
     api: "openai-responses",
     baseUrl: META_BASE_URL,
@@ -24,6 +24,6 @@ const metaPresetAppliers = createModelCatalogPresetAppliers({
 });
 
 /** Applies Meta provider/catalog config and default model aliases. */
-export function applyMetaConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyMetaConfig(cfg: BotConfig): BotConfig {
   return metaPresetAppliers.applyConfig(cfg);
 }

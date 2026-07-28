@@ -8,7 +8,7 @@ import {
   resolveAuthProfileDatabasePath,
   writePersistedAuthProfileStoreRaw,
 } from "../agents/auth-profiles/sqlite.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
 import { runSecretsAudit } from "./audit.js";
 
 type AuditFixture = {
@@ -138,9 +138,9 @@ async function expectPathMissing(filePath: string): Promise<void> {
 }
 
 async function createAuditFixture(): Promise<AuditFixture> {
-  const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-secrets-audit-"));
-  const stateDir = path.join(rootDir, ".openclaw");
-  const configPath = path.join(stateDir, "openclaw.json");
+  const rootDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-secrets-audit-"));
+  const stateDir = path.join(rootDir, ".bot");
+  const configPath = path.join(stateDir, "bot.json");
   const agentDir = path.join(stateDir, "agents", "main", "agent");
   const authStorePath = resolveAuthProfileDatabasePath(agentDir);
   const authJsonPath = path.join(agentDir, "auth.json");
@@ -160,8 +160,8 @@ async function createAuditFixture(): Promise<AuditFixture> {
     modelsPath,
     envPath,
     env: {
-      OPENCLAW_STATE_DIR: stateDir,
-      OPENCLAW_CONFIG_PATH: configPath,
+      BOT_STATE_DIR: stateDir,
+      BOT_CONFIG_PATH: configPath,
       OPENAI_API_KEY: "env-openai-key", // pragma: allowlist secret
       PATH: resolveRuntimePathEnv(),
     },
@@ -220,7 +220,7 @@ describe("secrets audit", () => {
       await writeJsonFile(warmFixture.configPath, {});
       await runSecretsAudit({ env: warmFixture.env });
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeBotAgentDatabasesForTest();
       await fs.rm(warmFixture.rootDir, { recursive: true, force: true });
     }
   });
@@ -265,7 +265,7 @@ describe("secrets audit", () => {
   });
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
     await fs.rm(fixture.rootDir, { recursive: true, force: true });
   });
 
@@ -596,7 +596,7 @@ describe("secrets audit", () => {
     const report = await runSecretsAudit({
       env: {
         ...fixture.env,
-        OPENCLAW_AGENT_DIR: externalAgentDir,
+        BOT_AGENT_DIR: externalAgentDir,
       },
     });
     expect(
@@ -706,7 +706,7 @@ describe("secrets audit", () => {
     },
   );
 
-  it("does not flag non-sensitive routing headers in openclaw config", async () => {
+  it("does not flag non-sensitive routing headers in bot config", async () => {
     await writeJsonFile(fixture.configPath, {
       models: {
         providers: {
@@ -735,7 +735,7 @@ describe("secrets audit", () => {
     ).toBe(false);
   });
 
-  it("keeps request headers in openclaw config covered by plaintext audit", async () => {
+  it("keeps request headers in bot config covered by plaintext audit", async () => {
     await writeJsonFile(fixture.configPath, {
       models: {
         providers: {
@@ -766,7 +766,7 @@ describe("secrets audit", () => {
     ).toBe(true);
   });
 
-  it("does not flag openclaw.json model provider apiKey marker values as plaintext", async () => {
+  it("does not flag bot.json model provider apiKey marker values as plaintext", async () => {
     await writeJsonFile(fixture.configPath, {
       models: {
         providers: {
@@ -823,15 +823,15 @@ describe("secrets audit", () => {
   });
 
   it("scans .env in legacy .clawdbot state directory via automatic fallback", async () => {
-    // Do NOT set OPENCLAW_STATE_DIR or OPENCLAW_CONFIG_PATH — rely on
+    // Do NOT set BOT_STATE_DIR or BOT_CONFIG_PATH — rely on
     // resolveStateDir's automatic legacy-directory fallback. A controlled
-    // HOME that contains only .clawdbot (no .openclaw) exercises the exact
+    // HOME that contains only .clawdbot (no .bot) exercises the exact
     // path the old resolveConfigDir call could not reach: resolveConfigDir
-    // always returns $HOME/.openclaw, so it would miss the .env inside
+    // always returns $HOME/.bot, so it would miss the .env inside
     // .clawdbot.  resolveStateDir finds .clawdbot via its legacy-dir scan.
-    const homeDir = tempDirs.make("openclaw-secrets-audit-legacy-");
+    const homeDir = tempDirs.make("bot-secrets-audit-legacy-");
     const legacyStateDir = path.join(homeDir, ".clawdbot");
-    const configPath = path.join(legacyStateDir, "openclaw.json");
+    const configPath = path.join(legacyStateDir, "bot.json");
     const envPath = path.join(legacyStateDir, ".env");
     const agentDir = path.join(legacyStateDir, "agents", "main", "agent");
 
@@ -871,7 +871,7 @@ describe("secrets audit", () => {
         true,
       );
     } finally {
-      closeOpenClawAgentDatabasesForTest();
+      closeBotAgentDatabasesForTest();
       await fs.rm(homeDir, { recursive: true, force: true });
     }
   });
@@ -879,12 +879,12 @@ describe("secrets audit", () => {
   it("scans config and state .env files when the config path is external", async () => {
     await seedAuditFixture(fixture);
     const configDir = path.join(fixture.rootDir, "config");
-    const configPath = path.join(configDir, "openclaw.json");
+    const configPath = path.join(configDir, "bot.json");
     const configEnvPath = path.join(configDir, ".env");
     await fs.mkdir(configDir, { recursive: true });
     await fs.copyFile(fixture.configPath, configPath);
     await fs.copyFile(fixture.envPath, configEnvPath);
-    fixture.env.OPENCLAW_CONFIG_PATH = configPath;
+    fixture.env.BOT_CONFIG_PATH = configPath;
 
     const report = await runSecretsAudit({ env: fixture.env });
 

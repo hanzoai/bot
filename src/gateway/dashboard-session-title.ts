@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 // Dashboard session titles use the shared utility-model completion path.
 import { resolveAgentEffectiveModelPrimary } from "../agents/agent-scope.js";
 import { splitTrailingAuthProfile } from "../agents/model-ref-profile.js";
@@ -7,7 +7,7 @@ import { resolveUtilityModelRefForAgent } from "../agents/utility-model.js";
 import { generateConversationLabelWithFallback } from "../auto-reply/reply/conversation-label-generator.js";
 import { updateSessionEntry } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { parseAgentSessionKey } from "../sessions/session-key-utils.js";
 
 type DashboardSessionTitleModelEntry = Pick<
@@ -57,7 +57,7 @@ export function isDashboardSessionTitleCandidate(params: {
 }
 
 function resolveDashboardTitleAuthProfile(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   entry: DashboardSessionTitleModelEntry | undefined;
   regularProvider: string;
@@ -93,7 +93,7 @@ function normalizeDashboardSessionTitle(raw: string): string | null {
 
 /** Generates the same short title used by dashboard session rows without persisting it. */
 export async function generateDashboardSessionTitle(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   entry?: DashboardSessionTitleModelEntry;
   userMessage: string;
@@ -133,7 +133,7 @@ export async function generateDashboardSessionTitle(params: {
 }
 
 export async function maybeGenerateDashboardSessionTitle(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   entry: SessionEntry | undefined;
   sessionId: string;
@@ -157,7 +157,7 @@ export async function maybeGenerateDashboardSessionTitle(params: {
 }
 
 export async function maybeGenerateSessionTitle(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   entry: SessionEntry | undefined;
   sessionId: string;

@@ -1,4 +1,4 @@
-import { sliceUtf16Safe, truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { sliceUtf16Safe, truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { filterHeartbeatTranscriptTurns } from "../../auto-reply/heartbeat-transcript-turns.js";
 import { redactSensitiveText } from "../../logging/redact.js";
 import { formatSkillExperienceReviewTranscript } from "./experience-review-prompt.js";

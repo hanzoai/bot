@@ -1,9 +1,9 @@
 // Qa Lab plugin module implements runtime tool fixture behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { loadTranscriptEventsSync } from "openclaw/plugin-sdk/session-store-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { loadTranscriptEventsSync } from "bot/plugin-sdk/session-store-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import { QaSuiteInfraError, QaSuiteScenarioSkipError } from "./errors.js";
 import {
   qaMockRequestCursorUrl,
@@ -604,7 +604,7 @@ async function readSessionTranscriptBytes(
     agentId: "qa",
     env: {
       ...process.env,
-      OPENCLAW_STATE_DIR: path.join(env.gateway.tempRoot, "state"),
+      BOT_STATE_DIR: path.join(env.gateway.tempRoot, "state"),
     },
     sessionId,
     sessionKey,
@@ -728,9 +728,9 @@ function formatCodexNativeWorkspaceDetails(params: {
   failureRequest?: QaRuntimeToolFixtureRequest;
 }) {
   return [
-    `codex-native-workspace ${params.toolName}: OpenClaw dynamic exposure is intentionally omitted because Codex owns this workspace operation natively`,
+    `codex-native-workspace ${params.toolName}: Bot dynamic exposure is intentionally omitted because Codex owns this workspace operation natively`,
     params.reason ? `reason: ${params.reason}` : undefined,
-    `available OpenClaw dynamic tools: ${[...params.tools].toSorted().join(", ")}`,
+    `available Bot dynamic tools: ${[...params.tools].toSorted().join(", ")}`,
     params.happyRequest
       ? `${params.toolName} mock provider happy planned args (diagnostic only): ${formatPlannedToolArgs(params.happyRequest.plannedToolArgs)}`
       : undefined,
@@ -829,7 +829,7 @@ export async function runRuntimeToolFixture(
     config,
   });
   const dynamicExposureIntentionallyExcluded =
-    env.gateway.runtimeEnv.OPENCLAW_QA_FORCE_RUNTIME === "codex" &&
+    env.gateway.runtimeEnv.BOT_QA_FORCE_RUNTIME === "codex" &&
     metadata.expectedLayer === "codex-native-workspace" &&
     !tools.has(toolName);
   const requireCodexNativePatchCoverage =

@@ -2,7 +2,7 @@
 import type {
   OpenKeyedStoreOptions,
   PluginStateSyncKeyedStore,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/plugin-state-runtime";
 import { getQQBotRuntime } from "../../bridge/runtime.js";
 export { buildQQBotStateKey } from "./state-keys.js";
 
@@ -16,7 +16,7 @@ function resolveStoreEnv(options: QQBotSyncStoreOptions): NodeJS.ProcessEnv | un
   }
   return {
     ...(options.env ?? process.env),
-    OPENCLAW_STATE_DIR: options.stateDir,
+    BOT_STATE_DIR: options.stateDir,
   };
 }
 

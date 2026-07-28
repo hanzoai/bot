@@ -1,7 +1,7 @@
 // Elevenlabs tests cover realtime transcription provider plugin behavior.
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type WebSocket from "ws";
 import { WebSocketServer } from "ws";
@@ -64,7 +64,7 @@ describe("buildElevenLabsRealtimeTranscriptionProvider", () => {
   it("normalizes nested provider config", () => {
     const provider = buildElevenLabsRealtimeTranscriptionProvider();
     const resolved = provider.resolveConfig?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       rawConfig: {
         providers: {
           elevenlabs: {
@@ -97,7 +97,7 @@ describe("buildElevenLabsRealtimeTranscriptionProvider", () => {
   it("drops malformed numeric realtime config values", () => {
     const provider = buildElevenLabsRealtimeTranscriptionProvider();
     const resolved = provider.resolveConfig?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       rawConfig: {
         providers: {
           elevenlabs: {
@@ -123,7 +123,7 @@ describe("buildElevenLabsRealtimeTranscriptionProvider", () => {
   it("keeps realtime VAD numeric config inside provider ranges", () => {
     const provider = buildElevenLabsRealtimeTranscriptionProvider();
     const resolved = provider.resolveConfig?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       rawConfig: {
         providers: {
           elevenlabs: {
@@ -178,7 +178,7 @@ describe("buildElevenLabsRealtimeTranscriptionProvider", () => {
     vi.stubEnv("XI_API_KEY", "   ");
     const provider = buildElevenLabsRealtimeTranscriptionProvider();
 
-    expect(provider.isConfigured({ cfg: {} as OpenClawConfig, providerConfig: {} })).toBe(false);
+    expect(provider.isConfigured({ cfg: {} as BotConfig, providerConfig: {} })).toBe(false);
     expect(() => provider.createSession({ providerConfig: {} })).toThrow(
       "ElevenLabs API key missing",
     );

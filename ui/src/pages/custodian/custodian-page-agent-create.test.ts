@@ -28,7 +28,7 @@ function createContext(request: ReturnType<typeof vi.fn>) {
       type: "hello-ok",
       protocol: 1,
       auth: { role: "operator", scopes: ["operator.admin"] },
-      features: { methods: ["openclaw.chat"] },
+      features: { methods: ["bot.chat"] },
     },
     assistantAgentId: "main",
     sessionKey: "main",
@@ -71,7 +71,7 @@ function createContext(request: ReturnType<typeof vi.fn>) {
 
 async function mountPage(context: ApplicationContext): Promise<TestCustodianPage> {
   const provider = createApplicationContextProvider(context);
-  const page = document.createElement("openclaw-custodian-page") as TestCustodianPage;
+  const page = document.createElement("bot-custodian-page") as TestCustodianPage;
   page.onboarding = false;
   page.newAgentIntent = true;
   provider.append(page);

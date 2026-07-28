@@ -103,27 +103,27 @@ describe("command-startup-policy", () => {
     ).toBe(false);
     expect(
       resolvePolicy({
-        argv: ["node", "openclaw", "agent", "--json"],
+        argv: ["node", "bot", "agent", "--json"],
         commandPath: ["agent"],
         jsonOutputMode: true,
       }).loadPlugins,
     ).toBe(false);
     expect(
       resolvePolicy({
-        argv: ["node", "openclaw", "agent", "--json", "--local"],
+        argv: ["node", "bot", "agent", "--json", "--local"],
         commandPath: ["agent"],
         jsonOutputMode: true,
       }).loadPlugins,
     ).toBe(true);
     expect(
       resolvePolicy({
-        argv: ["node", "openclaw", "agent", "exec", "fix it"],
+        argv: ["node", "bot", "agent", "exec", "fix it"],
         commandPath: ["agent", "exec"],
       }).loadPlugins,
     ).toBe(false);
     expect(
       resolvePolicy({
-        argv: ["node", "openclaw", "agent"],
+        argv: ["node", "bot", "agent"],
         commandPath: ["agent"],
       }).loadPlugins,
     ).toBe(true);
@@ -180,7 +180,7 @@ describe("command-startup-policy", () => {
         commandPath: ["status"],
         env: {
           ...process.env,
-          OPENCLAW_HIDE_BANNER: "1",
+          BOT_HIDE_BANNER: "1",
         },
       }).hideBanner,
     ).toBe(true);
@@ -188,9 +188,9 @@ describe("command-startup-policy", () => {
   });
 
   it("uses process env banner suppression when startup env is omitted", () => {
-    const originalHideBanner = process.env.OPENCLAW_HIDE_BANNER;
+    const originalHideBanner = process.env.BOT_HIDE_BANNER;
     try {
-      process.env.OPENCLAW_HIDE_BANNER = "1";
+      process.env.BOT_HIDE_BANNER = "1";
 
       expect(
         resolveCliStartupPolicy({
@@ -207,9 +207,9 @@ describe("command-startup-policy", () => {
       ).toBe(false);
     } finally {
       if (originalHideBanner === undefined) {
-        delete process.env.OPENCLAW_HIDE_BANNER;
+        delete process.env.BOT_HIDE_BANNER;
       } else {
-        process.env.OPENCLAW_HIDE_BANNER = originalHideBanner;
+        process.env.BOT_HIDE_BANNER = originalHideBanner;
       }
     }
   });

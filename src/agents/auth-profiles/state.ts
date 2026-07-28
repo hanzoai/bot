@@ -3,12 +3,12 @@
  * This state tracks order, last-good profile, and cooldown/failure metadata
  * separately from secret-bearing credentials.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
+import { asFiniteNumber } from "@hanzo/bot-normalization-core/number-coercion";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeTrimmedStringList } from "@hanzo/bot-normalization-core/string-normalization";
+import type { BotAgentDatabase } from "../../state/bot-agent-db.js";
 import { AUTH_STORE_VERSION } from "./constants.js";
 import { readPersistedAuthProfileStateRaw } from "./sqlite.js";
 import type {
@@ -193,7 +193,7 @@ export function mergeAuthProfileState(
 /** Loads persisted auth profile runtime state from SQLite. */
 export function loadPersistedAuthProfileState(
   agentDir?: string,
-  database?: OpenClawAgentDatabase,
+  database?: BotAgentDatabase,
 ): AuthProfileState {
   return coerceAuthProfileState(readPersistedAuthProfileStateRaw(agentDir, database));
 }

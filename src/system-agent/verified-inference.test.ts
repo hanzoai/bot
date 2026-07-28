@@ -9,7 +9,7 @@ import {
   fingerprintResolvedAuthProfileCredential,
   fingerprintResolvedProviderAuth,
 } from "../agents/execution-auth-binding.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginOrigin } from "../plugins/types.js";
 import { resolveSystemAgentConfiguredRouteFromConfig } from "./inference-route.js";
 import { resolvePersistentApplyInference } from "./setup-inference.js";
@@ -99,10 +99,10 @@ function pluginRecord(
     pluginId,
     origin: "global",
     rootDir,
-    manifestPath: `${rootDir}/openclaw.plugin.json`,
+    manifestPath: `${rootDir}/bot.plugin.json`,
     manifestHash: `${pluginId}-manifest-v1`,
     source: `${rootDir}/index.js`,
-    packageName: `@openclaw/${pluginId}`,
+    packageName: `@hanzo/bot-${pluginId}`,
     packageVersion: "1.0.0",
     installRecordHash: `${pluginId}-install-v1`,
     packageJson: { path: `${rootDir}/package.json`, hash: `${pluginId}-package-v1` },
@@ -178,7 +178,7 @@ const codexRuntimeArtifactAuth = {
   runtimeArtifactId: "codex-app-server",
 } as const;
 
-function config(model = "openai/gpt-5.5@openai:verified"): OpenClawConfig {
+function config(model = "openai/gpt-5.5@openai:verified"): BotConfig {
   return {
     agents: { defaults: { model } },
     auth: {
@@ -190,7 +190,7 @@ function config(model = "openai/gpt-5.5@openai:verified"): OpenClawConfig {
 }
 
 async function bindingFor(
-  baseConfig: OpenClawConfig,
+  baseConfig: BotConfig,
   deps: SystemAgentVerifiedInferenceDeps = { ...authDeps(), ...pluginArtifactDeps() },
 ) {
   const route = await resolveSystemAgentConfiguredRouteFromConfig(baseConfig);
@@ -207,7 +207,7 @@ async function bindingFor(
   const agentHarnessId =
     route.runner === "embedded"
       ? route.agentHarnessRuntimeOverride === "auto"
-        ? "openclaw"
+        ? "bot"
         : route.agentHarnessRuntimeOverride
       : undefined;
   return await createSystemAgentVerifiedInferenceBinding({
@@ -221,7 +221,7 @@ async function bindingFor(
       ...(agentHarnessId
         ? {
             agentHarnessId,
-            ...(agentHarnessId === "openclaw"
+            ...(agentHarnessId === "bot"
               ? {}
               : {
                   runtimeOwnerKind: "plugin-harness" as const,
@@ -235,12 +235,12 @@ async function bindingFor(
   });
 }
 
-describe("verified OpenClaw inference binding", () => {
+describe("verified Bot inference binding", () => {
   it("invalidates an identity-less OAuth binding when its grant changes", async () => {
     const oauthConfig = {
       agents: { defaults: { model: "anthropic/claude-opus-4-8@anthropic:oauth" } },
       auth: { profiles: { "anthropic:oauth": { provider: "anthropic", mode: "oauth" } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(oauthConfig);
     if (!route) {
       throw new Error("missing test OAuth route");
@@ -265,7 +265,7 @@ describe("verified OpenClaw inference binding", () => {
       auth: {
         authProfileId: "anthropic:oauth",
         authFingerprint,
-        agentHarnessId: "openclaw",
+        agentHarnessId: "bot",
       },
       deps: {
         ...pluginArtifactDeps(),
@@ -343,10 +343,10 @@ describe("verified OpenClaw inference binding", () => {
       agents: {
         defaults: {
           model: "openai/gpt-5.6",
-          models: { "openai/gpt-5.6": { agentRuntime: { id: "openclaw" } } },
+          models: { "openai/gpt-5.6": { agentRuntime: { id: "bot" } } },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(envConfig);
     if (!route) {
       throw new Error("missing test route");
@@ -366,7 +366,7 @@ describe("verified OpenClaw inference binding", () => {
       executionRoute: route,
       auth: {
         authFingerprint,
-        agentHarnessId: "openclaw",
+        agentHarnessId: "bot",
         modelId: "gpt-5.6",
         modelApi: "openai-responses",
       },
@@ -387,10 +387,10 @@ describe("verified OpenClaw inference binding", () => {
       agents: {
         defaults: {
           model: "openai/gpt-5.6",
-          models: { "openai/gpt-5.6": { agentRuntime: { id: "openclaw" } } },
+          models: { "openai/gpt-5.6": { agentRuntime: { id: "bot" } } },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(envConfig);
     if (!route) {
       throw new Error("missing test route");
@@ -410,7 +410,7 @@ describe("verified OpenClaw inference binding", () => {
       createSystemAgentVerifiedInferenceBinding({
         configuredRoute: route,
         executionRoute: route,
-        auth: { authFingerprint, agentHarnessId: "openclaw" },
+        auth: { authFingerprint, agentHarnessId: "bot" },
         deps: {
           ...pluginArtifactDeps(),
           resolveApiKeyForProvider: resolveAuth as never,
@@ -425,7 +425,7 @@ describe("verified OpenClaw inference binding", () => {
       agents: {
         entries: { ops: { default: true, model: "claude-cli/claude-opus-5" } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(cliConfig);
     if (!route || route.runner !== "cli") {
       throw new Error("missing test CLI route");
@@ -481,7 +481,7 @@ describe("verified OpenClaw inference binding", () => {
   it("invalidates a strict CLI credential when its package artifact changes", async () => {
     const cliConfig = {
       agents: { defaults: { model: "claude-cli/claude-opus-4-8" } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(cliConfig);
     if (!route || route.runner !== "cli") {
       throw new Error("missing test CLI route");
@@ -529,7 +529,7 @@ describe("verified OpenClaw inference binding", () => {
         ],
       },
       auth: { profiles: { [profileId]: { provider: "claude-cli", mode: "api_key" } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const credential = {
       type: "api_key" as const,
       provider: "claude-cli",
@@ -619,7 +619,7 @@ describe("verified OpenClaw inference binding", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(harnessConfig);
     if (!route || route.runner !== "embedded" || route.agentHarnessRuntimeOverride !== "codex") {
       throw new Error("missing test plugin harness route");
@@ -672,7 +672,7 @@ describe("verified OpenClaw inference binding", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(harnessConfig);
     if (!route || route.runner !== "embedded") {
       throw new Error("missing test plugin harness route");
@@ -727,7 +727,7 @@ describe("verified OpenClaw inference binding", () => {
       auth: {
         profiles: { "openai:verified": { provider: "openai", mode: "api_key" } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(harnessConfig);
     if (!route || route.runner !== "embedded") {
       throw new Error("missing test plugin harness route");
@@ -799,7 +799,7 @@ describe("verified OpenClaw inference binding", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const resolved = await resolveSystemAgentConfiguredRouteFromConfig(harnessConfig);
     if (!resolved || resolved.runner !== "embedded") {
       throw new Error("missing test plugin harness route");
@@ -842,13 +842,13 @@ describe("verified OpenClaw inference binding", () => {
       agents: {
         defaults: {
           model: "openai/gpt-5.5@openai:verified",
-          models: { "openai/gpt-5.5": { agentRuntime: { id: "openclaw" } } },
+          models: { "openai/gpt-5.5": { agentRuntime: { id: "bot" } } },
         },
       },
       auth: {
         profiles: { "openai:verified": { provider: "openai", mode: "api_key" } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const resolved = await resolveSystemAgentConfiguredRouteFromConfig(harnessConfig);
     if (!resolved || resolved.runner !== "embedded") {
       throw new Error("missing test embedded route");
@@ -882,15 +882,15 @@ describe("verified OpenClaw inference binding", () => {
       auth: {
         authProfileId: "openai:verified",
         authFingerprint,
-        agentHarnessId: "openclaw",
+        agentHarnessId: "bot",
         modelId: configuredRoute.model,
         modelApi: "openai-responses",
       },
       deps: { ...authDeps(), ...pluginArtifactDeps() },
     });
 
-    expect(binding.execution).toMatchObject({ agentHarnessRuntimeOverride: "openclaw" });
-    expect(binding.auth.agentHarnessId).toBe("openclaw");
+    expect(binding.execution).toMatchObject({ agentHarnessRuntimeOverride: "bot" });
+    expect(binding.auth.agentHarnessId).toBe("bot");
   });
 
   it("rejects an opaque harness with no trusted manifest owner", async () => {
@@ -905,7 +905,7 @@ describe("verified OpenClaw inference binding", () => {
           },
         ],
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const resolved = await resolveSystemAgentConfiguredRouteFromConfig(harnessConfig);
     if (!resolved || resolved.runner !== "embedded") {
       throw new Error("missing test plugin harness route");
@@ -956,7 +956,7 @@ describe("verified OpenClaw inference binding", () => {
         ],
       },
       plugins: { entries: { codex: { config: { appServer: { command: "codex" } } } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(harnessConfig);
     if (!route || route.runner !== "embedded" || route.agentHarnessRuntimeOverride !== "codex") {
       throw new Error("missing test plugin harness route");
@@ -1011,7 +1011,7 @@ describe("verified OpenClaw inference binding", () => {
         ],
       },
       auth: { profiles: { "openai:verified": { provider: "openai", mode: "api_key" } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(harnessConfig);
     if (!route || route.runner !== "embedded") {
       throw new Error("missing test plugin harness route");
@@ -1091,7 +1091,7 @@ describe("verified OpenClaw inference binding", () => {
         ],
       },
       auth: { profiles: { "openai:work": { provider: "openai", mode: "api_key" } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(harnessConfig);
     if (!route || route.runner !== "embedded" || route.authProfileId !== "openai:work") {
       throw new Error("missing test plugin harness profile route");
@@ -1198,7 +1198,7 @@ describe("verified OpenClaw inference binding", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const route = await resolveSystemAgentConfiguredRouteFromConfig(bedrockConfig);
     if (!route || route.runner !== "embedded") {
       throw new Error("missing test AWS route");
@@ -1306,7 +1306,7 @@ describe("verified OpenClaw inference binding", () => {
       replacement: {
         rootDir: "/replacement/provider-owner",
         source: "/replacement/provider-owner/index.js",
-        manifestPath: "/replacement/provider-owner/openclaw.plugin.json",
+        manifestPath: "/replacement/provider-owner/bot.plugin.json",
       },
     },
     {
@@ -1352,11 +1352,11 @@ describe("verified OpenClaw inference binding", () => {
   ])(
     "invalidates a strict credential after an in-place $name change with stable registry identity",
     async ({ origin, sourcePath, runtimePath, installRecordHash }) => {
-      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-openclaw-plugin-"));
+      const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-bot-plugin-"));
       try {
         const rootDir = path.join(tempDir, "provider-owner");
         const source = path.join(rootDir, sourcePath);
-        const manifestPath = path.join(rootDir, "openclaw.plugin.json");
+        const manifestPath = path.join(rootDir, "bot.plugin.json");
         const packageJsonPath = path.join(rootDir, "package.json");
         fs.mkdirSync(path.dirname(source), { recursive: true });
         fs.writeFileSync(source, "export const sourceRevision = 1;\n", "utf8");
@@ -1364,7 +1364,7 @@ describe("verified OpenClaw inference binding", () => {
         fs.mkdirSync(path.dirname(runtimeSource), { recursive: true });
         fs.writeFileSync(runtimeSource, "export const runtimeRevision = 1;\n", "utf8");
         fs.writeFileSync(manifestPath, '{"id":"provider-owner"}\n', "utf8");
-        fs.writeFileSync(packageJsonPath, '{"name":"@openclaw/provider-owner"}\n', "utf8");
+        fs.writeFileSync(packageJsonPath, '{"name":"@hanzo/bot-provider-owner"}\n', "utf8");
 
         const record = pluginRecord("provider-owner", {
           origin,
@@ -1376,12 +1376,12 @@ describe("verified OpenClaw inference binding", () => {
         });
         const codexRootDir = path.join(tempDir, "codex");
         const codexSource = path.join(codexRootDir, "index.js");
-        const codexManifestPath = path.join(codexRootDir, "openclaw.plugin.json");
+        const codexManifestPath = path.join(codexRootDir, "bot.plugin.json");
         const codexPackageJsonPath = path.join(codexRootDir, "package.json");
         fs.mkdirSync(codexRootDir, { recursive: true });
         fs.writeFileSync(codexSource, "export const runtime = 'codex';\n", "utf8");
         fs.writeFileSync(codexManifestPath, '{"id":"codex"}\n', "utf8");
-        fs.writeFileSync(codexPackageJsonPath, '{"name":"@openclaw/codex"}\n', "utf8");
+        fs.writeFileSync(codexPackageJsonPath, '{"name":"@hanzo/bot-codex"}\n', "utf8");
         const codexRecord = pluginRecord("codex", {
           rootDir: codexRootDir,
           manifestPath: codexManifestPath,
@@ -1440,7 +1440,7 @@ describe("verified OpenClaw inference binding", () => {
       ...baseConfig,
       channels: { discord: { enabled: true } },
       plugins: { entries: { discord: { enabled: true } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const route = await resolveSystemAgentVerifiedInferenceRoute(binding, {
       readConfigFileSnapshot: vi.fn(async () => ({
@@ -1508,9 +1508,9 @@ describe("verified OpenClaw inference binding", () => {
       remainsValid: false,
     },
   ])("projects the provider-owner policy when $name", async ({ plugins, remainsValid }) => {
-    const baseConfig = { ...config(), plugins: { allow: [] } } satisfies OpenClawConfig;
+    const baseConfig = { ...config(), plugins: { allow: [] } } satisfies BotConfig;
     const binding = await bindingFor(baseConfig);
-    const changed = { ...config(), plugins } satisfies OpenClawConfig;
+    const changed = { ...config(), plugins } satisfies BotConfig;
 
     const route = await resolveSystemAgentVerifiedInferenceRoute(binding, {
       readConfigFileSnapshot: vi.fn(async () => ({

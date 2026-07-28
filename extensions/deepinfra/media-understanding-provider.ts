@@ -5,7 +5,7 @@ import {
   transcribeOpenAiCompatibleAudio,
   type AudioTranscriptionRequest,
   type MediaUnderstandingProvider,
-} from "openclaw/plugin-sdk/media-understanding";
+} from "bot/plugin-sdk/media-understanding";
 import {
   DEEPINFRA_BASE_URL,
   DEEPINFRA_STT_FALLBACK_MODELS,

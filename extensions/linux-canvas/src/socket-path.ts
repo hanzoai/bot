@@ -7,9 +7,9 @@ export function resolveLinuxCanvasSocketPath(
 ): string {
   const runtimeDir = env.XDG_RUNTIME_DIR?.trim();
   if (runtimeDir) {
-    return path.join(runtimeDir, "openclaw-canvas.sock");
+    return path.join(runtimeDir, "bot-canvas.sock");
   }
-  return path.join("/tmp", `openclaw-canvas-${uid ?? "unknown"}.sock`);
+  return path.join("/tmp", `bot-canvas-${uid ?? "unknown"}.sock`);
 }
 
 export function linuxCanvasSocketExists(socketPath: string): boolean {

@@ -3,7 +3,7 @@
  *
  * Merges configured and persisted allowFrom entries for setup/status prompts.
  */
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
 import type { ChannelId } from "../plugins/types.public.js";
 import { readChannelIngressStoreAllowFromForDmPolicy } from "./store-allow-from.js";
 

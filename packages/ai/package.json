@@ -1,7 +1,7 @@
 {
-  "name": "@openclaw/ai",
+  "name": "@hanzo/bot-ai",
   "version": "2026.7.2",
-  "description": "Reusable model provider adapters and streaming runtime from OpenClaw",
+  "description": "Reusable model provider adapters and streaming runtime from Bot",
   "keywords": [
     "ai",
     "anthropic",
@@ -11,15 +11,15 @@
     "openai",
     "streaming"
   ],
-  "homepage": "https://github.com/openclaw/openclaw#readme",
+  "homepage": "https://github.com/hanzoai/bot#readme",
   "bugs": {
-    "url": "https://github.com/openclaw/openclaw/issues"
+    "url": "https://github.com/hanzoai/bot/issues"
   },
   "license": "MIT",
-  "author": "OpenClaw Foundation (https://openclaw.org)",
+  "author": "Bot Foundation (https://bot.org)",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/openclaw/openclaw.git",
+    "url": "git+https://github.com/hanzoai/bot.git",
     "directory": "packages/ai"
   },
   "files": [
@@ -106,7 +106,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "openclaw": {
+  "bot": {
     "release": {
       "publishToNpm": true
     }

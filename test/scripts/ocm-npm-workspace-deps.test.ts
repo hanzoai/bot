@@ -25,14 +25,14 @@ describe("OCM npm workspace dependency adapter", () => {
     expect(resolveNpmEnvironment(["pack", "--silent"], env)).toEqual({
       KEEP: "value",
       OCM_INTERNAL_NPM_BIN: adapterPath,
-      OPENCLAW_PREPACK_ALLOW_UNRELEASED_CHANGELOG: "1",
+      BOT_PREPACK_ALLOW_UNRELEASED_CHANGELOG: "1",
     });
   });
 
   it("uses a prepared runtime-only pack for the diagnostic build profile", () => {
     expect(
       resolveRuntimePackPlan(["pack", "--pack-destination", "/tmp/out"], {
-        OPENCLAW_OCM_RUNTIME_BUILD_PROFILE: "sourcePerformance",
+        BOT_OCM_RUNTIME_BUILD_PROFILE: "sourcePerformance",
       }),
     ).toEqual({
       profile: "sourcePerformance",
@@ -44,7 +44,7 @@ describe("OCM npm workspace dependency adapter", () => {
     expect(resolveRuntimePackPlan(["pack"], {})).toBeNull();
     expect(
       resolveRuntimePackPlan(["install"], {
-        OPENCLAW_OCM_RUNTIME_BUILD_PROFILE: "sourcePerformance",
+        BOT_OCM_RUNTIME_BUILD_PROFILE: "sourcePerformance",
       }),
     ).toBeNull();
   });
@@ -52,9 +52,9 @@ describe("OCM npm workspace dependency adapter", () => {
   it("rejects unsupported runtime build profiles", () => {
     expect(() =>
       resolveRuntimePackPlan(["pack"], {
-        OPENCLAW_OCM_RUNTIME_BUILD_PROFILE: "qaRuntime",
+        BOT_OCM_RUNTIME_BUILD_PROFILE: "qaRuntime",
       }),
-    ).toThrow("invalid OPENCLAW_OCM_RUNTIME_BUILD_PROFILE: qaRuntime");
+    ).toThrow("invalid BOT_OCM_RUNTIME_BUILD_PROFILE: qaRuntime");
   });
 
   it("pins one timestamp and commit across the prepared runtime pack", () => {
@@ -67,7 +67,7 @@ describe("OCM npm workspace dependency adapter", () => {
     expect(env).toMatchObject({
       KEEP: "value",
       GIT_COMMIT: "abcdef0123456789abcdef0123456789abcdef01",
-      OPENCLAW_BUILD_TIMESTAMP: "2026-07-11T12:34:56.000Z",
+      BOT_BUILD_TIMESTAMP: "2026-07-11T12:34:56.000Z",
     });
   });
 
@@ -97,7 +97,7 @@ describe("OCM npm workspace dependency adapter", () => {
           "--omit=dev",
           "--no-save",
           "--package-lock=false",
-          "openclaw.tgz",
+          "bot.tgz",
         ],
         ["/repo/packages/ai"],
         "/repo",
@@ -112,25 +112,25 @@ describe("OCM npm workspace dependency adapter", () => {
         "--package-lock=false",
       ],
       prefixDir: "/repo/runtime",
-      rootArchive: "/repo/openclaw.tgz",
+      rootArchive: "/repo/bot.tgz",
     });
   });
 
   it("keeps normal npm commands unchanged", () => {
     expect(resolveWorkspaceInstallPlan(["pack", "--silent"], ["/repo/packages/ai"])).toBeNull();
-    expect(resolveWorkspaceInstallPlan(["install", "openclaw.tgz"], [])).toBeNull();
+    expect(resolveWorkspaceInstallPlan(["install", "bot.tgz"], [])).toBeNull();
   });
 
   it("builds a manifest with the root and local workspace tarballs", () => {
     expect(
-      buildInstallManifest("/tmp/openclaw.tgz", [
-        { name: "@openclaw/ai", tarball: "/tmp/openclaw-ai.tgz" },
+      buildInstallManifest("/tmp/bot.tgz", [
+        { name: "@hanzo/bot-ai", tarball: "/tmp/bot-ai.tgz" },
       ]),
     ).toEqual({
       private: true,
       dependencies: {
-        "@openclaw/ai": "file:///tmp/openclaw-ai.tgz",
-        openclaw: "file:///tmp/openclaw.tgz",
+        "@hanzo/bot-ai": "file:///tmp/bot-ai.tgz",
+        bot: "file:///tmp/bot.tgz",
       },
     });
   });
@@ -138,7 +138,7 @@ describe("OCM npm workspace dependency adapter", () => {
   it("rewrites packed workspace protocols to the local package version", () => {
     const packageJson = {
       dependencies: {
-        "@openclaw/ai": "workspace:*",
+        "@hanzo/bot-ai": "workspace:*",
         chalk: "5.6.2",
       },
     };
@@ -146,40 +146,40 @@ describe("OCM npm workspace dependency adapter", () => {
     expect(
       rewriteWorkspaceDependencyVersions(packageJson, [
         {
-          name: "@openclaw/ai",
+          name: "@hanzo/bot-ai",
           version: "2026.7.1-beta.3",
-          tarball: "/tmp/openclaw-ai.tgz",
+          tarball: "/tmp/bot-ai.tgz",
         },
       ]),
     ).toBe(1);
     expect(packageJson.dependencies).toEqual({
-      "@openclaw/ai": "2026.7.1-beta.3",
+      "@hanzo/bot-ai": "2026.7.1-beta.3",
       chalk: "5.6.2",
     });
   });
 
   it("installs a packed root with a local workspace dependency", () => {
-    const root = mkdtempSync(join(tmpdir(), "openclaw-ocm-adapter-test-"));
+    const root = mkdtempSync(join(tmpdir(), "bot-ocm-adapter-test-"));
     try {
       const archiveRoot = join(root, "archive");
       const packagedRoot = join(archiveRoot, "package");
       const workspaceDir = join(root, "ai");
       const installDir = join(root, "install");
-      const rootArchive = join(root, "openclaw.tgz");
+      const rootArchive = join(root, "bot.tgz");
       mkdirSync(packagedRoot, { recursive: true });
       mkdirSync(workspaceDir, { recursive: true });
       writeFileSync(
         join(packagedRoot, "package.json"),
         `${JSON.stringify({
-          name: "openclaw",
+          name: "bot",
           version: "1.0.0",
-          dependencies: { "@openclaw/ai": "workspace:*" },
+          dependencies: { "@hanzo/bot-ai": "workspace:*" },
         })}\n`,
       );
       writeFileSync(
         join(workspaceDir, "package.json"),
         `${JSON.stringify({
-          name: "@openclaw/ai",
+          name: "@hanzo/bot-ai",
           version: "1.0.0",
           main: "index.js",
         })}\n`,
@@ -202,8 +202,8 @@ describe("OCM npm workspace dependency adapter", () => {
         {
           env: {
             ...process.env,
-            OPENCLAW_OCM_REAL_NPM_BIN: process.platform === "win32" ? "npm.cmd" : "npm",
-            OPENCLAW_OCM_WORKSPACE_DEPENDENCY_DIRS: workspaceDir,
+            BOT_OCM_REAL_NPM_BIN: process.platform === "win32" ? "npm.cmd" : "npm",
+            BOT_OCM_WORKSPACE_DEPENDENCY_DIRS: workspaceDir,
             npm_config_audit: "false",
             npm_config_cache: join(root, "npm-cache"),
             npm_config_fund: "false",
@@ -213,11 +213,11 @@ describe("OCM npm workspace dependency adapter", () => {
       );
 
       expect(
-        JSON.parse(readFileSync(join(installDir, "node_modules/openclaw/package.json"), "utf8"))
+        JSON.parse(readFileSync(join(installDir, "node_modules/bot/package.json"), "utf8"))
           .version,
       ).toBe("1.0.0");
       expect(
-        JSON.parse(readFileSync(join(installDir, "node_modules/@openclaw/ai/package.json"), "utf8"))
+        JSON.parse(readFileSync(join(installDir, "node_modules/@hanzo/bot-ai/package.json"), "utf8"))
           .version,
       ).toBe("1.0.0");
     } finally {

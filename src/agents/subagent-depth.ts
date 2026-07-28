@@ -3,10 +3,10 @@
  *
  * Reads persisted session store state to recover spawn depth and parent lineage across restarts.
  */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveStorePath } from "../config/sessions/paths.js";
 import { listSessionEntriesReadOnly } from "../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { parseStrictNonNegativeInteger } from "../infra/parse-finite-number.js";
 import { getSubagentDepth, parseAgentSessionKey } from "../sessions/session-key-utils.js";
 import { resolveDefaultAgentId } from "./agent-scope.js";
@@ -43,7 +43,7 @@ export function readSubagentSessionStore<T extends SessionDepthEntry = SessionDe
   return {};
 }
 
-function buildKeyCandidates(rawKey: string, cfg?: OpenClawConfig): string[] {
+function buildKeyCandidates(rawKey: string, cfg?: BotConfig): string[] {
   if (!cfg) {
     return [rawKey];
   }
@@ -77,7 +77,7 @@ export function findSubagentSessionEntryById<T extends SessionDepthEntry>(
 
 function resolveEntryForSessionKey(params: {
   sessionKey: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   store?: Record<string, SessionDepthEntry>;
   cache: Map<string, Record<string, SessionDepthEntry>>;
 }): SessionDepthEntry | undefined {
@@ -123,7 +123,7 @@ function resolveEntryForSessionKey(params: {
 export function getSubagentDepthFromSessionStore(
   sessionKey: string | undefined | null,
   opts?: {
-    cfg?: OpenClawConfig;
+    cfg?: BotConfig;
     store?: Record<string, SessionDepthEntry>;
   },
 ): number {

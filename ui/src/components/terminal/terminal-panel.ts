@@ -7,7 +7,7 @@
 import { html, nothing } from "lit";
 import { property, state } from "lit/decorators.js";
 import { t } from "../../i18n/index.ts";
-import { OpenClawLitElement } from "../../lit/openclaw-element.ts";
+import { BotLitElement } from "../../lit/bot-element.ts";
 import { DockLayoutController, dockPanelStyles } from "../dock-layout-controller.ts";
 import { createDockPanelLayout, type DockPanelSide } from "../dock-panel-layout.ts";
 import { panelTabStripStyles } from "../panel-tab-strip.ts";
@@ -40,7 +40,7 @@ import { renderTerminalSessionPicker } from "./terminal-session-picker.ts";
 type TerminalDock = Exclude<DockPanelSide, "left">;
 
 const panelLayout = createDockPanelLayout({
-  storageKey: "openclaw.terminal.panel.v1",
+  storageKey: "bot.terminal.panel.v1",
   minHeight: 140,
   minWidth: 320,
   defaultDock: "bottom",
@@ -50,8 +50,8 @@ const panelLayout = createDockPanelLayout({
 });
 const CATALOG_TERMINAL_READY_TIMEOUT_MS = 30_000;
 
-/** `<openclaw-terminal-panel>` — the dockable Control UI shell surface. */
-export class OpenClawTerminalPanel extends OpenClawLitElement {
+/** `<bot-terminal-panel>` — the dockable Control UI shell surface. */
+export class BotTerminalPanel extends BotLitElement {
   /** Gateway client used for terminal.* RPCs; null until connected. */
   @property({ attribute: false }) client: TerminalGatewayClient | null = null;
   /** Agent whose workspace and sandbox policy own newly opened sessions. */
@@ -341,6 +341,6 @@ export class OpenClawTerminalPanel extends OpenClawLitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-terminal-panel": OpenClawTerminalPanel;
+    "bot-terminal-panel": BotTerminalPanel;
   }
 }

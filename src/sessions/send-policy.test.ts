@@ -1,13 +1,13 @@
 // Session send policy tests cover message send eligibility decisions.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { buildAgentPeerSessionKey } from "../routing/session-key.js";
 import { resolveSendPolicy } from "./send-policy.js";
 
 describe("resolveSendPolicy", () => {
   const cfgWithRules = (
-    rules: NonNullable<NonNullable<OpenClawConfig["session"]>["sendPolicy"]>["rules"],
+    rules: NonNullable<NonNullable<BotConfig["session"]>["sendPolicy"]>["rules"],
   ) =>
     ({
       session: {
@@ -16,17 +16,17 @@ describe("resolveSendPolicy", () => {
           rules,
         },
       },
-    }) as OpenClawConfig;
+    }) as BotConfig;
 
   it("defaults to allow", () => {
-    const cfg = {} as OpenClawConfig;
+    const cfg = {} as BotConfig;
     expect(resolveSendPolicy({ cfg })).toBe("allow");
   });
 
   it("entry override wins", () => {
     const cfg = {
       session: { sendPolicy: { default: "allow" } },
-    } as OpenClawConfig;
+    } as BotConfig;
     const entry: SessionEntry = {
       sessionId: "s",
       updatedAt: 0,
@@ -168,7 +168,7 @@ describe("resolveSendPolicy", () => {
           ],
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(
       resolveSendPolicy({
@@ -201,7 +201,7 @@ describe("resolveSendPolicy", () => {
           ],
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(resolveSendPolicy({ cfg, sessionKey })).toBe("deny");
   });

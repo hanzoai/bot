@@ -20,7 +20,7 @@ import {
   sqliteSessionFileMarkerMatchesTarget,
 } from "../../config/sessions/sqlite-marker.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
 const FRESH_CRON_CARRIED_PREFERENCE_FIELDS = [
   "chatType",
@@ -138,7 +138,7 @@ export function loadCronSessionEntryLatest(
 
 /** Resolves or rolls over the cron session entry for one isolated-agent run. */
 export function resolveCronSession(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   sourceSessionKey?: string;
   nowMs: number;

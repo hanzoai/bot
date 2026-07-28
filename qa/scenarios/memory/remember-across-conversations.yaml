@@ -164,7 +164,7 @@ flow:
                   senderId: remember-group-member
                   senderName: Remember Group Member
                   text:
-                    expr: "`@openclaw Stable QA movie night usual favorite snack preference: ${config.groupFact}. This applies only inside this group. Acknowledge briefly.`"
+                    expr: "`@bot Stable QA movie night usual favorite snack preference: ${config.groupFact}. This applies only inside this group. Acknowledge briefly.`"
               - waitForOutbound:
                   conversation:
                     id:
@@ -338,7 +338,7 @@ flow:
                         senderId: remember-group-member
                         senderName: Remember Group Member
                         text:
-                          expr: "`@openclaw ${config.recallPrompt}`"
+                          expr: "`@bot ${config.recallPrompt}`"
                     - call: waitForCondition
                       saveAs: groupDestinationRequests
                       args:

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
 const configMocks = vi.hoisted(() => ({
   replaceConfigFile: vi.fn(),
@@ -29,7 +29,7 @@ describe("commitGatewayConfigWrite", () => {
 
   it("carries a missing file revision into the lock-time compare-and-swap", async () => {
     const snapshot = {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       exists: false,
       raw: null,
       hash: "missing-config-revision",
@@ -38,7 +38,7 @@ describe("commitGatewayConfigWrite", () => {
     await commitGatewayConfigWrite({
       snapshot: snapshot as never,
       writeOptions: {},
-      nextConfig: {} satisfies OpenClawConfig,
+      nextConfig: {} satisfies BotConfig,
     });
 
     expect(configMocks.replaceConfigFile).toHaveBeenCalledWith(

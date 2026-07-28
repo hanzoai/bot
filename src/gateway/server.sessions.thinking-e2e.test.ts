@@ -7,7 +7,7 @@
  * 3. Sessions matching the default model correctly inherit defaults
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { expect, test, vi } from "vitest";
 import { formatThinkingLevels } from "../auto-reply/thinking.js";
 import { testState, writeSessionStore } from "./test-helpers.js";

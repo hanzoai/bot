@@ -5,7 +5,7 @@ export {
   listRegisteredMemoryEmbeddingProviders,
   listMemoryEmbeddingProviders,
   listRegisteredMemoryEmbeddingProviderAdapters,
-} from "./host/openclaw-runtime-memory.js";
+} from "./host/bot-runtime-memory.js";
 export type {
   MemoryEmbeddingBatchChunk,
   MemoryEmbeddingBatchOptions,
@@ -15,7 +15,7 @@ export type {
   MemoryEmbeddingProviderCreateOptions,
   MemoryEmbeddingProviderCreateResult,
   MemoryEmbeddingProviderRuntime,
-} from "./host/openclaw-runtime-memory.js";
+} from "./host/bot-runtime-memory.js";
 export { createLocalEmbeddingProvider, DEFAULT_LOCAL_MODEL } from "./host/embeddings.js";
 export {
   EmbeddingBatchUnavailableError,

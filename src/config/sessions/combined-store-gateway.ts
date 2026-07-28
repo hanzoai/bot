@@ -1,7 +1,7 @@
 // Builds the gateway-visible combined session store across agent-specific stores.
 // Gateway callers need canonical per-agent keys even when stores are split by `{agentId}`.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { listAgentEntries, resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import {
   canonicalizeSpawnedByForAgent,
@@ -13,8 +13,8 @@ import {
   normalizeAgentId,
   parseAgentSessionKey,
 } from "../../routing/session-key.js";
-import { listOpenIncognitoAgentDatabases } from "../../state/openclaw-agent-db.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import { listOpenIncognitoAgentDatabases } from "../../state/bot-agent-db.js";
+import type { BotConfig } from "../types.bot.js";
 import { resolveStorePath } from "./paths.js";
 import { listSessionEntries, listSessionEntriesReadOnly } from "./session-accessor.js";
 import type { SessionEntryListScope } from "./session-accessor.types.js";
@@ -74,7 +74,7 @@ function loadIncognitoGatewayStoreEntries(params: {
 }
 
 function mergeSessionEntryIntoCombined(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   combined: Record<string, SessionEntry>;
   entry: SessionEntry;
   agentId: string;
@@ -116,7 +116,7 @@ function mergeSessionEntryIntoCombined(params: {
 
 function mergeOpenIncognitoStores(params: {
   allowedAgentIds?: ReadonlySet<string>;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   combined: Record<string, SessionEntry>;
   agentId?: string;
   projection: GatewaySessionEntryProjection;
@@ -157,7 +157,7 @@ function mergeOpenIncognitoStores(params: {
 
 /** Loads and canonicalizes session entries for gateway views across one or more agent stores. */
 export function loadCombinedSessionStoreForGateway(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   opts: {
     agentId?: string;
     configuredAgentsOnly?: boolean;

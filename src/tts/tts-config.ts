@@ -1,13 +1,13 @@
 // TTS config helpers read and normalize text-to-speech provider settings.
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { isRecord as isPlainObject } from "@openclaw/normalization-core/record-coerce";
+import { isRecord as isPlainObject } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveAgentConfig } from "../agents/agent-scope-config.js";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import type { TtsAutoMode, TtsConfig, TtsMode } from "../config/types.tts.js";
 import { mergeDeep } from "../infra/deep-merge.js";
 import { normalizeAccountId } from "../routing/session-key.js";
@@ -24,7 +24,7 @@ export type TtsConfigResolutionContext = {
 };
 
 function resolveAgentTtsOverride(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string | undefined,
 ): TtsConfig | undefined {
   if (!agentId) {
@@ -67,7 +67,7 @@ function asObjectRecord(value: unknown): Record<string, unknown> | undefined {
 }
 
 function resolveChannelConfig(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   channelId: string | undefined,
 ): Record<string, unknown> | undefined {
   if (!isPlainObject(cfg.channels)) {
@@ -87,14 +87,14 @@ function resolveChannelConfig(
 }
 
 function resolveChannelTtsOverride(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   context: TtsConfigResolutionContext,
 ): TtsConfig | undefined {
   return asTtsConfig(resolveChannelConfig(cfg, context.channelId)?.tts);
 }
 
 function resolveAccountTtsOverride(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   context: TtsConfigResolutionContext,
 ): TtsConfig | undefined {
   const channelConfig = resolveChannelConfig(cfg, context.channelId);
@@ -105,7 +105,7 @@ function resolveAccountTtsOverride(
 
 /** Resolve effective TTS config after applying global, agent, channel, and account layers. */
 export function resolveEffectiveTtsConfig(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   contextOrAgentId?: string | TtsConfigResolutionContext,
 ): TtsConfig {
   const context = resolveTtsConfigContext(contextOrAgentId);
@@ -122,7 +122,7 @@ export function resolveEffectiveTtsConfig(
 
 /** Resolve the configured TTS mode, defaulting to final-answer synthesis. */
 export function resolveConfiguredTtsMode(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   contextOrAgentId?: string | TtsConfigResolutionContext,
 ): TtsMode {
   return resolveEffectiveTtsConfig(cfg, contextOrAgentId).mode ?? "final";
@@ -135,7 +135,7 @@ function resolveTtsPrefsPathValue(
   if (prefsPath?.trim()) {
     return resolveUserPath(prefsPath.trim());
   }
-  const envPath = process.env.OPENCLAW_TTS_PREFS?.trim();
+  const envPath = process.env.BOT_TTS_PREFS?.trim();
   if (envPath) {
     return resolveUserPath(envPath);
   }
@@ -168,7 +168,7 @@ function readTtsPrefsAutoMode(prefsPath: string): TtsAutoMode | undefined {
 
 /** Return whether this payload should attempt TTS based on session, prefs, and config. */
 export function shouldAttemptTtsPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   ttsAuto?: string;
   agentId?: string;
   channelId?: string;
@@ -197,7 +197,7 @@ export function shouldAttemptTtsPayload(params: {
 
 /** Return whether TTS directive markup should be stripped from user-visible text. */
 export function shouldCleanTtsDirectiveText(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   ttsAuto?: string;
   agentId?: string;
   channelId?: string;

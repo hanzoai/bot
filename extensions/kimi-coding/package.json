@@ -1,22 +1,22 @@
 {
-  "name": "@openclaw/kimi-provider",
+  "name": "@hanzo/bot-kimi-provider",
   "version": "2026.7.2",
-  "description": "OpenClaw Kimi provider plugin.",
+  "description": "Bot Kimi provider plugin.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/kimi-provider",
-      "npmSpec": "@openclaw/kimi-provider",
+      "clawhubSpec": "clawhub:@hanzo/bot-kimi-provider",
+      "npmSpec": "@hanzo/bot-kimi-provider",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.8"
     },
@@ -24,7 +24,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {

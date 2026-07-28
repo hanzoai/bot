@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import type { SubagentLifecycleHookRunner } from "../plugins/hooks.js";
 import { isValidAgentId, normalizeAgentId, parseAgentSessionKey } from "../routing/session-key.js";
 import { listAgentIds } from "./agent-scope-config.js";
@@ -22,7 +22,7 @@ import { resolveSwarmConfig } from "./swarm-config.js";
 import { validateStructuredOutputSchema } from "./swarm-output-schema.js";
 import { reserveSwarmRun } from "./swarm-scheduler.js";
 
-function resolveConfiguredAgentIds(cfg: OpenClawConfig): string[] {
+function resolveConfiguredAgentIds(cfg: BotConfig): string[] {
   return listAgentIds(cfg);
 }
 
@@ -35,7 +35,7 @@ type ResolvedSubagentSpawnRequest = {
   };
   runtime: {
     hookRunner: SubagentLifecycleHookRunner | null;
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     runTimeoutSeconds: number;
     contextMode: ReturnType<typeof resolveSubagentContextMode>;
     requesterInternalKey: string;

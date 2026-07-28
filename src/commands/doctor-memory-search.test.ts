@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { checkQmdBinaryAvailability as checkQmdBinaryAvailabilityFn } from "../memory-host-sdk/engine-qmd.js";
 import type { DoctorPrompter } from "./doctor-prompter.js";
 
@@ -12,10 +12,10 @@ const listAgentIds = vi.hoisted(() =>
   ),
 );
 const resolveAgentDir = vi.hoisted(() =>
-  vi.fn<(_cfg: OpenClawConfig, agentId: string) => string>(() => "/tmp/agent-default"),
+  vi.fn<(_cfg: BotConfig, agentId: string) => string>(() => "/tmp/agent-default"),
 );
 const resolveAgentWorkspaceDir = vi.hoisted(() =>
-  vi.fn<(_cfg: OpenClawConfig, agentId: string) => string>(() => "/tmp/agent-default/workspace"),
+  vi.fn<(_cfg: BotConfig, agentId: string) => string>(() => "/tmp/agent-default/workspace"),
 );
 const resolveMemorySearchConfig = vi.hoisted(() => vi.fn());
 const resolveApiKeyForProvider = vi.hoisted(() => vi.fn());
@@ -162,7 +162,7 @@ function firstNoteMessage(): string {
 }
 
 describe("noteMemorySearchHealth", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as BotConfig;
 
   async function expectNoWarningWithConfiguredRemoteApiKey(provider: string) {
     resolveMemorySearchConfig.mockReturnValue({
@@ -198,7 +198,7 @@ describe("noteMemorySearchHealth", () => {
     getActiveMemorySearchManager.mockReset();
     resolveActiveMemoryBackendConfig.mockReset();
     resolveActiveMemoryBackendConfig.mockImplementation(
-      ({ cfg: cfgLocal }: { cfg: OpenClawConfig }) =>
+      ({ cfg: cfgLocal }: { cfg: BotConfig }) =>
         cfgLocal.memory?.backend === "qmd"
           ? { backend: "qmd", qmd: cfgLocal.memory.qmd ?? {} }
           : { backend: "builtin" },
@@ -226,7 +226,7 @@ describe("noteMemorySearchHealth", () => {
     expect(note).toHaveBeenCalledTimes(1);
     const message = firstNoteMessage();
     expect(message).toContain('Memory search provider is set to "local"');
-    expect(message).toContain("openclaw plugins install @openclaw/llama-cpp-provider");
+    expect(message).toContain("bot plugins install @hanzo/bot-llama-cpp-provider");
   });
 
   it("supports silent structured collection through an injected note sink", async () => {
@@ -411,7 +411,7 @@ describe("noteMemorySearchHealth", () => {
         checked: false,
         ready: false,
         error:
-          "memory embedding readiness not checked; run `openclaw memory status --deep` to probe",
+          "memory embedding readiness not checked; run `bot memory status --deep` to probe",
         skipped: true,
       },
     });
@@ -422,7 +422,7 @@ describe("noteMemorySearchHealth", () => {
   it("warns when local provider skipped readiness but configured local model is missing", async () => {
     resolveMemorySearchConfig.mockReturnValue({
       provider: "local",
-      local: { modelPath: "/definitely/missing/openclaw-memory-model.gguf" },
+      local: { modelPath: "/definitely/missing/bot-memory-model.gguf" },
       remote: {},
     });
 
@@ -431,7 +431,7 @@ describe("noteMemorySearchHealth", () => {
         checked: false,
         ready: false,
         error:
-          "memory embedding readiness not checked; run `openclaw memory status --deep` to probe",
+          "memory embedding readiness not checked; run `bot memory status --deep` to probe",
         skipped: true,
       },
     });
@@ -501,9 +501,9 @@ describe("noteMemorySearchHealth", () => {
       session: { dmScope: "per-peer" },
       plugins: {
         slots: { memory: "memory-lancedb" },
-        entries: { "memory-lancedb": { enabled: true, config: { dbPath: ".openclaw/memory" } } },
+        entries: { "memory-lancedb": { enabled: true, config: { dbPath: ".bot/memory" } } },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     await noteMemorySearchHealth(cfgWithLancedb, {});
 
@@ -522,7 +522,7 @@ describe("noteMemorySearchHealth", () => {
     const cfgWithSlotOnly = {
       session: { dmScope: "per-peer" },
       plugins: { slots: { memory: "memory-lancedb" } },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     await noteMemorySearchHealth(cfgWithSlotOnly, {});
 
@@ -543,7 +543,7 @@ describe("noteMemorySearchHealth", () => {
         slots: { memory: "memory-lancedb" },
         entries: { "memory-lancedb": { enabled: false } },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     await noteMemorySearchHealth(cfgWithDisabledLancedb, {});
 
@@ -564,7 +564,7 @@ describe("noteMemorySearchHealth", () => {
         slots: { memory: "memory-lancedb" },
         entries: { "memory-lancedb": {} },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     await noteMemorySearchHealth(cfgWithPlaceholderEntry, {});
 
@@ -631,7 +631,7 @@ describe("noteMemorySearchHealth", () => {
       agents: {
         list: [{ id: "personal", memory: { search: { rememberAcrossConversations: false } } }],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       local: {},
@@ -650,7 +650,7 @@ describe("noteMemorySearchHealth", () => {
         list: [{ id: "personal", memory: { search: { rememberAcrossConversations: true } } }],
       },
       plugins: { entries: { "active-memory": { enabled: true } } },
-    } as OpenClawConfig;
+    } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       local: {},
@@ -677,7 +677,7 @@ describe("noteMemorySearchHealth", () => {
           "lossless-claw": { enabled: true },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       local: {},
@@ -717,7 +717,7 @@ describe("noteMemorySearchHealth", () => {
             },
           },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       resolveMemorySearchConfig.mockReturnValue({
         provider: "auto",
         local: {},
@@ -741,7 +741,7 @@ describe("noteMemorySearchHealth", () => {
         list: [{ id: "personal", memory: { search: { rememberAcrossConversations: true } } }],
       },
       plugins: { entries: { "active-memory": { enabled: false } } },
-    } as OpenClawConfig;
+    } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       local: {},
@@ -768,7 +768,7 @@ describe("noteMemorySearchHealth", () => {
           "active-memory": { enabled: true, config: { enabled: false } },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       local: {},
@@ -793,7 +793,7 @@ describe("noteMemorySearchHealth", () => {
           "active-memory": { enabled: true, config: { toolsAllow: ["memory_get"] } },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       local: {},
@@ -815,8 +815,8 @@ describe("noteMemorySearchHealth", () => {
       agents: {
         list: [{ id: "personal", memory: { search: { rememberAcrossConversations: true } } }],
       },
-    } as OpenClawConfig;
-    resolveMemorySearchConfig.mockImplementation((_cfg: OpenClawConfig, agentId: string) =>
+    } as BotConfig;
+    resolveMemorySearchConfig.mockImplementation((_cfg: BotConfig, agentId: string) =>
       agentId === "personal"
         ? undefined
         : { provider: "auto", local: {}, remote: {}, sources: ["memory"] },
@@ -830,7 +830,7 @@ describe("noteMemorySearchHealth", () => {
   });
 
   it("does not warn when QMD backend is active", async () => {
-    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as OpenClawConfig;
+    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       local: {},
@@ -848,7 +848,7 @@ describe("noteMemorySearchHealth", () => {
   });
 
   it("skips QMD binary probing while preserving QMD session export warnings", async () => {
-    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "custom-qmd" } } } as OpenClawConfig;
+    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "custom-qmd" } } } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       sources: ["memory", "sessions"],
@@ -869,7 +869,7 @@ describe("noteMemorySearchHealth", () => {
   });
 
   it("warns when QMD backend is active but the qmd binary is unavailable", async () => {
-    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as OpenClawConfig;
+    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as BotConfig;
     checkQmdBinaryAvailability.mockResolvedValueOnce({
       available: false,
       reason: "binary",
@@ -892,7 +892,7 @@ describe("noteMemorySearchHealth", () => {
   });
 
   it("treats legacy QMD unavailable results without a reason as binary failures", async () => {
-    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as OpenClawConfig;
+    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as BotConfig;
     checkQmdBinaryAvailability.mockResolvedValueOnce({
       available: false,
       error: "spawn qmd ENOENT",
@@ -914,7 +914,7 @@ describe("noteMemorySearchHealth", () => {
   });
 
   it("warns with a workspace-specific fix when the QMD probe cwd is missing", async () => {
-    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as OpenClawConfig;
+    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as BotConfig;
     checkQmdBinaryAvailability.mockResolvedValueOnce({
       available: false,
       reason: "workspace-cwd",
@@ -937,7 +937,7 @@ describe("noteMemorySearchHealth", () => {
   });
 
   it("warns when QMD backend uses session sources but QMD session export is disabled", async () => {
-    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as OpenClawConfig;
+    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       sources: ["memory", "sessions"],
@@ -952,13 +952,13 @@ describe("noteMemorySearchHealth", () => {
     const message = String(note.mock.calls[0]?.[0] ?? "");
     expect(message).toContain("memory.search.sources with sessions");
     expect(message).toContain("memory.qmd.sessions.enabled is not true");
-    expect(message).toContain("openclaw config set memory.qmd.sessions.enabled true");
+    expect(message).toContain("bot config set memory.qmd.sessions.enabled true");
   });
 
   it("warns when QMD session export is explicitly disabled", async () => {
     const qmdCfg = {
       memory: { backend: "qmd", qmd: { command: "qmd", sessions: { enabled: false } } },
-    } as OpenClawConfig;
+    } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       sources: ["memory", "sessions"],
@@ -975,7 +975,7 @@ describe("noteMemorySearchHealth", () => {
   });
 
   it("does not warn about QMD session export when session sources are not enabled", async () => {
-    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as OpenClawConfig;
+    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       sources: ["memory"],
@@ -990,7 +990,7 @@ describe("noteMemorySearchHealth", () => {
   });
 
   it("reports QMD binary and session export warnings independently", async () => {
-    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as OpenClawConfig;
+    const qmdCfg = { memory: { backend: "qmd", qmd: { command: "qmd" } } } as BotConfig;
     checkQmdBinaryAvailability.mockResolvedValueOnce({
       available: false,
       error: "spawn qmd ENOENT",
@@ -1015,7 +1015,7 @@ describe("noteMemorySearchHealth", () => {
   it("does not warn when QMD session sources and QMD session export are both enabled", async () => {
     const qmdCfg = {
       memory: { backend: "qmd", qmd: { command: "qmd", sessions: { enabled: true } } },
-    } as OpenClawConfig;
+    } as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "auto",
       sources: ["memory", "sessions"],
@@ -1189,11 +1189,11 @@ describe("noteMemorySearchHealth", () => {
   });
 
   it("does not warn when key-optional provider (lmstudio) probe was skipped (skipped: true)", async () => {
-    // When `openclaw doctor` runs without --deep, the probe is skipped and returns
+    // When `bot doctor` runs without --deep, the probe is skipped and returns
     // { checked: false, ready: false, skipped: true }. This must NOT produce a
     // false-positive warning — it means readiness was never checked, not that
     // embeddings are unavailable.
-    // Regression test for: https://github.com/openclaw/openclaw/issues/74608
+    // Regression test for: https://github.com/hanzoai/bot/issues/74608
     resolveMemorySearchConfig.mockReturnValue({
       provider: "lmstudio",
       local: {},
@@ -1252,7 +1252,7 @@ describe("noteMemorySearchHealth", () => {
     const message = firstNoteMessage();
     expect(message).toContain('provider is set to "openai-compatible"');
     expect(message).toContain("remote.baseUrl");
-    expect(message).toContain("openclaw config set");
+    expect(message).toContain("bot config set");
     expect(resolveApiKeyForProvider).not.toHaveBeenCalled();
   });
 
@@ -1271,7 +1271,7 @@ describe("noteMemorySearchHealth", () => {
     const message = firstNoteMessage();
     expect(message).toContain('provider is set to "openai-compatible"');
     expect(message).toContain("memory.search.model");
-    expect(message).toContain("openclaw config set");
+    expect(message).toContain("bot config set");
     expect(resolveApiKeyForProvider).not.toHaveBeenCalled();
   });
 
@@ -1285,7 +1285,7 @@ describe("noteMemorySearchHealth", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "localEmbeddings",
       model: "text-embedding-bge-m3",
@@ -1333,7 +1333,7 @@ describe("noteMemorySearchHealth", () => {
     const orderedCfg = {
       ...cfg,
       auth: { order: { openai: ["openai:expired"] } },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await noteMemorySearchHealth(orderedCfg, {
       skipAuthProfileResolution: true,
@@ -1360,7 +1360,7 @@ describe("noteMemorySearchHealth", () => {
     const orderedCfg = {
       ...cfg,
       auth: { order: { openai: [] } },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     await noteMemorySearchHealth(orderedCfg, {
       skipAuthProfileResolution: true,
@@ -1390,7 +1390,7 @@ describe("noteMemorySearchHealth", () => {
           "amazon-bedrock": { auth: "aws-sdk", models: [] },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     await noteMemorySearchHealth(bedrockCfg, {
       skipAuthProfileResolution: true,
@@ -1425,7 +1425,7 @@ describe("noteMemorySearchHealth", () => {
         },
         order: { "amazon-bedrock": ["amazon-bedrock:default"] },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     await noteMemorySearchHealth(bedrockCfg, {
       skipAuthProfileResolution: true,
@@ -1493,7 +1493,7 @@ describe("noteMemorySearchHealth", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
     resolveMemorySearchConfig.mockReturnValue({
       provider: "openai",
       model: "text-embedding-3-small",
@@ -1518,7 +1518,7 @@ describe("noteMemorySearchHealth", () => {
   it("warns for key-optional provider (lmstudio) when gateway probe timed out", async () => {
     // A gateway timeout sets checked: false but skipped: false/absent. This is a
     // real diagnostic signal — embeddings may be unavailable — so we should warn.
-    // Regression guard: https://github.com/openclaw/openclaw/issues/74608
+    // Regression guard: https://github.com/hanzoai/bot/issues/74608
     resolveMemorySearchConfig.mockReturnValue({
       provider: "lmstudio",
       local: {},
@@ -1570,8 +1570,8 @@ describe("noteMemorySearchHealth", () => {
 
     const message = firstNoteMessage();
     expect(message).toContain("Gateway memory probe for default agent is not ready");
-    expect(message).toContain("openclaw configure --section model");
-    expect(message).not.toContain("openclaw auth add --provider");
+    expect(message).toContain("bot configure --section model");
+    expect(message).not.toContain("bot auth add --provider");
   });
 
   it("warns for legacy auto mode as OpenAI when no API key is configured", async () => {
@@ -1587,7 +1587,7 @@ describe("noteMemorySearchHealth", () => {
     const message = firstNoteMessage();
     expect(message).toContain('provider is set to "openai"');
     expect(message).toContain("OPENAI_API_KEY");
-    expect(message).toContain("openclaw configure --section model");
+    expect(message).toContain("bot configure --section model");
   });
 
   it("does not probe unrelated embedding providers for legacy auto mode", async () => {
@@ -1688,7 +1688,7 @@ describe("noteMemorySearchHealth", () => {
 });
 
 describe("memory recall doctor integration", () => {
-  const cfg = {} as OpenClawConfig;
+  const cfg = {} as BotConfig;
 
   beforeEach(() => {
     note.mockClear();
@@ -1828,7 +1828,7 @@ describe("memory recall doctor integration", () => {
     });
     repairDreamingArtifacts.mockResolvedValueOnce({
       changed: true,
-      archiveDir: "/tmp/agent-default/workspace/.openclaw-repair/dreaming/2026-04-11T21-35-00-000Z",
+      archiveDir: "/tmp/agent-default/workspace/.bot-repair/dreaming/2026-04-11T21-35-00-000Z",
       archivedDreamsDiary: false,
       archivedSessionCorpus: true,
       archivedSessionIngestion: true,

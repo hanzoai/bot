@@ -18,7 +18,7 @@ import {
 import { resolveWindowsTaskkillPath } from "../../scripts/lib/windows-taskkill.mjs";
 
 const tempDirs: string[] = [];
-const CHUNKED_PAYLOAD_MARKER = "__openclawQaCredentialPayloadChunksV1";
+const CHUNKED_PAYLOAD_MARKER = "__botQaCredentialPayloadChunksV1";
 
 // Upper bound for polling a spawned process to reach a state. Polls return as
 // soon as the state holds, so a wide budget costs nothing on success and only
@@ -131,7 +131,7 @@ describe("telegram user credential path handling", () => {
   });
 
   it("writes private JSON files", async () => {
-    const dir = makeTempDir("openclaw-telegram-credential-");
+    const dir = makeTempDir("bot-telegram-credential-");
     await writePrivateJson(path.join(dir, "payload.json"), { status: "ok" });
     await expect(readFile(path.join(dir, "payload.json"), "utf8")).resolves.toBe(
       '{\n  "status": "ok"\n}\n',
@@ -156,23 +156,23 @@ describe("telegram user credential IO", () => {
   });
 
   it("rejects loose and unsafe credential timeout env values", async () => {
-    const previous = process.env.OPENCLAW_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS;
+    const previous = process.env.BOT_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS;
     try {
       for (const value of ["1e3", String(Number.MAX_SAFE_INTEGER + 1)]) {
-        process.env.OPENCLAW_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS = value;
+        process.env.BOT_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS = value;
         await expect(
           import(
             `${new URL("../../scripts/e2e/telegram-user-credential.ts", import.meta.url).href}?case=loose-timeout-${value}-${Date.now()}`
           ),
         ).rejects.toThrow(
-          `OPENCLAW_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS must be a positive integer. Got: ${JSON.stringify(value)}.`,
+          `BOT_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS must be a positive integer. Got: ${JSON.stringify(value)}.`,
         );
       }
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS;
+        delete process.env.BOT_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS;
       } else {
-        process.env.OPENCLAW_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS = previous;
+        process.env.BOT_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS = previous;
       }
     }
   });
@@ -216,7 +216,7 @@ describe("telegram user credential IO", () => {
       groupId: "-100123",
       sutToken: "sut-token",
       testerUserId: "8709353529",
-      testerUsername: "OpenClawTestUser",
+      testerUsername: "BotTestUser",
       telegramApiId: "123456",
       telegramApiHash: "api-hash-\u00e9",
       tdlibDatabaseEncryptionKey: "db-key",
@@ -271,17 +271,17 @@ describe("telegram user credential IO", () => {
       credentialModule.optionalPositiveInteger(
         "1e3",
         30_000,
-        "OPENCLAW_QA_CREDENTIAL_LEASE_TTL_MS",
+        "BOT_QA_CREDENTIAL_LEASE_TTL_MS",
       ),
-    ).toThrow('OPENCLAW_QA_CREDENTIAL_LEASE_TTL_MS must be a positive integer. Got: "1e3".');
+    ).toThrow('BOT_QA_CREDENTIAL_LEASE_TTL_MS must be a positive integer. Got: "1e3".');
     expect(() =>
       credentialModule.optionalPositiveInteger(
         "9007199254740992",
         30_000,
-        "OPENCLAW_QA_CREDENTIAL_PAYLOAD_MAX_BYTES",
+        "BOT_QA_CREDENTIAL_PAYLOAD_MAX_BYTES",
       ),
     ).toThrow(
-      'OPENCLAW_QA_CREDENTIAL_PAYLOAD_MAX_BYTES must be a positive integer. Got: "9007199254740992".',
+      'BOT_QA_CREDENTIAL_PAYLOAD_MAX_BYTES must be a positive integer. Got: "9007199254740992".',
     );
   });
 
@@ -317,7 +317,7 @@ describe("telegram user credential IO", () => {
   it.runIf(process.platform !== "win32")(
     "waits for timed-out child processes to exit before rejecting",
     async () => {
-      const dir = makeTempDir("openclaw-telegram-credential-timeout-");
+      const dir = makeTempDir("bot-telegram-credential-timeout-");
       const terminatedPath = path.join(dir, "terminated.txt");
       const readyPath = path.join(dir, "ready.txt");
       const scriptPath = path.join(dir, "ignore-term.cjs");
@@ -366,7 +366,7 @@ setInterval(() => {}, 1000);
   it.runIf(process.platform !== "win32")(
     "rejects timed-out commands when descendant processes exit cleanly",
     async () => {
-      const dir = makeTempDir("openclaw-telegram-credential-tree-timeout-clean-");
+      const dir = makeTempDir("bot-telegram-credential-tree-timeout-clean-");
       const childPidPath = path.join(dir, "child.pid");
       const readyPath = path.join(dir, "child.ready");
       const cleanupPath = path.join(dir, "child.cleanup");
@@ -422,7 +422,7 @@ setInterval(() => {}, 1000);
   );
 
   it.runIf(process.platform !== "win32")("kills timed-out child process groups", async () => {
-    const dir = makeTempDir("openclaw-telegram-credential-tree-timeout-");
+    const dir = makeTempDir("bot-telegram-credential-tree-timeout-");
     const childPidPath = path.join(dir, "child.pid");
     let childPid: number | undefined;
 
@@ -529,7 +529,7 @@ setInterval(() => {}, 1000);
   it.runIf(process.platform !== "win32")(
     "exits promptly after forwarded SIGTERM children exit cleanly",
     async () => {
-      const dir = makeTempDir("openclaw-telegram-credential-signal-");
+      const dir = makeTempDir("bot-telegram-credential-signal-");
       const runnerPath = path.join(dir, "runner.mjs");
       const readyPath = path.join(dir, "ready.txt");
       const childPidPath = path.join(dir, "child.pid");
@@ -582,7 +582,7 @@ setInterval(() => {}, 1000);
   it.runIf(process.platform !== "win32")(
     "keeps the forwarded signal force-kill armed while grandchildren survive",
     async () => {
-      const dir = makeTempDir("openclaw-telegram-credential-grandchild-signal-");
+      const dir = makeTempDir("bot-telegram-credential-grandchild-signal-");
       const runnerPath = path.join(dir, "runner.mjs");
       const readyPath = path.join(dir, "ready.txt");
       const grandchildPidPath = path.join(dir, "grandchild.pid");
@@ -616,7 +616,7 @@ setInterval(() => {}, 1000);
       const runner = spawn(process.execPath, ["--import", "tsx", runnerPath], {
         env: {
           ...process.env,
-          OPENCLAW_QA_CREDENTIAL_KILL_GRACE_MS: "100",
+          BOT_QA_CREDENTIAL_KILL_GRACE_MS: "100",
         },
         stdio: ["ignore", "pipe", "pipe"],
       });

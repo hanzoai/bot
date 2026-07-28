@@ -28,7 +28,7 @@ type ApplicationStartupSettings = {
 
 declare global {
   interface Window {
-    __OPENCLAW_NATIVE_CONTROL_AUTH__?: NativeControlAuth;
+    __BOT_NATIVE_CONTROL_AUTH__?: NativeControlAuth;
   }
 }
 
@@ -56,12 +56,12 @@ export function resolveApplicationStartupSettings(
   };
 
   const nativeAuth =
-    typeof window === "undefined" ? undefined : window["__OPENCLAW_NATIVE_CONTROL_AUTH__"];
+    typeof window === "undefined" ? undefined : window["__BOT_NATIVE_CONTROL_AUTH__"];
   if (nativeAuth) {
     try {
-      delete window["__OPENCLAW_NATIVE_CONTROL_AUTH__"];
+      delete window["__BOT_NATIVE_CONTROL_AUTH__"];
     } catch {
-      window["__OPENCLAW_NATIVE_CONTROL_AUTH__"] = undefined;
+      window["__BOT_NATIVE_CONTROL_AUTH__"] = undefined;
     }
 
     const gatewayUrl = normalizeOptionalString(nativeAuth.gatewayUrl);
@@ -91,7 +91,7 @@ export function resolveApplicationStartupSettings(
 
   const url = new URL(
     `${location.pathname}${location.search}${location.hash}`,
-    "http://openclaw.local",
+    "http://bot.local",
   );
   const params = new URLSearchParams(url.search);
   const hashParams = new URLSearchParams(url.hash.startsWith("#") ? url.hash.slice(1) : url.hash);
@@ -120,7 +120,7 @@ export function resolveApplicationStartupSettings(
     if (queryToken != null) {
       queryTokenUsed = true;
       console.warn(
-        "[openclaw] Auth token passed as query parameter (?token=). Use URL fragment instead: #token=<token>. Query parameters may appear in server logs.",
+        "[bot] Auth token passed as query parameter (?token=). Use URL fragment instead: #token=<token>. Query parameters may appear in server logs.",
       );
     }
     if (token && gatewayUrlChanged) {

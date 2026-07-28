@@ -1,4 +1,4 @@
-// Shared OpenClaw banner: the pixel lobster mascot beside the OPENCLAW
+// Shared Bot banner: the pixel lobster mascot beside the BOT
 // wordmark, with a short startup animation on rich interactive terminals.
 // Used by the wizard flows (doctor/onboard/configure) and the foreground
 // gateway run; non-TTY and CI paths always get the plain static banner.
@@ -91,7 +91,7 @@ function staticBannerLines(): string[] {
 
 function plainTitleLine(): string {
   const icon = decorativeEmoji("🦞");
-  return supportsDecorativeEmoji() && icon ? `${icon} OPENCLAW ${icon}` : "OPENCLAW";
+  return supportsDecorativeEmoji() && icon ? `${icon} BOT ${icon}` : "BOT";
 }
 
 const defaultSleep = (ms: number) =>
@@ -209,7 +209,7 @@ async function animateBanner(opts: {
 }
 
 /**
- * Prints the OpenClaw banner: animated on rich interactive terminals, static
+ * Prints the Bot banner: animated on rich interactive terminals, static
  * otherwise, plain title on terminals too narrow for the art.
  */
 export async function printClawBanner(

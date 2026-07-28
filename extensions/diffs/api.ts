@@ -1,11 +1,11 @@
 // Diffs API module exposes the plugin public contract.
-export type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+export type { BotConfig } from "bot/plugin-sdk/config-contracts";
 export {
   definePluginEntry,
   type AnyAgentTool,
-  type OpenClawPluginApi,
-  type OpenClawPluginConfigSchema,
-  type OpenClawPluginToolContext,
+  type BotPluginApi,
+  type BotPluginConfigSchema,
+  type BotPluginToolContext,
   type PluginLogger,
-} from "openclaw/plugin-sdk/plugin-entry";
-export { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "bot/plugin-sdk/plugin-entry";
+export { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";

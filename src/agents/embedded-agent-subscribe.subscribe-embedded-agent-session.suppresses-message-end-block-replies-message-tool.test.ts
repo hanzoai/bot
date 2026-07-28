@@ -1,6 +1,6 @@
 // Message-tool suppression tests cover delivery tracking, source-reply mirrors,
 // and duplicate reply prevention after message tool sends.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import {
   createSubscribedSessionHarness,
@@ -443,7 +443,7 @@ describe("subscribeEmbeddedAgentSession", () => {
     const { emit, onBlockReply } = createBlockReplyHarness("message_end");
 
     emitAssistantMessageEnd(emit, "Mirrored transcript text", {
-      provider: "openclaw",
+      provider: "bot",
       model: "delivery-mirror",
     });
     await Promise.resolve();
@@ -455,7 +455,7 @@ describe("subscribeEmbeddedAgentSession", () => {
     const { emit, onBlockReply } = createBlockReplyHarness("message_end");
 
     emitAssistantMessageEnd(emit, "Injected transcript text", {
-      provider: "openclaw",
+      provider: "bot",
       model: "gateway-injected",
     });
     await Promise.resolve();

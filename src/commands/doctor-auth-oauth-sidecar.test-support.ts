@@ -12,7 +12,7 @@ type DoctorAuthOAuthSidecarTestApi = {
 
 function getTestApi(): DoctorAuthOAuthSidecarTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.doctorAuthOAuthSidecarTestApi")
+    Symbol.for("bot.doctorAuthOAuthSidecarTestApi")
   ] as DoctorAuthOAuthSidecarTestApi;
 }
 

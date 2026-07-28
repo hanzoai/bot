@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import type { OpenClawCrablineChannelDriverSelection } from "@openclaw/crabline";
+import type { BotCrablineChannelDriverSelection } from "@openclaw/crabline";
 import { assertQaSuiteArtifactWritten } from "./artifact-assertion.js";
 import {
   hasQaCrablineArtifactPath,
@@ -21,7 +21,7 @@ import type { QaSuiteScenarioResult } from "./suite-types.js";
 
 type QaCrablineRuntime = typeof import("@openclaw/crabline");
 type QaCrablineChannelDriverSmokeResult = Awaited<
-  ReturnType<QaCrablineRuntime["runOpenClawCrablineChannelDriverSmoke"]>
+  ReturnType<QaCrablineRuntime["runBotCrablineChannelDriverSmoke"]>
 >;
 
 export type QaSuiteSummaryJsonParams = {
@@ -125,13 +125,13 @@ export async function writeQaSuiteArtifacts(params: {
   fastMode: boolean;
   concurrency: number;
   channelDriver?: QaScorecardChannelDriver | null;
-  channelDriverSelection?: OpenClawCrablineChannelDriverSelection | null;
+  channelDriverSelection?: BotCrablineChannelDriverSelection | null;
   isolatedWorkers?: boolean;
   scenarioIds?: readonly string[];
   runtimePair?: [RuntimeId, RuntimeId];
   writeEvidenceFile?: boolean;
   runCrablineChannelDriverSmoke?: (
-    params: Parameters<QaCrablineRuntime["runOpenClawCrablineChannelDriverSmoke"]>[0],
+    params: Parameters<QaCrablineRuntime["runBotCrablineChannelDriverSmoke"]>[0],
   ) => Promise<QaCrablineChannelDriverSmokeResult>;
 }) {
   const reportPath = path.join(params.outputDir, "qa-suite-report.md");
@@ -147,7 +147,7 @@ export async function writeQaSuiteArtifacts(params: {
   if (crablineChannelDriverSelection) {
     const runCrablineChannelDriverSmoke =
       params.runCrablineChannelDriverSmoke ??
-      crablineRuntime?.runOpenClawCrablineChannelDriverSmoke;
+      crablineRuntime?.runBotCrablineChannelDriverSmoke;
     if (!runCrablineChannelDriverSmoke) {
       throw new Error("Crabline runtime did not provide its channel-driver smoke helper.");
     }
@@ -168,7 +168,7 @@ export async function writeQaSuiteArtifacts(params: {
         }
       : crablineChannelDriverSelection;
   const report = renderQaMarkdownReport({
-    title: "OpenClaw QA Scenario Suite",
+    title: "Bot QA Scenario Suite",
     startedAt: params.startedAt,
     finishedAt: params.finishedAt,
     checks: [],
@@ -181,7 +181,7 @@ export async function writeQaSuiteArtifacts(params: {
     notes: createQaSuiteReportNotes({
       ...params,
       channelDriverSelection: effectiveChannelDriverSelection,
-      createCrablineChannelReportNotes: crablineRuntime?.createOpenClawCrablineChannelReportNotes,
+      createCrablineChannelReportNotes: crablineRuntime?.createBotCrablineChannelReportNotes,
     }),
   });
   const evidence =
@@ -225,7 +225,7 @@ export async function writeQaSuiteArtifacts(params: {
       `${JSON.stringify(
         {
           version: 1,
-          source: "openclaw/crabline",
+          source: "bot/crabline",
           channelDriver: crablineChannelDriverSelection.channelDriver,
           selectedChannel: crablineChannelDriverSelection.channel,
           manifestPath: crablineChannelDriverSmoke.manifestPath,
@@ -247,7 +247,7 @@ export async function writeQaSuiteArtifacts(params: {
       `${JSON.stringify(
         {
           version: 1,
-          source: "openclaw/crabline",
+          source: "bot/crabline",
           channelDriver: crablineChannelDriverSelection.channelDriver,
           selectedChannel: crablineChannelDriverSelection.channel,
           manifestPath: crablineChannelDriverSmoke.manifestPath,

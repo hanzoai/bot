@@ -45,7 +45,7 @@ describe("Pi session upstream activity", () => {
       upstreamKind: continued.upstream!.kind,
       upstreamRef: continued.upstream!.ref,
       marker: continued.upstream!.marker,
-      ownRecentUserTexts: ["sent from OpenClaw"],
+      ownRecentUserTexts: ["sent from Bot"],
     };
 
     await fs.appendFile(
@@ -55,7 +55,7 @@ describe("Pi session upstream activity", () => {
         id: "user-own",
         parentId: "info-1",
         timestamp: "2026-07-13T10:00:05.000Z",
-        message: { role: "user", content: "sent  from OpenClaw" },
+        message: { role: "user", content: "sent  from Bot" },
       })}\n`,
     );
     const ownEcho = await checkPiUpstreamActivity([probe]);

@@ -3,11 +3,11 @@ import path from "node:path";
 import {
   normalizeMemoryHostEventRecordForStorage,
   resolveMemoryHostEventLogPath,
-} from "openclaw/plugin-sdk/memory-host-events";
+} from "bot/plugin-sdk/memory-host-events";
 import type {
   PluginDoctorStateMigration,
   PluginDoctorStateMigrationContext,
-} from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/runtime-doctor";
 import {
   collectLegacyMemoryHostEventSources,
   memoryHostWorkspacePrefix,
@@ -523,7 +523,7 @@ async function migrateLegacyMemoryHostEventSource(params: {
     }
     if (source.storage !== "archive" && (await source.root.exists(activeRelativePath))) {
       params.warnings.push(
-        "An old writer recreated the Memory Core host event source; rerun openclaw doctor --fix to import the retained rows",
+        "An old writer recreated the Memory Core host event source; rerun bot doctor --fix to import the retained rows",
       );
     }
     return "completed";

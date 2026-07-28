@@ -1,6 +1,6 @@
-// Implements channel-scoped tailing of the OpenClaw log file.
+// Implements channel-scoped tailing of the Bot log file.
 import fs from "node:fs/promises";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { theme } from "../../../packages/terminal-core/src/theme.js";
 import { normalizeChannelId as normalizeBundledChannelId } from "../../channels/registry.js";
 import { readFileWindowFully } from "../../infra/file-read.js";

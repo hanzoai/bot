@@ -3,9 +3,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  createBotTestState,
+  type BotTestState,
+} from "../test-utils/bot-test-state.js";
 
 const note = vi.hoisted(() => vi.fn());
 
@@ -38,13 +38,13 @@ function firstNoteCall(): [string, string] {
 }
 
 describe("noteSessionLockHealth", () => {
-  let state: OpenClawTestState;
+  let state: BotTestState;
 
   beforeEach(async () => {
     note.mockClear();
-    state = await createOpenClawTestState({
+    state = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-doctor-locks-",
+      prefix: "bot-doctor-locks-",
     });
   });
 
@@ -65,7 +65,7 @@ describe("noteSessionLockHealth", () => {
     await noteSessionLockHealth({
       shouldRepair: false,
       staleMs: 60_000,
-      readOwnerProcessArgs: () => ["node", "/opt/openclaw/openclaw.mjs", "doctor"],
+      readOwnerProcessArgs: () => ["node", "/opt/hanzoai/bot.mjs", "doctor"],
     });
 
     expect(note).toHaveBeenCalledTimes(1);
@@ -98,7 +98,7 @@ describe("noteSessionLockHealth", () => {
     await noteSessionLockHealth({
       shouldRepair: true,
       staleMs: 30_000,
-      readOwnerProcessArgs: () => ["node", "/opt/openclaw/openclaw.mjs", "doctor"],
+      readOwnerProcessArgs: () => ["node", "/opt/hanzoai/bot.mjs", "doctor"],
     });
 
     expect(note).toHaveBeenCalledTimes(1);
@@ -130,7 +130,7 @@ describe("noteSessionLockHealth", () => {
 
     const locks = await detectStaleSessionLocks({
       staleMs: 30_000,
-      readOwnerProcessArgs: () => ["node", "/opt/openclaw/openclaw.mjs", "doctor"],
+      readOwnerProcessArgs: () => ["node", "/opt/hanzoai/bot.mjs", "doctor"],
     });
 
     expect(locks).toHaveLength(1);
@@ -151,7 +151,7 @@ describe("noteSessionLockHealth", () => {
 
     const [lock] = await detectStaleSessionLocks({
       staleMs: 30_000,
-      readOwnerProcessArgs: () => ["node", "/opt/openclaw/openclaw.mjs", "doctor"],
+      readOwnerProcessArgs: () => ["node", "/opt/hanzoai/bot.mjs", "doctor"],
     });
     if (!lock) {
       throw new Error("expected stale session lock");
@@ -181,7 +181,7 @@ describe("noteSessionLockHealth", () => {
 
     const [lock] = await detectStaleSessionLocks({
       staleMs: 30_000,
-      readOwnerProcessArgs: () => ["node", "/opt/openclaw/openclaw.mjs", "doctor"],
+      readOwnerProcessArgs: () => ["node", "/opt/hanzoai/bot.mjs", "doctor"],
     });
     if (!lock) {
       throw new Error("expected stale session lock");
@@ -200,9 +200,9 @@ describe("noteSessionLockHealth", () => {
   });
 
   it("uses the supplied env to choose the structured lint state dir", async () => {
-    const other = await createOpenClawTestState({
+    const other = await createBotTestState({
       layout: "state-only",
-      prefix: "openclaw-doctor-locks-other-",
+      prefix: "bot-doctor-locks-other-",
       applyEnv: false,
     });
     try {
@@ -217,7 +217,7 @@ describe("noteSessionLockHealth", () => {
       const locks = await detectStaleSessionLocks({
         env: other.env,
         staleMs: 30_000,
-        readOwnerProcessArgs: () => ["node", "/opt/openclaw/openclaw.mjs", "doctor"],
+        readOwnerProcessArgs: () => ["node", "/opt/hanzoai/bot.mjs", "doctor"],
       });
 
       expect(locks.map((lock) => lock.lockPath)).toEqual([lockPath]);
@@ -226,7 +226,7 @@ describe("noteSessionLockHealth", () => {
     }
   });
 
-  it("preserves report-only live OpenClaw locks in dry-run repair effects", async () => {
+  it("preserves report-only live Bot locks in dry-run repair effects", async () => {
     const sessionsDir = state.sessionsDir();
     await fs.mkdir(sessionsDir, { recursive: true });
 
@@ -239,7 +239,7 @@ describe("noteSessionLockHealth", () => {
 
     const [lock] = await detectStaleSessionLocks({
       staleMs: 30_000,
-      readOwnerProcessArgs: () => ["node", "/opt/openclaw/openclaw.mjs", "doctor"],
+      readOwnerProcessArgs: () => ["node", "/opt/hanzoai/bot.mjs", "doctor"],
     });
     if (!lock) {
       throw new Error("expected stale session lock");
@@ -247,7 +247,7 @@ describe("noteSessionLockHealth", () => {
 
     expect(lock.staleReasons).toEqual(["too-old"]);
     expect(sessionLockToHealthFinding(lock).fixHint).toBe(
-      "OpenClaw is preserving this live owned lock; inspect the owning process if it appears stuck.",
+      "Bot is preserving this live owned lock; inspect the owning process if it appears stuck.",
     );
     expect(sessionLockToRepairEffect(lock)).toEqual({
       kind: "state",
@@ -258,7 +258,7 @@ describe("noteSessionLockHealth", () => {
     await expect(fs.access(reportOnlyLock)).resolves.toBeUndefined();
   });
 
-  it("uses the emergency stale-threshold environment override without removing live OpenClaw lock files", async () => {
+  it("uses the emergency stale-threshold environment override without removing live Bot lock files", async () => {
     const sessionsDir = state.sessionsDir();
     await fs.mkdir(sessionsDir, { recursive: true });
 
@@ -271,8 +271,8 @@ describe("noteSessionLockHealth", () => {
 
     await noteSessionLockHealth({
       shouldRepair: true,
-      env: { OPENCLAW_SESSION_WRITE_LOCK_STALE_MS: "30000" },
-      readOwnerProcessArgs: () => ["node", "/opt/openclaw/openclaw.mjs", "doctor"],
+      env: { BOT_SESSION_WRITE_LOCK_STALE_MS: "30000" },
+      readOwnerProcessArgs: () => ["node", "/opt/hanzoai/bot.mjs", "doctor"],
     });
 
     expect(note).toHaveBeenCalledTimes(1);
@@ -282,7 +282,7 @@ describe("noteSessionLockHealth", () => {
     await expect(fs.access(configuredStaleLock)).resolves.toBeUndefined();
   });
 
-  it("removes fresh live locks when the owner is not an OpenClaw process", async () => {
+  it("removes fresh live locks when the owner is not an Bot process", async () => {
     const sessionsDir = state.sessionsDir();
     await fs.mkdir(sessionsDir, { recursive: true });
 
@@ -301,7 +301,7 @@ describe("noteSessionLockHealth", () => {
 
     expect(note).toHaveBeenCalledTimes(1);
     const [message] = firstNoteCall();
-    expect(message).toContain("stale=yes (non-openclaw-owner)");
+    expect(message).toContain("stale=yes (non-bot-owner)");
     expect(message).toContain("[removed]");
     expect(message).toContain("Removed 1 stale session lock file");
     await expect(fs.access(falseLiveLock)).rejects.toThrow();

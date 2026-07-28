@@ -2,9 +2,9 @@
 import {
   createModelCatalogPresetAppliers,
   type ModelProviderConfig,
-  type OpenClawConfig,
+  type BotConfig,
   type ProviderOnboardPresetAppliers,
-} from "openclaw/plugin-sdk/provider-onboard";
+} from "bot/plugin-sdk/provider-onboard";
 import {
   buildStepFunPlanProvider,
   buildStepFunProvider,
@@ -26,7 +26,7 @@ function createStepFunPresetAppliers(params: {
 }): ProviderOnboardPresetAppliers<[string]> {
   return createModelCatalogPresetAppliers<[string]>({
     primaryModelRef: params.primaryModelRef,
-    resolveParams: (_cfg: OpenClawConfig, baseUrl: string) => {
+    resolveParams: (_cfg: BotConfig, baseUrl: string) => {
       const provider = params.buildProvider(baseUrl);
       const models = provider.models ?? [];
       return {
@@ -57,18 +57,18 @@ const stepFunPlanPresetAppliers = createStepFunPresetAppliers({
   buildProvider: buildStepFunPlanProvider,
 });
 
-export function applyStepFunStandardConfigCn(cfg: OpenClawConfig): OpenClawConfig {
+export function applyStepFunStandardConfigCn(cfg: BotConfig): BotConfig {
   return stepFunPresetAppliers.applyConfig(cfg, STEPFUN_STANDARD_CN_BASE_URL);
 }
 
-export function applyStepFunStandardConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyStepFunStandardConfig(cfg: BotConfig): BotConfig {
   return stepFunPresetAppliers.applyConfig(cfg, STEPFUN_STANDARD_INTL_BASE_URL);
 }
 
-export function applyStepFunPlanConfigCn(cfg: OpenClawConfig): OpenClawConfig {
+export function applyStepFunPlanConfigCn(cfg: BotConfig): BotConfig {
   return stepFunPlanPresetAppliers.applyConfig(cfg, STEPFUN_PLAN_CN_BASE_URL);
 }
 
-export function applyStepFunPlanConfig(cfg: OpenClawConfig): OpenClawConfig {
+export function applyStepFunPlanConfig(cfg: BotConfig): BotConfig {
   return stepFunPlanPresetAppliers.applyConfig(cfg, STEPFUN_PLAN_INTL_BASE_URL);
 }

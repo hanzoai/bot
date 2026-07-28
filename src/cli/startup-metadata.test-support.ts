@@ -7,7 +7,7 @@ type CliStartupMetadataTestApi = {
 
 function getTestApi(): CliStartupMetadataTestApi {
   return (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.cliStartupMetadataTestApi")
+    Symbol.for("bot.cliStartupMetadataTestApi")
   ] as CliStartupMetadataTestApi;
 }
 

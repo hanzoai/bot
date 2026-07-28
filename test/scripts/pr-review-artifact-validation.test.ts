@@ -64,7 +64,7 @@ function runValidation(
     orList?: boolean;
   } = {},
 ) {
-  const fixtureRoot = tempDirs.make("openclaw-pr-review-validation-");
+  const fixtureRoot = tempDirs.make("bot-pr-review-validation-");
   const localDir = join(fixtureRoot, ".local");
   mkdirSync(localDir);
   writeFileSync(join(localDir, "review.json"), `${JSON.stringify(review)}\n`);
@@ -103,7 +103,7 @@ function runValidation(
 }
 
 function runMergeVerification(checks: "api-error" | "invalid-json" | "no-required" | "pending") {
-  const fixtureRoot = tempDirs.make("openclaw-pr-merge-verification-");
+  const fixtureRoot = tempDirs.make("bot-pr-merge-verification-");
   const localDir = join(fixtureRoot, ".local");
   const head = "a".repeat(40);
   mkdirSync(localDir);

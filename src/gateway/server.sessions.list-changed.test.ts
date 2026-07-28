@@ -2,11 +2,11 @@
  * Gateway sessions.list changed-state tests.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import {
   createPluginRegistryFixture,
   registerTestPlugin,
-} from "openclaw/plugin-sdk/plugin-test-contracts";
+} from "bot/plugin-sdk/plugin-test-contracts";
 import { afterEach, expect, test, vi } from "vitest";
 import { loadSessionEntry } from "../config/sessions/session-accessor.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
@@ -382,7 +382,7 @@ test("sessions.list keeps bulk rows lightweight and uses persisted model fields"
       },
       {
         role: "assistant",
-        provider: "openclaw",
+        provider: "bot",
         model: "delivery-mirror",
         usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
       },

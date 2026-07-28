@@ -1,10 +1,10 @@
 // Tests elevated permission resolution from allowlists and message context.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { MsgContext } from "../templating.js";
 import { resolveElevatedPermissions } from "./reply-elevated.js";
 
-function buildConfig(allowFrom: string[]): OpenClawConfig {
+function buildConfig(allowFrom: string[]): BotConfig {
   return {
     tools: {
       elevated: {
@@ -13,7 +13,7 @@ function buildConfig(allowFrom: string[]): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function buildContext(overrides?: Partial<MsgContext>): MsgContext {

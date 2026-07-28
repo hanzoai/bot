@@ -46,8 +46,8 @@ const {
   sourceReplyDeliveryModeContexts: [] as unknown[],
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-outbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-outbound")>();
+vi.mock("bot/plugin-sdk/channel-outbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/channel-outbound")>();
   return {
     ...actual,
     deliverInboundReplyWithMessageSendContext: deliverInboundReplyWithMessageSendContextMock,
@@ -1069,7 +1069,7 @@ describe("whatsapp inbound dispatch", () => {
         Body: "incoming",
         ReplyToId: "quoted-bot-message",
         ReplyToBody: "Earlier bot reply",
-        ReplyToSender: "OpenClaw",
+        ReplyToSender: "Bot",
       },
       deliverReply,
       msg: makeMsg({
@@ -1092,7 +1092,7 @@ describe("whatsapp inbound dispatch", () => {
     expectRecordFields(requireRecord(durableParams.ctxPayload, "durable context"), {
       ReplyToId: "quoted-bot-message",
       ReplyToBody: "Earlier bot reply",
-      ReplyToSender: "OpenClaw",
+      ReplyToSender: "Bot",
     });
     expect(deliverReply).not.toHaveBeenCalled();
   });

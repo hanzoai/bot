@@ -11,8 +11,8 @@ Guarded end-to-end encrypted claw channel.
 
 ## Distribution
 
-- Package: `@openclaw/reef`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-reef`
+- Install route: included in Bot
 
 ## Surface
 

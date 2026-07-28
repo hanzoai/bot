@@ -167,11 +167,11 @@ type PersistedSender = {
 };
 
 function readPersistedSender(message: AgentMessage): PersistedSender | undefined {
-  const openclaw = (message as unknown as Record<string, unknown>)["__openclaw"];
-  if (!openclaw || typeof openclaw !== "object" || Array.isArray(openclaw)) {
+  const bot = (message as unknown as Record<string, unknown>)["__bot"];
+  if (!bot || typeof bot !== "object" || Array.isArray(bot)) {
     return undefined;
   }
-  const meta = openclaw as Record<string, unknown>;
+  const meta = bot as Record<string, unknown>;
   const sender = {
     id: normalizePersistedSenderValue(meta["senderId"]),
     name: normalizePersistedSenderValue(meta["senderName"]),

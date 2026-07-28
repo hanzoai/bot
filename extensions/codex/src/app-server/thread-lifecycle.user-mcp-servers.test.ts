@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { EmbeddedRunAttemptParams } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { EmbeddedRunAttemptParams } from "bot/plugin-sdk/agent-harness-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { CodexAppServerRuntimeOptions } from "./config.js";
 import {
@@ -107,7 +107,7 @@ describe("startOrResumeThread — user mcp.servers projection (regression: #8081
   let tempDir = "";
 
   beforeEach(async () => {
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-80814-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-80814-"));
     // Bindings are keyed by session identity, not tempDir, so sibling tests
     // would otherwise leak resumable threads into fresh-start expectations.
     resetCodexTestBindingStore();
@@ -177,7 +177,7 @@ describe("startOrResumeThread — user mcp.servers projection (regression: #8081
                 transport: "stdio",
                 command: "node",
                 args: [
-                  `/opt/openclaw/mcp/server-${index}/dist/index.js`,
+                  `/opt/bot/mcp/server-${index}/dist/index.js`,
                   "--description",
                   "x".repeat(400),
                 ],

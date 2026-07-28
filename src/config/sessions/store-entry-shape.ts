@@ -1,5 +1,5 @@
 // Store entry shape normalization rejects unsafe persisted metadata before runtime use.
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { validateSessionId } from "./paths.js";
 import type { SessionEntry } from "./types.js";
 

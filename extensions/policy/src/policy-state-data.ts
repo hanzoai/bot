@@ -1,7 +1,7 @@
 // Policy plugin data, secret, and auth evidence.
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import { coerceSecretRef } from "openclaw/plugin-sdk/secret-input";
-import { isRecord, asBoolean as readBoolean } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { normalizeAgentId } from "bot/plugin-sdk/routing";
+import { coerceSecretRef } from "bot/plugin-sdk/secret-input";
+import { isRecord, asBoolean as readBoolean } from "bot/plugin-sdk/string-coerce-runtime";
 import { ocPathSegment } from "./policy-state-helpers.js";
 import type {
   PolicyAuthProfileEvidence,
@@ -33,7 +33,7 @@ export function scanPolicyAuthProfiles(
         mode?: string;
       } = {
         id,
-        source: `oc://openclaw.config/auth/profiles/${ocPathSegment(id)}`,
+        source: `oc://bot.config/auth/profiles/${ocPathSegment(id)}`,
         validMetadata: isValidAuthProfileMetadata(value),
       };
       if (isRecord(value)) {
@@ -54,11 +54,11 @@ export function scanPolicyDataHandling(
   const entries: PolicyDataHandlingEvidence[] = [];
   // Redaction has no config surface: src/logging/redact.ts always redacts. This invariant
   // record is how dataHandling.sensitiveLogging.requireRedaction reports as satisfied in
-  // `openclaw policy check` evidence and the attestation, since no doctor check can fail.
+  // `bot policy check` evidence and the attestation, since no doctor check can fail.
   entries.push({
     id: "logging-redaction",
     kind: "sensitiveLoggingRedaction",
-    source: "oc://openclaw.invariant/logging/redaction",
+    source: "oc://bot.invariant/logging/redaction",
     scope: "global",
     value: true,
     explicit: true,
@@ -78,7 +78,7 @@ export function scanPolicyDataHandling(
   entries.push({
     id: "diagnostics-otel-content-capture",
     kind: "telemetryContentCapture",
-    source: "oc://openclaw.config/diagnostics/otel/captureContent",
+    source: "oc://bot.config/diagnostics/otel/captureContent",
     scope: "global",
     value: captureContent,
     explicit: otel.captureContent !== undefined,
@@ -90,7 +90,7 @@ export function scanPolicyDataHandling(
   entries.push({
     id: "session-maintenance-mode",
     kind: "sessionRetentionMode",
-    source: "oc://openclaw.config/session/maintenance/mode",
+    source: "oc://bot.config/session/maintenance/mode",
     scope: "global",
     value: retentionMode,
     explicit: maintenance.mode !== undefined,
@@ -137,7 +137,7 @@ function pushMemorySessionTranscriptIndexing(
     entries.push({
       id: "memory-qmd-session-transcripts",
       kind: "memorySessionTranscriptIndexing",
-      source: "oc://openclaw.config/memory/qmd/sessions/enabled",
+      source: "oc://bot.config/memory/qmd/sessions/enabled",
       scope: "global",
       value: memory.backend === "qmd" && readBoolean(qmdSessions.enabled) === true,
       explicit: true,
@@ -156,8 +156,8 @@ function pushMemorySessionTranscriptIndexing(
       source:
         readBoolean(defaultsMemorySearch.rememberAcrossConversations) === undefined &&
         readBoolean(defaultExperimental.sessionMemory) !== undefined
-          ? "oc://openclaw.config/memory/search/experimental/sessionMemory"
-          : "oc://openclaw.config/memory/search/rememberAcrossConversations",
+          ? "oc://bot.config/memory/search/experimental/sessionMemory"
+          : "oc://bot.config/memory/search/rememberAcrossConversations",
       scope: "global",
       value: defaultSessionMemory,
       explicit: true,
@@ -214,9 +214,9 @@ function pushMemorySessionTranscriptIndexing(
       source: explicit
         ? readBoolean(memorySearch?.rememberAcrossConversations) === undefined &&
           readBoolean(experimental.sessionMemory) !== undefined
-          ? `oc://openclaw.config/agents/${container}/${pathSegment}/memory/search/experimental/sessionMemory`
-          : `oc://openclaw.config/agents/${container}/${pathSegment}/memory/search/rememberAcrossConversations`
-        : "oc://openclaw.config/memory/search/rememberAcrossConversations",
+          ? `oc://bot.config/agents/${container}/${pathSegment}/memory/search/experimental/sessionMemory`
+          : `oc://bot.config/agents/${container}/${pathSegment}/memory/search/rememberAcrossConversations`
+        : "oc://bot.config/memory/search/rememberAcrossConversations",
       scope: "agent",
       agentId: normalizeAgentId(agentId),
       value: agentSessionMemory,
@@ -297,7 +297,7 @@ function scanPolicySecretProviders(cfg: Record<string, unknown>): readonly Polic
     } = {
       id,
       kind: "provider",
-      source: `oc://openclaw.config/secrets/providers/${ocPathSegment(id)}`,
+      source: `oc://bot.config/secrets/providers/${ocPathSegment(id)}`,
     };
     if (isRecord(value) && typeof value.source === "string") {
       entry.providerSource = value.source;
@@ -352,7 +352,7 @@ function collectSecretInputs(
 }
 
 function configPathSource(path: readonly string[]): string {
-  return `oc://openclaw.config/${path.map(ocPathSegment).join("/")}`;
+  return `oc://bot.config/${path.map(ocPathSegment).join("/")}`;
 }
 
 function isSecretInputPath(path: readonly string[]): boolean {

@@ -1,5 +1,5 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { TtsDirectiveOverrides } from "openclaw/plugin-sdk/speech-core";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { TtsDirectiveOverrides } from "bot/plugin-sdk/speech-core";
 import { assertSpeechRuntimeAvailable } from "./runtime-availability.js";
 import { executeTtsProviderAttempts, resolveTtsRequestSetup } from "./tts-synthesis-support.js";
 import { resolveTtsSynthesisTarget } from "./tts-synthesis.js";
@@ -7,7 +7,7 @@ import type { TtsStreamResult, TtsSynthesisStreamResult } from "./tts-types.js";
 
 export async function streamSpeech(params: {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prefsPath?: string;
   channel?: string;
   overrides?: TtsDirectiveOverrides;
@@ -79,7 +79,7 @@ export async function streamSpeech(params: {
 
 export async function textToSpeechStream(params: {
   text: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prefsPath?: string;
   channel?: string;
   overrides?: TtsDirectiveOverrides;

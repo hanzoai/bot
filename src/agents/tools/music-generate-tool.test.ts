@@ -1,7 +1,7 @@
 // Music generation tool tests cover provider selection, task lifecycle updates,
 // duplicate guards, media persistence, and result delivery metadata.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import * as mediaStore from "../../media/store.js";
 import * as webMedia from "../../media/web-media.js";
 import * as musicGenerationRuntime from "../../music-generation/runtime.js";
@@ -162,8 +162,8 @@ vi.mock("./music-generate-background.js", () => musicGenerateBackgroundMocks);
 vi.mock("../../tasks/runtime-internal.js", () => taskRuntimeInternalMocks);
 vi.mock("../../tasks/detached-task-runtime.js", () => taskExecutorMocks);
 
-function asConfig(value: unknown): OpenClawConfig {
-  return value as OpenClawConfig;
+function asConfig(value: unknown): BotConfig {
+  return value as BotConfig;
 }
 
 function expectMusicGenerateTool(
@@ -981,7 +981,7 @@ describe("createMusicGenerateTool", () => {
     }
 
     const result = await tool.execute("call-google-generate", {
-      prompt: "OpenClaw anthem",
+      prompt: "Bot anthem",
       instrumental: true,
       durationSeconds: 30,
       format: "wav",

@@ -2,12 +2,12 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   type JsonSchemaObject,
   validateJsonSchemaValue,
-} from "openclaw/plugin-sdk/json-schema-runtime";
-import { DEFAULT_SECRET_FILE_MAX_BYTES } from "openclaw/plugin-sdk/secret-file-runtime";
+} from "bot/plugin-sdk/json-schema-runtime";
+import { DEFAULT_SECRET_FILE_MAX_BYTES } from "bot/plugin-sdk/secret-file-runtime";
 import { describe, expect, it } from "vitest";
 import { qqbotConfigAdapter, qqbotSetupAdapterShared } from "./bridge/config-shared.js";
 import {
@@ -65,7 +65,7 @@ describe("qqbot config", () => {
 
   it("accepts top-level speech overrides in the manifest schema", () => {
     const manifest = JSON.parse(
-      fs.readFileSync(new URL("../openclaw.plugin.json", import.meta.url), "utf-8"),
+      fs.readFileSync(new URL("../bot.plugin.json", import.meta.url), "utf-8"),
     ) as { configSchema: JsonSchemaObject };
 
     const result = validateJsonSchemaValue({
@@ -86,7 +86,7 @@ describe("qqbot config", () => {
 
   it("accepts defaultAccount in the manifest schema", () => {
     const manifest = JSON.parse(
-      fs.readFileSync(new URL("../openclaw.plugin.json", import.meta.url), "utf-8"),
+      fs.readFileSync(new URL("../bot.plugin.json", import.meta.url), "utf-8"),
     ) as { configSchema: JsonSchemaObject };
 
     const result = validateJsonSchemaValue({
@@ -117,7 +117,7 @@ describe("qqbot config", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(resolveDefaultQQBotAccountId(cfg)).toBe("bot2");
   });
@@ -137,7 +137,7 @@ describe("qqbot config", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(qqbotConfigAdapter.resolveAccount(cfg, "work")).toMatchObject({
       accountId: "work",
@@ -186,7 +186,7 @@ describe("qqbot config", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(qqbotConfigAdapter.deleteAccount?.({ cfg, accountId: "default" })).toMatchObject({
       channels: {
@@ -222,7 +222,7 @@ describe("qqbot config", () => {
         transcodeEnabled: false,
       },
       urlDirectUpload: false,
-      upgradeUrl: "https://docs.openclaw.ai/channels/qqbot",
+      upgradeUrl: "https://docs.bot.ai/channels/qqbot",
       upgradeMode: "doc",
       accounts: {
         bot2: {
@@ -303,11 +303,11 @@ describe("qqbot config", () => {
             transcodeEnabled: false,
           },
           urlDirectUpload: false,
-          upgradeUrl: "https://docs.openclaw.ai/channels/qqbot",
+          upgradeUrl: "https://docs.bot.ai/channels/qqbot",
           upgradeMode: "hot-reload",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const resolved = resolveQQBotAccount(cfg, DEFAULT_ACCOUNT_ID);
 
@@ -318,7 +318,7 @@ describe("qqbot config", () => {
       transcodeEnabled: false,
     });
     expect(resolved.config.urlDirectUpload).toBe(false);
-    expect(resolved.config.upgradeUrl).toBe("https://docs.openclaw.ai/channels/qqbot");
+    expect(resolved.config.upgradeUrl).toBe("https://docs.bot.ai/channels/qqbot");
     expect(resolved.config.upgradeMode).toBe("hot-reload");
   });
 
@@ -336,7 +336,7 @@ describe("qqbot config", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const resolved = resolveQQBotAccount(cfg);
 
@@ -353,7 +353,7 @@ describe("qqbot config", () => {
       fs.writeFileSync(secretFile, "x".repeat(DEFAULT_SECRET_FILE_MAX_BYTES + 1));
       const resolved = resolveQQBotAccount({
         channels: { qqbot: { appId: "123456", clientSecretFile: secretFile } },
-      } as OpenClawConfig);
+      } as BotConfig);
 
       expect(resolved.clientSecret).toBe("");
       expect(resolved.secretSource).toBe("none");
@@ -377,7 +377,7 @@ describe("qqbot config", () => {
         }
         const resolved = resolveQQBotAccount({
           channels: { qqbot: { appId: "123456", clientSecretFile: linkedFile } },
-        } as OpenClawConfig);
+        } as BotConfig);
 
         expect(resolved.clientSecret).toBe("fixture-secret");
         expect(resolved.secretSource).toBe("file");
@@ -393,7 +393,7 @@ describe("qqbot config", () => {
   ])(
     "normalizes QQBOT_CLIENT_SECRET environment fallback %#",
     ({ value, secret, source, configured }) => {
-      const cfg = { channels: { qqbot: { appId: "123456" } } } as OpenClawConfig;
+      const cfg = { channels: { qqbot: { appId: "123456" } } } as BotConfig;
       const previous = process.env.QQBOT_CLIENT_SECRET;
       process.env.QQBOT_CLIENT_SECRET = value;
       try {
@@ -442,7 +442,7 @@ describe("qqbot config", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(() => resolveQQBotAccount(cfg, DEFAULT_ACCOUNT_ID)).toThrow(
       'channels.qqbot.clientSecret: unresolved SecretRef "file:default:/qqbot/clientSecret"',
@@ -457,7 +457,7 @@ describe("qqbot config", () => {
           clientSecret: "secretref:/QQBOT_CLIENT_SECRET",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     expect(() => resolveQQBotAccount(cfg, DEFAULT_ACCOUNT_ID)).toThrow(
       "channels.qqbot.clientSecret: legacy SecretRef marker strings are not valid QQ Bot clientSecret values; use a structured SecretRef object instead.",
@@ -492,7 +492,7 @@ describe("qqbot config", () => {
     const setup = requireQQBotSetup();
 
     const next = setup.applyAccountConfig?.({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       accountId: inputAccountId,
       input: {
         token: "102905186:Oi2Mg1Mh2Ni3:Pl7TpBXuHe1OmAYwKi7W",
@@ -523,28 +523,28 @@ describe("qqbot config", () => {
 
     expect(
       runtimeSetup.validateInput?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: DEFAULT_ACCOUNT_ID,
         input,
       } as never),
     ).toBe("QQBot --token must be in appId:clientSecret format");
     expect(
       lightweightSetup.validateInput?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: DEFAULT_ACCOUNT_ID,
         input,
       } as never),
     ).toBe("QQBot --token must be in appId:clientSecret format");
     expect(
       runtimeSetup.applyAccountConfig?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: DEFAULT_ACCOUNT_ID,
         input,
       } as never),
     ).toStrictEqual({});
     expect(
       lightweightSetup.applyAccountConfig?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: DEFAULT_ACCOUNT_ID,
         input,
       } as never),
@@ -559,7 +559,7 @@ describe("qqbot config", () => {
 
     expect(
       runtimeSetup.applyAccountConfig?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: DEFAULT_ACCOUNT_ID,
         input,
       } as never),
@@ -574,7 +574,7 @@ describe("qqbot config", () => {
     });
     expect(
       lightweightSetup.applyAccountConfig?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: DEFAULT_ACCOUNT_ID,
         input,
       } as never),
@@ -608,28 +608,28 @@ describe("qqbot config", () => {
 
     expect(
       runtimeSetup.validateInput?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: "bot2",
         input,
       } as never),
     ).toBe("QQBot --use-env only supports the default account");
     expect(
       lightweightSetup.validateInput?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: "bot2",
         input,
       } as never),
     ).toBe("QQBot --use-env only supports the default account");
     expect(
       runtimeSetup.applyAccountConfig?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: "bot2",
         input,
       } as never),
     ).toStrictEqual({});
     expect(
       lightweightSetup.applyAccountConfig?.({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         accountId: "bot2",
         input,
       } as never),

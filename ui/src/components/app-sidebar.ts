@@ -56,8 +56,8 @@ import { SidebarMenusController } from "./sidebar-menus-controller.ts";
 // chunk still stays off until reload when that retry fails, by design.
 const sidebarChromeImport = createIdleImport(() =>
   Promise.all([
-    customElements.get("openclaw-lobster-pet") ? undefined : import("./lobster-pet.ts"),
-    customElements.get("openclaw-viewer-facepile") ? undefined : import("./viewer-facepile.ts"),
+    customElements.get("bot-lobster-pet") ? undefined : import("./lobster-pet.ts"),
+    customElements.get("bot-viewer-facepile") ? undefined : import("./viewer-facepile.ts"),
   ]),
 );
 
@@ -143,7 +143,7 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
   }
 
   override disconnectedCallback() {
-    window.removeEventListener("openclaw:native-gateways-changed", this.nativeGatewaysChanged);
+    window.removeEventListener("bot:native-gateways-changed", this.nativeGatewaysChanged);
     this.narration?.disconnect();
     this.catalogRendererImport.dispose();
     super.disconnectedCallback();
@@ -240,7 +240,7 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
 
   override connectedCallback() {
     super.connectedCallback();
-    window.addEventListener("openclaw:native-gateways-changed", this.nativeGatewaysChanged);
+    window.addEventListener("bot:native-gateways-changed", this.nativeGatewaysChanged);
     // The decorative pet's large module stays out of startup and upgrades in place.
     // Its first visit is at least 15 seconds after load, so idle loading cannot miss one.
     sidebarChromeImport.schedule();
@@ -434,12 +434,12 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
           </div>
           <div class="sidebar-shell__footer">
             ${renderAppSidebarAttention(this)}
-            <openclaw-sidebar-update-card
+            <bot-sidebar-update-card
               .updateAvailable=${this.updateAvailable}
               .updateRunning=${this.updateRunning}
               .onUpdate=${this.onUpdate}
-            ></openclaw-sidebar-update-card>
-            <openclaw-lobster-pet
+            ></bot-sidebar-update-card>
+            <bot-lobster-pet
               .seed=${lobsterPetSeed(this.sessionKey)}
               .mode=${resolveLobsterPetMode(
                 !this.offline,
@@ -449,16 +449,16 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
               .visitsEnabled=${this.lobsterPetVisits}
               .soundsEnabled=${this.lobsterPetSounds}
               .gatewayVersion=${this.gatewayVersion}
-            ></openclaw-lobster-pet>
+            ></bot-lobster-pet>
             ${this.devGitBranch
-              ? html`<openclaw-tooltip .content=${this.devGitBranch}>
+              ? html`<bot-tooltip .content=${this.devGitBranch}>
                   <div class="sidebar-footer-branch">
                     <span class="sidebar-footer-branch__icon" aria-hidden="true"
                       >${icons.gitBranch}</span
                     >
                     <span class="sidebar-footer-branch__name">${this.devGitBranch}</span>
                   </div>
-                </openclaw-tooltip>`
+                </bot-tooltip>`
               : nothing}
             ${renderAppSidebarFooterBar(this)}
           </div>
@@ -473,6 +473,6 @@ class AppSidebar extends AppSidebarSessionNavigationElement implements SessionLi
   }
 }
 
-if (!customElements.get("openclaw-app-sidebar")) {
-  customElements.define("openclaw-app-sidebar", AppSidebar);
+if (!customElements.get("bot-app-sidebar")) {
+  customElements.define("bot-app-sidebar", AppSidebar);
 }

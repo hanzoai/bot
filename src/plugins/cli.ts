@@ -1,7 +1,7 @@
 // Registers plugin-related CLI commands.
 import type { Command } from "commander";
 import { getRuntimeConfig, readConfigFileSnapshot } from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   createPluginCliLogger,
   loadPluginCliDescriptors,
@@ -9,7 +9,7 @@ import {
   type PluginCliLoaderOptions,
 } from "./cli-registry-loader.js";
 import { registerPluginCliCommandGroups } from "./register-plugin-cli-command-groups.js";
-import type { OpenClawPluginCliRootCommandDescriptor, PluginLogger } from "./types.js";
+import type { BotPluginCliRootCommandDescriptor, PluginLogger } from "./types.js";
 
 type PluginCliRegistrationMode = "eager" | "lazy";
 
@@ -22,7 +22,7 @@ type PluginCliRegistrationEntries = Awaited<
   ReturnType<typeof loadPluginCliRegistrationEntriesWithDefaults>
 >;
 
-const PLUGIN_CLI_ENTRIES_CACHE_KEY = Symbol.for("openclaw.plugin-cli-registration-entries-cache");
+const PLUGIN_CLI_ENTRIES_CACHE_KEY = Symbol.for("bot.plugin-cli-registration-entries-cache");
 
 interface ProgramWithEntriesCache {
   [PLUGIN_CLI_ENTRIES_CACHE_KEY]?: {
@@ -76,7 +76,7 @@ function loaderOptionsKey(loaderOptions: PluginCliLoaderOptions | undefined): st
 }
 
 export const loadValidatedConfigForPluginRegistration =
-  async (): Promise<OpenClawConfig | null> => {
+  async (): Promise<BotConfig | null> => {
     const snapshot = await readConfigFileSnapshot();
     if (!snapshot.valid) {
       return null;
@@ -85,16 +85,16 @@ export const loadValidatedConfigForPluginRegistration =
   };
 
 export async function getPluginCliCommandDescriptors(
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
   env?: NodeJS.ProcessEnv,
   loaderOptions?: PluginCliLoaderOptions,
-): Promise<OpenClawPluginCliRootCommandDescriptor[]> {
+): Promise<BotPluginCliRootCommandDescriptor[]> {
   return loadPluginCliDescriptors({ cfg, env, loaderOptions, logger: quietDescriptorLogger });
 }
 
 export async function registerPluginCliCommands(
   program: Command,
-  cfg?: OpenClawConfig,
+  cfg?: BotConfig,
   env?: NodeJS.ProcessEnv,
   loaderOptions?: PluginCliLoaderOptions,
   options?: RegisterPluginCliOptions,
@@ -133,7 +133,7 @@ export async function registerPluginCliCommandsFromValidatedConfig(
   env?: NodeJS.ProcessEnv,
   loaderOptions?: PluginCliLoaderOptions,
   options?: RegisterPluginCliOptions,
-): Promise<OpenClawConfig | null> {
+): Promise<BotConfig | null> {
   const config = await loadValidatedConfigForPluginRegistration();
   if (!config) {
     return null;

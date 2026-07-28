@@ -1,4 +1,4 @@
-import { redactSensitiveUrlLikeString } from "@openclaw/net-policy/redact-sensitive-url";
+import { redactSensitiveUrlLikeString } from "@hanzo/bot-net-policy/redact-sensitive-url";
 import {
   listAgentEntries,
   listAgentIds,
@@ -201,7 +201,7 @@ export async function runClawsInspectCommand(
     valid: true,
     source: result.source,
     manifest: result.manifest,
-    ...(result.openClawProfile ? { openClawProfile: result.openClawProfile } : {}),
+    ...(result.botProfile ? { botProfile: result.botProfile } : {}),
     diagnostics: result.diagnostics,
   };
   if (opts.json) {
@@ -265,7 +265,7 @@ export async function runClawsAddCommand(
   let plan = await buildClawAddPlan({
     manifest: result.manifest,
     clawMarkdownBody: result.clawMarkdownBody,
-    openClawProfile: result.openClawProfile,
+    botProfile: result.botProfile,
     source: result.source,
     diagnostics: result.diagnostics,
     context: basePlanContext,
@@ -283,7 +283,7 @@ export async function runClawsAddCommand(
     plan = await buildClawAddPlan({
       manifest: result.manifest,
       clawMarkdownBody: result.clawMarkdownBody,
-      openClawProfile: result.openClawProfile,
+      botProfile: result.botProfile,
       source: result.source,
       diagnostics: result.diagnostics,
       context: {

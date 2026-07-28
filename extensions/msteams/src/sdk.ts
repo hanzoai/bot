@@ -1,11 +1,11 @@
 // Msteams plugin module implements sdk behavior.
 import * as fs from "node:fs";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import { normalizeBotFrameworkServiceUrl } from "./bot-framework-service-url.js";
 import type { MSTeamsCloudName } from "./cloud.js";
 import { MSTEAMS_REQUEST_TIMEOUT_MS } from "./request-timeout.js";
 import type { MSTeamsCredentials, MSTeamsFederatedCredentials } from "./token.js";
-import { buildOpenClawUserAgentFragment } from "./user-agent.js";
+import { buildBotUserAgentFragment } from "./user-agent.js";
 
 type MSTeamsHttpServerAdapter =
   import("@microsoft/teams.apps/dist/http/adapter.js").IHttpServerAdapter;
@@ -82,7 +82,7 @@ type MSTeamsAppOn = {
     cb: (ctx: FileConsentCtx) => void | Promise<void>,
   ): MSTeamsApp;
   // SSO sign-in invokes. The monitor registers guarded replacement routes and
-  // delegates back into the SDK handlers after OpenClaw sender policy passes.
+  // delegates back into the SDK handlers after Bot sender policy passes.
   (name: "signin.token-exchange", cb: (ctx: SigninTokenExchangeCtx) => unknown): MSTeamsApp;
   (name: "signin.verify-state", cb: (ctx: SigninVerifyStateCtx) => unknown): MSTeamsApp;
   // Feedback (thumbs up/down) on AI-generated messages — Teams delivers
@@ -263,7 +263,7 @@ async function createMSTeamsApp(
 ): Promise<MSTeamsApp> {
   const { App, cloudFromName } = await loadSdkModules();
   // Tag outbound SDK HTTP calls with a User-Agent fragment so the Teams
-  // backend can identify OpenClaw traffic for usage telemetry. Teams SDK
+  // backend can identify Bot traffic for usage telemetry. Teams SDK
   // 2.0.11+ preserves both its own `teams.ts[apps]/<sdk-version>` identifier
   // and caller-provided User-Agent fragments when plain client headers are used.
   const cloud = options?.cloud ?? "Public";
@@ -272,7 +272,7 @@ async function createMSTeamsApp(
     : undefined;
   const appOptions: Record<string, unknown> = {
     client: options?.httpClient ?? {
-      headers: { "User-Agent": buildOpenClawUserAgentFragment() },
+      headers: { "User-Agent": buildBotUserAgentFragment() },
       timeout: MSTEAMS_REQUEST_TIMEOUT_MS,
     },
     ...(options?.httpServerAdapter ? { httpServerAdapter: options.httpServerAdapter } : {}),

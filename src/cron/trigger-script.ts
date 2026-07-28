@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   resolveAgentConfig,
   resolveAgentDir,
@@ -8,7 +8,7 @@ import {
 } from "../agents/agent-scope.js";
 import type { HookContext } from "../agents/agent-tools.before-tool-call.js";
 import {
-  createOpenClawCodingTools,
+  createBotCodingTools,
   resolveToolLoopDetectionConfig,
 } from "../agents/agent-tools.js";
 import type {
@@ -40,7 +40,7 @@ import {
 import type { AnyAgentTool } from "../agents/tools/common.js";
 import { ensureAgentWorkspace } from "../agents/workspace.js";
 import { parseDurationMs } from "../cli/parse-duration.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { getPluginToolMeta } from "../plugins/tools.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import {
@@ -81,7 +81,7 @@ type PreparedTriggerRuntime = {
 };
 
 type PrepareTriggerRuntime = (params: {
-  runtimeConfig: OpenClawConfig;
+  runtimeConfig: BotConfig;
   jobId: string;
   agentId?: string;
   toolsAllow?: string[];
@@ -90,24 +90,24 @@ type PrepareTriggerRuntime = (params: {
 }) => Promise<PreparedTriggerRuntime>;
 
 type CronTriggerEvaluatorDeps = {
-  config: OpenClawConfig;
+  config: BotConfig;
   runHeadless?: typeof runCodeModeScriptHeadless;
   prepareRuntime?: PrepareTriggerRuntime;
 };
 
 type TriggerRuntimeCacheEntry = {
   promise: Promise<PreparedTriggerRuntime>;
-  configEpoch: OpenClawConfig;
+  configEpoch: BotConfig;
   agentId: string;
   toolsAllowKey: string;
 };
 
-function resolveTriggerAgentId(config: OpenClawConfig, agentId?: string): string {
+function resolveTriggerAgentId(config: BotConfig, agentId?: string): string {
   return agentId?.trim() ? normalizeAgentId(agentId) : resolveDefaultAgentId(config);
 }
 
 async function prepareTriggerRuntime(params: {
-  runtimeConfig: OpenClawConfig;
+  runtimeConfig: BotConfig;
   jobId: string;
   agentId?: string;
   toolsAllow?: string[];
@@ -122,7 +122,7 @@ async function prepareTriggerRuntime(params: {
     defaults: params.runtimeConfig.agents?.defaults,
     agentConfigOverride,
   });
-  const config: OpenClawConfig = {
+  const config: BotConfig = {
     ...params.runtimeConfig,
     agents: Object.assign({}, params.runtimeConfig.agents, { defaults: agentDefaults }),
   };
@@ -163,7 +163,7 @@ async function prepareTriggerRuntime(params: {
   // Bundle MCP tools are source:"mcp", which the headless bridge excludes.
   // LSP runtimes are session-scoped and intentionally outside trigger v1.
   const allTools = toolPlan.constructTools
-    ? createOpenClawCodingTools({
+    ? createBotCodingTools({
         agentId,
         exec: { config },
         sandbox,
@@ -346,7 +346,7 @@ function createCronCodeModeRunner(deps: CronTriggerEvaluatorDeps) {
     }
   };
   const resolveCachedRuntime = async (request: {
-    runtimeConfig: OpenClawConfig;
+    runtimeConfig: BotConfig;
     jobId: string;
     requestedAgentId?: string;
     agentId: string;

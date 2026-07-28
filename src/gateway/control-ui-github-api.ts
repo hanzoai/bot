@@ -1,7 +1,7 @@
 // Shared api.github.com plumbing for Control UI GitHub surfaces (link
 // previews, session pull request chips): pinned origin, manual redirects,
 // bounded bodies, and normalized upstream error statuses.
-export { isRecord } from "@openclaw/normalization-core/record-coerce";
+export { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { readResponseWithLimit } from "../infra/http-body.js";
 
 export const GITHUB_API_ORIGIN = "https://api.github.com";
@@ -45,7 +45,7 @@ export function githubApiToken(): string | undefined {
 function githubApiHeaders(token?: string): Record<string, string> {
   const headers: Record<string, string> = {
     Accept: "application/vnd.github+json",
-    "User-Agent": "OpenClaw-Control-UI",
+    "User-Agent": "Bot-Control-UI",
     "X-GitHub-Api-Version": GITHUB_API_VERSION,
   };
   if (token) {

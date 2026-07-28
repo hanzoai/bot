@@ -1,8 +1,8 @@
 import * as grammy from "grammy";
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
-import { isSingleUseReplyToMode } from "openclaw/plugin-sdk/reply-reference";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
+import { recordChannelActivity } from "bot/plugin-sdk/channel-activity-runtime";
+import { isSingleUseReplyToMode } from "bot/plugin-sdk/reply-reference";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "bot/plugin-sdk/ssrf-runtime";
 import { splitTelegramCaption } from "./caption.js";
 import { renderTelegramHtmlText, telegramHtmlToPlainTextFallback } from "./format.js";
 import { buildInlineKeyboard } from "./inline-keyboard.js";

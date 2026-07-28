@@ -3,9 +3,9 @@ import path from "node:path";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
 import {
-  isSameOpenClawAgentDatabasePath,
-  listOpenClawRegisteredAgentDatabases,
-} from "../../state/openclaw-agent-db-registry.js";
+  isSameBotAgentDatabasePath,
+  listBotRegisteredAgentDatabases,
+} from "../../state/bot-agent-db-registry.js";
 import {
   resolveSqliteTargetFromSessionStorePath,
   resolveUnsuffixedSqliteTargetFromSessionStorePath,
@@ -43,7 +43,7 @@ export function dedupeSessionStoreTargetsBySqliteTarget(
 ): SessionStoreTarget[] {
   // Ownership must not fall back while the authoritative registry is unreadable:
   // doing so can project the same physical DB under a different configured default.
-  const registeredDatabases = listOpenClawRegisteredAgentDatabases({ env: options.env });
+  const registeredDatabases = listBotRegisteredAgentDatabases({ env: options.env });
   const grouped = new Map<
     string,
     Array<{ target: SessionStoreTarget; databaseOwnerAgentId?: string; shared: boolean }>
@@ -57,7 +57,7 @@ export function dedupeSessionStoreTargetsBySqliteTarget(
     }>
   >();
   const resolvePhysicalGroupKey = <T>(groups: ReadonlyMap<string, T>, pathname: string) =>
-    [...groups.keys()].find((candidate) => isSameOpenClawAgentDatabasePath(candidate, pathname)) ??
+    [...groups.keys()].find((candidate) => isSameBotAgentDatabasePath(candidate, pathname)) ??
     path.resolve(pathname);
   for (const target of targets) {
     const resolvedUnsuffixedPath = path.resolve(
@@ -125,7 +125,7 @@ export function dedupeSessionStoreTargetsBySqliteTarget(
     const registeredOwners = [
       ...new Set(
         registeredDatabases
-          .filter((entry) => isSameOpenClawAgentDatabasePath(entry.path, sqlitePath))
+          .filter((entry) => isSameBotAgentDatabasePath(entry.path, sqlitePath))
           .map((entry) => normalizeAgentId(entry.agentId)),
       ),
     ];

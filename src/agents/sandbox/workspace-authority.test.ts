@@ -5,12 +5,12 @@ import { describe, expect, it } from "vitest";
 import { replaceSessionEntry } from "../../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
 import type { AgentSandboxConfig } from "../../config/types.agents-shared.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { resolveSandboxWorkspaceAuthority } from "./workspace-authority.js";
 
 const SAFE_WORKBOARD_TOOLS = ["exec", "process", "read", "write", "edit", "apply_patch"];
 
-function configWithSandbox(sandbox: AgentSandboxConfig): OpenClawConfig {
+function configWithSandbox(sandbox: AgentSandboxConfig): BotConfig {
   return {
     agents: {
       defaults: { workspace: "/workspace", sandbox: { scope: "session", ...sandbox } },
@@ -265,7 +265,7 @@ describe("resolveSandboxWorkspaceAuthority", () => {
 
   it("applies inherited session denies to required lifecycle tools", async () => {
     const sessionKey = "agent:main:subagent:workboard-card";
-    const storePath = createSessionStorePath("openclaw-workspace-authority");
+    const storePath = createSessionStorePath("bot-workspace-authority");
     await replaceSessionEntry({ sessionKey, storePath }, {
       sessionId: "workboard-card",
       updatedAt: Date.now(),

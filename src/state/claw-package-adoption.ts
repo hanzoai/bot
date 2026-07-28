@@ -1,9 +1,9 @@
 import { existsSync } from "node:fs";
 import {
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "./openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "./openclaw-state-db.paths.js";
+  runBotStateWriteTransaction,
+  type BotStateDatabaseOptions,
+} from "./bot-state-db.js";
+import { resolveBotStateSqlitePath } from "./bot-state-db.paths.js";
 
 type ClawPackageAdoption = {
   kind: "skill" | "plugin";
@@ -16,15 +16,15 @@ type ClawPackageAdoption = {
 /** Records an explicit non-Claw claim through the canonical package owner. */
 export function markClawPackageIndependentlyOwned(
   artifact: ClawPackageAdoption,
-  options: OpenClawStateDatabaseOptions & { nowMs?: number } = {},
+  options: BotStateDatabaseOptions & { nowMs?: number } = {},
 ): number {
-  const databasePath = options.path ?? resolveOpenClawStateSqlitePath(options.env ?? process.env);
+  const databasePath = options.path ?? resolveBotStateSqlitePath(options.env ?? process.env);
   if (!existsSync(databasePath)) {
     return 0;
   }
   const nowMs = options.nowMs ?? Date.now();
   try {
-    return runOpenClawStateWriteTransaction(({ db }) => {
+    return runBotStateWriteTransaction(({ db }) => {
       const workspaceScope =
         artifact.kind === "skill"
           ? `AND agent_id IN (

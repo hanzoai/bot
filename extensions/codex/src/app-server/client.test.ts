@@ -1,5 +1,5 @@
 // Codex tests cover client plugin behavior.
-import { embeddedAgentLog, OPENCLAW_VERSION } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog, BOT_VERSION } from "bot/plugin-sdk/agent-harness-runtime";
 import { inc as incrementSemver } from "semver";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
@@ -300,7 +300,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.143.0 (macOS; test)" },
+      result: { userAgent: "bot/0.143.0 (macOS; test)" },
     });
 
     await expect(initializing).resolves.toBeUndefined();
@@ -309,9 +309,9 @@ describe("CodexAppServerClient", () => {
       method: "initialize",
       params: {
         clientInfo: {
-          name: "openclaw",
-          title: "OpenClaw",
-          version: OPENCLAW_VERSION,
+          name: "bot",
+          title: "Bot",
+          version: BOT_VERSION,
         },
         capabilities: {
           experimentalApi: true,
@@ -326,7 +326,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.124.9 (macOS; test)" },
+      result: { userAgent: "bot/0.124.9 (macOS; test)" },
     });
 
     await expect(initializing).rejects.toThrow(
@@ -339,7 +339,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.143.0-alpha.2 (macOS; test)" },
+      result: { userAgent: "bot/0.143.0-alpha.2 (macOS; test)" },
     });
 
     await expect(initializing).rejects.toThrow(
@@ -352,7 +352,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.143.0+alpha.2 (macOS; test)" },
+      result: { userAgent: "bot/0.143.0+alpha.2 (macOS; test)" },
     });
 
     await expect(initializing).rejects.toThrow(
@@ -365,7 +365,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.144.0-alpha.1 (macOS; test)" },
+      result: { userAgent: "bot/0.144.0-alpha.1 (macOS; test)" },
     });
 
     await expect(initializing).rejects.toThrow(
@@ -378,7 +378,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: "openclaw/0.144.0+custom (macOS; test)" },
+      result: { userAgent: "bot/0.144.0+custom (macOS; test)" },
     });
 
     await expect(initializing).rejects.toThrow(
@@ -395,7 +395,7 @@ describe("CodexAppServerClient", () => {
     const { harness, initializing, outbound } = startInitialize();
     harness.send({
       id: outbound.id,
-      result: { userAgent: `openclaw/${newerVersion} (macOS; test)` },
+      result: { userAgent: `bot/${newerVersion} (macOS; test)` },
     });
 
     await expect(initializing).rejects.toThrow(
@@ -610,7 +610,7 @@ describe("CodexAppServerClient", () => {
         contentItems: [
           {
             type: "inputText",
-            text: `OpenClaw dynamic tool call timed out after ${CODEX_DYNAMIC_TOOL_SERVER_REQUEST_TIMEOUT_MS}ms before sending a response to Codex.`,
+            text: `Bot dynamic tool call timed out after ${CODEX_DYNAMIC_TOOL_SERVER_REQUEST_TIMEOUT_MS}ms before sending a response to Codex.`,
           },
         ],
       },

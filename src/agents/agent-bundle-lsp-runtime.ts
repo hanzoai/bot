@@ -1,7 +1,7 @@
 /** Session-scoped embedded LSP runtime and tool materialization for agent bundles. */
 import type { ChildProcess } from "node:child_process";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import { createAbortError } from "../infra/abort-signal.js";
 import { logDebug, logWarn } from "../logger.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
@@ -538,7 +538,7 @@ function formatLspResult(
 
 export async function createBundleLspToolRuntime(params: {
   workspaceDir: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   reservedToolNames?: Iterable<string>;
   manifestRegistry?: Pick<PluginManifestRegistry, "plugins">;
   dependencies?: BundleLspRuntimeDependencies;

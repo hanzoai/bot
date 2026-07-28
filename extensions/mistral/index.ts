@@ -1,4 +1,4 @@
-import { defineSingleProviderPluginEntry } from "openclaw/plugin-sdk/provider-entry";
+import { defineSingleProviderPluginEntry } from "bot/plugin-sdk/provider-entry";
 import {
   applyMistralModelCompat,
   MISTRAL_MEDIUM_3_5_ID,
@@ -8,7 +8,7 @@ import {
 import { mistralMediaUnderstandingProvider } from "./media-understanding-provider.js";
 import { mistralMemoryEmbeddingProviderAdapter } from "./memory-embedding-adapter.js";
 import { applyMistralConfig } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 import { buildMistralProvider } from "./provider-catalog.js";
 import { buildMistralRealtimeTranscriptionProvider } from "./realtime-transcription-provider.js";
 

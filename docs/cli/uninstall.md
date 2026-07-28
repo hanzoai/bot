@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `openclaw uninstall` (remove gateway service + local data)"
+summary: "CLI reference for `bot uninstall` (remove gateway service + local data)"
 read_when:
   - You want to remove the gateway service and/or local state
   - You want a dry-run first
 title: "Uninstall"
 ---
 
-# `openclaw uninstall`
+# `bot uninstall`
 
 Uninstall the Gateway service and/or local data. The CLI itself is not
 removed; uninstall it via npm/pnpm separately.
@@ -30,17 +30,17 @@ to remove (defaults to service, state, workspace preselected).
 ## Examples
 
 ```bash
-openclaw backup create
-openclaw uninstall
-openclaw uninstall --service --yes --non-interactive
-openclaw uninstall --state --workspace --yes --non-interactive
-openclaw uninstall --all --yes
-openclaw uninstall --dry-run
+bot backup create
+bot uninstall
+bot uninstall --service --yes --non-interactive
+bot uninstall --state --workspace --yes --non-interactive
+bot uninstall --all --yes
+bot uninstall --dry-run
 ```
 
 ## Notes
 
-- Run `openclaw backup create` first for a restorable snapshot before removing
+- Run `bot backup create` first for a restorable snapshot before removing
   state or workspaces.
 - `--state` preserves configured workspace directories unless `--workspace` is
   also selected.

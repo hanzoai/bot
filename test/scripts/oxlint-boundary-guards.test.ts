@@ -4,12 +4,12 @@ import { describe, expect, it } from "vitest";
 const FIXTURES = "test/fixtures/oxlint-boundary-guards";
 const cases = [
   {
-    rule: "openclaw-boundaries/no-register-http-handler-call",
+    rule: "bot-boundaries/no-register-http-handler-call",
     violation: `${FIXTURES}/register-http-handler-violation.ts`,
     violations: 3,
   },
   {
-    rule: "openclaw-boundaries/no-raw-window-open-call",
+    rule: "bot-boundaries/no-raw-window-open-call",
     violation: `${FIXTURES}/raw-window-open-violation.ts`,
     violations: 5,
   },
@@ -20,7 +20,7 @@ function runGuard(target: string) {
     process.execPath,
     [
       "scripts/run-oxlint.mjs",
-      "--openclaw-focused-config",
+      "--bot-focused-config",
       "--config",
       "config/oxlint/boundary-guards.json",
       target,

@@ -3,10 +3,10 @@ import {
   createChannelIngressMonitor,
   type ChannelIngressQueue,
   type ChannelIngressMonitorLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { resolvePersistentDedupePluginStateNamespace } from "openclaw/plugin-sdk/persistent-dedupe";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/channel-outbound";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { resolvePersistentDedupePluginStateNamespace } from "bot/plugin-sdk/persistent-dedupe";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
 import { z } from "zod";
 import {
   NEXTCLOUD_TALK_REPLAY_DEDUPE_MAX_ENTRIES,

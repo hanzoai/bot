@@ -3,16 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resetLogger, setLoggerOverride } from "../../../logging/logger.js";
 import { loggingState } from "../../../logging/state.js";
 import {
-  createOpenClawTestState,
-  type OpenClawTestState,
-} from "../../../test-utils/openclaw-test-state.js";
+  createBotTestState,
+  type BotTestState,
+} from "../../../test-utils/bot-test-state.js";
 import {
   legacyOAuthSidecarTestUtils,
   loadLegacyOAuthSidecarMaterial,
 } from "./legacy-oauth-sidecar.js";
 import { legacyOAuthSidecarInternalTestUtils } from "./legacy-oauth-sidecar.test-support.js";
 
-const states: OpenClawTestState[] = [];
+const states: BotTestState[] = [];
 
 function setPlatform(value: NodeJS.Platform): () => void {
   const descriptor = Object.getOwnPropertyDescriptor(process, "platform");
@@ -25,22 +25,22 @@ function setPlatform(value: NodeJS.Platform): () => void {
 }
 
 async function writeLegacySidecarThatNeedsKeychain(): Promise<{
-  state: OpenClawTestState;
-  ref: { source: "openclaw-credentials"; provider: "openai-codex"; id: string };
+  state: BotTestState;
+  ref: { source: "bot-credentials"; provider: "openai-codex"; id: string };
   profileId: string;
 }> {
-  const state = await createOpenClawTestState({
+  const state = await createBotTestState({
     layout: "state-only",
-    prefix: "openclaw-legacy-oauth-keychain-warn-",
+    prefix: "bot-legacy-oauth-keychain-warn-",
     env: {
-      OPENCLAW_AGENT_DIR: undefined,
-      OPENCLAW_AUTH_PROFILE_SECRET_KEY: undefined,
+      BOT_AGENT_DIR: undefined,
+      BOT_AUTH_PROFILE_SECRET_KEY: undefined,
     },
   });
   states.push(state);
   const profileId = "openai-codex:default";
   const ref = {
-    source: "openclaw-credentials" as const,
+    source: "bot-credentials" as const,
     provider: "openai-codex" as const,
     id: "0123456789abcdef0123456789abcdef",
   };
@@ -89,7 +89,7 @@ describe("loadLegacyOAuthSidecarMaterial keychain-only headless warning", () => 
     resetLogger();
   });
 
-  function envWithoutVitestSignals(state: OpenClawTestState): NodeJS.ProcessEnv {
+  function envWithoutVitestSignals(state: BotTestState): NodeJS.ProcessEnv {
     const env: NodeJS.ProcessEnv = { ...state.env };
     delete env.VITEST;
     delete env.VITEST_WORKER_ID;
@@ -110,7 +110,7 @@ describe("loadLegacyOAuthSidecarMaterial keychain-only headless warning", () => 
     expect(firstAttempt).toBeNull();
     expect(warnSpy).toHaveBeenCalledTimes(1);
     const [firstMessage] = warnSpy.mock.calls[0] as [unknown];
-    expect(String(firstMessage)).toContain("openclaw doctor --fix");
+    expect(String(firstMessage)).toContain("bot doctor --fix");
     expect(String(firstMessage)).toContain("macOS Keychain");
 
     const secondAttempt = loadLegacyOAuthSidecarMaterial({

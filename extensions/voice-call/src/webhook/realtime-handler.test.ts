@@ -1,12 +1,12 @@
 // Voice Call tests cover realtime handler plugin behavior.
 import http from "node:http";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import type {
   RealtimeVoiceBridge,
   RealtimeVoiceProviderPlugin,
   RealtimeVoiceSessionHarness,
   RealtimeVoiceToolCallEvent,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "bot/plugin-sdk/realtime-voice";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { WebSocket, type RawData } from "ws";
 import type { VoiceCallRealtimeConfig } from "../config.js";
@@ -20,8 +20,8 @@ const realtimeVoiceHarnessTestHooks = vi.hoisted(() => ({
   onCreate: undefined as ((harness: RealtimeVoiceSessionHarness) => void) | undefined,
 }));
 
-vi.mock("openclaw/plugin-sdk/realtime-voice", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/realtime-voice")>();
+vi.mock("bot/plugin-sdk/realtime-voice", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/realtime-voice")>();
   return {
     ...actual,
     createRealtimeVoiceSessionHarness: (
@@ -1134,7 +1134,7 @@ describe("RealtimeCallHandler path routing", () => {
         });
       },
     );
-    handler.registerToolHandler("openclaw_agent_consult", consultHandler);
+    handler.registerToolHandler("bot_agent_consult", consultHandler);
     handler.registerToolHandler("custom_lookup", async () => ({ ok: true }));
     const server = await startRealtimeServer(handler);
 
@@ -1156,13 +1156,13 @@ describe("RealtimeCallHandler path routing", () => {
         callbacks?.onToolCall?.({
           itemId: "item-1",
           callId: "consult-call",
-          name: "openclaw_agent_consult",
+          name: "bot_agent_consult",
           args: { question: "Are the basement lights on?" },
         });
         callbacks?.onToolCall?.({
           itemId: "item-2",
           callId: "consult-call-2",
-          name: "openclaw_agent_consult",
+          name: "bot_agent_consult",
           args: { question: "Are the basement lights on?" },
         });
         expect(receivedPartialTranscript).toBeUndefined();
@@ -1181,7 +1181,7 @@ describe("RealtimeCallHandler path routing", () => {
           }
           const payload = workingCall[1] as Record<string, unknown> | undefined;
           expect(payload?.status).toBe("working");
-          expect(payload?.tool).toBe("openclaw_agent_consult");
+          expect(payload?.tool).toBe("bot_agent_consult");
           expect(typeof payload?.message).toBe("string");
           expect(workingCall[2]).toEqual({ willContinue: true });
         });
@@ -1237,7 +1237,7 @@ describe("RealtimeCallHandler path routing", () => {
         callbacks?.onToolCall?.({
           itemId: "item-rejected",
           callId: "consult-rejected",
-          name: "openclaw_agent_consult",
+          name: "bot_agent_consult",
           args: { question: "Do not run this twice" },
         });
         await waitForRealtimeTest(() => {
@@ -1301,7 +1301,7 @@ describe("RealtimeCallHandler path routing", () => {
       realtimeProvider: makeRealtimeProvider(createBridge),
     });
     const consult = vi.fn(async () => ({ text: "should not run" }));
-    handler.registerToolHandler("openclaw_agent_consult", consult);
+    handler.registerToolHandler("bot_agent_consult", consult);
     const server = await startRealtimeServer(handler);
 
     try {
@@ -1332,7 +1332,7 @@ describe("RealtimeCallHandler path routing", () => {
         callbacks?.onToolCall?.({
           itemId: "item-cancelled",
           callId: "native-cancelled",
-          name: "openclaw_agent_consult",
+          name: "bot_agent_consult",
           args: { question: "cancelled question" },
         });
 
@@ -1341,7 +1341,7 @@ describe("RealtimeCallHandler path routing", () => {
             "native-cancelled",
             {
               status: "cancelled",
-              message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+              message: "Bot cancelled this consult before completion. Do not restart it.",
             },
             undefined,
           );
@@ -1397,7 +1397,7 @@ describe("RealtimeCallHandler path routing", () => {
     const consult = vi.fn<
       (args: unknown, callId: string, context: Record<string, unknown>) => Promise<{ text: string }>
     >(async () => ({ text: "I created the smoke test file." }));
-    handler.registerToolHandler("openclaw_agent_consult", consult);
+    handler.registerToolHandler("bot_agent_consult", consult);
     const server = await startRealtimeServer(handler);
 
     try {
@@ -1425,13 +1425,13 @@ describe("RealtimeCallHandler path routing", () => {
           question: "Create a smoke test file for me.",
         });
         expect(JSON.stringify(args)).not.toContain("consultPolicy");
-        expect(JSON.stringify(args)).not.toContain("openclaw_agent_consult");
+        expect(JSON.stringify(args)).not.toContain("bot_agent_consult");
         expect(callId).toBe("call-1");
         expect(context).toEqual({});
         await waitForRealtimeTest(() => {
           expect(sendUserMessage).toHaveBeenCalledTimes(1);
           expect(requireFirstMockCall(sendUserMessage.mock.calls, "user message")).toEqual([
-            "Internal OpenClaw consult result is ready.\nDo not call tools for this internal result.\nSpeak the following answer to the caller now, briefly and naturally:\nI created the smoke test file.",
+            "Internal Bot consult result is ready.\nDo not call tools for this internal result.\nSpeak the following answer to the caller now, briefly and naturally:\nI created the smoke test file.",
           ]);
         });
       } finally {
@@ -1572,7 +1572,7 @@ describe("RealtimeCallHandler path routing", () => {
     const consult = vi.fn<
       (args: unknown, callId: string, context: Record<string, unknown>) => Promise<{ text: string }>
     >(async () => ({ text: "I sent it." }));
-    handler.registerToolHandler("openclaw_agent_consult", consult);
+    handler.registerToolHandler("bot_agent_consult", consult);
     const server = await startRealtimeServer(handler);
 
     try {
@@ -1593,7 +1593,7 @@ describe("RealtimeCallHandler path routing", () => {
         callbacks?.onToolCall?.({
           itemId: "item-1",
           callId: "consult-call",
-          name: "openclaw_agent_consult",
+          name: "bot_agent_consult",
           args: { question: "message" },
         });
         await vi.advanceTimersByTimeAsync(50);
@@ -1674,7 +1674,7 @@ describe("RealtimeCallHandler path routing", () => {
       },
     );
     const consult = vi.fn(async () => ({ text: "Native consult result." }));
-    handler.registerToolHandler("openclaw_agent_consult", consult);
+    handler.registerToolHandler("bot_agent_consult", consult);
     const server = await startRealtimeServer(handler);
 
     try {
@@ -1695,7 +1695,7 @@ describe("RealtimeCallHandler path routing", () => {
         callbacks?.onToolCall?.({
           itemId: "item-1",
           callId: "consult-call",
-          name: "openclaw_agent_consult",
+          name: "bot_agent_consult",
           args: { question: "Send me a Discord message." },
         });
 
@@ -1767,7 +1767,7 @@ describe("RealtimeCallHandler path routing", () => {
         realtimeProvider: makeRealtimeProvider(createBridge),
       },
     );
-    handler.registerToolHandler("openclaw_agent_consult", async () => ({ text: "Fast context." }));
+    handler.registerToolHandler("bot_agent_consult", async () => ({ text: "Fast context." }));
     const server = await startRealtimeServer(handler);
 
     try {
@@ -1786,7 +1786,7 @@ describe("RealtimeCallHandler path routing", () => {
         callbacks?.onToolCall?.({
           itemId: "item-1",
           callId: "consult-call",
-          name: "openclaw_agent_consult",
+          name: "bot_agent_consult",
           args: { question: "What do you remember?" },
         });
 

@@ -1,8 +1,8 @@
 import Foundation
-import OpenClawChatUI
-import OpenClawProtocol
+import BotChatUI
+import BotProtocol
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 @Suite("Chat message speech client")
 struct ChatMessageSpeechClientTests {
@@ -32,7 +32,7 @@ struct ChatMessageSpeechClientTests {
         #expect(requestedMethod == "tts.speak")
         #expect(requestedParams?.text == "Read this")
         #expect(requestedTimeout == 60)
-        #expect(clip == OpenClawChatSpeechClip(
+        #expect(clip == BotChatSpeechClip(
             data: expectedAudio,
             outputFormat: "mp3",
             mimeType: "audio/mpeg",

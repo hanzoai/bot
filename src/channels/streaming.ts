@@ -1,7 +1,7 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Channel streaming config normalization and progress-draft formatting helpers.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { normalizeTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import { normalizeTrimmedStringList } from "@hanzo/bot-normalization-core/string-normalization";
 import { formatToolDetail, resolveToolDisplay } from "../agents/tool-display.js";
 import { formatToolAggregate } from "../auto-reply/tool-meta.js";
 import type {
@@ -185,7 +185,7 @@ function isAgentPlanStepStatus(value: unknown): value is AgentPlanStepStatus {
 /**
  * TODO(remove): normalizes the pre-2026.7.2 string plan-step wire shape to
  * pending typed steps. Bundled producers all emit typed steps, and
- * @openclaw/codex is force-updated with core, so this only covers a plugin
+ * @hanzo/bot-codex is force-updated with core, so this only covers a plugin
  * pinned against an update. Delete once that cannot happen.
  */
 export function normalizeAgentPlanSteps(value: unknown): AgentPlanStep[] | undefined {

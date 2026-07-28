@@ -2,11 +2,11 @@ import path from "node:path";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import {
   normalizeStringEntries,
   normalizeUniqueStringEntries,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-normalization";
 import {
   normalizeCommandDescriptorName,
   sanitizeCommandDescriptorDescription,
@@ -25,16 +25,16 @@ import { pluginCommands } from "./command-registry-state.js";
 import type { PluginRegistryState } from "./registry-state.js";
 import type { PluginRecord } from "./registry-types.js";
 import type {
-  OpenClawGatewayDiscoveryService,
-  OpenClawPluginCliRegistrationOptions,
-  OpenClawPluginCliRegistrar,
-  OpenClawPluginCliRootCommandDescriptor,
-  OpenClawPluginCommandDefinition,
-  OpenClawPluginNodeHostCommand,
-  OpenClawPluginNodeInvokePolicy,
-  OpenClawPluginReloadRegistration,
-  OpenClawPluginSecurityAuditCollector,
-  OpenClawPluginService,
+  BotGatewayDiscoveryService,
+  BotPluginCliRegistrationOptions,
+  BotPluginCliRegistrar,
+  BotPluginCliRootCommandDescriptor,
+  BotPluginCommandDefinition,
+  BotPluginNodeHostCommand,
+  BotPluginNodeInvokePolicy,
+  BotPluginReloadRegistration,
+  BotPluginSecurityAuditCollector,
+  BotPluginService,
 } from "./types.js";
 
 function isOfficialCodexPluginRecord(
@@ -43,14 +43,14 @@ function isOfficialCodexPluginRecord(
   if (record.id !== "codex" || record.origin !== "global") {
     return false;
   }
-  if (record.packageName === "@openclaw/codex") {
+  if (record.packageName === "@hanzo/bot-codex") {
     return true;
   }
   const sourcePath = path
     .normalize(record.rootDir ?? record.source)
     .split(path.sep)
     .join("/");
-  return sourcePath.includes("/node_modules/@openclaw/codex");
+  return sourcePath.includes("/node_modules/@hanzo/bot-codex");
 }
 
 function canClaimReservedCommandOwnership(
@@ -64,8 +64,8 @@ export function createOperationRegistrars(state: PluginRegistryState) {
 
   const registerCli = (
     record: PluginRecord,
-    registrar: OpenClawPluginCliRegistrar,
-    opts?: OpenClawPluginCliRegistrationOptions,
+    registrar: BotPluginCliRegistrar,
+    opts?: BotPluginCliRegistrationOptions,
   ) => {
     const normalizeCommandRoot = (raw: string, source: "command" | "descriptor") => {
       const normalized = normalizeCommandDescriptorName(raw);
@@ -92,12 +92,12 @@ export function createOperationRegistrars(state: PluginRegistryState) {
         const name = normalizeCommandRoot(descriptor.name, "descriptor");
         const description = sanitizeCommandDescriptorDescription(descriptor.description);
         const machineOutput = rootRegistration
-          ? (descriptor as OpenClawPluginCliRootCommandDescriptor).machineOutput
+          ? (descriptor as BotPluginCliRootCommandDescriptor).machineOutput
           : undefined;
         if (!name || !description) {
           return null;
         }
-        const normalized: OpenClawPluginCliRootCommandDescriptor = {
+        const normalized: BotPluginCliRootCommandDescriptor = {
           name,
           description,
           hasSubcommands: descriptor.hasSubcommands,
@@ -108,7 +108,7 @@ export function createOperationRegistrars(state: PluginRegistryState) {
         return normalized;
       })
       .filter(
-        (descriptor): descriptor is OpenClawPluginCliRootCommandDescriptor => descriptor !== null,
+        (descriptor): descriptor is BotPluginCliRootCommandDescriptor => descriptor !== null,
       );
     const commands = [
       ...(opts?.commands ?? []),
@@ -159,8 +159,8 @@ export function createOperationRegistrars(state: PluginRegistryState) {
     });
   };
 
-  const registerReload = (record: PluginRecord, registration: OpenClawPluginReloadRegistration) => {
-    const normalized: OpenClawPluginReloadRegistration = {
+  const registerReload = (record: PluginRecord, registration: BotPluginReloadRegistration) => {
+    const normalized: BotPluginReloadRegistration = {
       restartPrefixes: normalizeStringEntries(registration.restartPrefixes),
       hotPrefixes: normalizeStringEntries(registration.hotPrefixes),
       noopPrefixes: normalizeStringEntries(registration.noopPrefixes),
@@ -195,7 +195,7 @@ export function createOperationRegistrars(state: PluginRegistryState) {
 
   const registerNodeHostCommand = (
     record: PluginRecord,
-    nodeCommand: OpenClawPluginNodeHostCommand,
+    nodeCommand: BotPluginNodeHostCommand,
   ) => {
     const command = nodeCommand.command.trim();
     if (!command) {
@@ -241,7 +241,7 @@ export function createOperationRegistrars(state: PluginRegistryState) {
 
   const registerNodeInvokePolicy = (
     record: PluginRecord,
-    policy: OpenClawPluginNodeInvokePolicy,
+    policy: BotPluginNodeInvokePolicy,
     pluginConfig?: Record<string, unknown>,
   ) => {
     const commands = normalizeUniqueStringEntries(
@@ -291,7 +291,7 @@ export function createOperationRegistrars(state: PluginRegistryState) {
 
   const registerSecurityAuditCollector = (
     record: PluginRecord,
-    collector: OpenClawPluginSecurityAuditCollector,
+    collector: BotPluginSecurityAuditCollector,
   ) => {
     registry.securityAuditCollectors.push({
       pluginId: record.id,
@@ -302,7 +302,7 @@ export function createOperationRegistrars(state: PluginRegistryState) {
     });
   };
 
-  const registerService = (record: PluginRecord, service: OpenClawPluginService) => {
+  const registerService = (record: PluginRecord, service: BotPluginService) => {
     const id = service.id.trim();
     if (!id) {
       return;
@@ -335,7 +335,7 @@ export function createOperationRegistrars(state: PluginRegistryState) {
 
   const registerGatewayDiscoveryService = (
     record: PluginRecord,
-    service: OpenClawGatewayDiscoveryService,
+    service: BotGatewayDiscoveryService,
   ) => {
     const id = service.id.trim();
     if (!id) {
@@ -364,7 +364,7 @@ export function createOperationRegistrars(state: PluginRegistryState) {
     });
   };
 
-  const registerCommand = (record: PluginRecord, command: OpenClawPluginCommandDefinition) => {
+  const registerCommand = (record: PluginRecord, command: BotPluginCommandDefinition) => {
     const name = command.name.trim();
     if (!name) {
       pushDiagnostic({

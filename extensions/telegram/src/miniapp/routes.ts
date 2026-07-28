@@ -1,13 +1,13 @@
 // Telegram Mini App HTTP routes.
 import crypto from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   BOOTSTRAP_HANDOFF_OPERATOR_SCOPES,
   issueDeviceBootstrapToken,
-} from "openclaw/plugin-sdk/device-bootstrap";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
+} from "bot/plugin-sdk/device-bootstrap";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-entry";
 import { resolveTelegramAccount } from "../accounts.js";
 import { validateTelegramMiniAppInitData } from "./init-data.js";
 import { isTelegramMiniAppOwner } from "./owner.js";
@@ -26,13 +26,13 @@ const RATE_LIMIT_MAX = 10;
 const replayCache = new Map<string, number>();
 const rateLimit = new Map<string, { count: number; resetAtMs: number }>();
 
-export function registerTelegramMiniAppRoutes(api: OpenClawPluginApi): void {
+export function registerTelegramMiniAppRoutes(api: BotPluginApi): void {
   api.registerHttpRoute({
     path: TELEGRAM_MINIAPP_PATH_PREFIX,
     match: "prefix",
     auth: "plugin",
     handler: async (req, res) => {
-      const url = new URL(req.url ?? "", "http://openclaw.local");
+      const url = new URL(req.url ?? "", "http://bot.local");
       if (url.pathname === TELEGRAM_MINIAPP_PATH_PREFIX) {
         await handlePage(req, res, url);
         return true;
@@ -66,7 +66,7 @@ async function handlePage(req: IncomingMessage, res: ServerResponse, url: URL): 
 }
 
 async function handleAuth(
-  api: OpenClawPluginApi,
+  api: BotPluginApi,
   req: IncomingMessage,
   res: ServerResponse,
 ): Promise<void> {
@@ -135,8 +135,8 @@ async function handleAuth(
   });
 }
 
-function currentConfig(api: OpenClawPluginApi): OpenClawConfig {
-  return (api.runtime.config?.current?.() ?? api.config) as OpenClawConfig;
+function currentConfig(api: BotPluginApi): BotConfig {
+  return (api.runtime.config?.current?.() ?? api.config) as BotConfig;
 }
 
 async function readJsonBody(

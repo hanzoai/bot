@@ -12,8 +12,8 @@ import {
   TraceIdRatioBasedSampler,
 } from "@opentelemetry/sdk-trace-base";
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
-import { registerUnhandledRejectionHandler } from "openclaw/plugin-sdk/runtime-env";
-import type { OpenClawPluginService } from "../api.js";
+import { registerUnhandledRejectionHandler } from "bot/plugin-sdk/runtime-env";
+import type { BotPluginService } from "../api.js";
 import {
   DEFAULT_SERVICE_NAME,
   OTEL_EXPORTER_OTLP_ENDPOINT_ENV,
@@ -47,7 +47,7 @@ import { createUsageRecorders } from "./service-recorders-usage.js";
 import { createDiagnosticsTraceRuntime } from "./service-traces.js";
 import type { OtelLogsExporter, TelemetryExporterDiagnosticEvent } from "./service-types.js";
 
-export function createDiagnosticsOtelService(): OpenClawPluginService {
+export function createDiagnosticsOtelService(): BotPluginService {
   let sdk: NodeSDK | null = null;
   let logProvider: LoggerProvider | null = null;
   let unsubscribe: (() => void) | null = null;
@@ -253,8 +253,8 @@ export function createDiagnosticsOtelService(): OpenClawPluginService {
         ctx.logger.info("diagnostics-otel: using preloaded OpenTelemetry SDK");
       }
 
-      const meter = metrics.getMeter("openclaw");
-      const tracer = trace.getTracer("openclaw");
+      const meter = metrics.getMeter("bot");
+      const tracer = trace.getTracer("bot");
       const diagnosticsTrace = createDiagnosticsTraceRuntime(tracer);
       stopActiveTrustedSpans = diagnosticsTrace.stopActiveTrustedSpans;
       const diagnosticMetrics = createDiagnosticsMetrics(meter);
@@ -334,5 +334,5 @@ export function createDiagnosticsOtelService(): OpenClawPluginService {
     async stop() {
       await stopStarted();
     },
-  } satisfies OpenClawPluginService;
+  } satisfies BotPluginService;
 }

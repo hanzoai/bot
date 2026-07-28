@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginMetadataSnapshot } from "../plugins/plugin-metadata-snapshot.types.js";
 import { resolveOAuthApiKeyMarker } from "./model-auth-markers.js";
 import {
@@ -59,7 +59,7 @@ function registry(entries: ModelCatalogEntry[]): ModelRegistry {
 }
 
 async function build(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   entries?: ModelCatalogEntry[];
   metadataSnapshot?: PluginMetadataSnapshot;
   readOnly?: boolean;
@@ -106,7 +106,7 @@ describe("prepared model catalog builder", () => {
   });
 
   it("keeps account-denied runtime models out of the prepared catalog", async () => {
-    const config: OpenClawConfig = { plugins: { enabled: false } };
+    const config: BotConfig = { plugins: { enabled: false } };
     const runtimeManifest = providerManifestSnapshot({
       provider: "openai",
       discovery: "runtime",
@@ -279,7 +279,7 @@ describe("prepared model catalog builder", () => {
   });
 
   it("overlays configured metadata onto discovered rows", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       plugins: { enabled: false },
       models: {
         providers: {

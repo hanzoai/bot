@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 // Resolves CLI command path policy from the declarative command catalog.
 import { isGatewayConfigBypassCommandPath } from "../gateway/explicit-connection-policy.js";
 import { resolveCliStartupCommandPath } from "./argv-invocation.js";
@@ -45,7 +45,7 @@ function isCommandPathPrefix(commandPath: string[], pattern: readonly string[]):
 }
 
 function resolveCliCatalogCommandPath(argv: string[]): string[] {
-  // Gateway `run openclaw ...` argv needs catalog routing against the embedded command path.
+  // Gateway `run bot ...` argv needs catalog routing against the embedded command path.
   const startupPath = resolveCliStartupCommandPath(argv);
   const tokens =
     resolveGatewayCatalogCommandPath(argv) ??

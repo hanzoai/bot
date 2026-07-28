@@ -1,14 +1,14 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   addMeetingSetupCheck,
   createMeetingSetupStatus,
   MeetingPlatformAdapter,
   resolveMeetingBrowserNodeInfo,
   type MeetingSetupStatus,
-} from "openclaw/plugin-sdk/meeting-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
-import { uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/meeting-runtime";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
+import { uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import type { ZoomMeetingsConfig, ZoomMeetingsMode, ZoomMeetingsTransport } from "./config.js";
 import { assertBlackHole2chAvailable } from "./transports/chrome.js";
 import { ZOOM_MEETINGS_BROWSER_NODE_ADAPTER } from "./transports/zoom-meetings-platform-constants.js";
@@ -33,7 +33,7 @@ async function commandExists(runtime: PluginRuntime, command: string): Promise<b
 
 export async function getZoomMeetingsSetupStatus(params: {
   config: ZoomMeetingsConfig;
-  fullConfig: OpenClawConfig;
+  fullConfig: BotConfig;
   runtime: PluginRuntime;
   options?: { mode?: ZoomMeetingsMode; transport?: ZoomMeetingsTransport };
 }): Promise<MeetingSetupStatus> {
@@ -52,7 +52,7 @@ export async function getZoomMeetingsSetupStatus(params: {
       ok: true,
       message: params.config.chrome.browserProfile
         ? `Chrome node profile configured: ${params.config.chrome.browserProfile}`
-        : "Local Chrome uses the configured OpenClaw browser profile",
+        : "Local Chrome uses the configured Bot browser profile",
     },
     {
       id: "guest-join",

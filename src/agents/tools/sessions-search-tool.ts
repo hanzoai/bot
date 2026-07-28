@@ -1,7 +1,7 @@
 /** Full-text search over visible session transcripts. */
 import { Type } from "typebox";
 import { getRuntimeConfig } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { callGateway } from "../../gateway/call.js";
 import { jsonUtf8Bytes } from "../../infra/json-utf8-bytes.js";
 import { redactToolPayloadText } from "../../logging/redact.js";
@@ -322,7 +322,7 @@ export function createSessionsSearchTool(opts?: {
   agentId?: string;
   agentSessionKey?: string;
   sandboxed?: boolean;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   callGateway?: GatewayCaller;
 }): AnyAgentTool {
   const gatewayCall = opts?.callGateway ?? callGateway;

@@ -14,7 +14,7 @@ struct VoiceWakeWordsSettingsView: View {
                     TextField("Wake word", text: self.binding(for: index))
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                        .font(OpenClawType.subhead)
+                        .font(BotType.subhead)
                         .focused(self.$focusedTriggerIndex, equals: index)
                         .onSubmit {
                             self.commitTriggerWords()
@@ -26,7 +26,7 @@ struct VoiceWakeWordsSettingsView: View {
                     self.addWord()
                 } label: {
                     Label("Add word", systemImage: "plus")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                 }
                 .disabled(self.triggerWords
                     .contains(where: { $0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }))
@@ -35,26 +35,26 @@ struct VoiceWakeWordsSettingsView: View {
                     self.triggerWords = VoiceWakePreferences.defaultTriggerWords
                 } label: {
                     Text("Reset defaults")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                 }
             } header: {
                 Text("Wake Words")
-                    .font(OpenClawType.captionSemiBold)
+                    .font(BotType.captionSemiBold)
             } footer: {
                 // Keep the extraction key contiguous for the native localization inventory.
                 // swiftlint:disable line_length
                 Text(
                     String(
                         localized:
-                        "OpenClaw reacts when any trigger appears in a transcription. Keep them short to avoid false positives."))
-                    .font(OpenClawType.caption)
+                        "Bot reacts when any trigger appears in a transcription. Keep them short to avoid false positives."))
+                    .font(BotType.caption)
                 // swiftlint:enable line_length
             }
         }
         .navigationTitle("Wake Words")
         .toolbar {
             EditButton()
-                .font(OpenClawType.subheadSemiBold)
+                .font(BotType.subheadSemiBold)
         }
         .onAppear {
             if self.triggerWords.isEmpty {

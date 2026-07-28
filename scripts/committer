@@ -218,7 +218,7 @@ committer_requires_repo_formatter() {
   [ -f "$filter" ] || return 1
 
   local filter_output selected
-  filter_output=$(mktemp "${TMPDIR:-/tmp}/openclaw-committer-filter.XXXXXX") || {
+  filter_output=$(mktemp "${TMPDIR:-/tmp}/bot-committer-filter.XXXXXX") || {
     echo "Unable to create temporary output for formatter applicability check." >&2
     return 2
   }

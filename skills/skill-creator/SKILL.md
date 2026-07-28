@@ -9,13 +9,13 @@ Skills are compact triggerable workflows. Metadata is always visible; body loads
 
 ## Hard rules
 
-- For durable OpenClaw skill creation or updates in an agent session, use
+- For durable Bot skill creation or updates in an agent session, use
   `skill_workshop` to create or revise a pending proposal. Do not scaffold or
   apply live `SKILL.md` files with shell commands or helper scripts.
 - Keep `SKILL.md` lean; Codex is already capable.
 - Put only trigger-critical facts in frontmatter `description`.
 - Quote frontmatter `description`.
-- Frontmatter needs `name` + `description`; local OpenClaw skills may also use `metadata`, `homepage`, `allowed-tools`, `user-invocable`, `license`.
+- Frontmatter needs `name` + `description`; local Bot skills may also use `metadata`, `homepage`, `allowed-tools`, `user-invocable`, `license`.
 - Prefer noun-phrase descriptions; short generic trigger phrase, not full workflow.
 - Move long examples/docs to `references/`; scripts to `scripts/`; templates/media to `assets/`.
 - No extra README/changelog/setup docs inside a skill unless they are actual task references.
@@ -57,7 +57,7 @@ Use for PDF manipulation. Prefer deterministic scripts for page edits.
 1. Read existing skill and nearby resource names.
 2. Draft the proposed `SKILL.md` content.
 3. Create or revise the pending proposal through `skill_workshop` when the
-   change should persist as an OpenClaw skill.
+   change should persist as an Bot skill.
 4. Remove generic advice the base model already knows.
 5. Keep brittle command syntax, auth caveats, safety rules, and validation.
 6. Replace tables with bullets unless a table is clearly needed.

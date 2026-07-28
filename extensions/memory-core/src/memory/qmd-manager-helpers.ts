@@ -1,9 +1,9 @@
 import crypto from "node:crypto";
 import path from "node:path";
-import { resolveGlobalSingleton } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import type { ResolvedQmdConfig } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { isFutureDateTimestampMs, MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { resolveGlobalSingleton } from "bot/plugin-sdk/memory-core-host-engine-foundation";
+import type { ResolvedQmdConfig } from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { isFutureDateTimestampMs, MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 
 export const SEARCH_PENDING_UPDATE_WAIT_MS = 500;
 export const MAX_QMD_OUTPUT_CHARS = 200_000;
@@ -12,8 +12,8 @@ export const QMD_EMBED_BACKOFF_MAX_MS = 60 * 60 * 1000;
 
 const QMD_EMBED_LEASE_MIN_WAIT_MS = 15 * 60 * 1000;
 const QMD_WRITE_LEASE_MIN_WAIT_MS = 5 * 60 * 1000;
-const QMD_EMBED_QUEUE_KEY = Symbol.for("openclaw.qmdEmbedQueueTail");
-const QMD_UPDATE_QUEUE_KEY = Symbol.for("openclaw.qmdUpdateQueueState");
+const QMD_EMBED_QUEUE_KEY = Symbol.for("bot.qmdEmbedQueueTail");
+const QMD_UPDATE_QUEUE_KEY = Symbol.for("bot.qmdUpdateQueueState");
 const IGNORED_MEMORY_WATCH_DIR_NAMES = new Set([
   ".git",
   ".cache",
@@ -69,7 +69,7 @@ export function getQmdUpdateQueueState(): QmdUpdateQueueState {
 
 export function normalizeHanBm25Query(query: string): string {
   const trimmed = query.trim();
-  // Keep Han/CJK BM25 queries intact so OpenClaw search semantics match direct qmd search.
+  // Keep Han/CJK BM25 queries intact so Bot search semantics match direct qmd search.
   return trimmed;
 }
 

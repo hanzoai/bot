@@ -1,10 +1,10 @@
-import type { PluginRuntime } from "openclaw/plugin-sdk/plugin-runtime";
+import type { PluginRuntime } from "bot/plugin-sdk/plugin-runtime";
 import type {
   SessionCatalogHost,
   SessionCatalogTranscriptItem,
   SessionsCatalogReadResult,
-} from "openclaw/plugin-sdk/session-catalog";
-import type { ActiveSessionCatalog } from "openclaw/plugin-sdk/session-catalog-runtime";
+} from "bot/plugin-sdk/session-catalog";
+import type { ActiveSessionCatalog } from "bot/plugin-sdk/session-catalog-runtime";
 import { describe, expect, it } from "vitest";
 import {
   beamMirrorId,

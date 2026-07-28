@@ -1,6 +1,6 @@
 // Discord plugin module implements runtime.messaging behavior.
 import { readDiscordComponentSpec } from "../components.js";
-import type { OpenClawConfig } from "../runtime-api.js";
+import type { BotConfig } from "../runtime-api.js";
 import { sendDiscordComponentMessage } from "../send.components.js";
 import {
   createThreadDiscord,
@@ -60,7 +60,7 @@ export const discordMessagingActionRuntime = {
 
 async function resolveDiscordReactionTargetChannelId(params: {
   target: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string;
 }): Promise<string> {
   try {

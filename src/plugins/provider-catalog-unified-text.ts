@@ -1,5 +1,5 @@
 /** Builds unified text-inference provider catalog metadata from plugin providers. */
-import type { UnifiedModelCatalogEntry } from "@openclaw/model-catalog-core/model-catalog-types";
+import type { UnifiedModelCatalogEntry } from "@hanzo/bot-model-catalog-core/model-catalog-types";
 import { readRecordValue } from "../shared/safe-record.js";
 import {
   copyProviderCatalogModels,

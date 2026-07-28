@@ -4,7 +4,7 @@
  * follow-up dispatch, and approval-pending tool result rendering.
  */
 import crypto from "node:crypto";
-import { resolveExpiresAtMsFromDurationMs } from "@openclaw/normalization-core/number-coercion";
+import { resolveExpiresAtMsFromDurationMs } from "@hanzo/bot-normalization-core/number-coercion";
 import { isApprovalNotFoundError } from "../infra/approval-errors.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { buildExecApprovalUnavailableReplyPayload } from "../infra/exec-approval-reply.js";
@@ -441,7 +441,7 @@ export function buildHeadlessExecApprovalDeniedMessage(params: {
     '- align both files to security="full" and ask="off" for trusted local automation',
     "- keep allowlist mode and add an explicit allowlist entry for this command",
     "- enable Web UI, terminal UI, or chat exec approvals and rerun interactively",
-    'Tip: run "openclaw doctor" and "openclaw approvals get --gateway" to inspect the effective policy.',
+    'Tip: run "bot doctor" and "bot approvals get --gateway" to inspect the effective policy.',
   ].join("\n");
 }
 

@@ -38,7 +38,7 @@ type DoctorHealthContributionTestApi = {
 
 function getTestApi(): DoctorHealthContributionTestApi {
   const api = (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.doctorHealthContributionsTestApi")
+    Symbol.for("bot.doctorHealthContributionsTestApi")
   ];
   if (!api) {
     throw new Error("doctor health contributions test API is unavailable");

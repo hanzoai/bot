@@ -6,7 +6,7 @@ import { withEnv } from "../test-utils/env.js";
 import {
   clearActivatedPluginRuntimeState,
   clearPluginRegistryLoadCache,
-  loadOpenClawPlugins,
+  loadBotPlugins,
 } from "./loader.js";
 import { resetPluginLoaderTestStateForTest } from "./loader.test-fixtures.js";
 import {
@@ -23,7 +23,7 @@ function createBundledPluginFixture(): {
   builtSource: string;
 } {
   const packageRoot = fs.realpathSync(
-    fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-runtime-artifact-")),
+    fs.mkdtempSync(path.join(os.tmpdir(), "bot-plugin-runtime-artifact-")),
   );
   tempDirs.push(packageRoot);
   const rootDir = path.join(packageRoot, "extensions", "fixture");
@@ -34,7 +34,7 @@ function createBundledPluginFixture(): {
   fs.writeFileSync(source, "export default { register() {} };\n");
   fs.writeFileSync(builtSource, 'module.exports = { id: "fixture", register() {} };\n');
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "bot.plugin.json"),
     JSON.stringify({
       id: "fixture",
       configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -175,19 +175,19 @@ describe("resolvePluginRuntimeArtifact", () => {
 
     const [first, second] = withEnv(
       {
-        OPENCLAW_BUNDLED_PLUGINS_DIR: path.dirname(fixture.rootDir),
-        OPENCLAW_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
-        OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
+        BOT_BUNDLED_PLUGINS_DIR: path.dirname(fixture.rootDir),
+        BOT_TEST_TRUST_BUNDLED_PLUGINS_DIR: "1",
+        BOT_DISABLE_BUNDLED_PLUGINS: undefined,
       },
       () => {
-        const sourceRegistry = loadOpenClawPlugins({
+        const sourceRegistry = loadBotPlugins({
           cache: false,
           config,
           onlyPluginIds: ["fixture"],
           preferBuiltPluginArtifacts: false,
         });
         pinActivePluginChannelRegistry(sourceRegistry);
-        const builtPreferredRegistry = loadOpenClawPlugins({
+        const builtPreferredRegistry = loadBotPlugins({
           cache: false,
           config,
           onlyPluginIds: ["fixture"],
@@ -203,7 +203,7 @@ describe("resolvePluginRuntimeArtifact", () => {
 
   it("leaves dist-only installs unchanged because both preferences resolve the built entry", () => {
     const packageRoot = fs.realpathSync(
-      fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-plugin-runtime-dist-only-")),
+      fs.mkdtempSync(path.join(os.tmpdir(), "bot-plugin-runtime-dist-only-")),
     );
     tempDirs.push(packageRoot);
     const rootDir = path.join(packageRoot, "dist", "extensions", "fixture");

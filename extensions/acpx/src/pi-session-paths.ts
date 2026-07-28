@@ -1,7 +1,7 @@
 import { readFileSync, statSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 
 function optionalString(value: unknown, maxLength: number): string | undefined {
   if (typeof value !== "string") {

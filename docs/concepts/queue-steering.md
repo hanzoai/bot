@@ -8,25 +8,25 @@ read_when:
 title: "Steering queue"
 ---
 
-When a normal prompt arrives while a session run is already streaming and the queue mode is `steer` (the default, no config needed), OpenClaw tries to send that prompt into the active runtime. OpenClaw and the native Codex app-server harness implement the delivery details differently.
+When a normal prompt arrives while a session run is already streaming and the queue mode is `steer` (the default, no config needed), Bot tries to send that prompt into the active runtime. Bot and the native Codex app-server harness implement the delivery details differently.
 
 This page covers queue-mode steering for normal inbound messages in `steer` mode. In `followup` or `collect` mode, normal messages skip this path and wait until the active run finishes. For the explicit `/steer <message>` command, see [Steer](/tools/steer).
 
 ## Runtime boundary
 
-Steering does not interrupt a tool call that is already running. OpenClaw checks for queued steering messages at model boundaries:
+Steering does not interrupt a tool call that is already running. Bot checks for queued steering messages at model boundaries:
 
 1. The assistant asks for tool calls.
-2. OpenClaw executes the current assistant message's tool-call batch.
-3. OpenClaw emits the turn end event.
-4. OpenClaw drains queued steering messages.
-5. OpenClaw appends those messages as user messages before the next LLM call.
+2. Bot executes the current assistant message's tool-call batch.
+3. Bot emits the turn end event.
+4. Bot drains queued steering messages.
+5. Bot appends those messages as user messages before the next LLM call.
 
 This keeps tool results paired with the assistant message that requested them, then lets the next model call see the latest user input.
 
-The native Codex app-server harness exposes `turn/steer` instead of OpenClaw runtime's internal steering queue. OpenClaw batches queued prompts for the configured quiet window, then sends a single `turn/steer` request with all collected user input in arrival order.
+The native Codex app-server harness exposes `turn/steer` instead of Bot runtime's internal steering queue. Bot batches queued prompts for the configured quiet window, then sends a single `turn/steer` request with all collected user input in arrival order.
 
-Codex review and manual compaction turns reject same-turn steering. When a runtime cannot accept steering in `steer` mode, OpenClaw waits for the active run to finish before starting the prompt.
+Codex review and manual compaction turns reject same-turn steering. When a runtime cannot accept steering in `steer` mode, Bot waits for the active run to finish before starting the prompt.
 
 ## Why steering waits for the current batch
 
@@ -51,9 +51,9 @@ The wait is bounded by the current tool-call batch, not by the run: a steered co
 
 If four users send messages while the agent is executing a tool call:
 
-- With default behavior, the active runtime receives all four messages in arrival order before its next model decision. OpenClaw drains them at the next model boundary; Codex receives them as one batched `turn/steer`.
-- With `/queue collect`, OpenClaw does not steer. It waits until the active run ends, then creates a followup turn with compatible queued messages after the debounce window.
-- With `/queue interrupt`, OpenClaw aborts the active run and starts the newest message instead of steering.
+- With default behavior, the active runtime receives all four messages in arrival order before its next model decision. Bot drains them at the next model boundary; Codex receives them as one batched `turn/steer`.
+- With `/queue collect`, Bot does not steer. It waits until the active run ends, then creates a followup turn with compatible queued messages after the debounce window.
+- With `/queue interrupt`, Bot aborts the active run and starts the newest message instead of steering.
 
 ## Scope
 
@@ -63,7 +63,7 @@ Use `followup` or `collect` when you want messages to queue by default instead o
 
 ## Debounce
 
-The built-in queue debounce applies to queued `followup` and `collect` delivery. In `steer` mode with the native Codex harness, it also sets the quiet window before sending batched `turn/steer`. For OpenClaw, active steering itself does not use the debounce timer because OpenClaw naturally batches messages until the next model boundary.
+The built-in queue debounce applies to queued `followup` and `collect` delivery. In `steer` mode with the native Codex harness, it also sets the quiet window before sending batched `turn/steer`. For Bot, active steering itself does not use the debounce timer because Bot naturally batches messages until the next model boundary.
 
 ## Related
 

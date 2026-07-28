@@ -15,7 +15,7 @@ import {
   validateWorkerInferenceTerminalOutcome,
 } from "../../../packages/gateway-protocol/src/schema/worker-inference.js";
 import { stableStringify } from "../../agents/stable-stringify.js";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { BotConfig } from "../../config/types.js";
 import { withTimeout } from "../../infra/fs-safe.js";
 import { boundedJsonUtf8Bytes } from "../../infra/json-utf8-bytes.js";
 import { runWithGatewayIndependentRootWorkContinuation } from "../../process/gateway-work-admission.js";
@@ -47,7 +47,7 @@ export type WorkerInferenceExecutor = (params: {
   signal: AbortSignal;
   emit: (event: WorkerInferenceEventParams["event"]) => void;
   isCurrent(): boolean;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }) => Promise<WorkerInferenceTerminalOutcome>;
 
 type RevalidateInference = () => WorkerInferenceFenceReason | null;
@@ -216,7 +216,7 @@ function sameTurn(
 export function createWorkerInferenceManager(options: {
   execute: WorkerInferenceExecutor;
   store?: WorkerInferenceStore;
-  getConfig?: () => OpenClawConfig;
+  getConfig?: () => BotConfig;
   requestMaxBytes?: number;
   streamMaxBytes?: number;
   stopDrainMs?: number;

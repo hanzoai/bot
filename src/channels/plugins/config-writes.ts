@@ -1,10 +1,10 @@
 /**
  * Channel config-write policy facade.
  *
- * Applies shared config write authorization to concrete OpenClaw channel config.
+ * Applies shared config write authorization to concrete Bot channel config.
  */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   authorizeConfigWriteShared,
   canBypassConfigWritePolicyShared,
@@ -40,7 +40,7 @@ function isInternalConfigWriteMessageChannel(channel?: string | null): boolean {
  * Authorizes a channel config write under origin and target policy.
  */
 export function authorizeConfigWrite(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   origin?: ConfigWriteScope;
   target?: ConfigWriteTarget;
   allowBypass?: boolean;

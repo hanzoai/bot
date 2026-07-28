@@ -1,6 +1,6 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi } from "./api.js";
+import type { BotPluginApi } from "./api.js";
 import type { MemoryConfig } from "./config.js";
 
 const providerMocks = vi.hoisted(() => ({
@@ -8,25 +8,25 @@ const providerMocks = vi.hoisted(() => ({
   resolveDefaultAgentId: vi.fn(() => "main"),
 }));
 
-vi.mock("openclaw/plugin-sdk/memory-core-host-engine-embeddings", () => ({
+vi.mock("bot/plugin-sdk/memory-core-host-engine-embeddings", () => ({
   getMemoryEmbeddingProvider: providerMocks.getMemoryEmbeddingProvider,
 }));
 
-vi.mock("openclaw/plugin-sdk/memory-host-core", () => ({
+vi.mock("bot/plugin-sdk/memory-host-core", () => ({
   resolveDefaultAgentId: providerMocks.resolveDefaultAgentId,
 }));
 
 import { createEmbeddings } from "./embeddings.js";
 
-function createApi(): OpenClawPluginApi {
+function createApi(): BotPluginApi {
   const config = {};
   return {
     config,
     runtime: {
       config: { current: () => config },
-      agent: { resolveAgentDir: () => "/tmp/openclaw-agent" },
+      agent: { resolveAgentDir: () => "/tmp/bot-agent" },
     },
-  } as unknown as OpenClawPluginApi;
+  } as unknown as BotPluginApi;
 }
 
 const embeddingConfig = {

@@ -2,12 +2,12 @@
 import fs from "node:fs";
 import { createServer } from "node:http";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   acquireDebugProxyCaptureStore,
   resolveDebugProxySettings,
-} from "openclaw/plugin-sdk/proxy-capture";
+} from "bot/plugin-sdk/proxy-capture";
 import {
   closeQaHttpServer,
   handleQaBusRequest,
@@ -209,7 +209,7 @@ function sanitizeControlUiPublicUrl(url: string | null): string | null {
   return stripSensitiveQueryParams(withoutFragment);
 }
 
-function createQaLabConfig(baseUrl: string): OpenClawConfig {
+function createQaLabConfig(baseUrl: string): BotConfig {
   return createQaChannelGatewayConfig({ baseUrl });
 }
 
@@ -250,7 +250,7 @@ function detectQaEvidenceArtifactContentType(filePath: string): string {
 }
 
 async function startQaGatewayLoop(params: { state: QaBusState; baseUrl: string }) {
-  const { qaChannelPlugin, setQaChannelRuntime } = await import("openclaw/plugin-sdk/qa-channel");
+  const { qaChannelPlugin, setQaChannelRuntime } = await import("bot/plugin-sdk/qa-channel");
   const runtime = createQaRunnerRuntime();
   setQaChannelRuntime(runtime);
   const cfg = createQaLabConfig(params.baseUrl);
@@ -325,13 +325,13 @@ export async function startQaLabServer(
       scenarios: scenarioCatalog.scenarios,
       scorecardReport,
       defaultChannel:
-        crabline?.OPENCLAW_CRABLINE_DEFAULT_CHANNEL ??
+        crabline?.BOT_CRABLINE_DEFAULT_CHANNEL ??
         (selection.channelDriver === "qa-channel" ? "qa-channel" : undefined),
       ...(crabline
         ? {
             supportsChannel: (channel: string) => {
               try {
-                crabline.resolveOpenClawCrablineChannelDriverSelection({ channel });
+                crabline.resolveBotCrablineChannelDriverSelection({ channel });
                 return true;
               } catch {
                 return false;
@@ -358,7 +358,7 @@ export async function startQaLabServer(
   let controlUiUrl = sanitizeControlUiPublicUrl(params?.controlUiUrl?.trim() || null);
   let gateway:
     | {
-        cfg: OpenClawConfig;
+        cfg: BotConfig;
         stop: () => Promise<void>;
       }
     | undefined;
@@ -786,7 +786,7 @@ export async function startQaLabServer(
                 import("./suite-launch.runtime.js"),
                 selection.channelDriver === "crabline" && selection.channel
                   ? import("@openclaw/crabline").then((module) =>
-                      module.resolveOpenClawCrablineChannelDriverSelection({
+                      module.resolveBotCrablineChannelDriverSelection({
                         channel: selection.channel!,
                       }),
                     )

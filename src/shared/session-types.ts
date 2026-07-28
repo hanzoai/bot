@@ -16,7 +16,7 @@ type GatewayAgentModel = {
 /** Runtime selection metadata for an agent row. */
 export type GatewayAgentRuntime = {
   id: string;
-  fallback?: "openclaw" | "none";
+  fallback?: "bot" | "none";
   source:
     | "env"
     | "agent"

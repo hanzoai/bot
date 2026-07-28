@@ -40,7 +40,7 @@ function resolveChildInvocation(params: {
   const candidate = resolveWindowsSpawnProgramCandidate({
     command,
     env: params.env,
-    // npm shims invoke `node` from PATH; process.execPath may be a packaged OpenClaw executable.
+    // npm shims invoke `node` from PATH; process.execPath may be a packaged Bot executable.
     execPath:
       process.platform === "win32"
         ? resolveWindowsExecutablePath("node", params.env ?? process.env)
@@ -73,7 +73,7 @@ function resolveChildInvocation(params: {
 type ChildAdapter = SpawnProcessAdapter<NodeJS.Signals | null>;
 
 function isServiceManagedRuntime(): boolean {
-  return Boolean(process.env.OPENCLAW_SERVICE_MARKER?.trim());
+  return Boolean(process.env.BOT_SERVICE_MARKER?.trim());
 }
 
 export async function createChildAdapter(params: {

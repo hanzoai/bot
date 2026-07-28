@@ -1,26 +1,26 @@
 // Xiaomi provider module implements model/runtime integration.
-import { canonicalizeBase64, transcodeAudioBufferToOpus } from "openclaw/plugin-sdk/media-runtime";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
+import { canonicalizeBase64, transcodeAudioBufferToOpus } from "bot/plugin-sdk/media-runtime";
+import { resolveTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
 import {
   assertOkOrThrowProviderError,
   readProviderJsonResponse,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+} from "bot/plugin-sdk/provider-http";
+import { normalizeResolvedSecretInputString } from "bot/plugin-sdk/secret-input";
 import type {
   SpeechDirectiveTokenParseContext,
   SpeechProviderConfig,
   SpeechProviderOverrides,
   SpeechProviderPlugin,
-} from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/speech-core";
 import {
   asObject,
   resolveSpeechProviderApiKey,
   trimToUndefined,
-} from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/speech-core";
 import {
   fetchWithSsrFGuard,
   ssrfPolicyFromHttpBaseUrlAllowedHostname,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/ssrf-runtime";
 
 const DEFAULT_XIAOMI_TTS_BASE_URL = "https://api.xiaomimimo.com/v1";
 const DEFAULT_XIAOMI_TTS_MODEL = "mimo-v2.5-tts";

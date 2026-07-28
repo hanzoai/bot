@@ -20,7 +20,7 @@ import {
   CLAW_SCHEMA_VERSION,
   type ClawDiagnostic,
   type ClawManifest,
-  type ClawOpenClawProfile,
+  type ClawBotProfile,
 } from "./types.js";
 
 const nonEmptyString = z
@@ -89,7 +89,7 @@ const agentSchema = z
   })
   .strict();
 
-const openClawProfileSchema = z
+const botProfileSchema = z
   .object({
     schemaVersion: z.literal(1),
     agent: z
@@ -111,7 +111,7 @@ const openClawProfileSchema = z
             profile: nonEmptyString
               .refine(
                 (value) => resolveToolProfilePolicy(value) !== undefined,
-                "Tool profile must name a registered OpenClaw built-in profile.",
+                "Tool profile must name a registered Bot built-in profile.",
               )
               .optional(),
             allow: z.array(nonEmptyString).min(1).optional(),
@@ -155,7 +155,7 @@ const openClawProfileSchema = z
                     code: "custom",
                     path: ["rememberAcrossConversations"],
                     message:
-                      "The sessions source requires rememberAcrossConversations: true in the OpenClaw profile.",
+                      "The sessions source requires rememberAcrossConversations: true in the Bot profile.",
                   });
                 }
               })
@@ -497,20 +497,20 @@ export function parseClawManifest(
   return { ok: true, manifest: parsed.data as ClawManifest, diagnostics: [] };
 }
 
-export function parseClawOpenClawProfile(value: unknown):
+export function parseClawBotProfile(value: unknown):
   | {
       ok: true;
-      profile: ClawOpenClawProfile;
+      profile: ClawBotProfile;
       diagnostics: ClawDiagnostic[];
     }
   | { ok: false; diagnostics: ClawDiagnostic[] } {
-  const parsed = openClawProfileSchema.safeParse(value);
+  const parsed = botProfileSchema.safeParse(value);
   if (!parsed.success) {
     return { ok: false, diagnostics: diagnosticsFromZodError(parsed.error) };
   }
   return {
     ok: true,
-    profile: parsed.data as ClawOpenClawProfile,
+    profile: parsed.data as ClawBotProfile,
     diagnostics: [],
   };
 }

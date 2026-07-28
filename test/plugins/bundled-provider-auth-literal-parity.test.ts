@@ -158,7 +158,7 @@ const parityCases = listParityCases().toSorted((left, right) => {
   return left.methodId.localeCompare(right.methodId);
 });
 
-const probeAgentDir = mkdtempSync(path.join(tmpdir(), "openclaw-auth-parity-"));
+const probeAgentDir = mkdtempSync(path.join(tmpdir(), "bot-auth-parity-"));
 // Keep at least five imports in flight, but leave CPU headroom on larger CI runners.
 const PLUGIN_LOAD_CONCURRENCY = Math.max(5, Math.min(12, availableParallelism()));
 const parityPluginIds = [...new Set(parityCases.map((entry) => entry.pluginId))];

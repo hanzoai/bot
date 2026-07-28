@@ -7,7 +7,7 @@ import {
   resolveContextEngineOwnerPluginId,
   runAgentHarnessLlmOutputHook,
   runHarnessContextEngineMaintenance,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import { readMirroredSessionHistoryMessages } from "./attempt-context.js";
 import { classifyCodexModelCallFailureKind } from "./attempt-diagnostics.js";
 import {
@@ -86,7 +86,7 @@ export async function finalizeCodexAttempt(
   const {
     state,
     completion,
-    pendingOpenClawDynamicToolCompletionIds,
+    pendingBotDynamicToolCompletionIds,
     activeTurnItemIds,
     activeCompletionBlockerItemIds,
     activeFinalizationHookRunIds,
@@ -110,7 +110,7 @@ export async function finalizeCodexAttempt(
     state.activeAppServerTurnRequests === 0 &&
     activeTurnItemIds.size === 0 &&
     activeCompletionBlockerItemIds.size === 0 &&
-    pendingOpenClawDynamicToolCompletionIds.size === 0 &&
+    pendingBotDynamicToolCompletionIds.size === 0 &&
     activeFinalizationHookRunIds.size === 0 &&
     state.unsettledFinalizationHookCount === 0 &&
     state.rejectedFinalizationHookAssistant === undefined;

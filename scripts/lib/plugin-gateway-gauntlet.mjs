@@ -8,9 +8,9 @@ import {
 } from "./bundled-plugin-build-entries.mjs";
 import { parsePositiveInt } from "./numeric-options.mjs";
 
-const MANIFEST_NAMES = ["openclaw.plugin.json", "openclaw.plugin.json5"];
+const MANIFEST_NAMES = ["bot.plugin.json", "bot.plugin.json5"];
 const ANSI_PATTERN = new RegExp(String.raw`\u001B\[[0-9;]*m`, "gu");
-const QA_SUMMARY_MAX_BYTES_ENV = "OPENCLAW_PLUGIN_GATEWAY_GAUNTLET_QA_SUMMARY_MAX_BYTES";
+const QA_SUMMARY_MAX_BYTES_ENV = "BOT_PLUGIN_GATEWAY_GAUNTLET_QA_SUMMARY_MAX_BYTES";
 const DEFAULT_QA_SUMMARY_MAX_BYTES = 2 * 1024 * 1024;
 
 function readPositiveIntEnv(name, fallback) {
@@ -413,7 +413,7 @@ function collectQaBaselineRegressionObservations(rows, thresholds = {}) {
 function buildGauntletPrebuildEnv(env, options = {}) {
   const buildIds = new Set(normalizeStringArray(options.buildIds));
   const runtimeOnlyPrebuildEnv = options.skipDeclarationBuild
-    ? { OPENCLAW_RUN_NODE_SKIP_DTS_BUILD: "1" }
+    ? { BOT_RUN_NODE_SKIP_DTS_BUILD: "1" }
     : {};
   const hasRuntimeOnlyPrebuildEnv = Object.keys(runtimeOnlyPrebuildEnv).length > 0;
   if (options.includePrivateQa) {
@@ -430,7 +430,7 @@ function buildGauntletPrebuildEnv(env, options = {}) {
           ...runtimeOnlyPrebuildEnv,
           ...(buildIds.size > 0
             ? {
-                OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: [...buildIds]
+                BOT_BUNDLED_PLUGIN_BUILD_IDS: [...buildIds]
                   .toSorted((left, right) => left.localeCompare(right))
                   .join(","),
               }
@@ -441,11 +441,11 @@ function buildGauntletPrebuildEnv(env, options = {}) {
     ...env,
     PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: env.PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN ?? "false",
     ...runtimeOnlyPrebuildEnv,
-    OPENCLAW_BUILD_PRIVATE_QA: "1",
-    OPENCLAW_ENABLE_PRIVATE_QA_CLI: "1",
+    BOT_BUILD_PRIVATE_QA: "1",
+    BOT_ENABLE_PRIVATE_QA_CLI: "1",
     ...(buildIds.size > 0
       ? {
-          OPENCLAW_BUNDLED_PLUGIN_BUILD_IDS: [...buildIds]
+          BOT_BUNDLED_PLUGIN_BUILD_IDS: [...buildIds]
             .toSorted((left, right) => left.localeCompare(right))
             .join(","),
         }

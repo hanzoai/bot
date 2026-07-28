@@ -1,7 +1,7 @@
 import os from "node:os";
 import type { SessionEntry } from "../config/sessions.js";
 import { resolveSessionFilePath, resolveSessionFilePathOptions } from "../config/sessions/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatDurationCompact } from "../infra/format-time/format-duration.ts";
 import { formatMissingCostEntries } from "../infra/session-cost-usage-totals.js";
 import {
@@ -18,7 +18,7 @@ export function buildStatusUptimeLine(): string {
 }
 
 async function resolveSessionCostLine(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   sessionEntry?: SessionEntry;
   storePath?: string;
@@ -84,7 +84,7 @@ async function resolveSessionCostLine(params: {
 
 export async function appendSessionCostLine(
   usageLine: string | null,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string,
   sessionEntry?: SessionEntry,
   storePath?: string,

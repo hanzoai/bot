@@ -1,5 +1,5 @@
 ---
-summary: "First-run setup flow for OpenClaw (macOS app)"
+summary: "First-run setup flow for Bot (macOS app)"
 read_when:
   - Designing the macOS onboarding assistant
   - Implementing auth or identity setup
@@ -30,7 +30,7 @@ For CLI onboarding and a comparison of both paths, see [Onboarding Overview](/st
 
 Security trust model:
 
-- By default, OpenClaw is a personal agent: one trusted operator boundary.
+- By default, Bot is a personal agent: one trusted operator boundary.
 - Shared/multi-user setups need lock-down: split trust boundaries, keep tool access minimal, and follow [Security](/gateway/security).
 - Local onboarding defaults new configs to `tools.profile: "coding"` so fresh setups keep filesystem/runtime tools without the unrestricted `full` profile.
 - If hooks/webhooks or other untrusted content feeds are enabled, use a strong modern model tier and keep strict tool policy/sandboxing.
@@ -61,13 +61,13 @@ Where does the **Gateway** run?
 </Tip>
 </Step>
 <Step title="CLI">
-  Local setup installs the global `openclaw` CLI via npm, pnpm, or bun,
+  Local setup installs the global `bot` CLI via npm, pnpm, or bun,
   preferring npm first. Node remains the recommended runtime for the Gateway
   itself. Existing compatible installations are reused.
 </Step>
 <Step title="Connect your AI">
   A connected Gateway that already has a configured agent model skips this
-  page entirely and opens the normal agent UI. OpenClaw and provider setup
+  page entirely and opens the normal agent UI. Bot and provider setup
   only run for a fresh or incomplete Gateway.
 
 Once the Gateway is ready, onboarding looks for AI access you already have:
@@ -99,15 +99,15 @@ Gateway's active text-inference provider plugins rather than a fixed app list,
 so another provider can opt in without adding provider-specific macOS code.
 
 The manual key/token picker uses the same provider registry. In every route,
-the provider supplies its starter model and configuration; OpenClaw verifies
+the provider supplies its starter model and configuration; Bot verifies
 the credential with the same live test before storing its auth profile. Next
 remains locked until one backend has passed, so the first agent chat cannot
-start without working inference. After that live check passes, OpenClaw becomes
+start without working inference. After that live check passes, Bot becomes
 available to help configure the remaining workspace, Gateway, channels, and
-other optional features. When OpenClaw offers a short list of choices, the app
+other optional features. When Bot offers a short list of choices, the app
 shows native option cards; choosing one sends the selection, and **Skip for
-now** always leaves the choice optional. OpenClaw is also available later under
-Settings → OpenClaw.
+now** always leaves the choice optional. Bot is also available later under
+Settings → Bot.
 </Step>
 <Step title="Import memories (shown when detected)">
 For a local Gateway, onboarding checks the Mac for memories from supported AI
@@ -121,7 +121,7 @@ control.
 </Step>
 <Step title="Permissions">
 
-<Frame caption="Choose what permissions do you want to give OpenClaw">
+<Frame caption="Choose what permissions do you want to give Bot">
 <img src="/assets/macos-onboarding/05-permissions.png" alt="" />
 </Frame>
 
@@ -129,10 +129,10 @@ Onboarding requests TCC permissions for: Automation (AppleScript), Notifications
 
 </Step>
 <Step title="Finish">
-  After inference passes, OpenClaw owns the remaining optional setup and can
+  After inference passes, Bot owns the remaining optional setup and can
   hand you off to the normal agent chat. Finishing the permission walkthrough
   opens that same chat; the app does not create a workspace or launch a separate
-  agent setup conversation before OpenClaw. See
+  agent setup conversation before Bot. See
   [Bootstrapping](/start/bootstrapping) for what happens on the gateway host
   during the agent's first real turn.
 </Step>

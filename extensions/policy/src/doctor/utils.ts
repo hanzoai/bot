@@ -1,5 +1,5 @@
 // Shared policy doctor value readers.
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 
 export function readPolicyStringArray(
   policy: unknown,

@@ -15,9 +15,9 @@ afterEach(async () => {
 });
 
 async function createStateDir(): Promise<string> {
-  const stateDir = await mkdtemp(path.join(tmpdir(), "openclaw-canvas-serve-"));
+  const stateDir = await mkdtemp(path.join(tmpdir(), "bot-canvas-serve-"));
   tempDirs.push(stateDir);
-  vi.stubEnv("OPENCLAW_STATE_DIR", stateDir);
+  vi.stubEnv("BOT_STATE_DIR", stateDir);
   return stateDir;
 }
 
@@ -84,18 +84,18 @@ describe("core canvas document host", () => {
   it("rejects unsupported methods and traversal paths", async () => {
     await createStateDir();
     const methodResponse = await capture(
-      "/__openclaw__/canvas/documents/widget-1/index.html",
+      "/__bot__/canvas/documents/widget-1/index.html",
       "POST",
     );
     expect(methodResponse.statusCode).toBe(405);
     expect(methodResponse.text).toBe("Method Not Allowed");
 
     const traversalResponse = await capture(
-      "/__openclaw__/canvas/documents/../widget-1/index.html",
+      "/__bot__/canvas/documents/../widget-1/index.html",
     );
     expect(traversalResponse.handled).toBe(false);
 
-    const missingResponse = await capture("/__openclaw__/canvas/documents/widget-1/index.html");
+    const missingResponse = await capture("/__bot__/canvas/documents/widget-1/index.html");
     expect(missingResponse.statusCode).toBe(404);
     expect(missingResponse.text).toBe("not found");
   });

@@ -19,7 +19,7 @@ import { shouldShowChannelInSetup } from "../commands/channel-setup/discovery.js
 import { resolveChannelSetupWizardAdapterForPlugin } from "../commands/channel-setup/registry.js";
 import type { ChannelChoice } from "../commands/onboard-types.js";
 import { isChannelConfigured } from "../config/channel-configured.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   findBundledPluginSourceInMap,
   resolveBundledPluginSources,
@@ -335,7 +335,7 @@ export function findBundledSourceForCatalogChannel(params: {
 }
 
 export async function collectChannelStatus(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   options?: SetupChannelsOptions;
   accountOverrides: Partial<Record<ChannelChoice, string>>;
   installedPlugins?: ChannelSetupPlugin[];
@@ -443,7 +443,7 @@ export async function collectChannelStatus(params: {
 }
 
 export async function noteChannelStatus(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: WizardPrompter;
   options?: SetupChannelsOptions;
   accountOverrides?: Partial<Record<ChannelChoice, string>>;
@@ -481,11 +481,11 @@ export async function noteChannelPrimer(
     [
       t("wizard.channelsPrimer.inboundSafety"),
       t("wizard.channelsPrimer.approveWith", {
-        command: formatCliCommand("openclaw pairing approve <channel> <code>"),
+        command: formatCliCommand("bot pairing approve <channel> <code>"),
       }),
       t("wizard.channelsPrimer.openDm"),
       t("wizard.channelsPrimer.multiUserDm", {
-        command: formatCliCommand('openclaw config set session.dmScope "per-channel-peer"'),
+        command: formatCliCommand('bot config set session.dmScope "per-channel-peer"'),
       }),
       t("wizard.channelsPrimer.docs", {
         link: formatDocsLink("/channels/pairing", "channels/pairing"),
@@ -513,7 +513,7 @@ export function resolveQuickstartDefault(
 }
 
 export function resolveChannelSelectionNoteLines(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   installedPlugins: ChannelSetupPlugin[];
   selection: ChannelChoice[];
 }): string[] {

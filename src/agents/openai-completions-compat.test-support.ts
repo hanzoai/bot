@@ -1,6 +1,6 @@
-import type { detectOpenAICompletionsCompat } from "@openclaw/ai/transports";
+import type { detectOpenAICompletionsCompat } from "@hanzo/bot-ai/transports";
 import type { ProviderEndpointClass } from "./provider-attribution.js";
-import "@openclaw/ai/transports";
+import "@hanzo/bot-ai/transports";
 
 type OpenAICompletionsCompatDefaultsInput = {
   provider?: string;
@@ -21,7 +21,7 @@ type OpenAICompletionsCompatTestApi = {
 
 function getTestApi(): OpenAICompletionsCompatTestApi {
   const api = (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.openAICompletionsCompatTestApi")
+    Symbol.for("bot.openAICompletionsCompatTestApi")
   ];
   if (!api) {
     throw new Error("OpenAI completions compat test API is unavailable");

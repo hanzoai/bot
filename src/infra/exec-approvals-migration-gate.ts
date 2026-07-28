@@ -8,7 +8,7 @@ const legacyPresenceCache = new Map<string, boolean>();
 export class ExecApprovalsMigrationRequiredError extends Error {
   constructor(filePath: string) {
     super(
-      `Legacy exec approvals exist at ${filePath}. Run \`openclaw doctor --fix\` before using exec approvals.`,
+      `Legacy exec approvals exist at ${filePath}. Run \`bot doctor --fix\` before using exec approvals.`,
     );
     this.name = "ExecApprovalsMigrationRequiredError";
   }

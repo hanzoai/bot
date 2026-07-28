@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --import tsx
-// Release Check script supports OpenClaw repository automation.
+// Release Check script supports Bot repository automation.
 
 import { execFileSync, type ExecFileSyncOptions } from "node:child_process";
 import {
@@ -53,7 +53,7 @@ import { resolveNpmRunner } from "./npm-runner.mjs";
 import {
   collectInstalledPackageErrors,
   normalizeInstalledBinaryVersion,
-} from "./openclaw-npm-postpublish-verify.ts";
+} from "./bot-npm-postpublish-verify.ts";
 import { resolvePnpmRunner } from "./pnpm-runner.mjs";
 import { listStaticExtensionAssetOutputs } from "./runtime-postbuild.mjs";
 import { sparkleBuildFloorsFromShortVersion, type SparkleBuildFloors } from "./sparkle-build.ts";
@@ -67,7 +67,7 @@ export { collectBundledExtensionManifestErrors } from "./lib/bundled-extension-m
 export { packageNameFromSpecifier } from "./lib/plugin-package-dependencies.mjs";
 
 export const RELEASE_CHECK_LOCAL_PACKAGE_TARBALL_DIR_ENV =
-  "OPENCLAW_RELEASE_CHECK_LOCAL_PACKAGE_TARBALL_DIR";
+  "BOT_RELEASE_CHECK_LOCAL_PACKAGE_TARBALL_DIR";
 
 type PackFile = { path: string };
 type PackResult = { files?: PackFile[]; filename?: string; unpackedSize?: number };
@@ -114,7 +114,7 @@ const requiredPathGroups = [
   "dist/agents/model-provider-auth.worker.js",
   "dist/audit/audit-event-writer.worker.js",
   "dist/config/sessions/session-transcript-reconcile.worker.js",
-  "dist/state/openclaw-database-verify.worker.js",
+  "dist/state/bot-database-verify.worker.js",
   "dist/system-agent/setup-inference-detection.worker.js",
   "dist/task-registry-control.runtime.js",
   "dist/telegram-ingress-worker.runtime.js",
@@ -126,7 +126,7 @@ const forbiddenPrefixes = [
   ...rootPackageExcludedExtensionPrefixes,
   ...LOCAL_BUILD_METADATA_DIST_PATHS,
   "dist-runtime/",
-  "dist/OpenClaw.app/",
+  "dist/Bot.app/",
   "dist/extensions/qa-channel/",
   "dist/extensions/qa-lab/",
   "dist/plugin-sdk/extensions/qa-channel/",
@@ -174,11 +174,11 @@ const DEFAULT_RELEASE_CHECK_COMMAND_TIMEOUT_MS = 5 * 60 * 1000;
 const DEFAULT_RELEASE_CHECK_COMMAND_MAX_BUFFER_BYTES = 100 * 1024 * 1024;
 export const MAX_CRITICAL_PLUGIN_SDK_ENTRYPOINT_BYTES = 2 * 1024 * 1024;
 const CRITICAL_PLUGIN_SDK_SIZE_CHECK_SPECIFIERS = [
-  "openclaw/plugin-sdk/core",
-  "openclaw/plugin-sdk/provider-entry",
-  "openclaw/plugin-sdk/runtime",
+  "bot/plugin-sdk/core",
+  "bot/plugin-sdk/provider-entry",
+  "bot/plugin-sdk/runtime",
 ] as const;
-const CRITICAL_PLUGIN_SDK_IMPORT_SMOKE_SPECIFIERS = ["openclaw/plugin-sdk/core"] as const;
+const CRITICAL_PLUGIN_SDK_IMPORT_SMOKE_SPECIFIERS = ["bot/plugin-sdk/core"] as const;
 export const PACKED_CLI_SMOKE_COMMANDS = [
   ["--help"],
   ["onboard", "--help"],
@@ -222,7 +222,7 @@ export function runReleaseCheckCommand(
     maxBuffer:
       options.maxBuffer ??
       readPositiveEnvInt(
-        "OPENCLAW_RELEASE_CHECK_COMMAND_MAX_BUFFER_BYTES",
+        "BOT_RELEASE_CHECK_COMMAND_MAX_BUFFER_BYTES",
         process.env,
         DEFAULT_RELEASE_CHECK_COMMAND_MAX_BUFFER_BYTES,
       ),
@@ -231,7 +231,7 @@ export function runReleaseCheckCommand(
     timeout:
       options.timeoutMs ??
       readPositiveEnvInt(
-        "OPENCLAW_RELEASE_CHECK_COMMAND_TIMEOUT_MS",
+        "BOT_RELEASE_CHECK_COMMAND_TIMEOUT_MS",
         process.env,
         DEFAULT_RELEASE_CHECK_COMMAND_TIMEOUT_MS,
       ),
@@ -460,13 +460,13 @@ export function resolveReleaseCheckLocalPackageTarballs(
     .map((entry) => resolve(resolvedDir, entry.name))
     .toSorted((left, right) => left.localeCompare(right));
   const aiTarballs = tarballs.filter(
-    (tarballPath) => localPackageNameForTarball(tarballPath) === "@openclaw/ai",
+    (tarballPath) => localPackageNameForTarball(tarballPath) === "@hanzo/bot-ai",
   );
   const gatewayProtocolTarballs = tarballs.filter(
-    (tarballPath) => localPackageNameForTarball(tarballPath) === "@openclaw/gateway-protocol",
+    (tarballPath) => localPackageNameForTarball(tarballPath) === "@hanzo/bot-gateway-protocol",
   );
   const gatewayClientTarballs = tarballs.filter(
-    (tarballPath) => localPackageNameForTarball(tarballPath) === "@openclaw/gateway-client",
+    (tarballPath) => localPackageNameForTarball(tarballPath) === "@hanzo/bot-gateway-client",
   );
   const recognizedTarballs =
     aiTarballs.length + gatewayProtocolTarballs.length + gatewayClientTarballs.length;
@@ -477,15 +477,15 @@ export function resolveReleaseCheckLocalPackageTarballs(
   }
   const expectedAiTarballs = requiresAi ? 1 : 0;
   const aiTarballRequirement = requiresAi
-    ? "exactly one @openclaw/ai tarball"
-    : "no @openclaw/ai tarballs";
+    ? "exactly one @hanzo/bot-ai tarball"
+    : "no @hanzo/bot-ai tarballs";
   if (
     aiTarballs.length !== expectedAiTarballs ||
     gatewayProtocolTarballs.length > 1 ||
     gatewayClientTarballs.length > 1
   ) {
     throw new Error(
-      `release-check: ${RELEASE_CHECK_LOCAL_PACKAGE_TARBALL_DIR_ENV} must contain ${aiTarballRequirement}, at most one @openclaw/gateway-protocol tarball, and at most one @openclaw/gateway-client tarball; found ${aiTarballs.length}, ${gatewayProtocolTarballs.length}, and ${gatewayClientTarballs.length}.`,
+      `release-check: ${RELEASE_CHECK_LOCAL_PACKAGE_TARBALL_DIR_ENV} must contain ${aiTarballRequirement}, at most one @hanzo/bot-gateway-protocol tarball, and at most one @hanzo/bot-gateway-client tarball; found ${aiTarballs.length}, ${gatewayProtocolTarballs.length}, and ${gatewayClientTarballs.length}.`,
     );
   }
   return tarballs;
@@ -495,19 +495,19 @@ function rootPackageRequiresLocalAiTarball(): boolean {
   const packageJson = JSON.parse(readFileSync(resolve("package.json"), "utf8")) as {
     dependencies?: Record<string, unknown>;
   };
-  return typeof packageJson.dependencies?.["@openclaw/ai"] === "string";
+  return typeof packageJson.dependencies?.["@hanzo/bot-ai"] === "string";
 }
 
 function localPackageNameForTarball(tarballPath: string): string | undefined {
   const filename = basename(tarballPath);
-  if (/^openclaw-ai(?:-.+)?\.tgz$/.test(filename)) {
-    return "@openclaw/ai";
+  if (/^bot-ai(?:-.+)?\.tgz$/.test(filename)) {
+    return "@hanzo/bot-ai";
   }
-  if (/^openclaw-gateway-protocol(?:-.+)?\.tgz$/.test(filename)) {
-    return "@openclaw/gateway-protocol";
+  if (/^bot-gateway-protocol(?:-.+)?\.tgz$/.test(filename)) {
+    return "@hanzo/bot-gateway-protocol";
   }
-  if (/^openclaw-gateway-client(?:-.+)?\.tgz$/.test(filename)) {
-    return "@openclaw/gateway-client";
+  if (/^bot-gateway-client(?:-.+)?\.tgz$/.test(filename)) {
+    return "@hanzo/bot-gateway-client";
   }
   return undefined;
 }
@@ -545,11 +545,11 @@ export function writePackedTarballInstallManifest(
     packageName: localPackageNameForTarball(localPackageTarballPath),
     tarballPath: localPackageTarballPath,
   }));
-  const aiTarballs = localPackages.filter(({ packageName }) => packageName === "@openclaw/ai");
+  const aiTarballs = localPackages.filter(({ packageName }) => packageName === "@hanzo/bot-ai");
   const expectedAiTarballs = requiresAi ? 1 : 0;
   const aiTarballRequirement = requiresAi
-    ? "exactly one @openclaw/ai tarball"
-    : "no @openclaw/ai tarballs";
+    ? "exactly one @hanzo/bot-ai tarball"
+    : "no @hanzo/bot-ai tarballs";
   if (aiTarballs.length !== expectedAiTarballs) {
     throw new Error(
       `release-check: packed install requires ${aiTarballRequirement}; found ${aiTarballs.length}.`,
@@ -570,7 +570,7 @@ export function writePackedTarballInstallManifest(
   if (Object.keys(dependencies).length !== localPackages.length) {
     throw new Error("release-check: packed install received duplicate local package tarballs.");
   }
-  dependencies.openclaw = pathToFileURL(tarballPath).href;
+  dependencies.bot = pathToFileURL(tarballPath).href;
   mkdirSync(prefixDir, { recursive: true });
   writeFileSync(
     join(prefixDir, "package.json"),
@@ -607,7 +607,7 @@ export function resolvePackedInstalledBinaryPath(
     prefixDir,
     "node_modules",
     ".bin",
-    platform === "win32" ? "openclaw.cmd" : "openclaw",
+    platform === "win32" ? "bot.cmd" : "bot",
   );
 }
 
@@ -630,7 +630,7 @@ export function createPackedBundledPluginPostinstallEnv(
 ): NodeJS.ProcessEnv {
   return {
     ...env,
-    OPENCLAW_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1",
+    BOT_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1",
   };
 }
 
@@ -673,10 +673,10 @@ export function createPackedCliSmokeEnv(
     AWS_EC2_METADATA_DISABLED: "true",
     AWS_SHARED_CREDENTIALS_FILE: homeDir ? join(homeDir, ".aws", "credentials") : undefined,
     AWS_CONFIG_FILE: homeDir ? join(homeDir, ".aws", "config") : undefined,
-    OPENCLAW_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1",
-    OPENCLAW_NO_ONBOARD: "1",
-    OPENCLAW_SERVICE_REPAIR_POLICY: "external",
-    OPENCLAW_SUPPRESS_NOTES: "1",
+    BOT_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1",
+    BOT_NO_ONBOARD: "1",
+    BOT_SERVICE_REPAIR_POLICY: "external",
+    BOT_SUPPRESS_NOTES: "1",
     ...overrides,
   };
 }
@@ -688,8 +688,8 @@ export function createPackedCompletionSmokeEnv(
   return {
     ...env,
     ...overrides,
-    OPENCLAW_SUPPRESS_NOTES: "1",
-    OPENCLAW_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1",
+    BOT_SUPPRESS_NOTES: "1",
+    BOT_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1",
     [COMPLETION_SKIP_PLUGIN_COMMANDS_ENV]: "1",
   };
 }
@@ -726,7 +726,7 @@ export function collectPackedInstalledPackageVerificationErrors(params: {
     normalizeInstalledBinaryVersion(params.installedBinaryVersion) !== params.expectedVersion
   ) {
     errors.push(
-      `installed openclaw binary version mismatch: expected ${params.expectedVersion}, found ${params.installedBinaryVersion || "<missing>"}.`,
+      `installed bot binary version mismatch: expected ${params.expectedVersion}, found ${params.installedBinaryVersion || "<missing>"}.`,
     );
   }
   return errors;
@@ -769,17 +769,17 @@ export function createPackedPluginSdkTypescriptSmokeProject(params: {
   aiPackageSpec?: string;
 }): void {
   const dependencies: Record<string, string> = {
-    openclaw: params.packageSpec,
+    bot: params.packageSpec,
   };
   if (params.aiPackageSpec) {
-    dependencies["@openclaw/ai"] = params.aiPackageSpec;
+    dependencies["@hanzo/bot-ai"] = params.aiPackageSpec;
   }
   mkdirSync(join(params.consumerDir, "src"), { recursive: true });
   writeFileSync(
     join(params.consumerDir, "package.json"),
     `${JSON.stringify(
       {
-        name: "openclaw-plugin-sdk-type-smoke",
+        name: "bot-plugin-sdk-type-smoke",
         private: true,
         type: "module",
         dependencies,
@@ -821,7 +821,7 @@ function runPackedPluginSdkTypescriptSmoke(
 ): void {
   const consumerDir = join(tmpRoot, "plugin-sdk-type-consumer");
   const aiTarball = localPackageTarballs.find(
-    (localPackageTarball) => localPackageNameForTarball(localPackageTarball) === "@openclaw/ai",
+    (localPackageTarball) => localPackageNameForTarball(localPackageTarball) === "@hanzo/bot-ai",
   );
   createPackedPluginSdkTypescriptSmokeProject({
     consumerDir,
@@ -834,10 +834,10 @@ function runPackedPluginSdkTypescriptSmoke(
     stdio: "inherit",
   });
 
-  const installedOpenClawRoot = join(consumerDir, "node_modules", "openclaw");
+  const installedBotRoot = join(consumerDir, "node_modules", "bot");
   const tscPath = [
     join(consumerDir, "node_modules", "typescript", "bin", "tsc"),
-    join(installedOpenClawRoot, "node_modules", "typescript", "bin", "tsc"),
+    join(installedBotRoot, "node_modules", "typescript", "bin", "tsc"),
   ].find((candidate) => existsSync(candidate));
   if (!tscPath) {
     throw new Error("release-check: packed plugin SDK TypeScript smoke could not find tsc.");
@@ -852,8 +852,8 @@ function runPackedPluginSdkTypescriptSmoke(
 }
 
 export function writePackedBundledPluginActivationConfig(homeDir: string): void {
-  const configPath = join(homeDir, ".openclaw", "openclaw.json");
-  mkdirSync(join(homeDir, ".openclaw"), { recursive: true });
+  const configPath = join(homeDir, ".bot", "bot.json");
+  mkdirSync(join(homeDir, ".bot"), { recursive: true });
   writeFileSync(
     configPath,
     `${JSON.stringify(
@@ -871,7 +871,7 @@ export function writePackedBundledPluginActivationConfig(homeDir: string): void 
         models: {
           providers: {
             openai: {
-              apiKey: "sk-openclaw-release-check",
+              apiKey: "sk-bot-release-check",
               baseUrl: "https://api.openai.com/v1",
               models: [],
             },
@@ -898,14 +898,14 @@ function runPackedBundledPluginActivationSmoke(packageRoot: string, tmpRoot: str
   mkdirSync(homeDir, { recursive: true });
   const env = createPackedCliSmokeEnv(process.env, {
     HOME: homeDir,
-    OPENAI_API_KEY: "sk-openclaw-release-check",
+    OPENAI_API_KEY: "sk-bot-release-check",
   });
 
   writePackedBundledPluginActivationConfig(homeDir);
   runReleaseCheckCommand(
     {
       command: process.execPath,
-      args: [join(packageRoot, "openclaw.mjs"), ...PACKED_BUNDLED_RUNTIME_DEPS_REPAIR_ARGS],
+      args: [join(packageRoot, "bot.mjs"), ...PACKED_BUNDLED_RUNTIME_DEPS_REPAIR_ARGS],
     },
     {
       cwd: packageRoot,
@@ -914,7 +914,7 @@ function runPackedBundledPluginActivationSmoke(packageRoot: string, tmpRoot: str
     },
   );
   runReleaseCheckCommand(
-    { command: process.execPath, args: [join(packageRoot, "openclaw.mjs"), "plugins", "doctor"] },
+    { command: process.execPath, args: [join(packageRoot, "bot.mjs"), "plugins", "doctor"] },
     {
       cwd: packageRoot,
       stdio: "inherit",
@@ -960,8 +960,8 @@ function runPackedCliSmoke(params: {
   const binaryPath = resolvePackedInstalledBinaryPath(params.prefixDir);
   const env = createPackedCliSmokeEnv(process.env, {
     HOME: params.homeDir,
-    OPENCLAW_STATE_DIR: params.stateDir,
-    OPENAI_API_KEY: "sk-openclaw-release-check",
+    BOT_STATE_DIR: params.stateDir,
+    OPENAI_API_KEY: "sk-bot-release-check",
   });
   const windowsRoot = env.SystemRoot ?? env.WINDIR ?? "C:\\Windows";
   const trustedCmdPath = join(windowsRoot, "System32", "cmd.exe");
@@ -995,7 +995,7 @@ function runPackedCliSmoke(params: {
 }
 
 function runPackedBundledChannelEntrySmoke(): void {
-  const tmpRoot = mkdtempSync(join(tmpdir(), "openclaw-release-pack-smoke-"));
+  const tmpRoot = mkdtempSync(join(tmpdir(), "bot-release-pack-smoke-"));
   try {
     const expectedVersion = (
       JSON.parse(readFileSync(resolve("package.json"), "utf8")) as {
@@ -1017,7 +1017,7 @@ function runPackedBundledChannelEntrySmoke(): void {
     });
     installPackedTarball(prefixDir, tarballPath, tmpRoot, localPackageTarballs);
 
-    const packageRoot = join(prefixDir, "node_modules", "openclaw");
+    const packageRoot = join(prefixDir, "node_modules", "bot");
     verifyPackedInstalledPackage({
       expectedVersion,
       packageRoot,
@@ -1050,7 +1050,7 @@ function runPackedBundledChannelEntrySmoke(): void {
         stdio: "inherit",
         env: {
           ...process.env,
-          OPENCLAW_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1",
+          BOT_DISABLE_BUNDLED_ENTRY_SOURCE_FALLBACK: "1",
         },
       },
     );
@@ -1058,14 +1058,14 @@ function runPackedBundledChannelEntrySmoke(): void {
     runReleaseCheckCommand(
       {
         command: process.execPath,
-        args: [join(packageRoot, "openclaw.mjs"), ...PACKED_COMPLETION_SMOKE_ARGS],
+        args: [join(packageRoot, "bot.mjs"), ...PACKED_COMPLETION_SMOKE_ARGS],
       },
       {
         cwd: packageRoot,
         stdio: "inherit",
         env: createPackedCompletionSmokeEnv(process.env, {
           HOME: homeDir,
-          OPENCLAW_STATE_DIR: stateDir,
+          BOT_STATE_DIR: stateDir,
         }),
       },
     );
@@ -1122,8 +1122,8 @@ export function collectForbiddenPackPaths(paths: Iterable<string>): string[] {
       (path) =>
         isLegacyPluginDependencyInstallStagePath(path) ||
         forbiddenPrefixes.some((prefix) => path.startsWith(prefix)) ||
-        /(^|\/)\.openclaw-runtime-deps-[^/]+(\/|$)/u.test(path) ||
-        path.endsWith("/.openclaw-runtime-deps-stamp.json") ||
+        /(^|\/)\.bot-runtime-deps-[^/]+(\/|$)/u.test(path) ||
+        path.endsWith("/.bot-runtime-deps-stamp.json") ||
         path.includes("node_modules/"),
     )
     .toSorted((left, right) => left.localeCompare(right));
@@ -1244,7 +1244,7 @@ function checkAppcastSparkleVersions() {
   }
 }
 
-// Critical functions that channel extension plugins import from openclaw/plugin-sdk.
+// Critical functions that channel extension plugins import from bot/plugin-sdk.
 // If any are missing from the compiled output, plugins crash at runtime (#27569).
 const requiredPluginSdkExports = [
   "isDangerousNameMatchingEnabled",
@@ -1325,7 +1325,7 @@ async function checkPluginSdkExports() {
 export function collectCriticalPluginSdkEntrypointSizeErrors(rootDir = process.cwd()): string[] {
   const errors: string[] = [];
   for (const specifier of CRITICAL_PLUGIN_SDK_SIZE_CHECK_SPECIFIERS) {
-    const subpath = specifier.slice("openclaw/plugin-sdk/".length);
+    const subpath = specifier.slice("bot/plugin-sdk/".length);
     const relativePath = `dist/plugin-sdk/${subpath}.js`;
     const filePath = resolve(rootDir, relativePath);
     if (!existsSync(filePath)) {

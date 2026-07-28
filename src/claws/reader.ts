@@ -5,7 +5,7 @@ import { basename, dirname, isAbsolute, relative, resolve, sep } from "node:path
 import { isScalar, parseDocument, visit } from "yaml";
 import { assertNoSymlinkParents } from "../infra/fs-safe-advanced.js";
 import { FsSafeError, root as fsSafeRoot, type OpenResult } from "../infra/fs-safe.js";
-import { readClawOpenClawProfile } from "./openclaw-profile.js";
+import { readClawBotProfile } from "./bot-profile.js";
 import { isCanonicalClawHubPackageName, isExactSemVer } from "./schema-portability.js";
 import { clawManifestWorkspaceConflictsWithPath, parseClawManifest } from "./schema.js";
 import {
@@ -24,7 +24,7 @@ import type {
 type PackageJson = {
   name: string;
   version: string;
-  openclaw: { claw: string };
+  bot: { claw: string };
 };
 
 type ResolvedClawSource = Omit<ClawSourceIdentity, "integrity" | "integrityKind" | "byteLength"> & {
@@ -95,7 +95,7 @@ async function buildDevelopmentSnapshot(params: {
   source: ResolvedClawSource;
   manifest: ClawManifest;
   manifestRaw: Buffer;
-  openClawProfile?: { path: string; raw: Buffer };
+  botProfile?: { path: string; raw: Buffer };
 }): Promise<
   | {
       ok: true;
@@ -113,8 +113,8 @@ async function buildDevelopmentSnapshot(params: {
   };
   add("canonical-source", Buffer.from(params.source.manifestPath, "utf8"));
   add("manifest", params.manifestRaw);
-  if (params.openClawProfile) {
-    add(`profile:${params.openClawProfile.path.replaceAll("\\", "/")}`, params.openClawProfile.raw);
+  if (params.botProfile) {
+    add(`profile:${params.botProfile.path.replaceAll("\\", "/")}`, params.botProfile.raw);
   }
 
   if (params.source.kind === "package") {
@@ -228,11 +228,11 @@ function parsePackageJson(value: unknown): PackageJson | undefined {
     return undefined;
   }
   const record = value as Record<string, unknown>;
-  const openclaw = record.openclaw;
-  if (!openclaw || typeof openclaw !== "object" || Array.isArray(openclaw)) {
+  const bot = record.bot;
+  if (!bot || typeof bot !== "object" || Array.isArray(bot)) {
     return undefined;
   }
-  const claw = (openclaw as Record<string, unknown>).claw;
+  const claw = (bot as Record<string, unknown>).claw;
   if (
     typeof record.name !== "string" ||
     !isCanonicalClawHubPackageName(record.name) ||
@@ -243,7 +243,7 @@ function parsePackageJson(value: unknown): PackageJson | undefined {
   ) {
     return undefined;
   }
-  return { name: record.name, version: record.version, openclaw: { claw } };
+  return { name: record.name, version: record.version, bot: { claw } };
 }
 
 async function readJson(
@@ -448,20 +448,20 @@ async function resolvePackageSource(
       diagnostics: [
         fileDiagnostic(
           "invalid_package_metadata",
-          "package.json must declare non-empty name, version, and openclaw.claw fields.",
+          "package.json must declare non-empty name, version, and bot.claw fields.",
         ),
       ],
     };
   }
-  if (isAbsolute(packageJson.openclaw.claw)) {
+  if (isAbsolute(packageJson.bot.claw)) {
     return {
       ok: false,
       diagnostics: [
-        fileDiagnostic("manifest_escapes_package", "openclaw.claw must be package-relative."),
+        fileDiagnostic("manifest_escapes_package", "bot.claw must be package-relative."),
       ],
     };
   }
-  const declaredManifestPath = resolve(packageRootReal, packageJson.openclaw.claw);
+  const declaredManifestPath = resolve(packageRootReal, packageJson.bot.claw);
   const manifestPath = await realpath(declaredManifestPath).catch(() => undefined);
   if (!manifestPath || !isContained(packageRootReal, manifestPath)) {
     return {
@@ -559,7 +559,7 @@ export async function readClawManifestFile(path: string): Promise<ClawReadResult
       ],
     };
   }
-  const profile = await readClawOpenClawProfile({
+  const profile = await readClawBotProfile({
     packageRoot: sourceResult.source.packageRoot,
     manifest: parsed.manifest,
   });
@@ -571,7 +571,7 @@ export async function readClawManifestFile(path: string): Promise<ClawReadResult
     manifest: parsed.manifest,
     manifestRaw: manifestResult.raw,
     ...(profile.raw && profile.path
-      ? { openClawProfile: { path: profile.path, raw: profile.raw } }
+      ? { botProfile: { path: profile.path, raw: profile.raw } }
       : {}),
   });
   if (!snapshot.ok) {
@@ -592,7 +592,7 @@ export async function readClawManifestFile(path: string): Promise<ClawReadResult
     ok: true,
     manifest: parsed.manifest,
     ...(hasMarkdownBody ? { clawMarkdownBody: manifestResult.body } : {}),
-    ...(profile.profile ? { openClawProfile: profile.profile } : {}),
+    ...(profile.profile ? { botProfile: profile.profile } : {}),
     source,
     snapshot: { workspaceSources: snapshot.workspaceSources },
     diagnostics: parsed.diagnostics,

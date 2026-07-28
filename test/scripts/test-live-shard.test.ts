@@ -195,7 +195,7 @@ describe("scripts/test-live-shard", () => {
 
   it("adds JSON report evidence without dropping operator output", () => {
     const reportPath = buildLiveShardReportPath("native-live-src-agents", {
-      OPENCLAW_LIVE_SHARD_REPORT_DIR: ".artifacts/live-proof",
+      BOT_LIVE_SHARD_REPORT_DIR: ".artifacts/live-proof",
     });
 
     expect(reportPath).toBe(".artifacts/live-proof/native-live-src-agents.vitest.json");
@@ -216,7 +216,7 @@ describe("scripts/test-live-shard", () => {
 
   it("prepares the private QA runtime for live shards that load its built API", () => {
     const expected = {
-      env: { OPENCLAW_BUILD_PRIVATE_QA: "1" },
+      env: { BOT_BUILD_PRIVATE_QA: "1" },
       profile: "qaRuntime",
       requiredArtifact: "dist/extensions/qa-lab/runtime-api.js",
     };
@@ -344,7 +344,7 @@ describe("scripts/test-live-shard", () => {
     });
     expect(
       validateLiveShardReportPayload(payload, expectedFiles, process.cwd(), {
-        OPENCLAW_LIVE_CLI_BACKEND: "1",
+        BOT_LIVE_CLI_BACKEND: "1",
       }),
     ).toEqual({
       ok: false,
@@ -378,7 +378,7 @@ describe("scripts/test-live-shard", () => {
     });
     expect(
       validateLiveShardReportPayload(payload, expectedFiles, process.cwd(), {
-        OPENCLAW_LIVE_ACP_SPAWN_DEFAULTS: "1",
+        BOT_LIVE_ACP_SPAWN_DEFAULTS: "1",
       }),
     ).toEqual({
       ok: false,
@@ -410,7 +410,7 @@ describe("scripts/test-live-shard", () => {
     });
     expect(
       validateLiveShardReportPayload(payload, expectedFiles, process.cwd(), {
-        OPENCLAW_LIVE_SKILL_EXPERIENCE_REVIEW: "1",
+        BOT_LIVE_SKILL_EXPERIENCE_REVIEW: "1",
       }),
     ).toEqual({
       ok: false,
@@ -457,7 +457,7 @@ describe("scripts/test-live-shard", () => {
   });
 
   it("removes stale live shard reports before running a shard", () => {
-    const root = mkdtempSync(path.join(tmpdir(), "openclaw-live-shard-"));
+    const root = mkdtempSync(path.join(tmpdir(), "bot-live-shard-"));
     const reportPath = path.join(root, "stale.vitest.json");
     writeFileSync(reportPath, JSON.stringify({ numPassedTests: 1, numTotalTests: 1 }), "utf8");
 
@@ -487,7 +487,7 @@ describe("scripts/test-live-shard", () => {
   it.skipIf(process.platform === "win32")(
     "cleans live shard descendants before forwarding parent SIGTERM",
     async () => {
-      const root = mkdtempSync(path.join(tmpdir(), "openclaw-live-shard-signal-"));
+      const root = mkdtempSync(path.join(tmpdir(), "bot-live-shard-signal-"));
       const fakePnpmPath = path.join(root, "pnpm");
       const childPidPath = path.join(root, "child.pid");
       const descendantPidPath = path.join(root, "descendant.pid");
@@ -504,9 +504,9 @@ describe("scripts/test-live-shard", () => {
           {
             env: {
               ...process.env,
-              OPENCLAW_FAKE_PNPM_DESCENDANT_PID_PATH: descendantPidPath,
-              OPENCLAW_FAKE_PNPM_PID_PATH: childPidPath,
-              OPENCLAW_FAKE_PNPM_SIGNALED_PATH: signaledPath,
+              BOT_FAKE_PNPM_DESCENDANT_PID_PATH: descendantPidPath,
+              BOT_FAKE_PNPM_PID_PATH: childPidPath,
+              BOT_FAKE_PNPM_SIGNALED_PATH: signaledPath,
               npm_execpath: fakePnpmPath,
             },
             stdio: "ignore",
@@ -555,11 +555,11 @@ function writeFakePnpm(filePath: string): void {
       "  \"process.on('SIGTERM', () => {}); setInterval(() => {}, 1000);\",",
       "], { stdio: 'ignore' });",
       'process.on("SIGTERM", () => {',
-      '  fs.writeFileSync(process.env.OPENCLAW_FAKE_PNPM_SIGNALED_PATH, "SIGTERM");',
+      '  fs.writeFileSync(process.env.BOT_FAKE_PNPM_SIGNALED_PATH, "SIGTERM");',
       "  process.exit(0);",
       "});",
-      "fs.writeFileSync(process.env.OPENCLAW_FAKE_PNPM_DESCENDANT_PID_PATH, String(child.pid));",
-      "fs.writeFileSync(process.env.OPENCLAW_FAKE_PNPM_PID_PATH, String(process.pid));",
+      "fs.writeFileSync(process.env.BOT_FAKE_PNPM_DESCENDANT_PID_PATH, String(child.pid));",
+      "fs.writeFileSync(process.env.BOT_FAKE_PNPM_PID_PATH, String(process.pid));",
       "setInterval(() => {}, 1000);",
       "",
     ].join("\n"),

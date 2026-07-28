@@ -121,8 +121,8 @@ describe("AppSidebar agent chip", () => {
     const menu = sidebar.querySelector(".sidebar-agent-menu");
     expect(menu).not.toBeNull();
     expect(menu?.querySelector(".sidebar-pair-mobile")).toBeNull();
-    expect(menu?.querySelector("openclaw-sidebar-build-chip")).toBeNull();
-    expect(menu?.querySelector("openclaw-theme-mode-toggle")).toBeNull();
+    expect(menu?.querySelector("bot-sidebar-build-chip")).toBeNull();
+    expect(menu?.querySelector("bot-theme-mode-toggle")).toBeNull();
     expect(
       [...(menu?.children ?? [])]
         .filter((element) => element.localName === "wa-dropdown-item")

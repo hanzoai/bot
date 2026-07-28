@@ -1,4 +1,4 @@
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { verifyAgentRuntimeIdentityToken } from "../../gateway/agent-runtime-identity-token.js";
 import type { CallGatewayOptions } from "../../gateway/call.js";
@@ -63,8 +63,8 @@ function capturedGatewayCall(): CallGatewayOptions {
 
 describe("gateway tool defaults", () => {
   const envSnapshot = {
-    openclaw: process.env.OPENCLAW_GATEWAY_TOKEN,
-    gatewayUrl: process.env.OPENCLAW_GATEWAY_URL,
+    bot: process.env.BOT_GATEWAY_TOKEN,
+    gatewayUrl: process.env.BOT_GATEWAY_URL,
   };
 
   beforeEach(() => {
@@ -73,20 +73,20 @@ describe("gateway tool defaults", () => {
     mocks.persistedDeviceIdentity = undefined;
     mocks.configState.value = {};
     setActivePluginRegistry(createEmptyPluginRegistry());
-    delete process.env.OPENCLAW_GATEWAY_TOKEN;
-    delete process.env.OPENCLAW_GATEWAY_URL;
+    delete process.env.BOT_GATEWAY_TOKEN;
+    delete process.env.BOT_GATEWAY_URL;
   });
 
   afterAll(() => {
-    if (envSnapshot.openclaw === undefined) {
-      delete process.env.OPENCLAW_GATEWAY_TOKEN;
+    if (envSnapshot.bot === undefined) {
+      delete process.env.BOT_GATEWAY_TOKEN;
     } else {
-      process.env.OPENCLAW_GATEWAY_TOKEN = envSnapshot.openclaw;
+      process.env.BOT_GATEWAY_TOKEN = envSnapshot.bot;
     }
     if (envSnapshot.gatewayUrl === undefined) {
-      delete process.env.OPENCLAW_GATEWAY_URL;
+      delete process.env.BOT_GATEWAY_URL;
     } else {
-      process.env.OPENCLAW_GATEWAY_URL = envSnapshot.gatewayUrl;
+      process.env.BOT_GATEWAY_URL = envSnapshot.gatewayUrl;
     }
   });
 
@@ -130,8 +130,8 @@ describe("gateway tool defaults", () => {
     expect(capturedGatewayCall().timeoutMs).toBe(5000);
   });
 
-  it("uses OPENCLAW_GATEWAY_TOKEN for allowlisted local overrides", () => {
-    process.env.OPENCLAW_GATEWAY_TOKEN = "env-token";
+  it("uses BOT_GATEWAY_TOKEN for allowlisted local overrides", () => {
+    process.env.BOT_GATEWAY_TOKEN = "env-token";
     const opts = resolveGatewayOptions({ gatewayUrl: "ws://127.0.0.1:18789" });
     expect(opts.url).toBe("ws://127.0.0.1:18789");
     expect(opts.token).toBe("env-token");
@@ -164,7 +164,7 @@ describe("gateway tool defaults", () => {
   it("does not leak local env/config tokens to remote overrides", () => {
     // Remote gateway overrides must use their own configured token; the local
     // daemon token is scoped to loopback-style endpoints only.
-    process.env.OPENCLAW_GATEWAY_TOKEN = "local-env-token";
+    process.env.BOT_GATEWAY_TOKEN = "local-env-token";
     mocks.configState.value = {
       gateway: {
         auth: { token: "local-config-token" },
@@ -199,7 +199,7 @@ describe("gateway tool defaults", () => {
   });
 
   it("explicit gatewayToken overrides fallback token resolution", () => {
-    process.env.OPENCLAW_GATEWAY_TOKEN = "local-env-token";
+    process.env.BOT_GATEWAY_TOKEN = "local-env-token";
     mocks.configState.value = {
       gateway: {
         remote: {
@@ -471,7 +471,7 @@ describe("gateway tool defaults", () => {
         },
       ),
     ).rejects.toThrow(
-      "The running Gateway is from an older OpenClaw build and rejected current agent runtime connection metadata. Restart the Gateway with `openclaw gateway restart`, then retry.",
+      "The running Gateway is from an older Bot build and rejected current agent runtime connection metadata. Restart the Gateway with `bot gateway restart`, then retry.",
     );
 
     const call = capturedGatewayCall();
@@ -493,7 +493,7 @@ describe("gateway tool defaults", () => {
         },
       ),
     ).rejects.toThrow(
-      "The running Gateway is from an older OpenClaw build and rejected current agent runtime connection metadata. Restart the Gateway with `openclaw gateway restart`, then retry.",
+      "The running Gateway is from an older Bot build and rejected current agent runtime connection metadata. Restart the Gateway with `bot gateway restart`, then retry.",
     );
 
     const call = capturedGatewayCall();
@@ -878,7 +878,7 @@ describe("gateway tool defaults", () => {
   });
 
   it("does not send the local approval runtime token to env-selected gateways", async () => {
-    process.env.OPENCLAW_GATEWAY_URL = "wss://gateway.example";
+    process.env.BOT_GATEWAY_URL = "wss://gateway.example";
     mocks.callGateway.mockResolvedValueOnce({ decision: "allow-once" });
 
     await callGatewayTool("exec.approval.waitDecision", {}, { id: "approval-id" });
@@ -890,7 +890,7 @@ describe("gateway tool defaults", () => {
   });
 
   it("does not send the local approval runtime token to loopback env-selected gateways", async () => {
-    process.env.OPENCLAW_GATEWAY_URL = "ws://127.0.0.1:18789";
+    process.env.BOT_GATEWAY_URL = "ws://127.0.0.1:18789";
     mocks.callGateway.mockResolvedValueOnce({ decision: "allow-once" });
 
     await callGatewayTool("exec.approval.waitDecision", {}, { id: "approval-id" });
@@ -902,7 +902,7 @@ describe("gateway tool defaults", () => {
   });
 
   it("does not send the local approval runtime token to loopback env-selected gateway paths", async () => {
-    process.env.OPENCLAW_GATEWAY_URL = "ws://127.0.0.1:18789/ws";
+    process.env.BOT_GATEWAY_URL = "ws://127.0.0.1:18789/ws";
     mocks.callGateway.mockResolvedValueOnce({ decision: "allow-once" });
 
     await callGatewayTool("exec.approval.waitDecision", {}, { id: "approval-id" });
@@ -914,7 +914,7 @@ describe("gateway tool defaults", () => {
   });
 
   it("fails env-selected approval calls when requester device identity is unavailable", async () => {
-    process.env.OPENCLAW_GATEWAY_URL = "ws://127.0.0.1:18789";
+    process.env.BOT_GATEWAY_URL = "ws://127.0.0.1:18789";
     mocks.deviceIdentityError = new Error("state directory read-only");
 
     await expect(

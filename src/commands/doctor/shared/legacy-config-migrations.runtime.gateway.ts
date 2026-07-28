@@ -1,5 +1,5 @@
 // Legacy gateway runtime config migrations for bind modes, WebChat, and Control UI origins.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   buildDefaultControlUiAllowedOrigins,
   hasConfiguredControlUiAllowedOrigins,
@@ -17,27 +17,27 @@ import { DEFAULT_GATEWAY_PORT } from "../../../config/paths.js";
 const GATEWAY_PORT_OOB_RULE: LegacyConfigRule = {
   path: ["gateway", "port"],
   message:
-    'gateway.port is outside the valid TCP range (1–65535) and will be removed to avoid startup failure. Run "openclaw doctor --fix".',
+    'gateway.port is outside the valid TCP range (1–65535) and will be removed to avoid startup failure. Run "bot doctor --fix".',
   match: (value) => typeof value === "number" && (value < 1 || value > 65_535),
 };
 
 const GATEWAY_BIND_RULE: LegacyConfigRule = {
   path: ["gateway", "bind"],
   message:
-    'gateway.bind host aliases (for example 0.0.0.0/localhost) are legacy; use bind modes (lan/loopback/custom/tailnet/auto) instead. Run "openclaw doctor --fix".',
+    'gateway.bind host aliases (for example 0.0.0.0/localhost) are legacy; use bind modes (lan/loopback/custom/tailnet/auto) instead. Run "bot doctor --fix".',
   match: (value) => isLegacyGatewayBindHostAlias(value),
   requireSourceLiteral: true,
 };
 
 const GATEWAY_WEBCHAT_RULE: LegacyConfigRule = {
   path: ["gateway", "webchat"],
-  message: 'gateway.webchat is retired. Run "openclaw doctor --fix".',
+  message: 'gateway.webchat is retired. Run "bot doctor --fix".',
 };
 
 const CONTROL_UI_DEVICE_AUTH_MIGRATION_RULE: LegacyConfigRule = {
   path: ["gateway", "controlUi", "dangerouslyDisableDeviceAuth"],
   message:
-    'gateway.controlUi.dangerouslyDisableDeviceAuth is retired. OpenClaw will preserve authenticated, pairing-only access for remediation, remove the legacy key, and prompt you to reopen the Control UI over HTTPS or localhost before clicking Secure this browser. Run "openclaw doctor --fix".',
+    'gateway.controlUi.dangerouslyDisableDeviceAuth is retired. Bot will preserve authenticated, pairing-only access for remediation, remove the legacy key, and prompt you to reopen the Control UI over HTTPS or localhost before clicking Secure this browser. Run "bot doctor --fix".',
   match: (value) => typeof value === "boolean",
 };
 

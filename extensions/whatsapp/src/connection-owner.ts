@@ -5,8 +5,8 @@ import {
   FILE_LOCK_STALE_ERROR_CODE,
   FILE_LOCK_TIMEOUT_ERROR_CODE,
   type FileLockHandle,
-} from "openclaw/plugin-sdk/file-lock";
-import { resolveUserPath } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/file-lock";
+import { resolveUserPath } from "bot/plugin-sdk/text-utility-runtime";
 
 const WHATSAPP_CONNECTION_OWNER_BUSY_CODE = "whatsapp_connection_owner_busy";
 

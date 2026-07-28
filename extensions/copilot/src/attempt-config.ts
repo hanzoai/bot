@@ -1,10 +1,10 @@
 import type { MessageOptions, SessionConfig, Tool as SdkTool } from "@github/copilot-sdk";
-import type { AgentMessage, SandboxContext } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage, SandboxContext } from "bot/plugin-sdk/agent-harness-runtime";
 import {
   detectAndLoadAgentHarnessPromptImages,
   getModelProviderRequestTransport,
   resolveUserPath,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
+} from "bot/plugin-sdk/agent-harness-runtime";
 import {
   COPILOT_ASK_USER_AVAILABLE_TOOLS,
   COPILOT_SETTLED_FINALIZATION_EXCLUDED_TOOLS,

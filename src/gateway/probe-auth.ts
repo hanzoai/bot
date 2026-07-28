@@ -1,7 +1,7 @@
 // Gateway probe auth resolver.
 // Adapts gateway credential precedence for local/remote reachability checks.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveGatewayCredentialsWithSecretInputs } from "./credentials-secret-inputs.js";
 import {
   type ExplicitGatewayAuth,
@@ -15,7 +15,7 @@ export type { GatewayProbeTargetResolution } from "./probe-target.js";
 // checks. Local probes must not accidentally consume remote gateway credentials
 // from config when they are only checking the embedded/local gateway.
 function buildGatewayProbeCredentialPolicy(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   mode: "local" | "remote";
   env?: NodeJS.ProcessEnv;
   explicitAuth?: ExplicitGatewayAuth;
@@ -33,9 +33,9 @@ function buildGatewayProbeCredentialPolicy(params: {
 }
 
 export function resolveGatewayProbeCredentialConfig(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   mode: "local" | "remote";
-}): OpenClawConfig {
+}): BotConfig {
   if (params.mode !== "local") {
     return params.cfg;
   }
@@ -85,7 +85,7 @@ function resolveGatewayProbeWarning(error: unknown): string | undefined {
 
 /** Resolves synchronous probe auth, throwing when configured secrets cannot be read. */
 export function resolveGatewayProbeAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   mode: "local" | "remote";
   env?: NodeJS.ProcessEnv;
 }): { token?: string; password?: string } {
@@ -95,7 +95,7 @@ export function resolveGatewayProbeAuth(params: {
 
 /** Resolves probe auth with async SecretRef support. */
 export async function resolveGatewayProbeAuthWithSecretInputs(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   mode: "local" | "remote";
   env?: NodeJS.ProcessEnv;
   explicitAuth?: ExplicitGatewayAuth;
@@ -112,7 +112,7 @@ export async function resolveGatewayProbeAuthWithSecretInputs(params: {
 
 /** Resolves probe auth without throwing for unavailable SecretRefs, returning a warning. */
 export async function resolveGatewayProbeAuthSafeWithSecretInputs(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   mode: "local" | "remote";
   env?: NodeJS.ProcessEnv;
   explicitAuth?: ExplicitGatewayAuth;
@@ -140,7 +140,7 @@ export async function resolveGatewayProbeAuthSafeWithSecretInputs(params: {
 
 /** Synchronous safe probe auth wrapper for config-only credential paths. */
 export function resolveGatewayProbeAuthSafe(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   mode: "local" | "remote";
   env?: NodeJS.ProcessEnv;
   explicitAuth?: ExplicitGatewayAuth;

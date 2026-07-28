@@ -2,7 +2,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { RuntimeEnv } from "../runtime.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
@@ -61,7 +61,7 @@ describe("backup commands", () => {
     vi.spyOn(backupShared, "resolveBackupPlanFromDisk").mockResolvedValue(
       await resolveBackupPlanFromPaths({
         stateDir,
-        configPath: path.join(stateDir, "openclaw.json"),
+        configPath: path.join(stateDir, "bot.json"),
         oauthDir: path.join(stateDir, "credentials"),
         workspaceDirs: [workspaceDir],
         includeWorkspace: true,
@@ -73,7 +73,7 @@ describe("backup commands", () => {
   }
 
   beforeAll(async () => {
-    tempHome = await createTempHomeEnv("openclaw-backup-test-");
+    tempHome = await createTempHomeEnv("bot-backup-test-");
   });
 
   beforeEach(async () => {
@@ -101,13 +101,13 @@ describe("backup commands", () => {
   });
 
   async function withInvalidWorkspaceBackupConfig<T>(fn: (runtime: RuntimeEnv) => Promise<T>) {
-    const stateDir = path.join(tempHome.home, ".openclaw");
+    const stateDir = path.join(tempHome.home, ".bot");
     const configPath = path.join(tempHome.home, "custom-config.json");
-    await fs.writeFile(path.join(stateDir, "openclaw.json"), JSON.stringify({}), "utf8");
+    await fs.writeFile(path.join(stateDir, "bot.json"), JSON.stringify({}), "utf8");
     await fs.writeFile(configPath, '{"agents": { defaults: { workspace: ', "utf8");
 
-    const envSnapshot = captureEnv(["OPENCLAW_CONFIG_PATH"]);
-    setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+    const envSnapshot = captureEnv(["BOT_CONFIG_PATH"]);
+    setTestEnvValue("BOT_CONFIG_PATH", configPath);
     const runtime = createBackupTestRuntime();
     try {
       return await fn(runtime);
@@ -165,11 +165,11 @@ describe("backup commands", () => {
     try {
       setTestEnvValue("TZ", "Asia/Shanghai");
       expect(buildBackupArchiveRoot(Date.UTC(2026, 2, 14, 1, 2, 3, 456))).toBe(
-        "2026-03-14T09-02-03.456+08-00-openclaw-backup",
+        "2026-03-14T09-02-03.456+08-00-bot-backup",
       );
       setTestEnvValue("TZ", "America/New_York");
       expect(buildBackupArchiveRoot(Date.UTC(2026, 2, 14, 1, 2, 3, 456))).toBe(
-        "2026-03-13T21-02-03.456-04-00-openclaw-backup",
+        "2026-03-13T21-02-03.456-04-00-bot-backup",
       );
     } finally {
       envSnapshot.restore();
@@ -177,8 +177,8 @@ describe("backup commands", () => {
   });
 
   it("collapses default config, credentials, and workspace into the state backup root", async () => {
-    const stateDir = path.join(tempHome.home, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const stateDir = path.join(tempHome.home, ".bot");
+    const configPath = path.join(stateDir, "bot.json");
     const oauthDir = path.join(stateDir, "credentials");
     const workspaceDir = path.join(stateDir, "workspace");
     await fs.writeFile(configPath, JSON.stringify({}), "utf8");
@@ -205,9 +205,9 @@ describe("backup commands", () => {
       return;
     }
 
-    const stateDir = path.join(tempHome.home, ".openclaw");
+    const stateDir = path.join(tempHome.home, ".bot");
     const workspaceDir = path.join(stateDir, "workspace");
-    const symlinkDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-link-"));
+    const symlinkDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-workspace-link-"));
     const workspaceLink = path.join(symlinkDir, "ws-link");
     try {
       await fs.mkdir(workspaceDir, { recursive: true });
@@ -215,7 +215,7 @@ describe("backup commands", () => {
       await fs.symlink(workspaceDir, workspaceLink);
       const plan = await resolveBackupPlanFromPaths({
         stateDir,
-        configPath: path.join(stateDir, "openclaw.json"),
+        configPath: path.join(stateDir, "bot.json"),
         oauthDir: path.join(stateDir, "credentials"),
         workspaceDirs: [workspaceLink],
         includeWorkspace: true,
@@ -230,16 +230,16 @@ describe("backup commands", () => {
   });
 
   it("creates an archive with a manifest and external workspace payload", async () => {
-    const stateDir = path.join(tempHome.home, ".openclaw");
-    const externalWorkspace = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-workspace-"));
+    const stateDir = path.join(tempHome.home, ".bot");
+    const externalWorkspace = await fs.mkdtemp(path.join(os.tmpdir(), "bot-workspace-"));
     const configPath = path.join(tempHome.home, "custom-config.json");
-    const backupDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-backups-"));
+    const backupDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-backups-"));
     let capturedManifest: CapturedBackupManifest | null = null;
     let capturedEntryPaths: string[] = [];
     let capturedOnWriteEntry: ((entry: { path: string }) => void) | null = null;
-    const envSnapshot = captureEnv(["OPENCLAW_CONFIG_PATH"]);
+    const envSnapshot = captureEnv(["BOT_CONFIG_PATH"]);
     try {
-      setTestEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+      setTestEnvValue("BOT_CONFIG_PATH", configPath);
       await fs.writeFile(
         configPath,
         JSON.stringify({
@@ -357,8 +357,8 @@ describe("backup commands", () => {
   });
 
   it("keeps volatile-skip notices out of json output", async () => {
-    const stateDir = path.join(tempHome.home, ".openclaw");
-    const backupDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-backups-json-"));
+    const stateDir = path.join(tempHome.home, ".bot");
+    const backupDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-backups-json-"));
     try {
       const runtime = createBackupTestRuntime();
       await mockStateOnlyBackupPlan(stateDir);
@@ -399,8 +399,8 @@ describe("backup commands", () => {
   });
 
   it("rejects output paths that would be created inside a backed-up directory", async () => {
-    const stateDir = path.join(tempHome.home, ".openclaw");
-    await fs.writeFile(path.join(stateDir, "openclaw.json"), JSON.stringify({}), "utf8");
+    const stateDir = path.join(tempHome.home, ".bot");
+    await fs.writeFile(path.join(stateDir, "bot.json"), JSON.stringify({}), "utf8");
 
     const runtime = createBackupTestRuntime();
     await mockStateOnlyBackupPlan(stateDir);
@@ -417,11 +417,11 @@ describe("backup commands", () => {
       return;
     }
 
-    const stateDir = path.join(tempHome.home, ".openclaw");
-    const symlinkDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-backup-link-"));
+    const stateDir = path.join(tempHome.home, ".bot");
+    const symlinkDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-backup-link-"));
     const symlinkPath = path.join(symlinkDir, "linked-state");
     try {
-      await fs.writeFile(path.join(stateDir, "openclaw.json"), JSON.stringify({}), "utf8");
+      await fs.writeFile(path.join(stateDir, "bot.json"), JSON.stringify({}), "utf8");
       await fs.symlink(stateDir, symlinkPath);
 
       const runtime = createBackupTestRuntime();
@@ -438,9 +438,9 @@ describe("backup commands", () => {
   });
 
   it("falls back to the home directory when cwd is inside a backed-up source tree", async () => {
-    const stateDir = path.join(tempHome.home, ".openclaw");
+    const stateDir = path.join(tempHome.home, ".bot");
     const workspaceDir = path.join(stateDir, "workspace");
-    await fs.writeFile(path.join(stateDir, "openclaw.json"), JSON.stringify({}), "utf8");
+    await fs.writeFile(path.join(stateDir, "bot.json"), JSON.stringify({}), "utf8");
     await fs.mkdir(workspaceDir, { recursive: true });
     await fs.writeFile(path.join(workspaceDir, "SOUL.md"), "# soul\n", "utf8");
     vi.spyOn(process, "cwd").mockReturnValue(workspaceDir);
@@ -457,7 +457,7 @@ describe("backup commands", () => {
     await fs.rm(result.archivePath, { force: true });
 
     if (process.platform !== "win32") {
-      const linkParent = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-backup-cwd-link-"));
+      const linkParent = await fs.mkdtemp(path.join(os.tmpdir(), "bot-backup-cwd-link-"));
       const workspaceLink = path.join(linkParent, "workspace-link");
       try {
         await fs.symlink(workspaceDir, workspaceLink);
@@ -478,14 +478,14 @@ describe("backup commands", () => {
   });
 
   it("allows dry-run preview even when the target archive already exists", async () => {
-    const stateDir = path.join(tempHome.home, ".openclaw");
+    const stateDir = path.join(tempHome.home, ".bot");
     const existingArchive = path.join(tempHome.home, "existing-backup.tar.gz");
-    await fs.writeFile(path.join(stateDir, "openclaw.json"), JSON.stringify({}), "utf8");
+    await fs.writeFile(path.join(stateDir, "bot.json"), JSON.stringify({}), "utf8");
     await fs.writeFile(existingArchive, "already here", "utf8");
     vi.spyOn(backupShared, "resolveBackupPlanFromDisk").mockResolvedValue(
       await resolveBackupPlanFromPaths({
         stateDir,
-        configPath: path.join(stateDir, "openclaw.json"),
+        configPath: path.join(stateDir, "bot.json"),
         oauthDir: path.join(stateDir, "credentials"),
         includeWorkspace: false,
         configInsideState: true,
@@ -530,8 +530,8 @@ describe("backup commands", () => {
   });
 
   it("backs up only the active config file when --only-config is requested", async () => {
-    const stateDir = path.join(tempHome.home, ".openclaw");
-    const configPath = path.join(stateDir, "openclaw.json");
+    const stateDir = path.join(tempHome.home, ".bot");
+    const configPath = path.join(stateDir, "bot.json");
     await fs.mkdir(path.join(stateDir, "credentials"), { recursive: true });
     await fs.writeFile(configPath, JSON.stringify({ theme: "config-only" }), "utf8");
     await fs.writeFile(path.join(stateDir, "state.txt"), "state\n", "utf8");

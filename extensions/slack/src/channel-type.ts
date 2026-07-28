@@ -1,14 +1,14 @@
 // Slack plugin module implements channel type behavior.
 import { createHash } from "node:crypto";
-import { pruneMapToMaxSize } from "openclaw/plugin-sdk/collection-runtime";
+import { pruneMapToMaxSize } from "bot/plugin-sdk/collection-runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveSlackAccount, resolveSlackOperationToken } from "./accounts.js";
 import { createSlackWebClient } from "./client.js";
 import { normalizeAllowListLower } from "./monitor/allow-list.js";
-import type { OpenClawConfig } from "./runtime-api.js";
+import type { BotConfig } from "./runtime-api.js";
 
 export type SlackConversationInfo = {
   type: "channel" | "group" | "dm" | "unknown";
@@ -71,7 +71,7 @@ function resolveConfiguredSlackConversationInfo(params: {
 }
 
 export async function resolveSlackConversationInfo(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   channelId: string;
   operation?: "read" | "write";
@@ -147,7 +147,7 @@ export async function resolveSlackConversationInfo(params: {
 }
 
 export async function resolveSlackChannelType(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   channelId: string;
 }): Promise<"channel" | "group" | "dm" | "unknown"> {

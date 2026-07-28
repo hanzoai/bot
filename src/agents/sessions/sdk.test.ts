@@ -1,4 +1,4 @@
-import { createAssistantMessageEventStream, type AssistantMessage } from "openclaw/plugin-sdk/llm";
+import { createAssistantMessageEventStream, type AssistantMessage } from "bot/plugin-sdk/llm";
 // Agent session SDK tests cover default tool wiring, prompt preservation, and
 // session write-lock behavior.
 import { Type } from "typebox";
@@ -287,7 +287,7 @@ describe("AgentSession queued user turns", () => {
       message: {
         role: "user",
         content: "visible group prompt",
-        __openclaw: { senderId: "user-42", senderName: "Ada" },
+        __bot: { senderId: "user-42", senderName: "Ada" },
       },
       recorder,
     });
@@ -308,7 +308,7 @@ describe("AgentSession queued user turns", () => {
     const runtimeMessage = steer.mock.calls[0]?.[0];
     expect(runtimeMessage).toBeDefined();
     const mediaSymbol = Object.getOwnPropertySymbols(runtimeMessage ?? {}).find(
-      (symbol) => Symbol.keyFor(symbol) === "openclaw.runtimePromptMediaFacts",
+      (symbol) => Symbol.keyFor(symbol) === "bot.runtimePromptMediaFacts",
     );
     expect(mediaSymbol).toBeDefined();
     if (!runtimeMessage || !mediaSymbol) {
@@ -318,7 +318,7 @@ describe("AgentSession queued user turns", () => {
       expect.objectContaining({ path: "/tmp/a.png", contentType: "image/png", kind: "image" }),
     ]);
     expect(readRuntimePromptImageOrder(runtimeMessage)).toEqual(imageOrder);
-    expect((runtimeMessage as unknown as Record<string, unknown>)["__openclaw"]).toEqual({
+    expect((runtimeMessage as unknown as Record<string, unknown>)["__bot"]).toEqual({
       mediaImageBlockFactIndexes: [0],
     });
     expect(JSON.stringify(runtimeMessage)).not.toContain("runtimePromptMediaFacts");
@@ -352,13 +352,13 @@ describe("createAgentSession attribution headers", () => {
     });
 
     expect(providerOptions.headers).toMatchObject({
-      "HTTP-Referer": "https://openclaw.ai",
-      "X-OpenRouter-Title": "OpenClaw",
+      "HTTP-Referer": "https://bot.ai",
+      "X-OpenRouter-Title": "Bot",
       "X-OpenRouter-Categories": "cli-agent",
     });
     expect(endpointOptions.headers).toMatchObject({
-      "HTTP-Referer": "https://openclaw.ai",
-      "X-OpenRouter-Title": "OpenClaw",
+      "HTTP-Referer": "https://bot.ai",
+      "X-OpenRouter-Title": "Bot",
       "X-OpenRouter-Categories": "cli-agent",
     });
   });
@@ -375,8 +375,8 @@ describe("createAgentSession attribution headers", () => {
       baseUrl: "https://gateway.ai.cloudflare.com/v1/account/gateway/openai",
     });
 
-    expect(providerOptions.headers).toMatchObject({ "User-Agent": "openclaw" });
-    expect(endpointOptions.headers).toMatchObject({ "User-Agent": "openclaw" });
+    expect(providerOptions.headers).toMatchObject({ "User-Agent": "bot" });
+    expect(endpointOptions.headers).toMatchObject({ "User-Agent": "bot" });
   });
 });
 
@@ -489,7 +489,7 @@ describe("createAgentSession tool defaults", () => {
       settingsManager: SettingsManager.inMemory(),
       modelRegistry: ModelRegistry.inMemory(AuthStorage.inMemory()),
     });
-    const systemPrompt = "You are a personal assistant running inside OpenClaw.";
+    const systemPrompt = "You are a personal assistant running inside Bot.";
 
     session.setBaseSystemPrompt(systemPrompt);
     session.setActiveToolsByName(["bash", "custom_lookup"]);

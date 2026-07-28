@@ -2,7 +2,7 @@
 summary: "Scheduled jobs, webhooks, and Gmail PubSub triggers for the Gateway scheduler"
 read_when:
   - Scheduling background jobs or wakeups
-  - Wiring external triggers (webhooks, Gmail) into OpenClaw
+  - Wiring external triggers (webhooks, Gmail) into Bot
   - Deciding between heartbeat and cron for scheduled tasks
 title: "Scheduled tasks"
 sidebarTitle: "Scheduled tasks"
@@ -15,7 +15,7 @@ Cron is the Gateway's built-in scheduler. It persists jobs, wakes the agent at t
 <Steps>
   <Step title="Add a one-shot reminder">
     ```bash
-    openclaw cron create "2027-02-01T16:00:00Z" \
+    bot cron create "2027-02-01T16:00:00Z" \
       --name "Reminder" \
       --session main \
       --system-event "Reminder: check the cron docs draft" \
@@ -25,14 +25,14 @@ Cron is the Gateway's built-in scheduler. It persists jobs, wakes the agent at t
   </Step>
   <Step title="Check your jobs">
     ```bash
-    openclaw cron list
-    openclaw cron get <job-id>
-    openclaw cron show <job-id>
+    bot cron list
+    bot cron get <job-id>
+    bot cron show <job-id>
     ```
   </Step>
   <Step title="See run history">
     ```bash
-    openclaw cron runs --id <job-id>
+    bot cron runs --id <job-id>
     ```
   </Step>
 </Steps>
@@ -40,18 +40,18 @@ Cron is the Gateway's built-in scheduler. It persists jobs, wakes the agent at t
 ## How cron works
 
 - Cron runs **inside the Gateway process**, not inside the model. The Gateway must be running for schedules to fire.
-- Job definitions, runtime state, and run history persist in OpenClaw's shared SQLite state database, so restarts do not lose schedules.
+- Job definitions, runtime state, and run history persist in Bot's shared SQLite state database, so restarts do not lose schedules.
 - Every cron execution creates a [background task](/automation/tasks) record.
 - One-shot jobs (`--at`) auto-delete after success by default; pass `--keep-after-run` to keep them.
 - Per-run wall-clock budget: `--timeout-seconds` when set. Otherwise, isolated/detached agent-turn jobs are bounded by cron's own 60-minute watchdog before the underlying agent-turn timeout (`agents.defaults.timeoutSeconds`, default 48 hours) would ever apply; command jobs default to 10 minutes, and script payloads default to 5 minutes.
 - On Gateway startup, overdue isolated agent-turn jobs are rescheduled instead of replayed immediately, keeping model/tool bootstrap work out of the channel-connect window.
-- If you drive `openclaw agent` from system cron or another external scheduler, wrap it with a hard-kill escalation even though the CLI already handles `SIGTERM`/`SIGINT`. Gateway-backed runs ask the Gateway to abort accepted runs; `--local` runs get the same abort signal. For GNU `timeout`, prefer `timeout -k 60 600 openclaw agent ...` over plain `timeout 600 ...` — the `-k` value is the backstop if the process cannot drain in time. For systemd units, use a `SIGTERM` stop signal with a grace window (`TimeoutStopSec`) before the final kill. Reusing a `--run-id` while the original Gateway run is still active reports the duplicate as in-flight instead of starting a second run.
+- If you drive `bot agent` from system cron or another external scheduler, wrap it with a hard-kill escalation even though the CLI already handles `SIGTERM`/`SIGINT`. Gateway-backed runs ask the Gateway to abort accepted runs; `--local` runs get the same abort signal. For GNU `timeout`, prefer `timeout -k 60 600 bot agent ...` over plain `timeout 600 ...` — the `-k` value is the backstop if the process cannot drain in time. For systemd units, use a `SIGTERM` stop signal with a grace window (`TimeoutStopSec`) before the final kill. Reusing a `--run-id` while the original Gateway run is still active reports the duplicate as in-flight instead of starting a second run.
 
 <AccordionGroup>
   <Accordion title="Isolated run hardening">
     - Isolated runs best-effort close tracked browser tabs/processes for their `cron:<jobId>` session on completion, and dispose any bundled MCP runtime instances created for the job through the same shared teardown path used by main-session and custom-session runs. Cleanup failures are ignored so the cron result still wins.
     - Isolated runs with the narrow cron self-cleanup grant can read scheduler status, a self-filtered list containing only their own job, and that job's run history, and may remove only their own job.
-    - Isolated runs guard against stale acknowledgement replies: if the first result is only an interim status update (`on it`, `pulling everything together`, and similar hints) and no descendant subagent is still responsible for the final answer, OpenClaw re-prompts once for the actual result before delivery.
+    - Isolated runs guard against stale acknowledgement replies: if the first result is only an interim status update (`on it`, `pulling everything together`, and similar hints) and no descendant subagent is still responsible for the final answer, Bot re-prompts once for the actual result before delivery.
     - Structured execution-denial metadata (including node-host `UNAVAILABLE` wrappers whose nested error starts with `SYSTEM_RUN_DENIED` or `INVALID_REQUEST`) is recognized so a blocked command is not reported as a green run, while ordinary assistant prose is not mistaken for a denial.
     - Run-level agent failures count as job errors even with no reply payload, so model/provider failures increment error counters and trigger failure notifications instead of clearing the job as successful.
     - When a job hits `timeoutSeconds`, cron aborts the run and gives it a short cleanup window. If it does not drain, Gateway-owned cleanup force-clears that run's session ownership before cron records the timeout, so queued chat work is not stuck behind a stale processing session.
@@ -79,9 +79,9 @@ Recurring top-of-hour expressions (minute `0` with a wildcard hour field) are au
 
 ### Heartbeat task migration
 
-Older heartbeat scratch supported a structured `tasks:` block. Run `openclaw doctor --fix` after upgrading to convert each entry into an ordinary editable main-session cron job. Doctor preserves the interval and previous last-run timing, creates the jobs before removing the block, and safely converges the same declaration keys on rerun.
+Older heartbeat scratch supported a structured `tasks:` block. Run `bot doctor --fix` after upgrading to convert each entry into an ordinary editable main-session cron job. Doctor preserves the interval and previous last-run timing, creates the jobs before removing the block, and safely converges the same declaration keys on rerun.
 
-These migrated jobs carry public `systemEvent` payloads, so `openclaw cron list`, `get`, `edit`, and `remove` plus the cron tool manage them like other jobs. Their execution uses the guarded heartbeat task wake: active hours, minimum spacing, flood control, and busy retries still apply, while cron owns each task's independent cadence. Jobs due in the same coalescing window can share one heartbeat turn. A scheduled occurrence outside heartbeat active hours is skipped and retried at the job's next occurrence.
+These migrated jobs carry public `systemEvent` payloads, so `bot cron list`, `get`, `edit`, and `remove` plus the cron tool manage them like other jobs. Their execution uses the guarded heartbeat task wake: active hours, minimum spacing, flood control, and busy retries still apply, while cron owns each task's independent cadence. Jobs due in the same coalescing window can share one heartbeat turn. A scheduled occurrence outside heartbeat active hours is skipped and retried at the job's next occurrence.
 
 Heartbeat scratch is now monitor prose only. Runtime heartbeats do not parse `tasks:` text as schedules; create new recurring work with cron.
 
@@ -90,7 +90,7 @@ Heartbeat scratch is now monitor prose only. Runtime heartbeats do not parse `ta
 A stream schedule keeps an operator-authored argv command running under the Gateway and fires the job from its stdout and stderr lines. Stream schedules are event-driven, never time-due, and require `cron.triggers.enabled: true` because the long-lived command has the same unattended trust class as trigger scripts. Disabling or removing the job stops the process; Gateway shutdown waits for process-tree teardown. Fast failures restart with cron's built-in error backoff. Five consecutive runs shorter than 60 seconds leave the job in an error state and use the normal failure-alert path; manually re-enable the job to clear the restart cap.
 
 ```bash
-openclaw cron add \
+bot cron add \
   --name "Build event stream" \
   --stream-command '["node","scripts/build-events.mjs"]' \
   --stream-mode match \
@@ -110,7 +110,7 @@ When a stream job also has `trigger.script`, the gate runs once per closed batch
 
 Recurring jobs can set `pacing.min` and/or `pacing.max` to duration strings such as `15m` or `4h`; at least one bound is required. Use `--pacing-min` and `--pacing-max` with `cron add|edit` (`--clear-pacing` removes both bounds).
 
-During an agent-turn run, a paced job can call the `cron` tool with `action: "next_check"` and `in: "30m"`. The proposal applies only to that currently running job and is measured from successful run completion. OpenClaw silently clamps it to the configured bounds.
+During an agent-turn run, a paced job can call the `cron` tool with `action: "next_check"` and `in: "30m"`. The proposal applies only to that currently running job and is measured from successful run completion. Bot silently clamps it to the configured bounds.
 
 Pacing without a proposal leaves the normal schedule unchanged. Failed, timed-out, and skipped runs discard the proposal, so existing retry and error-backoff behavior takes precedence. Manually forcing a recurring job is out-of-band and preserves its pending natural or paced slot. For condition-triggered jobs, the built-in minimum interval remains a lower bound even when a proposal requests an earlier check.
 
@@ -159,7 +159,7 @@ Enabling `cron.triggers.enabled` permits both condition-trigger scripts and `scr
 Create a watcher from a local script file (`-` reads the script from stdin):
 
 ```bash
-openclaw cron add \
+bot cron add \
   --name "PR CI watcher" \
   --every 30s \
   --trigger-script ./watch-pr-ci.js \
@@ -178,7 +178,7 @@ Every job carries exactly one payload kind, chosen by flag:
 | Command       | `--command <shell>` or `--command-argv <json>` | A shell/process on the Gateway host, no model call         |
 | Script        | `--script <file\|->`                           | A headless code-mode script using the owning agent's tools |
 
-One additional payload kind, `heartbeat`, is system-owned: the gateway converges one heartbeat monitor job per heartbeat-enabled agent (see [Heartbeat](/gateway/heartbeat)). It appears in `cron list --all` but cannot be created or edited through the CLI or API. Heartbeat config is written through to the persisted monitor schedule at startup, on config reload, or by `openclaw doctor --fix`. When cron is disabled, the monitor does not tick and no fallback heartbeat timer runs.
+One additional payload kind, `heartbeat`, is system-owned: the gateway converges one heartbeat monitor job per heartbeat-enabled agent (see [Heartbeat](/gateway/heartbeat)). It appears in `cron list --all` but cannot be created or edited through the CLI or API. Heartbeat config is written through to the persisted monitor schedule at startup, on config reload, or by `bot doctor --fix`. When cron is disabled, the monitor does not tick and no fallback heartbeat timer runs.
 
 ### Agent-turn options
 
@@ -217,7 +217,7 @@ unrestricted `*` policy; `cron edit --clear-tools` restores that explicit unrest
 policy. Existing jobs that predate an explicit tool policy retain their current behavior
 until their tool policy is explicitly edited or the job is recreated.
 
-`--model` sets the job's primary model; it does not replace a session `/model` override, so configured fallback chains still apply on top of it. An unresolved or disallowed model fails the run with an explicit validation error rather than silently falling back to the default. If a job has `--model` but no explicit or configured fallback list, OpenClaw passes an empty fallback override instead of silently appending the agent primary as a hidden retry target.
+`--model` sets the job's primary model; it does not replace a session `/model` override, so configured fallback chains still apply on top of it. An unresolved or disallowed model fails the run with an explicit validation error rather than silently falling back to the default. If a job has `--model` but no explicit or configured fallback list, Bot passes an empty fallback override instead of silently appending the agent primary as a hidden retry target.
 
 Model-selection precedence for isolated jobs, highest first:
 
@@ -230,7 +230,7 @@ Fast mode follows the resolved live selection. If the selected model config has 
 
 If a run hits a live model-switch handoff, cron retries with the switched provider/model and persists that selection (and any new auth profile) for the active run. Retries are bounded: after the initial attempt plus 2 switch retries, cron aborts instead of looping.
 
-Before an isolated run starts, OpenClaw checks reachable local endpoints for configured `api: "ollama"` and `api: "openai-completions"` providers whose `baseUrl` is loopback, private-network, or `.local`. This preflight walks the job's configured fallback chain and only marks the run `skipped` once every candidate is unreachable; `--fallbacks ""` keeps that walk strict to just the primary model. A down endpoint records the run as `skipped` with a clear error instead of starting a model call. The result is cached for 5 minutes per endpoint (not per job or model), so many due jobs sharing a dead local Ollama/vLLM/SGLang/LM Studio server cost one probe instead of a request storm. Skipped preflight runs do not increment execution-error backoff; set `failureAlert.includeSkipped` to opt into repeated skip alerts.
+Before an isolated run starts, Bot checks reachable local endpoints for configured `api: "ollama"` and `api: "openai-completions"` providers whose `baseUrl` is loopback, private-network, or `.local`. This preflight walks the job's configured fallback chain and only marks the run `skipped` once every candidate is unreachable; `--fallbacks ""` keeps that walk strict to just the primary model. A down endpoint records the run as `skipped` with a clear error instead of starting a model call. The result is cached for 5 minutes per endpoint (not per job or model), so many due jobs sharing a dead local Ollama/vLLM/SGLang/LM Studio server cost one probe instead of a request storm. Skipped preflight runs do not increment execution-error backoff; set `failureAlert.includeSkipped` to opt into repeated skip alerts.
 
 ### Command payloads
 
@@ -241,7 +241,7 @@ Command cron is an operator-admin Gateway automation surface, not an agent `tool
 </Note>
 
 ```bash
-openclaw cron create "*/15 * * * *" \
+bot cron create "*/15 * * * *" \
   --name "Queue depth probe" \
   --command "scripts/check-queue.sh" \
   --command-cwd "/srv/app" \
@@ -259,7 +259,7 @@ Delivered text is derived from process output: non-empty stdout wins; if stdout 
 Script payloads run headlessly in the same code-mode executor as trigger scripts, without starting a conversational agent turn. Enable `cron.triggers.enabled` before creating or running them; this dangerous-automation gate covers both trigger scripts and script payloads. Script jobs support only `main` and `isolated` session targets.
 
 ```bash
-openclaw cron create "0 * * * *" \
+bot cron create "0 * * * *" \
   --name "Hourly queue check" \
   --script ./automation/check-queue.js \
   --script-timeout-seconds 300 \
@@ -298,7 +298,7 @@ Agent-turn jobs default to the creating conversation when the create request car
 
   </Accordion>
   <Accordion title="What 'fresh session' means for isolated jobs">
-    A new transcript/session id per run. OpenClaw carries safe preferences (thinking/fast/verbose settings, labels, explicit user-selected model/auth overrides), but does not inherit ambient conversation context from an older cron row: channel/group routing, send or queue policy, elevation, origin, or ACP runtime binding. Use `current` or `session:<id>` when a recurring job should deliberately build on the same conversation context.
+    A new transcript/session id per run. Bot carries safe preferences (thinking/fast/verbose settings, labels, explicit user-selected model/auth overrides), but does not inherit ambient conversation context from an older cron row: channel/group routing, send or queue policy, elevation, origin, or ACP runtime binding. Use `current` or `session:<id>` when a recurring job should deliberately build on the same conversation context.
   </Accordion>
   <Accordion title="Unattended run contract">
     Isolated cron and hook agent turns are explicitly unattended: no one is present to clarify or approve. The final reply must be the deliverable rather than a plan, acknowledgement, or request for input. The agent returns `HEARTBEAT_OK` when nothing needs doing and states failures plainly; cron owns retry and failure-alert policy.
@@ -307,9 +307,9 @@ Agent-turn jobs default to the creating conversation when the create request car
 
   </Accordion>
   <Accordion title="Subagent and Discord delivery">
-    When isolated cron runs orchestrate subagents, delivery prefers the final descendant output over stale parent interim text. If descendants are still running, OpenClaw suppresses that partial parent update instead of announcing it.
+    When isolated cron runs orchestrate subagents, delivery prefers the final descendant output over stale parent interim text. If descendants are still running, Bot suppresses that partial parent update instead of announcing it.
 
-    For text-only Discord announce targets, OpenClaw sends the canonical final assistant text once instead of replaying both streamed/intermediate text and the final answer. Media and structured Discord payloads are still delivered separately so attachments and components are not dropped.
+    For text-only Discord announce targets, Bot sends the canonical final assistant text once instead of replaying both streamed/intermediate text and the final answer. Media and structured Discord payloads are still delivered separately so attachments and components are not dropped.
 
   </Accordion>
 </AccordionGroup>
@@ -322,13 +322,13 @@ Agent-turn jobs default to the creating conversation when the create request car
 | `webhook`  | POST finished event payload to a URL                                |
 | `none`     | No runner fallback delivery                                         |
 
-Use `--announce --channel telegram --to "-1001234567890"` for channel delivery. For Telegram forum topics, use `-1001234567890:topic:123`; OpenClaw also accepts the Telegram-owned `-1001234567890:123` shorthand. Direct RPC/config callers may pass `delivery.threadId` as a string or number. Slack/Discord/Mattermost targets use explicit prefixes (`channel:<id>`, `user:<id>`). Matrix room IDs are case-sensitive; use the exact room ID or `room:!room:server` form from Matrix.
+Use `--announce --channel telegram --to "-1001234567890"` for channel delivery. For Telegram forum topics, use `-1001234567890:topic:123`; Bot also accepts the Telegram-owned `-1001234567890:123` shorthand. Direct RPC/config callers may pass `delivery.threadId` as a string or number. Slack/Discord/Mattermost targets use explicit prefixes (`channel:<id>`, `user:<id>`). Matrix room IDs are case-sensitive; use the exact room ID or `room:!room:server` form from Matrix.
 
 When announce delivery uses `channel: "last"` or omits `channel`, a provider-prefixed target such as `telegram:123` can select the channel before cron falls back to session history or a single configured channel. Only prefixes advertised by the loaded plugin are provider selectors. If `delivery.channel` is explicit, the target prefix must name the same provider; `channel: "whatsapp"` with `to: "telegram:123"` is rejected instead of letting WhatsApp interpret the Telegram ID as a phone number. Target-kind and service prefixes (`channel:<id>`, `user:<id>`, `imessage:<handle>`, `sms:<number>`) stay channel-owned target syntax, not provider selectors.
 
-For isolated jobs, chat delivery is shared: if a chat route is available, the agent can use the `message` tool even with `--no-deliver`. If the agent sends to the configured/current target, OpenClaw skips the fallback announce. Otherwise `announce`, `webhook`, and `none` only control what the runner does with the final reply after the agent turn.
+For isolated jobs, chat delivery is shared: if a chat route is available, the agent can use the `message` tool even with `--no-deliver`. If the agent sends to the configured/current target, Bot skips the fallback announce. Otherwise `announce`, `webhook`, and `none` only control what the runner does with the final reply after the agent turn.
 
-When an agent creates an isolated reminder from an active chat, OpenClaw stores the preserved live delivery target for the fallback announce route. Internal session keys may be lowercase; provider delivery targets are not reconstructed from those keys when current chat context is available.
+When an agent creates an isolated reminder from an active chat, Bot stores the preserved live delivery target for the fallback announce route. Internal session keys may be lowercase; provider delivery targets are not reconstructed from those keys when current chat context is available.
 
 Implicit announce delivery uses configured channel allowlists to validate and reroute stale targets. DM pairing-store approvals are not fallback automation recipients; set `delivery.to` or configure the channel `allowFrom` entry when a scheduled job should proactively send to a DM.
 
@@ -336,19 +336,19 @@ Implicit announce delivery uses configured channel allowlists to validate and re
 
 Failure notifications follow a separate destination path:
 
-- The destination fields on `cron.failureAlert` (`mode`, `channel`, `to`, `accountId`) set a global default for failure notifications. The retired `cron.failureDestination` block is merged into them by `openclaw doctor --fix`.
+- The destination fields on `cron.failureAlert` (`mode`, `channel`, `to`, `accountId`) set a global default for failure notifications. The retired `cron.failureDestination` block is merged into them by `bot doctor --fix`.
 - `job.delivery.failureDestination` overrides that per job.
 - If neither is set and the job already delivers via `announce`, failure notifications fall back to that primary announce target.
 - `delivery.failureDestination` is only supported on `sessionTarget="isolated"` jobs unless the primary delivery mode is `webhook`.
 - `failureAlert.includeSkipped: true` opts a job or global cron alert policy into repeated skipped-run alerts. Skipped runs keep a separate consecutive-skip counter, so they do not affect execution-error backoff.
-- `openclaw cron edit` exposes per-job alert tuning: `--failure-alert`/`--no-failure-alert`, `--failure-alert-after <n>`, `--failure-alert-channel`, `--failure-alert-to`, `--failure-alert-cooldown`, `--failure-alert-include-skipped`/`--failure-alert-exclude-skipped`, `--failure-alert-mode`, and `--failure-alert-account-id`.
+- `bot cron edit` exposes per-job alert tuning: `--failure-alert`/`--no-failure-alert`, `--failure-alert-after <n>`, `--failure-alert-channel`, `--failure-alert-to`, `--failure-alert-cooldown`, `--failure-alert-include-skipped`/`--failure-alert-exclude-skipped`, `--failure-alert-mode`, and `--failure-alert-account-id`.
 
 ### Output language
 
 Cron jobs do not infer a reply language from channel, locale, or previous messages. Put the language rule in the scheduled message or template:
 
 ```bash
-openclaw cron edit <jobId> \
+bot cron edit <jobId> \
   --message "Summarize the updates. Respond in Chinese; keep URLs, code, and product names unchanged."
 ```
 
@@ -359,7 +359,7 @@ For template files, keep the language instruction in the rendered prompt and ver
 <Tabs>
   <Tab title="One-shot reminder">
     ```bash
-    openclaw cron add \
+    bot cron add \
       --name "Calendar check" \
       --at "20m" \
       --session main \
@@ -369,7 +369,7 @@ For template files, keep the language instruction in the rendered prompt and ver
   </Tab>
   <Tab title="Recurring isolated job">
     ```bash
-    openclaw cron create "0 7 * * *" \
+    bot cron create "0 7 * * *" \
       "Summarize overnight updates." \
       --name "Morning brief" \
       --tz "America/Los_Angeles" \
@@ -381,7 +381,7 @@ For template files, keep the language instruction in the rendered prompt and ver
   </Tab>
   <Tab title="Model and thinking override">
     ```bash
-    openclaw cron add \
+    bot cron add \
       --name "Deep analysis" \
       --cron "0 6 * * 1" \
       --tz "America/Los_Angeles" \
@@ -394,15 +394,15 @@ For template files, keep the language instruction in the rendered prompt and ver
   </Tab>
   <Tab title="Webhook output">
     ```bash
-    openclaw cron create "0 18 * * 1-5" \
+    bot cron create "0 18 * * 1-5" \
       "Summarize today's deploys as JSON." \
       --name "Deploy digest" \
-      --webhook "https://example.invalid/openclaw/cron"
+      --webhook "https://example.invalid/bot/cron"
     ```
   </Tab>
   <Tab title="Command output">
     ```bash
-    openclaw cron create "*/15 * * * *" \
+    bot cron create "*/15 * * * *" \
       --name "Queue depth probe" \
       --command "scripts/check-queue.sh" \
       --command-cwd "/srv/app" \
@@ -417,65 +417,65 @@ For template files, keep the language instruction in the rendered prompt and ver
 
 ```bash
 # List enabled jobs
-openclaw cron list
+bot cron list
 
 # Include disabled jobs
-openclaw cron list --all
+bot cron list --all
 
 # Get one stored job as JSON
-openclaw cron get <jobId>
+bot cron get <jobId>
 
 # Show one job, including resolved delivery route
-openclaw cron show <jobId>
+bot cron show <jobId>
 
 # Enable/disable without deleting
-openclaw cron enable <jobId>
-openclaw cron disable <jobId>
+bot cron enable <jobId>
+bot cron disable <jobId>
 
 # Edit a job
-openclaw cron edit <jobId> --message "Updated prompt" --model "opus"
+bot cron edit <jobId> --message "Updated prompt" --model "opus"
 
 # Force run a job now
-openclaw cron run <jobId>
+bot cron run <jobId>
 
 # Force run a job now and wait for its terminal status
-openclaw cron run <jobId> --wait --wait-timeout 10m --poll-interval 2s
+bot cron run <jobId> --wait --wait-timeout 10m --poll-interval 2s
 
 # Run only if due
-openclaw cron run <jobId> --due
+bot cron run <jobId> --due
 
 # View run history
-openclaw cron runs --id <jobId> --limit 50
+bot cron runs --id <jobId> --limit 50
 
 # View one exact run
-openclaw cron runs --id <jobId> --run-id <runId>
+bot cron runs --id <jobId> --run-id <runId>
 
 # Delete a job
-openclaw cron remove <jobId>
+bot cron remove <jobId>
 
 # Agent selection (multi-agent setups)
-openclaw cron create "0 6 * * *" "Check ops queue" --name "Ops sweep" --session isolated --agent ops
-openclaw cron edit <jobId> --clear-agent
+bot cron create "0 6 * * *" "Check ops queue" --name "Ops sweep" --session isolated --agent ops
+bot cron edit <jobId> --clear-agent
 ```
 
-Archiving a session (Control UI, or `sessions.patch { archived: true }` from an operator-admin caller) disables every enabled cron job bound to that session: its isolated `cron:<jobId>` session, a `session:<key>` target, or a delivery/wake `sessionKey` lane. Restoring the session does not re-enable those jobs; use `openclaw cron enable <jobId>`. Sessions with an enabled bound job show a clock badge in the Control UI sidebar.
+Archiving a session (Control UI, or `sessions.patch { archived: true }` from an operator-admin caller) disables every enabled cron job bound to that session: its isolated `cron:<jobId>` session, a `session:<key>` target, or a delivery/wake `sessionKey` lane. Restoring the session does not re-enable those jobs; use `bot cron enable <jobId>`. Sessions with an enabled bound job show a clock badge in the Control UI sidebar.
 
-`openclaw cron run <jobId>` returns after enqueueing the manual run. Use `--wait` for shutdown hooks, maintenance scripts, or other automation that must block until the queued run finishes; it polls the returned `runId` (default timeout `10m`, poll interval `2s`) and exits `0` for status `ok`, non-zero for `error`, `skipped`, or a wait timeout.
+`bot cron run <jobId>` returns after enqueueing the manual run. Use `--wait` for shutdown hooks, maintenance scripts, or other automation that must block until the queued run finishes; it polls the returned `runId` (default timeout `10m`, poll interval `2s`) and exits `0` for status `ok`, non-zero for `error`, `skipped`, or a wait timeout.
 
 The agent `cron` tool returns compact job summaries (`id`, `name`, `enabled`, `nextRunAtMs`, `scheduleKind`, `lastRunStatus`) from `cron(action: "list")`; use `cron(action: "get", jobId: "...")` for one full job definition. Direct Gateway callers can pass `compact: true` to `cron.list`; omitting it preserves the full response with delivery previews.
 
-`openclaw cron create` is an alias for `openclaw cron add`. New jobs can use a positional schedule (`"0 9 * * 1"`, `"every 1h"`, `"20m"`, or an ISO timestamp) followed by a positional agent prompt. Use `--webhook <url>` on `cron add|create` or `cron edit` to POST the finished run payload to an HTTP endpoint; webhook delivery cannot combine with chat delivery flags (`--announce`, `--channel`, `--to`, `--thread-id`, `--account`). On `cron edit`, `--clear-channel`, `--clear-to`, `--clear-thread-id`, and `--clear-account` unset those routing fields individually (each rejected alongside its matching set flag) — distinct from `--no-deliver`, which only disables runner fallback delivery.
+`bot cron create` is an alias for `bot cron add`. New jobs can use a positional schedule (`"0 9 * * 1"`, `"every 1h"`, `"20m"`, or an ISO timestamp) followed by a positional agent prompt. Use `--webhook <url>` on `cron add|create` or `cron edit` to POST the finished run payload to an HTTP endpoint; webhook delivery cannot combine with chat delivery flags (`--announce`, `--channel`, `--to`, `--thread-id`, `--account`). On `cron edit`, `--clear-channel`, `--clear-to`, `--clear-thread-id`, and `--clear-account` unset those routing fields individually (each rejected alongside its matching set flag) — distinct from `--no-deliver`, which only disables runner fallback delivery.
 
 <Note>
 Model override note:
 
-- `openclaw cron add|edit --model ...` changes the job's selected model.
+- `bot cron add|edit --model ...` changes the job's selected model.
 - If the model is allowed, that exact provider/model reaches the isolated agent run.
 - If it is not allowed or cannot be resolved, cron fails the run with an explicit validation error.
 - API `cron.update` payload patches can set `model: null` to clear a stored job model override.
-- `openclaw cron edit <job-id> --clear-model` clears that override from the CLI (same effect as the `model: null` patch) and cannot combine with `--model`.
+- `bot cron edit <job-id> --clear-model` clears that override from the CLI (same effect as the `model: null` patch) and cannot combine with `--model`.
 - Configured fallback chains still apply because cron `--model` is a job primary, not a session `/model` override.
-- `openclaw cron add|edit --fallbacks ...` sets payload `fallbacks`, replacing configured fallbacks for that job; `--fallbacks ""` disables fallback and makes the run strict. `openclaw cron edit <job-id> --clear-fallbacks` clears the per-job override.
+- `bot cron add|edit --fallbacks ...` sets payload `fallbacks`, replacing configured fallbacks for that job; `--fallbacks ""` disables fallback and makes the run strict. `bot cron edit <job-id> --clear-fallbacks` clears the per-job override.
 - A plain `--model` with no explicit or configured fallback list does not fall through to the agent primary as a silent extra retry target.
 
 </Note>
@@ -499,7 +499,7 @@ Gateway can expose HTTP webhook endpoints for external triggers. Enable in confi
 Every request must include the hook token via header:
 
 - `Authorization: Bearer <token>` (recommended)
-- `x-openclaw-token: <token>`
+- `x-bot-token: <token>`
 
 Query-string tokens are rejected.
 
@@ -554,16 +554,16 @@ Keep hook endpoints behind loopback, tailnet, or a trusted reverse proxy.
 
 ## Gmail PubSub integration
 
-Wire Gmail inbox triggers to OpenClaw via Google PubSub.
+Wire Gmail inbox triggers to Bot via Google PubSub.
 
 <Note>
-**Prerequisites:** `gcloud` CLI, `gog` (gogcli), OpenClaw hooks enabled, Tailscale for the public HTTPS endpoint.
+**Prerequisites:** `gcloud` CLI, `gog` (gogcli), Bot hooks enabled, Tailscale for the public HTTPS endpoint.
 </Note>
 
 ### Wizard setup (recommended)
 
 ```bash
-openclaw webhooks gmail setup --account openclaw@gmail.com
+bot webhooks gmail setup --account bot@gmail.com
 ```
 
 This writes `hooks.gmail` config, enables the Gmail preset, and defaults to Tailscale Funnel for the push endpoint (`--tailscale funnel|serve|off`).
@@ -576,7 +576,7 @@ For untrusted inboxes, route the hook to a dedicated reader agent, give that age
 
 ### Gateway auto-start
 
-When `hooks.enabled=true` and `hooks.gmail.account` is set, the Gateway starts `gog gmail watch serve` on boot and auto-renews the watch. Set `OPENCLAW_SKIP_GMAIL_WATCHER=1` to opt out.
+When `hooks.enabled=true` and `hooks.gmail.account` is set, the Gateway starts `gog gmail watch serve` on boot and auto-renews the watch. Set `BOT_SKIP_GMAIL_WATCHER=1` to opt out.
 
 ### Manual one-time setup
 
@@ -602,7 +602,7 @@ When `hooks.enabled=true` and `hooks.gmail.account` is set, the Gateway starts `
   <Step title="Start the watch">
     ```bash
     gog gmail watch start \
-      --account openclaw@gmail.com \
+      --account bot@gmail.com \
       --label INBOX \
       --topic projects/<project-id>/topics/gog-gmail-watch
     ```
@@ -630,7 +630,7 @@ Use the latest-generation, best-tier model available from your provider for untr
 {
   cron: {
     enabled: true,
-    store: "~/.openclaw/cron/jobs.json",
+    store: "~/.bot/cron/jobs.json",
     triggers: {
       enabled: false,
     },
@@ -644,7 +644,7 @@ Use the latest-generation, best-tier model available from your provider for untr
 
 `cron.store` is a logical store key and doctor migration path, not a live JSON file to hand-edit. Job data lives in SQLite; use the CLI or Gateway API for changes.
 
-Disable cron: `cron.enabled: false` or `OPENCLAW_SKIP_CRON=1`.
+Disable cron: `cron.enabled: false` or `BOT_SKIP_CRON=1`.
 
 <AccordionGroup>
   <Accordion title="Retry behavior">
@@ -657,7 +657,7 @@ Disable cron: `cron.enabled: false` or `OPENCLAW_SKIP_CRON=1`.
     `cron.sessionRetention` (default `24h`, `false` disables) prunes isolated run-session entries. Run history keeps the newest 2000 terminal rows per job; lost rows retain their 24-hour cleanup window.
   </Accordion>
   <Accordion title="Legacy store migration">
-    On upgrade, run `openclaw doctor --fix` to import legacy `~/.openclaw/cron/jobs.json`, `jobs-state.json`, and `runs/*.jsonl` files into SQLite and rename them with a `.migrated` suffix. Malformed job rows are skipped from runtime and copied to `jobs-quarantine.json` for later repair or review.
+    On upgrade, run `bot doctor --fix` to import legacy `~/.bot/cron/jobs.json`, `jobs-state.json`, and `runs/*.jsonl` files into SQLite and rename them with a `.migrated` suffix. Malformed job rows are skipped from runtime and copied to `jobs-quarantine.json` for later repair or review.
   </Accordion>
 </AccordionGroup>
 
@@ -666,22 +666,22 @@ Disable cron: `cron.enabled: false` or `OPENCLAW_SKIP_CRON=1`.
 ### Command ladder
 
 ```bash
-openclaw status
-openclaw gateway status
-openclaw cron status
-openclaw cron list
-openclaw cron runs --id <jobId> --limit 20
-openclaw system heartbeat last
-openclaw logs --follow
-openclaw doctor
+bot status
+bot gateway status
+bot cron status
+bot cron list
+bot cron runs --id <jobId> --limit 20
+bot system heartbeat last
+bot logs --follow
+bot doctor
 ```
 
 <AccordionGroup>
   <Accordion title="Cron not firing">
-    - Check `cron.enabled` and the `OPENCLAW_SKIP_CRON` env var.
+    - Check `cron.enabled` and the `BOT_SKIP_CRON` env var.
     - Confirm the Gateway is running continuously.
     - For `cron` schedules, verify timezone (`--tz`) vs the host timezone.
-    - `reason: not-due` in run output means the manual run was checked with `openclaw cron run <jobId> --due` and the job was not due yet.
+    - `reason: not-due` in run output means the manual run was checked with `bot cron run <jobId> --due` and the job was not due yet.
 
   </Accordion>
   <Accordion title="Cron fired but no delivery">
@@ -689,14 +689,14 @@ openclaw doctor
     - Delivery target missing/invalid (`channel`/`to`) means outbound was skipped.
     - For Matrix, copied or legacy jobs with lowercased `delivery.to` room IDs can fail because Matrix room IDs are case-sensitive. Edit the job to the exact `!room:server` or `room:!room:server` value from Matrix.
     - Channel auth errors (`unauthorized`, `Forbidden`) mean delivery was blocked by credentials.
-    - If the isolated run returns only the silent token (`NO_REPLY` / `no_reply`), OpenClaw suppresses direct outbound delivery and the fallback queued-summary path, so nothing is posted back to chat.
+    - If the isolated run returns only the silent token (`NO_REPLY` / `no_reply`), Bot suppresses direct outbound delivery and the fallback queued-summary path, so nothing is posted back to chat.
     - If the agent should message the user itself, check that the job has a usable route (`channel: "last"` with a previous chat, or an explicit channel/target).
 
   </Accordion>
   <Accordion title="Cron or heartbeat appears to prevent /new-style rollover">
     - Daily and idle reset freshness is not based on `updatedAt`; see [Session management](/concepts/session#session-lifecycle).
     - Cron wakeups, heartbeat runs, exec notifications, and gateway bookkeeping may update the session row for routing/status, but they do not extend `sessionStartedAt` or `lastInteractionAt`.
-    - For legacy rows created before those fields existed, OpenClaw can recover `sessionStartedAt` from the transcript JSONL session header when the file is still available. Legacy idle rows without `lastInteractionAt` use that recovered start time as their idle baseline.
+    - For legacy rows created before those fields existed, Bot can recover `sessionStartedAt` from the transcript JSONL session header when the file is still available. Legacy idle rows without `lastInteractionAt` use that recovered start time as their idle baseline.
 
   </Accordion>
   <Accordion title="Timezone gotchas">

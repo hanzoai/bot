@@ -1,11 +1,11 @@
 // Google tests cover web search provider plugin behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { withEnvAsync, withFetchPreconnect } from "openclaw/plugin-sdk/test-env";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { withEnvAsync, withFetchPreconnect } from "bot/plugin-sdk/test-env";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createGeminiWebSearchProvider } from "./src/gemini-web-search-provider.js";
 
 type TestModelProviderConfig = NonNullable<
-  NonNullable<OpenClawConfig["models"]>["providers"]
+  NonNullable<BotConfig["models"]>["providers"]
 >[string];
 
 function installGeminiFetch() {
@@ -95,8 +95,8 @@ describe("google web search provider", () => {
         throw new Error("Expected tool definition");
       }
 
-      await expect(tool.execute({ query: "OpenClaw docs" })).resolves.toEqual({
-        docs: "https://docs.openclaw.ai/tools/web",
+      await expect(tool.execute({ query: "Bot docs" })).resolves.toEqual({
+        docs: "https://docs.bot.ai/tools/web",
         error: "missing_gemini_api_key",
         message:
           "web_search (gemini) needs an API key. Set GEMINI_API_KEY in the Gateway environment, configure plugins.entries.google.config.webSearch.apiKey, or reuse models.providers.google.apiKey. If you do not want to configure a search API key, use web_fetch for a specific URL or the browser tool for interactive pages.",
@@ -106,7 +106,7 @@ describe("google web search provider", () => {
 
   it("stores configured credentials at the canonical plugin config path", () => {
     const provider = createGeminiWebSearchProvider();
-    const config = {} as OpenClawConfig;
+    const config = {} as BotConfig;
 
     provider.setConfiguredCredentialValue?.(config, "AIza-plugin-test");
 
@@ -135,7 +135,7 @@ describe("google web search provider", () => {
       searchConfig: { provider: "gemini" },
     });
 
-    await tool?.execute({ query: "OpenClaw docs" });
+    await tool?.execute({ query: "Bot docs" });
 
     expect(getGeminiFetchUrl(mockFetch)).toBe(
       "https://generativelanguage.googleapis.com/proxy/v1beta/models/gemini-2.5-flash:generateContent",
@@ -213,7 +213,7 @@ describe("google web search provider", () => {
       searchConfig: { provider: "gemini" },
     });
 
-    await expect(tool?.execute({ query: "OpenClaw docs" })).rejects.toThrow(
+    await expect(tool?.execute({ query: "Bot docs" })).rejects.toThrow(
       "Gemini API error: malformed JSON response",
     );
   });
@@ -241,7 +241,7 @@ describe("google web search provider", () => {
       searchConfig: { provider: "gemini" },
     });
 
-    await expect(tool?.execute({ query: "OpenClaw docs" })).rejects.toThrow(
+    await expect(tool?.execute({ query: "Bot docs" })).rejects.toThrow(
       "Gemini API error: malformed JSON response",
     );
   });
@@ -275,7 +275,7 @@ describe("google web search provider", () => {
       searchConfig: { provider: "gemini" },
     });
 
-    await expect(tool?.execute({ query: "OpenClaw docs" })).rejects.toThrow(
+    await expect(tool?.execute({ query: "Bot docs" })).rejects.toThrow(
       "Gemini API error: malformed JSON response",
     );
   });
@@ -302,7 +302,7 @@ describe("google web search provider", () => {
       searchConfig: { provider: "gemini" },
     });
 
-    await tool?.execute({ query: "OpenClaw docs" }, { signal: controller.signal });
+    await tool?.execute({ query: "Bot docs" }, { signal: controller.signal });
 
     const [, init] = requireFirstGeminiFetchCall(mockFetch);
     expect(init?.signal?.aborted).toBe(true);
@@ -325,10 +325,10 @@ describe("google web search provider", () => {
         searchConfig: { provider: "gemini" },
       });
 
-      await tool?.execute({ query: "OpenClaw provider key fallback" });
+      await tool?.execute({ query: "Bot provider key fallback" });
 
       expect(getFetchHeaders(mockFetch)["x-goog-api-key"]).toBe("AIza-provider-test");
-      expect(getFetchHeaders(mockFetch)["x-goog-api-client"]).toMatch(/^openclaw\//u);
+      expect(getFetchHeaders(mockFetch)["x-goog-api-client"]).toMatch(/^bot\//u);
     });
   });
 
@@ -360,10 +360,10 @@ describe("google web search provider", () => {
         searchConfig: { provider: "gemini" },
       });
 
-      await tool?.execute({ query: "OpenClaw plugin key precedence" });
+      await tool?.execute({ query: "Bot plugin key precedence" });
 
       expect(getFetchHeaders(mockFetch)["x-goog-api-key"]).toBe("AIza-plugin-test");
-      expect(getFetchHeaders(mockFetch)["x-goog-api-client"]).toMatch(/^openclaw\//u);
+      expect(getFetchHeaders(mockFetch)["x-goog-api-client"]).toMatch(/^bot\//u);
     });
   });
 
@@ -384,7 +384,7 @@ describe("google web search provider", () => {
       searchConfig: { provider: "gemini" },
     });
 
-    await tool?.execute({ query: "OpenClaw provider baseUrl fallback" });
+    await tool?.execute({ query: "Bot provider baseUrl fallback" });
 
     expect(getGeminiFetchUrl(mockFetch)).toBe(
       "https://generativelanguage.googleapis.com/provider/v1beta/models/gemini-2.5-flash:generateContent",
@@ -419,7 +419,7 @@ describe("google web search provider", () => {
       searchConfig: { provider: "gemini" },
     });
 
-    await tool?.execute({ query: "OpenClaw plugin baseUrl precedence" });
+    await tool?.execute({ query: "Bot plugin baseUrl precedence" });
 
     expect(getGeminiFetchUrl(mockFetch)).toBe(
       "https://generativelanguage.googleapis.com/plugin/v1beta/models/gemini-2.5-flash:generateContent",
@@ -601,7 +601,7 @@ describe("google web search provider", () => {
     });
 
     await tool?.execute({
-      query: "OpenClaw release notes",
+      query: "Bot release notes",
       date_after: "2026-04-01",
       date_before: "2026-04-30",
     });
@@ -635,12 +635,12 @@ describe("google web search provider", () => {
 
     await expect(
       tool?.execute({
-        query: "OpenClaw release notes",
+        query: "Bot release notes",
         freshness: "week",
         date_after: "2026-04-01",
       }),
     ).resolves.toEqual({
-      docs: "https://docs.openclaw.ai/tools/web",
+      docs: "https://docs.bot.ai/tools/web",
       error: "conflicting_time_filters",
       message:
         "freshness and date_after/date_before cannot be used together. Use either freshness (day/week/month/year) or a date range (date_after/date_before), not both.",

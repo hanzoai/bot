@@ -4,7 +4,7 @@ import {
   type NpmSpecResolution,
 } from "../infra/install-source-utils.js";
 import {
-  compareOpenClawReleaseVersions,
+  compareBotReleaseVersions,
   isExactSemverVersion,
   isPrereleaseSemverVersion,
   type ParsedRegistryNpmSpec,
@@ -12,7 +12,7 @@ import {
 import { compareValidSemver } from "../infra/semver.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import {
-  validateOpenClawPackageInstallCompatibility,
+  validateBotPackageInstallCompatibility,
   type PluginInstallRuntime,
 } from "./install-shared.js";
 import {
@@ -20,7 +20,7 @@ import {
   type PluginInstallFailureResult,
   type PluginInstallLogger,
 } from "./install-types.js";
-import type { OpenClawPackageManifest } from "./manifest.js";
+import type { BotPackageManifest } from "./manifest.js";
 
 export function isNpmPackageNotFoundMessage(error: string): boolean {
   const normalized = error.trim();
@@ -31,7 +31,7 @@ export function isNpmPackageNotFoundMessage(error: string): boolean {
 }
 
 function compareNpmSemver(a: string, b: string): number {
-  const releaseCmp = compareOpenClawReleaseVersions(a, b);
+  const releaseCmp = compareBotReleaseVersions(a, b);
   if (releaseCmp !== null) {
     return releaseCmp;
   }
@@ -75,7 +75,7 @@ export async function resolveTrustedOfficialPrereleaseResolution(params: {
   timeoutMs: number;
   logger: PluginInstallLogger;
 }): Promise<TrustedOfficialPrereleaseResolution | null> {
-  if (!params.spec.name.startsWith("@openclaw/")) {
+  if (!params.spec.name.startsWith("@hanzo/bot-")) {
     return null;
   }
   const semverVersions = await loadNpmPackageVersions({
@@ -105,12 +105,12 @@ export async function resolveTrustedOfficialPrereleaseResolution(params: {
           return null;
         }
         params.logger.warn?.(
-          `Resolved ${params.spec.raw} to prerelease version ${params.resolvedPrereleaseVersion}; using newest prerelease ${prereleaseSpec} because this trusted official OpenClaw package has no stable npm versions yet.`,
+          `Resolved ${params.spec.raw} to prerelease version ${params.resolvedPrereleaseVersion}; using newest prerelease ${prereleaseSpec} because this trusted official Bot package has no stable npm versions yet.`,
         );
         return { kind: "prerelease-only", resolution: metadataResult.metadata };
       }
       params.logger.warn?.(
-        `Resolved ${params.spec.raw} to prerelease version ${params.resolvedPrereleaseVersion}; allowing it because this trusted official OpenClaw package has no stable npm versions yet.`,
+        `Resolved ${params.spec.raw} to prerelease version ${params.resolvedPrereleaseVersion}; allowing it because this trusted official Bot package has no stable npm versions yet.`,
       );
       return { kind: "allow-prerelease-only" };
     }
@@ -126,7 +126,7 @@ export async function resolveTrustedOfficialPrereleaseResolution(params: {
     return null;
   }
   params.logger.warn?.(
-    `Resolved ${params.spec.raw} to prerelease version ${params.resolvedPrereleaseVersion}; falling back to stable ${stableSpec} for this trusted official OpenClaw install.`,
+    `Resolved ${params.spec.raw} to prerelease version ${params.resolvedPrereleaseVersion}; falling back to stable ${stableSpec} for this trusted official Bot install.`,
   );
   return { kind: "stable", resolution: metadataResult.metadata };
 }
@@ -174,10 +174,10 @@ export function validateNpmResolutionCompatibility(params: {
   expectedPluginId?: string;
   resolution: NpmSpecResolution;
 }): PluginInstallFailureResult | null {
-  return validateOpenClawPackageInstallCompatibility({
+  return validateBotPackageInstallCompatibility({
     runtime: params.runtime,
     pluginId: params.expectedPluginId ?? params.resolution.name ?? params.parsedSpec.name,
-    packageMetadata: params.resolution.packageOpenClaw as OpenClawPackageManifest | undefined,
+    packageMetadata: params.resolution.packageBot as BotPackageManifest | undefined,
   });
 }
 
@@ -241,7 +241,7 @@ export async function resolveLatestCompatibleNpmResolution(params: {
     });
     if (!compatibilityError) {
       params.logger.warn?.(
-        `Resolved ${params.parsedSpec.raw} to ${params.currentResolution.resolvedSpec ?? currentVersion}, but that version is incompatible with this OpenClaw runtime; using newest compatible ${metadataResult.metadata.resolvedSpec ?? spec}.`,
+        `Resolved ${params.parsedSpec.raw} to ${params.currentResolution.resolvedSpec ?? currentVersion}, but that version is incompatible with this Bot runtime; using newest compatible ${metadataResult.metadata.resolvedSpec ?? spec}.`,
       );
       return metadataResult.metadata;
     }

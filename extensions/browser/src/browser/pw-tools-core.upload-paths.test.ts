@@ -93,7 +93,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
     interactionMocks.setFileChooserFilesViaPlaywright.mockClear();
     pathMocks.resolveStrictExistingUploadPaths.mockResolvedValue({
       ok: true,
-      paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+      paths: ["/home/user/.bot/media/inbound/report.pdf"],
     });
   });
 
@@ -103,13 +103,13 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
     await armFileUploadViaPlaywright({
       cdpUrl: "http://127.0.0.1:18792",
       targetId: "T1",
-      paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+      paths: ["/home/user/.bot/media/inbound/report.pdf"],
     });
     await Promise.resolve();
 
     await vi.waitFor(() => {
       expect(fileChooser.setFiles).toHaveBeenCalledWith([
-        "/home/user/.openclaw/media/inbound/report.pdf",
+        "/home/user/.bot/media/inbound/report.pdf",
       ]);
     });
     expect(fileChooser.setFiles).toHaveBeenCalledTimes(1);
@@ -152,7 +152,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
       cdpUrl: "http://127.0.0.1:18792",
       targetId: "T1",
       ref: "e12",
-      paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+      paths: ["/home/user/.bot/media/inbound/report.pdf"],
     }).then(() => {
       settled = true;
     });
@@ -162,7 +162,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
       expect.objectContaining({ resolvedPage: page.currentPage }),
     );
     expect(page.fileChooser.setFiles).toHaveBeenCalledWith(
-      ["/home/user/.openclaw/media/inbound/report.pdf"],
+      ["/home/user/.bot/media/inbound/report.pdf"],
       { timeout: expect.any(Number) },
     );
     expect(settled).toBe(false);
@@ -183,7 +183,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
     await uploadViaPlaywright({
       cdpUrl: "http://127.0.0.1:18792",
       ref: "e12",
-      paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+      paths: ["/home/user/.bot/media/inbound/report.pdf"],
     });
 
     expect(page.fileChooser.setFiles).toHaveBeenCalledTimes(1);
@@ -199,7 +199,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
       uploadViaPlaywright({
         cdpUrl: "http://127.0.0.1:18792",
         ref: "e12",
-        paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+        paths: ["/home/user/.bot/media/inbound/report.pdf"],
       }),
     ).rejects.toThrow("stale ref");
 
@@ -220,7 +220,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
       uploadViaPlaywright({
         cdpUrl: "http://127.0.0.1:18792",
         ref: "e12",
-        paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+        paths: ["/home/user/.bot/media/inbound/report.pdf"],
       }),
     ).rejects.toThrow("Invalid path: upload target changed");
     expect(page.press).not.toHaveBeenCalled();
@@ -237,7 +237,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
       uploadViaPlaywright({
         cdpUrl: "http://127.0.0.1:18792",
         ref: "e12",
-        paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+        paths: ["/home/user/.bot/media/inbound/report.pdf"],
       }),
     ).rejects.toThrow("setFiles failed");
     expect(page.listenerCount()).toBe(0);
@@ -250,7 +250,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
       const upload = uploadViaPlaywright({
         cdpUrl: "http://127.0.0.1:18792",
         ref: "e12",
-        paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+        paths: ["/home/user/.bot/media/inbound/report.pdf"],
         timeoutMs: 500,
       });
       const rejection = expect(upload).rejects.toThrow(
@@ -282,7 +282,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
       const upload = uploadViaPlaywright({
         cdpUrl: "http://127.0.0.1:18792",
         ref: "e12",
-        paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+        paths: ["/home/user/.bot/media/inbound/report.pdf"],
         timeoutMs: 500,
       });
       const rejection = expect(upload).rejects.toThrow(
@@ -309,7 +309,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
       const upload = uploadViaPlaywright({
         cdpUrl: "http://127.0.0.1:18792",
         ref: "e12",
-        paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+        paths: ["/home/user/.bot/media/inbound/report.pdf"],
         timeoutMs: 500,
       });
       const rejection = expect(upload).rejects.toThrow(
@@ -353,14 +353,14 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
       cdpUrl: "http://127.0.0.1:18792",
       targetId: "T1",
       ref: "e1",
-      paths: ["/home/user/.openclaw/media/inbound/first.pdf"],
+      paths: ["/home/user/.bot/media/inbound/first.pdf"],
     });
     await vi.waitFor(() => expect(page.fileChooser.setFiles).toHaveBeenCalledTimes(1));
     const second = uploadViaPlaywright({
       cdpUrl: "http://127.0.0.1:18792",
       targetId: "T2",
       ref: "e2",
-      paths: ["/home/user/.openclaw/media/inbound/second.pdf"],
+      paths: ["/home/user/.bot/media/inbound/second.pdf"],
     });
 
     const firstRejection = expect(first).rejects.toThrow("superseded by another waiter");
@@ -403,7 +403,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
     const first = uploadViaPlaywright({
       cdpUrl: "http://127.0.0.1:18792",
       ref: "e1",
-      paths: ["/home/user/.openclaw/media/inbound/first.pdf"],
+      paths: ["/home/user/.bot/media/inbound/first.pdf"],
     });
     const firstRejection = expect(first).rejects.toThrow("superseded by another waiter");
     await vi.waitFor(() => expect(page.fileChooser.setFiles).toHaveBeenCalledTimes(1));
@@ -412,7 +412,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
     const second = uploadViaPlaywright({
       cdpUrl: "http://127.0.0.1:18792",
       ref: "e2",
-      paths: ["/home/user/.openclaw/media/inbound/second.pdf"],
+      paths: ["/home/user/.bot/media/inbound/second.pdf"],
       signal: secondController.signal,
     });
     await vi.waitFor(() =>
@@ -424,7 +424,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
     const third = uploadViaPlaywright({
       cdpUrl: "http://127.0.0.1:18792",
       ref: "e3",
-      paths: ["/home/user/.openclaw/media/inbound/third.pdf"],
+      paths: ["/home/user/.bot/media/inbound/third.pdf"],
     });
     await Promise.resolve();
     expect(interactionMocks.clickViaPlaywright).toHaveBeenCalledTimes(1);
@@ -455,13 +455,13 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
     const first = uploadViaPlaywright({
       cdpUrl: "http://127.0.0.1:18792",
       ref: "e1",
-      paths: ["/home/user/.openclaw/media/inbound/first.pdf"],
+      paths: ["/home/user/.bot/media/inbound/first.pdf"],
     });
     await vi.waitFor(() => expect(interactionMocks.clickViaPlaywright).toHaveBeenCalledTimes(1));
     const second = uploadViaPlaywright({
       cdpUrl: "http://127.0.0.1:18792",
       ref: "e2",
-      paths: ["/home/user/.openclaw/media/inbound/second.pdf"],
+      paths: ["/home/user/.bot/media/inbound/second.pdf"],
     });
     await Promise.resolve();
     expect(interactionMocks.clickViaPlaywright).toHaveBeenCalledTimes(1);
@@ -480,7 +480,7 @@ describe("armFileUploadViaPlaywright upload path validation", () => {
     const upload = uploadViaPlaywright({
       cdpUrl: "http://127.0.0.1:18792",
       ref: "e12",
-      paths: ["/home/user/.openclaw/media/inbound/report.pdf"],
+      paths: ["/home/user/.bot/media/inbound/report.pdf"],
       signal: controller.signal,
     });
 

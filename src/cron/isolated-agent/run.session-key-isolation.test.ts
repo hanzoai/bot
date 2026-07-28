@@ -72,7 +72,7 @@ describe("runCronIsolatedAgentTurn isolated session identity", () => {
     expect(runRequest.sessionId).toBe("isolated-run-1");
     expect(runRequest.sessionKey).toBe("agent:default:cron:daily-monitor:run:isolated-run-1");
     expect(runRequest.sessionKey).not.toBe("agent:default:cron:daily-monitor");
-    expect(runRequest.promptCacheKey).toMatch(/^openclaw-cron-[a-f0-9]{32}$/u);
+    expect(runRequest.promptCacheKey).toMatch(/^bot-cron-[a-f0-9]{32}$/u);
     expect(runRequest.promptCacheKey).not.toContain("isolated-run-1");
     expect(runRequest.promptCacheKey).not.toContain("daily-monitor");
     expect(runRequest.bootstrapContextMode).toBe("lightweight");
@@ -149,7 +149,7 @@ describe("runCronIsolatedAgentTurn isolated session identity", () => {
     expect(requests[1]?.sessionId).toBe("isolated-run-b");
     expect(requests[0]?.sessionKey).not.toBe(requests[1]?.sessionKey);
     expect(requests[0]?.promptCacheKey).toBe(requests[1]?.promptCacheKey);
-    expect(requests[0]?.promptCacheKey).toMatch(/^openclaw-cron-[a-f0-9]{32}$/u);
+    expect(requests[0]?.promptCacheKey).toMatch(/^bot-cron-[a-f0-9]{32}$/u);
   });
 
   it("keeps explicit session-bound cron execution on the requested session key", async () => {

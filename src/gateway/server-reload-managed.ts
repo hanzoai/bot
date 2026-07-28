@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { runWithGatewayIndependentRootWorkAdmission } from "../process/gateway-work-admission.js";
 import { getActiveSecretsRuntimeSnapshotRevision } from "../secrets/runtime-state.js";
 import {
@@ -47,22 +47,22 @@ export function startManagedGatewayConfigReloader(
   }
 
   const prepareRuntimeCandidate = (
-    runtimeConfig: OpenClawConfig,
-    sourceConfig: OpenClawConfig,
+    runtimeConfig: BotConfig,
+    sourceConfig: BotConfig,
     ownership?: GatewayConfigReloadTransactionOwnership,
-  ): OpenClawConfig => {
+  ): BotConfig => {
     const canonicalConfig = restoreCanonicalSecretRefs(runtimeConfig, sourceConfig);
     const candidateConfig = ownership?.reapplyRuntimeOverlays(canonicalConfig) ?? canonicalConfig;
     return params.applyRuntimeConfigOverrides?.(candidateConfig) ?? candidateConfig;
   };
-  const applyRuntimeConfigOverrides = (config: OpenClawConfig): OpenClawConfig =>
+  const applyRuntimeConfigOverrides = (config: BotConfig): BotConfig =>
     params.applyRuntimeConfigOverrides?.(config) ?? config;
   const restartRecoveryAvailable =
     params.restartRecoveryAvailable !== false && params.requestRecoveryRestart !== undefined;
 
   let stopped = false;
   const tryPrepareRuntimeSecrets = async (
-    config: OpenClawConfig,
+    config: BotConfig,
     transactionOwnership: GatewayConfigReloadTransactionOwnership,
     activationParams: RuntimeSecretsPreflightParams,
   ): Promise<CurrentRuntimeSecretsPreparation | null> => {
@@ -155,9 +155,9 @@ export function startManagedGatewayConfigReloader(
   });
   const runManagedRestart = async (
     plan: GatewayReloadPlan,
-    nextConfig: OpenClawConfig,
+    nextConfig: BotConfig,
     transactionOwnership: GatewayConfigReloadTransactionOwnership,
-    sourceConfig: OpenClawConfig,
+    sourceConfig: BotConfig,
     restartOptions?: GatewayRestartRequestOptions,
     beforeRestartRequest?: () => Promise<void>,
   ) => {
@@ -175,7 +175,7 @@ export function startManagedGatewayConfigReloader(
           previousRequired: string | undefined | null;
           previousCurrent: string | undefined;
           nextGeneration: string | undefined;
-          runtimeConfig: OpenClawConfig;
+          runtimeConfig: BotConfig;
         }
       | undefined;
     try {

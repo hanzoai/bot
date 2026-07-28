@@ -1,7 +1,7 @@
 ---
 name: qqbot-channel
 description: QQ channel management skill. Use qqbot_channel_api for explicit QQ channel-management requests; confirm write, delete, and bulk actions before calling authenticated QQ Open Platform endpoints.
-metadata: { "openclaw": { "emoji": "📡", "requires": { "config": ["channels.qqbot"] } } }
+metadata: { "bot": { "emoji": "📡", "requires": { "config": ["channels.qqbot"] } } }
 ---
 
 # QQ 频道 API 请求指导

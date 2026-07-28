@@ -6,7 +6,7 @@
 // store and its per-node token were retired; state-migrations.ts folds old
 // rows into device records once.
 import { randomUUID } from "node:crypto";
-import { normalizeArrayBackedTrimmedStringList } from "@openclaw/normalization-core/string-normalization";
+import { normalizeArrayBackedTrimmedStringList } from "@hanzo/bot-normalization-core/string-normalization";
 import { resolveMissingRequestedScope } from "../shared/operator-scope-compat.js";
 import { updatePairedDeviceNodeSurfaceInTransaction } from "./device-pairing-store.js";
 import {

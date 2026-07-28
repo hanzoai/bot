@@ -3,7 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
 
 const ttsMocks = vi.hoisted(() => ({
@@ -46,7 +46,7 @@ type TtsCommandResult = Awaited<ReturnType<typeof handleTtsCommands>>;
 
 function buildTtsParams(
   commandBodyNormalized: string,
-  cfg: OpenClawConfig = {},
+  cfg: BotConfig = {},
   agentId?: string,
   overrides: Partial<Parameters<typeof handleTtsCommands>[0]> = {},
 ): Parameters<typeof handleTtsCommands>[0] {
@@ -242,7 +242,7 @@ describe("handleTtsCommands status fallback reporting", () => {
     const result = await handleTtsCommands(
       buildTtsParams("/tts", {
         tts: { prefsPath: "/tmp/tts.json" },
-      } as OpenClawConfig),
+      } as BotConfig),
       true,
     );
     const reply = expectReply(result);
@@ -268,7 +268,7 @@ describe("handleTtsCommands status fallback reporting", () => {
   it("resolves status config for the active agent", async () => {
     const cfg = {
       agents: { list: [{ id: "reader", tts: { provider: "elevenlabs" } }] },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = await handleTtsCommands(buildTtsParams("/tts status", cfg, "reader"), true);
 
@@ -289,7 +289,7 @@ describe("handleTtsCommands status fallback reporting", () => {
     });
     const cfg = {
       agents: { list: [{ id: "reader", tts: { provider: PRIMARY_TTS_PROVIDER } }] },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = await handleTtsCommands(
       buildTtsParams("/tts audio hello", cfg, "reader", {
@@ -302,7 +302,7 @@ describe("handleTtsCommands status fallback reporting", () => {
     const speechCall = lastMockCall(ttsMocks.textToSpeech, "textToSpeech")[0] as {
       accountId?: string;
       agentId?: string;
-      cfg?: OpenClawConfig;
+      cfg?: BotConfig;
       text?: string;
     };
     expect(speechCall.text).toBe("hello");
@@ -330,7 +330,7 @@ describe("handleTtsCommands status fallback reporting", () => {
   });
 
   it("reads the latest assistant transcript reply once", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-tts-latest-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-tts-latest-"));
     const sessionFile = path.join(tempDir, "session.jsonl");
     fs.writeFileSync(
       sessionFile,
@@ -397,7 +397,7 @@ describe("handleTtsCommands status fallback reporting", () => {
   });
 
   it("does not resend /tts latest for the same assistant reply", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-tts-latest-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-tts-latest-"));
     const sessionFile = path.join(tempDir, "session.jsonl");
     fs.writeFileSync(
       sessionFile,

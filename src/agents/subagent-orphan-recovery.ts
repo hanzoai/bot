@@ -7,7 +7,7 @@
  * synthetic resume message to restart their work. Parent notification is handled
  * separately by completion delivery after the child reaches a terminal result.
  *
- * @see https://github.com/openclaw/openclaw/issues/47711
+ * @see https://github.com/hanzoai/bot/issues/47711
  */
 
 import crypto from "node:crypto";
@@ -265,7 +265,7 @@ export async function recoverOrphanedSubagentSessions(params: {
   const resumedSessionKeys = params.resumedSessionKeys ?? new Set<string>();
   const pendingStaleFinalizations = params.pendingStaleFinalizations ?? new Map<string, string>();
   const readSessionMessages = params.readSessionMessages ?? readSessionMessagesAsync;
-  const configChangePattern = /openclaw\.json|openclaw gateway restart|config\.patch/i;
+  const configChangePattern = /bot\.json|bot gateway restart|config\.patch/i;
 
   try {
     const activeRuns = params.getActiveRuns();
@@ -482,7 +482,7 @@ export async function recoverOrphanedSubagentSessions(params: {
           task: runRecord.task,
           lastHumanMessage: extractMessageText(lastHumanMessage),
           configChangeHint: configChangeDetected
-            ? "\n\n[config changes from your previous run were already applied — do not re-modify openclaw.json or restart the gateway]"
+            ? "\n\n[config changes from your previous run were already applied — do not re-modify bot.json or restart the gateway]"
             : undefined,
           originalRunId: runId,
           originalRun: runRecord,

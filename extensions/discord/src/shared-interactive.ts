@@ -3,14 +3,14 @@ import {
   reduceLegacyInteractiveReply,
   resolveMessagePresentationButtonAction,
   resolveMessagePresentationOptionAction,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "bot/plugin-sdk/interactive-runtime";
 import type {
   InteractiveButtonStyle,
   LegacyInteractiveReply,
   MessagePresentation,
   MessagePresentationButton,
   MessagePresentationOption,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "bot/plugin-sdk/interactive-runtime";
 import { buildDiscordApprovalCustomId } from "./approval-custom-id.js";
 import {
   buildDiscordActivityCustomId,

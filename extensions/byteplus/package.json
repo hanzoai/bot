@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/byteplus-provider",
+  "name": "@hanzo/bot-byteplus-provider",
   "version": "2026.7.2",
   "private": true,
-  "description": "OpenClaw BytePlus provider plugin",
+  "description": "Bot BytePlus provider plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

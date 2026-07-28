@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { html, nothing } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { renderCopyAsMarkdownButton } from "../../../components/copy-button.ts";
@@ -76,7 +76,7 @@ function renderExpandButton(
   },
 ) {
   return html`
-    <openclaw-tooltip .content=${t("chat.messages.openInCanvas")}>
+    <bot-tooltip .content=${t("chat.messages.openInCanvas")}>
       <button
         class="chat-expand-btn"
         type="button"
@@ -99,7 +99,7 @@ function renderExpandButton(
       >
         <span class="chat-expand-btn__icon" aria-hidden="true">${icons.panelRightOpen}</span>
       </button>
-    </openclaw-tooltip>
+    </bot-tooltip>
   `;
 }
 
@@ -142,10 +142,10 @@ export function resolveMessageActionDetails(params: {
     return null;
   }
   const transcriptMeta =
-    record["__openclaw"] &&
-    typeof record["__openclaw"] === "object" &&
-    !Array.isArray(record["__openclaw"])
-      ? (record["__openclaw"] as Record<string, unknown>)
+    record["__bot"] &&
+    typeof record["__bot"] === "object" &&
+    !Array.isArray(record["__bot"])
+      ? (record["__bot"] as Record<string, unknown>)
       : null;
   const messageId =
     typeof transcriptMeta?.id === "string"
@@ -170,7 +170,7 @@ export function resolveMessageActionDetails(params: {
     shouldFetchFullMessage: Boolean(
       onOpenSidebar &&
       messageId &&
-      !record.openclawMessageToolMirror &&
+      !record.botMessageToolMirror &&
       (transcriptMeta?.truncated === true || markdown?.includes("\n...(truncated)...")),
     ),
   };
@@ -207,7 +207,7 @@ export function renderReplyButton(
   onReply: (target: MessageReplyTarget) => void,
 ) {
   return html`
-    <openclaw-tooltip .content=${t("chat.messages.reply")}>
+    <bot-tooltip .content=${t("chat.messages.reply")}>
       <button
         class="chat-reply-btn"
         type="button"
@@ -216,7 +216,7 @@ export function renderReplyButton(
       >
         ${icons.messageSquare}
       </button>
-    </openclaw-tooltip>
+    </bot-tooltip>
   `;
 }
 

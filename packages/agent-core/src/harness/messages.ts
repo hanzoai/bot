@@ -1,5 +1,5 @@
 // Agent Core module implements messages behavior.
-import type { ImageContent, Message, TextContent } from "@openclaw/llm-core";
+import type { ImageContent, Message, TextContent } from "@hanzo/bot-llm-core";
 import type {
   AgentMessage,
   BashExecutionMessage,

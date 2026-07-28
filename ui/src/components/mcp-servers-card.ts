@@ -16,7 +16,7 @@ import {
   type McpServerSummary,
   type McpServersPatchBuildResult,
 } from "../lib/config/mcp-servers.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../lit/bot-element.ts";
 import { SubscriptionsController } from "../lit/subscriptions-controller.ts";
 import { icons } from "./icons.ts";
 import { renderMcpServerForm, type McpServerForm } from "./mcp-server-form.ts";
@@ -39,7 +39,7 @@ function tlsLabel(tls: McpServerSummary["tls"]): string | null {
   }
 }
 
-class McpServersCard extends OpenClawLightDomElement {
+class McpServersCard extends BotLightDomElement {
   @consume({ context: applicationContext, subscribe: true })
   private context?: ApplicationContext;
 
@@ -158,7 +158,7 @@ class McpServersCard extends OpenClawLightDomElement {
   }
 
   private renderRow(server: McpServerSummary): TemplateResult {
-    const command = `openclaw mcp ${server.auth === "oauth" ? "login" : "probe"} ${quoteShellArg(
+    const command = `bot mcp ${server.auth === "oauth" ? "login" : "probe"} ${quoteShellArg(
       server.name,
     )}`;
     const meta = [
@@ -276,12 +276,12 @@ class McpServersCard extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-mcp-servers-card")) {
-  customElements.define("openclaw-mcp-servers-card", McpServersCard);
+if (!customElements.get("bot-mcp-servers-card")) {
+  customElements.define("bot-mcp-servers-card", McpServersCard);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-mcp-servers-card": McpServersCard;
+    "bot-mcp-servers-card": McpServersCard;
   }
 }

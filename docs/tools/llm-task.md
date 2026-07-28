@@ -9,7 +9,7 @@ title: "LLM task"
 `llm-task` is a bundled **optional plugin tool** that runs a single JSON-only
 LLM call and returns structured output, optionally validated against a JSON
 Schema. It gives workflow engines like Lobster an LLM step without custom
-OpenClaw code per workflow.
+Bot code per workflow.
 
 ## Enable
 
@@ -90,24 +90,24 @@ and `details.model` naming what actually ran.
 ### Important limitation
 
 The example below assumes the **standalone Lobster CLI** is running where
-`openclaw.invoke` already has the correct gateway URL/auth context.
+`bot.invoke` already has the correct gateway URL/auth context.
 
-For the bundled **embedded** Lobster runner inside OpenClaw, this nested CLI
+For the bundled **embedded** Lobster runner inside Bot, this nested CLI
 pattern is **not currently reliable**:
 
 ```lobster
-openclaw.invoke --tool llm-task --action json --args-json '{ ... }'
+bot.invoke --tool llm-task --action json --args-json '{ ... }'
 ```
 
 Until embedded Lobster has a supported bridge for this flow, prefer either:
 
 - direct `llm-task` tool calls outside Lobster, or
-- Lobster steps that do not rely on nested `openclaw.invoke` calls.
+- Lobster steps that do not rely on nested `bot.invoke` calls.
 
 Standalone Lobster CLI example:
 
 ```lobster
-openclaw.invoke --tool llm-task --action json --args-json '{
+bot.invoke --tool llm-task --action json --args-json '{
   "prompt": "Given the input email, return intent and draft.",
   "thinking": "low",
   "input": {

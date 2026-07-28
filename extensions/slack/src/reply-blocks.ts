@@ -2,10 +2,10 @@ import {
   normalizeMessagePresentation,
   renderMessagePresentationFallbackText,
   type MessagePresentation,
-} from "openclaw/plugin-sdk/interactive-runtime";
+} from "bot/plugin-sdk/interactive-runtime";
 // Slack plugin module implements reply blocks behavior.
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   resolveSlackAuthoredTextPlacement,
   type SlackAuthoredTextPlacement,
@@ -370,9 +370,9 @@ function readGeneratedSlackControlRowKey(block: SlackBlock): string | undefined 
   if (record.type !== "actions" || typeof record.block_id !== "string") {
     return undefined;
   }
-  const expectedElementType = /^openclaw_reply_buttons_[1-9]\d*$/.test(record.block_id)
+  const expectedElementType = /^bot_reply_buttons_[1-9]\d*$/.test(record.block_id)
     ? "button"
-    : /^openclaw_reply_select_[1-9]\d*$/.test(record.block_id)
+    : /^bot_reply_select_[1-9]\d*$/.test(record.block_id)
       ? "static_select"
       : undefined;
   if (!expectedElementType || !Array.isArray(record.elements) || record.elements.length === 0) {

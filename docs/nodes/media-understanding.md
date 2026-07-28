@@ -7,9 +7,9 @@ title: "Media understanding"
 sidebarTitle: "Media understanding"
 ---
 
-OpenClaw can summarize inbound media (image/audio/video) before the reply pipeline runs, so command parsing and routing work off short text instead of raw bytes. Understanding auto-detects local tools or provider keys, or you can configure explicit models. Original media is always delivered to the model as usual; when understanding fails or is disabled, the reply flow continues unchanged.
+Bot can summarize inbound media (image/audio/video) before the reply pipeline runs, so command parsing and routing work off short text instead of raw bytes. Understanding auto-detects local tools or provider keys, or you can configure explicit models. Original media is always delivered to the model as usual; when understanding fails or is disabled, the reply flow continues unchanged.
 
-Vendor plugins register capability metadata (which provider supports which media type, default model, priority). OpenClaw core owns the shared `tools.media` config, fallback order, and reply-pipeline integration.
+Vendor plugins register capability metadata (which provider supports which media type, default model, priority). Bot core owns the shared `tools.media` config, fallback order, and reply-pipeline integration.
 
 ## How it works
 
@@ -136,14 +136,14 @@ See [Tools and custom providers](/gateway/config-tools) for profiles, env vars, 
 
 - Media exceeding `maxBytes` skips that model and tries the next one.
 - Audio files under 1024 bytes are treated as empty/corrupt and skipped before transcription; the agent gets a deterministic placeholder transcript instead.
-- If the active primary image model already supports vision natively, OpenClaw skips the `[Image]` summary block and passes the original image into the model directly. MiniMax is an exception: `minimax`, `minimax-cn`, `minimax-portal`, and `minimax-portal-cn` always route image understanding through the plugin-owned `MiniMax-VL-01` media provider, even if legacy MiniMax M2.x chat metadata claims image input (only `MiniMax-M3` and later are treated as natively vision-capable).
+- If the active primary image model already supports vision natively, Bot skips the `[Image]` summary block and passes the original image into the model directly. MiniMax is an exception: `minimax`, `minimax-cn`, `minimax-portal`, and `minimax-portal-cn` always route image understanding through the plugin-owned `MiniMax-VL-01` media provider, even if legacy MiniMax M2.x chat metadata claims image input (only `MiniMax-M3` and later are treated as natively vision-capable).
 - If a Gateway/WebChat primary model is text-only, image attachments are preserved as offloaded `media://inbound/*` refs so image/PDF tools or a configured image model can still inspect them instead of losing the attachment.
-- Explicit `openclaw infer image describe --file <path> --model <provider/model>` (alias: `openclaw capability image describe`) runs that image-capable provider/model directly, including Ollama refs such as `ollama/qwen2.5vl:7b` when a matching image-capable model is configured under `models.providers.ollama.models[]`.
-- If `<capability>.enabled` is not `false` but no models are configured, OpenClaw tries the active reply model when its provider supports the capability.
+- Explicit `bot infer image describe --file <path> --model <provider/model>` (alias: `bot capability image describe`) runs that image-capable provider/model directly, including Ollama refs such as `ollama/qwen2.5vl:7b` when a matching image-capable model is configured under `models.providers.ollama.models[]`.
+- If `<capability>.enabled` is not `false` but no models are configured, Bot tries the active reply model when its provider supports the capability.
 
 ### Auto-detect (default)
 
-When `tools.media.<capability>.enabled` is not `false` and no models are configured, OpenClaw tries these in order and stops at the first working option:
+When `tools.media.<capability>.enabled` is not `false` and no models are configured, Bot tries these in order and stops at the first working option:
 
 <Steps>
   <Step title="Configured image model (image only)">
@@ -175,7 +175,7 @@ When `tools.media.<capability>.enabled` is not `false` and no models are configu
 
   </Step>
   <Step title="Antigravity CLI (image/video only)">
-    First installed `agy` or `antigravity` binary (override with `OPENCLAW_ANTIGRAVITY_CLI`), sandboxed against the media's directory.
+    First installed `agy` or `antigravity` binary (override with `BOT_ANTIGRAVITY_CLI`), sandboxed against the media's directory.
   </Step>
 </Steps>
 
@@ -199,11 +199,11 @@ Binary detection is best-effort across macOS/Linux/Windows; ensure the CLI is on
 
 ### Proxy support (audio/video provider calls)
 
-Provider-based **audio** and **video** understanding honors standard outbound proxy environment variables, including `NO_PROXY`/`no_proxy` bypass rules: `HTTPS_PROXY`, `HTTP_PROXY`, `ALL_PROXY`, `https_proxy`, `http_proxy`, `all_proxy`. Lowercase vars take precedence over uppercase. If none are set, media understanding uses direct egress; if the proxy value is malformed, OpenClaw logs a warning and falls back to direct fetch. Image understanding does not go through this proxy path.
+Provider-based **audio** and **video** understanding honors standard outbound proxy environment variables, including `NO_PROXY`/`no_proxy` bypass rules: `HTTPS_PROXY`, `HTTP_PROXY`, `ALL_PROXY`, `https_proxy`, `http_proxy`, `all_proxy`. Lowercase vars take precedence over uppercase. If none are set, media understanding uses direct egress; if the proxy value is malformed, Bot logs a warning and falls back to direct fetch. Image understanding does not go through this proxy path.
 
 ## Capabilities
 
-Set `capabilities` on a `models[]` entry to restrict it to specific media types. For shared lists, OpenClaw infers defaults per bundled provider:
+Set `capabilities` on a `models[]` entry to restrict it to specific media types. For shared lists, Bot infers defaults per bundled provider:
 
 | Provider                                                                 | Capabilities          |
 | ------------------------------------------------------------------------ | --------------------- |
@@ -240,7 +240,7 @@ For CLI entries, set `capabilities` explicitly to avoid surprising matches; if o
 - Keep at least one fallback per capability for availability (quality model + faster/cheaper model).
 - CLI fallbacks (`whisper-cli`, `whisper`, `gemini`) help when provider APIs are unavailable.
 - Known file-output modes are authoritative: an empty or missing inferred transcript file produces no transcript instead of falling back to CLI progress output.
-- `parakeet-mlx`: use `--output-format txt` (or `all`) with `--output-dir` and the default `{filename}` output template. The upstream `PARAKEET_OUTPUT_FORMAT` and `PARAKEET_OUTPUT_TEMPLATE` environment variables are also honored. OpenClaw reads `<output-dir>/<media-basename>.txt`; the default `srt` format, other formats, and custom output templates continue to use stdout.
+- `parakeet-mlx`: use `--output-format txt` (or `all`) with `--output-dir` and the default `{filename}` output template. The upstream `PARAKEET_OUTPUT_FORMAT` and `PARAKEET_OUTPUT_TEMPLATE` environment variables are also honored. Bot reads `<output-dir>/<media-basename>.txt`; the default `srt` format, other formats, and custom output templates continue to use stdout.
 
 ## Attachment policy
 
@@ -263,7 +263,7 @@ When `mode: "all"`, outputs are labeled `[Image 1/2]`, `[Audio 2/2]`, etc.
 - Extracted file text is wrapped as untrusted external content before it's appended to the media prompt, using boundary markers like `<<<EXTERNAL_UNTRUSTED_CONTENT id="...">>>` / `<<<END_EXTERNAL_UNTRUSTED_CONTENT id="...">>>` plus a `Source: External` metadata line.
 - This path intentionally omits the long `SECURITY NOTICE:` banner to keep the media prompt short; the boundary markers and metadata still apply.
 - A file with no extractable text gets `[No extractable text]`.
-- If a PDF falls back to rendered page images, OpenClaw forwards those images to vision-capable reply models and keeps the placeholder `[PDF content rendered to images]` in the file block.
+- If a PDF falls back to rendered page images, Bot forwards those images to vision-capable reply models and keeps the placeholder `[PDF content rendered to images]` in the file block.
 
 ## Config examples
 
@@ -420,10 +420,10 @@ When media understanding runs, `/status` includes a per-capability summary line:
 📎 Media: image ok (openai/gpt-5.6-sol) · audio ok (whisper-cli observed=metal)
 ```
 
-For preflight inventory, run `openclaw capability audio providers`. Local rows show the local fallback winner separately from global provider selection, readiness, and separate capable/requested/observed backend fields. The same local selection is available as an informational doctor finding:
+For preflight inventory, run `bot capability audio providers`. Local rows show the local fallback winner separately from global provider selection, readiness, and separate capable/requested/observed backend fields. The same local selection is available as an informational doctor finding:
 
 ```bash
-openclaw doctor --lint --only core/doctor/local-audio-acceleration --severity-min info
+bot doctor --lint --only core/doctor/local-audio-acceleration --severity-min info
 ```
 
 ## Notes

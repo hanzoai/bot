@@ -33,7 +33,7 @@ export type MemorySyncProgressUpdate = {
 };
 
 export type MemorySessionSyncTarget = {
-  /** Owning OpenClaw agent. Omit only when the active manager scope already supplies it. */
+  /** Owning Bot agent. Omit only when the active manager scope already supplies it. */
   agentId?: string;
   /** Storage-neutral transcript/session identity. */
   sessionId: string;

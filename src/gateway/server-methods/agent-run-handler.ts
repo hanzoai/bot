@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import { scheduleMainSessionRecoveryPendingTarget } from "../../agents/main-session-recovery-owner-release.js";
 import {
@@ -6,7 +6,7 @@ import {
   type MainSessionRecoveryOwnerLease,
 } from "../../agents/main-session-recovery-store.js";
 import { mergeSessionEntry, type SessionEntry } from "../../config/sessions.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { normalizeDeliveryContext } from "../../utils/delivery-context.shared.js";
 import { authorizeResolvedSessionMutation } from "../session-sharing.js";
 import { formatForLog } from "../ws-log.js";
@@ -174,7 +174,7 @@ export const agentRunHandler: GatewayRequestHandlers["agent"] = async ({
       | undefined;
     let sessionPersistedBeforeGatewayAdmission = false;
     let bestEffortDeliver = requestedBestEffortDeliver ?? false;
-    let cfgForAgent: OpenClawConfig | undefined;
+    let cfgForAgent: BotConfig | undefined;
     let resolvedSessionKey = requestedSessionKey;
     let resolvedSessionAgentId: string | undefined;
     let isNewSession = false;

@@ -3,12 +3,12 @@
  *
  * Keeps web_fetch and web_search providers aligned on bounded IO and cache semantics.
  */
-import { decodeTextPrefix } from "@openclaw/normalization-core";
+import { decodeTextPrefix } from "@hanzo/bot-normalization-core";
 import {
   asDateTimestampMs,
   MAX_TIMER_TIMEOUT_SECONDS,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@hanzo/bot-normalization-core/number-coercion";
 export type CacheEntry<T> = {
   value: T;
   expiresAt: number;

@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { setTimeout as sleep } from "node:timers/promises";
 import { randomBytes } from "@noble/hashes/utils.js";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginRuntime } from "bot/plugin-sdk/core";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   createAuditEntry,
   verifyChainSegment,
@@ -116,7 +116,7 @@ class ReefSqliteAuditStore implements AuditStore {
     });
     if (migration.lookup(REEF_AUDIT_MIGRATION_KEY)) {
       throw new Error(
-        "Reef audit migration is incomplete; repair audit.jsonl and rerun openclaw doctor --fix",
+        "Reef audit migration is incomplete; repair audit.jsonl and rerun bot doctor --fix",
       );
     }
     this.#store = runtime.state.openSyncKeyedStore<ReefAuditStateRecord>({

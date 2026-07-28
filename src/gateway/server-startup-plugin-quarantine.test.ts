@@ -35,7 +35,7 @@ describe("Gateway startup plugin quarantine", () => {
 
   it("reaches readiness without importing one broken configured plugin", async () => {
     const pluginId = "broken-payload";
-    const pluginRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-quarantined-plugin-"));
+    const pluginRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-quarantined-plugin-"));
     tempDirs.push(pluginRoot);
     fs.writeFileSync(
       path.join(pluginRoot, "package.json"),
@@ -43,12 +43,12 @@ describe("Gateway startup plugin quarantine", () => {
         name: pluginId,
         type: "commonjs",
         main: "./missing-main.cjs",
-        openclaw: { extensions: ["./index.cjs"] },
+        bot: { extensions: ["./index.cjs"] },
       }),
       "utf8",
     );
     fs.writeFileSync(
-      path.join(pluginRoot, "openclaw.plugin.json"),
+      path.join(pluginRoot, "bot.plugin.json"),
       JSON.stringify({
         id: pluginId,
         configSchema: {
@@ -80,7 +80,7 @@ describe("Gateway startup plugin quarantine", () => {
     ]);
     setActiveDegradedPlugins(buildDegradedPluginsFromVerificationFailures(smoke.failures));
 
-    const { loadOpenClawPlugins } =
+    const { loadBotPlugins } =
       await vi.importActual<typeof import("../plugins/loader.js")>("../plugins/loader.js");
     const pluginConfig = {
       enabled: true,
@@ -88,7 +88,7 @@ describe("Gateway startup plugin quarantine", () => {
       allow: [pluginId],
       entries: { [pluginId]: { enabled: true } },
     };
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: { plugins: pluginConfig },
       onlyPluginIds: [pluginId],
@@ -128,8 +128,8 @@ describe("Gateway startup plugin quarantine", () => {
 
   it("does not quarantine a healthy explicit root that shadows a broken install with the same id", async () => {
     const pluginId = "shadowed-payload";
-    const brokenRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-broken-install-"));
-    const selectedRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-selected-plugin-"));
+    const brokenRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-broken-install-"));
+    const selectedRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-selected-plugin-"));
     tempDirs.push(brokenRoot, selectedRoot);
     fs.writeFileSync(
       path.join(brokenRoot, "package.json"),
@@ -137,7 +137,7 @@ describe("Gateway startup plugin quarantine", () => {
         name: pluginId,
         type: "commonjs",
         main: "./missing-main.cjs",
-        openclaw: { extensions: ["./index.cjs"] },
+        bot: { extensions: ["./index.cjs"] },
       }),
       "utf8",
     );
@@ -147,12 +147,12 @@ describe("Gateway startup plugin quarantine", () => {
         name: pluginId,
         type: "commonjs",
         main: "./index.cjs",
-        openclaw: { extensions: ["./index.cjs"] },
+        bot: { extensions: ["./index.cjs"] },
       }),
       "utf8",
     );
     fs.writeFileSync(
-      path.join(selectedRoot, "openclaw.plugin.json"),
+      path.join(selectedRoot, "bot.plugin.json"),
       JSON.stringify({
         id: pluginId,
         configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -173,9 +173,9 @@ describe("Gateway startup plugin quarantine", () => {
     });
     setActiveDegradedPlugins(buildDegradedPluginsFromVerificationFailures(smoke.failures));
 
-    const { loadOpenClawPlugins } =
+    const { loadBotPlugins } =
       await vi.importActual<typeof import("../plugins/loader.js")>("../plugins/loader.js");
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {
@@ -195,8 +195,8 @@ describe("Gateway startup plugin quarantine", () => {
 
   it("keeps the broken install visible when its explicit override fails to load", async () => {
     const pluginId = "failed-shadow";
-    const brokenRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-broken-install-"));
-    const selectedRoot = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-selected-plugin-"));
+    const brokenRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-broken-install-"));
+    const selectedRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bot-selected-plugin-"));
     tempDirs.push(brokenRoot, selectedRoot);
     fs.writeFileSync(
       path.join(brokenRoot, "package.json"),
@@ -204,7 +204,7 @@ describe("Gateway startup plugin quarantine", () => {
         name: pluginId,
         type: "commonjs",
         main: "./missing-main.cjs",
-        openclaw: { extensions: ["./index.cjs"] },
+        bot: { extensions: ["./index.cjs"] },
       }),
       "utf8",
     );
@@ -214,12 +214,12 @@ describe("Gateway startup plugin quarantine", () => {
         name: pluginId,
         type: "commonjs",
         main: "./index.cjs",
-        openclaw: { extensions: ["./index.cjs"] },
+        bot: { extensions: ["./index.cjs"] },
       }),
       "utf8",
     );
     fs.writeFileSync(
-      path.join(selectedRoot, "openclaw.plugin.json"),
+      path.join(selectedRoot, "bot.plugin.json"),
       JSON.stringify({
         id: pluginId,
         configSchema: { type: "object", additionalProperties: false, properties: {} },
@@ -240,9 +240,9 @@ describe("Gateway startup plugin quarantine", () => {
     });
     setActiveDegradedPlugins(buildDegradedPluginsFromVerificationFailures(smoke.failures));
 
-    const { loadOpenClawPlugins } =
+    const { loadBotPlugins } =
       await vi.importActual<typeof import("../plugins/loader.js")>("../plugins/loader.js");
-    const registry = loadOpenClawPlugins({
+    const registry = loadBotPlugins({
       cache: false,
       config: {
         plugins: {

@@ -1,35 +1,35 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-source scripts/lib/openclaw-e2e-instance.sh
+source scripts/lib/bot-e2e-instance.sh
 source scripts/e2e/lib/upgrade-survivor/update-restart-auth.sh
 
-if [ "${OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF:-0}" != "1" ]; then
-  echo "blocked destructive package self-upgrade; set OPENCLAW_QA_ALLOW_UPDATE_RUN_SELF=1 to run" >&2
+if [ "${BOT_QA_ALLOW_UPDATE_RUN_SELF:-0}" != "1" ]; then
+  echo "blocked destructive package self-upgrade; set BOT_QA_ALLOW_UPDATE_RUN_SELF=1 to run" >&2
   exit 2
 fi
 
 export CI=true
-export OPENCLAW_NO_ONBOARD=1
-export OPENCLAW_NO_PROMPT=1
-export OPENCLAW_SKIP_PROVIDERS=1
-export OPENCLAW_DISABLE_BONJOUR=1
+export BOT_NO_ONBOARD=1
+export BOT_NO_PROMPT=1
+export BOT_SKIP_PROVIDERS=1
+export BOT_DISABLE_BONJOUR=1
 export npm_config_audit=false
 export npm_config_fund=false
 export npm_config_loglevel=error
 
-SOURCE_VERSION="${OPENCLAW_UPDATE_RUN_SELF_UPGRADE_SOURCE_VERSION:-2026.4.26}"
-SOURCE_SPEC="openclaw@$SOURCE_VERSION"
+SOURCE_VERSION="${BOT_UPDATE_RUN_SELF_UPGRADE_SOURCE_VERSION:-2026.4.26}"
+SOURCE_SPEC="bot@$SOURCE_VERSION"
 TARGET_TAG="latest"
 RESTART_NOTE="QA-UPDATE-RUN-PACKAGE-SELF-UPGRADE"
 PORT=18789
 QA_BUS_PORT=43123
-ARTIFACT_DIR="${OPENCLAW_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR:-/tmp/openclaw-update-run-artifacts}"
-RUNTIME_ROOT="${OPENCLAW_UPDATE_RUN_SELF_UPGRADE_RUNTIME_ROOT:-/tmp/openclaw-update-run-runtime}"
+ARTIFACT_DIR="${BOT_UPDATE_RUN_SELF_UPGRADE_ARTIFACT_DIR:-/tmp/bot-update-run-artifacts}"
+RUNTIME_ROOT="${BOT_UPDATE_RUN_SELF_UPGRADE_RUNTIME_ROOT:-/tmp/bot-update-run-runtime}"
 export HOME="$RUNTIME_ROOT/home"
-export OPENCLAW_STATE_DIR="$HOME/.openclaw"
-export OPENCLAW_CONFIG_PATH="$OPENCLAW_STATE_DIR/openclaw.json"
-export OPENCLAW_TEST_WORKSPACE_DIR="$HOME/workspace"
+export BOT_STATE_DIR="$HOME/.bot"
+export BOT_CONFIG_PATH="$BOT_STATE_DIR/bot.json"
+export BOT_TEST_WORKSPACE_DIR="$HOME/workspace"
 export npm_config_prefix="$RUNTIME_ROOT/npm-prefix"
 export NPM_CONFIG_PREFIX="$npm_config_prefix"
 export npm_config_cache="$RUNTIME_ROOT/npm-cache"
@@ -65,10 +65,10 @@ SYSTEMCTL_SHIM_DAEMON_LOG="$ARTIFACT_DIR/systemctl-shim-gateway.log"
 SUPERVISOR_MONITOR_LOG="$ARTIFACT_DIR/supervisor-monitor.log"
 SERVICE_INSTALL_JSON="$ARTIFACT_DIR/gateway-service-install.json"
 SERVICE_INSTALL_ERR="$ARTIFACT_DIR/gateway-service-install.err"
-SERVICE_UNIT_ARTIFACT="$ARTIFACT_DIR/openclaw-gateway.service"
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG="$SYSTEMCTL_SHIM_LOG"
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE="$SYSTEMCTL_SHIM_PID_FILE"
-export OPENCLAW_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG="$SYSTEMCTL_SHIM_DAEMON_LOG"
+SERVICE_UNIT_ARTIFACT="$ARTIFACT_DIR/bot-gateway.service"
+export BOT_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_LOG="$SYSTEMCTL_SHIM_LOG"
+export BOT_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_PID_FILE="$SYSTEMCTL_SHIM_PID_FILE"
+export BOT_UPGRADE_SURVIVOR_SYSTEMCTL_SHIM_DAEMON_LOG="$SYSTEMCTL_SHIM_DAEMON_LOG"
 gateway_pid=""
 qa_bus_pid=""
 supervisor_monitor_pid=""
@@ -76,8 +76,8 @@ supervisor_monitor_pid=""
 mkdir -p \
   "$ARTIFACT_DIR" \
   "$HOME" \
-  "$OPENCLAW_STATE_DIR" \
-  "$OPENCLAW_TEST_WORKSPACE_DIR" \
+  "$BOT_STATE_DIR" \
+  "$BOT_TEST_WORKSPACE_DIR" \
   "$npm_config_prefix" \
   "$npm_config_cache"
 rm -f \
@@ -94,9 +94,9 @@ cleanup() {
     kill "$supervisor_monitor_pid" >/dev/null 2>&1 || true
     wait "$supervisor_monitor_pid" >/dev/null 2>&1 || true
   fi
-  openclaw_e2e_terminate_gateways "${gateway_pid:-}"
+  bot_e2e_terminate_gateways "${gateway_pid:-}"
   if [ -s "$SYSTEMCTL_SHIM_PID_FILE" ]; then
-    openclaw_e2e_terminate_gateways "$(cat "$SYSTEMCTL_SHIM_PID_FILE" 2>/dev/null || true)"
+    bot_e2e_terminate_gateways "$(cat "$SYSTEMCTL_SHIM_PID_FILE" 2>/dev/null || true)"
   fi
   if [ -n "${qa_bus_pid:-}" ]; then
     kill "$qa_bus_pid" >/dev/null 2>&1 || true
@@ -106,7 +106,7 @@ cleanup() {
 trap cleanup EXIT
 
 package_root() {
-  printf '%s/lib/node_modules/openclaw\n' "$npm_config_prefix"
+  printf '%s/lib/node_modules/bot\n' "$npm_config_prefix"
 }
 
 read_installed_version() {
@@ -116,7 +116,7 @@ read_installed_version() {
 }
 
 echo "Installing declared source package $SOURCE_SPEC"
-openclaw_e2e_maybe_timeout 600s \
+bot_e2e_maybe_timeout 600s \
   npm install -g --prefix "$npm_config_prefix" "$SOURCE_SPEC" --no-fund --no-audit \
   >"$BASELINE_INSTALL_LOG" 2>&1
 
@@ -125,13 +125,13 @@ if [ "$installed_source_version" != "$SOURCE_VERSION" ]; then
   echo "source package version mismatch: expected $SOURCE_VERSION, got $installed_source_version" >&2
   exit 1
 fi
-if ! openclaw --version | grep -Fq "$SOURCE_VERSION"; then
-  echo "source openclaw --version did not report $SOURCE_VERSION" >&2
+if ! bot --version | grep -Fq "$SOURCE_VERSION"; then
+  echo "source bot --version did not report $SOURCE_VERSION" >&2
   exit 1
 fi
 
 target_version="$(
-  npm view "openclaw@$TARGET_TAG" version --json --prefer-online --cache "$npm_config_cache" |
+  npm view "bot@$TARGET_TAG" version --json --prefer-online --cache "$npm_config_cache" |
     node -e '
       let raw = "";
       process.stdin.on("data", (chunk) => (raw += chunk));
@@ -154,9 +154,9 @@ TARGET_VERSION="$target_version" TARGET_TAG="$TARGET_TAG" node -e '
   );
 ' "$TARGET_RESOLUTION_JSON"
 
-qa_plugin_source="/tmp/openclaw-update-run-build/dist/extensions/qa-channel"
+qa_plugin_source="/tmp/bot-update-run-build/dist/extensions/qa-channel"
 qa_plugin_dir="$qa_plugin_source"
-if [ ! -f "$qa_plugin_source/openclaw.plugin.json" ] || [ ! -f "$qa_plugin_source/index.js" ]; then
+if [ ! -f "$qa_plugin_source/bot.plugin.json" ] || [ ! -f "$qa_plugin_source/index.js" ]; then
   echo "compiled tagged QA channel fixture is missing" >&2
   exit 1
 fi
@@ -167,8 +167,8 @@ QA_PLUGIN_SOURCE="$qa_plugin_source" node -e '
     fs.readFileSync(path.join(process.env.QA_PLUGIN_SOURCE, "package.json"), "utf8"),
   );
   const entries = [
-    ...(packageJson.openclaw?.extensions ?? []),
-    packageJson.openclaw?.setupEntry,
+    ...(packageJson.bot?.extensions ?? []),
+    packageJson.bot?.setupEntry,
   ].filter(Boolean);
   if (entries.length === 0 || entries.some((entry) => /\.[cm]?ts$/u.test(entry))) {
     throw new Error(`compiled QA channel retained TypeScript entrypoints: ${JSON.stringify(entries)}`);
@@ -180,10 +180,10 @@ QA_PLUGIN_SOURCE="$qa_plugin_source" node -e '
     }
   }
 '
-openclaw_e2e_maybe_timeout 300s \
-  openclaw plugins install "$qa_plugin_source" --link \
+bot_e2e_maybe_timeout 300s \
+  bot plugins install "$qa_plugin_source" --link \
   >"$PLUGIN_INSTALL_LOG" 2>&1
-openclaw plugins inspect qa-channel --json >"$SOURCE_PLUGIN_INSPECT_JSON"
+bot plugins inspect qa-channel --json >"$SOURCE_PLUGIN_INSPECT_JSON"
 node -e '
   const fs = require("node:fs");
   const inspect = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
@@ -197,7 +197,7 @@ node -e '
   SOURCE_PLUGIN_INDEX_OUT="$SOURCE_PLUGIN_INDEX_JSON" \
   node -e '
     const fs = require("node:fs");
-    const indexPath = `${process.env.OPENCLAW_STATE_DIR}/plugins/installs.json`;
+    const indexPath = `${process.env.BOT_STATE_DIR}/plugins/installs.json`;
     const index = JSON.parse(fs.readFileSync(indexPath, "utf8"));
     const record = index.installRecords?.["qa-channel"];
     if (
@@ -223,7 +223,7 @@ for _ in $(seq 1 100); do
     break
   fi
   if ! kill -0 "$qa_bus_pid" 2>/dev/null; then
-    openclaw_e2e_print_log "$QA_BUS_STDIO_LOG" >&2
+    bot_e2e_print_log "$QA_BUS_STDIO_LOG" >&2
     exit 1
   fi
   sleep 0.1
@@ -233,7 +233,7 @@ if [ ! -s "$QA_BUS_READY_FILE" ]; then
   exit 1
 fi
 
-CONFIG_PATH="$OPENCLAW_CONFIG_PATH" \
+CONFIG_PATH="$BOT_CONFIG_PATH" \
   QA_BUS_PORT="$QA_BUS_PORT" \
   node -e '
     const fs = require("node:fs");
@@ -261,8 +261,8 @@ CONFIG_PATH="$OPENCLAW_CONFIG_PATH" \
         "qa-channel": {
           enabled: true,
           baseUrl: `http://127.0.0.1:${process.env.QA_BUS_PORT}`,
-          botUserId: "openclaw",
-          botDisplayName: "OpenClaw QA",
+          botUserId: "bot",
+          botDisplayName: "Bot QA",
           allowFrom: ["*"],
           pollTimeoutMs: 250,
         },
@@ -271,32 +271,32 @@ CONFIG_PATH="$OPENCLAW_CONFIG_PATH" \
     fs.writeFileSync(process.env.CONFIG_PATH, `${JSON.stringify(config, null, 2)}\n`);
   '
 
-openclaw config validate >"$ARTIFACT_DIR/config-validate.log" 2>&1
+bot config validate >"$ARTIFACT_DIR/config-validate.log" 2>&1
 
 install_update_restart_systemctl_shim
-if ! openclaw_e2e_maybe_timeout 120s \
-  openclaw gateway install --force --json \
+if ! bot_e2e_maybe_timeout 120s \
+  bot gateway install --force --json \
   >"$SERVICE_INSTALL_JSON" 2>"$SERVICE_INSTALL_ERR"; then
   echo "historical Gateway service install failed" >&2
-  openclaw_e2e_print_log "$SERVICE_INSTALL_ERR" >&2
+  bot_e2e_print_log "$SERVICE_INSTALL_ERR" >&2
   exit 1
 fi
-service_unit="$HOME/.config/systemd/user/openclaw-gateway.service"
+service_unit="$HOME/.config/systemd/user/bot-gateway.service"
 if [ ! -f "$service_unit" ] || ! grep -q '^ExecStart=' "$service_unit"; then
   echo "historical Gateway install did not create a service unit" >&2
   exit 1
 fi
-if grep -q 'OPENCLAW_SKIP_PROVIDERS' "$service_unit"; then
+if grep -q 'BOT_SKIP_PROVIDERS' "$service_unit"; then
   echo "service-owned target environment unexpectedly suppresses providers" >&2
   exit 1
 fi
-if ! grep -q 'OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service' "$service_unit"; then
+if ! grep -q 'BOT_SYSTEMD_UNIT=bot-gateway.service' "$service_unit"; then
   echo "service-owned target environment omitted its systemd marker" >&2
   exit 1
 fi
 cp "$service_unit" "$SERVICE_UNIT_ARTIFACT"
-systemctl --user stop openclaw-gateway.service
-if systemctl --user is-active openclaw-gateway.service >/dev/null 2>&1; then
+systemctl --user stop bot-gateway.service
+if systemctl --user is-active bot-gateway.service >/dev/null 2>&1; then
   echo "setup service remained active before the update.run proof" >&2
   exit 1
 fi
@@ -308,12 +308,12 @@ cp "$SYSTEMCTL_SHIM_LOG" "$SYSTEMCTL_SHIM_SETUP_LOG"
 : >"$SYSTEMCTL_SHIM_LOG"
 
 env \
-  OPENCLAW_SYSTEMD_UNIT=openclaw-gateway.service \
-  openclaw gateway --port "$PORT" --bind loopback --allow-unconfigured \
+  BOT_SYSTEMD_UNIT=bot-gateway.service \
+  bot gateway --port "$PORT" --bind loopback --allow-unconfigured \
   >"$GATEWAY_LOG" 2>&1 &
 gateway_pid="$!"
 printf '%s\n' "$gateway_pid" >"$SYSTEMCTL_SHIM_PID_FILE"
-openclaw_e2e_wait_gateway_ready "$gateway_pid" "$GATEWAY_LOG" 360 "$PORT"
+bot_e2e_wait_gateway_ready "$gateway_pid" "$GATEWAY_LOG" 360 "$PORT"
 
 gateway_call() {
   local method="$1"
@@ -321,7 +321,7 @@ gateway_call() {
   local output="$3"
   local error_output="$4"
   local timeout_ms="${5:-30000}"
-  openclaw gateway call "$method" \
+  bot gateway call "$method" \
     --url "ws://127.0.0.1:$PORT" \
     --token "test-token" \
     --timeout "$timeout_ms" \
@@ -364,8 +364,8 @@ source_gateway_pid="$gateway_pid"
   echo "source Gateway exited through supervised update handoff"
   echo "starting installed service without provider suppression"
   env \
-    -u OPENCLAW_SKIP_PROVIDERS \
-    systemctl --user start openclaw-gateway.service
+    -u BOT_SKIP_PROVIDERS \
+    systemctl --user start bot-gateway.service
   service_pid="$(cat "$SYSTEMCTL_SHIM_PID_FILE" 2>/dev/null || true)"
   [[ "$service_pid" =~ ^[0-9]+$ ]] || exit 1
   echo "service Gateway started pid=$service_pid"
@@ -382,7 +382,7 @@ fi
 gateway_pid=""
 if ! wait "$supervisor_monitor_pid"; then
   echo "service monitor did not restart the target Gateway" >&2
-  openclaw_e2e_print_log "$SUPERVISOR_MONITOR_LOG" >&2
+  bot_e2e_print_log "$SUPERVISOR_MONITOR_LOG" >&2
   exit 1
 fi
 supervisor_monitor_pid=""
@@ -392,7 +392,7 @@ if ! [[ "$gateway_pid" =~ ^[0-9]+$ ]]; then
   exit 1
 fi
 
-openclaw_e2e_wait_gateway_ready "$gateway_pid" "$SYSTEMCTL_SHIM_DAEMON_LOG" 180 "$PORT"
+bot_e2e_wait_gateway_ready "$gateway_pid" "$SYSTEMCTL_SHIM_DAEMON_LOG" 180 "$PORT"
 
 deadline=$((SECONDS + 180))
 update_status_candidate="$ARTIFACT_DIR/update-status.candidate.json"
@@ -420,9 +420,9 @@ while [ "$SECONDS" -lt "$deadline" ]; do
 done
 if [ ! -f "$UPDATE_STATUS_JSON" ]; then
   echo "timed out waiting for target Gateway update sentinel" >&2
-  openclaw_e2e_print_log "$UPDATE_STATUS_ERR" >&2
-  openclaw_e2e_print_log "$GATEWAY_LOG" >&2
-  openclaw_e2e_print_log "$SYSTEMCTL_SHIM_DAEMON_LOG" >&2
+  bot_e2e_print_log "$UPDATE_STATUS_ERR" >&2
+  bot_e2e_print_log "$GATEWAY_LOG" >&2
+  bot_e2e_print_log "$SYSTEMCTL_SHIM_DAEMON_LOG" >&2
   exit 1
 fi
 
@@ -456,7 +456,7 @@ node scripts/e2e/lib/upgrade-survivor/probe-gateway.mjs \
   --expect ready \
   --out "$READYZ_JSON"
 
-openclaw gateway status \
+bot gateway status \
   --url "ws://127.0.0.1:$PORT" \
   --token "test-token" \
   --timeout 30000 \
@@ -473,7 +473,7 @@ TARGET_PLUGIN_INDEX_OUT="$TARGET_PLUGIN_INDEX_JSON" node --input-type=module -e 
   const record = index.installRecords?.["qa-channel"];
   if (
     record?.source !== "path" ||
-    record.installPath !== "/tmp/openclaw-update-run-build/dist/extensions/qa-channel"
+    record.installPath !== "/tmp/bot-update-run-build/dist/extensions/qa-channel"
   ) {
     throw new Error(`target SQLite index omitted qa-channel path install: ${JSON.stringify(record)}`);
   }

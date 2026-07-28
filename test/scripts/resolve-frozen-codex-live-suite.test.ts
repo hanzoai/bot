@@ -18,7 +18,7 @@ function runResolver(params: {
   selectedSha?: string;
   suiteId: string;
 }) {
-  const root = mkdtempSync(join(tmpdir(), "openclaw-frozen-codex-"));
+  const root = mkdtempSync(join(tmpdir(), "bot-frozen-codex-"));
   tempRoots.push(root);
   const catalogDir = join(root, "extensions/codex");
   mkdirSync(catalogDir, { recursive: true });
@@ -42,11 +42,11 @@ function runResolver(params: {
       GITHUB_ENV: envFile,
       GITHUB_OUTPUT: output,
       GITHUB_STEP_SUMMARY: summary,
-      OPENCLAW_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: params.allow === false ? "0" : "1",
-      OPENCLAW_FROZEN_CODEX_SUITE_ID: params.suiteId,
-      OPENCLAW_FROZEN_TARGET_ROOT: root,
-      OPENCLAW_SELECTED_SHA: params.selectedSha ?? "a".repeat(40),
-      OPENCLAW_WORKFLOW_SHA: "b".repeat(40),
+      BOT_ALLOW_FROZEN_TARGET_SCENARIO_OMISSIONS: params.allow === false ? "0" : "1",
+      BOT_FROZEN_CODEX_SUITE_ID: params.suiteId,
+      BOT_FROZEN_TARGET_ROOT: root,
+      BOT_SELECTED_SHA: params.selectedSha ?? "a".repeat(40),
+      BOT_WORKFLOW_SHA: "b".repeat(40),
     },
   });
   return {
@@ -63,7 +63,7 @@ describe("frozen Codex live-suite resolver", () => {
 
     expect(result.status).toBe(0);
     expect(result.output).toBe("run_lane=true\n");
-    expect(result.envFile).toBe("OPENCLAW_LIVE_CODEX_HARNESS_MODEL=openai/gpt-5.5\n");
+    expect(result.envFile).toBe("BOT_LIVE_CODEX_HARNESS_MODEL=openai/gpt-5.5\n");
     expect(result.summary).toContain("uses `openai/gpt-5.5`");
   });
 
@@ -87,7 +87,7 @@ describe("frozen Codex live-suite resolver", () => {
     expect(dedicated.status).toBe(0);
     expect(dedicated.output).toBe("run_lane=true\n");
     expect(generic.status).toBe(0);
-    expect(generic.envFile).toBe("OPENCLAW_LIVE_CODEX_HARNESS_MODEL=openai/gpt-5.6-luna\n");
+    expect(generic.envFile).toBe("BOT_LIVE_CODEX_HARNESS_MODEL=openai/gpt-5.6-luna\n");
   });
 
   it("does nothing without the trusted frozen-target opt-in", () => {

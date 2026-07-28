@@ -12,7 +12,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 const artifactDir = path.resolve(process.cwd(), ".artifacts/control-ui-e2e/workboard-routing");
 const boards = [
@@ -37,7 +37,7 @@ function configSnapshot(enabled: boolean) {
   return {
     config,
     hash: `workboard-routing-${enabled}`,
-    path: "/tmp/openclaw-e2e/openclaw.json",
+    path: "/tmp/bot-e2e/bot.json",
     raw: JSON.stringify(config),
     resolved: config,
     sourceConfig: config,
@@ -127,7 +127,7 @@ describeControlUiE2e("Control UI Workboard routing", () => {
         path: path.join(artifactDir, "01-board-route.png"),
       });
 
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       await sidebar.locator(".sidebar-nav__head-action").click();
       await sidebar
         .locator("wa-dropdown.sidebar-more-menu")
@@ -209,7 +209,7 @@ describeControlUiE2e("Control UI Workboard routing", () => {
       await page.goto(`${server.baseUrl}workboard`);
       await gateway.waitForRequest("agents.list");
 
-      const agentScope = page.locator(".agent-scope-control openclaw-agent-select");
+      const agentScope = page.locator(".agent-scope-control bot-agent-select");
       await agentScope.locator(".agent-select__trigger").click();
       await expect
         .poll(() =>
@@ -245,7 +245,7 @@ describeControlUiE2e("Control UI Workboard routing", () => {
       await gateway.deferNext("workboard.cards.create");
       await page.getByRole("button", { name: /New card/u }).click();
 
-      const createForm = page.locator('openclaw-modal-dialog[label="New card"]');
+      const createForm = page.locator('bot-modal-dialog[label="New card"]');
       await expect
         .poll(() =>
           createForm
@@ -283,7 +283,7 @@ describeControlUiE2e("Control UI Workboard routing", () => {
         },
       });
       await page.goto(`${server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       await sidebar.locator(".sidebar-nav__head-action").click();
       const moreMenu = sidebar.locator("wa-dropdown.sidebar-more-menu");
       await moreMenu.waitFor();

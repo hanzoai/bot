@@ -4,11 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useAutoCleanupTempDirTracker } from "../../../test/helpers/temp-dir.js";
 import { configureSqliteConnectionPragmas } from "../../infra/sqlite-wal.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-  runOpenClawAgentWriteTransaction,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+  runBotAgentWriteTransaction,
+} from "../../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import {
   listSessionEntries,
   listSessionEntryKeysReadOnly,
@@ -40,8 +40,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
 });
 
 function readDataVersion(database: DatabaseSync): number {
@@ -56,7 +56,7 @@ function readTotalChanges(database: DatabaseSync): number {
 
 describe("SQLite entry cache validity counters", () => {
   it("separately tracks same-connection and other-connection commits", () => {
-    const databasePath = path.join(tempDirs.make("openclaw-data-version-"), "probe.sqlite");
+    const databasePath = path.join(tempDirs.make("bot-data-version-"), "probe.sqlite");
     const first = new DatabaseSync(databasePath);
     const firstMaintenance = configureSqliteConnectionPragmas(first, {
       checkpointIntervalMs: 0,
@@ -102,10 +102,10 @@ describe("SQLite entry cache validity counters", () => {
 });
 
 function createSessionScope(label: string) {
-  const stateDir = tempDirs.make(`openclaw-entry-cache-${label}-`);
+  const stateDir = tempDirs.make(`bot-entry-cache-${label}-`);
   return {
     agentId: "main",
-    env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+    env: { ...process.env, BOT_STATE_DIR: stateDir },
     sessionKey: `agent:main:${label}`,
   };
 }
@@ -186,7 +186,7 @@ describe("SQLite session entry cache", () => {
     if (!before) {
       throw new Error("missing seeded external-write entry");
     }
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openBotAgentDatabase(scope);
     const external = new DatabaseSync(database.path);
     const maintenance = configureSqliteConnectionPragmas(external, {
       checkpointIntervalMs: 0,
@@ -221,7 +221,7 @@ describe("SQLite session entry cache", () => {
     });
     listSessionEntries(scope);
 
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openBotAgentDatabase(scope);
     const insertedKey = "agent:main:same-connection-inserted";
     const insertedEntry = {
       label: "inserted",
@@ -270,7 +270,7 @@ describe("SQLite session entry cache", () => {
     });
     listSessionEntries(scope);
 
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openBotAgentDatabase(scope);
     const rawEntry = { label: "raw-after", sessionId: "raw", updatedAt: Date.now() };
     database.db
       .prepare("UPDATE session_nodes SET entry_json = ?, updated_at = ? WHERE session_key = ?")
@@ -297,7 +297,7 @@ describe("SQLite session entry cache", () => {
     ]);
 
     const placeholderKey = "agent:main:placeholder-only";
-    runOpenClawAgentWriteTransaction((database) => {
+    runBotAgentWriteTransaction((database) => {
       ensureTranscriptSessionRoot(
         database,
         {
@@ -326,7 +326,7 @@ describe("SQLite session entry cache", () => {
     }
 
     expect(() =>
-      runOpenClawAgentWriteTransaction((database) => {
+      runBotAgentWriteTransaction((database) => {
         const updated = { ...borrowedBefore, label: "uncommitted", updatedAt: 2 };
         database.db
           .prepare("UPDATE session_nodes SET entry_json = ?, updated_at = ? WHERE session_key = ?")
@@ -365,7 +365,7 @@ describe("SQLite session entry cache", () => {
     await upsertSessionEntry(scope, { label: "cached", sessionId: "latest", updatedAt: 1 });
     expect(loadSessionEntry(scope)?.label).toBe("cached");
 
-    const database = openOpenClawAgentDatabase(scope);
+    const database = openBotAgentDatabase(scope);
     const updated = { label: "latest", sessionId: "latest", updatedAt: 2 };
     database.db
       .prepare("UPDATE session_nodes SET entry_json = ?, updated_at = ? WHERE session_key = ?")

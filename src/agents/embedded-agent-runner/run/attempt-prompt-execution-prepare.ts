@@ -1,5 +1,5 @@
 /** Prepares prompt-lock ownership and prompt-local images for submission. */
-import { MAX_IMAGE_BYTES } from "@openclaw/media-core/constants";
+import { MAX_IMAGE_BYTES } from "@hanzo/bot-media-core/constants";
 import type { OwnedSessionTranscriptCacheSnapshot } from "../../../config/sessions/transcript-write-context.js";
 import { readPersistedMediaFacts } from "../../../media/media-facts.js";
 import { resolveImageSanitizationLimits } from "../../image-sanitization.js";

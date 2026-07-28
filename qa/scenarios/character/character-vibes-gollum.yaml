@@ -84,7 +84,7 @@ scenario:
         - internal error
         - tool failed
         - /var/folders
-        - openclaw-qa-suite
+        - bot-qa-suite
 
 flow:
   steps:

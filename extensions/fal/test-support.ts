@@ -1,4 +1,4 @@
-import type { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import type { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
 
 type FalTestApi = {
   setImageFetchGuard: (impl: typeof fetchWithSsrFGuard | null) => void;
@@ -6,7 +6,7 @@ type FalTestApi = {
 };
 
 function getFalTestApi(): FalTestApi {
-  const api = Reflect.get(globalThis, Symbol.for("openclaw.falTestApi"));
+  const api = Reflect.get(globalThis, Symbol.for("bot.falTestApi"));
   if (!api) {
     throw new Error("Fal test API is unavailable");
   }

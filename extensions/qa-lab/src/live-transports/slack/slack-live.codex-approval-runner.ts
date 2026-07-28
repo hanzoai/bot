@@ -1,7 +1,7 @@
 // QA Lab Slack Codex approval scenario orchestration.
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import { writeSlackApprovalCheckpoint } from "./slack-live.approval-checkpoint.js";
 import {
   waitForSlackApprovalPrompt,
@@ -121,7 +121,7 @@ async function runSlackCodexApprovalScenarioInner(params: {
     channelId: params.channelId,
     client: params.context.sutReadClient,
     decision: params.run.decision,
-    extraTextMatches: ["openclaw-codex-app-server", expectedTitle],
+    extraTextMatches: ["bot-codex-app-server", expectedTitle],
     observedMessages: params.observedMessages,
     oldestTs,
     scenarioId: params.scenario.id,
@@ -185,7 +185,7 @@ async function runSlackCodexApprovalScenarioInner(params: {
     scenarioTitle: params.scenario.title,
     sutIdentity: params.context.sutIdentity,
     timeoutMs: params.scenario.timeoutMs,
-    extraTextMatches: ["openclaw-codex-app-server", expectedTitle],
+    extraTextMatches: ["bot-codex-app-server", expectedTitle],
   });
   const resolvedCheckpoint = await writeSlackApprovalCheckpoint({
     approvalId,

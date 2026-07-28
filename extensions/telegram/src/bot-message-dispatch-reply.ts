@@ -2,17 +2,17 @@
 import {
   createChannelPartialDeliveryError,
   isChannelPartialDeliveryError,
-} from "openclaw/plugin-sdk/channel-inbound";
-import type { OpenClawConfig, TelegramAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeMessagePresentation } from "openclaw/plugin-sdk/interactive-runtime";
+} from "bot/plugin-sdk/channel-inbound";
+import type { BotConfig, TelegramAccountConfig } from "bot/plugin-sdk/config-contracts";
+import { normalizeMessagePresentation } from "bot/plugin-sdk/interactive-runtime";
 import {
   isFastModeAutoProgressPayload,
   isReplyPayloadNonTerminalToolErrorWarning,
   resolveSendableOutboundReplyParts,
-} from "openclaw/plugin-sdk/reply-payload";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-payload";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { danger } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/reply-payload";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-payload";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
+import { danger } from "bot/plugin-sdk/runtime-env";
 import type { TelegramBotDeps } from "./bot-deps.js";
 import type { TelegramMessageContext } from "./bot-message-context.js";
 import type { TelegramDeliveryController } from "./bot-message-dispatch-delivery.js";
@@ -82,7 +82,7 @@ function hasExecApprovalPayload(payload: ReplyPayload): boolean {
 }
 
 export function createTelegramReplyDelivery(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   context: TelegramMessageContext;
   delivery: TelegramDeliveryController;
   draft: TelegramDraftController;

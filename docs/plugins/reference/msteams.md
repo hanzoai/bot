@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Microsoft Teams channel plugin for bot conversations."
+summary: "Bot Microsoft Teams channel plugin for bot conversations."
 read_when:
   - You are installing, configuring, or auditing the msteams plugin
 title: "Microsoft Teams plugin"
@@ -7,11 +7,11 @@ title: "Microsoft Teams plugin"
 
 # Microsoft Teams plugin
 
-OpenClaw Microsoft Teams channel plugin for bot conversations.
+Bot Microsoft Teams channel plugin for bot conversations.
 
 ## Distribution
 
-- Package: `@openclaw/msteams`
+- Package: `@hanzo/bot-msteams`
 - Install route: npm; ClawHub
 
 ## Surface

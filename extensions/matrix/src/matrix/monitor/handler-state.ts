@@ -1,8 +1,8 @@
-import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
+import { isDangerousNameMatchingEnabled } from "bot/plugin-sdk/dangerous-name-runtime";
 import {
   isFutureDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 import type { CoreConfig } from "../../types.js";
 import {
   resolveMatrixAccountAllowlistConfig,

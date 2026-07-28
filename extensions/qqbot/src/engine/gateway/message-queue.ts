@@ -1,6 +1,6 @@
 // Qqbot plugin module implements message queue behavior.
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { formatErrorMessage } from "../utils/format.js";
 import { isQQBotAuthenticationFailure } from "./ingress-errors.js";
 import { buildQQBotMergedIngressLifecycle } from "./message-queue-ingress.js";

@@ -18,20 +18,20 @@ import {
 import { createScriptTestHarness } from "./test-helpers.js";
 
 const { createTempDir } = createScriptTestHarness();
-const originalOpenClawCodexRepo = process.env.OPENCLAW_CODEX_REPO;
+const originalBotCodexRepo = process.env.BOT_CODEX_REPO;
 
 afterEach(() => {
-  if (originalOpenClawCodexRepo === undefined) {
-    delete process.env.OPENCLAW_CODEX_REPO;
+  if (originalBotCodexRepo === undefined) {
+    delete process.env.BOT_CODEX_REPO;
   } else {
-    process.env.OPENCLAW_CODEX_REPO = originalOpenClawCodexRepo;
+    process.env.BOT_CODEX_REPO = originalBotCodexRepo;
   }
 });
 
 describe("Codex app-server generated artifact staging", () => {
   it("copies JSON bytes and normalizes nested TypeScript files in one pass", async () => {
-    const sourceRoot = createTempDir("openclaw-protocol-artifacts-source-");
-    const targetRoot = createTempDir("openclaw-protocol-artifacts-target-");
+    const sourceRoot = createTempDir("bot-protocol-artifacts-source-");
+    const targetRoot = createTempDir("bot-protocol-artifacts-target-");
     const typescriptRoot = path.join(targetRoot, "typescript");
     const jsonRoot = path.join(targetRoot, "json");
     const rootTypeScript = [
@@ -91,8 +91,8 @@ version = "9.9.9"
   });
 
   it("rejects a Codex checkout that differs from the pinned package version", async () => {
-    const repoRoot = createTempDir("openclaw-protocol-version-root-");
-    const codexRepo = createTempDir("openclaw-protocol-version-codex-");
+    const repoRoot = createTempDir("bot-protocol-version-root-");
+    const codexRepo = createTempDir("bot-protocol-version-codex-");
     fs.mkdirSync(path.join(repoRoot, "extensions/codex"), { recursive: true });
     fs.mkdirSync(path.join(codexRepo, "codex-rs"), { recursive: true });
     fs.writeFileSync(
@@ -136,7 +136,7 @@ version = "9.9.9"
   });
 
   it("allows an explicit local disk headroom override", () => {
-    expect(resolveCodexProtocolMinFreeBytes({ OPENCLAW_CODEX_PROTOCOL_MIN_FREE_BYTES: "0" })).toBe(
+    expect(resolveCodexProtocolMinFreeBytes({ BOT_CODEX_PROTOCOL_MIN_FREE_BYTES: "0" })).toBe(
       0,
     );
     expect(() =>
@@ -150,7 +150,7 @@ version = "9.9.9"
 
   it("rejects malformed local disk headroom overrides", () => {
     expect(() =>
-      resolveCodexProtocolMinFreeBytes({ OPENCLAW_CODEX_PROTOCOL_MIN_FREE_BYTES: "nope" }),
+      resolveCodexProtocolMinFreeBytes({ BOT_CODEX_PROTOCOL_MIN_FREE_BYTES: "nope" }),
     ).toThrow(/non-negative byte count/);
   });
 
@@ -212,11 +212,11 @@ version = "9.9.9"
     });
   });
 
-  it("uses OPENCLAW_CODEX_REPO when provided", async () => {
-    const root = createTempDir("openclaw-protocol-source-root-");
-    const codexRepo = createTempDir("openclaw-protocol-source-codex-");
+  it("uses BOT_CODEX_REPO when provided", async () => {
+    const root = createTempDir("bot-protocol-source-root-");
+    const codexRepo = createTempDir("bot-protocol-source-codex-");
     createProtocolSchema(codexRepo);
-    process.env.OPENCLAW_CODEX_REPO = codexRepo;
+    process.env.BOT_CODEX_REPO = codexRepo;
 
     await expect(resolveCodexAppServerProtocolSource(root)).resolves.toEqual({
       codexRepo,
@@ -225,20 +225,20 @@ version = "9.9.9"
   });
 
   it("finds the primary checkout sibling from a git worktree", async () => {
-    const parentDir = createTempDir("openclaw-protocol-source-parent-");
-    const primaryOpenClaw = path.join(parentDir, "openclaw");
+    const parentDir = createTempDir("bot-protocol-source-parent-");
+    const primaryBot = path.join(parentDir, "bot");
     const codexRepo = path.join(parentDir, "codex");
-    const worktreeRoot = createTempDir("openclaw-protocol-source-worktree-");
-    fs.mkdirSync(path.join(primaryOpenClaw, ".git", "worktrees", "codex-harness"), {
+    const worktreeRoot = createTempDir("bot-protocol-source-worktree-");
+    fs.mkdirSync(path.join(primaryBot, ".git", "worktrees", "codex-harness"), {
       recursive: true,
     });
     fs.mkdirSync(worktreeRoot, { recursive: true });
     fs.writeFileSync(
       path.join(worktreeRoot, ".git"),
-      `gitdir: ${path.join(primaryOpenClaw, ".git", "worktrees", "codex-harness")}\n`,
+      `gitdir: ${path.join(primaryBot, ".git", "worktrees", "codex-harness")}\n`,
     );
     createProtocolSchema(codexRepo);
-    delete process.env.OPENCLAW_CODEX_REPO;
+    delete process.env.BOT_CODEX_REPO;
 
     await expect(resolveCodexAppServerProtocolSource(worktreeRoot)).resolves.toEqual({
       codexRepo,

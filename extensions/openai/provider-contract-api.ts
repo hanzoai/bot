@@ -1,5 +1,5 @@
 // Openai API module exposes the plugin public contract.
-import type { ProviderPlugin } from "openclaw/plugin-sdk/provider-model-shared";
+import type { ProviderPlugin } from "bot/plugin-sdk/provider-model-shared";
 import {
   OPENAI_ACCOUNT_WIZARD_GROUP,
   OPENAI_API_KEY_LABEL,

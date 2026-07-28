@@ -9,7 +9,7 @@ type TranslateTestApi = {
 
 function getTestApi(): TranslateTestApi {
   const api = (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.i18nManagerTestApi")
+    Symbol.for("bot.i18nManagerTestApi")
   ];
   if (!api) {
     throw new Error("i18n manager test API is unavailable");

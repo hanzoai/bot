@@ -1,6 +1,6 @@
-import { readProviderJsonResponse } from "openclaw/plugin-sdk/provider-http";
-import type { ProviderUsageSnapshot } from "openclaw/plugin-sdk/provider-usage";
-import { buildUsageHttpErrorSnapshot } from "openclaw/plugin-sdk/provider-usage";
+import { readProviderJsonResponse } from "bot/plugin-sdk/provider-http";
+import type { ProviderUsageSnapshot } from "bot/plugin-sdk/provider-usage";
+import { buildUsageHttpErrorSnapshot } from "bot/plugin-sdk/provider-usage";
 
 const OPENROUTER_USAGE_RESPONSE_MAX_BYTES = 1024 * 1024;
 const OPENROUTER_API_ROOT = "https://openrouter.ai/api/v1";

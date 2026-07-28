@@ -1,5 +1,5 @@
 // Performs lightweight safe-regex checks for user-supplied patterns.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 type QuantifierRead = {
   consumed: number;
   minRepeat: number;

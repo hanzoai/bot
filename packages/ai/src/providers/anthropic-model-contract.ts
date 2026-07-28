@@ -6,8 +6,8 @@ import {
   resolveClaudeMythos5ModelIdentity,
   resolveClaudeOpus5ModelIdentity,
   resolveClaudeSonnet5ModelIdentity,
-} from "@openclaw/llm-core";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-llm-core";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import type { Context, Model } from "../types.js";
 export {
   requiresClaudeDefaultSampling,
@@ -21,7 +21,7 @@ export {
   supportsClaudeAdaptiveThinking,
   supportsClaudeNativeMaxEffort,
   supportsClaudeNativeXhighEffort,
-} from "@openclaw/llm-core";
+} from "@hanzo/bot-llm-core";
 
 type ReplayModelRef = {
   provider?: string;
@@ -41,7 +41,7 @@ function normalizeModelId(modelId?: string): string {
 
 function normalizeApi(api?: string): string {
   const normalized = normalizeLowercaseStringOrEmpty(api);
-  return normalized === "openclaw-anthropic-messages-transport" ? "anthropic-messages" : normalized;
+  return normalized === "bot-anthropic-messages-transport" ? "anthropic-messages" : normalized;
 }
 
 function hasConcreteResponseModel(ref: ReplayModelRef): boolean {

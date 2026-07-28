@@ -1,5 +1,5 @@
 // Memory Core tests cover manager targeted sync plugin behavior.
-import type { MemorySessionSyncTarget } from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+import type { MemorySessionSyncTarget } from "bot/plugin-sdk/memory-core-host-engine-storage";
 import { describe, expect, it, vi } from "vitest";
 import { enqueueMemoryTargetedSessionSync } from "./manager-sync-control.js";
 import {

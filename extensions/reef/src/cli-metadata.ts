@@ -1,8 +1,8 @@
 // Reef plugin module registers headless CLI commands so agents can drive
 // registration, pairing, and status without the interactive wizard.
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/channel-plugin-common";
+import type { BotPluginApi } from "bot/plugin-sdk/channel-plugin-common";
 
-export function registerReefCliMetadata(api: OpenClawPluginApi) {
+export function registerReefCliMetadata(api: BotPluginApi) {
   api.registerCli(
     async ({ program }) => {
       const { registerReefCli } = await import("./cli.js");

@@ -1,9 +1,9 @@
 // Telegram reply-chain cache and prompt-context projection.
 import type { Message } from "grammy/types";
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import type { OpenClawConfig, TelegramAccountConfig } from "openclaw/plugin-sdk/config-contracts";
-import { DEFAULT_GROUP_HISTORY_LIMIT } from "openclaw/plugin-sdk/reply-history";
-import { stripInlineDirectiveTagsForDelivery } from "openclaw/plugin-sdk/text-chunking";
+import { resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import type { BotConfig, TelegramAccountConfig } from "bot/plugin-sdk/config-contracts";
+import { DEFAULT_GROUP_HISTORY_LIMIT } from "bot/plugin-sdk/reply-history";
+import { stripInlineDirectiveTagsForDelivery } from "bot/plugin-sdk/text-chunking";
 import type { TelegramMediaRef } from "./bot-message-context.js";
 import type {
   TelegramMessageContextOptions,
@@ -32,8 +32,8 @@ function legacyAssistantTextKey(node: TelegramCachedMessageNode, botUserId?: num
     return undefined;
   }
   const timestamp = (
-    node.sourceMessage as Message & { openclaw_prompt_context_timestamp_ms?: unknown }
-  ).openclaw_prompt_context_timestamp_ms;
+    node.sourceMessage as Message & { bot_prompt_context_timestamp_ms?: unknown }
+  ).bot_prompt_context_timestamp_ms;
   const legacySelf =
     isTelegramMessageFromCurrentBot(node.sourceMessage, botUserId) ||
     (node.sourceMessage.from?.id === 0 && node.sourceMessage.from.is_bot);
@@ -142,7 +142,7 @@ export function createTelegramMessageContextRuntime({
     ctx: TelegramContext,
     msg: Message,
     replyChainNodes: TelegramCachedMessageNode[],
-    runtimeCfg: OpenClawConfig,
+    runtimeCfg: BotConfig,
     runtimeTelegramCfg: TelegramAccountConfig,
     options?: TelegramMessageContextOptions,
     mediaByMessageId?: ReadonlyMap<string, TelegramMediaRef>,

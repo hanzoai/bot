@@ -6,11 +6,11 @@ import {
   collectPluginSchemaMetadata,
 } from "./channel-config-metadata.js";
 import { getRuntimeConfig, readConfigFileSnapshot } from "./config.js";
-import type { OpenClawConfig } from "./config.js";
+import type { BotConfig } from "./config.js";
 import { buildConfigSchema, type ConfigSchemaResponse } from "./schema.js";
 
 // Runtime schemas include currently loaded plugin/channel metadata for accurate UI fields.
-function loadManifestRegistry(config: OpenClawConfig, env?: NodeJS.ProcessEnv) {
+function loadManifestRegistry(config: BotConfig, env?: NodeJS.ProcessEnv) {
   const workspaceDir = resolveAgentWorkspaceDir(config, resolveDefaultAgentId(config), env);
   return resolvePluginMetadataSnapshot({
     config,

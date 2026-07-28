@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveAgentEntry } from "../agents/agent-scope-config.js";
 import * as configModule from "../config/config.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { projectDefaultInferenceRoute } from "./inference-route.js";
 
@@ -11,31 +11,31 @@ type ConfigSnapshot = {
   path: string;
   hash: string | null;
   parsed: unknown;
-  sourceConfigBeforeMigrations?: OpenClawConfig;
-  config: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
-  runtimeConfig?: OpenClawConfig;
+  sourceConfigBeforeMigrations?: BotConfig;
+  config: BotConfig;
+  sourceConfig: BotConfig;
+  runtimeConfig?: BotConfig;
   issues: Array<{ path?: string; message: string }>;
 };
 
 type CommitTransform = (
-  currentConfig: OpenClawConfig,
+  currentConfig: BotConfig,
   context: {
     previousHash: string | null;
     snapshot: ConfigSnapshot;
     attempt: number;
   },
 ) =>
-  | { nextConfig: OpenClawConfig; result?: unknown }
-  | Promise<{ nextConfig: OpenClawConfig; result?: unknown }>;
+  | { nextConfig: BotConfig; result?: unknown }
+  | Promise<{ nextConfig: BotConfig; result?: unknown }>;
 
 const mocks = vi.hoisted(() => ({
   state: {
     initialSnapshot: {} as ConfigSnapshot,
-    commitConfig: {} as OpenClawConfig,
+    commitConfig: {} as BotConfig,
     commitSnapshot: {} as ConfigSnapshot,
     commitPreviousHash: "probe" as string | null,
-    persistedConfig: undefined as OpenClawConfig | undefined,
+    persistedConfig: undefined as BotConfig | undefined,
   },
   events: [] as string[],
   readSnapshot: vi.fn<() => Promise<ConfigSnapshot>>(),
@@ -72,7 +72,7 @@ vi.mock("../wizard/setup.shared.js", async (importOriginal) => ({
 }));
 
 vi.mock("../commands/onboard-helpers.js", () => ({
-  applyWizardMetadata: (config: OpenClawConfig) => ({
+  applyWizardMetadata: (config: BotConfig) => ({
     ...config,
     wizard: {
       ...config.wizard,
@@ -112,7 +112,7 @@ vi.mock("../infra/exec-approvals.js", () => ({
 
 vi.mock("../agents/agent-scope.js", async (importOriginal) => ({
   ...(await importOriginal<typeof import("../agents/agent-scope.js")>()),
-  resolveAgentDir: (config: OpenClawConfig, agentId: string) =>
+  resolveAgentDir: (config: BotConfig, agentId: string) =>
     resolveAgentEntry(config, agentId)?.agentDir ?? `/agents/${agentId}`,
 }));
 
@@ -126,13 +126,13 @@ const runtime: RuntimeEnv = {
 
 function snapshot(
   hash: string | null,
-  sourceConfig: OpenClawConfig,
-  runtimeConfig: OpenClawConfig = sourceConfig,
+  sourceConfig: BotConfig,
+  runtimeConfig: BotConfig = sourceConfig,
 ): ConfigSnapshot {
   return {
     exists: hash !== null,
     valid: true,
-    path: "/tmp/openclaw.json",
+    path: "/tmp/bot.json",
     hash,
     parsed: structuredClone(sourceConfig),
     sourceConfigBeforeMigrations: structuredClone(sourceConfig),
@@ -159,7 +159,7 @@ function codexPluginMetadataSnapshot(homeScope: "agent" | "user") {
           hooks: [],
           rootDir: "/tmp/codex",
           source: "/tmp/codex/index.js",
-          manifestPath: "/tmp/codex/openclaw.plugin.json",
+          manifestPath: "/tmp/codex/bot.plugin.json",
           configSchema: {
             type: "object",
             additionalProperties: false,
@@ -183,9 +183,9 @@ function codexPluginMetadataSnapshot(homeScope: "agent" | "user") {
 }
 
 function materializePluginDefaults(
-  config: OpenClawConfig,
+  config: BotConfig,
   pluginMetadataSnapshot: ReturnType<typeof codexPluginMetadataSnapshot>,
-): OpenClawConfig {
+): BotConfig {
   const result = configModule.validateConfigObjectWithPlugins(config, { pluginMetadataSnapshot });
   if (!result.ok) {
     throw new Error(result.issues[0]?.message ?? "test config failed validation");
@@ -195,7 +195,7 @@ function materializePluginDefaults(
 
 function baseParams(overrides: Partial<Parameters<typeof applySystemAgentSetup>[0]> = {}) {
   return {
-    workspace: "/tmp/openclaw-workspace",
+    workspace: "/tmp/bot-workspace",
     surface: "gateway" as const,
     runtime,
     ...overrides,
@@ -224,7 +224,7 @@ describe("applySystemAgentModelSelection", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     const result = await applySystemAgentModelSelection({
       config,
@@ -257,7 +257,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     mocks.events.length = 0;
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       agents: {
         defaults: { model: { primary: "openai/gpt-5.5" } },
         entries: { main: { default: true } },
@@ -296,7 +296,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
       mocks.state.persistedConfig = result.nextConfig;
       return {
         nextConfig: result.nextConfig,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         previousHash: mocks.state.commitPreviousHash,
         persistedHash: "persisted",
         result: result.result,
@@ -307,7 +307,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
         nextConfig,
         quickstartGateway,
       }: {
-        nextConfig: OpenClawConfig;
+        nextConfig: BotConfig;
         quickstartGateway: {
           authMode: "token" | "password";
           bind: "loopback" | "lan";
@@ -375,7 +375,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
     expect(result.bootstrapPending).toBe(true);
     expect(mocks.state.persistedConfig).toMatchObject({
       agents: {
-        defaults: { workspace: "/tmp/openclaw-workspace" },
+        defaults: { workspace: "/tmp/bot-workspace" },
         entries: { main: { default: true } },
       },
     });
@@ -404,10 +404,10 @@ describe("applySystemAgentSetup transaction boundaries", () => {
   });
 
   it("configures the requested workspace for a persisted pre-roster config", async () => {
-    const authoredConfig: OpenClawConfig = {
+    const authoredConfig: BotConfig = {
       agents: { defaults: { model: { primary: "openai/gpt-5.5" } } },
     };
-    const preRosterRuntime: OpenClawConfig = {
+    const preRosterRuntime: BotConfig = {
       agents: {
         ...authoredConfig.agents,
         entries: { main: { default: true, agentDir: "/agents/main" } },
@@ -433,13 +433,13 @@ describe("applySystemAgentSetup transaction boundaries", () => {
     { label: "entries", agents: { entries: {} } },
     { label: "list", agents: { list: [] } },
   ])("treats an authored empty $label roster as bootstrap", async ({ agents }) => {
-    const authoredConfig: OpenClawConfig = {
+    const authoredConfig: BotConfig = {
       agents: {
         ...agents,
         defaults: { model: { primary: "openai/gpt-5.5" } },
       },
     };
-    const emptyRosterRuntime: OpenClawConfig = {
+    const emptyRosterRuntime: BotConfig = {
       agents: {
         ...authoredConfig.agents,
         list: undefined,
@@ -463,7 +463,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
   });
 
   it("preserves fleet workspace ownership when the roster comes from an include", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       agents: {
         defaults: { model: { primary: "openai/gpt-5.5" }, workspace: "/tmp/current-workspace" },
         entries: { main: { default: true } },
@@ -496,7 +496,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     mocks.state.initialSnapshot = snapshot("probe", config);
     mocks.state.commitConfig = structuredClone(config);
     mocks.state.commitSnapshot = snapshot("probe", config);
@@ -536,13 +536,13 @@ describe("applySystemAgentSetup transaction boundaries", () => {
     const config = {
       agents: {
         defaults: { model: "openai/gpt-5.5" },
-        entries: { OpenClaw: {} },
+        entries: { Bot: {} },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     mocks.state.initialSnapshot = snapshot("reserved", config);
 
     await expect(applySystemAgentSetup(baseParams())).rejects.toThrow(
-      'Agent id "openclaw" is reserved',
+      'Agent id "bot" is reserved',
     );
 
     expect(mocks.commit).not.toHaveBeenCalled();
@@ -554,7 +554,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
         defaults: { model: "openai/gpt-5.5" },
         entries: { crestodian: {} }, // reserved retired id
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     mocks.state.initialSnapshot = snapshot("reserved-retired", config);
 
     await expect(applySystemAgentSetup(baseParams())).rejects.toThrow(
@@ -576,7 +576,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
 
   it.each<{
     name: string;
-    runtimeConfig: OpenClawConfig;
+    runtimeConfig: BotConfig;
     error: string;
   }>([
     {
@@ -616,7 +616,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
   });
 
   it("rejects same-revision agent credential directory drift in the final snapshot", async () => {
-    const movedConfig: OpenClawConfig = {
+    const movedConfig: BotConfig = {
       agents: {
         defaults: { model: { primary: "openai/gpt-5.5" } },
         entries: { main: { default: true, agentDir: "/agents/moved" } },
@@ -666,19 +666,19 @@ describe("applySystemAgentSetup transaction boundaries", () => {
       logging: { level: "debug" },
       plugins: { entries: { codex: { enabled: true } } },
     });
-    expect(result.configPath).toBe("/tmp/openclaw.json");
+    expect(result.configPath).toBe("/tmp/bot.json");
   });
 
   it("rejects route drift before opening the config transaction", async () => {
     const current = {
       agents: { defaults: { model: "openai/gpt-5.5" }, entries: { main: { default: true } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const verified = {
       agents: {
         defaults: { model: "anthropic/claude-opus-4-8" },
         entries: { main: { default: true } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     mocks.state.initialSnapshot = snapshot("probe", current);
     mocks.readVerifiedSnapshot.mockResolvedValue(snapshot("probe", current));
 
@@ -695,11 +695,11 @@ describe("applySystemAgentSetup transaction boundaries", () => {
     const stale = {
       agents: { defaults: { model: "openai/gpt-5.5" }, entries: { main: { default: true } } },
       gateway: { port: 18789 },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const current = {
       ...stale,
       gateway: { port: 19000 },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     mocks.state.initialSnapshot = snapshot("same-root", stale);
     mocks.readVerifiedSnapshot.mockResolvedValue(snapshot("same-root", current));
 
@@ -715,7 +715,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
   it("rejects a setup candidate that changes the exact verified route identity", async () => {
     const initial = {
       agents: { defaults: { model: "openai/gpt-5.5" }, entries: { main: { default: true } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const initialSnapshot = snapshot("probe", initial);
     mocks.state.initialSnapshot = initialSnapshot;
     mocks.state.commitConfig = initial;
@@ -743,7 +743,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
         bind: "loopback",
         auth: { mode: "token", token: "initial-token" },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const concurrent = {
       ...initial,
       gateway: {
@@ -752,7 +752,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
         bind: "lan",
         auth: { mode: "token" as const, token: "concurrent-token" },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const initialSnapshot = snapshot("hash-1", initial);
     const concurrentSnapshot = snapshot("hash-2", concurrent);
     mocks.state.initialSnapshot = initialSnapshot;
@@ -791,7 +791,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
       mocks.state.persistedConfig = result.nextConfig;
       return {
         nextConfig: result.nextConfig,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         previousHash: "hash-2",
         persistedHash: "persisted",
         result: result.result,
@@ -823,13 +823,13 @@ describe("applySystemAgentSetup transaction boundaries", () => {
   it("revalidates the verified route after the config write", async () => {
     const initial = {
       agents: { defaults: { model: "openai/gpt-5.5" }, entries: { main: { default: true } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const drifted = {
       agents: {
         defaults: { model: "anthropic/claude-opus-4-8" },
         entries: { main: { default: true } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const initialSnapshot = snapshot("probe", initial);
     const driftedSnapshot = snapshot("persisted", drifted);
     mocks.state.initialSnapshot = initialSnapshot;
@@ -852,7 +852,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
       mocks.state.persistedConfig = persistedDrift;
       return {
         nextConfig: persistedDrift,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         previousHash: "probe",
         persistedHash: "persisted",
         result: result.result,
@@ -880,7 +880,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const initialSnapshot = {
       ...snapshot("probe", sourceConfig),
       runtimeConfig: materializePluginDefaults(sourceConfig, pluginMetadataSnapshot),
@@ -915,13 +915,13 @@ describe("applySystemAgentSetup transaction boundaries", () => {
   it("rejects a materialized route that differs from the inference proof", async () => {
     const sourceConfig = {
       agents: { defaults: { model: "openai/gpt-5.5" }, entries: { main: { default: true } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const materializedConfig = {
       agents: {
         defaults: { model: "anthropic/claude-opus-4-8" },
         entries: { main: { default: true } },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const verifiedSnapshot = snapshot("probe", sourceConfig);
     const persistedSnapshot = () => {
       const persisted = mocks.state.persistedConfig ?? sourceConfig;
@@ -963,10 +963,10 @@ describe("applySystemAgentSetup transaction boundaries", () => {
     const initial = {
       agents: { defaults: { model: "openai/gpt-5.5" }, entries: { main: { default: true } } },
       auth: { order: { openai: ["openai:verified"] } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     const initialSnapshot = snapshot("probe", initial);
     const expectedInferenceRoute = await projectDefaultInferenceRoute(initial);
-    let currentConfig: OpenClawConfig = initial;
+    let currentConfig: BotConfig = initial;
     let currentHash = "probe";
     mocks.state.initialSnapshot = initialSnapshot;
     mocks.state.commitConfig = initial;
@@ -988,7 +988,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
       mocks.events.push("commit");
       return {
         nextConfig: result.nextConfig,
-        path: "/tmp/openclaw.json",
+        path: "/tmp/bot.json",
         previousHash: "probe",
         persistedHash: currentHash,
         result: result.result,
@@ -1023,12 +1023,12 @@ describe("applySystemAgentSetup transaction boundaries", () => {
   it("finalizes setup against the source config held by the commit lock", async () => {
     const sourceConfig = {
       plugins: { entries: { codex: { config: { supervision: { enabled: false } } } } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     mocks.state.commitSnapshot = {
       ...snapshot("probe", mocks.state.commitConfig),
       sourceConfig,
     };
-    const finalizeConfig = vi.fn((config: OpenClawConfig, source: OpenClawConfig) => {
+    const finalizeConfig = vi.fn((config: BotConfig, source: BotConfig) => {
       const { list: _legacyList, ...agents } = config.agents ?? {};
       return {
         ...config,
@@ -1070,7 +1070,7 @@ describe("applySystemAgentSetup transaction boundaries", () => {
     expect(result.lines).toEqual(
       expect.arrayContaining([
         "Workspace files: workspace exploded",
-        "OpenClaw exec approval: approval exploded; local model harnesses may ask again.",
+        "Bot exec approval: approval exploded; local model harnesses may ask again.",
         "Plugin registry refresh failed: registry exploded",
         "Gateway service: service exploded",
       ]),

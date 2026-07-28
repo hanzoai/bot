@@ -1,11 +1,11 @@
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
-import type { QmdQueryResult } from "openclaw/plugin-sdk/memory-core-host-engine-qmd";
+import { truncateUtf16Safe } from "bot/plugin-sdk/memory-core-host-engine-foundation";
+import type { QmdQueryResult } from "bot/plugin-sdk/memory-core-host-engine-qmd";
 import type {
   MemorySearchResult,
   MemorySearchRuntimeDebug,
   MemorySource,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import { uniqueValues } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import { uniqueValues } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   attachQmdSessionArtifactHit,
   resolveQmdSessionArtifactIdentity,

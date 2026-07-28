@@ -8,7 +8,7 @@ import {
 import { resolveChannelModelOverride } from "../../channels/model-overrides.js";
 import { resolveSessionModelOverrideRouteResolution } from "../../config/sessions/model-override-provenance.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { isSubagentSessionKey } from "../../routing/session-key.js";
 import { isValidAgentHarnessSessionStoreEntry } from "../../sessions/agent-harness-session-key.js";
 import {
@@ -67,7 +67,7 @@ import type { AgentCommandOpts } from "./types.js";
 type AgentRunContext = ReturnType<typeof resolveAgentRunContext>;
 
 export async function resolveEmbeddedModelSelection(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   opts: AgentCommandOpts;
   sessionEntry?: SessionEntry;
   sessionStore?: Record<string, SessionEntry>;

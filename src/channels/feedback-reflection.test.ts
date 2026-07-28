@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { recordChannelFeedbackEvent, runChannelFeedbackReflection } from "./feedback-reflection.js";
 
 const appendTranscriptEvent = vi.hoisted(() => vi.fn(async () => undefined));
@@ -17,7 +17,7 @@ vi.mock("../config/sessions/session-accessor.js", () => ({
 }));
 vi.mock("./turn/kernel.js", () => ({ dispatchChannelInboundTurn }));
 
-const cfg = {} as OpenClawConfig;
+const cfg = {} as BotConfig;
 
 describe("channel feedback reflection", () => {
   beforeEach(() => vi.clearAllMocks());

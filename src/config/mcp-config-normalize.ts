@@ -2,9 +2,9 @@
 import { isRecord } from "../utils.js";
 
 type ConfigMcpServers = Record<string, Record<string, unknown>>;
-type OpenClawMcpHttpTransport = "sse" | "streamable-http";
+type BotMcpHttpTransport = "sse" | "streamable-http";
 
-const CLI_MCP_TYPE_TO_OPENCLAW_TRANSPORT: Record<string, OpenClawMcpHttpTransport | "stdio"> = {
+const CLI_MCP_TYPE_TO_BOT_TRANSPORT: Record<string, BotMcpHttpTransport | "stdio"> = {
   http: "streamable-http",
   "streamable-http": "streamable-http",
   sse: "sse",
@@ -15,17 +15,17 @@ function normalizeMcpString(value: unknown): string {
   return typeof value === "string" ? value.trim().toLowerCase() : "";
 }
 
-/** Maps CLI-native MCP type aliases to OpenClaw HTTP transport names. */
-export function resolveOpenClawMcpTransportAlias(
+/** Maps CLI-native MCP type aliases to Bot HTTP transport names. */
+export function resolveBotMcpTransportAlias(
   value: unknown,
-): OpenClawMcpHttpTransport | undefined {
-  const mapped = CLI_MCP_TYPE_TO_OPENCLAW_TRANSPORT[normalizeMcpString(value)];
+): BotMcpHttpTransport | undefined {
+  const mapped = CLI_MCP_TYPE_TO_BOT_TRANSPORT[normalizeMcpString(value)];
   return mapped === "sse" || mapped === "streamable-http" ? mapped : undefined;
 }
 
-/** Checks whether a raw MCP `type` value is a legacy CLI alias OpenClaw can rewrite. */
+/** Checks whether a raw MCP `type` value is a legacy CLI alias Bot can rewrite. */
 export function isKnownCliMcpTypeAlias(value: unknown): boolean {
-  return Object.hasOwn(CLI_MCP_TYPE_TO_OPENCLAW_TRANSPORT, normalizeMcpString(value));
+  return Object.hasOwn(CLI_MCP_TYPE_TO_BOT_TRANSPORT, normalizeMcpString(value));
 }
 
 /**
@@ -38,8 +38,8 @@ export function canonicalizeConfiguredMcpServer(
   server: Record<string, unknown>,
 ): Record<string, unknown> {
   const next = { ...server };
-  const transportAlias = resolveOpenClawMcpTransportAlias(next.type);
-  // `transport` is OpenClaw's canonical field; legacy `type` only fills a gap.
+  const transportAlias = resolveBotMcpTransportAlias(next.type);
+  // `transport` is Bot's canonical field; legacy `type` only fills a gap.
   if (typeof next.transport !== "string" && transportAlias) {
     next.transport = transportAlias;
   }

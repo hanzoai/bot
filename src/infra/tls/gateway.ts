@@ -135,11 +135,11 @@ async function generateSelfSignedCert(params: {
       "openssl not found in trusted system directories. Install it in an OS-managed location.",
     );
   }
-  const certStageDir = await fs.mkdtemp(path.join(certDir, ".openclaw-gateway-tls-cert-"));
+  const certStageDir = await fs.mkdtemp(path.join(certDir, ".bot-gateway-tls-cert-"));
   const stagedCertPath = path.join(certStageDir, "cert.pem");
   let keyStageDir: string | undefined;
   try {
-    keyStageDir = await fs.mkdtemp(path.join(keyDir, ".openclaw-gateway-tls-key-"));
+    keyStageDir = await fs.mkdtemp(path.join(keyDir, ".bot-gateway-tls-key-"));
     const stagedKeyPath = path.join(keyStageDir, "key.pem");
     await Promise.all([fs.chmod(certStageDir, 0o700), fs.chmod(keyStageDir, 0o700)]);
     // OpenSSL never sees the configured final paths, so timeout and generation
@@ -160,7 +160,7 @@ async function generateSelfSignedCert(params: {
         "-out",
         stagedCertPath,
         "-subj",
-        "/CN=openclaw-gateway",
+        "/CN=bot-gateway",
       ],
       {
         logOutput: false,

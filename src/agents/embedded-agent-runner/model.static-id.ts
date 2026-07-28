@@ -1,4 +1,4 @@
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import { normalizeStaticProviderModelId } from "../model-ref-shared.js";
 
 export function staticModelIdMatches(params: {

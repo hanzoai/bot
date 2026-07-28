@@ -6,7 +6,7 @@ import {
   addTimerTimeoutGraceMs,
   MAX_DATE_TIMESTAMP_MS,
   MAX_TIMER_TIMEOUT_MS,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@hanzo/bot-normalization-core/number-coercion";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const callGatewayMock = vi.fn();
@@ -113,7 +113,7 @@ describe("readLatestAssistantReply", () => {
     expect(result).toBe("older output");
   });
 
-  it("skips trailing transcript-only OpenClaw assistant mirrors for normal latest-reply reads", async () => {
+  it("skips trailing transcript-only Bot assistant mirrors for normal latest-reply reads", async () => {
     callGatewayMock.mockResolvedValue({
       messages: [
         {
@@ -124,7 +124,7 @@ describe("readLatestAssistantReply", () => {
         {
           role: "assistant",
           content: [{ type: "text", text: "already delivered through message tool" }],
-          openclawMessageToolMirror: {
+          botMessageToolMirror: {
             toolName: "message",
             toolCallId: "call-message-send",
           },
@@ -132,7 +132,7 @@ describe("readLatestAssistantReply", () => {
         },
         {
           role: "assistant",
-          provider: "openclaw",
+          provider: "bot",
           model: "gateway-injected",
           content: [{ type: "text", text: "gateway notice" }],
           timestamp: 12,
@@ -181,7 +181,7 @@ describe("readLatestAssistantReply", () => {
         },
         {
           role: "assistant",
-          provider: "openclaw",
+          provider: "bot",
           model: "gateway-injected",
           content: [{ type: "text", text: "gateway notice" }],
           timestamp: 11,
@@ -535,7 +535,7 @@ describe("waitForAgentRunAndReadUpdatedAssistantReply", () => {
           baselineMessage,
           {
             role: "assistant",
-            provider: "openclaw",
+            provider: "bot",
             model: "delivery-mirror",
             content: [{ type: "text", text: "already delivered source reply" }],
             timestamp: 42,
@@ -575,7 +575,7 @@ describe("waitForAgentRunAndReadUpdatedAssistantReply", () => {
           {
             role: "assistant",
             content: [{ type: "text", text: "already delivered source reply" }],
-            openclawMessageToolMirror: {
+            botMessageToolMirror: {
               toolName: "message",
               toolCallId: "call-message-send",
             },
@@ -611,13 +611,13 @@ describe("waitForAgentRunAndReadUpdatedAssistantReply", () => {
             sourceTool: "sessions_send",
           },
           content: [{ type: "text", text: "forwarded request" }],
-          __openclaw: { seq: 41 },
+          __bot: { seq: 41 },
           timestamp: 41,
         },
         {
           role: "assistant",
           content: [{ type: "text", text: "source reply awaiting delivery" }],
-          openclawMessageToolMirror: {
+          botMessageToolMirror: {
             toolName: "message",
             toolCallId: "call-message-send",
             sourceReplySink: "internal-ui",
@@ -651,13 +651,13 @@ describe("waitForAgentRunAndReadUpdatedAssistantReply", () => {
             sourceTool: "sessions_send",
           },
           content: [{ type: "text", text: "forwarded request" }],
-          __openclaw: { seq: 41 },
+          __bot: { seq: 41 },
           timestamp: 41,
         },
         {
           role: "assistant",
           content: [{ type: "text", text: "source reply awaiting delivery" }],
-          openclawMessageToolMirror: {
+          botMessageToolMirror: {
             toolName: "message",
             toolCallId: "call-message-send",
             sourceReplySink: "internal-ui",
@@ -696,13 +696,13 @@ describe("waitForAgentRunAndReadUpdatedAssistantReply", () => {
             sourceTool: "sessions_send",
           },
           content: [{ type: "text", text: "new forwarded request" }],
-          __openclaw: { seq: 42 },
+          __bot: { seq: 42 },
           timestamp: 42,
         },
         {
           role: "assistant",
           content: [{ type: "text", text: "stale source reply" }],
-          openclawMessageToolMirror: {
+          botMessageToolMirror: {
             toolName: "message",
             toolCallId: "call-message-before-request",
             sourceReplySink: "internal-ui",
@@ -746,7 +746,7 @@ describe("waitForAgentRunAndReadUpdatedAssistantReply", () => {
         {
           role: "assistant",
           content: [{ type: "text", text: "already delivered source reply" }],
-          openclawMessageToolMirror: {
+          botMessageToolMirror: {
             toolName: "message",
             toolCallId: "call-message-send",
           },
@@ -778,7 +778,7 @@ describe("waitForAgentRunAndReadUpdatedAssistantReply", () => {
         {
           role: "assistant",
           content: [{ type: "text", text: "older delivered reply" }],
-          openclawMessageToolMirror: {
+          botMessageToolMirror: {
             toolName: "message",
             toolCallId: "call-older-message-send",
           },
@@ -828,7 +828,7 @@ describe("waitForAgentRunAndReadUpdatedAssistantReply", () => {
           },
           {
             role: "assistant",
-            provider: "openclaw",
+            provider: "bot",
             model: "delivery-mirror",
             content: [{ type: "text", text: "already delivered source reply" }],
             timestamp: 42,

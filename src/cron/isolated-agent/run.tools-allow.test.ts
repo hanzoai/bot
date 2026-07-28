@@ -17,7 +17,7 @@ import {
 } from "./run.test-harness.js";
 
 const MISSING_WEB_SEARCH_PROVIDER_DIAGNOSTIC_MESSAGE =
-  "web_search tool requested in toolsAllow but no web search provider is selected. Configure one with: openclaw configure --section web, or set tools.web.search.provider.";
+  "web_search tool requested in toolsAllow but no web search provider is selected. Configure one with: bot configure --section web, or set tools.web.search.provider.";
 
 const RUN_TOOLS_ALLOW_TIMEOUT_MS = 300_000;
 
@@ -113,7 +113,7 @@ function requireEmbeddedAgentCall(): {
       }
     | undefined;
   if (!call) {
-    throw new Error("Expected embedded OpenClaw agent call for toolsAllow passthrough");
+    throw new Error("Expected embedded Bot agent call for toolsAllow passthrough");
   }
   return call;
 }
@@ -122,8 +122,8 @@ describe("runCronIsolatedAgentTurn toolsAllow passthrough", () => {
   let previousFastTestEnv: string | undefined;
 
   beforeEach(() => {
-    previousFastTestEnv = process.env.OPENCLAW_TEST_FAST;
-    vi.stubEnv("OPENCLAW_TEST_FAST", "1");
+    previousFastTestEnv = process.env.BOT_TEST_FAST;
+    vi.stubEnv("BOT_TEST_FAST", "1");
     resetRunCronIsolatedAgentTurnHarness();
     clearActiveRuntimeWebToolsMetadata();
     resolveDeliveryTargetMock.mockResolvedValue({
@@ -142,10 +142,10 @@ describe("runCronIsolatedAgentTurn toolsAllow passthrough", () => {
     clearActiveRuntimeWebToolsMetadata();
     if (previousFastTestEnv == null) {
       vi.unstubAllEnvs();
-      delete process.env.OPENCLAW_TEST_FAST;
+      delete process.env.BOT_TEST_FAST;
       return;
     }
-    vi.stubEnv("OPENCLAW_TEST_FAST", previousFastTestEnv);
+    vi.stubEnv("BOT_TEST_FAST", previousFastTestEnv);
   });
 
   it(

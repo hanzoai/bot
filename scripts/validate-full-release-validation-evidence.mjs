@@ -176,7 +176,7 @@ export function validateFullReleaseValidationEvidence({
       targetSha: expectedTargetSha,
     });
     if (
-      strictEvidence?.schema !== "openclaw.release-validation-evidence/v3" ||
+      strictEvidence?.schema !== "bot.release-validation-evidence/v3" ||
       strictEvidence.valid !== true ||
       String(strictEvidence.current?.runId ?? "") !== String(expectedRunId) ||
       strictEvidence.current?.targetSha !== expectedTargetSha ||

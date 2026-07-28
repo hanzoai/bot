@@ -1,10 +1,10 @@
 import { PassThrough, type Readable } from "node:stream";
-import { expectDefined } from "@openclaw/normalization-core";
-import { createOpenClawCodingTools } from "openclaw/plugin-sdk/agent-harness";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { createBotCodingTools } from "bot/plugin-sdk/agent-harness";
 import type {
   RealtimeVoiceAgentControlResult,
   RealtimeVoiceSessionHarness,
-} from "openclaw/plugin-sdk/realtime-voice";
+} from "bot/plugin-sdk/realtime-voice";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { ChannelType } from "../internal/discord.js";
 import { createVoiceCaptureState } from "./capture-state.js";
@@ -187,7 +187,7 @@ const {
         active: false,
         queued: false,
         reason: "no_active_run",
-        message: "There is no active OpenClaw run to steer.",
+        message: "There is no active Bot run to steer.",
         speak: true,
         show: true,
         suppress: false,
@@ -222,9 +222,9 @@ vi.mock("./sdk-runtime.js", () => ({
   }),
 }));
 
-vi.mock("openclaw/plugin-sdk/routing", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/routing")>(
-    "openclaw/plugin-sdk/routing",
+vi.mock("bot/plugin-sdk/routing", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/routing")>(
+    "bot/plugin-sdk/routing",
   );
   return {
     ...actual,
@@ -232,30 +232,30 @@ vi.mock("openclaw/plugin-sdk/routing", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/agent-runtime", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/agent-runtime")>(
-    "openclaw/plugin-sdk/agent-runtime",
+vi.mock("bot/plugin-sdk/agent-runtime", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/agent-runtime")>(
+    "bot/plugin-sdk/agent-runtime",
   );
   return {
     ...actual,
     agentCommandFromIngress: agentCommandMock,
-    resolveAgentDir: vi.fn(() => "/tmp/openclaw-agent"),
+    resolveAgentDir: vi.fn(() => "/tmp/bot-agent"),
   };
 });
 
-vi.mock("openclaw/plugin-sdk/realtime-bootstrap-context", async () => {
+vi.mock("bot/plugin-sdk/realtime-bootstrap-context", async () => {
   const actual = await vi.importActual<
-    typeof import("openclaw/plugin-sdk/realtime-bootstrap-context")
-  >("openclaw/plugin-sdk/realtime-bootstrap-context");
+    typeof import("bot/plugin-sdk/realtime-bootstrap-context")
+  >("bot/plugin-sdk/realtime-bootstrap-context");
   return {
     ...actual,
     resolveRealtimeBootstrapContextInstructions: resolveRealtimeBootstrapContextInstructionsMock,
   };
 });
 
-vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/runtime-env")>(
-    "openclaw/plugin-sdk/runtime-env",
+vi.mock("bot/plugin-sdk/runtime-env", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/runtime-env")>(
+    "bot/plugin-sdk/runtime-env",
   );
   return {
     ...actual,
@@ -263,13 +263,13 @@ vi.mock("openclaw/plugin-sdk/runtime-env", async () => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/system-event-runtime", () => ({
+vi.mock("bot/plugin-sdk/system-event-runtime", () => ({
   enqueueSystemEvent: enqueueSystemEventMock,
 }));
 
-vi.mock("openclaw/plugin-sdk/realtime-voice", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/realtime-voice")>(
-    "openclaw/plugin-sdk/realtime-voice",
+vi.mock("bot/plugin-sdk/realtime-voice", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/realtime-voice")>(
+    "bot/plugin-sdk/realtime-voice",
   );
   return {
     ...actual,
@@ -397,7 +397,7 @@ describe("DiscordVoiceManager", () => {
       active: false,
       queued: false,
       reason: "no_active_run",
-      message: "There is no active OpenClaw run to steer.",
+      message: "There is no active Bot run to steer.",
       speak: true,
       show: true,
       suppress: false,
@@ -542,12 +542,12 @@ describe("DiscordVoiceManager", () => {
     if (typeof args.senderIsOwner !== "boolean") {
       throw new Error("expected agent command owner identity");
     }
-    return createOpenClawCodingTools({
+    return createBotCodingTools({
       config: {},
       senderIsOwner: args.senderIsOwner,
       messageProvider: "discord",
-      workspaceDir: "/tmp/openclaw-discord-voice-tools",
-      agentDir: "/tmp/openclaw-discord-voice-agent",
+      workspaceDir: "/tmp/bot-discord-voice-tools",
+      agentDir: "/tmp/bot-discord-voice-agent",
     }).map((tool) => tool.name);
   };
 
@@ -1027,7 +1027,7 @@ describe("DiscordVoiceManager", () => {
 
     await manager.join({ guildId: "g1", channelId: "1001" });
 
-    expect(getVoiceConnectionMock).toHaveBeenCalledWith("g1", "openclaw:default");
+    expect(getVoiceConnectionMock).toHaveBeenCalledWith("g1", "bot:default");
     expect(staleConnection.destroy).toHaveBeenCalledTimes(1);
     expectConnectedStatus(manager, "1001");
   });
@@ -1039,15 +1039,15 @@ describe("DiscordVoiceManager", () => {
     await firstManager.join({ guildId: "g1", channelId: "1001" });
     await secondManager.join({ guildId: "g1", channelId: "1002" });
 
-    expect(getVoiceConnectionMock).toHaveBeenNthCalledWith(1, "g1", "openclaw:first");
-    expect(getVoiceConnectionMock).toHaveBeenNthCalledWith(2, "g1", "openclaw:second");
+    expect(getVoiceConnectionMock).toHaveBeenNthCalledWith(1, "g1", "bot:first");
+    expect(getVoiceConnectionMock).toHaveBeenNthCalledWith(2, "g1", "bot:second");
     expect(joinVoiceChannelMock).toHaveBeenNthCalledWith(
       1,
-      expect.objectContaining({ group: "openclaw:first" }),
+      expect.objectContaining({ group: "bot:first" }),
     );
     expect(joinVoiceChannelMock).toHaveBeenNthCalledWith(
       2,
-      expect.objectContaining({ group: "openclaw:second" }),
+      expect.objectContaining({ group: "bot:second" }),
     );
   });
 
@@ -2593,10 +2593,10 @@ describe("DiscordVoiceManager", () => {
     const bridgeParams = lastRealtimeBridgeParams();
     expect(bridgeParams?.cfg).toBe(cfg);
     expect(bridgeParams?.autoRespondToAudio).toBe(false);
-    expect(bridgeParams?.instructions).toContain("same OpenClaw agent");
+    expect(bridgeParams?.instructions).toContain("same Bot agent");
     expect(bridgeParams?.instructions).toContain("short natural backchannel");
-    expect(bridgeParams?.tools?.map((tool) => tool.name)).toContain("openclaw_agent_consult");
-    expect(bridgeParams?.tools?.map((tool) => tool.name)).toContain("openclaw_agent_control");
+    expect(bridgeParams?.tools?.map((tool) => tool.name)).toContain("bot_agent_consult");
+    expect(bridgeParams?.tools?.map((tool) => tool.name)).toContain("bot_agent_control");
     const player = getLastAudioPlayer();
     bridgeParams?.audioSink?.sendAudio(Buffer.alloc(24_000));
     expect(player.play).toHaveBeenCalled();
@@ -2606,7 +2606,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-1",
         callId: "call-1",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "what did I ask?" },
       },
       realtimeSessionMock,
@@ -2648,7 +2648,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-control",
         callId: "call-control",
-        name: "openclaw_agent_control",
+        name: "bot_agent_control",
         args: { text: "revísalo en WebUI", mode: "steer" },
       },
       realtimeSessionMock,
@@ -2716,7 +2716,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-control",
         callId: "call-control",
-        name: "openclaw_agent_control",
+        name: "bot_agent_control",
         args: { text: "check this", mode: "steer" },
       },
       realtimeSessionMock,
@@ -2740,7 +2740,7 @@ describe("DiscordVoiceManager", () => {
         {
           itemId: "item-empty-consult",
           callId: "call-empty-consult",
-          name: "openclaw_agent_consult",
+          name: "bot_agent_consult",
           args: {},
         },
         realtimeSessionMock,
@@ -2763,7 +2763,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-exact",
         callId: "call-exact",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: {
           question: "Speak the provided exact answer verbatim to the Discord voice channel.",
           context: 'Provided answer text: "already answered"\\nSpoken style: verbatim only',
@@ -2775,10 +2775,10 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-internal",
         callId: "call-internal",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: {
           question: [
-            "Speak this exact OpenClaw answer to the Discord voice channel, without adding, removing, or rephrasing words.",
+            "Speak this exact Bot answer to the Discord voice channel, without adding, removing, or rephrasing words.",
             'Answer: "direct internal answer"',
           ].join("\n"),
         },
@@ -3070,7 +3070,7 @@ describe("DiscordVoiceManager", () => {
       sessionId: "embedded-active",
       active: true,
       aborted: true,
-      message: "Cancelled the active OpenClaw run.",
+      message: "Cancelled the active Bot run.",
       speak: true,
       show: true,
       suppress: false,
@@ -3096,16 +3096,16 @@ describe("DiscordVoiceManager", () => {
         force: true,
       }),
     );
-    await vi.waitFor(() => expectUserMessageIncludes("Cancelled the active OpenClaw run."));
+    await vi.waitFor(() => expectUserMessageIncludes("Cancelled the active Bot run."));
     expect(textToSpeechMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({ text: "Cancelled the active OpenClaw run." }),
+      expect.objectContaining({ text: "Cancelled the active Bot run." }),
     );
 
     const stopCallsAfterControl = player.stop.mock.calls.length;
-    bridgeParams?.onTranscript?.("assistant", "Cancelled the active OpenClaw run.", true);
+    bridgeParams?.onTranscript?.("assistant", "Cancelled the active Bot run.", true);
     expect(player.stop).toHaveBeenCalledTimes(stopCallsAfterControl);
     bridgeParams?.audioSink?.sendAudio(Buffer.alloc(24_000));
-    bridgeParams?.onTranscript?.("assistant", "Cancelled the active OpenClaw run.", true);
+    bridgeParams?.onTranscript?.("assistant", "Cancelled the active Bot run.", true);
     expect(player.stop).toHaveBeenCalledTimes(stopCallsAfterControl + 1);
   });
 
@@ -3341,20 +3341,20 @@ describe("DiscordVoiceManager", () => {
     expectUserMessageIncludes("wake answer");
   });
 
-  it("accepts OpenClaw as a default wake name before realtime agent-proxy consults", async () => {
-    agentCommandMock.mockResolvedValueOnce({ payloads: [{ text: "openclaw wake answer" }] });
+  it("accepts Bot as a default wake name before realtime agent-proxy consults", async () => {
+    agentCommandMock.mockResolvedValueOnce({ payloads: [{ text: "bot wake answer" }] });
     const { entry, bridgeParams } = await createWakeNameFixture();
 
     beginSpeakerTurn(entry);
-    await emitFinalRealtimeUserTranscript(bridgeParams, "OpenClaw, how is it going");
+    await emitFinalRealtimeUserTranscript(bridgeParams, "Bot, how is it going");
 
     expect(controlRealtimeVoiceAgentRunMock).toHaveBeenCalledWith({
       sessionKey: "discord:g1:c1",
       text: "how is it going",
     });
     expect(lastAgentCommandArgs().message).toContain("how is it going");
-    expect(lastAgentCommandArgs().message).not.toContain("OpenClaw");
-    expectUserMessageIncludes("openclaw wake answer");
+    expect(lastAgentCommandArgs().message).not.toContain("Bot");
+    expectUserMessageIncludes("bot wake answer");
   });
 
   it("ignores default agent wake names longer than two words", async () => {
@@ -3367,10 +3367,10 @@ describe("DiscordVoiceManager", () => {
     expect(agentCommandMock).not.toHaveBeenCalled();
 
     beginSpeakerTurn(entry);
-    await emitFinalRealtimeUserTranscript(bridgeParams, "OpenClaw, fallback still wakes");
+    await emitFinalRealtimeUserTranscript(bridgeParams, "Bot, fallback still wakes");
 
     expect(lastAgentCommandArgs().message).toContain("fallback still wakes");
-    expect(lastAgentCommandArgs().message).not.toContain("OpenClaw");
+    expect(lastAgentCommandArgs().message).not.toContain("Bot");
     expectUserMessageIncludes("fallback wake answer");
   });
 
@@ -3489,7 +3489,7 @@ describe("DiscordVoiceManager", () => {
     await emitFinalRealtimeUserTranscript(bridgeParams, "Claw Bot Helper, ship it");
 
     beginSpeakerTurn(entry);
-    await emitFinalRealtimeUserTranscript(bridgeParams, "OpenClaw, ship it");
+    await emitFinalRealtimeUserTranscript(bridgeParams, "Bot, ship it");
 
     expect(agentCommandMock).not.toHaveBeenCalled();
   });
@@ -3586,7 +3586,7 @@ describe("DiscordVoiceManager", () => {
 
     expect(lastAgentCommandArgs().message).toBe("What?");
     expect(lastAgentCommandArgs().message).not.toContain("consultPolicy");
-    expect(lastAgentCommandArgs().message).not.toContain("openclaw_agent_consult");
+    expect(lastAgentCommandArgs().message).not.toContain("bot_agent_consult");
     expectUserMessageIncludes("Could you repeat that?");
   });
 
@@ -3766,7 +3766,7 @@ describe("DiscordVoiceManager", () => {
         {
           itemId: "item-owner",
           callId: "call-owner",
-          name: "openclaw_agent_consult",
+          name: "bot_agent_consult",
           args: { question: "owner question" },
         },
         realtimeSessionMock,
@@ -3800,7 +3800,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-late",
         callId: "call-late",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "late question" },
       },
       realtimeSessionMock,
@@ -3814,7 +3814,7 @@ describe("DiscordVoiceManager", () => {
       "call-late",
       {
         status: "already_delivered",
-        message: "OpenClaw already delivered this answer to Discord voice. Do not repeat it.",
+        message: "Bot already delivered this answer to Discord voice. Do not repeat it.",
       },
       { suppressResponse: true },
     );
@@ -3824,7 +3824,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-late-unsuppressed",
         callId: "call-late-unsuppressed",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "late question" },
       },
       realtimeSessionMock,
@@ -3837,7 +3837,7 @@ describe("DiscordVoiceManager", () => {
         "call-late-unsuppressed",
         {
           status: "already_delivered",
-          message: "OpenClaw already delivered this answer to Discord voice. Do not repeat it.",
+          message: "Bot already delivered this answer to Discord voice. Do not repeat it.",
         },
       ]);
     });
@@ -3863,7 +3863,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-cancelled",
         callId: "call-cancelled",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "cancelled question" },
       },
       realtimeSessionMock,
@@ -3874,7 +3874,7 @@ describe("DiscordVoiceManager", () => {
       "call-cancelled",
       {
         status: "cancelled",
-        message: "OpenClaw cancelled this consult before completion. Do not restart it.",
+        message: "Bot cancelled this consult before completion. Do not restart it.",
       },
       { suppressResponse: true },
     );
@@ -3900,7 +3900,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-late",
         callId: "call-late",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "late question" },
       },
       realtimeSessionMock,
@@ -3929,7 +3929,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-retry",
         callId: "call-retry",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "retry question" },
       },
       realtimeSessionMock,
@@ -3960,7 +3960,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-late",
         callId: "call-late",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "late question" },
       },
       realtimeSessionMock,
@@ -3971,7 +3971,7 @@ describe("DiscordVoiceManager", () => {
         "call-late",
         {
           status: "already_delivered",
-          message: "OpenClaw already delivered this answer to Discord voice. Do not repeat it.",
+          message: "Bot already delivered this answer to Discord voice. Do not repeat it.",
         },
         { suppressResponse: true },
       ),
@@ -4000,7 +4000,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-late",
         callId: "call-late",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "late question" },
       },
       realtimeSessionMock,
@@ -4038,7 +4038,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-old",
         callId: "call-old",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "repeat question" },
       },
       realtimeSessionMock,
@@ -4056,7 +4056,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-new",
         callId: "call-new",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "repeat question" },
       },
       realtimeSessionMock,
@@ -4070,7 +4070,7 @@ describe("DiscordVoiceManager", () => {
       "call-new",
       {
         status: "already_delivered",
-        message: "OpenClaw already delivered this answer to Discord voice. Do not repeat it.",
+        message: "Bot already delivered this answer to Discord voice. Do not repeat it.",
       },
       { suppressResponse: true },
     );
@@ -4137,14 +4137,14 @@ describe("DiscordVoiceManager", () => {
     const bridgeParams = lastRealtimeBridgeParams();
     expect(bridgeParams?.autoRespondToAudio).toBe(true);
     expect(bridgeParams?.interruptResponseOnInputAudio).toBe(false);
-    expect(bridgeParams?.instructions).toContain("Call openclaw_agent_consult");
-    expect(bridgeParams?.tools?.map((tool) => tool.name)).toContain("openclaw_agent_consult");
+    expect(bridgeParams?.instructions).toContain("Call bot_agent_consult");
+    expect(bridgeParams?.tools?.map((tool) => tool.name)).toContain("bot_agent_consult");
 
     void bridgeParams?.onToolCall?.(
       {
         itemId: "item-1",
         callId: "call-1",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "check my Discord" },
       },
       realtimeSessionMock,
@@ -4173,7 +4173,7 @@ describe("DiscordVoiceManager", () => {
       sessionKey: "agent:main:discord:channel:1001",
     });
     resolveRealtimeBootstrapContextInstructionsMock.mockResolvedValue(
-      "OpenClaw realtime voice profile context:\n\n### IDENTITY.md\nName: Wilfred",
+      "Bot realtime voice profile context:\n\n### IDENTITY.md\nName: Wilfred",
     );
     const manager = createManager({
       groupPolicy: "open",
@@ -4197,10 +4197,10 @@ describe("DiscordVoiceManager", () => {
       warn: expect.any(Function),
     });
     const bridgeParams = lastRealtimeBridgeParams();
-    expect(bridgeParams?.instructions).toContain("OpenClaw realtime voice profile context");
+    expect(bridgeParams?.instructions).toContain("Bot realtime voice profile context");
     expect(bridgeParams?.instructions).toContain("Name: Wilfred");
     expect(bridgeParams?.instructions).toContain("short natural backchannel");
-    expect(bridgeParams?.instructions).toContain("Call openclaw_agent_consult");
+    expect(bridgeParams?.instructions).toContain("Call bot_agent_consult");
   });
 
   it("routes bidi realtime consults through a configured voice agent session target", async () => {
@@ -4245,7 +4245,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-1",
         callId: "call-1",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "check the maintainer channel context" },
       },
       realtimeSessionMock,
@@ -4292,7 +4292,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-guest",
         callId: "call-guest",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "guest question" },
       },
       realtimeSessionMock,
@@ -4337,7 +4337,7 @@ describe("DiscordVoiceManager", () => {
       {
         itemId: "item-guest",
         callId: "call-guest",
-        name: "openclaw_agent_consult",
+        name: "bot_agent_consult",
         args: { question: "guest question" },
       },
       realtimeSessionMock,
@@ -4771,7 +4771,7 @@ describe("DiscordVoiceManager", () => {
       manager: (client: ReturnType<typeof createClient>) =>
         createManager({ groupPolicy: "open", allowFrom: ["discord:u-owner"] }, client),
       expectedOwner: false,
-      toolNames: { include: ["exec"], exclude: ["gateway", "nodes", "openclaw"] },
+      toolNames: { include: ["exec"], exclude: ["gateway", "nodes", "bot"] },
     },
     ...["*", " * "].map((allowFrom, index) => ({
       name:
@@ -4796,7 +4796,7 @@ describe("DiscordVoiceManager", () => {
           commands: { ownerAllowFrom: ["discord:100000000000000001"] },
         }),
       expectedOwner: true,
-      toolNames: { include: ["gateway", "nodes", "openclaw"], exclude: [] },
+      toolNames: { include: ["gateway", "nodes", "bot"], exclude: [] },
     },
     {
       name: "supports the Discord command-owner wildcard for voice speakers",

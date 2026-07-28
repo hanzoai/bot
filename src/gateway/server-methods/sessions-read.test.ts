@@ -5,11 +5,11 @@ import { GATEWAY_CLIENT_CAPS } from "../../../packages/gateway-protocol/src/clie
 import { replaceSessionEntry } from "../../config/sessions/session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "../../config/sessions/session-sqlite-target.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  listOpenClawRegisteredAgentDatabases,
-  resolveOpenClawAgentSqlitePath,
-} from "../../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+  closeBotAgentDatabasesForTest,
+  listBotRegisteredAgentDatabases,
+  resolveBotAgentSqlitePath,
+} from "../../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import { testState } from "../test-helpers.js";
 import {
   getGatewayConfigModule,
@@ -26,18 +26,18 @@ const UNKNOWN_AGENT_ID = "ghost";
 const UNKNOWN_SESSION_KEY = `agent:${UNKNOWN_AGENT_ID}:zzz`;
 
 function requireStateDir(): string {
-  const stateDir = process.env.OPENCLAW_STATE_DIR;
+  const stateDir = process.env.BOT_STATE_DIR;
   if (!stateDir) {
-    throw new Error("OPENCLAW_STATE_DIR is required");
+    throw new Error("BOT_STATE_DIR is required");
   }
   return stateDir;
 }
 
 function expectAgentStoreAbsent(agentId: string): void {
-  const env = { OPENCLAW_STATE_DIR: requireStateDir() };
-  expect(fs.existsSync(path.join(env.OPENCLAW_STATE_DIR, "agents", agentId))).toBe(false);
-  expect(fs.existsSync(resolveOpenClawAgentSqlitePath({ agentId, env }))).toBe(false);
-  expect(listOpenClawRegisteredAgentDatabases({ env }).map((entry) => entry.agentId)).not.toContain(
+  const env = { BOT_STATE_DIR: requireStateDir() };
+  expect(fs.existsSync(path.join(env.BOT_STATE_DIR, "agents", agentId))).toBe(false);
+  expect(fs.existsSync(resolveBotAgentSqlitePath({ agentId, env }))).toBe(false);
+  expect(listBotRegisteredAgentDatabases({ env }).map((entry) => entry.agentId)).not.toContain(
     agentId,
   );
 }
@@ -73,10 +73,10 @@ async function setAgentsConfig(agentsConfig: Record<string, unknown> | undefined
 }
 
 test("agents.list includes system rows only when negotiated", async () => {
-  fs.mkdirSync(path.join(requireStateDir(), "agents", "openclaw"), { recursive: true });
+  fs.mkdirSync(path.join(requireStateDir(), "agents", "bot"), { recursive: true });
 
   expect(await listAgentIdsViaRpc()).toEqual(["main"]);
-  expect(await listAgentIdsViaRpc(true)).toEqual(["main", "openclaw"]);
+  expect(await listAgentIdsViaRpc(true)).toEqual(["main", "bot"]);
 });
 
 beforeEach(async () => {
@@ -88,8 +88,8 @@ beforeEach(async () => {
 afterEach(() => {
   testState.sessionStorePath = undefined;
   testState.sessionConfig = undefined;
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
 });
 
 async function configureFixedSessionStore(label = "default"): Promise<string> {
@@ -148,8 +148,8 @@ test("sessions.describe reads a pre-existing store after its agent is removed fr
     { sessionId: "session-ghost", updatedAt: 42 },
   );
   await setAgentsConfig({ list: [{ id: "main", default: true }] });
-  const registeredBefore = listOpenClawRegisteredAgentDatabases({
-    env: { OPENCLAW_STATE_DIR: requireStateDir() },
+  const registeredBefore = listBotRegisteredAgentDatabases({
+    env: { BOT_STATE_DIR: requireStateDir() },
   });
 
   const described = await directSessionReq<{ session: { key: string; sessionId: string } | null }>(
@@ -163,8 +163,8 @@ test("sessions.describe reads a pre-existing store after its agent is removed fr
   });
   expect(await listAgentIdsViaRpc()).toEqual(["main"]);
   expect(
-    listOpenClawRegisteredAgentDatabases({
-      env: { OPENCLAW_STATE_DIR: requireStateDir() },
+    listBotRegisteredAgentDatabases({
+      env: { BOT_STATE_DIR: requireStateDir() },
     }),
   ).toEqual(registeredBefore);
 });
@@ -337,17 +337,17 @@ test("session reads still open stores for the default and configured agents", as
     expect(result).toMatchObject({ ok: true, payload: { session: null } });
     expect(
       fs.existsSync(
-        resolveOpenClawAgentSqlitePath({
+        resolveBotAgentSqlitePath({
           agentId,
-          env: { OPENCLAW_STATE_DIR: requireStateDir() },
+          env: { BOT_STATE_DIR: requireStateDir() },
         }),
       ),
     ).toBe(true);
   }
 
   expect(
-    listOpenClawRegisteredAgentDatabases({
-      env: { OPENCLAW_STATE_DIR: requireStateDir() },
+    listBotRegisteredAgentDatabases({
+      env: { BOT_STATE_DIR: requireStateDir() },
     }).map((entry) => entry.agentId),
   ).toEqual(expect.arrayContaining(["main", "work"]));
 });

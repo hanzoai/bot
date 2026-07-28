@@ -1,6 +1,6 @@
 // Long fenced block and compaction retry tests cover Markdown-safe chunking and
 // subscription state reset around automatic compaction retries.
-import type { AssistantMessage } from "openclaw/plugin-sdk/llm";
+import type { AssistantMessage } from "bot/plugin-sdk/llm";
 import { describe, expect, it, vi } from "vitest";
 import {
   createParagraphChunkedBlockReplyHarness,

@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import {
   buildGroupedTestComparison,
@@ -29,7 +29,7 @@ import {
 import { withEnv } from "../../src/test-utils/env.js";
 
 function makeTempDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-test-group-report-"));
+  return fs.mkdtempSync(path.join(os.tmpdir(), "bot-test-group-report-"));
 }
 
 function isProcessAlive(pid: number): boolean {
@@ -1003,7 +1003,7 @@ describe("scripts/test-group-report child process guard", () => {
       return;
     }
 
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-test-group-report-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-test-group-report-"));
     const markerPath = path.join(tempDir, "marker.txt");
     try {
       const result = await spawnText(
@@ -1221,7 +1221,7 @@ describe("scripts/test-group-report child process guard", () => {
   });
 
   it.concurrent("streams large child output to a log path without retaining it", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-test-group-report-log-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-test-group-report-log-"));
     const logPath = path.join(tempDir, "child.log");
     try {
       const result = await spawnText(
@@ -1281,7 +1281,7 @@ describe("scripts/test-group-report child process guard", () => {
   });
 
   it.concurrent("stops streamed child output after the configured log cap", async () => {
-    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-test-group-report-log-cap-"));
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-test-group-report-log-cap-"));
     const logPath = path.join(tempDir, "child.log");
     try {
       const result = await spawnText(
@@ -1323,14 +1323,14 @@ describe("scripts/test-group-report run plans", () => {
   beforeAll(() => {
     withEnv(
       {
-        OPENCLAW_TEST_PROJECTS_PARALLEL: undefined,
-        OPENCLAW_TEST_PROJECTS_LEAF_SHARDS: undefined,
+        BOT_TEST_PROJECTS_PARALLEL: undefined,
+        BOT_TEST_PROJECTS_LEAF_SHARDS: undefined,
       },
       () => {
         serialFullSuitePlans = resolveRunPlans(parseTestGroupReportArgs(["--full-suite"]));
       },
     );
-    withEnv({ OPENCLAW_TEST_PROJECTS_PARALLEL: "6" }, () => {
+    withEnv({ BOT_TEST_PROJECTS_PARALLEL: "6" }, () => {
       parallelFullSuitePlans = resolveRunPlans(parseTestGroupReportArgs(["--full-suite"]));
     });
   });
@@ -1356,7 +1356,7 @@ describe("scripts/test-group-report run plans", () => {
 
   it("caps Vitest workers for full-suite profiling by default", () => {
     expect(resolveFullSuiteVitestEnv(parseTestGroupReportArgs(["--full-suite"]), {})).toEqual({
-      OPENCLAW_VITEST_MAX_WORKERS: "2",
+      BOT_VITEST_MAX_WORKERS: "2",
     });
   });
 
@@ -1364,19 +1364,19 @@ describe("scripts/test-group-report run plans", () => {
     expect(
       resolveFullSuiteVitestEnv(parseTestGroupReportArgs(["--full-suite"]), {}, "commands"),
     ).toEqual({
-      OPENCLAW_VITEST_MAX_WORKERS: "1",
+      BOT_VITEST_MAX_WORKERS: "1",
     });
   });
 
   it("preserves explicit Vitest worker budgets for full-suite profiling", () => {
     expect(
       resolveFullSuiteVitestEnv(parseTestGroupReportArgs(["--full-suite"]), {
-        OPENCLAW_VITEST_MAX_WORKERS: "2",
+        BOT_VITEST_MAX_WORKERS: "2",
       }),
     ).toEqual({});
     expect(
       resolveFullSuiteVitestEnv(parseTestGroupReportArgs(["--full-suite"]), {
-        OPENCLAW_TEST_WORKERS: "2",
+        BOT_TEST_WORKERS: "2",
       }),
     ).toEqual({});
   });
@@ -1406,7 +1406,7 @@ describe("scripts/test-group-report run plans", () => {
       { cwd: "/repo", env: {} },
     );
 
-    expect(specs.map((spec) => spec.env.OPENCLAW_VITEST_FS_MODULE_CACHE_PATH)).toEqual([
+    expect(specs.map((spec) => spec.env.BOT_VITEST_FS_MODULE_CACHE_PATH)).toEqual([
       path.join("/repo", "node_modules", ".experimental-vitest-cache", "0-a.ts"),
       path.join("/repo", "node_modules", ".experimental-vitest-cache", "1-b.ts"),
     ]);

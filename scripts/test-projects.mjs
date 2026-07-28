@@ -146,7 +146,7 @@ async function runVitestSpec(spec) {
 }
 
 function applyDefaultParallelVitestWorkerBudget(specs, env) {
-  if (env.OPENCLAW_VITEST_MAX_WORKERS || env.OPENCLAW_TEST_WORKERS || isCiLikeEnv(env)) {
+  if (env.BOT_VITEST_MAX_WORKERS || env.BOT_TEST_WORKERS || isCiLikeEnv(env)) {
     return specs;
   }
   const { vitestMaxWorkers } = resolveLocalFullSuiteProfile(env);
@@ -154,7 +154,7 @@ function applyDefaultParallelVitestWorkerBudget(specs, env) {
     ...spec,
     env: {
       ...spec.env,
-      OPENCLAW_VITEST_MAX_WORKERS: String(vitestMaxWorkers),
+      BOT_VITEST_MAX_WORKERS: String(vitestMaxWorkers),
     },
   }));
 }
@@ -322,7 +322,7 @@ async function main() {
     changedTargetArgs === null &&
     !runSpecs.some((spec) => spec.watchMode);
   const isExplicitParallelMultiConfigRun =
-    Boolean(baseEnv.OPENCLAW_TEST_PROJECTS_PARALLEL) &&
+    Boolean(baseEnv.BOT_TEST_PROJECTS_PARALLEL) &&
     runSpecs.length > 1 &&
     !runSpecs.some((spec) => spec.watchMode);
   const isParallelShardRun =

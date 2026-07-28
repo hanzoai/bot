@@ -3,7 +3,7 @@
  */
 import type { MemoryCitationsMode } from "../../config/types.memory.js";
 import {
-  OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+  BOT_EMBEDDED_CONTEXT_ENGINE_HOST,
   type ContextEngineHostSupport,
 } from "../../context-engine/host-compat.js";
 import { buildContextEngineRuntimeSettings } from "../../context-engine/runtime-settings.js";
@@ -51,7 +51,7 @@ function buildHarnessContextEngineRuntimeSettings(
     (() => {
       const selectedId = params.contextEngine?.info.id;
       return buildContextEngineRuntimeSettings({
-        contextEngineHost: params.contextEngineHostSupport ?? OPENCLAW_EMBEDDED_CONTEXT_ENGINE_HOST,
+        contextEngineHost: params.contextEngineHostSupport ?? BOT_EMBEDDED_CONTEXT_ENGINE_HOST,
         harnessId: params.harnessId,
         runtimeId: params.runtimeId,
         provider: params.providerId,

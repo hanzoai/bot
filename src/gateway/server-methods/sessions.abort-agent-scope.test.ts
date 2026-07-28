@@ -2,7 +2,7 @@
  * Tests that session abort requests stay scoped to the targeted agent.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createReplyOperation } from "../../auto-reply/reply/reply-run-registry.js";
 import type { GatewayClient, GatewayRequestContext, RespondFn } from "./types.js";
@@ -220,7 +220,7 @@ describe("sessions.abort agent scope", () => {
     listSessionsFromStoreAsyncMock.mockResolvedValue({ sessions: [] });
     loadCombinedSessionStoreForGatewayMock.mockReset();
     loadCombinedSessionStoreForGatewayMock.mockReturnValue({
-      storePath: "/tmp/openclaw-sessions.json",
+      storePath: "/tmp/bot-sessions.json",
       store: {},
     });
     loadSessionEntryMock.mockClear();
@@ -258,7 +258,7 @@ describe("sessions.abort agent scope", () => {
       extra: { loadGatewayModelCatalog: vi.fn().mockResolvedValue([]) },
     });
     listSessionsFromStoreAsyncMock.mockResolvedValue({
-      sessions: [{ key: "agent:main:openclaw-weixin:direct:user", sessionId: "sess-weixin" }],
+      sessions: [{ key: "agent:main:bot-weixin:direct:user", sessionId: "sess-weixin" }],
     });
     isEmbeddedAgentRunInProgressMock.mockImplementation(
       (sessionId: string) => sessionId === "sess-weixin",
@@ -276,7 +276,7 @@ describe("sessions.abort agent scope", () => {
       expect.objectContaining({
         sessions: [
           expect.objectContaining({
-            key: "agent:main:openclaw-weixin:direct:user",
+            key: "agent:main:bot-weixin:direct:user",
             sessionId: "sess-weixin",
             hasActiveRun: true,
           }),
@@ -387,7 +387,7 @@ describe("sessions.abort agent scope", () => {
   it("reports reply-only aborts as aborted without a fabricated run id", async () => {
     const broadcastToConnIds = vi.fn();
     const weixinOperation = createReplyOperation({
-      sessionKey: "agent:main:openclaw-weixin:direct:wechat-user",
+      sessionKey: "agent:main:bot-weixin:direct:wechat-user",
       sessionId: "weixin-session",
       resetTriggered: false,
     });
@@ -402,7 +402,7 @@ describe("sessions.abort agent scope", () => {
       entry: { sessionId: "weixin-session" },
     }));
     loadGatewaySessionRowMock.mockReturnValue({
-      key: "agent:main:openclaw-weixin:direct:wechat-user",
+      key: "agent:main:bot-weixin:direct:wechat-user",
       kind: "direct",
       sessionId: "weixin-session",
       updatedAt: null,
@@ -418,7 +418,7 @@ describe("sessions.abort agent scope", () => {
     try {
       const respond = await callSessions(
         "sessions.abort",
-        { key: "agent:main:openclaw-weixin:direct:wechat-user" },
+        { key: "agent:main:bot-weixin:direct:wechat-user" },
         { context, reqId: "req-reply-only-abort" },
       );
 
@@ -436,13 +436,13 @@ describe("sessions.abort agent scope", () => {
         "sessions.changed",
         expect.objectContaining({
           hasActiveRun: false,
-          sessionKey: "agent:main:openclaw-weixin:direct:wechat-user",
+          sessionKey: "agent:main:bot-weixin:direct:wechat-user",
           reason: "abort",
         }),
         new Set(["conn-1"]),
         {
           dropIfSlow: true,
-          sessionKeys: ["agent:main:openclaw-weixin:direct:wechat-user"],
+          sessionKeys: ["agent:main:bot-weixin:direct:wechat-user"],
         },
       );
     } finally {
@@ -453,7 +453,7 @@ describe("sessions.abort agent scope", () => {
 
   it("preserves queued work while also aborting the exact active reply run", async () => {
     const weixinOperation = createReplyOperation({
-      sessionKey: "agent:main:openclaw-weixin:direct:wechat-user",
+      sessionKey: "agent:main:bot-weixin:direct:wechat-user",
       sessionId: "weixin-session",
       resetTriggered: false,
     });
@@ -477,7 +477,7 @@ describe("sessions.abort agent scope", () => {
     try {
       const respond = await callSessions(
         "sessions.abort",
-        { key: "agent:main:openclaw-weixin:direct:wechat-user" },
+        { key: "agent:main:bot-weixin:direct:wechat-user" },
         { context, reqId: "req-visible-and-reply-abort" },
       );
 
@@ -517,15 +517,15 @@ describe("sessions.abort agent scope", () => {
     const respond = await callSessions(
       "sessions.abort",
       {
-        key: "agent:main:openclaw-weixin:direct:queued-user",
+        key: "agent:main:bot-weixin:direct:queued-user",
         clearQueued: true,
       },
       { context, reqId: "req-queued-only-abort" },
     );
 
     expect(clearSessionQueuesMock).toHaveBeenCalledWith([
-      "agent:main:openclaw-weixin:direct:queued-user",
-      "agent:main:openclaw-weixin:direct:queued-user",
+      "agent:main:bot-weixin:direct:queued-user",
+      "agent:main:bot-weixin:direct:queued-user",
       "queued-session",
     ]);
     expect(abortEmbeddedAgentRunMock).toHaveBeenCalledWith("queued-session");
@@ -538,7 +538,7 @@ describe("sessions.abort agent scope", () => {
   });
 
   it("clears key-addressed queues without requiring a persisted session id", async () => {
-    const sessionKey = "agent:main:openclaw-weixin:direct:queued-without-entry";
+    const sessionKey = "agent:main:bot-weixin:direct:queued-without-entry";
     mockChatSuccess(chatAbortMock, { ok: true, aborted: false, runIds: [] });
     loadSessionEntryMock.mockImplementationOnce(() => ({ canonicalKey: sessionKey }));
     clearSessionQueuesMock.mockReturnValueOnce({
@@ -579,7 +579,7 @@ describe("sessions.abort agent scope", () => {
     const respond = await callSessions(
       "sessions.abort",
       {
-        key: "agent:main:openclaw-weixin:direct:wechat-user",
+        key: "agent:main:bot-weixin:direct:wechat-user",
         runId: "missing-run",
       },
       { context, reqId: "req-targeted-run-abort" },

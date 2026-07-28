@@ -6,15 +6,15 @@ import path from "node:path";
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   archiveLegacyStateSource,
   defineChannelAliasMigration,
   type PluginDoctorStateMigration,
-} from "openclaw/plugin-sdk/runtime-doctor";
-import { resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/runtime-doctor";
+import { resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import { normalizeStoredConversationId } from "./src/conversation-store-helpers.js";
 import {
   buildMSTeamsConversationStateKey,
@@ -74,7 +74,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] =
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): ChannelDoctorConfigMutation {
   return streamingAliasMigration.normalizeChannelConfig({ cfg });
 }
@@ -147,7 +147,7 @@ function resolveLegacySanitizedSessionKey(
   return matches.length === 1 && match ? match : null;
 }
 
-function listAgentIds(config: OpenClawConfig): string[] {
+function listAgentIds(config: BotConfig): string[] {
   const ids = new Set<string>(["main"]);
   if (isRecord(config.agents?.entries)) {
     for (const agentId of Object.keys(config.agents.entries)) {

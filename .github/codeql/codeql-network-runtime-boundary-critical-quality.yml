@@ -1,10 +1,10 @@
-name: openclaw-codeql-network-runtime-boundary-critical-quality
+name: bot-codeql-network-runtime-boundary-critical-quality
 
 disable-default-queries: true
 
 queries:
-  - uses: ./.github/codeql/openclaw-boundary/queries/raw-socket-callsite-classification.ql
-  - uses: ./.github/codeql/openclaw-boundary/queries/managed-proxy-runtime-mutation.ql
+  - uses: ./.github/codeql/bot-boundary/queries/raw-socket-callsite-classification.ql
+  - uses: ./.github/codeql/bot-boundary/queries/managed-proxy-runtime-mutation.ql
 
 paths:
   - src/cli/gateway-cli/run-loop.ts

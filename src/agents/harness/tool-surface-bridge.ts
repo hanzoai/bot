@@ -1,5 +1,5 @@
 import { messageToolOwnsVisibleReply } from "../../auto-reply/source-reply-delivery-mode.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { HookContext } from "../agent-tools.before-tool-call.js";
 import { getActiveAgentRingZeroTools } from "../agent-tools.ring-zero-context.js";
 import {
@@ -49,7 +49,7 @@ export type AgentHarnessToolSurfaceRuntime = {
   ) => {
     tools: AnyAgentTool[];
   };
-  config: OpenClawConfig | undefined;
+  config: BotConfig | undefined;
   includeToolSearchControls: boolean;
   runtimeToolAllowlist: string[] | undefined;
   toolSearchCatalogRef: ToolSearchCatalogRef | undefined;
@@ -61,7 +61,7 @@ export type AgentHarnessToolSurfaceRuntime = {
 export function createAgentHarnessToolSurfaceRuntime(params: {
   abortSignal?: AbortSignal;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   disableTools?: boolean;
   executeTool: ToolSearchCatalogToolExecutor;
   forceMessageTool?: boolean;

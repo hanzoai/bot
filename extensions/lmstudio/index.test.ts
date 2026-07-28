@@ -1,8 +1,8 @@
 // Lmstudio tests cover index plugin behavior.
-import type { OpenClawConfig, ProviderAuthMethod } from "openclaw/plugin-sdk/plugin-entry";
-import { capturePluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
-import { CUSTOM_LOCAL_AUTH_MARKER } from "openclaw/plugin-sdk/provider-auth";
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
+import type { BotConfig, ProviderAuthMethod } from "bot/plugin-sdk/plugin-entry";
+import { capturePluginRegistration } from "bot/plugin-sdk/plugin-test-runtime";
+import { CUSTOM_LOCAL_AUTH_MARKER } from "bot/plugin-sdk/provider-auth";
+import type { ModelProviderConfig } from "bot/plugin-sdk/provider-model-shared";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import plugin from "./index.js";
 import { LMSTUDIO_LOCAL_API_KEY_PLACEHOLDER } from "./src/defaults.js";
@@ -352,12 +352,12 @@ describe("lmstudio plugin", () => {
           },
         },
       },
-    } as unknown as OpenClawConfig;
+    } as unknown as BotConfig;
 
     expect(
       provider?.augmentModelCatalog?.({
         config,
-        agentDir: "/tmp/openclaw",
+        agentDir: "/tmp/bot",
         env: {},
         entries: [],
       }),

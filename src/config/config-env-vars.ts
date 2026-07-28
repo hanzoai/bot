@@ -11,12 +11,12 @@ import {
 } from "../infra/host-env-security.js";
 import { containsEnvVarReference } from "./env-substitution.js";
 import { ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS_ENV } from "./future-version-guard.js";
-import type { OpenClawConfig } from "./types.js";
+import type { BotConfig } from "./types.js";
 
 function isBlockedConfigEnvVar(key: string): boolean {
   return (
     key.toUpperCase() === ALLOW_OLDER_BINARY_DESTRUCTIVE_ACTIONS_ENV ||
-    key.toUpperCase() === "OPENCLAW_INCLUDE_ROOTS" ||
+    key.toUpperCase() === "BOT_INCLUDE_ROOTS" ||
     isDangerousHostEnvVarName(key) ||
     isDangerousHostEnvOverrideVarName(key)
   );
@@ -27,7 +27,7 @@ export function isConfigRuntimeEnvVarAllowed(key: string, value: string): boolea
   return Boolean(value.trim()) && !isBlockedConfigEnvVar(key) && !containsEnvVarReference(value);
 }
 
-function collectConfigEnvVarsByTarget(cfg?: OpenClawConfig): Record<string, string> {
+function collectConfigEnvVarsByTarget(cfg?: BotConfig): Record<string, string> {
   const envConfig = cfg?.env;
   if (!envConfig) {
     return {};
@@ -175,19 +175,19 @@ export function cloneEnvWithPlatformSemantics(env: NodeJS.ProcessEnv): NodeJS.Pr
 }
 
 /** Collects config env vars safe to inject into runtime process environments. */
-export function collectConfigRuntimeEnvVars(cfg?: OpenClawConfig): Record<string, string> {
+export function collectConfigRuntimeEnvVars(cfg?: BotConfig): Record<string, string> {
   return collectConfigEnvVarsByTarget(cfg);
 }
 
 /** Collects config env vars safe to persist into managed service environments. */
-export function collectConfigServiceEnvVars(cfg?: OpenClawConfig): Record<string, string> {
+export function collectConfigServiceEnvVars(cfg?: BotConfig): Record<string, string> {
   // Runtime and service envs intentionally share filtering until a target-specific contract exists.
   return collectConfigEnvVarsByTarget(cfg);
 }
 
 /** Builds a cloned environment with config env vars applied without mutating the base env. */
 export function createConfigRuntimeEnv(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   baseEnv: NodeJS.ProcessEnv = process.env,
 ): NodeJS.ProcessEnv {
   const env = cloneEnvWithPlatformSemantics(baseEnv);
@@ -208,7 +208,7 @@ export type PreparedConfigRuntimeEnv = {
 type PublishedConfigRuntimeEnvState = {
   generation: number;
   ownedEnv: Readonly<Record<string, string>>;
-  sourceConfig: OpenClawConfig | null;
+  sourceConfig: BotConfig | null;
 };
 
 type PublishedConfigRuntimeEnvChange = {
@@ -284,7 +284,7 @@ export function getPublishedConfigRuntimeEnvState(): PublishedConfigRuntimeEnvSt
 }
 
 export function collectConfigRuntimeEnvOwnership(
-  sourceConfig: OpenClawConfig,
+  sourceConfig: BotConfig,
   before: Readonly<Record<string, string | undefined>>,
   after: Readonly<Record<string, string | undefined>>,
   options: { replacedLowerPrecedenceKeys?: readonly string[] } = {},
@@ -316,7 +316,7 @@ export function collectConfigRuntimeEnvOwnership(
 }
 
 function filterConfigRuntimeEnvOwnership(
-  sourceConfig: OpenClawConfig,
+  sourceConfig: BotConfig,
   env: NodeJS.ProcessEnv,
   ownedEnv: Readonly<Record<string, string>>,
 ): Record<string, string> {
@@ -340,7 +340,7 @@ function filterConfigRuntimeEnvOwnership(
 }
 
 export function initializePublishedConfigRuntimeEnv(
-  sourceConfig: OpenClawConfig,
+  sourceConfig: BotConfig,
   options: {
     ownedEnv?: Readonly<Record<string, string>>;
     preserveExistingOwnership?: boolean;
@@ -370,7 +370,7 @@ export function resetPublishedConfigRuntimeEnv(): void {
 
 /** Removes the active config-owned layer from an isolated read environment. */
 export function createConfigRuntimeEnvBase(
-  activeConfig: OpenClawConfig,
+  activeConfig: BotConfig,
   env: NodeJS.ProcessEnv = process.env,
   options: {
     ownedEnv?: Readonly<Record<string, string>>;
@@ -396,8 +396,8 @@ export function createConfigRuntimeEnvBase(
 
 /** Prepares a config-owned env layer without mutating the live process. */
 export function prepareConfigRuntimeEnv(params: {
-  previousConfig: OpenClawConfig;
-  nextConfig: OpenClawConfig;
+  previousConfig: BotConfig;
+  nextConfig: BotConfig;
   env?: NodeJS.ProcessEnv;
   previousOwnedEnv?: Readonly<Record<string, string>>;
 }): PreparedConfigRuntimeEnv {
@@ -534,7 +534,7 @@ export function prepareConfigRuntimeEnv(params: {
 
 /** Applies config env vars to an environment without overwriting existing non-empty values. */
 export function applyConfigEnvVars(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv = process.env,
   options: {
     lowerPrecedenceEnv?: Readonly<Record<string, string>>;
@@ -595,7 +595,7 @@ export function applyConfigEnvVars(
     }
     // Skip values containing unresolved ${VAR} references — applyConfigEnvVars runs
     // before env substitution, so these would pollute process.env with literal placeholders
-    // (e.g. process.env.OPENCLAW_GATEWAY_TOKEN = "${VAULT_TOKEN}") which downstream auth
+    // (e.g. process.env.BOT_GATEWAY_TOKEN = "${VAULT_TOKEN}") which downstream auth
     // resolution would accept as valid credentials.
     if (containsEnvVarReference(value)) {
       continue;

@@ -2,7 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { DatabaseSync } from "node:sqlite";
-import type { Result } from "@openclaw/normalization-core/result";
+import type { Result } from "@hanzo/bot-normalization-core/result";
 import { MAX_TIMER_TIMEOUT_MS } from "../shared/number-coercion.js";
 import { isSqliteLockError } from "./sqlite-transaction.js";
 

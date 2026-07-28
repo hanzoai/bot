@@ -1,22 +1,22 @@
 // Lobster tests cover lobster tool plugin behavior.
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+import { createTestPluginApi } from "bot/plugin-sdk/plugin-test-api";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi, OpenClawPluginToolContext } from "../runtime-api.js";
+import type { BotPluginApi, BotPluginToolContext } from "../runtime-api.js";
 import { createLobsterTool } from "./lobster-tool.js";
 import { createFakeTaskFlow } from "./taskflow-test-helpers.js";
 
-function fakeApi(overrides: Partial<OpenClawPluginApi> = {}): OpenClawPluginApi {
+function fakeApi(overrides: Partial<BotPluginApi> = {}): BotPluginApi {
   return createTestPluginApi({
     id: "lobster",
     name: "lobster",
     source: "test",
-    runtime: { version: "test" } as OpenClawPluginApi["runtime"],
+    runtime: { version: "test" } as BotPluginApi["runtime"],
     resolvePath: (p) => p,
     ...overrides,
   });
 }
 
-function fakeCtx(overrides: Partial<OpenClawPluginToolContext> = {}): OpenClawPluginToolContext {
+function fakeCtx(overrides: Partial<BotPluginToolContext> = {}): BotPluginToolContext {
   return {
     config: {},
     workspaceDir: "/tmp",
@@ -585,7 +585,7 @@ describe("lobster plugin tool", () => {
 
   it("can be gated off in sandboxed contexts", () => {
     const api = fakeApi();
-    const factoryTool = (ctx: OpenClawPluginToolContext) => {
+    const factoryTool = (ctx: BotPluginToolContext) => {
       if (ctx.sandboxed) {
         return null;
       }

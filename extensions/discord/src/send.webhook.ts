@@ -1,13 +1,13 @@
 // Discord plugin module implements send.webhook behavior.
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
-import { recordOutboundMessageIdentity } from "openclaw/plugin-sdk/channel-outbound";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { recordChannelActivity } from "bot/plugin-sdk/channel-activity-runtime";
+import { recordOutboundMessageIdentity } from "bot/plugin-sdk/channel-outbound";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   readProviderJsonResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/provider-http";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { resolveDiscordClientAccountContext } from "./client.js";
 import {
   DiscordError,
@@ -23,7 +23,7 @@ import type { DiscordSendResult } from "./send.types.js";
 const DISCORD_WEBHOOK_ERROR_BODY_LIMIT_BYTES = 8 * 1024;
 
 type DiscordWebhookSendOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   webhookId: string;
   webhookToken: string;
   accountId?: string;

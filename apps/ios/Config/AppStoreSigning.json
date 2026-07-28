@@ -1,46 +1,46 @@
 {
   "teamId": "FWJYW4S8P8",
-  "signingRepo": "git@github.com:openclaw/apps-signing.git",
+  "signingRepo": "git@github.com:bot/apps-signing.git",
   "signingBranch": "main",
   "profileType": "appstore",
-  "appGroupId": "group.ai.openclawfoundation.app.shared",
+  "appGroupId": "group.ai.botfoundation.app.shared",
   "targets": [
     {
-      "target": "OpenClaw",
-      "displayName": "OpenClaw",
-      "bundleId": "ai.openclawfoundation.app",
+      "target": "Bot",
+      "displayName": "Bot",
+      "bundleId": "ai.botfoundation.app",
       "platform": "IOS",
-      "profileKey": "OPENCLAW_APP_PROFILE",
-      "profileName": "OpenClaw App Store ai.openclawfoundation.app",
+      "profileKey": "BOT_APP_PROFILE",
+      "profileName": "Bot App Store ai.botfoundation.app",
       "capabilities": ["PUSH_NOTIFICATIONS", "APP_GROUPS", "APP_ATTEST", "HEALTH_KIT"],
-      "appGroups": ["group.ai.openclawfoundation.app.shared"]
+      "appGroups": ["group.ai.botfoundation.app.shared"]
     },
     {
-      "target": "OpenClawShareExtension",
-      "displayName": "OpenClaw Share",
-      "bundleId": "ai.openclawfoundation.app.share",
+      "target": "BotShareExtension",
+      "displayName": "Bot Share",
+      "bundleId": "ai.botfoundation.app.share",
       "platform": "IOS",
-      "profileKey": "OPENCLAW_SHARE_PROFILE",
-      "profileName": "OpenClaw App Store ai.openclawfoundation.app.share",
+      "profileKey": "BOT_SHARE_PROFILE",
+      "profileName": "Bot App Store ai.botfoundation.app.share",
       "capabilities": ["APP_GROUPS"],
-      "appGroups": ["group.ai.openclawfoundation.app.shared"]
+      "appGroups": ["group.ai.botfoundation.app.shared"]
     },
     {
-      "target": "OpenClawActivityWidget",
-      "displayName": "OpenClaw Activity Widget",
-      "bundleId": "ai.openclawfoundation.app.activitywidget",
+      "target": "BotActivityWidget",
+      "displayName": "Bot Activity Widget",
+      "bundleId": "ai.botfoundation.app.activitywidget",
       "platform": "IOS",
-      "profileKey": "OPENCLAW_ACTIVITY_WIDGET_PROFILE",
-      "profileName": "OpenClaw App Store ai.openclawfoundation.app.activitywidget",
+      "profileKey": "BOT_ACTIVITY_WIDGET_PROFILE",
+      "profileName": "Bot App Store ai.botfoundation.app.activitywidget",
       "capabilities": []
     },
     {
-      "target": "OpenClawWatchApp",
-      "displayName": "OpenClaw Watch App",
-      "bundleId": "ai.openclawfoundation.app.watchkitapp",
+      "target": "BotWatchApp",
+      "displayName": "Bot Watch App",
+      "bundleId": "ai.botfoundation.app.watchkitapp",
       "platform": "IOS",
-      "profileKey": "OPENCLAW_WATCH_APP_PROFILE",
-      "profileName": "OpenClaw App Store ai.openclawfoundation.app.watchkitapp",
+      "profileKey": "BOT_WATCH_APP_PROFILE",
+      "profileName": "Bot App Store ai.botfoundation.app.watchkitapp",
       "capabilities": []
     }
   ]

@@ -1,6 +1,6 @@
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import type { PluginStateKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { parseStrictPositiveInteger } from "bot/plugin-sdk/number-runtime";
+import type { PluginStateKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { AuditRow } from "./broker.js";
 import type { OnePasswordConfig } from "./config.js";
 import type { OpClient } from "./op-client.js";

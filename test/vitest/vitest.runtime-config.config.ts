@@ -5,7 +5,7 @@ export function createRuntimeConfigVitestConfig(env?: Record<string, string | un
   const config = createScopedVitestConfig(["src/config/**/*.test.ts"], {
     dir: "src",
     env,
-    includeOpenClawRuntimeSetup: false,
+    includeBotRuntimeSetup: false,
     name: "runtime-config",
     passWithNoTests: true,
     // Native SQLite handles can abort V8 when threaded workers tear down.

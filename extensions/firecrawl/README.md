@@ -1,12 +1,12 @@
-# OpenClaw Firecrawl Plugin
+# Bot Firecrawl Plugin
 
-Official OpenClaw plugin for Firecrawl.
+Official Bot plugin for Firecrawl.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/firecrawl-plugin
-openclaw gateway restart
+bot plugins install @hanzo/bot-firecrawl-plugin
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/tools/firecrawl> for setup and configuration.
+See <https://docs.bot.ai/tools/firecrawl> for setup and configuration.

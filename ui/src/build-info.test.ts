@@ -5,7 +5,7 @@ const COMMIT = "0123456789abcdef0123456789abcdef01234567";
 
 describe("Control UI build info", () => {
   it("compares the normalized embedded version with the gateway", async () => {
-    vi.stubGlobal("OPENCLAW_CONTROL_UI_BUILD_INFO", {
+    vi.stubGlobal("BOT_CONTROL_UI_BUILD_INFO", {
       version: "2026.7.19",
       buildId: "test",
     });

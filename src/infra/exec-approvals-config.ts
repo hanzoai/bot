@@ -5,7 +5,7 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
   readStringValue,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { DEFAULT_AGENT_ID } from "../routing/session-key.js";
 import type {
   ExecApprovalsAgent,
@@ -32,14 +32,14 @@ export const DEFAULT_SECURITY: ExecSecurity = "full";
 export const DEFAULT_ASK: ExecAsk = "off";
 export const DEFAULT_EXEC_APPROVAL_ASK_FALLBACK: ExecSecurity = "deny";
 export const DEFAULT_AUTO_ALLOW_SKILLS = false;
-const DEFAULT_EXEC_APPROVALS_STATE_DIR = "~/.openclaw";
+const DEFAULT_EXEC_APPROVALS_STATE_DIR = "~/.bot";
 const EXEC_APPROVALS_FILE = "exec-approvals.json";
 const EXEC_APPROVALS_SOCKET = "exec-approvals.sock";
 function resolveExecApprovalsStateDir(env: NodeJS.ProcessEnv = process.env): {
   path: string;
   displayPath: string;
 } {
-  const override = env.OPENCLAW_STATE_DIR?.trim();
+  const override = env.BOT_STATE_DIR?.trim();
   if (override) {
     const resolved = resolveHomeRelativePath(override, { env });
     return {
@@ -63,16 +63,16 @@ export function resolveExecApprovalsSocketPath(): string {
 
 export function resolveExecApprovalsDisplayPath(): string {
   const stateDir = resolveExecApprovalsStateDir().displayPath;
-  const locator = path.join("state", "openclaw.sqlite#exec_approvals_config");
+  const locator = path.join("state", "bot.sqlite#exec_approvals_config");
   return stateDir === DEFAULT_EXEC_APPROVALS_STATE_DIR
     ? `${stateDir}/${locator}`
     : path.join(stateDir, locator);
 }
 
 export function resolveExecApprovalsTranscriptPath(): string {
-  return process.env.OPENCLAW_STATE_DIR?.trim()
-    ? "$OPENCLAW_STATE_DIR/state/openclaw.sqlite#exec_approvals_config"
-    : `${DEFAULT_EXEC_APPROVALS_STATE_DIR}/state/openclaw.sqlite#exec_approvals_config`;
+  return process.env.BOT_STATE_DIR?.trim()
+    ? "$BOT_STATE_DIR/state/bot.sqlite#exec_approvals_config"
+    : `${DEFAULT_EXEC_APPROVALS_STATE_DIR}/state/bot.sqlite#exec_approvals_config`;
 }
 
 export function createFailClosedExecApprovalsFallback(): ExecApprovalsFile {

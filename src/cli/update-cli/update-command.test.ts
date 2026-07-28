@@ -23,7 +23,7 @@ import { testing as updateCommandServiceTesting } from "./update-command-service
 
 describe("resolveGatewayInstallEntrypoint", () => {
   it("prefers dist/index.js over dist/entry.js when both exist", async () => {
-    const root = "/tmp/openclaw-root";
+    const root = "/tmp/bot-root";
     const indexPath = path.join(root, "dist", "index.js");
     const entryPath = path.join(root, "dist", "entry.js");
 
@@ -36,7 +36,7 @@ describe("resolveGatewayInstallEntrypoint", () => {
   });
 
   it("falls back to dist/entry.js when index.js is missing", async () => {
-    const root = "/tmp/openclaw-root";
+    const root = "/tmp/bot-root";
     const entryPath = path.join(root, "dist", "entry.js");
 
     await expect(
@@ -67,7 +67,7 @@ describe("applyPostPluginConfigValidation", () => {
       reason: "post-plugin-doctor-invalid-config",
       warnings: [
         {
-          guidance: ["Run `openclaw doctor --fix`, then rerun `openclaw update repair`."],
+          guidance: ["Run `bot doctor --fix`, then rerun `bot update repair`."],
         },
       ],
     });
@@ -159,8 +159,8 @@ describe("resolveUpdatedGatewayRestartPort", () => {
     expect(
       resolveUpdatedGatewayRestartPort({
         config: { gateway: { port: 19000 } } as never,
-        processEnv: { OPENCLAW_GATEWAY_PORT: "19001" },
-        serviceEnv: { OPENCLAW_GATEWAY_PORT: "19002" },
+        processEnv: { BOT_GATEWAY_PORT: "19001" },
+        serviceEnv: { BOT_GATEWAY_PORT: "19002" },
       }),
     ).toBe(19002);
   });
@@ -179,12 +179,12 @@ describe("resolveUpdatedGatewayRestartPort", () => {
 describe("resolvePostUpdateServiceStateReadEnv", () => {
   it("keeps package restart preparation anchored to the pre-update service env", () => {
     const processEnv = {
-      OPENCLAW_STATE_DIR: "/source/state",
-      OPENCLAW_CONFIG_PATH: "/source/openclaw.json",
+      BOT_STATE_DIR: "/source/state",
+      BOT_CONFIG_PATH: "/source/bot.json",
     } as NodeJS.ProcessEnv;
     const prePackageServiceEnv = {
-      OPENCLAW_STATE_DIR: "/managed/state",
-      OPENCLAW_CONFIG_PATH: "/managed/openclaw.json",
+      BOT_STATE_DIR: "/managed/state",
+      BOT_CONFIG_PATH: "/managed/bot.json",
     } as NodeJS.ProcessEnv;
 
     expect(
@@ -197,8 +197,8 @@ describe("resolvePostUpdateServiceStateReadEnv", () => {
   });
 
   it("keeps git updates tied to the caller environment", () => {
-    const processEnv = { OPENCLAW_STATE_DIR: "/source/state" } as NodeJS.ProcessEnv;
-    const prePackageServiceEnv = { OPENCLAW_STATE_DIR: "/managed/state" } as NodeJS.ProcessEnv;
+    const processEnv = { BOT_STATE_DIR: "/source/state" } as NodeJS.ProcessEnv;
+    const prePackageServiceEnv = { BOT_STATE_DIR: "/managed/state" } as NodeJS.ProcessEnv;
 
     expect(
       resolvePostUpdateServiceStateReadEnv({
@@ -210,8 +210,8 @@ describe("resolvePostUpdateServiceStateReadEnv", () => {
   });
 
   it("uses the managed service environment for git updates stopped by this updater", () => {
-    const processEnv = { OPENCLAW_STATE_DIR: "/source/state" } as NodeJS.ProcessEnv;
-    const preManagedServiceEnv = { OPENCLAW_STATE_DIR: "/managed/state" } as NodeJS.ProcessEnv;
+    const processEnv = { BOT_STATE_DIR: "/source/state" } as NodeJS.ProcessEnv;
+    const preManagedServiceEnv = { BOT_STATE_DIR: "/managed/state" } as NodeJS.ProcessEnv;
 
     expect(
       resolvePostUpdateServiceStateReadEnv({
@@ -226,61 +226,61 @@ describe("resolvePostUpdateServiceStateReadEnv", () => {
 describe("resolvePostInstallDoctorEnv", () => {
   it("uses the managed service profile paths for post-install doctor", () => {
     const env = resolvePostInstallDoctorEnv({
-      invocationCwd: "/srv/openclaw",
+      invocationCwd: "/srv/bot",
       baseEnv: {
         PATH: "/bin",
-        OPENCLAW_STATE_DIR: "/wrong/state",
-        OPENCLAW_CONFIG_PATH: "/wrong/openclaw.json",
-        OPENCLAW_PROFILE: "wrong",
+        BOT_STATE_DIR: "/wrong/state",
+        BOT_CONFIG_PATH: "/wrong/bot.json",
+        BOT_PROFILE: "wrong",
       },
       serviceEnv: {
-        OPENCLAW_STATE_DIR: "daemon-state",
-        OPENCLAW_CONFIG_PATH: "daemon-state/openclaw.json",
-        OPENCLAW_PROFILE: "work",
+        BOT_STATE_DIR: "daemon-state",
+        BOT_CONFIG_PATH: "daemon-state/bot.json",
+        BOT_PROFILE: "work",
       },
     });
 
     expect(env.PATH).toBe("/bin");
     expect(env.NODE_DISABLE_COMPILE_CACHE).toBe("1");
-    expect(env.OPENCLAW_STATE_DIR).toBe(path.join("/srv/openclaw", "daemon-state"));
-    expect(env.OPENCLAW_CONFIG_PATH).toBe(
-      path.join("/srv/openclaw", "daemon-state", "openclaw.json"),
+    expect(env.BOT_STATE_DIR).toBe(path.join("/srv/bot", "daemon-state"));
+    expect(env.BOT_CONFIG_PATH).toBe(
+      path.join("/srv/bot", "daemon-state", "bot.json"),
     );
-    expect(env.OPENCLAW_PROFILE).toBe("work");
+    expect(env.BOT_PROFILE).toBe("work");
   });
 
   it("keeps the caller env when no managed service env is available", () => {
     const env = resolvePostInstallDoctorEnv({
       baseEnv: {
         PATH: "/bin",
-        OPENCLAW_STATE_DIR: "/caller/state",
-        OPENCLAW_PROFILE: "caller",
+        BOT_STATE_DIR: "/caller/state",
+        BOT_PROFILE: "caller",
       },
     });
 
     expect(env.PATH).toBe("/bin");
     expect(env.NODE_DISABLE_COMPILE_CACHE).toBe("1");
-    expect(env.OPENCLAW_STATE_DIR).toBe("/caller/state");
-    expect(env.OPENCLAW_PROFILE).toBe("caller");
+    expect(env.BOT_STATE_DIR).toBe("/caller/state");
+    expect(env.BOT_PROFILE).toBe("caller");
   });
 });
 
 describe("collectMissingPluginInstallPayloads", () => {
   it("reports tracked npm install records whose package payload is absent", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
-    const presentDir = path.join(tmpDir, "state", "npm", "node_modules", "@openclaw", "present");
-    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@openclaw", "missing");
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-update-plugin-payload-"));
+    const presentDir = path.join(tmpDir, "state", "npm", "node_modules", "@bot", "present");
+    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@bot", "missing");
     const noPackageJsonDir = path.join(
       tmpDir,
       "state",
       "npm",
       "node_modules",
-      "@openclaw",
+      "@bot",
       "no-package-json",
     );
     try {
       await fs.mkdir(presentDir, { recursive: true });
-      await fs.writeFile(path.join(presentDir, "package.json"), '{"name":"@openclaw/present"}\n');
+      await fs.writeFile(path.join(presentDir, "package.json"), '{"name":"@hanzo/bot-present"}\n');
       await fs.mkdir(noPackageJsonDir, { recursive: true });
 
       await expect(
@@ -289,22 +289,22 @@ describe("collectMissingPluginInstallPayloads", () => {
           records: {
             present: {
               source: "npm",
-              spec: "@openclaw/present@beta",
+              spec: "@hanzo/bot-present@beta",
               installPath: presentDir,
             },
             missing: {
               source: "npm",
-              spec: "@openclaw/missing@beta",
+              spec: "@hanzo/bot-missing@beta",
               installPath: missingDir,
             },
             "no-package-json": {
               source: "npm",
-              spec: "@openclaw/no-package-json@beta",
+              spec: "@hanzo/bot-no-package-json@beta",
               installPath: noPackageJsonDir,
             },
             "missing-install-path": {
               source: "npm",
-              spec: "@openclaw/missing-install-path@beta",
+              spec: "@hanzo/bot-missing-install-path@beta",
             },
             local: {
               source: "path",
@@ -335,7 +335,7 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("accepts tracked bundle records validated by the shared bundle loader", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-update-plugin-payload-"));
     const bundleDir = path.join(tmpDir, "state", "clawhub", "cursor-bundle");
     try {
       await fs.mkdir(path.join(bundleDir, ".cursor-plugin"), { recursive: true });
@@ -362,7 +362,7 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("accepts persisted marketplace bundle records without transient format metadata", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-update-plugin-payload-"));
     const bundleDir = path.join(tmpDir, "state", "marketplace", "cursor-bundle");
     try {
       await fs.mkdir(path.join(bundleDir, ".cursor-plugin"), { recursive: true });
@@ -391,7 +391,7 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("keeps dual-format bundle records on the native package payload path", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-update-plugin-payload-"));
     const bundleDir = path.join(tmpDir, "state", "clawhub", "dual-format-bundle");
     try {
       await fs.mkdir(path.join(bundleDir, ".codex-plugin"), { recursive: true });
@@ -404,7 +404,7 @@ describe("collectMissingPluginInstallPayloads", () => {
         path.join(bundleDir, "package.json"),
         JSON.stringify({
           name: "dual-format-bundle",
-          openclaw: { extensions: ["./missing-extension.js"] },
+          bot: { extensions: ["./missing-extension.js"] },
         }),
         "utf8",
       );
@@ -426,7 +426,7 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("keeps corrupt tracked bundle records eligible for payload repair", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-update-plugin-payload-"));
     const bundleDir = path.join(tmpDir, "state", "clawhub", "bad-bundle");
     try {
       await fs.mkdir(path.join(bundleDir, ".codex-plugin"), { recursive: true });
@@ -455,8 +455,8 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("skips disabled tracked records when requested", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
-    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@openclaw", "missing");
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-update-plugin-payload-"));
+    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@bot", "missing");
     try {
       await expect(
         updateCommandPluginsTesting.collectMissingPluginInstallPayloads({
@@ -474,7 +474,7 @@ describe("collectMissingPluginInstallPayloads", () => {
           records: {
             missing: {
               source: "npm",
-              spec: "@openclaw/missing@beta",
+              spec: "@hanzo/bot-missing@beta",
               installPath: missingDir,
             },
           },
@@ -486,8 +486,8 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("keeps disabled trusted official npm records eligible for payload repair when requested", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
-    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@openclaw", "codex");
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-update-plugin-payload-"));
+    const missingDir = path.join(tmpDir, "state", "npm", "node_modules", "@bot", "codex");
     try {
       await expect(
         updateCommandPluginsTesting.collectMissingPluginInstallPayloads({
@@ -506,9 +506,9 @@ describe("collectMissingPluginInstallPayloads", () => {
           records: {
             codex: {
               source: "npm",
-              spec: "@openclaw/codex@2026.5.3",
-              resolvedName: "@openclaw/codex",
-              resolvedSpec: "@openclaw/codex@2026.5.3",
+              spec: "@hanzo/bot-codex@2026.5.3",
+              resolvedName: "@hanzo/bot-codex",
+              resolvedSpec: "@hanzo/bot-codex@2026.5.3",
               installPath: missingDir,
             },
           },
@@ -526,7 +526,7 @@ describe("collectMissingPluginInstallPayloads", () => {
   });
 
   it("keeps disabled trusted official ClawHub records eligible for payload repair when requested", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-update-plugin-payload-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-update-plugin-payload-"));
     const missingDir = path.join(tmpDir, "state", "clawhub", "diagnostics-otel");
     try {
       await expect(
@@ -546,7 +546,7 @@ describe("collectMissingPluginInstallPayloads", () => {
           records: {
             "diagnostics-otel": {
               source: "clawhub",
-              spec: "clawhub:@openclaw/diagnostics-otel@2026.5.3",
+              spec: "clawhub:@hanzo/bot-diagnostics-otel@2026.5.3",
               installPath: missingDir,
             },
           },
@@ -616,9 +616,9 @@ describe("formatPostUpdateGatewayRecoveryInstructions", () => {
     );
 
     expect(line).toContain("the systemd user service");
-    expect(line).toContain("openclaw gateway restart");
-    expect(line).toContain("openclaw gateway install --force");
-    expect(line).toContain("openclaw gateway status --deep");
+    expect(line).toContain("bot gateway restart");
+    expect(line).toContain("bot gateway install --force");
+    expect(line).toContain("bot gateway status --deep");
     expect(line).not.toContain("Linux reports");
     expect(line).not.toContain("macOS");
     expect(line).not.toContain("LaunchAgent");
@@ -661,8 +661,8 @@ describe("formatPostUpdateGatewayRecoveryInstructions", () => {
 describe("recoverInstalledLaunchAgentAfterUpdate", () => {
   it("re-bootstraps an installed-but-not-loaded macOS LaunchAgent after update", async () => {
     const service = {} as never;
-    const serviceEnv = { OPENCLAW_PROFILE: "stomme" } as NodeJS.ProcessEnv;
-    const recoveredEnv = { ...serviceEnv, OPENCLAW_PORT: "18790" } as NodeJS.ProcessEnv;
+    const serviceEnv = { BOT_PROFILE: "stomme" } as NodeJS.ProcessEnv;
+    const recoveredEnv = { ...serviceEnv, BOT_PORT: "18790" } as NodeJS.ProcessEnv;
     const readState = vi.fn(async () => ({
       installed: true,
       loaded: false,
@@ -721,7 +721,7 @@ describe("recoverInstalledLaunchAgentAfterUpdate", () => {
       installed: true,
       loaded: true,
       running: true,
-      env: { OPENCLAW_PROFILE: "stomme" } as NodeJS.ProcessEnv,
+      env: { BOT_PROFILE: "stomme" } as NodeJS.ProcessEnv,
       command: null,
       runtime: { status: "running" },
     }));
@@ -746,7 +746,7 @@ describe("recoverInstalledLaunchAgentAfterUpdate", () => {
       installed: true,
       loaded: false,
       running: false,
-      env: { OPENCLAW_PROFILE: "stomme" } as NodeJS.ProcessEnv,
+      env: { BOT_PROFILE: "stomme" } as NodeJS.ProcessEnv,
       command: null,
       runtime: { status: "unknown", missingSupervision: true },
     }));
@@ -801,7 +801,7 @@ describe("recoverLaunchAgentAndRecheckGatewayHealth", () => {
         service,
         port: 18790,
         expectedVersion: "2026.5.3",
-        env: { OPENCLAW_PROFILE: "stomme", OPENCLAW_PORT: "18790" },
+        env: { BOT_PROFILE: "stomme", BOT_PORT: "18790" },
         deps: { recoverLaunchAgent, waitForHealthy },
       }),
     ).resolves.toEqual({
@@ -818,7 +818,7 @@ describe("recoverLaunchAgentAndRecheckGatewayHealth", () => {
       service,
       port: 18790,
       expectedVersion: "2026.5.3",
-      env: { OPENCLAW_PROFILE: "stomme", OPENCLAW_PORT: "18790" },
+      env: { BOT_PROFILE: "stomme", BOT_PORT: "18790" },
       supervisorKeepsAlive: true,
     });
   });
@@ -867,7 +867,7 @@ describe("hasLoadedLaunchdKeepAliveSupervisor", () => {
     await expect(
       updateCommandServiceTesting.hasLoadedLaunchdKeepAliveSupervisor({
         service,
-        env: { OPENCLAW_PROFILE: "work" },
+        env: { BOT_PROFILE: "work" },
       }),
     ).resolves.toBe(false);
     isLoaded.mockResolvedValue(true);
@@ -897,7 +897,7 @@ describe("resolvePostCoreUpdateChildStdio", () => {
   it('returns "pipe" on Windows so the child never inherits the parent console handles', () => {
     // On Windows, stdio:"inherit" passes the parent's console HANDLE to the child process.
     // PowerShell/CMD will not return the prompt until every holder of those handles exits,
-    // causing the terminal to hang after `openclaw update` completes (#78445).
+    // causing the terminal to hang after `bot update` completes (#78445).
     expect(resolvePostCoreUpdateChildStdio("win32")).toBe("pipe");
   });
 
@@ -920,7 +920,7 @@ describe("updatePluginsAfterCoreUpdate (invalid config end-to-end)", () => {
     // config is sufficient to prove the gate fires end-to-end. We pass
     // `json: true` to suppress logging side-effects without mocking.
     const result = await updatePluginsAfterCoreUpdate({
-      root: "/tmp/openclaw-test",
+      root: "/tmp/bot-test",
       channel: "stable",
       configSnapshot: {
         valid: false,
@@ -941,8 +941,8 @@ describe("updatePluginsAfterCoreUpdate (invalid config end-to-end)", () => {
         message:
           "Plugin post-update convergence skipped because the config is invalid; refusing to restart the gateway with an unverified plugin set.",
         guidance: [
-          "Run `openclaw doctor` to inspect the config validation errors.",
-          "Once the config parses, rerun `openclaw update repair`.",
+          "Run `bot doctor` to inspect the config validation errors.",
+          "Once the config parses, rerun `bot update repair`.",
         ],
       },
     ]);
@@ -960,8 +960,8 @@ describe("buildInvalidConfigPostCoreUpdateResult", () => {
   it("surfaces actionable repair guidance in both the structural warnings and the message string", () => {
     const built = updateCommandPluginsTesting.buildInvalidConfigPostCoreUpdateResult();
     expect(built.guidance).toStrictEqual([
-      "Run `openclaw doctor` to inspect the config validation errors.",
-      "Once the config parses, rerun `openclaw update repair`.",
+      "Run `bot doctor` to inspect the config validation errors.",
+      "Once the config parses, rerun `bot update repair`.",
     ]);
     expect(built.result.warnings).toStrictEqual([
       {

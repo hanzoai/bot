@@ -7,7 +7,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { GatewayClientRequestError } from "../gateway/client.js";
 import {
   onInternalDiagnosticEvent,
@@ -46,7 +46,7 @@ import {
   runBeforeToolCallHook,
   wrapToolWithBeforeToolCallHook,
 } from "./agent-tools.before-tool-call.js";
-import { createOpenClawCodingTools } from "./agent-tools.js";
+import { createBotCodingTools } from "./agent-tools.js";
 import { createWriteTool } from "./sessions/index.js";
 import type { AnyAgentTool } from "./tools/common.js";
 import { callGatewayTool } from "./tools/gateway.js";
@@ -68,7 +68,7 @@ vi.mock("./tools/gateway.js", () => ({
 }));
 
 const mockGetGlobalHookRunner = vi.mocked(getGlobalHookRunner);
-const hookRunnerGlobalStateKey = Symbol.for("openclaw.plugins.hook-runner-global-state");
+const hookRunnerGlobalStateKey = Symbol.for("bot.plugins.hook-runner-global-state");
 
 function setGlobalHookRunnerForTest(hookRunner: HookRunner | null): void {
   const hookRunnerGlobalState = globalThis as Record<
@@ -561,7 +561,7 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("detects alternating-path churn from the production write result contract", async () => {
-    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-write-churn-"));
+    const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-write-churn-"));
     const sessionId = "production-write-churn-session";
     const sessionKey = "main";
     const runId = "production-write-churn-run";
@@ -1379,7 +1379,7 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("emits skill usage diagnostics when a run reads a known skill instruction file", async () => {
-    const workspaceDir = path.join("/tmp", "openclaw-skill-usage");
+    const workspaceDir = path.join("/tmp", "bot-skill-usage");
     const skillBaseDir = path.join(workspaceDir, ".agents", "skills", "demo-skill");
     const skillFilePath = path.join(skillBaseDir, "SKILL.md");
     const execute = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "skill" }] });
@@ -1439,13 +1439,13 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("matches home-compacted skill instruction paths from prompts", async () => {
-    const skillBaseDir = path.join(os.homedir(), ".openclaw", "skills", "home-skill");
+    const skillBaseDir = path.join(os.homedir(), ".bot", "skills", "home-skill");
     const skillFilePath = path.join(skillBaseDir, "SKILL.md");
     const execute = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "skill" }] });
     const tool = wrapToolWithBeforeToolCallHook(asAgentTool({ name: "read", execute }), {
       agentId: "main",
       sessionKey: "session-key",
-      workspaceDir: "/tmp/openclaw-workspace",
+      workspaceDir: "/tmp/bot-workspace",
       skillsSnapshot: {
         prompt: "",
         skills: [{ name: "home-skill" }],
@@ -1455,7 +1455,7 @@ describe("before_tool_call loop detection behavior", () => {
             description: "Home skill",
             filePath: skillFilePath,
             baseDir: skillBaseDir,
-            source: "openclaw-managed",
+            source: "bot-managed",
           }),
         ],
       },
@@ -1465,7 +1465,7 @@ describe("before_tool_call loop detection behavior", () => {
     await withSkillUsageDiagnosticEvents(async (emitted, privateData, flush) => {
       await tool.execute(
         "tool-call-home-skill",
-        { path: "~/.openclaw/skills/home-skill/SKILL.md" },
+        { path: "~/.bot/skills/home-skill/SKILL.md" },
         undefined,
         undefined,
       );
@@ -1499,7 +1499,7 @@ describe("before_tool_call loop detection behavior", () => {
             description: "Remote skill",
             filePath: locator,
             baseDir: "node://node-1/skills/remote-skill",
-            source: "openclaw-node",
+            source: "bot-node",
           }),
         ],
       },
@@ -1521,7 +1521,7 @@ describe("before_tool_call loop detection behavior", () => {
 
   it("accounts sandbox skill reads against the original canonical file", async () => {
     const workspaceDir = "/workspace";
-    const readPath = "/workspace/.openclaw/sandbox-skills/skills/demo/SKILL.md";
+    const readPath = "/workspace/.bot/sandbox-skills/skills/demo/SKILL.md";
     const skillFile = "/agent-workspace/skills/demo/SKILL.md";
     const execute = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "skill" }] });
     const tool = wrapToolWithBeforeToolCallHook(asAgentTool({ name: "read", execute }), {
@@ -1542,7 +1542,7 @@ describe("before_tool_call loop detection behavior", () => {
     await withSkillUsageDiagnosticEvents(async (emitted, privateData, flush) => {
       await tool.execute(
         "tool-call-sandbox-skill",
-        { path: ".openclaw/sandbox-skills/skills/demo/SKILL.md" },
+        { path: ".bot/sandbox-skills/skills/demo/SKILL.md" },
         undefined,
         undefined,
       );
@@ -1561,7 +1561,7 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("does not count unused read params as skill usage", async () => {
-    const workspaceDir = path.join("/tmp", "openclaw-skill-unused-param");
+    const workspaceDir = path.join("/tmp", "bot-skill-unused-param");
     const skillBaseDir = path.join(workspaceDir, ".agents", "skills", "demo-skill");
     const execute = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "readme" }] });
     const tool = wrapToolWithBeforeToolCallHook(asAgentTool({ name: "read", execute }), {
@@ -1604,7 +1604,7 @@ describe("before_tool_call loop detection behavior", () => {
   });
 
   it("emits skill usage diagnostics for command-dispatched skill tools", async () => {
-    const skillBaseDir = path.join("/tmp", "openclaw-skill-command", "skills", "matrix-profile");
+    const skillBaseDir = path.join("/tmp", "bot-skill-command", "skills", "matrix-profile");
     const skillFilePath = path.join(skillBaseDir, "SKILL.md");
     const execute = vi.fn().mockResolvedValue({ content: [{ type: "text", text: "sent" }] });
     const tool = wrapToolWithBeforeToolCallHook(asAgentTool({ name: "message", execute }), {
@@ -2140,7 +2140,7 @@ describe("before_tool_call requireApproval handling", () => {
   });
 
   it("passes host-derived apply_patch paths to before_tool_call hooks", async () => {
-    const cwd = path.join("/tmp", "openclaw-hooks");
+    const cwd = path.join("/tmp", "bot-hooks");
     const patch = [
       "*** Begin Patch",
       "*** Add File: src/new.ts",
@@ -2334,7 +2334,7 @@ describe("before_tool_call requireApproval handling", () => {
   });
 
   it("recomputes host-derived paths after trusted policy param rewrites", async () => {
-    const cwd = path.join("/tmp", "openclaw-hooks");
+    const cwd = path.join("/tmp", "bot-hooks");
     const originalPatch = [
       "*** Begin Patch",
       "*** Add File: src/old.ts",
@@ -3053,7 +3053,7 @@ describe("before_tool_call requireApproval handling", () => {
       },
     });
 
-    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-hook-route-"));
+    const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-hook-route-"));
     await fs.writeFile(path.join(tempDir, "note.txt"), "hello");
     mockCallGateway.mockResolvedValueOnce({ id: "transport-route-id", status: "accepted" });
     mockCallGateway.mockResolvedValueOnce({
@@ -3061,7 +3061,7 @@ describe("before_tool_call requireApproval handling", () => {
       decision: "allow-once",
     });
 
-    const tools = createOpenClawCodingTools({
+    const tools = createBotCodingTools({
       workspaceDir: tempDir,
       messageProvider: "discord-voice",
       messageChannel: "discord",
@@ -3144,7 +3144,7 @@ describe("before_tool_call tool content private-data capture", () => {
     }
   }
 
-  function configWithToolContent(): OpenClawConfig {
+  function configWithToolContent(): BotConfig {
     return {
       diagnostics: {
         enabled: true,

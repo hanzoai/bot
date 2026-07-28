@@ -1,12 +1,12 @@
-// Whatsapp plugin entrypoint registers its OpenClaw integration.
+// Whatsapp plugin entrypoint registers its Bot integration.
 import {
   defineBundledChannelEntry,
   loadBundledEntryExportSync,
-} from "openclaw/plugin-sdk/channel-entry-contract";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/channel-entry-contract";
+} from "bot/plugin-sdk/channel-entry-contract";
+import type { BotPluginApi } from "bot/plugin-sdk/channel-entry-contract";
 
-function registerWhatsAppCallTool(api: OpenClawPluginApi): void {
-  const registerTool = loadBundledEntryExportSync<(api: OpenClawPluginApi) => void>(
+function registerWhatsAppCallTool(api: BotPluginApi): void {
+  const registerTool = loadBundledEntryExportSync<(api: BotPluginApi) => void>(
     import.meta.url,
     {
       specifier: "./call-tool-api.js",

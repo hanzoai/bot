@@ -12,9 +12,9 @@ import {
 let monitorWebInbox: typeof import("./inbound.js").monitorWebInbox;
 const inboundLoggerInfoMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/logging-core", async () => {
-  const actual = await vi.importActual<typeof import("openclaw/plugin-sdk/logging-core")>(
-    "openclaw/plugin-sdk/logging-core",
+vi.mock("bot/plugin-sdk/logging-core", async () => {
+  const actual = await vi.importActual<typeof import("bot/plugin-sdk/logging-core")>(
+    "bot/plugin-sdk/logging-core",
   );
   return {
     ...actual,
@@ -168,7 +168,7 @@ describe("web monitor inbox", () => {
     expect(sock.end).toHaveBeenCalledTimes(1);
     const closeError = sock.end.mock.calls[0]?.[0];
     expect(closeError).toBeInstanceOf(Error);
-    expect(closeError?.message).toBe("OpenClaw WhatsApp listener close");
+    expect(closeError?.message).toBe("Bot WhatsApp listener close");
     expect(sock.ws.close).not.toHaveBeenCalled();
   });
 

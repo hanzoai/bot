@@ -10,7 +10,7 @@ import os from "node:os";
 import path from "node:path";
 import { readDockerE2eJsonArtifact } from "./lib/docker-e2e-json-artifacts.mjs";
 
-const DEFAULT_WORKFLOW = "openclaw-live-and-e2e-checks-reusable.yml";
+const DEFAULT_WORKFLOW = "bot-live-and-e2e-checks-reusable.yml";
 
 function usage() {
   return [
@@ -213,7 +213,7 @@ function groupByReuseInputs(entries) {
 }
 
 function ghWorkflowCommand(lanes, ref, workflow, reuseInputs = {}) {
-  const workflowRef = process.env.OPENCLAW_DOCKER_E2E_WORKFLOW_REF;
+  const workflowRef = process.env.BOT_DOCKER_E2E_WORKFLOW_REF;
   const releasePath = lanes.some(laneNeedsReleasePath);
   const fields = [
     "gh workflow run",
@@ -458,7 +458,7 @@ function safePathSegment(value) {
 
 function defaultOutputDir(input) {
   return fs.mkdtempSync(
-    path.join(os.tmpdir(), `openclaw-docker-e2e-rerun-${safePathSegment(input)}-`),
+    path.join(os.tmpdir(), `bot-docker-e2e-rerun-${safePathSegment(input)}-`),
   );
 }
 

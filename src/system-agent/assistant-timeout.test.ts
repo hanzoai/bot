@@ -8,7 +8,7 @@ import "./assistant-timeout.js";
 
 const { resolveSystemAgentAssistantTimeoutFromManifests } = (
   globalThis as Record<PropertyKey, unknown>
-)[Symbol.for("openclaw.systemAgentTimeoutTestApi")] as {
+)[Symbol.for("bot.systemAgentTimeoutTestApi")] as {
   resolveSystemAgentAssistantTimeoutFromManifests: (params: {
     route: { modelLabel: string; provider: string };
     plugins: ReadonlyArray<{

@@ -195,7 +195,7 @@ test("webchat session mutations follow operator scope policy", async () => {
 });
 
 test("session:patch hook fires with correct context", async () => {
-  const dir = makeTempDir(permHookTempDirs, "openclaw-sessions-patch-hook-");
+  const dir = makeTempDir(permHookTempDirs, "bot-sessions-patch-hook-");
   const storePath = path.join(dir, "sessions.json");
   testState.sessionStorePath = storePath;
 
@@ -235,7 +235,7 @@ test("session:patch hook fires with correct context", async () => {
 });
 
 test("session:patch hook does not fire after scope rejection", async () => {
-  const dir = makeTempDir(permHookTempDirs, "openclaw-sessions-webchat-hook-");
+  const dir = makeTempDir(permHookTempDirs, "bot-sessions-webchat-hook-");
   const storePath = path.join(dir, "sessions.json");
   testState.sessionStorePath = storePath;
 
@@ -265,7 +265,7 @@ test("session:patch hook does not fire after scope rejection", async () => {
 });
 
 test("session:patch hook only fires after successful patch", async () => {
-  const dir = makeTempDir(permHookTempDirs, "openclaw-sessions-success-hook-");
+  const dir = makeTempDir(permHookTempDirs, "bot-sessions-success-hook-");
   const storePath = path.join(dir, "sessions.json");
   testState.sessionStorePath = storePath;
 

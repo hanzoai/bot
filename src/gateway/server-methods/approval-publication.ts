@@ -39,7 +39,7 @@ export type PluginApprovalIosPushDelivery = {
 function broadcastResolvedEvent(params: {
   approvalKind: "exec" | "plugin" | "system-agent";
   context: GatewayRequestContext;
-  eventName: "exec.approval.resolved" | "plugin.approval.resolved" | "openclaw.approval.resolved";
+  eventName: "exec.approval.resolved" | "plugin.approval.resolved" | "bot.approval.resolved";
   event: ExecApprovalResolved | PluginApprovalResolved | SystemAgentApprovalResolved;
   liveRecord: ExecApprovalRecord<ApprovalRequest>;
 }): void {
@@ -112,7 +112,7 @@ export async function publishAppliedApprovalResolution(params: {
       ? "exec.approval.resolved"
       : params.record.kind === "plugin"
         ? "plugin.approval.resolved"
-        : "openclaw.approval.resolved";
+        : "bot.approval.resolved";
   const event = {
     id: params.record.id,
     decision,

@@ -1,25 +1,25 @@
 // Xai tests cover index plugin behavior.
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
-import { createCapturedPluginRegistration } from "openclaw/plugin-sdk/plugin-test-runtime";
+import type { BotPluginApi } from "bot/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "bot/plugin-sdk/plugin-test-api";
+import { createCapturedPluginRegistration } from "bot/plugin-sdk/plugin-test-runtime";
 import {
   registerProviderPlugin,
   registerSingleProviderPlugin,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import {
   clearLiveCatalogCacheForTests,
   type LiveModelCatalogFetchGuard,
-} from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+} from "bot/plugin-sdk/provider-catalog-live-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const providerAuthRuntimeMocks = vi.hoisted(() => ({
   resolveApiKeyForProvider: vi.fn(),
 }));
 
-vi.mock("openclaw/plugin-sdk/provider-auth-runtime", () => providerAuthRuntimeMocks);
+vi.mock("bot/plugin-sdk/provider-auth-runtime", () => providerAuthRuntimeMocks);
 
 import plugin from "./index.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 import { buildLiveXaiProvider } from "./provider-catalog.js";
 import setupPlugin from "./setup-api.js";
 import {
@@ -48,7 +48,7 @@ function createProviderModel(overrides: {
   };
 }
 
-type XaiAutoEnableProbe = Parameters<OpenClawPluginApi["registerAutoEnableProbe"]>[0];
+type XaiAutoEnableProbe = Parameters<BotPluginApi["registerAutoEnableProbe"]>[0];
 
 function registerXaiAutoEnableProbe(): XaiAutoEnableProbe {
   const probes: XaiAutoEnableProbe[] = [];
@@ -77,7 +77,7 @@ function requireEntry<T extends { id?: string }>(entries: T[], id: string): T {
 type XaiBilledToolName = "code_execution" | "x_search";
 
 function registerXaiBilledToolFactories() {
-  const tools = new Map<string, Parameters<OpenClawPluginApi["registerTool"]>[0]>();
+  const tools = new Map<string, Parameters<BotPluginApi["registerTool"]>[0]>();
   plugin.register(
     createTestPluginApi({
       registerTool(tool, opts) {

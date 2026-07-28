@@ -1,19 +1,19 @@
 import CoreLocation
 import Foundation
-import OpenClawKit
+import BotKit
 import UIKit
 
-typealias OpenClawCameraSnapResult = (format: String, base64: String, width: Int, height: Int)
-typealias OpenClawCameraClipResult = (format: String, base64: String, durationMs: Int, hasAudio: Bool)
+typealias BotCameraSnapResult = (format: String, base64: String, width: Int, height: Int)
+typealias BotCameraClipResult = (format: String, base64: String, durationMs: Int, hasAudio: Bool)
 
 protocol CameraServicing: Sendable {
     func listDevices() async -> [CameraController.CameraDeviceInfo]
     func snap(
-        params: OpenClawCameraSnapParams,
-        defaultFacing: OpenClawCameraFacing) async throws -> OpenClawCameraSnapResult
+        params: BotCameraSnapParams,
+        defaultFacing: BotCameraFacing) async throws -> BotCameraSnapResult
     func clip(
-        params: OpenClawCameraClipParams,
-        defaultFacing: OpenClawCameraFacing) async throws -> OpenClawCameraClipResult
+        params: BotCameraClipParams,
+        defaultFacing: BotCameraFacing) async throws -> BotCameraClipResult
 }
 
 protocol ScreenRecordingServicing: Sendable {
@@ -30,10 +30,10 @@ protocol LocationServicing: Sendable {
     func authorizationStatus() -> CLAuthorizationStatus
     func accuracyAuthorization() -> CLAccuracyAuthorization
     func authorizationSnapshot() -> LocationAuthorizationSnapshot
-    func ensureAuthorization(mode: OpenClawLocationMode) async -> CLAuthorizationStatus
+    func ensureAuthorization(mode: BotLocationMode) async -> CLAuthorizationStatus
     func currentLocation(
-        params: OpenClawLocationGetParams,
-        desiredAccuracy: OpenClawLocationAccuracy,
+        params: BotLocationGetParams,
+        desiredAccuracy: BotLocationAccuracy,
         maxAgeMs: Int?,
         timeoutMs: Int?) async throws -> CLLocation
     func setBackgroundLocationUpdatesEnabled(_ enabled: Bool)
@@ -53,32 +53,32 @@ extension LocationServicing {
 
 @MainActor
 protocol DeviceStatusServicing: Sendable {
-    func status() async throws -> OpenClawDeviceStatusPayload
-    func info() -> OpenClawDeviceInfoPayload
+    func status() async throws -> BotDeviceStatusPayload
+    func info() -> BotDeviceInfoPayload
 }
 
 protocol PhotosServicing: Sendable {
-    func latest(params: OpenClawPhotosLatestParams) async throws -> OpenClawPhotosLatestPayload
+    func latest(params: BotPhotosLatestParams) async throws -> BotPhotosLatestPayload
 }
 
 protocol ContactsServicing: Sendable {
-    func search(params: OpenClawContactsSearchParams) async throws -> OpenClawContactsSearchPayload
-    func add(params: OpenClawContactsAddParams) async throws -> OpenClawContactsAddPayload
+    func search(params: BotContactsSearchParams) async throws -> BotContactsSearchPayload
+    func add(params: BotContactsAddParams) async throws -> BotContactsAddPayload
 }
 
 protocol CalendarServicing: Sendable {
-    func events(params: OpenClawCalendarEventsParams) async throws -> OpenClawCalendarEventsPayload
-    func add(params: OpenClawCalendarAddParams) async throws -> OpenClawCalendarAddPayload
+    func events(params: BotCalendarEventsParams) async throws -> BotCalendarEventsPayload
+    func add(params: BotCalendarAddParams) async throws -> BotCalendarAddPayload
 }
 
 protocol RemindersServicing: Sendable {
-    func list(params: OpenClawRemindersListParams) async throws -> OpenClawRemindersListPayload
-    func add(params: OpenClawRemindersAddParams) async throws -> OpenClawRemindersAddPayload
+    func list(params: BotRemindersListParams) async throws -> BotRemindersListPayload
+    func add(params: BotRemindersAddParams) async throws -> BotRemindersAddPayload
 }
 
 protocol MotionServicing: Sendable {
-    func activities(params: OpenClawMotionActivityParams) async throws -> OpenClawMotionActivityPayload
-    func pedometer(params: OpenClawPedometerParams) async throws -> OpenClawPedometerPayload
+    func activities(params: BotMotionActivityParams) async throws -> BotMotionActivityPayload
+    func pedometer(params: BotPedometerParams) async throws -> BotPedometerPayload
 }
 
 struct WatchMessagingStatus: Equatable {
@@ -110,7 +110,7 @@ struct WatchExecApprovalResolveEvent: Codable, Equatable {
     var replyId: String
     var approvalId: String
     var gatewayStableID: String?
-    var decision: OpenClawWatchExecApprovalDecision
+    var decision: BotWatchExecApprovalDecision
     var sentAtMs: Int64?
     var transport: String
 }
@@ -150,7 +150,7 @@ struct WatchAppSnapshotRequestEvent: Equatable {
 
 struct WatchAppCommandEvent: Codable, Equatable {
     var commandId: String
-    var command: OpenClawWatchAppCommand
+    var command: BotWatchAppCommand
     var sessionKey: String?
     var gatewayStableID: String?
     var text: String?
@@ -177,20 +177,20 @@ protocol WatchMessagingServicing: AnyObject, Sendable {
     func sendDirectNodeSetup(setupCode: String) async throws -> WatchNotificationSendResult
     func sendNotification(
         id: String,
-        params: OpenClawWatchNotifyParams,
+        params: BotWatchNotifyParams,
         gatewayStableID: String?) async throws -> WatchNotificationSendResult
     func sendExecApprovalPrompt(
-        _ message: OpenClawWatchExecApprovalPromptMessage) async throws -> WatchNotificationSendResult
+        _ message: BotWatchExecApprovalPromptMessage) async throws -> WatchNotificationSendResult
     func sendExecApprovalResolved(
-        _ message: OpenClawWatchExecApprovalResolvedMessage) async throws -> WatchNotificationSendResult
+        _ message: BotWatchExecApprovalResolvedMessage) async throws -> WatchNotificationSendResult
     func sendExecApprovalExpired(
-        _ message: OpenClawWatchExecApprovalExpiredMessage) async throws -> WatchNotificationSendResult
+        _ message: BotWatchExecApprovalExpiredMessage) async throws -> WatchNotificationSendResult
     func syncExecApprovalSnapshot(
-        _ message: OpenClawWatchExecApprovalSnapshotMessage) async throws -> WatchNotificationSendResult
+        _ message: BotWatchExecApprovalSnapshotMessage) async throws -> WatchNotificationSendResult
     func syncAppSnapshot(
-        _ message: OpenClawWatchAppSnapshotMessage) async throws -> WatchNotificationSendResult
+        _ message: BotWatchAppSnapshotMessage) async throws -> WatchNotificationSendResult
     func sendChatCompletion(
-        _ message: OpenClawWatchChatCompletionMessage) async throws -> WatchNotificationSendResult
+        _ message: BotWatchChatCompletionMessage) async throws -> WatchNotificationSendResult
 }
 
 extension CameraController: CameraServicing {}

@@ -1,10 +1,10 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 /** Normalizes plugin config and resolves effective enablement, slots, and activation sources. */
 import {
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   createEffectiveEnableStateResolver,
   createPluginEnableStateResolver,
@@ -30,8 +30,8 @@ export type PluginActivationState = PluginActivationStateLike;
 
 export type PluginActivationConfigSource = {
   plugins: NormalizedPluginsConfig;
-  rootConfig?: OpenClawConfig;
-} & PluginActivationConfigSourceLike<OpenClawConfig>;
+  rootConfig?: BotConfig;
+} & PluginActivationConfigSourceLike<BotConfig>;
 
 export type NormalizedPluginsConfig = SharedNormalizedPluginsConfig;
 
@@ -81,16 +81,16 @@ export function normalizePluginId(id: string): string {
 }
 
 export const normalizePluginsConfig = (
-  config?: OpenClawConfig["plugins"],
+  config?: BotConfig["plugins"],
 ): NormalizedPluginsConfig => {
   return normalizePluginsConfigWithResolver(config, createScopedPluginIdNormalizer());
 };
 
 /** Canonicalizes one plugin entry and its policy-list ids before a targeted mutation. */
 export function normalizePluginTargetConfig(
-  config: OpenClawConfig,
+  config: BotConfig,
   pluginId: string,
-): OpenClawConfig {
+): BotConfig {
   const normalizedId = normalizePluginId(pluginId);
   const normalized = normalizePluginsConfig(config.plugins);
   const rawEntries = config.plugins?.entries ?? {};
@@ -119,7 +119,7 @@ export function normalizePluginTargetConfig(
 }
 
 export function createPluginActivationSource(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   plugins?: NormalizedPluginsConfig;
 }): PluginActivationConfigSource {
   return {
@@ -128,19 +128,19 @@ export function createPluginActivationSource(params: {
   };
 }
 
-const hasExplicitMemorySlot = (plugins?: OpenClawConfig["plugins"]) =>
+const hasExplicitMemorySlot = (plugins?: BotConfig["plugins"]) =>
   Boolean(plugins?.slots && Object.hasOwn(plugins.slots, "memory"));
 
-const hasExplicitMemoryEntry = (plugins?: OpenClawConfig["plugins"]) =>
+const hasExplicitMemoryEntry = (plugins?: BotConfig["plugins"]) =>
   Boolean(plugins?.entries && Object.hasOwn(plugins.entries, defaultSlotIdForKey("memory")));
 
-export const hasExplicitPluginConfig = (plugins?: OpenClawConfig["plugins"]) =>
+export const hasExplicitPluginConfig = (plugins?: BotConfig["plugins"]) =>
   hasExplicitPluginConfigShared(plugins);
 
 export function applyTestPluginDefaults(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv = process.env,
-): OpenClawConfig {
+): BotConfig {
   if (!env.VITEST) {
     return cfg;
   }
@@ -176,7 +176,7 @@ export function applyTestPluginDefaults(
 }
 
 export function isTestDefaultMemorySlotDisabled(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
   if (!env.VITEST) {
@@ -193,7 +193,7 @@ export function resolvePluginActivationState(params: {
   id: string;
   origin: PluginOrigin;
   config: NormalizedPluginsConfig;
-  rootConfig?: OpenClawConfig;
+  rootConfig?: BotConfig;
   enabledByDefault?: boolean;
   activationSource?: PluginActivationConfigSource;
   autoEnabledReason?: string;
@@ -224,7 +224,7 @@ type EffectiveActivationParams = {
   id: string;
   origin: PluginOrigin;
   config: NormalizedPluginsConfig;
-  rootConfig?: OpenClawConfig;
+  rootConfig?: BotConfig;
   enabledByDefault?: boolean;
   activationSource?: PluginActivationConfigSource;
 };

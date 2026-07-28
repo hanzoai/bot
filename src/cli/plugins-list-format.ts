@@ -1,5 +1,5 @@
 // Text formatter for plugin list rows and verbose plugin details.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { sanitizeTerminalText } from "../../packages/terminal-core/src/safe-text.js";
 import { theme } from "../../packages/terminal-core/src/theme.js";
 import type { PluginRecord } from "../plugins/registry.js";
@@ -21,7 +21,7 @@ export function formatPluginLine(plugin: PluginRecord, verbose = false): string 
           : plugin.description,
       )
     : theme.muted("(no description)");
-  const format = plugin.format ?? "openclaw";
+  const format = plugin.format ?? "bot";
 
   if (!verbose) {
     return `${name}${idSuffix} ${status} ${theme.muted(`[${format}]`)} - ${desc}`;

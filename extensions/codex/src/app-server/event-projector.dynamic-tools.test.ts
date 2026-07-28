@@ -18,7 +18,7 @@ import {
 registerCodexEventProjectorTestLifecycle();
 
 describe("CodexAppServerEventProjector dynamic tool projection", () => {
-  it("records dynamic OpenClaw tool calls in mirrored transcript snapshots", async () => {
+  it("records dynamic Bot tool calls in mirrored transcript snapshots", async () => {
     const projector = await createProjector();
 
     projector.recordDynamicToolCall({
@@ -315,11 +315,11 @@ describe("CodexAppServerEventProjector dynamic tool projection", () => {
         arguments: { action: "send", text: "hello" },
         executionStarted: false,
         outcome: "failure",
-        failure: { error: "Unknown OpenClaw tool: message" },
+        failure: { error: "Unknown Bot tool: message" },
       }),
       success: false,
       terminalType: "error",
-      contentItems: [{ type: "inputText", text: "Unknown OpenClaw tool: message" }],
+      contentItems: [{ type: "inputText", text: "Unknown Bot tool: message" }],
     });
 
     const result = projector.buildResult(buildEmptyToolTelemetry());

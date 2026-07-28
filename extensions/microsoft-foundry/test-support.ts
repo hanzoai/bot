@@ -19,7 +19,7 @@ type MicrosoftFoundryTestApi = {
   supportsFoundryReasoningEffort: (value?: string | null) => boolean;
 };
 
-const api = Reflect.get(globalThis, Symbol.for("openclaw.microsoftFoundryTestApi"));
+const api = Reflect.get(globalThis, Symbol.for("bot.microsoftFoundryTestApi"));
 if (!api) {
   throw new Error("Microsoft Foundry test API is unavailable");
 }

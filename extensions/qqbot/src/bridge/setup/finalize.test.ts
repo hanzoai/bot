@@ -1,7 +1,7 @@
 import {
   createNonExitingRuntimeEnv,
   createQueuedWizardPrompter,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
+} from "bot/plugin-sdk/plugin-test-runtime";
 import { describe, expect, it, vi } from "vitest";
 
 const qrConnect = vi.hoisted(() => vi.fn());
@@ -45,7 +45,7 @@ describe("QQ Bot setup persistent effects", () => {
     const result = await finalizeQQBotSetup(createParams(beforePersistentEffect));
 
     expect(beforePersistentEffect).toHaveBeenCalledTimes(1);
-    expect(qrConnect).toHaveBeenCalledWith({ source: "openclaw" });
+    expect(qrConnect).toHaveBeenCalledWith({ source: "bot" });
     expect(beforePersistentEffect.mock.invocationCallOrder[0]).toBeLessThan(
       qrConnect.mock.invocationCallOrder[0]!,
     );

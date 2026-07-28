@@ -9,7 +9,7 @@ import JSZip from "jszip";
 import { describe, expect, it } from "vitest";
 import { loadInstalledPluginIndexInstallRecords } from "../plugins/installed-plugin-index-records.js";
 
-const PACKAGE_NAME = "@openclaw/telemetry-demo";
+const PACKAGE_NAME = "@hanzo/bot-telemetry-demo";
 const PACKAGE_VERSION = "1.0.0";
 const PLUGIN_ID = "telemetry-demo";
 const ENCODED_PACKAGE_NAME = encodeURIComponent(PACKAGE_NAME);
@@ -22,7 +22,7 @@ async function readRequestBody(req: IncomingMessage): Promise<string> {
   return Buffer.concat(chunks).toString("utf8");
 }
 
-async function spawnOpenClaw(
+async function spawnBot(
   args: string[],
   options: { cwd: string; env: NodeJS.ProcessEnv },
 ): Promise<{ status: number | null; stdout: string; stderr: string }> {
@@ -55,11 +55,11 @@ async function buildPluginZip(): Promise<Buffer> {
       name: PACKAGE_NAME,
       version: PACKAGE_VERSION,
       type: "module",
-      openclaw: { extensions: ["./dist/index.js"] },
+      bot: { extensions: ["./dist/index.js"] },
     }),
   );
   zip.file(
-    "package/openclaw.plugin.json",
+    "package/bot.plugin.json",
     JSON.stringify({
       id: PLUGIN_ID,
       configSchema: { type: "object", properties: {} },
@@ -101,7 +101,7 @@ async function startClawHubServer(options: TestServerOptions = {}) {
             tags: { latest: PACKAGE_VERSION },
             compatibility: {},
           },
-          owner: { handle: "openclaw" },
+          owner: { handle: "bot" },
         }),
       );
       return;
@@ -200,45 +200,45 @@ async function startClawHubServer(options: TestServerOptions = {}) {
 function buildEnv(stateDir: string, registry: string): NodeJS.ProcessEnv {
   return {
     ...process.env,
-    OPENCLAW_STATE_DIR: stateDir,
-    OPENCLAW_CONFIG_PATH: path.join(stateDir, "openclaw.json"),
-    OPENCLAW_CLAWHUB_URL: registry,
+    BOT_STATE_DIR: stateDir,
+    BOT_CONFIG_PATH: path.join(stateDir, "bot.json"),
+    BOT_CLAWHUB_URL: registry,
     CLAWHUB_TOKEN: "test-token",
     CLAWHUB_DISABLE_TELEMETRY: "",
     CLAWDHUB_DISABLE_TELEMETRY: "",
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1",
+    BOT_DISABLE_BUNDLED_PLUGINS: "1",
   };
 }
 
 async function readPersistedInstallRecord(stateDir: string) {
-  const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  const previousConfigPath = process.env.OPENCLAW_CONFIG_PATH;
-  process.env.OPENCLAW_STATE_DIR = stateDir;
-  process.env.OPENCLAW_CONFIG_PATH = path.join(stateDir, "openclaw.json");
+  const previousStateDir = process.env.BOT_STATE_DIR;
+  const previousConfigPath = process.env.BOT_CONFIG_PATH;
+  process.env.BOT_STATE_DIR = stateDir;
+  process.env.BOT_CONFIG_PATH = path.join(stateDir, "bot.json");
   try {
     const records = await loadInstalledPluginIndexInstallRecords();
     return records[PLUGIN_ID];
   } finally {
     if (previousStateDir === undefined) {
-      delete process.env.OPENCLAW_STATE_DIR;
+      delete process.env.BOT_STATE_DIR;
     } else {
-      process.env.OPENCLAW_STATE_DIR = previousStateDir;
+      process.env.BOT_STATE_DIR = previousStateDir;
     }
     if (previousConfigPath === undefined) {
-      delete process.env.OPENCLAW_CONFIG_PATH;
+      delete process.env.BOT_CONFIG_PATH;
     } else {
-      process.env.OPENCLAW_CONFIG_PATH = previousConfigPath;
+      process.env.BOT_CONFIG_PATH = previousConfigPath;
     }
   }
 }
 
-describe("openclaw plugins install ClawHub E2E", () => {
+describe("bot plugins install ClawHub E2E", () => {
   it("reports successful installs and repeat updates after persisting the install record", async () => {
     const testServer = await startClawHubServer();
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-telemetry-e2e-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-plugin-telemetry-e2e-"));
     try {
       const env = buildEnv(stateDir, testServer.registry);
-      const first = await spawnOpenClaw(
+      const first = await spawnBot(
         ["plugins", "install", `clawhub:${PACKAGE_NAME}@${PACKAGE_VERSION}`],
         { cwd: process.cwd(), env },
       );
@@ -258,7 +258,7 @@ describe("openclaw plugins install ClawHub E2E", () => {
         },
       ]);
 
-      const repeat = await spawnOpenClaw(
+      const repeat = await spawnBot(
         ["plugins", "install", `clawhub:${PACKAGE_NAME}@${PACKAGE_VERSION}`, "--force"],
         { cwd: process.cwd(), env },
       );
@@ -273,9 +273,9 @@ describe("openclaw plugins install ClawHub E2E", () => {
 
   it("does not report success when plugin installation fails", async () => {
     const testServer = await startClawHubServer({ artifactSha256: "0".repeat(64) });
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-telemetry-fail-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-plugin-telemetry-fail-"));
     try {
-      const result = await spawnOpenClaw(
+      const result = await spawnBot(
         ["plugins", "install", `clawhub:${PACKAGE_NAME}@${PACKAGE_VERSION}`],
         { cwd: process.cwd(), env: buildEnv(stateDir, testServer.registry) },
       );
@@ -291,9 +291,9 @@ describe("openclaw plugins install ClawHub E2E", () => {
 
   it("keeps a valid local install successful when telemetry is unavailable", async () => {
     const testServer = await startClawHubServer({ telemetryStatus: 503 });
-    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-plugin-telemetry-down-"));
+    const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-plugin-telemetry-down-"));
     try {
-      const result = await spawnOpenClaw(
+      const result = await spawnBot(
         ["plugins", "install", `clawhub:${PACKAGE_NAME}@${PACKAGE_VERSION}`],
         { cwd: process.cwd(), env: buildEnv(stateDir, testServer.registry) },
       );

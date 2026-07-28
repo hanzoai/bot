@@ -4,7 +4,7 @@
  * plugin hook decisions.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { clearRuntimeConfigSnapshot, setRuntimeConfigSnapshot } from "../config/config.js";
 import { setEmbeddedMode } from "../infra/embedded-mode.js";
@@ -661,7 +661,7 @@ describe("runBeforeToolCallHook — embedded mode approvals", () => {
       kind: "veto",
       deniedReason: "plugin-approval",
       reason:
-        "The Skill Workshop approval request expired without a decision. This lifecycle call left the proposal unchanged and pending; check its current status in case another operator acted on it. Decide in the Skill Workshop UI or run `openclaw skills workshop apply|reject|quarantine <id>`. Do not retry this tool call in a loop.",
+        "The Skill Workshop approval request expired without a decision. This lifecycle call left the proposal unchanged and pending; check its current status in case another operator acted on it. Decide in the Skill Workshop UI or run `bot skills workshop apply|reject|quarantine <id>`. Do not retry this tool call in a loop.",
     });
   });
 

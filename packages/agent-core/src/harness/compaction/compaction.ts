@@ -6,12 +6,12 @@ import {
   type SimpleStreamOptions,
   type StreamFn,
   type Usage,
-} from "@openclaw/llm-core";
+} from "@hanzo/bot-llm-core";
 // Agent Core module implements compaction behavior.
 import {
   CHARS_PER_TOKEN_ESTIMATE,
   estimateStringChars,
-} from "@openclaw/normalization-core/cjk-chars";
+} from "@hanzo/bot-normalization-core/cjk-chars";
 import { resolveAgentReasoningOption } from "../../reasoning.js";
 import {
   type AgentCoreCompletionRuntimeDeps,

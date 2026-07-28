@@ -11,8 +11,8 @@ Experimental cua-driver computer control for Windows and Linux node hosts.
 
 ## Distribution
 
-- Package: `@openclaw/cua-computer`
-- Install route: included in OpenClaw
+- Package: `@hanzo/bot-cua-computer`
+- Install route: included in Bot
 
 ## Surface
 

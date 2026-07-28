@@ -1,20 +1,20 @@
 import {
   resolveAgentConfig,
   resolveDefaultAgentId as resolveConfiguredDefaultAgentId,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "bot/plugin-sdk/agent-runtime";
 import {
   optionalFiniteNumberSchema,
   optionalPositiveIntegerSchema,
-} from "openclaw/plugin-sdk/channel-actions";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { readFiniteNumberParam, readPositiveIntegerParam } from "openclaw/plugin-sdk/param-readers";
-import { resolveLivePluginConfigObject } from "openclaw/plugin-sdk/plugin-config-runtime";
-import { isIncognitoSessionKey, normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import { asOptionalRecord as asRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/channel-actions";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { readFiniteNumberParam, readPositiveIntegerParam } from "bot/plugin-sdk/param-readers";
+import { resolveLivePluginConfigObject } from "bot/plugin-sdk/plugin-config-runtime";
+import { isIncognitoSessionKey, normalizeAgentId } from "bot/plugin-sdk/routing";
+import { asOptionalRecord as asRecord } from "bot/plugin-sdk/string-coerce-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import { Type } from "typebox";
-import { definePluginEntry, type OpenClawPluginApi } from "./api.js";
+import { definePluginEntry, type BotPluginApi } from "./api.js";
 import {
   MEMORY_CATEGORIES,
   type MemoryConfig,
@@ -48,7 +48,7 @@ import {
 } from "./memory-policy.js";
 
 const loadMemoryHostCoreModule = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/memory-host-core"),
+  () => import("bot/plugin-sdk/memory-host-core"),
 );
 
 const DEFAULT_AUTO_RECALL_TIMEOUT_MS = 15_000;
@@ -88,7 +88,7 @@ export default definePluginEntry({
   kind: "memory" as const,
   configSchema: memoryConfigSchema,
 
-  register(api: OpenClawPluginApi) {
+  register(api: BotPluginApi) {
     let cfg: MemoryConfig;
     try {
       cfg = memoryConfigSchema.parse(api.pluginConfig);
@@ -112,8 +112,8 @@ export default definePluginEntry({
     const embeddings = createEmbeddings(api, cfg);
     const autoCaptureCursors = new Map<string, AutoCaptureCursor>();
     const memoryRecallCooldowns = new Map<string, { until: number; error: string }>();
-    const resolveRuntimeConfig = (): OpenClawConfig =>
-      (api.runtime.config?.current?.() ?? api.config) as OpenClawConfig;
+    const resolveRuntimeConfig = (): BotConfig =>
+      (api.runtime.config?.current?.() ?? api.config) as BotConfig;
     const resolveEnabledAgentId = (
       rawAgentId: string | undefined,
       runtimeConfig = resolveRuntimeConfig(),
@@ -136,7 +136,7 @@ export default definePluginEntry({
     const resolveCurrentHookConfig = () => {
       const runtimePluginConfig = resolveLivePluginConfigObject(
         api.runtime.config?.current
-          ? () => api.runtime.config.current() as OpenClawConfig
+          ? () => api.runtime.config.current() as BotConfig
           : undefined,
         "memory-lancedb",
         api.pluginConfig as Record<string, unknown>,

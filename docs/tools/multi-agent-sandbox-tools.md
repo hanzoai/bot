@@ -21,7 +21,7 @@ Each agent in a multi-agent setup can override the global sandbox and tool polic
 </CardGroup>
 
 <Warning>
-Auth is scoped by agent: each agent has its own `agentDir` auth store in `~/.openclaw/agents/<agentId>/agent/openclaw-agent.sqlite`. Never reuse `agentDir` across agents. Agents can read through to the default/main agent's auth profiles when they do not have a local profile, but OAuth refresh tokens are not cloned into secondary agent stores. If you copy credentials manually, copy only portable static `api_key` or `token` profiles.
+Auth is scoped by agent: each agent has its own `agentDir` auth store in `~/.bot/agents/<agentId>/agent/bot-agent.sqlite`. Never reuse `agentDir` across agents. Agents can read through to the default/main agent's auth profiles when they do not have a local profile, but OAuth refresh tokens are not cloned into secondary agent stores. If you copy credentials manually, copy only portable static `api_key` or `token` profiles.
 </Warning>
 
 ---
@@ -38,13 +38,13 @@ Auth is scoped by agent: each agent has its own `agentDir` auth store in `~/.ope
             "id": "main",
             "default": true,
             "name": "Personal Assistant",
-            "workspace": "~/.openclaw/workspace",
+            "workspace": "~/.bot/workspace",
             "sandbox": { "mode": "off" }
           },
           {
             "id": "family",
             "name": "Family Bot",
-            "workspace": "~/.openclaw/workspace-family",
+            "workspace": "~/.bot/workspace-family",
             "sandbox": {
               "mode": "all",
               "scope": "agent"
@@ -91,12 +91,12 @@ Auth is scoped by agent: each agent has its own `agentDir` auth store in `~/.ope
         "list": [
           {
             "id": "personal",
-            "workspace": "~/.openclaw/workspace-personal",
+            "workspace": "~/.bot/workspace-personal",
             "sandbox": { "mode": "off" }
           },
           {
             "id": "work",
-            "workspace": "~/.openclaw/workspace-work",
+            "workspace": "~/.bot/workspace-work",
             "sandbox": {
               "mode": "all",
               "scope": "shared",
@@ -146,14 +146,14 @@ Auth is scoped by agent: each agent has its own `agentDir` auth store in `~/.ope
         "list": [
           {
             "id": "main",
-            "workspace": "~/.openclaw/workspace",
+            "workspace": "~/.bot/workspace",
             "sandbox": {
               "mode": "off"
             }
           },
           {
             "id": "public",
-            "workspace": "~/.openclaw/workspace-public",
+            "workspace": "~/.bot/workspace-public",
             "sandbox": {
               "mode": "all",
               "scope": "agent"
@@ -234,7 +234,7 @@ The filtering order is:
 
   </Accordion>
   <Accordion title="Empty allowlist behavior">
-    If any explicit allowlist in that chain leaves the run with no callable tools, OpenClaw stops before submitting the prompt to the model. This is intentional: an agent configured with a missing tool such as `agents.entries.*.tools.allow: ["query_db"]` should fail loudly until the plugin that registers `query_db` is enabled, not continue as a text-only agent.
+    If any explicit allowlist in that chain leaves the run with no callable tools, Bot stops before submitting the prompt to the model. This is intentional: an agent configured with a missing tool such as `agents.entries.*.tools.allow: ["query_db"]` should fail loudly until the plugin that registers `query_db` is enabled, not continue as a text-only agent.
   </Accordion>
 </AccordionGroup>
 
@@ -252,7 +252,7 @@ Per-agent elevated overrides (`agents.entries.*.tools.elevated`) can further res
     {
       "agents": {
         "defaults": {
-          "workspace": "~/.openclaw/workspace",
+          "workspace": "~/.bot/workspace",
           "sandbox": {
             "mode": "non-main"
           }
@@ -277,7 +277,7 @@ Per-agent elevated overrides (`agents.entries.*.tools.elevated`) can further res
           {
             "id": "main",
             "default": true,
-            "workspace": "~/.openclaw/workspace",
+            "workspace": "~/.bot/workspace",
             "sandbox": { "mode": "off" }
           }
         ]
@@ -288,7 +288,7 @@ Per-agent elevated overrides (`agents.entries.*.tools.elevated`) can further res
 </Tabs>
 
 <Note>
-Legacy `agents.defaults.*`/`agents.entries.*.*` config keys (such as `sandbox.perSession`, `agentRuntime`, `embeddedPi`) are migrated by `openclaw doctor`; prefer `agents.defaults` + `agents.entries` going forward.
+Legacy `agents.defaults.*`/`agents.entries.*.*` config keys (such as `sandbox.perSession`, `agentRuntime`, `embeddedPi`) are migrated by `bot doctor`; prefer `agents.defaults` + `agents.entries` going forward.
 </Note>
 
 ---
@@ -317,7 +317,7 @@ Legacy `agents.defaults.*`/`agents.entries.*.*` config keys (such as `sandbox.pe
     ```
 
     <Warning>
-    This policy disables OpenClaw filesystem tools, but `exec` is still a shell and can write files wherever the selected host or sandbox filesystem allows. For a read-only agent, deny `exec` and `process`, or combine shell access with sandbox filesystem controls such as `agents.defaults.sandbox.workspaceAccess: "ro"` or `"none"`.
+    This policy disables Bot filesystem tools, but `exec` is still a shell and can write files wherever the selected host or sandbox filesystem allows. For a read-only agent, deny `exec` and `process`, or combine shell access with sandbox filesystem controls such as `agents.defaults.sandbox.workspaceAccess: "ro"` or `"none"`.
     </Warning>
 
   </Tab>
@@ -342,7 +342,7 @@ Legacy `agents.defaults.*`/`agents.entries.*.*` config keys (such as `sandbox.pe
 ## Common pitfall: "non-main"
 
 <Warning>
-`agents.defaults.sandbox.mode: "non-main"` checks the session key against the main session key (always `"main"`; `session.mainKey` is not user-configurable, and OpenClaw warns and ignores any other value), not the agent id. Group/channel sessions always get their own keys, so they are treated as non-main and will be sandboxed. If you want an agent to never sandbox, set `agents.entries.*.sandbox.mode: "off"`.
+`agents.defaults.sandbox.mode: "non-main"` checks the session key against the main session key (always `"main"`; `session.mainKey` is not user-configurable, and Bot warns and ignores any other value), not the agent id. Group/channel sessions always get their own keys, so they are treated as non-main and will be sandboxed. If you want an agent to never sandbox, set `agents.entries.*.sandbox.mode: "off"`.
 </Warning>
 
 ---
@@ -354,12 +354,12 @@ After configuring multi-agent sandbox and tools:
 <Steps>
   <Step title="Check agent resolution">
     ```bash
-    openclaw agents list --bindings
+    bot agents list --bindings
     ```
   </Step>
   <Step title="Verify sandbox containers">
     ```bash
-    docker ps --filter "name=openclaw-sbx-"
+    docker ps --filter "name=bot-sbx-"
     ```
   </Step>
   <Step title="Test tool restrictions">
@@ -369,7 +369,7 @@ After configuring multi-agent sandbox and tools:
   </Step>
   <Step title="Monitor logs">
     ```bash
-    openclaw logs --follow | grep -E "routing|sandbox|tools"
+    bot logs --follow | grep -E "routing|sandbox|tools"
     ```
   </Step>
 </Steps>

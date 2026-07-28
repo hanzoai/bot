@@ -1,5 +1,5 @@
 import { Type } from "typebox";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { onSubagentRegistryPersisted } from "../subagent-registry-state.js";
 import { getSubagentRunsByRunIds } from "../subagent-registry.js";
 import type { SubagentRunRecord } from "../subagent-registry.types.js";
@@ -190,7 +190,7 @@ export function createAgentsWaitTool(opts: {
   agentSessionKey?: string;
   runSessionKey?: string;
   agentId?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
 }): AnyAgentTool {
   const swarm = resolveSwarmConfig(opts.config, opts.agentId);
   return {
@@ -236,7 +236,7 @@ const testing = {
 };
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.agentsWaitToolTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.agentsWaitToolTestApi")] = {
     testing,
   };
 }

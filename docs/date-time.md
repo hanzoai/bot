@@ -6,7 +6,7 @@ read_when:
 title: "Date and time"
 ---
 
-OpenClaw uses **host-local time for transport timestamps** and puts **only the time zone** in the system prompt.
+Bot uses **host-local time for transport timestamps** and puts **only the time zone** in the system prompt.
 Provider timestamps are preserved so tools keep their native semantics. When the agent needs the current
 time, it runs the `session_status` tool.
 
@@ -99,7 +99,7 @@ System: [2026-01-12 12:19:17 PST] Model switched.
 
 ## Time format detection (auto)
 
-When `timeFormat: "auto"`, OpenClaw inspects the OS preference (macOS and Windows)
+When `timeFormat: "auto"`, Bot inspects the OS preference (macOS and Windows)
 and falls back to locale formatting. The detected value is **cached per process**
 to avoid repeated system calls.
 

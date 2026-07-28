@@ -1,7 +1,7 @@
 /**
  * Cerebras model provider builder.
  */
-import type { ModelProviderConfig } from "openclaw/plugin-sdk/provider-model-shared";
+import type { ModelProviderConfig } from "bot/plugin-sdk/provider-model-shared";
 import { buildCerebrasCatalogModels, CEREBRAS_BASE_URL } from "./models.js";
 
 /** Builds the Cerebras OpenAI-compatible model provider config. */

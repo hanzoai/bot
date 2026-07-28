@@ -5,18 +5,18 @@
 import {
   createAccountListHelpers,
   hasConfiguredAccountValue,
-} from "openclaw/plugin-sdk/account-helpers";
-import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import { resolveNormalizedAccountEntry } from "openclaw/plugin-sdk/account-resolution-runtime";
-import { resolveIntegerOption } from "openclaw/plugin-sdk/number-runtime";
-import { resolveDefaultSecretProviderAlias } from "openclaw/plugin-sdk/provider-auth";
-import { tryReadSecretFileSync } from "openclaw/plugin-sdk/secret-file-runtime";
+} from "bot/plugin-sdk/account-helpers";
+import { DEFAULT_ACCOUNT_ID, normalizeAccountId } from "bot/plugin-sdk/account-id";
+import { resolveNormalizedAccountEntry } from "bot/plugin-sdk/account-resolution-runtime";
+import { resolveIntegerOption } from "bot/plugin-sdk/number-runtime";
+import { resolveDefaultSecretProviderAlias } from "bot/plugin-sdk/provider-auth";
+import { tryReadSecretFileSync } from "bot/plugin-sdk/secret-file-runtime";
 import {
   normalizeSecretInputString,
   normalizeResolvedSecretInputString,
   resolveSecretInputString,
-} from "openclaw/plugin-sdk/secret-input";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/secret-input";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import type { ClickClackAccountConfig, CoreConfig, ResolvedClickClackAccount } from "./types.js";
 
 const DEFAULT_RECONNECT_MS = 1_500;

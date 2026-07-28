@@ -3,7 +3,7 @@
  * Verifies snapshots are cloned and isolated across agent-specific stores.
  */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   clearRuntimeAuthProfileStoreSnapshot,
@@ -60,7 +60,7 @@ function expectOpenAICodexSnapshotCredential(
 
 describe("runtime auth profile snapshots", () => {
   it("notifies listeners only when credential ownership changes", () => {
-    const agentDir = "/tmp/openclaw-auth-runtime-listener";
+    const agentDir = "/tmp/bot-auth-runtime-listener";
     const listener = vi.fn();
     const unregister = registerRuntimeAuthProfileStoreMutationListener(listener);
     try {
@@ -91,7 +91,7 @@ describe("runtime auth profile snapshots", () => {
   });
 
   it("notifies when provider credential order changes", () => {
-    const agentDir = "/tmp/openclaw-auth-runtime-order";
+    const agentDir = "/tmp/bot-auth-runtime-order";
     const store = createStore("order");
     setRuntimeAuthProfileStoreSnapshot(store, agentDir);
     const listener = vi.fn();
@@ -118,7 +118,7 @@ describe("runtime auth profile snapshots", () => {
   });
 
   it("notifies when an empty runtime snapshot starts or stops shadowing persisted auth", () => {
-    const agentDir = "/tmp/openclaw-auth-runtime-empty-owner";
+    const agentDir = "/tmp/bot-auth-runtime-empty-owner";
     const listener = vi.fn();
     const unregister = registerRuntimeAuthProfileStoreMutationListener(listener);
     const emptyStore: AuthProfileStore = { version: 1, profiles: {} };
@@ -160,7 +160,7 @@ describe("runtime auth profile snapshots", () => {
 
   it("isolates set/get/replace snapshot mutations without structuredClone", () => {
     const structuredCloneSpy = vi.spyOn(globalThis, "structuredClone");
-    const agentDir = "/tmp/openclaw-auth-runtime-snapshot-agent";
+    const agentDir = "/tmp/bot-auth-runtime-snapshot-agent";
     try {
       const stored = createStore("access-1");
       setRuntimeAuthProfileStoreSnapshot(stored, agentDir);
@@ -207,8 +207,8 @@ describe("runtime auth profile snapshots", () => {
   });
 
   it("clears one agent snapshot without disturbing other stores", () => {
-    const firstAgentDir = "/tmp/openclaw-auth-runtime-snapshot-first";
-    const secondAgentDir = "/tmp/openclaw-auth-runtime-snapshot-second";
+    const firstAgentDir = "/tmp/bot-auth-runtime-snapshot-first";
+    const secondAgentDir = "/tmp/bot-auth-runtime-snapshot-second";
     try {
       setRuntimeAuthProfileStoreSnapshot(createStore("main"));
       setRuntimeAuthProfileStoreSnapshot(createStore("first"), firstAgentDir);
@@ -228,14 +228,14 @@ describe("runtime auth profile snapshots", () => {
 
   it("bounds persisted mutation lineage by owner and profile", () => {
     for (let index = 0; index <= testing.MAX_PERSISTED_MUTATION_OWNERS; index += 1) {
-      noteRuntimeAuthProfileStorePersistedMutation(`/tmp/openclaw-mutation-owner-${index}`, {
+      noteRuntimeAuthProfileStorePersistedMutation(`/tmp/bot-mutation-owner-${index}`, {
         credentialsChanged: true,
         stateChanged: false,
         profileIds: ["openai:default"],
       });
     }
     for (let index = 0; index <= testing.MAX_PERSISTED_MUTATION_PROFILES_PER_OWNER; index += 1) {
-      noteRuntimeAuthProfileStorePersistedMutation("/tmp/openclaw-mutation-profile-owner", {
+      noteRuntimeAuthProfileStorePersistedMutation("/tmp/bot-mutation-profile-owner", {
         credentialsChanged: true,
         stateChanged: false,
         profileIds: [`openai:${index}`],

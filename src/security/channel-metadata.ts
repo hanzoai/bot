@@ -1,6 +1,6 @@
 // Extracts channel metadata used by security audit findings.
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { wrapExternalContent } from "./external-content.js";
 
 const DEFAULT_MAX_CHARS = 800;

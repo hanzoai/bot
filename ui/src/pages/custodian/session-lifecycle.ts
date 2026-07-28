@@ -1,7 +1,7 @@
 import {
   readSystemAgentSessionInvalidatedErrorDetails,
   type SystemAgentChatParams,
-} from "@openclaw/gateway-protocol";
+} from "@hanzo/bot-gateway-protocol";
 
 export type CustodianSessionVariant = "onboarding" | "new-agent" | "caretaker";
 

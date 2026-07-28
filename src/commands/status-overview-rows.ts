@@ -1,4 +1,4 @@
-// Builds overview table rows for `openclaw status` and `openclaw status --all`.
+// Builds overview table rows for `bot status` and `bot status --all`.
 // The row builders combine scan surfaces with health/session summaries while keeping rendering elsewhere.
 
 import { formatCliCommand } from "../cli/command-format.js";
@@ -30,7 +30,7 @@ import {
 import type { MemoryPluginStatus, MemoryStatusSnapshot } from "./status.scan.shared.js";
 import type { StatusSummary } from "./status.types.js";
 
-/** Builds the default `openclaw status` overview rows from scan, health, memory, and session inputs. */
+/** Builds the default `bot status` overview rows from scan, health, memory, and session inputs. */
 export function buildStatusCommandOverviewRows(
   params: {
     opts: {
@@ -188,7 +188,7 @@ export function buildStatusAllOverviewRows(params: {
       ...(params.updateRestartValue
         ? [{ Item: "Update restart", Value: params.updateRestartValue }]
         : []),
-      { Item: "Security", Value: `Run: ${formatCliCommand("openclaw security audit --deep")}` },
+      { Item: "Security", Value: `Run: ${formatCliCommand("bot security audit --deep")}` },
     ],
     agentsValue: buildStatusAllAgentsValue({
       agentStatus: params.agentStatus,

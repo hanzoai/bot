@@ -12,7 +12,7 @@ vi.mock("../auto-reply/reply/conversation-label-generator.js", () => ({
 vi.mock("../config/sessions/session-accessor.js", () => ({ updateSessionEntry }));
 
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   generateDashboardSessionTitle,
   maybeGenerateDashboardSessionTitle,
@@ -20,7 +20,7 @@ import {
 
 const cfg = {
   agents: { defaults: { model: { primary: "openai/gpt-5.5" } } },
-} as OpenClawConfig;
+} as BotConfig;
 const baseEntry: SessionEntry = {
   sessionId: "session-1",
   updatedAt: 1,
@@ -33,7 +33,7 @@ function titleParams(entry: SessionEntry | undefined = baseEntry) {
     entry,
     sessionId: "session-1",
     sessionKey: "agent:main:dashboard:chat-1",
-    storePath: "/tmp/openclaw/sessions.json",
+    storePath: "/tmp/bot/sessions.json",
     userMessage: "Help me plan the release",
   };
 }
@@ -79,7 +79,7 @@ describe("maybeGenerateDashboardSessionTitle", () => {
       {
         agentId: "main",
         sessionKey: "agent:main:dashboard:chat-1",
-        storePath: "/tmp/openclaw/sessions.json",
+        storePath: "/tmp/bot/sessions.json",
       },
       expect.any(Function),
       { requireWriteSuccess: true },
@@ -123,7 +123,7 @@ describe("maybeGenerateDashboardSessionTitle", () => {
           utilityModel: "openai/gpt-5.6-luna",
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     resolveUtilityModelRefForAgent.mockReturnValue("openai/gpt-5.6-luna");
 
     await expect(

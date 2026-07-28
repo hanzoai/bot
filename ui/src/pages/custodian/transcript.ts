@@ -1,7 +1,7 @@
 import type {
   SystemAgentChatHistoryResult,
   SystemAgentChatHistoryTurn,
-} from "@openclaw/gateway-protocol";
+} from "@hanzo/bot-gateway-protocol";
 import { html, nothing } from "lit";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
 import { t } from "../../i18n/index.ts";
@@ -87,7 +87,7 @@ export async function readCustodianTranscript(
   try {
     return (
       await client.request<SystemAgentChatHistoryResult>(
-        "openclaw.chat.history",
+        "bot.chat.history",
         {},
         {
           timeoutMs: CUSTODIAN_TRANSCRIPT_TIMEOUT_MS,

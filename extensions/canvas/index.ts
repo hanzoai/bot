@@ -4,10 +4,10 @@
  */
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Duplex } from "node:stream";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { definePluginEntry, type AnyAgentTool } from "openclaw/plugin-sdk/plugin-entry";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { definePluginEntry, type AnyAgentTool } from "bot/plugin-sdk/plugin-entry";
 import { validateSupportedA2UIJsonl } from "./src/a2ui-jsonl.js";
 import { canvasConfigSchema, isCanvasHostEnabled } from "./src/config.js";
 import { A2UI_PATH, CANVAS_HOST_PATH, CANVAS_WS_PATH } from "./src/host/a2ui-shared.js";
@@ -25,7 +25,7 @@ const CANVAS_NODE_COMMANDS = [
 ];
 
 function createLazyCanvasTool(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   workspaceDir?: string;
   agentSessionKey?: string;
 }): AnyAgentTool {

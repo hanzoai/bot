@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 private enum NotificationOperationProbeError: LocalizedError {
     case expected

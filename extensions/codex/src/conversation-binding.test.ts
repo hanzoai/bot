@@ -2,8 +2,8 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { ExecApprovalsFile } from "openclaw/plugin-sdk/exec-approvals-runtime";
-import { upsertSessionEntry } from "openclaw/plugin-sdk/session-store-runtime";
+import type { ExecApprovalsFile } from "bot/plugin-sdk/exec-approvals-runtime";
+import { upsertSessionEntry } from "bot/plugin-sdk/session-store-runtime";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const sharedClientMocks = vi.hoisted(() => ({
@@ -47,8 +47,8 @@ vi.mock("node:fs", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/agent-harness-runtime")>();
+vi.mock("bot/plugin-sdk/agent-harness-runtime", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/agent-harness-runtime")>();
   return {
     ...actual,
     resolveSandboxContext: resolveSandboxContextMock,
@@ -73,15 +73,15 @@ vi.mock("./app-server/shared-client.js", () => ({
     run: (client: unknown) => Promise<unknown>;
   }) => await params.run(params.lease.client),
 }));
-vi.mock("openclaw/plugin-sdk/exec-approvals-runtime", async (importOriginal) => {
+vi.mock("bot/plugin-sdk/exec-approvals-runtime", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("openclaw/plugin-sdk/exec-approvals-runtime")>();
+    await importOriginal<typeof import("bot/plugin-sdk/exec-approvals-runtime")>();
   return {
     ...actual,
     loadExecApprovals: execApprovalsRuntimeMocks.loadExecApprovals,
   };
 });
-vi.mock("openclaw/plugin-sdk/agent-runtime", () => agentRuntimeMocks);
+vi.mock("bot/plugin-sdk/agent-runtime", () => agentRuntimeMocks);
 
 import { resolveCodexAppServerRuntimeOptions } from "./app-server/config.js";
 import {
@@ -214,7 +214,7 @@ function mockCallArg(mock: ReturnType<typeof vi.fn>, callIndex = 0, argIndex = 0
 describe("codex conversation binding", () => {
   beforeEach(async () => {
     resetCodexTestBindingStore();
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-codex-binding-"));
+    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-codex-binding-"));
   });
 
   afterEach(async () => {
@@ -529,7 +529,7 @@ describe("codex conversation binding", () => {
         model: "gpt-5.4-mini",
       }),
     ).rejects.toThrow(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Bot native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(requests).toEqual([]);
   });
@@ -568,7 +568,7 @@ describe("codex conversation binding", () => {
         model: "gpt-5.4-mini",
       }),
     ).rejects.toThrow(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Bot native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(request).not.toHaveBeenCalled();
   });
@@ -600,7 +600,7 @@ describe("codex conversation binding", () => {
         model: "gpt-5.4-mini",
       }),
     ).rejects.toThrow(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Bot native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(requests).toEqual([]);
   });
@@ -817,7 +817,7 @@ describe("codex conversation binding", () => {
     });
   });
 
-  it("blocks bound Codex app-server turns when the current OpenClaw session is sandboxed", async () => {
+  it("blocks bound Codex app-server turns when the current Bot session is sandboxed", async () => {
     const sessionFile = path.join(tempDir, "session.jsonl");
     await writeTestConversationBinding(sessionFile, { threadId: "thread-1", cwd: tempDir });
 
@@ -857,7 +857,7 @@ describe("codex conversation binding", () => {
       handled: true,
       reply: {
         text: expect.stringContaining(
-          "Codex-native Codex app-server conversation binding is unavailable because OpenClaw sandboxing is active for this session.",
+          "Codex-native Codex app-server conversation binding is unavailable because Bot sandboxing is active for this session.",
         ),
       },
     });
@@ -904,7 +904,7 @@ describe("codex conversation binding", () => {
       handled: true,
       reply: {
         text: expect.stringContaining(
-          "Codex-native Codex app-server conversation binding is unavailable because OpenClaw exec host=node is active for this session.",
+          "Codex-native Codex app-server conversation binding is unavailable because Bot exec host=node is active for this session.",
         ),
       },
     });
@@ -957,7 +957,7 @@ describe("codex conversation binding", () => {
     );
 
     expect(result?.handled).toBe(true);
-    expect(result?.reply?.text).toContain("OpenClaw exec host=node is active");
+    expect(result?.reply?.text).toContain("Bot exec host=node is active");
     expect(sharedClientMocks.getSharedCodexAppServerClient).not.toHaveBeenCalled();
   });
 
@@ -1022,7 +1022,7 @@ describe("codex conversation binding", () => {
     );
 
     expect(result?.handled).toBe(true);
-    expect(result?.reply?.text).toContain("OpenClaw exec host=node is active");
+    expect(result?.reply?.text).toContain("Bot exec host=node is active");
     expect(sharedClientMocks.getSharedCodexAppServerClient).not.toHaveBeenCalled();
   });
 
@@ -1090,7 +1090,7 @@ describe("codex conversation binding", () => {
 
     expect(result?.handled).toBe(true);
     expect(result?.reply?.text).toContain(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Bot native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(request).not.toHaveBeenCalled();
   });
@@ -1173,12 +1173,12 @@ describe("codex conversation binding", () => {
 
     expect(result?.handled).toBe(true);
     expect(result?.reply?.text).toContain(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Bot native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(request).not.toHaveBeenCalled();
   });
 
-  it("blocks bound Codex CLI node turns when the current OpenClaw session is sandboxed", async () => {
+  it("blocks bound Codex CLI node turns when the current Bot session is sandboxed", async () => {
     const resumeCodexCliSessionOnNode = vi.fn();
 
     const result = await handleCodexConversationInboundClaim(
@@ -1219,7 +1219,7 @@ describe("codex conversation binding", () => {
       handled: true,
       reply: {
         text: expect.stringContaining(
-          "Codex-native Codex CLI node conversation binding is unavailable because OpenClaw sandboxing is active for this session.",
+          "Codex-native Codex CLI node conversation binding is unavailable because Bot sandboxing is active for this session.",
         ),
       },
     });
@@ -1636,7 +1636,7 @@ describe("codex conversation binding", () => {
 
     expect(result?.handled).toBe(true);
     expect(result?.reply?.text).toContain(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Bot native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(requests).toEqual([]);
   });
@@ -1807,7 +1807,7 @@ describe("codex conversation binding", () => {
 
     expect(result?.handled).toBe(true);
     expect(result?.reply?.text).toContain(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Bot native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(result?.reply?.text).not.toContain(
       "legacy full exec security with ask requires Codex app-server danger-full-access",
@@ -2083,7 +2083,7 @@ describe("codex conversation binding", () => {
     await writeTestConversationBinding(sessionFile, {
       threadId: "thread-old",
       cwd: tempDir,
-      networkProxyProfileName: "openclaw-network-stale",
+      networkProxyProfileName: "bot-network-stale",
       networkProxyConfigFingerprint: "stale-proxy-config",
       conversationStartId: "start-1",
       conversationSourceTransferComplete: true,
@@ -2256,7 +2256,7 @@ describe("codex conversation binding", () => {
 
     expect(result?.handled).toBe(true);
     expect(result?.reply?.text).toContain(
-      "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+      "Bot native Codex conversation binding cannot route interactive approvals yet",
     );
     expect(turnStartParams).toEqual([]);
     expect(sharedClientMocks.getSharedCodexAppServerClient).not.toHaveBeenCalled();
@@ -2340,7 +2340,7 @@ describe("codex conversation binding", () => {
       handled: true,
       reply: {
         text: expect.stringContaining(
-          "OpenClaw native Codex conversation binding cannot route interactive approvals yet",
+          "Bot native Codex conversation binding cannot route interactive approvals yet",
         ),
       },
     });

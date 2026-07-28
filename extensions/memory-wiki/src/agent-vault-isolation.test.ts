@@ -1,16 +1,16 @@
 // Memory Wiki tests cover agent-scoped vault isolation through the public tools.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { createPluginRuntimeMock } from "openclaw/plugin-sdk/channel-test-helpers";
+import { createPluginRuntimeMock } from "bot/plugin-sdk/channel-test-helpers";
 import {
   clearMemoryPluginState,
   registerMemoryCorpusSupplement,
-} from "openclaw/plugin-sdk/memory-host-core";
-import type { AnyAgentTool, OpenClawPluginToolFactory } from "openclaw/plugin-sdk/plugin-entry";
-import { createTestPluginApi } from "openclaw/plugin-sdk/plugin-test-api";
+} from "bot/plugin-sdk/memory-host-core";
+import type { AnyAgentTool, BotPluginToolFactory } from "bot/plugin-sdk/plugin-entry";
+import { createTestPluginApi } from "bot/plugin-sdk/plugin-test-api";
 import { describe, expect, it } from "vitest";
 import memoryCorePlugin from "../../memory-core/index.js";
-import type { OpenClawConfig } from "../api.js";
+import type { BotConfig } from "../api.js";
 import {
   resolveMemoryWikiAgentConfig,
   resolveMemoryWikiConfig,
@@ -34,9 +34,9 @@ function textContent(result: { content: Array<{ type: string; text?: string }> }
 }
 
 function registerMemoryCoreToolFactories(
-  appConfig: OpenClawConfig,
-): Map<string, OpenClawPluginToolFactory> {
-  const factories = new Map<string, OpenClawPluginToolFactory>();
+  appConfig: BotConfig,
+): Map<string, BotPluginToolFactory> {
+  const factories = new Map<string, BotPluginToolFactory>();
   memoryCorePlugin.register(
     createTestPluginApi({
       id: "memory-core",
@@ -56,9 +56,9 @@ function registerMemoryCoreToolFactories(
 }
 
 function createMemoryCoreTool(params: {
-  factories: Map<string, OpenClawPluginToolFactory>;
+  factories: Map<string, BotPluginToolFactory>;
   name: "memory_search" | "memory_get";
-  appConfig: OpenClawConfig;
+  appConfig: BotConfig;
   agentId: string;
 }): AnyAgentTool {
   const factory = params.factories.get(params.name);
@@ -85,7 +85,7 @@ describe("agent-scoped memory-wiki tools", () => {
       agents: {
         list: [{ id: "support", default: true }, { id: "marketing" }],
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const baseConfig = resolveMemoryWikiConfig({
       vault: { scope: "agent", path: vaultParent },
       search: { backend: "local", corpus: "wiki" },

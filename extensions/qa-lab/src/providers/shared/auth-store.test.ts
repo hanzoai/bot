@@ -5,14 +5,14 @@ import path from "node:path";
 import {
   loadAuthProfileStoreWithoutExternalProfiles,
   saveAuthProfileStore,
-} from "openclaw/plugin-sdk/agent-runtime";
+} from "bot/plugin-sdk/agent-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import { readQaAuthProfiles, writeQaAuthProfiles } from "./auth-store.js";
 
 const tempDirs: string[] = [];
 
 async function createTempDir(): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-qa-auth-store-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-qa-auth-store-"));
   tempDirs.push(dir);
   return dir;
 }

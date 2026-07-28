@@ -1,13 +1,13 @@
 // Resolves agent-specific config and workspace directories.
 import os from "node:os";
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { listAgentEntries, resolveAgentConfig } from "../agents/agent-scope-config.js";
 import { resolveRequiredHomeDir } from "../infra/home-dir.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import { resolveUserPath } from "../utils.js";
 import { resolveStateDir } from "./paths.js";
-import type { OpenClawConfig } from "./types.js";
+import type { BotConfig } from "./types.js";
 
 type DuplicateAgentDir = {
   agentDir: string;
@@ -34,7 +34,7 @@ function canonicalizeAgentDir(agentDir: string): string {
   return resolved;
 }
 
-function collectReferencedAgentIds(cfg: OpenClawConfig): string[] {
+function collectReferencedAgentIds(cfg: BotConfig): string[] {
   const ids = new Set<string>();
 
   const agents = listAgentEntries(cfg);
@@ -63,7 +63,7 @@ function collectReferencedAgentIds(cfg: OpenClawConfig): string[] {
 }
 
 function resolveEffectiveAgentDir(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string,
   deps?: { env?: NodeJS.ProcessEnv; homedir?: () => string },
 ): string {
@@ -83,7 +83,7 @@ function resolveEffectiveAgentDir(
 
 /** Finds agent ids whose effective agentDir would share auth/session state. */
 export function findDuplicateAgentDirs(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   deps?: { env?: NodeJS.ProcessEnv; homedir?: () => string },
 ): DuplicateAgentDir[] {
   const byDir = new Map<string, { agentDir: string; agentIds: string[] }>();

@@ -432,7 +432,7 @@ export function createApplicationOverlays(
     if (
       event.event === "exec.approval.resolved" ||
       event.event === "plugin.approval.resolved" ||
-      event.event === "openclaw.approval.resolved"
+      event.event === "bot.approval.resolved"
     ) {
       const resolved = parseExecApprovalResolved(event.payload);
       if (resolved) {

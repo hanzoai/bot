@@ -1,13 +1,13 @@
-# Venice OpenClaw provider
+# Venice Bot provider
 
-Official OpenClaw provider plugin for Venice.
+Official Bot provider plugin for Venice.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/venice-provider
+bot plugins install @hanzo/bot-venice-provider
 ```
 
 ## Docs
 
-See `docs/providers/venice.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/providers/venice`.
+See `docs/providers/venice.md` in the Bot repository, or the published docs at `https://docs.bot.ai/providers/venice`.

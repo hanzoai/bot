@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { emitSessionIdentityMutation } from "../../sessions/session-lifecycle-events.js";
 import type { SessionEntry } from "./types.js";
 

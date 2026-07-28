@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { GatewayBrowserDeviceAuthLifecycle } from "./browser-device-auth.js";
 
 const client = {
-  id: "openclaw-browser-copilot" as const,
+  id: "bot-browser-copilot" as const,
   version: "test",
   platform: "Chrome",
   deviceFamily: "Extension",
@@ -40,7 +40,7 @@ describe("GatewayBrowserDeviceAuthLifecycle", () => {
     });
     expect(plan.scopes).toEqual(["operator.read"]);
     expect(sign).toHaveBeenCalledWith(
-      "v3|device|openclaw-browser-copilot|ui|operator|operator.read|123|test-token-placeholder|nonce|chrome|extension",
+      "v3|device|bot-browser-copilot|ui|operator|operator.read|123|test-token-placeholder|nonce|chrome|extension",
     );
 
     await lifecycle.acceptHello(
@@ -48,7 +48,7 @@ describe("GatewayBrowserDeviceAuthLifecycle", () => {
       plan,
     );
     expect(store).toHaveBeenCalledWith({
-      clientId: "openclaw-browser-copilot",
+      clientId: "bot-browser-copilot",
       deviceId: "device",
       role: "operator",
       token: "test-auth-token",

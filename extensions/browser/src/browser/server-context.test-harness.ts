@@ -12,13 +12,13 @@ export function makeBrowserProfile(
   overrides: Partial<ResolvedBrowserProfile> = {},
 ): ResolvedBrowserProfile {
   return {
-    name: "openclaw",
+    name: "bot",
     cdpUrl: "http://127.0.0.1:18800",
     cdpHost: "127.0.0.1",
     cdpIsLoopback: true,
     cdpPort: 18800,
     color: "#FF4500",
-    driver: "openclaw",
+    driver: "bot",
     headless: false,
     attachOnly: false,
     ...overrides,
@@ -76,16 +76,16 @@ export function makeBrowserServerState(params?: {
   };
 }
 
-/** Mocks a launched OpenClaw Chrome process with the supplied pid. */
+/** Mocks a launched Bot Chrome process with the supplied pid. */
 export function mockLaunchedChrome(
-  launchOpenClawChrome: { mockResolvedValue: (value: RunningChrome) => unknown },
+  launchBotChrome: { mockResolvedValue: (value: RunningChrome) => unknown },
   pid: number,
 ) {
   const proc = new EventEmitter() as unknown as ChildProcessWithoutNullStreams;
-  launchOpenClawChrome.mockResolvedValue({
+  launchBotChrome.mockResolvedValue({
     pid,
     exe: { kind: "chromium", path: "/usr/bin/chromium" },
-    userDataDir: "/tmp/openclaw-test",
+    userDataDir: "/tmp/bot-test",
     cdpPort: 18800,
     startedAt: Date.now(),
     proc,

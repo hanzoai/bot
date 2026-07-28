@@ -1,11 +1,11 @@
-import type { ChannelInboundMediaInput } from "openclaw/plugin-sdk/channel-inbound";
+import type { ChannelInboundMediaInput } from "bot/plugin-sdk/channel-inbound";
 // Signal plugin helpers isolate active-run control scheduling from the inbound handler.
 import {
   listChatCommands,
   maybeResolveTextAlias,
   normalizeCommandBody,
-} from "openclaw/plugin-sdk/command-auth-native";
-import { isAbortRequestText } from "openclaw/plugin-sdk/command-primitives-runtime";
+} from "bot/plugin-sdk/command-auth-native";
+import { isAbortRequestText } from "bot/plugin-sdk/command-primitives-runtime";
 import type { SignalIngressLifecycle } from "../signal-ingress.js";
 
 export type SignalInboundEntry = {

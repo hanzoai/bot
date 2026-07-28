@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { isJavaScriptModulePath } from "../../plugins/native-module-require.js";
 import { resolveExistingPluginModulePath } from "./module-loader.js";
@@ -23,7 +23,7 @@ afterEach(() => {
 });
 
 function createTempDir(): string {
-  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-channel-module-loader-"));
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-channel-module-loader-"));
   tempDirs.push(tempDir);
   return tempDir;
 }

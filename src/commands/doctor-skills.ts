@@ -3,7 +3,7 @@ import { existsSync } from "node:fs";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { listAgentIds, resolveAgentWorkspaceDir } from "../agents/agent-scope.js";
 import { formatCliCommand } from "../cli/command-format.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { SkillStatusEntry } from "../skills/discovery/status.js";
 import { buildWorkspaceSkillStatus } from "../skills/discovery/status.js";
 import {
@@ -69,10 +69,10 @@ function formatUnavailableSkillDoctorLines(
       .join(", ")}`,
   ];
   if (includeDisableHint) {
-    lines.push(`Disable unused skills: ${formatCliCommand("openclaw doctor --fix")}`);
+    lines.push(`Disable unused skills: ${formatCliCommand("bot doctor --fix")}`);
   }
   lines.push(
-    `Inspect details: ${formatCliCommand("openclaw skills check --agent <id>")} or ${formatCliCommand("openclaw skills info <name> --agent <id>")}`,
+    `Inspect details: ${formatCliCommand("bot skills check --agent <id>")} or ${formatCliCommand("bot skills info <name> --agent <id>")}`,
   );
   return lines;
 }
@@ -98,9 +98,9 @@ function collectFleetUnavailableSkills(
 
 /** Checks every agent's skill readiness and disables only fleet-wide unavailable skills. */
 export async function maybeRepairSkillReadiness(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: DoctorPrompter;
-}): Promise<OpenClawConfig> {
+}): Promise<BotConfig> {
   const agentIds = listAgentIds(params.cfg);
   const scopes = agentIds.map((agentId) => ({
     agentId,

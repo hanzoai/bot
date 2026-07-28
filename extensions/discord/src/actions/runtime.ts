@@ -1,8 +1,8 @@
 // Discord plugin module implements runtime behavior.
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import type { ChannelMessageActionContext } from "openclaw/plugin-sdk/channel-contract";
+import type { AgentToolResult } from "bot/plugin-sdk/agent-core";
+import type { ChannelMessageActionContext } from "bot/plugin-sdk/channel-contract";
 import { createDiscordActionGate } from "../accounts.js";
-import { readStringParam, type OpenClawConfig } from "../runtime-api.js";
+import { readStringParam, type BotConfig } from "../runtime-api.js";
 import { handleDiscordGuildAction } from "./runtime.guild.js";
 import { handleDiscordMessagingAction } from "./runtime.messaging.js";
 import { handleDiscordModerationAction } from "./runtime.moderation.js";
@@ -62,7 +62,7 @@ const presenceActions = new Set(["setPresence"]);
 
 export async function handleDiscordAction(
   params: Record<string, unknown>,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   options?: {
     mediaAccess?: {
       localRoots?: readonly string[];

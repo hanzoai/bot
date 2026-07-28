@@ -31,8 +31,8 @@ async function runGit(cwd: string, ...args: string[]): Promise<string> {
 async function initGitRepo(root: string): Promise<void> {
   await fs.mkdir(root, { recursive: true });
   await runGit(root, "init", "--initial-branch=main");
-  await runGit(root, "config", "user.name", "OpenClaw Test");
-  await runGit(root, "config", "user.email", "test@openclaw.invalid");
+  await runGit(root, "config", "user.name", "Bot Test");
+  await runGit(root, "config", "user.email", "test@bot.invalid");
 }
 
 async function commitGit(root: string, message: string): Promise<void> {
@@ -52,7 +52,7 @@ describe("compareSemverStrings", () => {
     expect(compareSemverStrings("2026.6.6.beta.2", "2026.6.6-beta.1")).toBe(1);
   });
 
-  it("treats OpenClaw stable correction releases as newer than their base release", () => {
+  it("treats Bot stable correction releases as newer than their base release", () => {
     expect(compareSemverStrings("2026.5.3", "2026.5.3-1")).toBe(-1);
     expect(compareSemverStrings("2026.5.3-1", "2026.5.3")).toBe(1);
     expect(compareSemverStrings("2026.5.3-2", "2026.5.3-1")).toBe(1);
@@ -96,15 +96,15 @@ describe("resolveNpmChannelTag", () => {
 
   it("delegates package target metadata to npm view with global config scope", async () => {
     versionByTag.latest = "1.0.4";
-    const env = { ...process.env, NPM_CONFIG_USERCONFIG: "/tmp/openclaw-user-npmrc" };
+    const env = { ...process.env, NPM_CONFIG_USERCONFIG: "/tmp/bot-user-npmrc" };
 
     await expect(
       fetchNpmPackageTargetStatus({
         target: "latest",
-        spec: "openclaw@latest",
-        command: "/opt/openclaw/node/bin/npm",
+        spec: "bot@latest",
+        command: "/opt/bot/node/bin/npm",
         timeoutMs: 1000,
-        cwd: "/tmp/openclaw-project",
+        cwd: "/tmp/bot-project",
         env,
         runCommand,
       }),
@@ -116,18 +116,18 @@ describe("resolveNpmChannelTag", () => {
 
     expect(runCommandMock).toHaveBeenCalledWith(
       [
-        "/opt/openclaw/node/bin/npm",
+        "/opt/bot/node/bin/npm",
         "view",
-        "openclaw@latest",
+        "bot@latest",
         "version",
         "engines.node",
-        "openclaw.schemaVersions",
+        "bot.schemaVersions",
         "--json",
         "--global",
       ],
       expect.objectContaining({
         timeoutMs: 1000,
-        cwd: "/tmp/openclaw-project",
+        cwd: "/tmp/bot-project",
         env,
       }),
     );
@@ -139,7 +139,7 @@ describe("resolveNpmChannelTag", () => {
         {
           version: "2026.7.1",
           engines: { node: ">=22.22.3" },
-          openclaw: { schemaVersions: { state: 3, agent: 11 } },
+          bot: { schemaVersions: { state: 3, agent: 11 } },
         },
       ]),
       stderr: "",
@@ -161,7 +161,7 @@ describe("resolveNpmChannelTag", () => {
   });
 
   it("uses npm global scope, user config auth, and ignores project npmrc for real metadata", async () => {
-    await withTempDir({ prefix: "openclaw-update-check-npm-view-" }, async (base) => {
+    await withTempDir({ prefix: "bot-update-check-npm-view-" }, async (base) => {
       const requests: Array<{ url: string; authorization?: string }> = [];
       const server = http.createServer((req, res) => {
         requests.push({
@@ -171,15 +171,15 @@ describe("resolveNpmChannelTag", () => {
         res.setHeader("content-type", "application/json");
         res.end(
           JSON.stringify({
-            name: "openclaw",
+            name: "bot",
             "dist-tags": { latest: "2026.6.6" },
             versions: {
               "2026.6.6": {
-                name: "openclaw",
+                name: "bot",
                 version: "2026.6.6",
                 engines: { node: ">=22.19.0" },
                 dist: {
-                  tarball: "http://example.invalid/openclaw-2026.6.6.tgz",
+                  tarball: "http://example.invalid/bot-2026.6.6.tgz",
                   shasum: "0".repeat(40),
                 },
               },
@@ -225,7 +225,7 @@ describe("resolveNpmChannelTag", () => {
           nodeEngine: ">=22.19.0",
         });
 
-        expect(requests.some((request) => request.url.startsWith("/user/openclaw"))).toBe(true);
+        expect(requests.some((request) => request.url.startsWith("/user/bot"))).toBe(true);
         expect(requests.some((request) => request.url.startsWith("/project/"))).toBe(false);
         expect(requests.some((request) => request.authorization === "Bearer test-token")).toBe(
           true,
@@ -240,7 +240,7 @@ describe("resolveNpmChannelTag", () => {
 
   it("uses the public registry when no npm command is available", async () => {
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/latest",
+      url: "https://registry.npmjs.org/bot/latest",
       reply: {
         json: {
           version: "2026.6.8",
@@ -294,7 +294,7 @@ describe("resolveNpmChannelTag", () => {
         error: "TimeoutError: request timed out",
       });
       expect(fetchMock).toHaveBeenCalledWith(
-        "https://registry.npmjs.org/openclaw/latest",
+        "https://registry.npmjs.org/bot/latest",
         expect.objectContaining({ signal: expect.any(AbortSignal) }),
       );
     } finally {
@@ -306,7 +306,7 @@ describe("resolveNpmChannelTag", () => {
   it("cancels public registry HTTP failure bodies", async () => {
     const cancel = vi.spyOn(ReadableStream.prototype, "cancel");
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/latest",
+      url: "https://registry.npmjs.org/bot/latest",
       reply: { status: 503, body: "unavailable" },
     });
 
@@ -324,7 +324,7 @@ describe("resolveNpmChannelTag", () => {
   it("returns error on oversized public registry response exceeding 16 MiB", async () => {
     const ONE_MIB = 1024 * 1024;
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/latest",
+      url: "https://registry.npmjs.org/bot/latest",
       reply: {
         body: Buffer.alloc(16 * ONE_MIB + 1, 0x41),
         headers: { "content-type": "application/json" },
@@ -344,7 +344,7 @@ describe("resolveNpmChannelTag", () => {
     const body = `{"version":"${"0".repeat(innerLen)}"}`;
 
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/latest",
+      url: "https://registry.npmjs.org/bot/latest",
       reply: { body, headers: { "content-type": "application/json" } },
     });
 
@@ -357,7 +357,7 @@ describe("resolveNpmChannelTag", () => {
 
   it("returns error on malformed JSON from registry", async () => {
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/latest",
+      url: "https://registry.npmjs.org/bot/latest",
       reply: {
         body: "not-json-at-all{{{",
         headers: { "content-type": "application/json" },
@@ -371,7 +371,7 @@ describe("resolveNpmChannelTag", () => {
 
   it("returns error on non-200 status from registry", async () => {
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/latest",
+      url: "https://registry.npmjs.org/bot/latest",
       reply: { status: 404 },
     });
 
@@ -440,7 +440,7 @@ describe("resolveNpmChannelTag", () => {
     }));
 
     const result = await fetchNpmPackageTargetStatus({
-      target: "openclaw",
+      target: "bot",
       timeoutMs: 1000,
       runCommand: badRunCommand as unknown as typeof runCommandWithTimeout,
     });
@@ -455,11 +455,11 @@ describe("resolveNpmChannelTag", () => {
 describe("resolveExtendedStablePackage", () => {
   it("resolves and verifies an exact public package without falling back", async () => {
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/extended-stable",
+      url: "https://registry.npmjs.org/bot/extended-stable",
       reply: { json: { version: "2026.6.33" } },
     });
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/2026.6.33",
+      url: "https://registry.npmjs.org/bot/2026.6.33",
       reply: { json: { version: "2026.6.33" } },
     });
 
@@ -469,17 +469,17 @@ describe("resolveExtendedStablePackage", () => {
       status: "resolved",
       selector: "extended-stable",
       version: "2026.6.33",
-      packageSpec: "openclaw@2026.6.33",
+      packageSpec: "bot@2026.6.33",
     });
   });
 
   it("supports an explicit scoped-package override on a loopback test registry", async () => {
     mockHttp.intercept({
-      url: "http://127.0.0.1:4873/%40kevins8%2Fopenclaw/extended-stable",
+      url: "http://127.0.0.1:4873/%40kevins8%2Fbot/extended-stable",
       reply: { json: { version: "2000.4.34" } },
     });
     mockHttp.intercept({
-      url: "http://127.0.0.1:4873/%40kevins8%2Fopenclaw/2000.4.34",
+      url: "http://127.0.0.1:4873/%40kevins8%2Fbot/2000.4.34",
       reply: { json: { version: "2000.4.34" } },
     });
 
@@ -487,9 +487,9 @@ describe("resolveExtendedStablePackage", () => {
       resolveExtendedStablePackage({
         installKind: "package",
         timeoutMs: 1000,
-        packageName: "@kevins8/openclaw",
+        packageName: "@kevins8/bot",
         env: {
-          OPENCLAW_UPDATE_PACKAGE_SPEC: "@kevins8/openclaw",
+          BOT_UPDATE_PACKAGE_SPEC: "@kevins8/bot",
           NPM_CONFIG_REGISTRY: "http://127.0.0.1:4873/",
         },
       }),
@@ -497,17 +497,17 @@ describe("resolveExtendedStablePackage", () => {
       status: "resolved",
       selector: "extended-stable",
       version: "2000.4.34",
-      packageSpec: "@kevins8/openclaw@2000.4.34",
+      packageSpec: "@kevins8/bot@2000.4.34",
     });
   });
 
   it("ignores package overrides that do not use a loopback registry", async () => {
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/extended-stable",
+      url: "https://registry.npmjs.org/bot/extended-stable",
       reply: { json: { version: "2026.6.33" } },
     });
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/2026.6.33",
+      url: "https://registry.npmjs.org/bot/2026.6.33",
       reply: { json: { version: "2026.6.33" } },
     });
 
@@ -515,21 +515,21 @@ describe("resolveExtendedStablePackage", () => {
       resolveExtendedStablePackage({
         installKind: "package",
         timeoutMs: 1000,
-        packageName: "@kevins8/openclaw",
+        packageName: "@kevins8/bot",
         env: {
-          OPENCLAW_UPDATE_PACKAGE_SPEC: "@kevins8/openclaw",
+          BOT_UPDATE_PACKAGE_SPEC: "@kevins8/bot",
           NPM_CONFIG_REGISTRY: "https://registry.example.com/",
         },
       }),
     ).resolves.toMatchObject({
       status: "resolved",
-      packageSpec: "openclaw@2026.6.33",
+      packageSpec: "bot@2026.6.33",
     });
   });
 
   it("returns selector_missing for an absent public selector", async () => {
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/extended-stable",
+      url: "https://registry.npmjs.org/bot/extended-stable",
       reply: { status: 404, body: "not found" },
     });
 
@@ -540,7 +540,7 @@ describe("resolveExtendedStablePackage", () => {
 
   it("returns selector_query_failed for unusable selector metadata", async () => {
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/extended-stable",
+      url: "https://registry.npmjs.org/bot/extended-stable",
       reply: { body: "{", headers: { "content-type": "application/json" } },
     });
 
@@ -551,11 +551,11 @@ describe("resolveExtendedStablePackage", () => {
 
   it("returns exact_package_mismatch when exact readback differs", async () => {
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/extended-stable",
+      url: "https://registry.npmjs.org/bot/extended-stable",
       reply: { json: { version: "2026.6.33" } },
     });
     mockHttp.intercept({
-      url: "https://registry.npmjs.org/openclaw/2026.6.33",
+      url: "https://registry.npmjs.org/bot/2026.6.33",
       reply: { json: { version: "2026.6.34" } },
     });
 
@@ -563,7 +563,7 @@ describe("resolveExtendedStablePackage", () => {
       resolveExtendedStablePackage({ installKind: "package", timeoutMs: 1000 }),
     ).resolves.toEqual({ status: "failed", reason: "exact_package_mismatch" });
     expect(mockHttp.requests().map((request) => request.fullUrl)).not.toContain(
-      "https://registry.npmjs.org/openclaw/latest",
+      "https://registry.npmjs.org/bot/latest",
     );
   });
 
@@ -627,7 +627,7 @@ describe("formatGitInstallLabel", () => {
 
 describe("checkUpdateStatus", () => {
   it("does not report divergence for unrelated histories", async () => {
-    await withTempDir({ prefix: "openclaw-update-check-unrelated-" }, async (base) => {
+    await withTempDir({ prefix: "bot-update-check-unrelated-" }, async (base) => {
       const localRoot = path.join(base, "local");
       const remoteRoot = path.join(base, "remote");
       await initGitRepo(localRoot);
@@ -663,7 +663,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("reports divergence only when shallow history retains a merge base", async () => {
-    await withTempDir({ prefix: "openclaw-update-check-shallow-" }, async (base) => {
+    await withTempDir({ prefix: "bot-update-check-shallow-" }, async (base) => {
       const sourceRoot = path.join(base, "source");
       await initGitRepo(sourceRoot);
       await commitGit(sourceRoot, "common base");
@@ -744,7 +744,7 @@ describe("checkUpdateStatus", () => {
   });
 
   it("detects package installs for non-git roots", async () => {
-    await withTempDir({ prefix: "openclaw-update-check-" }, async (root) => {
+    await withTempDir({ prefix: "bot-update-check-" }, async (root) => {
       await fs.writeFile(
         path.join(root, "package.json"),
         JSON.stringify({ packageManager: "npm@10.0.0" }),
@@ -785,10 +785,10 @@ describe("checkUpdateStatus", () => {
       expectedLockfile: "bun.lock",
     },
   ])("reports dependency status for Bun's $name", async ({ lockfiles, expectedLockfile }) => {
-    await withTempDir({ prefix: "openclaw-update-check-bun-" }, async (root) => {
+    await withTempDir({ prefix: "bot-update-check-bun-" }, async (root) => {
       await fs.writeFile(
         path.join(root, "package.json"),
-        JSON.stringify({ name: "openclaw", packageManager: "bun@1.2.0" }),
+        JSON.stringify({ name: "bot", packageManager: "bun@1.2.0" }),
         "utf8",
       );
       for (const lockfile of lockfiles) {
@@ -816,13 +816,13 @@ describe("checkUpdateStatus", () => {
     });
   });
 
-  it("detects lockless OpenClaw npm installs despite packed pnpm metadata", async () => {
-    await withTempDir({ prefix: "openclaw-update-check-lockless-npm-" }, async (base) => {
-      const root = path.join(base, "prefix", "node_modules", "openclaw");
+  it("detects lockless Bot npm installs despite packed pnpm metadata", async () => {
+    await withTempDir({ prefix: "bot-update-check-lockless-npm-" }, async (base) => {
+      const root = path.join(base, "prefix", "node_modules", "bot");
       await fs.mkdir(root, { recursive: true });
       await fs.writeFile(
         path.join(root, "package.json"),
-        JSON.stringify({ name: "openclaw", packageManager: "pnpm@11.2.2" }),
+        JSON.stringify({ name: "bot", packageManager: "pnpm@11.2.2" }),
         "utf8",
       );
 
@@ -845,10 +845,10 @@ describe("checkUpdateStatus", () => {
   });
 
   it("reports missing and stale dependency markers for package installs", async () => {
-    await withTempDir({ prefix: "openclaw-update-check-deps-" }, async (root) => {
+    await withTempDir({ prefix: "bot-update-check-deps-" }, async (root) => {
       await fs.writeFile(
         path.join(root, "package.json"),
-        JSON.stringify({ name: "openclaw", packageManager: "pnpm@11.2.2" }),
+        JSON.stringify({ name: "bot", packageManager: "pnpm@11.2.2" }),
         "utf8",
       );
       const lockfilePath = path.join(root, "pnpm-lock.yaml");
@@ -899,13 +899,13 @@ describe("checkUpdateStatus", () => {
   });
 
   it("treats symlinked git installs as git roots", async () => {
-    await withTempDir({ prefix: "openclaw-update-check-git-" }, async (base) => {
+    await withTempDir({ prefix: "bot-update-check-git-" }, async (base) => {
       const repoRoot = path.join(base, "repo");
-      const linkedRoot = path.join(base, "linked-openclaw");
+      const linkedRoot = path.join(base, "linked-bot");
       await fs.mkdir(repoRoot, { recursive: true });
       await fs.writeFile(
         path.join(repoRoot, "package.json"),
-        JSON.stringify({ name: "openclaw", packageManager: "pnpm@10.0.0" }),
+        JSON.stringify({ name: "bot", packageManager: "pnpm@10.0.0" }),
         "utf8",
       );
       await runCommandWithTimeout(["git", "init"], { cwd: repoRoot, timeoutMs: 1000 });
@@ -924,10 +924,10 @@ describe("checkUpdateStatus", () => {
   });
 
   it("reports unsupported_git_channel for Git status without querying npm", async () => {
-    await withTempDir({ prefix: "openclaw-update-check-git-channel-" }, async (root) => {
+    await withTempDir({ prefix: "bot-update-check-git-channel-" }, async (root) => {
       await fs.writeFile(
         path.join(root, "package.json"),
-        JSON.stringify({ name: "openclaw", packageManager: "pnpm@10.0.0" }),
+        JSON.stringify({ name: "bot", packageManager: "pnpm@10.0.0" }),
         "utf8",
       );
       await runCommandWithTimeout(["git", "init"], { cwd: root, timeoutMs: 1000 });

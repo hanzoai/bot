@@ -6,7 +6,7 @@ import { RealtimeTalkLevelSignal } from "../realtime-talk-level.ts";
 import type { RealtimeTalkStatus } from "../realtime-talk.ts";
 
 const BAR_GAINS = [0.38, 0.62, 0.84, 1, 0.84, 0.62, 0.38];
-const MICROPHONE_ACTIVITY_TAG = "openclaw-microphone-activity";
+const MICROPHONE_ACTIVITY_TAG = "bot-microphone-activity";
 const EMPTY_LEVEL_SIGNAL = new RealtimeTalkLevelSignal();
 
 class MicrophoneActivityElement extends HTMLElement {
@@ -84,7 +84,7 @@ export function voiceStatusLabel(
     return explicitDetail;
   }
   if (status === "thinking") {
-    return "Asking OpenClaw...";
+    return "Asking Bot...";
   }
   if (status === "connecting") {
     return "Connecting voice input...";
@@ -102,14 +102,14 @@ type MicrophoneActivityProps = {
 // aria-hidden while `data-status` keeps driving the bar animations.
 export function renderMicrophoneActivity(props: MicrophoneActivityProps): TemplateResult {
   return html`
-    <openclaw-microphone-activity
+    <bot-microphone-activity
       class="agent-chat__voice-activity"
       data-status=${activeStatus(props.status)}
       data-source="microphone"
       aria-hidden="true"
       .signal=${props.inputLevel ?? EMPTY_LEVEL_SIGNAL}
     >
-    </openclaw-microphone-activity>
+    </bot-microphone-activity>
   `;
 }
 
@@ -128,7 +128,7 @@ export function renderChatVoiceError(props: ChatVoiceErrorProps): TemplateResult
       <span class="agent-chat__talk-status-text">${props.detail}</span>
       ${props.onDismissError
         ? html`
-            <openclaw-tooltip .content=${t("chat.composer.dismissVoiceInputError")}>
+            <bot-tooltip .content=${t("chat.composer.dismissVoiceInputError")}>
               <button
                 class="callout__dismiss"
                 type="button"
@@ -137,7 +137,7 @@ export function renderChatVoiceError(props: ChatVoiceErrorProps): TemplateResult
               >
                 ${icons.x}
               </button>
-            </openclaw-tooltip>
+            </bot-tooltip>
           `
         : nothing}
     </div>

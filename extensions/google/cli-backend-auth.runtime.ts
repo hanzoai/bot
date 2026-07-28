@@ -4,9 +4,9 @@ import path from "node:path";
 import type {
   CliBackendPreparedExecution,
   CliBackendToolAvailability,
-} from "openclaw/plugin-sdk/cli-backend";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "bot/plugin-sdk/cli-backend";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
 import {
   GOOGLE_GEMINI_CLI_PROVIDER_ID,
   resolveGeminiCliProfileHome as resolveGeminiCliProfileHomePath,
@@ -81,7 +81,7 @@ function normalizeString(value: string | undefined): string | undefined {
 function throwUnsupportedGeminiCredential(credential: GeminiAuthProfileCredential): never {
   if (credential.provider === VERCEL_AI_GATEWAY_PROVIDER_ID) {
     throw new Error(
-      "Gemini CLI execution cannot use a vercel-ai-gateway auth profile. Use the OpenClaw vercel-ai-gateway provider instead.",
+      "Gemini CLI execution cannot use a vercel-ai-gateway auth profile. Use the Bot vercel-ai-gateway provider instead.",
     );
   }
   throw new Error("Gemini CLI execution requires a google-gemini-cli auth profile.");
@@ -97,14 +97,14 @@ function throwUnstageableSelectedGeminiProfile(
   }
   if (!credential) {
     throw new Error(
-      "Gemini CLI auth profile was selected but no credential material was found. Re-authenticate with `openclaw models auth login --provider google-gemini-cli --force`.",
+      "Gemini CLI auth profile was selected but no credential material was found. Re-authenticate with `bot models auth login --provider google-gemini-cli --force`.",
     );
   }
   if (credential.provider !== GEMINI_CLI_PROVIDER_ID) {
     throwUnsupportedGeminiCredential(credential);
   }
   throw new Error(
-    "Gemini CLI execution supports google-gemini-cli OAuth or API-key auth profiles. Re-authenticate with `openclaw models auth login --provider google-gemini-cli --force`.",
+    "Gemini CLI execution supports google-gemini-cli OAuth or API-key auth profiles. Re-authenticate with `bot models auth login --provider google-gemini-cli --force`.",
   );
 }
 
@@ -130,7 +130,7 @@ function requireGeminiOAuthCredential(
     !Number.isFinite(credential.expires)
   ) {
     throw new Error(
-      "Gemini CLI OAuth profile is missing usable token material. Re-authenticate with `openclaw models auth login --provider google-gemini-cli --force`.",
+      "Gemini CLI OAuth profile is missing usable token material. Re-authenticate with `bot models auth login --provider google-gemini-cli --force`.",
     );
   }
 
@@ -247,7 +247,7 @@ async function buildGeminiCliSystemSettings(
     );
     if (enforcedType && enforcedType !== selectedType) {
       throw new Error(
-        `Gemini CLI system settings enforce ${enforcedType} auth, but the selected OpenClaw profile requires ${selectedType}.`,
+        `Gemini CLI system settings enforce ${enforcedType} auth, but the selected Bot profile requires ${selectedType}.`,
       );
     }
     security.auth = { ...auth, selectedType };
@@ -266,8 +266,8 @@ function applyGeminiCliToolAvailability(
     throw new Error("Gemini CLI cannot expose backend-native tools in an exact restricted run.");
   }
   const mcpServers = isRecord(base.mcpServers) ? { ...base.mcpServers } : {};
-  if (!isRecord(mcpServers.openclaw)) {
-    throw new Error("Gemini CLI exact tool availability requires the OpenClaw MCP server.");
+  if (!isRecord(mcpServers.bot)) {
+    throw new Error("Gemini CLI exact tool availability requires the Bot MCP server.");
   }
   const tools = isRecord(base.tools) ? { ...base.tools } : {};
   // `tools.allowed` has higher policy priority than the `tools.core` default
@@ -290,15 +290,15 @@ function applyGeminiCliToolAvailability(
     ...base,
     tools: {
       ...nonAuthorityToolSettings,
-      core: ["mcp_openclaw_*"],
+      core: ["mcp_bot_*"],
       discoveryCommand: "",
       callCommand: "",
     },
-    mcp: { ...nonAuthorityMcpSettings, allowed: ["openclaw"], serverCommand: "" },
+    mcp: { ...nonAuthorityMcpSettings, allowed: ["bot"], serverCommand: "" },
     mcpServers: {
-      openclaw: {
-        ...mcpServers.openclaw,
-        includeTools: [...availability.openClaw],
+      bot: {
+        ...mcpServers.bot,
+        includeTools: [...availability.bot],
       },
     },
     experimental: { ...experimental, enableAgents: false },
@@ -351,7 +351,7 @@ async function prepareGeminiCliProfileHome(
   const settings = buildGeminiCliAuthSettings(selectedType);
   const systemSettings = await buildGeminiCliSystemSettings(ctx, selectedType);
   const systemSettingsDir = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-gemini-cli-"),
+    path.join(resolvePreferredBotTmpDir(), "bot-gemini-cli-"),
   );
   await fs.chmod(systemSettingsDir, 0o700);
   const systemSettingsPath = path.join(systemSettingsDir, "settings.json");
@@ -377,7 +377,7 @@ async function prepareGeminiCliProfileHome(
 
 async function clearGeminiCliCachedCredentials(geminiDir: string): Promise<void> {
   // Gemini prefers its token store over oauth_creds.json. Rebuild that store
-  // from the selected OpenClaw profile each run so stale CLI auth cannot win.
+  // from the selected Bot profile each run so stale CLI auth cannot win.
   await fs.rm(path.join(geminiDir, GEMINI_CLI_CREDENTIALS_FILENAME), { force: true });
 }
 
@@ -465,7 +465,7 @@ async function prepareGeminiCliRestrictedSystemSettings(
 ): Promise<CliBackendPreparedExecution> {
   const settings = await buildGeminiCliSystemSettings(ctx);
   const systemSettingsDir = await fs.mkdtemp(
-    path.join(resolvePreferredOpenClawTmpDir(), "openclaw-gemini-cli-policy-"),
+    path.join(resolvePreferredBotTmpDir(), "bot-gemini-cli-policy-"),
   );
   await fs.chmod(systemSettingsDir, 0o700);
   const systemSettingsPath = path.join(systemSettingsDir, "settings.json");

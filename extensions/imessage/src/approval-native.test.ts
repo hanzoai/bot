@@ -2,22 +2,22 @@
 import type {
   ExecApprovalRequest,
   PluginApprovalRequest,
-} from "openclaw/plugin-sdk/approval-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/approval-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import {
   imessageApprovalCapability,
   shouldSuppressLocalIMessageExecApprovalPrompt,
 } from "./approval-native.js";
 
-type IMessageConfig = NonNullable<NonNullable<OpenClawConfig["channels"]>["imessage"]>;
+type IMessageConfig = NonNullable<NonNullable<BotConfig["channels"]>["imessage"]>;
 
 function buildConfig(
   params: {
     imessage?: Partial<IMessageConfig>;
-    approvals?: OpenClawConfig["approvals"];
+    approvals?: BotConfig["approvals"];
   } = {},
-): OpenClawConfig {
+): BotConfig {
   return {
     channels: {
       imessage: {
@@ -26,7 +26,7 @@ function buildConfig(
       },
     },
     approvals: params.approvals,
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function buildExecRequest(
@@ -71,7 +71,7 @@ function buildPluginRequest(
 }
 
 function nativeShouldHandle(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   approvalKind: "exec" | "plugin";
   request: ExecApprovalRequest | PluginApprovalRequest;
   accountId?: string | null;

@@ -1,5 +1,5 @@
 // Plugin management service tests cover cold state, catalog identity, and guarded mutations.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
@@ -28,7 +28,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("../config/config.js", () => ({
   assertConfigWriteAllowedInCurrentMode: (params?: { env?: NodeJS.ProcessEnv }) => {
-    if (params?.env?.OPENCLAW_NIX_MODE === "1") {
+    if (params?.env?.BOT_NIX_MODE === "1") {
       throw new Error("Config is managed by Nix");
     }
   },
@@ -112,12 +112,12 @@ function configSnapshot(config: Record<string, unknown> = {}) {
     snapshot: {
       valid: true,
       parsed: {},
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       sourceConfig: config,
       hash: "base-hash",
     },
     writeOptions: {
-      expectedConfigPath: "/tmp/openclaw.json",
+      expectedConfigPath: "/tmp/bot.json",
       includeFileHashesForWrite: { "/tmp/plugins.json": "include-hash" },
       includeFileTargetsForWrite: { "/tmp/plugins.json": "/tmp/plugins.json" },
     },
@@ -147,14 +147,14 @@ function metadataSnapshot(params: {
     origin: params.origin ?? "bundled",
     rootDir: `/tmp/${id}`,
     source: `/tmp/${id}/index.ts`,
-    manifestPath: `/tmp/${id}/openclaw.plugin.json`,
+    manifestPath: `/tmp/${id}/bot.plugin.json`,
   };
   return {
     index: {
       plugins: [
         {
           pluginId: id,
-          packageName: `@openclaw/${id}`,
+          packageName: `@hanzo/bot-${id}`,
           origin: params.origin ?? "bundled",
           enabled: params.enabled,
         },
@@ -179,28 +179,28 @@ function emptyMetadataSnapshot() {
 }
 
 const hostedDiffsEntry = {
-  name: "@openclaw/diffs",
+  name: "@hanzo/bot-diffs",
   version: "2.0.0",
   description: "Hosted description",
-  openclaw: {
+  bot: {
     plugin: { id: "diffs", label: "Hosted Diffs" },
-    install: { clawhubSpec: "clawhub:@openclaw/diffs", defaultChoice: "clawhub" },
+    install: { clawhubSpec: "clawhub:@hanzo/bot-diffs", defaultChoice: "clawhub" },
   },
 };
 
 // Mirrors the current default ClawHub feed shape: package identity lives in a
 // source candidate while runtime/editorial metadata remains local.
 const hostedFeedDiffsEntry = {
-  id: "@openclaw/diffs",
+  id: "@hanzo/bot-diffs",
   title: "Diffs",
   state: "available",
   featured: true,
-  publisher: { id: "openclaw", trust: "official" },
+  publisher: { id: "bot", trust: "official" },
   install: {
     candidates: [
       {
         sourceRef: "public-clawhub",
-        package: "@openclaw/diffs",
+        package: "@hanzo/bot-diffs",
         version: "2026.6.11",
         integrity: `sha256:${"a".repeat(64)}`,
       },
@@ -253,7 +253,7 @@ describe("plugin management service", () => {
         version: "2.0.0",
         featured: true,
         order: 40,
-        install: { source: "clawhub", packageName: "@openclaw/diffs" },
+        install: { source: "clawhub", packageName: "@hanzo/bot-diffs" },
       }),
     ]);
   });
@@ -295,8 +295,8 @@ describe("plugin management service", () => {
         {
           ...hostedDiffsEntry,
           name: "community/impostor",
-          openclaw: {
-            ...hostedDiffsEntry.openclaw,
+          bot: {
+            ...hostedDiffsEntry.bot,
             install: { clawhubSpec: "clawhub:community/impostor", defaultChoice: "clawhub" },
           },
         },
@@ -320,14 +320,14 @@ describe("plugin management service", () => {
         entries: [
           {
             name: "community/partial",
-            openclaw: {
+            bot: {
               plugin: { id: "partial", label: "Partial" },
               catalog: { featured: "yes", order: 25 },
             },
           },
           {
             name: "community/invalid",
-            openclaw: {
+            bot: {
               plugin: { id: "invalid", label: "Invalid" },
               catalog: { featured: "yes", order: "first" },
             },
@@ -357,7 +357,7 @@ describe("plugin management service", () => {
     expect(catalog.plugins).toEqual([
       expect.objectContaining({
         id: "workboard",
-        packageName: "@openclaw/workboard",
+        packageName: "@hanzo/bot-workboard",
         installed: true,
         enabled: false,
         state: "disabled",
@@ -393,9 +393,9 @@ describe("plugin management service", () => {
     const officialCatalog = {
       entries: [
         {
-          name: "@openclaw/firecrawl",
+          name: "@hanzo/bot-firecrawl",
           description: "Web extraction and crawling.",
-          openclaw: {
+          bot: {
             plugin: { id: "firecrawl", label: "FireCrawl" },
             catalog: { featured: true, order: 60 },
             icon,
@@ -462,7 +462,7 @@ describe("plugin management service", () => {
       setManagedPluginEnabled({
         pluginId: "workboard",
         enabled: true,
-        env: { OPENCLAW_NIX_MODE: "1" },
+        env: { BOT_NIX_MODE: "1" },
       }),
     ).rejects.toThrow("managed by Nix");
     expect(mocks.readConfig).not.toHaveBeenCalled();
@@ -643,11 +643,11 @@ describe("plugin management service", () => {
       pluginId: "impostor",
       targetDir: "/tmp/extensions/impostor",
       extensions: ["index.js"],
-      packageName: "@openclaw/diffs",
+      packageName: "@hanzo/bot-diffs",
       clawhub: {
         source: "clawhub",
         clawhubUrl: "https://clawhub.ai",
-        clawhubPackage: "@openclaw/diffs",
+        clawhubPackage: "@hanzo/bot-diffs",
         clawhubFamily: "code-plugin",
       },
     });
@@ -656,7 +656,7 @@ describe("plugin management service", () => {
       installManagedPlugin({
         request: {
           source: "clawhub",
-          packageName: "@openclaw/diffs",
+          packageName: "@hanzo/bot-diffs",
           acknowledgeClawHubRisk: true,
         },
         env: {},
@@ -664,7 +664,7 @@ describe("plugin management service", () => {
     ).rejects.toThrow("expected diffs, got impostor");
     expect(mocks.clawhubInstall).toHaveBeenCalledWith(
       expect.objectContaining({
-        spec: "clawhub:@openclaw/diffs@2026.6.11",
+        spec: "clawhub:@hanzo/bot-diffs@2026.6.11",
         expectedPluginId: "diffs",
         expectedIntegrity: `sha256-${Buffer.from("a".repeat(64), "hex").toString("base64")}`,
         acknowledgeClawHubRisk: true,
@@ -676,7 +676,7 @@ describe("plugin management service", () => {
   it("does not pin a runtime id when the hosted entry only exposes its package name", async () => {
     const installRecord = {
       source: "clawhub",
-      spec: "clawhub:@openclaw/bluebubbles",
+      spec: "clawhub:@hanzo/bot-bluebubbles",
       installPath: "/tmp/extensions/bluebubbles",
     };
     mocks.readConfig.mockResolvedValue(configSnapshot());
@@ -686,12 +686,12 @@ describe("plugin management service", () => {
       // the package name, which must not become an expectedPluginId pin.
       entries: [
         {
-          id: "@openclaw/bluebubbles",
+          id: "@hanzo/bot-bluebubbles",
           title: "BlueBubbles",
           state: "available",
-          publisher: { id: "openclaw", trust: "official" },
+          publisher: { id: "bot", trust: "official" },
           install: {
-            candidates: [{ sourceRef: "public-clawhub", package: "@openclaw/bluebubbles" }],
+            candidates: [{ sourceRef: "public-clawhub", package: "@hanzo/bot-bluebubbles" }],
           },
         },
       ],
@@ -703,11 +703,11 @@ describe("plugin management service", () => {
       pluginId: "bluebubbles",
       targetDir: "/tmp/extensions/bluebubbles",
       extensions: ["index.js"],
-      packageName: "@openclaw/bluebubbles",
+      packageName: "@hanzo/bot-bluebubbles",
       clawhub: {
         source: "clawhub",
         clawhubUrl: "https://clawhub.ai",
-        clawhubPackage: "@openclaw/bluebubbles",
+        clawhubPackage: "@hanzo/bot-bluebubbles",
         clawhubFamily: "code-plugin",
       },
     });
@@ -724,7 +724,7 @@ describe("plugin management service", () => {
     );
 
     const result = await installManagedPlugin({
-      request: { source: "clawhub", packageName: "@openclaw/bluebubbles" },
+      request: { source: "clawhub", packageName: "@hanzo/bot-bluebubbles" },
       env: {},
     });
 
@@ -744,8 +744,8 @@ describe("plugin management service", () => {
           id: "sonos",
           title: "Sonos",
           state: "available",
-          publisher: { id: "openclaw", trust: "official" },
-          openclaw: { plugin: { id: "sonos" } },
+          publisher: { id: "bot", trust: "official" },
+          bot: { plugin: { id: "sonos" } },
           install: { candidates: [{ sourceRef: "public-clawhub", package: "sonos" }] },
         },
       ],
@@ -790,11 +790,11 @@ describe("plugin management service", () => {
       pluginId: "diffs",
       targetDir: "/tmp/extensions/diffs",
       extensions: ["index.js"],
-      packageName: "@openclaw/diffs",
+      packageName: "@hanzo/bot-diffs",
       clawhub: {
         source: "clawhub",
         clawhubUrl: "https://clawhub.ai",
-        clawhubPackage: "@openclaw/diffs",
+        clawhubPackage: "@hanzo/bot-diffs",
         clawhubFamily: "code-plugin",
       },
     });
@@ -810,7 +810,7 @@ describe("plugin management service", () => {
 
     expect(mocks.clawhubInstall).toHaveBeenCalledWith(
       expect.objectContaining({
-        spec: "clawhub:@openclaw/diffs@2026.6.11",
+        spec: "clawhub:@hanzo/bot-diffs@2026.6.11",
         expectedPluginId: "diffs",
         expectedIntegrity: `sha256-${Buffer.from("a".repeat(64), "hex").toString("base64")}`,
       }),
@@ -1007,7 +1007,7 @@ describe("plugin management service", () => {
   it("uninstalls an external plugin through commit, file removal, and registry refresh", async () => {
     const installRecord = {
       source: "clawhub",
-      spec: "clawhub:@openclaw/diffs",
+      spec: "clawhub:@hanzo/bot-diffs",
       installPath: "/tmp/extensions/diffs",
     };
     const prepared = configSnapshot({ plugins: { entries: { diffs: { enabled: true } } } });

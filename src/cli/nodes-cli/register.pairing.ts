@@ -1,5 +1,5 @@
 // Node pairing commands: list, approve, reject, remove, and rename paired nodes.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { Command } from "commander";
 import { getTerminalTableWidth } from "../../../packages/terminal-core/src/table.js";
 import type { OperatorScope } from "../../gateway/method-scopes.js";
@@ -99,7 +99,7 @@ function buildUnknownNodePairRequestIdMessage(
       lines.push("No pending node pairing requests are currently visible.");
     }
   }
-  lines.push(`Run ${formatCliCommand("openclaw nodes pending")} to inspect current requests.`);
+  lines.push(`Run ${formatCliCommand("bot nodes pending")} to inspect current requests.`);
   const connectionReminder = formatConnectionFlagReminder(opts);
   if (connectionReminder) {
     lines.push(connectionReminder);
@@ -200,7 +200,7 @@ export function registerNodesPairingCommands(nodes: Command) {
           const nodeId = await resolveNodeId(opts, normalizeOptionalString(opts.node) ?? "");
           if (!nodeId) {
             defaultRuntime.error(
-              `--node is required. Run ${formatCliCommand("openclaw nodes pairing pending")} to choose a node request.`,
+              `--node is required. Run ${formatCliCommand("bot nodes pairing pending")} to choose a node request.`,
             );
             defaultRuntime.exit(1);
             return;
@@ -228,7 +228,7 @@ export function registerNodesPairingCommands(nodes: Command) {
           const name = normalizeOptionalString(opts.name) ?? "";
           if (!nodeId || !name) {
             defaultRuntime.error(
-              `--node and --name are required. Run ${formatCliCommand("openclaw nodes pairing pending")} to choose a node, then rerun with --name <displayName>.`,
+              `--node and --name are required. Run ${formatCliCommand("bot nodes pairing pending")} to choose a node, then rerun with --name <displayName>.`,
             );
             defaultRuntime.exit(1);
             return;

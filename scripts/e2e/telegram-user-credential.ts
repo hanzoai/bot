@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --import tsx
-// Telegram User Credential script supports OpenClaw repository automation.
+// Telegram User Credential script supports Bot repository automation.
 
 import { createHash, randomUUID } from "node:crypto";
 import { copyFile, mkdir, mkdtemp, readFile, rm, unlink, writeFile } from "node:fs/promises";
@@ -15,7 +15,7 @@ const DEFAULT_USER_DRIVER_DIR = "~/.codex/skills/custom/telegram-e2e-bot-to-bot/
 const DEFAULT_BOT_CREDENTIALS_FILE =
   "~/.codex/skills/custom/telegram-e2e-bot-to-bot/credentials.local.json";
 const DEFAULT_CONVEX_ENV_FILE = "~/.codex/skills/custom/telegram-e2e-bot-to-bot/convex.local.env";
-const CHUNKED_PAYLOAD_MARKER = "__openclawQaCredentialPayloadChunksV1";
+const CHUNKED_PAYLOAD_MARKER = "__botQaCredentialPayloadChunksV1";
 const TELEGRAM_USER_QA_CREDENTIAL_KIND = "telegram-user";
 const SHA256_HEX_RE = /^[a-f0-9]{64}$/u;
 const TELEGRAM_CHAT_ID_RE = /^-?\d+$/u;
@@ -23,24 +23,24 @@ const TELEGRAM_USER_ID_RE = /^\d+$/u;
 const DEFAULT_CHUNKED_PAYLOAD_MAX_BYTES = 64 * 1024 * 1024;
 const DEFAULT_CHUNKED_PAYLOAD_MAX_CHUNKS = 4096;
 const COMMAND_TIMEOUT_MS = optionalPositiveInteger(
-  process.env.OPENCLAW_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS?.trim(),
+  process.env.BOT_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS?.trim(),
   120_000,
-  "OPENCLAW_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS",
+  "BOT_TELEGRAM_USER_CREDENTIAL_COMMAND_TIMEOUT_MS",
 );
 const BROKER_TIMEOUT_MS = optionalPositiveInteger(
-  process.env.OPENCLAW_TELEGRAM_USER_CREDENTIAL_BROKER_TIMEOUT_MS?.trim(),
+  process.env.BOT_TELEGRAM_USER_CREDENTIAL_BROKER_TIMEOUT_MS?.trim(),
   30_000,
-  "OPENCLAW_TELEGRAM_USER_CREDENTIAL_BROKER_TIMEOUT_MS",
+  "BOT_TELEGRAM_USER_CREDENTIAL_BROKER_TIMEOUT_MS",
 );
 const CHUNKED_PAYLOAD_MAX_BYTES = optionalPositiveInteger(
-  process.env.OPENCLAW_QA_CREDENTIAL_PAYLOAD_MAX_BYTES?.trim(),
+  process.env.BOT_QA_CREDENTIAL_PAYLOAD_MAX_BYTES?.trim(),
   DEFAULT_CHUNKED_PAYLOAD_MAX_BYTES,
-  "OPENCLAW_QA_CREDENTIAL_PAYLOAD_MAX_BYTES",
+  "BOT_QA_CREDENTIAL_PAYLOAD_MAX_BYTES",
 );
 const CHUNKED_PAYLOAD_MAX_CHUNKS = optionalPositiveInteger(
-  process.env.OPENCLAW_QA_CREDENTIAL_PAYLOAD_MAX_CHUNKS?.trim(),
+  process.env.BOT_QA_CREDENTIAL_PAYLOAD_MAX_CHUNKS?.trim(),
   DEFAULT_CHUNKED_PAYLOAD_MAX_CHUNKS,
-  "OPENCLAW_QA_CREDENTIAL_PAYLOAD_MAX_CHUNKS",
+  "BOT_QA_CREDENTIAL_PAYLOAD_MAX_CHUNKS",
 );
 
 function usage(): never {
@@ -318,38 +318,38 @@ async function resolveConvexLeaseConfig(opts: Map<string, string>) {
   const fileEnv = await readEnvFile(envFile);
   const siteUrl =
     opts.get("site-url") ||
-    process.env.OPENCLAW_QA_CONVEX_SITE_URL?.trim() ||
-    fileEnv.OPENCLAW_QA_CONVEX_SITE_URL;
+    process.env.BOT_QA_CONVEX_SITE_URL?.trim() ||
+    fileEnv.BOT_QA_CONVEX_SITE_URL;
   const token =
     opts.get("ci-secret") ||
-    process.env.OPENCLAW_QA_CONVEX_SECRET_CI?.trim() ||
-    fileEnv.OPENCLAW_QA_CONVEX_SECRET_CI;
+    process.env.BOT_QA_CONVEX_SECRET_CI?.trim() ||
+    fileEnv.BOT_QA_CONVEX_SECRET_CI;
   if (!siteUrl) {
-    throw new Error("Missing OPENCLAW_QA_CONVEX_SITE_URL.");
+    throw new Error("Missing BOT_QA_CONVEX_SITE_URL.");
   }
   if (!token) {
-    throw new Error("Missing OPENCLAW_QA_CONVEX_SECRET_CI.");
+    throw new Error("Missing BOT_QA_CONVEX_SECRET_CI.");
   }
   return {
     siteUrl,
     token,
     leaseTtlMs: optionalPositiveInteger(
       opts.get("lease-ttl-ms") ||
-        process.env.OPENCLAW_QA_CREDENTIAL_LEASE_TTL_MS?.trim() ||
-        fileEnv.OPENCLAW_QA_CREDENTIAL_LEASE_TTL_MS,
+        process.env.BOT_QA_CREDENTIAL_LEASE_TTL_MS?.trim() ||
+        fileEnv.BOT_QA_CREDENTIAL_LEASE_TTL_MS,
       20 * 60 * 1_000,
-      "OPENCLAW_QA_CREDENTIAL_LEASE_TTL_MS",
+      "BOT_QA_CREDENTIAL_LEASE_TTL_MS",
     ),
     heartbeatIntervalMs: optionalPositiveInteger(
       opts.get("heartbeat-interval-ms") ||
-        process.env.OPENCLAW_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS?.trim() ||
-        fileEnv.OPENCLAW_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS,
+        process.env.BOT_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS?.trim() ||
+        fileEnv.BOT_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS,
       30_000,
-      "OPENCLAW_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS",
+      "BOT_QA_CREDENTIAL_HEARTBEAT_INTERVAL_MS",
     ),
     ownerId:
       opts.get("owner-id") ||
-      process.env.OPENCLAW_QA_CREDENTIAL_OWNER_ID?.trim() ||
+      process.env.BOT_QA_CREDENTIAL_OWNER_ID?.trim() ||
       buildTelegramUserCredentialOwnerId(),
   };
 }
@@ -449,7 +449,7 @@ async function createTelegramUserPayload(opts: Map<string, string>) {
   const config = await readJson(`${userDriverDir}/config.local.json`);
   const botCredentials = await readJson(botCredentialsFile);
   const sutToken =
-    process.env.OPENCLAW_QA_TELEGRAM_SUT_BOT_TOKEN?.trim() ||
+    process.env.BOT_QA_TELEGRAM_SUT_BOT_TOKEN?.trim() ||
     process.env.TELEGRAM_E2E_SUT_BOT_TOKEN?.trim() ||
     (typeof botCredentials.sutBotToken === "string" ? botCredentials.sutBotToken.trim() : "") ||
     (typeof botCredentials.botAToken === "string" ? botCredentials.botAToken.trim() : "") ||
@@ -459,7 +459,7 @@ async function createTelegramUserPayload(opts: Map<string, string>) {
   }
 
   const groupId =
-    process.env.OPENCLAW_QA_TELEGRAM_GROUP_ID?.trim() ||
+    process.env.BOT_QA_TELEGRAM_GROUP_ID?.trim() ||
     process.env.TELEGRAM_E2E_GROUP_ID?.trim() ||
     (typeof config.defaultChatId === "string" ? config.defaultChatId.trim() : "") ||
     (typeof botCredentials.groupId === "string" ? botCredentials.groupId.trim() : "");
@@ -467,7 +467,7 @@ async function createTelegramUserPayload(opts: Map<string, string>) {
     throw new Error("Missing group id in env, user-driver config, or bot credentials file.");
   }
 
-  const tempRoot = await mkdtemp(path.join(tmpdir(), "openclaw-telegram-user-credential-"));
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "bot-telegram-user-credential-"));
   const tdlibArchive = path.join(tempRoot, "tdlib.tgz");
   const desktopArchive = path.join(tempRoot, "desktop-tdata.tgz");
   try {
@@ -545,7 +545,7 @@ async function restoreTelegramUserPayload(params: {
     usage();
   }
   const payload = parseTelegramUserQaCredentialPayload(params.payload);
-  const tempRoot = await mkdtemp(path.join(tmpdir(), "openclaw-telegram-user-restore-"));
+  const tempRoot = await mkdtemp(path.join(tmpdir(), "bot-telegram-user-restore-"));
   const tdlibArchive = path.join(tempRoot, "tdlib.tgz");
   const desktopArchive = path.join(tempRoot, "desktop-tdata.tgz");
   await mkdir(expandHome(userDriverDir), { recursive: true });

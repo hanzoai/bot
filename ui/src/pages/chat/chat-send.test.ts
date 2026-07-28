@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { GatewayRequestError } from "../../api/gateway.ts";
 import type { GatewaySessionRow, SessionsListResult } from "../../api/types.ts";
@@ -859,7 +859,7 @@ describe("refreshChatAvatar", () => {
     },
     {
       name: "prefers the paired device token for avatar metadata and local avatar URLs",
-      basePath: "/openclaw/",
+      basePath: "/bot/",
       objectUrl: "blob:device-avatar",
       expectedToken: "device-token",
       overrides: {
@@ -870,7 +870,7 @@ describe("refreshChatAvatar", () => {
     },
     {
       name: "fetches local avatars through Authorization headers instead of tokenized URLs",
-      basePath: "/openclaw/",
+      basePath: "/bot/",
       objectUrl: "blob:session-avatar",
       expectedToken: "session-token",
       overrides: { settings: { token: "session-token" } },
@@ -922,10 +922,10 @@ describe("refreshChatAvatar", () => {
     });
     vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
 
-    const host = makeHost({ basePath: "/openclaw/", sessionKey: "agent:ops:main" });
+    const host = makeHost({ basePath: "/bot/", sessionKey: "agent:ops:main" });
     await refreshChatAvatar(host);
 
-    expect(fetchUrl(fetchMock as unknown as MockCallSource, 0)).toBe("/openclaw/avatar/ops?meta=1");
+    expect(fetchUrl(fetchMock as unknown as MockCallSource, 0)).toBe("/bot/avatar/ops?meta=1");
     expect(fetchInit(fetchMock as unknown as MockCallSource, 0).method).toBe("GET");
     expect(host.chatAvatarUrl).toBeNull();
   });
@@ -3903,7 +3903,7 @@ describe("handleSendChat", () => {
     ).toEqual(["user", "assistant"]);
     expect(
       inactiveCached.filter((message) => {
-        const marker = requireRecord(message, "cached terminal transcript")["__openclaw"];
+        const marker = requireRecord(message, "cached terminal transcript")["__bot"];
         return (
           marker &&
           typeof marker === "object" &&
@@ -5712,7 +5712,7 @@ describe("handleSendChat", () => {
             messages: [
               {
                 role: "user",
-                __openclaw: { idempotencyKey: "ambiguous-run:user" },
+                __bot: { idempotencyKey: "ambiguous-run:user" },
               },
             ],
             sessionInfo: row("agent:main", { hasActiveRun: false, status: "done" }),
@@ -5753,7 +5753,7 @@ describe("handleSendChat", () => {
                 : [
                     {
                       role: "user",
-                      __openclaw: { idempotencyKey: "late-history-proof:user" },
+                      __bot: { idempotencyKey: "late-history-proof:user" },
                     },
                   ],
             sessionInfo: row("agent:main", { hasActiveRun: false, status: "done" }),
@@ -5858,7 +5858,7 @@ describe("handleSendChat", () => {
             messages: [
               {
                 role: "user",
-                __openclaw: { idempotencyKey: "delivered-removal-failure:user" },
+                __bot: { idempotencyKey: "delivered-removal-failure:user" },
               },
             ],
             sessionInfo: row("agent:main", { hasActiveRun: false, status: "done" }),
@@ -6656,7 +6656,7 @@ describe("handleSendChat", () => {
     expect(host.chatMessages).toEqual([
       expect.objectContaining({
         role: "user",
-        __openclaw: { idempotencyKey: "completed-steer-run:user" },
+        __bot: { idempotencyKey: "completed-steer-run:user" },
       }),
     ]);
     expect(JSON.stringify(host.chatMessages[0])).toContain(original.text);
@@ -6681,7 +6681,7 @@ describe("handleSendChat", () => {
     const historyUser = {
       role: "user",
       content: [{ type: "text", text: "history-owned steer" }],
-      __openclaw: { idempotencyKey: "history-steer:user", seq: 1 },
+      __bot: { idempotencyKey: "history-steer:user", seq: 1 },
     };
     const host = makeHost({
       client: clientWithRequest(
@@ -6719,7 +6719,7 @@ describe("handleSendChat", () => {
                 role: "user",
                 content: [{ type: "text", text: "cross-run steer" }],
                 idempotencyKey: "cross-run-steer",
-                __openclaw: { seq: 1 },
+                __bot: { seq: 1 },
               },
             ],
           },
@@ -6762,7 +6762,7 @@ describe("handleSendChat", () => {
               {
                 role: "user",
                 content: [{ type: "text", text: inflight.text }],
-                __openclaw: { idempotencyKey: "inflight-steer:user", seq: 1 },
+                __bot: { idempotencyKey: "inflight-steer:user", seq: 1 },
               },
             ],
           },
@@ -6975,7 +6975,7 @@ describe("handleSendChat", () => {
     expect(host.chatMessages).toHaveLength(2);
     expect(host.chatMessages[0]).toMatchObject({
       role: "user",
-      __openclaw: { idempotencyKey: "steer-send-run:user" },
+      __bot: { idempotencyKey: "steer-send-run:user" },
     });
     expect(JSON.stringify(host.chatMessages[0])).toContain("keep this visible");
   });
@@ -6985,7 +6985,7 @@ describe("handleSendChat", () => {
       role: "assistant",
       content: [{ type: "text", text: "assistant reply for the same run" }],
       timestamp: 1,
-      __openclaw: { idempotencyKey: "steer-send-run" },
+      __bot: { idempotencyKey: "steer-send-run" },
     };
     const host = makeHost({
       chatRunId: "active-run",
@@ -7024,7 +7024,7 @@ describe("handleSendChat", () => {
     );
     expect(userTurn).toMatchObject({
       role: "user",
-      __openclaw: { idempotencyKey: "steer-send-run:user" },
+      __bot: { idempotencyKey: "steer-send-run:user" },
     });
     expect(JSON.stringify(userTurn)).toContain("user turn must still appear");
   });
@@ -7079,7 +7079,7 @@ describe("handleSendChat", () => {
     expect(host.chatQueue).toEqual([]);
     expect(host.chatMessages[0]).toMatchObject({
       role: "user",
-      __openclaw: { idempotencyKey: "steer-att-run:user" },
+      __bot: { idempotencyKey: "steer-att-run:user" },
     });
     // Inline data-URL images render as a labeled placeholder block; the point
     // is the turn materializes with content instead of vanishing.
@@ -7130,7 +7130,7 @@ describe("handleSendChat", () => {
     expect(listStoredChatOutboxes(host)).toEqual([]);
     expect(host.chatQueue).toEqual([]);
     const idempotencyKeys = host.chatMessages.map((message) => {
-      const marker = (message as { __openclaw?: { idempotencyKey?: string } })["__openclaw"];
+      const marker = (message as { __bot?: { idempotencyKey?: string } })["__bot"];
       return marker?.idempotencyKey;
     });
     expect(idempotencyKeys.slice(0, 2)).toEqual(["active-run:user", "steer-send-run:user"]);
@@ -7644,7 +7644,7 @@ describe("handleSendChat", () => {
           },
         ],
         timestamp: expect.any(Number),
-        __openclaw: { idempotencyKey: expect.stringMatching(/:user$/) },
+        __bot: { idempotencyKey: expect.stringMatching(/:user$/) },
       },
     ]);
   });
@@ -7708,7 +7708,7 @@ describe("handleAbortChat", () => {
 
   it("aborts the exact selected session when no browser run id exists", async () => {
     const request = vi.fn(async () => ({ abortedRunId: null, status: "aborted" }));
-    const sessionKey = "agent:main:openclaw-weixin:direct:wechat-user";
+    const sessionKey = "agent:main:bot-weixin:direct:wechat-user";
     const host = makeHost({
       client: { request } as unknown as ChatHost["client"],
       chatRunId: null,

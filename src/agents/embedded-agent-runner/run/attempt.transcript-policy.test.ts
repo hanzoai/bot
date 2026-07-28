@@ -39,7 +39,7 @@ describe("resolveAttemptTranscriptPolicy", () => {
       },
     } as unknown as AgentRuntimePlan;
     const runtimePlanModelContext = {
-      workspaceDir: "/tmp/openclaw-transcript-policy",
+      workspaceDir: "/tmp/bot-transcript-policy",
       modelApi: "anthropic-messages",
       model: {
         id: "claude-opus-4.6",
@@ -69,10 +69,10 @@ describe("resolveAttemptTranscriptPolicy", () => {
   it("keeps the legacy provider transcript fallback when no RuntimePlan is available", () => {
     // Legacy fallback remains for older runner paths and tests provider runtime
     // plugin discovery with the same workspace/env context.
-    const env = { OPENCLAW_TEST_TRANSCRIPT_POLICY: "1" } as NodeJS.ProcessEnv;
+    const env = { BOT_TEST_TRANSCRIPT_POLICY: "1" } as NodeJS.ProcessEnv;
     const policy = resolveAttemptTranscriptPolicy({
       runtimePlanModelContext: {
-        workspaceDir: "/tmp/openclaw-transcript-policy",
+        workspaceDir: "/tmp/bot-transcript-policy",
         modelApi: "openai-responses",
       },
       provider: "custom-openai-compatible",
@@ -90,7 +90,7 @@ describe("resolveAttemptTranscriptPolicy", () => {
       provider: "custom-openai-compatible",
       modelId: "gpt-5.4",
       config: undefined,
-      workspaceDir: "/tmp/openclaw-transcript-policy",
+      workspaceDir: "/tmp/bot-transcript-policy",
       env,
     });
   });
@@ -98,7 +98,7 @@ describe("resolveAttemptTranscriptPolicy", () => {
   it("inherits Claude-family OpenAI Responses turn validation from legacy fallback", () => {
     const policy = resolveAttemptTranscriptPolicy({
       runtimePlanModelContext: {
-        workspaceDir: "/tmp/openclaw-transcript-policy",
+        workspaceDir: "/tmp/bot-transcript-policy",
         modelApi: "openai-responses",
       },
       provider: "anthropic-foundry",

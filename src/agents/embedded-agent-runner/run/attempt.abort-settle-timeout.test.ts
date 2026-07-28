@@ -6,7 +6,7 @@ describe("resolveEmbeddedAbortSettleTimeoutMs", () => {
   it("uses a positive decimal integer override", () => {
     expect(
       resolveEmbeddedAbortSettleTimeoutMs({
-        OPENCLAW_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS: "1250",
+        BOT_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS: "1250",
       }),
     ).toBe(1250);
   });
@@ -16,7 +16,7 @@ describe("resolveEmbeddedAbortSettleTimeoutMs", () => {
     // behavior depend on JavaScript coercion quirks.
     expect(
       resolveEmbeddedAbortSettleTimeoutMs({
-        OPENCLAW_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS: value,
+        BOT_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS: value,
       }),
     ).toBe(2_000);
   });
@@ -24,8 +24,8 @@ describe("resolveEmbeddedAbortSettleTimeoutMs", () => {
   it("keeps the fast-test fallback when the override is invalid", () => {
     expect(
       resolveEmbeddedAbortSettleTimeoutMs({
-        OPENCLAW_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS: "10ms",
-        OPENCLAW_TEST_FAST: "1",
+        BOT_EMBEDDED_ABORT_SETTLE_TIMEOUT_MS: "10ms",
+        BOT_TEST_FAST: "1",
       }),
     ).toBe(250);
   });

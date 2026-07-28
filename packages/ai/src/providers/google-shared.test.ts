@@ -309,6 +309,6 @@ describe("buildGoogleGenerateContentParams", () => {
     });
 
     expect(params.config?.systemInstruction).toBe("Stable\nDynamic");
-    expect(JSON.stringify(params)).not.toContain("OPENCLAW_CACHE_BOUNDARY");
+    expect(JSON.stringify(params)).not.toContain("BOT_CACHE_BOUNDARY");
   });
 });

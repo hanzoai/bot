@@ -9,17 +9,17 @@ import {
   resolveMemorySearchSyncConfig,
   resolveAgentWorkspaceDir,
   resolveStateDir,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+  type BotConfig,
+} from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import type {
   MemorySource,
   ResolvedMemoryBackendConfig,
   ResolvedQmdConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
 import type {
   PluginStateLeaseContext,
   PluginStateLeaseRunner,
-} from "openclaw/plugin-sdk/plugin-state-runtime";
+} from "bot/plugin-sdk/plugin-state-runtime";
 import {
   QmdCollectionController,
   type ManagedQmdCollection as ManagedCollection,
@@ -471,7 +471,7 @@ export abstract class QmdManagerBase {
 }
 
 export function resolveQmdManagerRuntimeConfig(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string,
 ): QmdManagerRuntimeConfig {
   return {
@@ -482,7 +482,7 @@ export function resolveQmdManagerRuntimeConfig(
 }
 
 export type QmdManagerCreateParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   resolved: ResolvedMemoryBackendConfig;
   withLease: PluginStateLeaseRunner;

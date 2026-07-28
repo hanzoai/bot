@@ -158,7 +158,7 @@ let lazyElementSequence = 0;
 
 function createLazyElementSpec(label: string): TestOptionalCustomElement {
   lazyElementSequence += 1;
-  const tagName = `openclaw-app-host-lazy-${lazyElementSequence}`;
+  const tagName = `bot-app-host-lazy-${lazyElementSequence}`;
   return {
     tagName,
     label,
@@ -242,9 +242,9 @@ function committedRouterState(
   } as unknown as RouterState<RouteId>;
 }
 
-describe("OpenClaw app lifecycle", () => {
+describe("Bot app lifecycle", () => {
   it("hides revealed login credentials when the app connection epoch ends", () => {
-    const app = document.createElement("openclaw-app") as unknown as AppLifecycleState;
+    const app = document.createElement("bot-app") as unknown as AppLifecycleState;
     app.loginShowGatewayToken = true;
     app.loginShowGatewayPassword = true;
 
@@ -255,7 +255,7 @@ describe("OpenClaw app lifecycle", () => {
   });
 
   it("hides revealed login credentials when the Gateway source changes", () => {
-    const app = document.createElement("openclaw-app") as unknown as AppLifecycleState;
+    const app = document.createElement("bot-app") as unknown as AppLifecycleState;
     const snapshot = {
       client: null,
       phase: "stopped",
@@ -287,7 +287,7 @@ describe("OpenClaw app lifecycle", () => {
   });
 });
 
-describe("OpenClaw shell source initialization", () => {
+describe("Bot shell source initialization", () => {
   it("delegates repeated locale import failures to guarded stale-chunk recovery", () => {
     const scheduleReload = vi.mocked(scheduleStaleChunkReload);
     scheduleReload.mockClear();
@@ -306,7 +306,7 @@ describe("OpenClaw shell source initialization", () => {
   it("retries a pending locale once when the Gateway becomes connected", () => {
     const retryPendingLocale = vi.spyOn(i18n, "retryPendingLocale").mockImplementation(() => {});
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "bot-app-shell",
     ) as unknown as ShellGatewaySynchronizationState;
     shell.outboxStoreImport = { load: vi.fn(async () => undefined) };
     const reconnecting = {
@@ -330,7 +330,7 @@ describe("OpenClaw shell source initialization", () => {
   });
 
   it("clears retained presentation and source ownership when its context epoch ends", () => {
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellEpochState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellEpochState;
     const client = {} as GatewayBrowserClient;
     const agents = {} as ApplicationContext["agents"];
     const runtimeConfig = {} as ApplicationContext["runtimeConfig"];
@@ -367,7 +367,7 @@ describe("OpenClaw shell source initialization", () => {
 
   it("initializes replacement capabilities even when the Gateway client is unchanged", () => {
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "bot-app-shell",
     ) as unknown as ShellInitializationState;
     shell.routeState = { routeId: "usage" };
     const client = {} as GatewayBrowserClient;
@@ -401,11 +401,11 @@ describe("OpenClaw shell source initialization", () => {
   });
 });
 
-describe("OpenClaw shell route session commits", () => {
+describe("Bot shell route session commits", () => {
   it("builds session paths from the requested destination face", () => {
     const navigate = vi.fn();
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "bot-app-shell",
     ) as unknown as ShellSessionNavigationState;
     shell.runtime = {
       context: {
@@ -433,7 +433,7 @@ describe("OpenClaw shell route session commits", () => {
   it("preserves catalog identity when routing a slash-command draft", () => {
     const navigate = vi.fn();
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "bot-app-shell",
     ) as unknown as ShellSessionNavigationState;
     shell.runtime = {
       context: {
@@ -460,7 +460,7 @@ describe("OpenClaw shell route session commits", () => {
     const replace = vi.fn();
     const snapshot = { phase: "connecting", hello: null };
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "bot-app-shell",
     ) as unknown as ShellSessionNavigationState;
     shell.runtime = {
       context: {
@@ -490,7 +490,7 @@ describe("OpenClaw shell route session commits", () => {
     const calls: string[] = [];
     const setAgent = vi.fn((agentId: string | null) => calls.push(`agent:${agentId}`));
     const setSessionKey = vi.fn((sessionKey: string) => calls.push(`session:${sessionKey}`));
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellRouteCommitState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellRouteCommitState;
     shell.runtime = {
       context: {
         gateway: {
@@ -519,7 +519,7 @@ describe("OpenClaw shell route session commits", () => {
   });
 });
 
-describe("OpenClaw shell server preferences", () => {
+describe("Bot shell server preferences", () => {
   it("refreshes live navigation when a sidebar preference arrives from the gateway", () => {
     vi.stubGlobal("localStorage", createStorageMock());
     resetServerUiPrefsSync();
@@ -542,7 +542,7 @@ describe("OpenClaw shell server preferences", () => {
       runtimeConfig,
     } as unknown as ApplicationContext;
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "bot-app-shell",
     ) as unknown as ShellServerPreferencesState;
     shell.runtime = { context };
 
@@ -554,14 +554,14 @@ describe("OpenClaw shell server preferences", () => {
   });
 });
 
-describe("OpenClaw shell settings search", () => {
+describe("Bot shell settings search", () => {
   it("loads config and schema for a non-empty query", async () => {
     const runtimeConfig = {
       ensureLoaded: vi.fn(() => Promise.resolve()),
       ensureSchemaLoaded: vi.fn(() => Promise.resolve()),
     } as unknown as ApplicationContext["runtimeConfig"];
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "bot-app-shell",
     ) as unknown as ShellSettingsSearchLoadState;
     shell.runtime = {
       context: { runtimeConfig } as unknown as ApplicationContext,
@@ -589,7 +589,7 @@ describe("OpenClaw shell settings search", () => {
       ensureSchemaLoaded: vi.fn(() => Promise.resolve()),
     } as unknown as ApplicationContext["runtimeConfig"];
     const shell = document.createElement(
-      "openclaw-app-shell",
+      "bot-app-shell",
     ) as unknown as ShellSettingsSearchLoadState;
     shell.runtime = {
       context: { runtimeConfig: firstRuntimeConfig } as unknown as ApplicationContext,
@@ -623,7 +623,7 @@ describe("OpenClaw shell settings search", () => {
         ),
       } as unknown as ApplicationContext["runtimeConfig"];
       const shell = document.createElement(
-        "openclaw-app-shell",
+        "bot-app-shell",
       ) as unknown as ShellSettingsSearchLoadState;
       shell.runtime = {
         context: { runtimeConfig } as unknown as ApplicationContext,
@@ -639,7 +639,7 @@ describe("OpenClaw shell settings search", () => {
   );
 });
 
-describe("OpenClaw shell keyboard shortcuts", () => {
+describe("Bot shell keyboard shortcuts", () => {
   it("resolves onboarding mode from the active route search", () => {
     expect(resolveOnboardingMode("?onboarding=1")).toBe(true);
     expect(resolveOnboardingMode("?onboarding=true")).toBe(true);
@@ -661,7 +661,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
       shouldMergeChatChrome({ mobileNavLayout: true, routeId: "chat", onboarding: true }),
     ).toBe(false);
 
-    document.documentElement.classList.add("openclaw-native-nav");
+    document.documentElement.classList.add("bot-native-nav");
     expect(
       shouldMergeChatChrome({ mobileNavLayout: true, routeId: "chat", onboarding: false }),
     ).toBe(false);
@@ -669,7 +669,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
 
   it("wires merged header window events for the shell lifecycle", () => {
     const addEventListener = vi.spyOn(window, "addEventListener");
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellChromeEventState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellChromeEventState;
 
     shell.connectedCallback();
 
@@ -683,7 +683,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
   });
 
   it("prevents unhandled window file drops without overriding accepted targets", () => {
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellChromeEventState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellChromeEventState;
     const acceptedDropTarget = document.createElement("div");
     const nativeFileInput = document.createElement("input");
     nativeFileInput.type = "file";
@@ -729,7 +729,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
     );
     const openPalette = vi.fn();
     const trigger = document.createElement("button");
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellChromeEventState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellChromeEventState;
     shell.runtime = {
       context: {
         navigation: { snapshot: { navCollapsed: false }, update: vi.fn() },
@@ -752,7 +752,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
   it("loads and toggles the command palette on its first shortcut", async () => {
     const element = createLazyElementSpec("command palette");
     const togglePalette = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellLazySurfaceState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellLazySurfaceState;
     shell.commandPaletteElement = element;
     Object.defineProperty(shell, "updateComplete", {
       configurable: true,
@@ -782,7 +782,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
     const browserElement = createLazyElementSpec("browser panel");
     const terminalToggle = vi.fn();
     const browserToggle = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellLazySurfaceState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellLazySurfaceState;
     shell.terminalPanelElement = terminalElement;
     shell.browserPanelElement = browserElement;
     shell.runtime = {
@@ -832,7 +832,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
   it("opens approvals after the modal module loads on demand", async () => {
     const element = createLazyElementSpec("exec approval modal");
     const show = vi.fn();
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellApprovalLazyState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellApprovalLazyState;
     shell.execApprovalElement = element;
     Object.defineProperty(shell, "updateComplete", {
       configurable: true,
@@ -857,7 +857,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
     const uiCommandEvent = vi.fn();
     window.addEventListener(TERMINAL_PANEL_TOGGLE_EVENT, panelEvent);
     window.addEventListener(UI_COMMAND_EVENT, uiCommandEvent);
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellUiCommandState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellUiCommandState;
     shell.runtime = {
       context: {
         basePath: "",
@@ -947,7 +947,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
       ]),
       selectedId: "main",
     });
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellUiCommandState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellUiCommandState;
     shell.runtime = { context: harness.context };
 
     shell.handleGatewayEvent({ event: "config.changed", payload: {} });
@@ -968,7 +968,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
       next: roster("main", [{ id: "fallback" }, { id: "main" }]),
       selectedId: "writer",
     });
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellUiCommandState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellUiCommandState;
     shell.runtime = { context: harness.context };
 
     shell.handleGatewayEvent({ event: "config.changed", payload: {} });
@@ -985,7 +985,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
       next: structuredClone(unchanged),
       selectedId: "main",
     });
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellUiCommandState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellUiCommandState;
     shell.runtime = { context: harness.context };
 
     shell.handleGatewayEvent({ event: "config.changed", payload: {} });
@@ -1005,7 +1005,7 @@ describe("OpenClaw shell keyboard shortcuts", () => {
       next: unchanged,
       selectedId: "main",
     });
-    const shell = document.createElement("openclaw-app-shell") as unknown as ShellUiCommandState;
+    const shell = document.createElement("bot-app-shell") as unknown as ShellUiCommandState;
     shell.runtime = { context: harness.context };
 
     shell.handleGatewayEvent({ event: "config.changed", payload: {} });

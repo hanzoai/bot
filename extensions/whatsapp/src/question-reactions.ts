@@ -1,9 +1,9 @@
 // WhatsApp transport binding for numbered ask_user reactions.
 import type { WAMessage } from "baileys";
-import type { OutboundDeliveryResult } from "openclaw/plugin-sdk/channel-send-result";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { questionGatewayRuntime } from "openclaw/plugin-sdk/question-gateway-runtime";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
+import type { OutboundDeliveryResult } from "bot/plugin-sdk/channel-send-result";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { questionGatewayRuntime } from "bot/plugin-sdk/question-gateway-runtime";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
 import { resolveWhatsAppAccount } from "./accounts.js";
 
 const TARGET_TTL_MS = 24 * 60 * 60 * 1_000;
@@ -86,7 +86,7 @@ function listDeliveredIdentities(
 }
 
 export function registerWhatsAppQuestionReactionTargetForDeliveredPayload(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   target: { channel: string; accountId?: string | null };
   payload: ReplyPayload;
   results: readonly OutboundDeliveryResult[];
@@ -112,7 +112,7 @@ export function registerWhatsAppQuestionReactionTargetForDeliveredPayload(params
 }
 
 export async function maybeResolveWhatsAppQuestionReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   msg: WAMessage;
   senderId: string;

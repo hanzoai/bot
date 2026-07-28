@@ -1,13 +1,13 @@
 {
-  "name": "@openclaw/deepgram-provider",
+  "name": "@hanzo/bot-deepgram-provider",
   "version": "2026.7.2",
   "private": true,
-  "description": "OpenClaw Deepgram media-understanding provider",
+  "description": "Bot Deepgram media-understanding provider",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ]

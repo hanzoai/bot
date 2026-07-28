@@ -4,8 +4,8 @@
 import {
   clampTimerTimeoutMs,
   resolveTimerTimeoutMs,
-} from "@openclaw/normalization-core/number-coercion";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+} from "@hanzo/bot-normalization-core/number-coercion";
+import type { BotConfig } from "../config/types.bot.js";
 import type { ModelCatalogEntry, ModelCatalogSnapshot } from "./model-catalog.types.js";
 import {
   buildConfiguredModelCatalog,
@@ -23,7 +23,7 @@ export type ModelCatalogBrowseView = "default" | "configured" | "provider-config
 
 /** Source-authored provider rows for inventory UIs, independent of picker allowlists. */
 export function buildProviderConfigModelCatalogForBrowse(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   workspaceDir?: string;
 }): ModelCatalogEntry[] {
   return buildConfiguredModelCatalog(params).toSorted(
@@ -36,7 +36,7 @@ export function buildProviderConfigModelCatalogForBrowse(params: {
 
 /** True when a browse view requires the full published catalog generation. */
 export function modelCatalogBrowseRequiresFullDiscovery(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   view?: ModelCatalogBrowseView;
 }): boolean {
   const view = params.view ?? "default";
@@ -55,7 +55,7 @@ function resolveModelCatalogBrowseTimeoutMs(value: number | undefined): number {
 }
 
 async function loadCatalogForBrowse<T>(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   view?: ModelCatalogBrowseView;
   loadCatalog: (params: { readOnly: boolean }) => Promise<T>;
   empty: T;
@@ -96,7 +96,7 @@ async function loadCatalogForBrowse<T>(params: {
 
 /** Loads an explicit logical/physical catalog snapshot for route-aware browse surfaces. */
 export function loadPreparedModelCatalogSnapshotForBrowse(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   view?: ModelCatalogBrowseView;
   loadCatalog: (params: { readOnly: boolean }) => Promise<ModelCatalogSnapshot>;
   timeoutFullDiscovery?: boolean;

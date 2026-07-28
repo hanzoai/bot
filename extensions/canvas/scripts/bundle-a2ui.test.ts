@@ -2,7 +2,7 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { resolvePreferredOpenClawTmpDir, withTempWorkspace } from "openclaw/plugin-sdk/temp-path";
+import { resolvePreferredBotTmpDir, withTempWorkspace } from "bot/plugin-sdk/temp-path";
 import { describe, expect, it } from "vitest";
 import {
   compareNormalizedPaths,
@@ -66,7 +66,7 @@ describe("scripts/bundle-a2ui.mjs", () => {
     "falls back when tracked-input discovery stalls",
     async () => {
       await withTempWorkspace(
-        { rootDir: resolvePreferredOpenClawTmpDir(), prefix: "openclaw-a2ui-git-timeout-" },
+        { rootDir: resolvePreferredBotTmpDir(), prefix: "bot-a2ui-git-timeout-" },
         async ({ dir }) => {
           const fakeBinDir = path.join(dir, "bin");
           const fakeGitPath = path.join(fakeBinDir, "git");
@@ -88,8 +88,8 @@ describe("scripts/bundle-a2ui.mjs", () => {
               encoding: "utf8",
               env: {
                 ...process.env,
-                OPENCLAW_A2UI_BUNDLE_HASH_FILE: hashFile,
-                OPENCLAW_A2UI_BUNDLE_OUT: outputFile,
+                BOT_A2UI_BUNDLE_HASH_FILE: hashFile,
+                BOT_A2UI_BUNDLE_OUT: outputFile,
                 PATH: `${fakeBinDir}${path.delimiter}${process.env.PATH ?? ""}`,
               },
               killSignal: "SIGKILL",

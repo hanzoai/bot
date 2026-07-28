@@ -76,7 +76,7 @@ describe("custodian route", () => {
 
     render(renderCustodianRoute({ onboarding: false, intent: null }), provider);
     const normalPage = provider.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-      "openclaw-custodian-page",
+      "bot-custodian-page",
     );
     await normalPage?.updateComplete;
     expect(normalPage?.querySelector(".custodian__header .btn")).toBeNull();
@@ -87,7 +87,7 @@ describe("custodian route", () => {
     render(renderCustodianRoute({ onboarding: true, intent: null }), provider);
     const onboardingPage = provider.querySelector<
       HTMLElement & { updateComplete: Promise<boolean> }
-    >("openclaw-custodian-page");
+    >("bot-custodian-page");
     await onboardingPage?.updateComplete;
     expect(onboardingPage?.querySelector(".custodian__header .btn")).not.toBeNull();
     expect(onboardingPage?.querySelector(".custodian__header p")?.textContent?.trim()).toBe(

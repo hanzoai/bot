@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/zalouser",
+  "name": "@hanzo/bot-zalouser",
   "version": "2026.7.2",
-  "description": "OpenClaw Zalo Personal Account plugin via native zca-js integration.",
+  "description": "Bot Zalo Personal Account plugin via native zca-js integration.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
@@ -13,18 +13,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -55,10 +55,12 @@
         "groupAllowFromFallbackToAllowFrom": false,
         "warnOnEmptyGroupSenderAllowlist": false
       },
-      "setup": { "fields": [] }
+      "setup": {
+        "fields": []
+      }
     },
     "install": {
-      "npmSpec": "@openclaw/zalouser",
+      "npmSpec": "@hanzo/bot-zalouser",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.10"
     },
@@ -66,7 +68,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2"
+      "botVersion": "2026.7.2"
     },
     "release": {
       "publishToClawHub": true,

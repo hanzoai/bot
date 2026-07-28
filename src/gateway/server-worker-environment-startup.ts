@@ -1,4 +1,4 @@
-import { uniqueStrings } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings } from "@hanzo/bot-normalization-core/string-normalization";
 import { getRuntimeConfig } from "../config/config.js";
 import type { PluginRegistry } from "../plugins/registry-types.js";
 import {

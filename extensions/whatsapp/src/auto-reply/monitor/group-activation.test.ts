@@ -6,8 +6,8 @@ import {
   getSessionEntry,
   upsertSessionEntry,
   type SessionEntry,
-} from "openclaw/plugin-sdk/session-store-runtime";
-import { closeOpenClawAgentDatabasesForTest } from "openclaw/plugin-sdk/sqlite-runtime-testing";
+} from "bot/plugin-sdk/session-store-runtime";
+import { closeBotAgentDatabasesForTest } from "bot/plugin-sdk/sqlite-runtime-testing";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resolveGroupActivationFor } from "./group-activation.js";
 
@@ -24,7 +24,7 @@ type SessionStoreEntry = {
 async function makeSessionStore(
   entries: Record<string, unknown> = {},
 ): Promise<{ storePath: string; cleanup: () => Promise<void> }> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-session-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-session-"));
   const storePath = path.join(dir, "sessions.json");
   await Promise.all(
     Object.entries(entries as Record<string, SessionEntry>).map(([sessionKey, entry]) =>
@@ -95,7 +95,7 @@ describe("resolveGroupActivationFor", () => {
   const cleanups: Array<() => Promise<void>> = [];
 
   afterEach(async () => {
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
     while (cleanups.length > 0) {
       await cleanups.pop()?.();
     }

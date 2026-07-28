@@ -4,8 +4,8 @@
  * Converts ARIA or AI snapshots into compact role/name text with stable refs
  * and duplicate disambiguation for agent actions.
  */
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { CONTENT_ROLES, INTERACTIVE_ROLES, STRUCTURAL_ROLES } from "./snapshot-roles.js";
 
 type RoleRef = {

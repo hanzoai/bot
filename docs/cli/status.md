@@ -1,18 +1,18 @@
 ---
-summary: "CLI reference for `openclaw status` (diagnostics, probes, usage snapshots)"
+summary: "CLI reference for `bot status` (diagnostics, probes, usage snapshots)"
 read_when:
   - You want a quick diagnosis of channel health + recent session recipients
   - You want a pasteable "all" status for debugging
-title: "openclaw status"
+title: "bot status"
 ---
 
 Diagnostics for channels + sessions.
 
 ```bash
-openclaw status
-openclaw status --all
-openclaw status --deep
-openclaw status --usage
+bot status
+bot status --all
+bot status --deep
+bot status --usage
 ```
 
 | Flag                    | Description                                                                                                     |
@@ -23,17 +23,17 @@ openclaw status --usage
 | `--json`                | Machine-readable output.                                                                                        |
 | `--verbose` / `--debug` | Also print the raw Gateway target resolution before the report.                                                 |
 
-Plain `openclaw status` stays on the fast read-only path and marks memory as
+Plain `bot status` stays on the fast read-only path and marks memory as
 `not checked` instead of unavailable when it skips memory inspection. Heavy
 security audit, plugin compatibility, and memory-vector probes are left to
-`openclaw status --all`, `openclaw status --deep`, `openclaw security audit`,
-and `openclaw memory status --deep`.
+`bot status --all`, `bot status --deep`, `bot security audit`,
+and `bot memory status --deep`.
 
 ## Session and model resolution
 
 - Session status output separates `Execution:` from `Runtime:`. `Execution`
   is the sandbox path (`direct`, `docker/*`), while `Runtime` tells you
-  whether the session is using `OpenClaw Default`, `OpenAI Codex`, a CLI
+  whether the session is using `Bot Default`, `OpenAI Codex`, a CLI
   backend, or an ACP backend such as `codex (acp/acpx)`. See
   [Agent runtimes](/concepts/agent-runtimes) for the provider/model/runtime
   distinction.
@@ -59,7 +59,7 @@ and `openclaw memory status --deep`.
 
 - `--usage` prints normalized provider usage windows as `X% left`.
 - MiniMax's raw `usage_percent` / `usagePercent` fields are remaining quota,
-  so OpenClaw inverts them before display; count-based fields win when
+  so Bot inverts them before display; count-based fields win when
   present. `model_remains` responses prefer the chat-model entry, derive the
   window label from timestamps when needed, and include the model name in
   the plan label.
@@ -72,7 +72,7 @@ and `openclaw memory status --deep`.
   available, plus compact Gateway process uptime and host system uptime.
 - Overview includes update channel + git SHA (for source checkouts).
 - Update info surfaces in the Overview; if an update is available, status
-  prints a hint to run `openclaw update` (see [Updating](/install/updating)).
+  prints a hint to run `bot update` (see [Updating](/install/updating)).
 
 ## Secrets
 

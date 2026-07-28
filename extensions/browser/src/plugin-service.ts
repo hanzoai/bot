@@ -4,11 +4,11 @@
 import {
   startLazyPluginServiceModule,
   type LazyPluginServiceHandle,
-  type OpenClawPluginService,
+  type BotPluginService,
 } from "./sdk-node-runtime.js";
 
 type BrowserControlHandle = LazyPluginServiceHandle | null;
-const EAGER_BROWSER_CONTROL_SERVICE_ENV = "OPENCLAW_EAGER_BROWSER_CONTROL_SERVER";
+const EAGER_BROWSER_CONTROL_SERVICE_ENV = "BOT_EAGER_BROWSER_CONTROL_SERVER";
 const UNSAFE_BROWSER_CONTROL_OVERRIDE_SPECIFIER = /^(?:data|http|https|node):/i;
 
 function isTruthyEnvValue(value: string | undefined): boolean {
@@ -24,7 +24,7 @@ function validateBrowserControlOverrideSpecifier(specifier: string): string {
 }
 
 /** Creates the Browser plugin service registered by the plugin entrypoint. */
-export function createBrowserPluginService(): OpenClawPluginService {
+export function createBrowserPluginService(): BotPluginService {
   let handle: BrowserControlHandle = null;
 
   return {
@@ -41,8 +41,8 @@ export function createBrowserPluginService(): OpenClawPluginService {
         return;
       }
       handle = await startLazyPluginServiceModule({
-        skipEnvVar: "OPENCLAW_SKIP_BROWSER_CONTROL_SERVER",
-        overrideEnvVar: "OPENCLAW_BROWSER_CONTROL_MODULE",
+        skipEnvVar: "BOT_SKIP_BROWSER_CONTROL_SERVER",
+        overrideEnvVar: "BOT_BROWSER_CONTROL_MODULE",
         validateOverrideSpecifier: validateBrowserControlOverrideSpecifier,
         // Keep the default module import static so compiled builds still bundle it.
         loadDefaultModule: async () => await import("./server.js"),

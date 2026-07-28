@@ -1,4 +1,4 @@
-import { uniqueStrings, uniqueValues } from "@openclaw/normalization-core/string-normalization";
+import { uniqueStrings, uniqueValues } from "@hanzo/bot-normalization-core/string-normalization";
 import { getPluginToolMeta, type PluginToolMcpMeta } from "../plugins/tools.js";
 import type { HookContext } from "./agent-tools.before-tool-call.js";
 import {
@@ -24,7 +24,7 @@ import {
 import { ToolInputError, type AnyAgentTool } from "./tools/common.js";
 
 const MAX_REUSABLE_CATALOG_SNAPSHOTS = 256;
-const SESSION_CATALOGS_KEY = Symbol.for("openclaw.toolSearch.sessionCatalogs");
+const SESSION_CATALOGS_KEY = Symbol.for("bot.toolSearch.sessionCatalogs");
 const globalToolSearchState = globalThis as typeof globalThis & {
   [SESSION_CATALOGS_KEY]?: Map<string, ToolSearchCatalogSession>;
 };
@@ -143,10 +143,10 @@ function catalogEntriesFingerprint(entries: readonly ToolSearchCatalogEntry[]): 
         entry.description,
         // Remote/client schemas may be attacker-sized. Object identity still
         // invalidates reuse when a schema object is replaced without walking it.
-        entry.source === "openclaw"
+        entry.source === "bot"
           ? stableJsonFingerprint(entry.parameters)
           : untrustedSchemaFingerprint(entry.parameters),
-        entry.source === "openclaw"
+        entry.source === "bot"
           ? stableJsonFingerprint(entry.outputSchema)
           : untrustedSchemaFingerprint(entry.outputSchema),
         String(catalogToolIdentity(entry.tool)),
@@ -239,9 +239,9 @@ function classifyTool(tool: CatalogTool): {
     return { source: "mcp", sourceName: pluginId };
   }
   if (pluginId) {
-    return { source: "openclaw", sourceName: pluginId };
+    return { source: "bot", sourceName: pluginId };
   }
-  return { source: "openclaw", sourceName: "core" };
+  return { source: "bot", sourceName: "core" };
 }
 
 function makeCatalogId(tool: CatalogTool, source: CatalogSource, sourceName?: string): string {
@@ -275,7 +275,7 @@ function toCatalogEntry(
     label: tool.label,
     description: tool.description ?? "",
     parameters: tool.parameters,
-    ...(source === "openclaw" && (tool as AnyAgentTool).outputSchema
+    ...(source === "bot" && (tool as AnyAgentTool).outputSchema
       ? { outputSchema: (tool as AnyAgentTool).outputSchema }
       : {}),
     tool: catalogTool,
@@ -289,7 +289,7 @@ function shouldCatalogTool(tool: AnyAgentTool): boolean {
 /**
  * Core file/shell primitives and caller-required names (e.g. message when it is
  * the only reply path) stay visible while remaining searchable. Both must
- * resolve to trusted OpenClaw tools: an MCP lookalike must never become a
+ * resolve to trusted Bot tools: an MCP lookalike must never become a
  * direct delivery or core-coding tool.
  */
 export function isDirectVisibleCatalogTool(
@@ -298,7 +298,7 @@ export function isDirectVisibleCatalogTool(
 ): boolean {
   const classified = classifyTool(tool);
   return (
-    classified.source === "openclaw" &&
+    classified.source === "bot" &&
     (directToolNames.has(tool.name) ||
       (isCoreCodingSurfaceToolName(tool.name) && classified.sourceName === "core"))
   );
@@ -430,7 +430,7 @@ export function visibleCatalogEntries(
 
 export function compactToolSearchCatalogEntry(entry: ToolSearchCatalogEntry) {
   const output =
-    entry.source === "openclaw" ? compactToolOutputHint(entry.outputSchema) : undefined;
+    entry.source === "bot" ? compactToolOutputHint(entry.outputSchema) : undefined;
   return {
     id: entry.id,
     source: entry.source,
@@ -439,7 +439,7 @@ export function compactToolSearchCatalogEntry(entry: ToolSearchCatalogEntry) {
     name: entry.name,
     label: entry.label,
     description: entry.description,
-    input: entry.source === "openclaw" ? compactToolInputHint(entry.parameters) : "unknown",
+    input: entry.source === "bot" ? compactToolInputHint(entry.parameters) : "unknown",
     ...(output ? { output } : {}),
   };
 }

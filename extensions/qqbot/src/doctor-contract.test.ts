@@ -1,5 +1,5 @@
 // Qqbot tests cover doctor migration behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { legacyConfigRules, normalizeCompatibilityConfig } from "./doctor-contract.js";
 
@@ -52,7 +52,7 @@ describe("qqbot doctor contract", () => {
   });
 
   it("migrates streaming true to the full nested enable (mode + nativeTransport)", () => {
-    const cfg = { channels: { qqbot: { streaming: true } } } as OpenClawConfig;
+    const cfg = { channels: { qqbot: { streaming: true } } } as BotConfig;
     const result = normalizeCompatibilityConfig({ cfg });
     expect(result.config.channels?.qqbot?.streaming).toStrictEqual({
       mode: "partial",
@@ -64,7 +64,7 @@ describe("qqbot doctor contract", () => {
   });
 
   it("migrates streaming false to mode off without nativeTransport", () => {
-    const cfg = { channels: { qqbot: { streaming: false } } } as OpenClawConfig;
+    const cfg = { channels: { qqbot: { streaming: false } } } as BotConfig;
     const result = normalizeCompatibilityConfig({ cfg });
     expect(result.config.channels?.qqbot?.streaming).toStrictEqual({ mode: "off" });
   });
@@ -79,7 +79,7 @@ describe("qqbot doctor contract", () => {
           },
         },
       },
-    } as never as OpenClawConfig;
+    } as never as BotConfig;
     const result = normalizeCompatibilityConfig({ cfg });
     expect(result.config.channels?.qqbot?.streaming).toStrictEqual({
       mode: "off",
@@ -95,7 +95,7 @@ describe("qqbot doctor contract", () => {
       channels: {
         qqbot: { streaming: { nativeTransport: false, c2cStreamApi: true } },
       },
-    } as never as OpenClawConfig;
+    } as never as BotConfig;
     const result = normalizeCompatibilityConfig({ cfg });
     expect(result.config.channels?.qqbot?.streaming).toStrictEqual({ nativeTransport: false });
     expect(result.changes).toContain(
@@ -113,7 +113,7 @@ describe("qqbot doctor contract", () => {
           },
         },
       },
-    } as never as OpenClawConfig;
+    } as never as BotConfig;
     const result = normalizeCompatibilityConfig({ cfg });
     expect(result.config.channels?.qqbot?.accounts?.bot2?.streaming).toStrictEqual({
       mode: "partial",
@@ -141,7 +141,7 @@ describe("qqbot doctor contract", () => {
           },
         },
       },
-    } as never as OpenClawConfig;
+    } as never as BotConfig;
 
     const result = normalizeCompatibilityConfig({ cfg });
     const qqbot = result.config.channels?.qqbot as unknown as Record<string, unknown>;
@@ -162,7 +162,7 @@ describe("qqbot doctor contract", () => {
       channels: {
         qqbot: { streaming: true, accounts: { bot2: { streaming: false } } },
       },
-    } as never as OpenClawConfig;
+    } as never as BotConfig;
     const first = normalizeCompatibilityConfig({ cfg });
     expect(first.changes.length).toBeGreaterThan(0);
     const second = normalizeCompatibilityConfig({ cfg: first.config });
@@ -181,7 +181,7 @@ describe("qqbot doctor contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = normalizeCompatibilityConfig({ cfg });
 
@@ -206,7 +206,7 @@ describe("qqbot doctor contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = normalizeCompatibilityConfig({ cfg });
 
@@ -227,7 +227,7 @@ describe("qqbot doctor contract", () => {
           },
         },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const result = normalizeCompatibilityConfig({ cfg });
 

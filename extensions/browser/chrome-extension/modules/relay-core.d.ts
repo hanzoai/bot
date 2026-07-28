@@ -1,7 +1,7 @@
 // Types for the extension's pure-logic module (the runtime is plain ESM JS so
 // it can load unbundled in Chrome). Kept in sync with relay-core.js.
 
-export const OPENCLAW_TAB_GROUP_TITLE: string;
+export const BOT_TAB_GROUP_TITLE: string;
 export function parsePairingString(raw: unknown): {
   relayUrl: string;
   token: string;

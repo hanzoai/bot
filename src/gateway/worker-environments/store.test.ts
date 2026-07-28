@@ -5,10 +5,10 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { WorkerAdmissionHandshake } from "../../../packages/gateway-protocol/src/schema/worker-admission.js";
 import type { WorkerProfile, WorkerSshEndpoint } from "../../plugins/types.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+  type BotStateDatabase,
+} from "../../state/bot-state-db.js";
 import { hashWorkerCredential } from "./credential.js";
 import { createWorkerEnvironmentStore, type WorkerEnvironmentStore } from "./store.js";
 
@@ -20,7 +20,7 @@ const HOST_KEY = ["ssh-ed25519", "AAAA"].join(" ");
 const SSH_ENDPOINT: WorkerEnvironmentSshEndpoint = {
   host: "worker.example.test",
   port: 22,
-  user: "openclaw",
+  user: "bot",
   hostKey: HOST_KEY,
   keyRef: {
     source: "file",
@@ -30,26 +30,26 @@ const SSH_ENDPOINT: WorkerEnvironmentSshEndpoint = {
 };
 const BOOTSTRAP_RECEIPT: WorkerEnvironmentBootstrapReceipt = {
   bundleHash: "a".repeat(64),
-  openclawVersion: "2026.7.1",
+  botVersion: "2026.7.1",
   protocolFeatures: ["workspace-sync-v1", "model-proxy-v1"],
 };
 const CREDENTIAL = ["worker", "credential", "fixture"].join("-");
 
 describe("worker environment store", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: BotStateDatabase;
   let store: WorkerEnvironmentStore;
   let nowMs: number;
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-env-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "bot-worker-env-"));
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     nowMs = 1_000;
     store = createWorkerEnvironmentStore({ database, now: () => nowMs });
   });
 
   afterEach(async () => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -126,8 +126,8 @@ describe("worker environment store", () => {
     });
 
     snapshot.settings.region = "mutated-after-create";
-    closeOpenClawStateDatabaseForTest();
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    closeBotStateDatabaseForTest();
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     store = createWorkerEnvironmentStore({ database, now: () => nowMs });
 
     expect(store.get("worker-crash")?.profileSnapshot).toEqual({
@@ -150,8 +150,8 @@ describe("worker environment store", () => {
       updatedAtMs: 1_050,
     });
 
-    closeOpenClawStateDatabaseForTest();
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    closeBotStateDatabaseForTest();
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     store = createWorkerEnvironmentStore({ database, now: () => nowMs });
     expect(store.get("worker-cancelled")?.destroyRequestedAtMs).toBe(1_050);
   });
@@ -174,8 +174,8 @@ describe("worker environment store", () => {
       to: "ready",
       patch: readyPatch(),
     });
-    closeOpenClawStateDatabaseForTest();
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    closeBotStateDatabaseForTest();
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     store = createWorkerEnvironmentStore({ database, now: () => nowMs });
     expect(store.get("worker-1")).toMatchObject({
       sshEndpoint: SSH_ENDPOINT,
@@ -240,8 +240,8 @@ describe("worker environment store", () => {
     expect(store.get("worker-owner")?.ownerEpoch).toBe(1);
     expect(store.getCredential("worker-owner")).toMatchObject({ ownerEpoch: 1, sessionId: null });
 
-    closeOpenClawStateDatabaseForTest();
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    closeBotStateDatabaseForTest();
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     store = createWorkerEnvironmentStore({ database, now: () => nowMs });
     const renewal = [CREDENTIAL, "renewal"].join("-");
     expect(
@@ -441,7 +441,7 @@ describe("worker environment store", () => {
       UPDATE worker_environments
       SET
         bootstrap_bundle_hash = NULL,
-        bootstrap_openclaw_version = NULL,
+        bootstrap_bot_version = NULL,
         bootstrap_protocol_features_json = NULL
       WHERE environment_id = 'worker-rebootstrap';
     `);

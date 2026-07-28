@@ -1,5 +1,5 @@
-import { resolveExpiresAtMsFromDurationMs } from "openclaw/plugin-sdk/number-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { resolveExpiresAtMsFromDurationMs } from "bot/plugin-sdk/number-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import type { ConsoleMessage, Dialog, Frame, Page, Request, Response } from "playwright-core";
 import { saveBrowserDownload, type BrowserDownloadCaptureOptions } from "./pw-download-capture.js";
 import {

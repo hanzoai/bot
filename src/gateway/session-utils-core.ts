@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   countActiveDescendantRuns,
   getSessionDisplaySubagentRunByChildSessionKey,
@@ -11,7 +11,7 @@ import {
 } from "../agents/subagent-run-liveness.js";
 import { stripInboundMetadata } from "../auto-reply/reply/strip-inbound-meta.js";
 import { isTerminalSessionStatus, type SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveNonNegativeNumber } from "../shared/number-coercion.js";
 import { truncateUtf16Safe } from "../utils.js";
 import {
@@ -188,7 +188,7 @@ export function buildCompactionCheckpointPreview(
 function resolveModelCostConfigCached(
   provider: string | undefined,
   model: string | undefined,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   rowContext?: SessionListRowContext,
 ): ModelCostConfig | undefined {
   if (!rowContext) {
@@ -204,7 +204,7 @@ function resolveModelCostConfigCached(
 }
 
 export function resolveEstimatedSessionCostUsd(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider?: string;
   model?: string;
   entry?: Pick<

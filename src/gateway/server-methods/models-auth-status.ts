@@ -3,7 +3,7 @@
 import {
   findNormalizedProviderValue,
   normalizeProviderId,
-} from "@openclaw/model-catalog-core/provider-id";
+} from "@hanzo/bot-model-catalog-core/provider-id";
 import { ErrorCodes, errorShape } from "../../../packages/gateway-protocol/src/index.js";
 import {
   type AuthHealthSummary,
@@ -43,7 +43,7 @@ import {
   warmCurrentProviderAuthStateOffMainThread,
 } from "../../agents/model-provider-auth.js";
 import { resolveProviderIdForAuth } from "../../agents/provider-auth-aliases.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import { coerceSecretRef, hasConfiguredSecretInput } from "../../config/types.secrets.js";
 import { providerUsageLabel, resolveUsageProviderId } from "../../infra/provider-usage.shared.js";
 import type { UsageProviderId } from "../../infra/provider-usage.types.js";
@@ -323,7 +323,7 @@ function resolveEnvVarName(source: string): string | undefined {
 }
 
 function resolveProviderApiKeys(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   store: AuthProfileStore,
 ): Map<string, ModelAuthStatusProvider["apiKey"]> {
   const lookupMaps = resolveProviderEnvAuthLookupMaps({ config: cfg, env: process.env });
@@ -392,7 +392,7 @@ function resolveProviderApiKeys(
   return apiKeys;
 }
 
-function resolveConfigBoundProfileIds(cfg: OpenClawConfig, store: AuthProfileStore): Set<string> {
+function resolveConfigBoundProfileIds(cfg: BotConfig, store: AuthProfileStore): Set<string> {
   const profileIds = new Set<string>();
   for (const provider of Object.keys(cfg.models?.providers ?? {})) {
     const reference = resolveProviderEntryApiKeyProfileReference({ cfg, provider, store });
@@ -404,7 +404,7 @@ function resolveConfigBoundProfileIds(cfg: OpenClawConfig, store: AuthProfileSto
 }
 
 function resolveConfiguredProviders(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   apiKeys: ReadonlyMap<string, ModelAuthStatusProvider["apiKey"]>,
 ): {
   providers: string[];

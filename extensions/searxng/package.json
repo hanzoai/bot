@@ -1,18 +1,18 @@
 {
-  "name": "@openclaw/searxng-plugin",
+  "name": "@hanzo/bot-searxng-plugin",
   "version": "2026.7.2",
-  "description": "OpenClaw SearXNG plugin",
+  "description": "Bot SearXNG plugin",
   "type": "module",
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "clawhubSpec": "clawhub:@openclaw/searxng-plugin",
-      "npmSpec": "@openclaw/searxng-plugin",
+      "clawhubSpec": "clawhub:@hanzo/bot-searxng-plugin",
+      "npmSpec": "@hanzo/bot-searxng-plugin",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.6.9",
       "allowInvalidConfigRecovery": true
@@ -21,7 +21,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "bundledDist": false
     },
     "release": {
@@ -31,6 +31,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   }
 }

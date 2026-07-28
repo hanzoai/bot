@@ -10,11 +10,11 @@ import {
   type OpusDecoderHandle as LibopusDecoder,
   type OpusEncoderHandle as LibopusEncoder,
 } from "libopus-wasm";
-import { resolveFfmpegBin } from "openclaw/plugin-sdk/media-runtime";
-import { resamplePcm } from "openclaw/plugin-sdk/realtime-voice";
-import { logVerbose, shouldLogVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { formatErrorMessage } from "openclaw/plugin-sdk/ssrf-runtime";
-import { tempWorkspace, resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+import { resolveFfmpegBin } from "bot/plugin-sdk/media-runtime";
+import { resamplePcm } from "bot/plugin-sdk/realtime-voice";
+import { logVerbose, shouldLogVerbose } from "bot/plugin-sdk/runtime-env";
+import { formatErrorMessage } from "bot/plugin-sdk/ssrf-runtime";
+import { tempWorkspace, resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
 
 const SAMPLE_RATE = 48_000;
 const CHANNELS = 2;
@@ -371,7 +371,7 @@ export async function writeVoiceWavFile(
   pcm: Buffer,
 ): Promise<{ path: string; durationSeconds: number }> {
   const workspace = await tempWorkspace({
-    rootDir: resolvePreferredOpenClawTmpDir(),
+    rootDir: resolvePreferredBotTmpDir(),
     prefix: "discord-voice-",
   });
   const wav = buildWavBuffer(pcm);

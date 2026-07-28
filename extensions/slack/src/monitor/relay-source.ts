@@ -6,8 +6,8 @@ import {
   sleepWithAbort,
   warn,
   type RuntimeEnv,
-} from "openclaw/plugin-sdk/runtime-env";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/runtime-env";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import WebSocket, { type ClientOptions, type RawData } from "ws";
 import type { SlackSendIdentity } from "../send.js";
 import type { SlackMessageEvent } from "../types.js";

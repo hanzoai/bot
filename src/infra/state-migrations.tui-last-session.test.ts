@@ -3,11 +3,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  runOpenClawStateWriteTransaction,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  runBotStateWriteTransaction,
+} from "../state/bot-state-db.js";
 import { readTuiLastSessionKey } from "../tui/tui-last-session.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "./kysely-sync.js";
 import {
@@ -15,12 +15,12 @@ import {
   migrateLegacyTuiLastSessions,
 } from "./state-migrations.tui-last-session.js";
 
-type TuiLastSessionTestDatabase = Pick<OpenClawStateKyselyDatabase, "tui_last_sessions">;
+type TuiLastSessionTestDatabase = Pick<BotStateKyselyDatabase, "tui_last_sessions">;
 
 const tempDirs: string[] = [];
 
 function makeStateDir(): string {
-  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-tui-migration-"));
+  const stateDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-tui-migration-"));
   tempDirs.push(stateDir);
   return stateDir;
 }
@@ -60,7 +60,7 @@ function seedPointer(params: {
   sessionKey: string;
   updatedAt: number;
 }): void {
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       executeSqliteQuerySync(
         db,
@@ -71,12 +71,12 @@ function seedPointer(params: {
         }),
       );
     },
-    { env: { ...process.env, OPENCLAW_STATE_DIR: params.stateDir } },
+    { env: { ...process.env, BOT_STATE_DIR: params.stateDir } },
   );
 }
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   for (const dir of tempDirs.splice(0)) {
     fs.rmSync(dir, { recursive: true, force: true });
   }

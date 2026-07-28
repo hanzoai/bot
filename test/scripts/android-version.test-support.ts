@@ -21,7 +21,7 @@ export function writeAndroidFixture(params: {
   versionProperties?: string;
   prefix?: string;
 }): string {
-  const rootDir = makeTempDir(tempDirs, params.prefix ?? "openclaw-android-version-");
+  const rootDir = makeTempDir(tempDirs, params.prefix ?? "bot-android-version-");
   fs.mkdirSync(path.join(rootDir, "apps", "android", "Config"), { recursive: true });
   fs.mkdirSync(path.join(rootDir, "apps", "android", "fastlane", "metadata", "android", "en-US"), {
     recursive: true,
@@ -37,10 +37,10 @@ export function writeAndroidFixture(params: {
     "utf8",
   );
   const releaseNotes =
-    "OpenClaw is now available on Android.\n\nConnect to your OpenClaw Gateway.\n";
+    "Bot is now available on Android.\n\nConnect to your Bot Gateway.\n";
   fs.writeFileSync(
     path.join(rootDir, "apps", "android", "CHANGELOG.md"),
-    params.changelog ?? `# OpenClaw Android Changelog\n\n## Unreleased\n\n${releaseNotes}`,
+    params.changelog ?? `# Bot Android Changelog\n\n## Unreleased\n\n${releaseNotes}`,
     "utf8",
   );
   fs.writeFileSync(

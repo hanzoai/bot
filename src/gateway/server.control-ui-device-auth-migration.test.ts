@@ -56,10 +56,10 @@ async function signedDevice(ws: WebSocket, identityPath: string, scopes: string[
 describe("Control UI device-auth upgrade migration", () => {
   it("retains only the migration session bound to the approved public key", () => {
     const approvedIdentity = loadOrCreateDeviceIdentity({
-      path: path.join(os.tmpdir(), `openclaw-device-auth-approved-${randomUUID()}.sqlite`),
+      path: path.join(os.tmpdir(), `bot-device-auth-approved-${randomUUID()}.sqlite`),
     });
     const otherIdentity = loadOrCreateDeviceIdentity({
-      path: path.join(os.tmpdir(), `openclaw-device-auth-other-${randomUUID()}.sqlite`),
+      path: path.join(os.tmpdir(), `bot-device-auth-other-${randomUUID()}.sqlite`),
     });
     const approvedPublicKey = publicKeyRawBase64UrlFromPem(approvedIdentity.publicKeyPem);
     const otherPublicKey = publicKeyRawBase64UrlFromPem(otherIdentity.publicKeyPem);
@@ -128,7 +128,7 @@ describe("Control UI device-auth upgrade migration", () => {
       const { requestDevicePairing } = await import("../infra/device-pairing.js");
       const otherIdentityPath = path.join(
         os.tmpdir(),
-        `openclaw-device-auth-migration-device-less-target-${randomUUID()}.sqlite`,
+        `bot-device-auth-migration-device-less-target-${randomUUID()}.sqlite`,
       );
       const otherIdentity = loadOrCreateDeviceIdentity({ path: otherIdentityPath });
       const otherRequest = await requestDevicePairing({
@@ -230,7 +230,7 @@ describe("Control UI device-auth upgrade migration", () => {
         "x-forwarded-for": "203.0.113.50",
         "x-forwarded-proto": "https",
         "x-forwarded-user": "reader@example.com",
-        "x-openclaw-scopes": "operator.read",
+        "x-bot-scopes": "operator.read",
       });
       const connected = await connectReq(ws, {
         skipDefaultAuth: true,
@@ -265,7 +265,7 @@ describe("Control UI device-auth upgrade migration", () => {
     const { approveDevicePairing, requestDevicePairing } =
       await import("../infra/device-pairing.js");
     const ownerIdentity = loadOrCreateDeviceIdentity({
-      path: path.join(os.tmpdir(), `openclaw-migration-existing-owner-${randomUUID()}.sqlite`),
+      path: path.join(os.tmpdir(), `bot-migration-existing-owner-${randomUUID()}.sqlite`),
     });
     const ownerRequest = await requestDevicePairing({
       deviceId: ownerIdentity.deviceId,
@@ -303,7 +303,7 @@ describe("Control UI device-auth upgrade migration", () => {
     const { approveDevicePairing, requestDevicePairing } =
       await import("../infra/device-pairing.js");
     const ownerIdentity = loadOrCreateDeviceIdentity({
-      path: path.join(os.tmpdir(), `openclaw-migration-read-only-owner-${randomUUID()}.sqlite`),
+      path: path.join(os.tmpdir(), `bot-migration-read-only-owner-${randomUUID()}.sqlite`),
     });
     const ownerRequest = await requestDevicePairing({
       deviceId: ownerIdentity.deviceId,
@@ -377,7 +377,7 @@ describe("Control UI device-auth upgrade migration", () => {
       const { approveDevicePairing, requestDevicePairing } =
         await import("../infra/device-pairing.js");
       const ownerIdentity = loadOrCreateDeviceIdentity({
-        path: path.join(os.tmpdir(), `openclaw-migration-race-owner-${randomUUID()}.sqlite`),
+        path: path.join(os.tmpdir(), `bot-migration-race-owner-${randomUUID()}.sqlite`),
       });
       const ownerRequest = await requestDevicePairing({
         deviceId: ownerIdentity.deviceId,
@@ -420,7 +420,7 @@ describe("Control UI device-auth upgrade migration", () => {
     const { requestDevicePairing } = await import("../infra/device-pairing.js");
     const otherIdentityPath = path.join(
       os.tmpdir(),
-      `openclaw-other-pending-${randomUUID()}.sqlite`,
+      `bot-other-pending-${randomUUID()}.sqlite`,
     );
     const otherIdentity = loadOrCreateDeviceIdentity({ path: otherIdentityPath });
     await requestDevicePairing({
@@ -431,7 +431,7 @@ describe("Control UI device-auth upgrade migration", () => {
     });
     const identityPath = path.join(
       os.tmpdir(),
-      `openclaw-device-auth-migration-${randomUUID()}.sqlite`,
+      `bot-device-auth-migration-${randomUUID()}.sqlite`,
     );
     const headers = {
       origin: BROWSER_ORIGIN,
@@ -558,7 +558,7 @@ describe("Control UI device-auth upgrade migration", () => {
     const harness = await createGatewaySuiteHarness();
     const identityPath = path.join(
       os.tmpdir(),
-      `openclaw-device-auth-migration-local-explicit-${randomUUID()}.sqlite`,
+      `bot-device-auth-migration-local-explicit-${randomUUID()}.sqlite`,
     );
     let ws: WebSocket | undefined;
     try {
@@ -606,7 +606,7 @@ describe("Control UI device-auth upgrade migration", () => {
     const harness = await createGatewaySuiteHarness();
     const identityPath = path.join(
       os.tmpdir(),
-      `openclaw-device-auth-migration-read-only-${randomUUID()}.sqlite`,
+      `bot-device-auth-migration-read-only-${randomUUID()}.sqlite`,
     );
     let ws: WebSocket | undefined;
     try {
@@ -675,7 +675,7 @@ describe("Control UI device-auth upgrade migration", () => {
       await import("../infra/device-pairing.js");
     const ownerIdentityPath = path.join(
       os.tmpdir(),
-      `openclaw-device-auth-migration-existing-owner-${randomUUID()}.sqlite`,
+      `bot-device-auth-migration-existing-owner-${randomUUID()}.sqlite`,
     );
     const ownerIdentity = loadOrCreateDeviceIdentity({ path: ownerIdentityPath });
     const ownerRequest = await requestDevicePairing({
@@ -728,7 +728,7 @@ describe("Control UI device-auth upgrade migration", () => {
     };
     const identityPath = path.join(
       os.tmpdir(),
-      `openclaw-device-auth-migration-secure-completion-${randomUUID()}.sqlite`,
+      `bot-device-auth-migration-secure-completion-${randomUUID()}.sqlite`,
     );
     let deviceLessWs: WebSocket | undefined;
     let signedWs: WebSocket | undefined;
@@ -764,7 +764,7 @@ describe("Control UI device-auth upgrade migration", () => {
       const otherIdentity = loadOrCreateDeviceIdentity({
         path: path.join(
           os.tmpdir(),
-          `openclaw-device-auth-migration-other-pending-${randomUUID()}.sqlite`,
+          `bot-device-auth-migration-other-pending-${randomUUID()}.sqlite`,
         ),
       });
       const otherRequest = await requestDevicePairing({
@@ -827,7 +827,7 @@ describe("Control UI device-auth upgrade migration", () => {
     };
     const migrationIdentityPath = path.join(
       os.tmpdir(),
-      `openclaw-device-auth-migration-stale-${randomUUID()}.sqlite`,
+      `bot-device-auth-migration-stale-${randomUUID()}.sqlite`,
     );
     let migrationWs: WebSocket | undefined;
     try {
@@ -852,7 +852,7 @@ describe("Control UI device-auth upgrade migration", () => {
         await import("../infra/device-pairing.js");
       const ownerIdentityPath = path.join(
         os.tmpdir(),
-        `openclaw-device-auth-migration-owner-${randomUUID()}.sqlite`,
+        `bot-device-auth-migration-owner-${randomUUID()}.sqlite`,
       );
       const ownerIdentity = loadOrCreateDeviceIdentity({ path: ownerIdentityPath });
       const ownerRequest = await requestDevicePairing({

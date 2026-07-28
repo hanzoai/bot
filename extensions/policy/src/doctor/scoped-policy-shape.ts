@@ -1,6 +1,6 @@
-import type { HealthFinding } from "openclaw/plugin-sdk/health";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { HealthFinding } from "bot/plugin-sdk/health";
+import { normalizeAgentId } from "bot/plugin-sdk/routing";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   execApprovalsPolicyShapeFinding,
   ingressPolicyShapeFinding,

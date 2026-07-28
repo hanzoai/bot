@@ -1,7 +1,7 @@
 import {
   assertCodeModeResponsesToolSurface,
   enforceCodeModeResponsesToolSurface,
-} from "@openclaw/ai/transports";
+} from "@hanzo/bot-ai/transports";
 import { describe, expect, it } from "vitest";
 
 describe("OpenAI Code Mode direct tools", () => {

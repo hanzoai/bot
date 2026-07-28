@@ -1,6 +1,6 @@
 // Zai tests cover detect plugin behavior.
-import { MAX_TIMER_TIMEOUT_MS } from "openclaw/plugin-sdk/number-runtime";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
+import { MAX_TIMER_TIMEOUT_MS } from "bot/plugin-sdk/number-runtime";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { detectZaiEndpoint } from "./detect.js";
 

@@ -3,9 +3,9 @@ import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../api.js";
+import type { BotConfig } from "../api.js";
 import {
   activateMemoryWikiCompiledCacheOwner,
   configureMemoryWikiCompiledCacheStore,
@@ -64,10 +64,10 @@ async function seedCompiledDigest(params: {
   pages: PromptPageFixture[];
 }): Promise<void> {
   configureCompiledCacheStore();
-  await fs.mkdir(path.join(params.config.vault.path, ".openclaw-wiki"), { recursive: true });
+  await fs.mkdir(path.join(params.config.vault.path, ".bot-wiki"), { recursive: true });
   await Promise.all([
     fs.writeFile(path.join(params.config.vault.path, "WIKI.md"), "# Memory Wiki\n", "utf8"),
-    fs.writeFile(path.join(params.config.vault.path, ".openclaw-wiki", "log.jsonl"), "", "utf8"),
+    fs.writeFile(path.join(params.config.vault.path, ".bot-wiki", "log.jsonl"), "", "utf8"),
   ]);
   activateMemoryWikiCompiledCacheOwner(
     params.config,
@@ -254,7 +254,7 @@ describe("Memory Wiki prompt section", () => {
     const rootDir = path.join(suiteRoot, "agent-digests");
     const appConfig = {
       agents: { list: [{ id: "support", default: true }, { id: "marketing" }] },
-    } as OpenClawConfig;
+    } as BotConfig;
     const config = resolveMemoryWikiConfig({
       vault: { scope: "agent", path: rootDir },
       context: { includeCompiledDigestPrompt: true },

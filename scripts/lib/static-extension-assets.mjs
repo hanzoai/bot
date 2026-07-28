@@ -110,17 +110,17 @@ function listDistExtensionPackageDirs(rootDir, fsImpl) {
 }
 
 function readPackageStaticAssetEntries(packageJson) {
-  const entries = packageJson.openclaw?.build?.staticAssets;
+  const entries = packageJson.bot?.build?.staticAssets;
   return Array.isArray(entries) ? entries : [];
 }
 
 function hasPackageAssetBuild(packageJson) {
-  const command = packageJson.openclaw?.assetScripts?.build;
+  const command = packageJson.bot?.assetScripts?.build;
   return typeof command === "string" && command.trim().length > 0;
 }
 
 function readPackageGeneratedAssetOutputEntries(packageJson) {
-  const entries = packageJson.openclaw?.assetScripts?.buildOutputs;
+  const entries = packageJson.bot?.assetScripts?.buildOutputs;
   return Array.isArray(entries) ? entries : [];
 }
 
@@ -128,7 +128,7 @@ function readPackageGeneratedAssetOutputEntries(packageJson) {
 // from core dist, so their static assets must not be discovered for core
 // runtime postbuild copies.
 function isExternalDistPackage(packageJson) {
-  return packageJson.openclaw?.build?.bundledDist === false;
+  return packageJson.bot?.build?.bundledDist === false;
 }
 
 /**

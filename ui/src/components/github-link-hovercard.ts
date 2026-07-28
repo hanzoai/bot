@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { ControlUiGitHubPreview } from "../../../src/gateway/control-ui-contract.js";
 import type { GatewayBrowserClient } from "../api/gateway.ts";
 import { i18n, t } from "../i18n/index.ts";
@@ -438,7 +438,7 @@ export class GitHubLinkHovercardProvider extends HTMLElement {
     const version = ++this.requestVersion;
     const card = document.createElement("div");
     nextHovercardId += 1;
-    card.id = `openclaw-github-hovercard-${nextHovercardId}`;
+    card.id = `bot-github-hovercard-${nextHovercardId}`;
     card.className = "github-link-hovercard";
     card.dataset.open = "true";
     card.setAttribute("role", "tooltip");

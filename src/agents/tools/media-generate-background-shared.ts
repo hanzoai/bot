@@ -6,7 +6,7 @@
 import crypto from "node:crypto";
 import { getCliSessionBinding } from "../../config/sessions/cli-session-binding.js";
 import { loadSessionEntryReadOnly } from "../../config/sessions/session-accessor.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { clearAgentRunContext, registerAgentRunContext } from "../../infra/agent-events.js";
 import { formatErrorMessage } from "../../infra/errors.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
@@ -130,7 +130,7 @@ type FailMediaGenerationTaskRunParams = {
 };
 
 type WakeMediaGenerationTaskCompletionParams = {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   handle: MediaGenerationTaskHandle | null;
   status: "ok" | "error";
   statusLabel: string;
@@ -479,7 +479,7 @@ export function scheduleMediaGenerationTaskCompletion<
   handle: MediaGenerationTaskHandle | null;
   scheduleBackgroundWork: MediaGenerateBackgroundScheduler;
   progressSummary: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   toolName: string;
   run: () => Promise<T>;
   onWakeFailure: (message: string, meta?: Record<string, unknown>) => void;
@@ -599,7 +599,7 @@ export function scheduleMediaGenerationTaskCompletion<
 }
 
 async function wakeMediaGenerationTaskCompletion(params: {
-  config?: OpenClawConfig;
+  config?: BotConfig;
   handle: MediaGenerationTaskHandle | null;
   status: "ok" | "error";
   statusLabel: string;

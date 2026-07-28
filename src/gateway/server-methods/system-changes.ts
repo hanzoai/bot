@@ -126,7 +126,7 @@ function classifyConfigWriteSource(record: Extract<ConfigAuditRecord, { event: "
     return record.origin;
   }
   const launcherIndex = record.argv.findIndex((arg) =>
-    /(?:^|[/\\])openclaw(?:\.m?js)?$/i.test(arg),
+    /(?:^|[/\\])bot(?:\.m?js)?$/i.test(arg),
   );
   let command: string | undefined;
   if (launcherIndex >= 0) {
@@ -174,7 +174,7 @@ function configWriteSummary(
         : source === "plugin-install"
           ? "Plugin installation updated configuration"
           : source === "system-agent"
-            ? "OpenClaw updated configuration"
+            ? "Bot updated configuration"
             : source === "cli"
               ? "CLI updated configuration"
               : "Configuration updated";
@@ -213,7 +213,7 @@ function toConfigCandidate(
         at: recordTime(value.ts, record.createdAt),
         kind: "external-edit",
         source: "external",
-        summary: summarizePaths("Configuration edited outside OpenClaw", changedPaths),
+        summary: summarizePaths("Configuration edited outside Bot", changedPaths),
         ...(changedPaths ? { changedPaths } : {}),
         ...(!value.valid ? { invalid: true } : {}),
         ...(value.opaqueChange ? { opaqueChange: true } : {}),
@@ -613,9 +613,9 @@ export function listSystemChanges(
 }
 
 export const systemChangesHandlers: GatewayRequestHandlers = {
-  "openclaw.changes.list": ({ params, respond }) => {
+  "bot.changes.list": ({ params, respond }) => {
     if (
-      !assertValidParams(params, validateSystemChangesListParams, "openclaw.changes.list", respond)
+      !assertValidParams(params, validateSystemChangesListParams, "bot.changes.list", respond)
     ) {
       return;
     }

@@ -1,14 +1,14 @@
 // Deepinfra setup module handles plugin onboarding behavior.
 import {
   applyAgentDefaultModelPrimary,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/provider-onboard";
+  type BotConfig,
+} from "bot/plugin-sdk/provider-onboard";
 import { DEEPINFRA_DEFAULT_MODEL_REF } from "./provider-models.js";
 
 export function applyDeepInfraConfig(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   modelRef: string = DEEPINFRA_DEFAULT_MODEL_REF,
-): OpenClawConfig {
+): BotConfig {
   const models = { ...cfg.agents?.defaults?.models };
   models[modelRef] = {
     ...models[modelRef],

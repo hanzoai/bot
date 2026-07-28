@@ -3,14 +3,14 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { collectCodexNativeAssetInfoNotes } from "./codex-native-assets.js";
 import { scanCodexNativeAssets } from "./codex-native-assets.test-support.js";
 
 const tempRoots = new Set<string>();
 
 async function makeTempRoot(): Promise<string> {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-doctor-codex-assets-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-doctor-codex-assets-"));
   tempRoots.add(root);
   return root;
 }
@@ -20,7 +20,7 @@ async function writeFile(filePath: string, content = ""): Promise<void> {
   await fs.writeFile(filePath, content, "utf8");
 }
 
-function codexConfig(): OpenClawConfig {
+function codexConfig(): BotConfig {
   return {
     plugins: {
       entries: {
@@ -34,7 +34,7 @@ function codexConfig(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function hasAsset(hits: Array<{ kind: string; path: string }>, kind: string, assetPath: string) {
@@ -102,7 +102,7 @@ describe("scanCodexNativeAssets", () => {
 
     await expect(
       scanCodexNativeAssets({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         env: { CODEX_HOME: codexHome, HOME: root },
       }),
     ).resolves.toStrictEqual([]);
@@ -123,7 +123,7 @@ describe("collectCodexNativeAssetInfoNotes", () => {
     expect(notes).toStrictEqual([
       [
         `- Personal Codex CLI assets found (1 skill, 0 plugins, 0 config files, 0 hook files) in ${codexHome} and ${path.join(root, ".agents", "skills")}; native Codex-mode agents use isolated per-agent homes and will not load them.`,
-        "- To review or promote them: install the Codex plugin (openclaw plugins install npm:@openclaw/codex), then run openclaw migrate plan codex.",
+        "- To review or promote them: install the Codex plugin (bot plugins install npm:@hanzo/bot-codex), then run bot migrate plan codex.",
       ].join("\n"),
     ]);
   });

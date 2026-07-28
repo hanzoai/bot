@@ -10,10 +10,10 @@ import {
 import { waitForSessionTranscriptIndexReconcile } from "../config/sessions/session-transcript-reconcile.js";
 import { formatSqliteSessionFileMarker } from "../config/sessions/sqlite-marker.js";
 import {
-  closeOpenClawAgentDatabasesForTest,
-  openOpenClawAgentDatabase,
-} from "../state/openclaw-agent-db.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+  closeBotAgentDatabasesForTest,
+  openBotAgentDatabase,
+} from "../state/bot-agent-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { captureEnv, setTestEnvValue } from "../test-utils/env.js";
 import { readSessionMessagesAroundIdWithStatsAsync } from "./session-transcript-anchor-reader.js";
 import {
@@ -43,15 +43,15 @@ describe("session transcript reader facade", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    envSnapshot = captureEnv(["OPENCLAW_STATE_DIR"]);
-    tempDir = tempDirs.make("openclaw-transcript-readers-");
+    envSnapshot = captureEnv(["BOT_STATE_DIR"]);
+    tempDir = tempDirs.make("bot-transcript-readers-");
     storePath = path.join(tempDir, "sessions.json");
-    setTestEnvValue("OPENCLAW_STATE_DIR", tempDir);
+    setTestEnvValue("BOT_STATE_DIR", tempDir);
   });
 
   afterEach(() => {
-    closeOpenClawAgentDatabasesForTest();
-    closeOpenClawStateDatabaseForTest();
+    closeBotAgentDatabasesForTest();
+    closeBotStateDatabaseForTest();
     envSnapshot.restore();
   });
 
@@ -369,7 +369,7 @@ describe("session transcript reader facade", () => {
     ]);
     await expect(
       readSessionMessagesAsync(scope, { mode: "recent", maxMessages: 1 }),
-    ).resolves.toMatchObject([{ content: "sqlite follow-up", __openclaw: { seq: 3 } }]);
+    ).resolves.toMatchObject([{ content: "sqlite follow-up", __bot: { seq: 3 } }]);
     await expect(readSessionMessageCountAsync(scope)).resolves.toBe(3);
   });
 
@@ -509,7 +509,7 @@ describe("session transcript reader facade", () => {
     ).resolves.toMatchObject([
       {
         idempotencyKey: "initial-send:user",
-        __openclaw: {
+        __bot: {
           id: "sqlite-user-message",
           idempotencyKey: "initial-send:user",
           seq: 1,
@@ -582,9 +582,9 @@ describe("session transcript reader facade", () => {
       ],
       touchSessionEntry: false,
     });
-    const database = openOpenClawAgentDatabase({
+    const database = openBotAgentDatabase({
       agentId: "main",
-      path: path.join(tempDir, "openclaw-agent.sqlite"),
+      path: path.join(tempDir, "bot-agent.sqlite"),
     });
     database.db
       .prepare("UPDATE session_transcript_index_state SET needs_rebuild = 1 WHERE session_id = ?")
@@ -623,7 +623,7 @@ describe("session transcript reader facade", () => {
     });
     await waitForSessionTranscriptIndexReconcile({
       agentId: "main",
-      path: path.join(tempDir, "openclaw-agent.sqlite"),
+      path: path.join(tempDir, "bot-agent.sqlite"),
     });
 
     const messages = await readSessionMessagesAsync(scope, {
@@ -633,10 +633,10 @@ describe("session transcript reader facade", () => {
 
     expect(messages).toMatchObject([{ content: "branch prompt" }, { content: "active branch" }]);
     expect(
-      messages.map((message) => (message as { __openclaw?: { id?: string } })["__openclaw"]?.id),
+      messages.map((message) => (message as { __bot?: { id?: string } })["__bot"]?.id),
     ).toEqual(["root", "active"]);
     expect(
-      messages.map((message) => (message as { __openclaw?: { seq?: number } })["__openclaw"]?.seq),
+      messages.map((message) => (message as { __bot?: { seq?: number } })["__bot"]?.seq),
     ).toEqual([1, 2]);
     await expect(readSessionMessageCountAsync(scope)).resolves.toBe(2);
   });
@@ -671,7 +671,7 @@ describe("session transcript reader facade", () => {
     ]);
     expect(
       page.messages.map(
-        (message) => (message as { __openclaw?: { seq?: number } })["__openclaw"]?.seq,
+        (message) => (message as { __bot?: { seq?: number } })["__bot"]?.seq,
       ),
     ).toEqual([2, 3]);
   });

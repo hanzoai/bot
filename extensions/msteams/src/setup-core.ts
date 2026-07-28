@@ -1,6 +1,6 @@
-import { defineChannelSetupContract } from "openclaw/plugin-sdk/channel-setup";
+import { defineChannelSetupContract } from "bot/plugin-sdk/channel-setup";
 // Msteams plugin module implements setup core behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   createStandardChannelSetupStatus,
   DEFAULT_ACCOUNT_ID,
@@ -8,8 +8,8 @@ import {
   type ChannelSetupAdapter,
   type ChannelSetupWizard,
   type WizardPrompter,
-} from "openclaw/plugin-sdk/setup";
-import { formatDocsLink } from "openclaw/plugin-sdk/setup-tools";
+} from "bot/plugin-sdk/setup";
+import { formatDocsLink } from "bot/plugin-sdk/setup-tools";
 import { normalizeSecretInputString } from "./secret-input.js";
 import { hasConfiguredMSTeamsCredentials, resolveMSTeamsCredentials } from "./token.js";
 
@@ -112,7 +112,7 @@ export function createMSTeamsSetupWizardBase(): Pick<
         normalizeSecretInputString(process.env.MSTEAMS_TENANT_ID),
       );
 
-      let next: OpenClawConfig = cfg;
+      let next: BotConfig = cfg;
       let appId: string | null = null;
       let appPassword: string | null = null;
       let tenantId: string | null = null;

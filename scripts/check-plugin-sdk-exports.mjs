@@ -20,7 +20,7 @@ import {
 import { publicPluginSdkEntrypoints, publicPluginSdkSubpaths } from "./lib/plugin-sdk-entries.mjs";
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
-const forbiddenPublicDeclarationSpecifiers = ["@openclaw/llm-core"];
+const forbiddenPublicDeclarationSpecifiers = ["@hanzo/bot-llm-core"];
 const FORBIDDEN_PUBLIC_PROTOCOL_REGISTRY_RE = /\bdeclare\s+const\s+ProtocolSchemas(?:\$\d+)?\b/u;
 const RELATIVE_DECLARATION_SPECIFIER_RE = /\b(?:from|import)\s*(?:\(\s*)?["']([^"']+)["']/gu;
 const requiredSubpathExports = {

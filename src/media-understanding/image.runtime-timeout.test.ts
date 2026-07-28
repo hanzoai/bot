@@ -1,7 +1,7 @@
 // Image runtime tests cover model-backed image routing, auth/profile handling,
 // provider payload transforms, and MiniMax/Copilot special paths.
 import path from "node:path";
-import { MAX_TIMER_TIMEOUT_MS } from "@openclaw/normalization-core/number-coercion";
+import { MAX_TIMER_TIMEOUT_MS } from "@hanzo/bot-normalization-core/number-coercion";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const API_KEY_FIELD = ["api", "Key"].join("") as "apiKey";
@@ -10,7 +10,7 @@ const SET_RUNTIME_API_KEY_FIELD = ["setRuntime", "ApiKey"].join("");
 
 const hoisted = vi.hoisted(() => ({
   completeMock: vi.fn(),
-  ensureOpenClawModelsJsonMock: vi.fn(async () => {}),
+  ensureBotModelsJsonMock: vi.fn(async () => {}),
   getApiKeyForModelMock: vi.fn(
     async (): Promise<{
       apiKey: string;
@@ -44,7 +44,7 @@ const hoisted = vi.hoisted(() => ({
 }));
 const {
   completeMock,
-  ensureOpenClawModelsJsonMock,
+  ensureBotModelsJsonMock,
   getApiKeyForModelMock,
   resolveApiKeyForProviderMock,
   requireApiKeyMock,
@@ -102,7 +102,7 @@ vi.mock("../agents/models-config.js", async () => ({
   ...(await vi.importActual<typeof import("../agents/models-config.js")>(
     "../agents/models-config.js",
   )),
-  ensureOpenClawModelsJson: ensureOpenClawModelsJsonMock,
+  ensureBotModelsJson: ensureBotModelsJsonMock,
 }));
 
 vi.mock("../agents/model-auth.js", () => ({
@@ -186,7 +186,7 @@ describe("describeImageWithModel", () => {
   beforeEach(() => {
     // Provider endpoint policy comes from manifests. Pin source manifests so a
     // prior local build cannot make this source-checkout test read partial dist output.
-    vi.stubEnv("OPENCLAW_BUNDLED_PLUGINS_DIR", path.join(process.cwd(), "extensions"));
+    vi.stubEnv("BOT_BUNDLED_PLUGINS_DIR", path.join(process.cwd(), "extensions"));
     vi.stubGlobal("fetch", fetchMock);
     vi.clearAllMocks();
     acquireAgentRunPreparedModelRuntimeMock.mockImplementation(
@@ -273,7 +273,7 @@ describe("describeImageWithModel", () => {
     await expect(
       describeImageWithModel({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         provider: "lmstudio",
         model: "text-only",
         buffer: Buffer.from("png-bytes"),
@@ -309,7 +309,7 @@ describe("describeImageWithModel", () => {
 
     const result = await describeImageWithModel({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       provider: "openai",
       model: "gpt-5.4",
       buffer: Buffer.from("png-bytes"),
@@ -375,7 +375,7 @@ describe("describeImageWithModel", () => {
 
     const result = await describeImageWithModel({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       provider: "openai",
       model: "gpt-5.4",
       buffer: Buffer.from("png-bytes"),
@@ -416,7 +416,7 @@ describe("describeImageWithModel", () => {
 
     const result = await describeImageWithModel({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       provider: "openrouter",
       model: "google/gemini-2.5-flash",
       buffer: Buffer.from("png-bytes"),
@@ -469,7 +469,7 @@ describe("describeImageWithModel", () => {
 
     const result = await describeImageWithModel({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       provider: "qwen",
       model: "qwen3.6-plus",
       buffer: Buffer.from("png-bytes"),
@@ -588,7 +588,7 @@ describe("describeImageWithModel", () => {
 
       const result = await describeImageWithModel({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         provider,
         model: model.id,
         buffer: Buffer.from("png-bytes"),
@@ -647,7 +647,7 @@ describe("describeImageWithModel", () => {
     await expect(
       describeImageWithModel({
         cfg: {},
-        agentDir: "/tmp/openclaw-agent",
+        agentDir: "/tmp/bot-agent",
         provider: "openai",
         model: "gpt-5.4-mini",
         buffer: Buffer.from("png-bytes"),
@@ -679,7 +679,7 @@ describe("describeImageWithModel", () => {
 
     const result = describeImageWithModel({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),
@@ -717,7 +717,7 @@ describe("describeImageWithModel", () => {
     const controller = new AbortController();
     const result = describeImageWithModel({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),
@@ -771,7 +771,7 @@ describe("describeImageWithModel", () => {
 
     const result = describeImageWithModel({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),
@@ -805,7 +805,7 @@ describe("describeImageWithModel", () => {
 
     const result = describeImageWithModel({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),
@@ -839,7 +839,7 @@ describe("describeImageWithModel", () => {
 
     const result = describeImageWithModel({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),
@@ -884,7 +884,7 @@ describe("describeImageWithModel", () => {
     const controller = new AbortController();
     const result = describeImageWithModel({
       cfg: {},
-      agentDir: "/tmp/openclaw-agent",
+      agentDir: "/tmp/bot-agent",
       provider: "openai",
       model: "gpt-5.4-mini",
       buffer: Buffer.from("png-bytes"),

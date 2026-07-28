@@ -1,8 +1,8 @@
 /**
  * Detects message-tool sends that delivered a visible reply to the current source.
  */
-import { safeParseJson } from "@openclaw/normalization-core";
-import { asOptionalRecord } from "@openclaw/normalization-core/record-coerce";
+import { safeParseJson } from "@hanzo/bot-normalization-core";
+import { asOptionalRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import type { SourceReplyDeliveryMode } from "../auto-reply/get-reply-options.types.js";
 import {
   isMessageToolConversationCreateActionName,

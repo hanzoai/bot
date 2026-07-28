@@ -1,4 +1,4 @@
-import { addTimerTimeoutGraceMs } from "@openclaw/normalization-core/number-coercion";
+import { addTimerTimeoutGraceMs } from "@hanzo/bot-normalization-core/number-coercion";
 import { sanitizeExecApprovalWarningTextWithStatus } from "../../infra/exec-approval-command-display.js";
 import type { ExecAsk, ExecSecurity } from "../../infra/exec-approvals.js";
 import {

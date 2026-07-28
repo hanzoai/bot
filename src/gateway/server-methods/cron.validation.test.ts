@@ -1,10 +1,10 @@
 // Cron validation tests cover channel target validation against plugin
 // prefixes/aliases and runtime config for cron delivery destinations.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChannelPlugin } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { CronDelivery, CronJob } from "../../cron/types.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
@@ -15,7 +15,7 @@ import { getGatewayProcessInstanceId } from "../process-instance.js";
 import type { GatewayClient } from "./types.js";
 
 const getRuntimeConfig = vi.hoisted(() =>
-  vi.fn<() => OpenClawConfig>(() => ({}) as OpenClawConfig),
+  vi.fn<() => BotConfig>(() => ({}) as BotConfig),
 );
 const loadGatewaySessionEntry = vi.hoisted(() =>
   vi.fn(
@@ -308,17 +308,17 @@ function telegramDeliveryWithSlackFailure(overrides: Partial<CronDelivery> = {})
   };
 }
 
-function setRuntimeConfig(config: OpenClawConfig): void {
+function setRuntimeConfig(config: BotConfig): void {
   getRuntimeConfig.mockReturnValue(config);
 }
 
-function pluginEntries(...ids: string[]): OpenClawConfig["plugins"] {
+function pluginEntries(...ids: string[]): BotConfig["plugins"] {
   return {
     entries: Object.fromEntries(ids.map((id) => [id, { enabled: true }])),
   };
 }
 
-function telegramConfig(): OpenClawConfig {
+function telegramConfig(): BotConfig {
   return {
     channels: {
       telegram: {
@@ -326,10 +326,10 @@ function telegramConfig(): OpenClawConfig {
       },
     },
     plugins: pluginEntries("telegram"),
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
-function telegramSlackConfig(params: { includeMainSession?: boolean } = {}): OpenClawConfig {
+function telegramSlackConfig(params: { includeMainSession?: boolean } = {}): BotConfig {
   return {
     ...(params.includeMainSession ? { session: { mainKey: "main" } } : {}),
     channels: {
@@ -342,10 +342,10 @@ function telegramSlackConfig(params: { includeMainSession?: boolean } = {}): Ope
       },
     },
     plugins: pluginEntries("telegram", "slack"),
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
-function msteamsConfig(): OpenClawConfig {
+function msteamsConfig(): BotConfig {
   return {
     channels: {
       msteams: {
@@ -353,10 +353,10 @@ function msteamsConfig(): OpenClawConfig {
       },
     },
     plugins: pluginEntries("msteams"),
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
-function slackSynologyConfig(): OpenClawConfig {
+function slackSynologyConfig(): BotConfig {
   return {
     channels: {
       slack: {
@@ -368,10 +368,10 @@ function slackSynologyConfig(): OpenClawConfig {
       },
     },
     plugins: pluginEntries("slack", "synology-chat"),
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
-function slackConfig(params: { includeMainSession?: boolean } = {}): OpenClawConfig {
+function slackConfig(params: { includeMainSession?: boolean } = {}): BotConfig {
   return {
     ...(params.includeMainSession ? { session: { mainKey: "main" } } : {}),
     channels: {
@@ -381,7 +381,7 @@ function slackConfig(params: { includeMainSession?: boolean } = {}): OpenClawCon
       },
     },
     plugins: pluginEntries("slack"),
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
 function agentTurnCronParams(overrides: Record<string, unknown> = {}) {
@@ -474,7 +474,7 @@ function expectInvalidCronPatternError(respond: ReturnType<typeof vi.fn>): void 
 
 describe("cron method validation", () => {
   beforeEach(() => {
-    getRuntimeConfig.mockReset().mockReturnValue({} as OpenClawConfig);
+    getRuntimeConfig.mockReset().mockReturnValue({} as BotConfig);
     loadGatewaySessionEntry
       .mockReset()
       .mockImplementation((sessionKey: string) => ({ canonicalKey: sessionKey, entry: undefined }));
@@ -2062,7 +2062,7 @@ describe("cron method validation", () => {
         },
       },
       plugins: pluginEntries("slack"),
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const { context, respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -2087,7 +2087,7 @@ describe("cron method validation", () => {
         },
       },
       plugins: pluginEntries("slack"),
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const { context, respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -2108,7 +2108,7 @@ describe("cron method validation", () => {
         },
       },
       plugins: pluginEntries(),
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const { context, respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -2288,7 +2288,7 @@ describe("cron method validation", () => {
     setRuntimeConfig({
       ...telegramSlackConfig(),
       cron: { failureAlert: { enabled: true, mode: "webhook" } },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const { context, respond } = await invokeCronUpdate(
       {
@@ -2306,7 +2306,7 @@ describe("cron method validation", () => {
     setRuntimeConfig({
       ...slackConfig(),
       cron: { failureAlert: { enabled: true, mode: "webhook" } },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const { context, respond } = await invokeCronAdd(
       agentTurnCronParams({
@@ -2325,7 +2325,7 @@ describe("cron method validation", () => {
     setRuntimeConfig({
       ...telegramSlackConfig(),
       cron: { failureAlert: { enabled: true, mode: "webhook" } },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const { context, respond } = await invokeCronUpdate(
       { id: "cron-1", patch: { failureAlert: { mode: "announce", channel: "C0EXAMPLE01" } } },
@@ -2460,7 +2460,7 @@ describe("cron method validation", () => {
     setRuntimeConfig({
       ...telegramSlackConfig(),
       cron: { failureAlert: { enabled: true } },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const { context, respond } = await invokeCronUpdate(
       { id: "cron-1", patch: { failureAlert: { after: 3 } } },
@@ -2557,7 +2557,7 @@ describe("cron method validation", () => {
     setRuntimeConfig({
       ...telegramSlackConfig(),
       cron: { failureAlert: { enabled: true } },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const { context, respond } = await invokeCronUpdate(
       { id: "cron-1", patch: { failureAlert: null } },
@@ -2578,7 +2578,7 @@ describe("cron method validation", () => {
     setRuntimeConfig({
       ...telegramSlackConfig(),
       cron: { failureAlert: { enabled: true } },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const { context, respond } = await invokeCronUpdate(
       { id: "cron-1", patch: { failureAlert: null } },
@@ -2593,7 +2593,7 @@ describe("cron method validation", () => {
     setRuntimeConfig({
       ...telegramSlackConfig(),
       cron: { failureAlert: { enabled: true } },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const { context, respond } = await invokeCronUpdate(
       { id: "cron-1", patch: { failureAlert: null } },
@@ -2970,7 +2970,7 @@ describe("cron method validation", () => {
           slack: { enabled: true },
         },
       },
-    } as OpenClawConfig);
+    } as BotConfig);
 
     const context = createCronContext(createCronJob());
     context.cron.getJob.mockReturnValue(undefined);

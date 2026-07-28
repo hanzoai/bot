@@ -1,10 +1,10 @@
 ---
 name: imsg
-description: "Use the imsg CLI from OpenClaw agents for iMessage/SMS DMs, groups, replies, reactions, polls, watching, and private-API actions."
+description: "Use the imsg CLI from Bot agents for iMessage/SMS DMs, groups, replies, reactions, polls, watching, and private-API actions."
 homepage: https://imsg.to
 metadata:
   {
-    "openclaw":
+    "bot":
       {
         "emoji": "📨",
         "os": ["darwin"],
@@ -25,9 +25,9 @@ metadata:
 
 # imsg
 
-Use `imsg` when an OpenClaw agent must act through the user's local macOS Messages.app account: inspect iMessage/SMS history, choose the correct DM or group, send messages/files, reply, react, vote in polls, or use private-API iMessage features.
+Use `imsg` when an Bot agent must act through the user's local macOS Messages.app account: inspect iMessage/SMS history, choose the correct DM or group, send messages/files, reply, react, vote in polls, or use private-API iMessage features.
 
-Do not use this skill for Telegram, Signal, WhatsApp, Discord, Slack, or for replying inside the current OpenClaw conversation when the configured channel already routes the reply.
+Do not use this skill for Telegram, Signal, WhatsApp, Discord, Slack, or for replying inside the current Bot conversation when the configured channel already routes the reply.
 
 ## Agent Flow
 
@@ -42,8 +42,8 @@ Never infer a recipient from a casual name alone when several chats or handles c
 ## Host Requirements
 
 - macOS 14+ with Messages.app signed in for send/react/bridge actions.
-- Private API mode is strongly encouraged for OpenClaw iMessage. It unlocks replies, precise tapbacks, effects, polls, attachment replies, read/typing actions, and group management. Basic mode is a fallback for reads plus plain text/file send.
-- Full Disk Access for the process context that runs `imsg` or OpenClaw; reads fail without Messages DB access.
+- Private API mode is strongly encouraged for Bot iMessage. It unlocks replies, precise tapbacks, effects, polls, attachment replies, read/typing actions, and group management. Basic mode is a fallback for reads plus plain text/file send.
+- Full Disk Access for the process context that runs `imsg` or Bot; reads fail without Messages DB access.
 - Automation permission for Messages.app when using public `send`.
 - Accessibility permission for the process context that runs public `imsg react`; it uses System Events UI automation. Bridge `tapback` uses private API instead.
 - Optional Contacts permission for contact-name resolution.
@@ -80,7 +80,7 @@ Use standard commands for reads, target resolution, and plain sends:
 - Basic text/file send: `send`
 - Standard tapback to most recent incoming message in a chat: `react`
 
-Use the private API bridge for the native iMessage actions OpenClaw users normally expect:
+Use the private API bridge for the native iMessage actions Bot users normally expect:
 
 - Rich replies, text formatting, effects, subjects, multipart sends
 - Native Apple Messages polls and poll votes
@@ -90,7 +90,7 @@ Use the private API bridge for the native iMessage actions OpenClaw users normal
 - Group create/name/photo/member/leave/delete/mark actions
 - Account, whois, nickname checks
 
-For OpenClaw channel setup, check bridge availability early:
+For Bot channel setup, check bridge availability early:
 
 ```bash
 imsg status --json

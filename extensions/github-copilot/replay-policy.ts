@@ -1,6 +1,6 @@
 // Github Copilot plugin module implements replay policy behavior.
-import type { ProviderSanitizeReplayHistoryContext } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { ProviderSanitizeReplayHistoryContext } from "bot/plugin-sdk/plugin-entry";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 
 const OMITTED_COPILOT_REASONING_TEXT = "[assistant reasoning omitted]";
 

@@ -2,7 +2,7 @@
  * Chat message types for the UI layer.
  */
 
-import type { MediaKind } from "@openclaw/media-core/constants";
+import type { MediaKind } from "@hanzo/bot-media-core/constants";
 import type { SenderIdentity } from "./sender-label.ts";
 
 export type ChatAttachment = {

@@ -15,7 +15,7 @@ const tempDirs: string[] = [];
 const LOAD_SENSITIVE_PROCESS_TIMEOUT_MS = process.env.CI ? 30_000 : 15_000;
 
 function makeTempDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-upgrade-probe-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-upgrade-probe-"));
   tempDirs.push(dir);
   return dir;
 }
@@ -127,13 +127,13 @@ describe("scripts/e2e/lib/upgrade-survivor/probe-gateway.mjs", () => {
       ["--base-url", "http://127.0.0.1:9", "--path", "/readyz", "--expect", "ready", "--out", out],
       5_000,
       {
-        OPENCLAW_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES: "64bytes",
+        BOT_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES: "64bytes",
       },
     );
 
     expect(bodyLimitResult.status).not.toBe(0);
     expect(bodyLimitResult.stderr).toContain(
-      "invalid OPENCLAW_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES: 64bytes",
+      "invalid BOT_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES: 64bytes",
     );
   });
 
@@ -334,7 +334,7 @@ describe("scripts/e2e/lib/upgrade-survivor/probe-gateway.mjs", () => {
         "100",
       ],
       LOAD_SENSITIVE_PROCESS_TIMEOUT_MS,
-      { OPENCLAW_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES: "64" },
+      { BOT_UPGRADE_SURVIVOR_PROBE_MAX_BODY_BYTES: "64" },
       nodeArgs,
     );
 

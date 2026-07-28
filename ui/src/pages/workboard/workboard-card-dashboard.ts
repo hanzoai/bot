@@ -15,16 +15,16 @@ import {
   type BoardViewCallbacks,
 } from "../../lib/board/provider.ts";
 import type { BoardViewSnapshot } from "../../lib/board/view-types.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 
 function ensureBoardViewElement(): Promise<void> {
   return ensureCustomElementDefined(
-    "openclaw-board-view",
+    "bot-board-view",
     () => import("../../components/board/board-view.ts"),
   );
 }
 
-class WorkboardCardDashboard extends OpenClawLightDomElement {
+class WorkboardCardDashboard extends BotLightDomElement {
   @property({ attribute: false }) sessionKey = "";
   @property({ attribute: false }) client: GatewayBrowserClient | null = null;
   @property({ attribute: false }) connected = false;
@@ -154,7 +154,7 @@ class WorkboardCardDashboard extends OpenClawLightDomElement {
         <div class="workboard-card-dashboard__body" ?hidden=${!this.expanded}>
           ${hasBoard && provider && boardSnapshot && callbacks
             ? html`
-                <openclaw-board-view
+                <bot-board-view
                   .snapshot=${boardSnapshot}
                   .activeTabId=${this.activeTabId}
                   .widgetFrameUrl=${(name: string, revision: number) =>
@@ -164,7 +164,7 @@ class WorkboardCardDashboard extends OpenClawLightDomElement {
                   .canMutate=${provider.canMutate}
                   .canGrant=${provider.canGrant}
                   .ticketRefreshEnabled=${this.expanded}
-                ></openclaw-board-view>
+                ></bot-board-view>
               `
             : html`<p class="workboard-card-dashboard__empty">${t("workboard.dashboardEmpty")}</p>`}
         </div>
@@ -178,12 +178,12 @@ class WorkboardCardDashboard extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-workboard-card-dashboard")) {
-  customElements.define("openclaw-workboard-card-dashboard", WorkboardCardDashboard);
+if (!customElements.get("bot-workboard-card-dashboard")) {
+  customElements.define("bot-workboard-card-dashboard", WorkboardCardDashboard);
 }
 
 declare global {
   interface HTMLElementTagNameMap {
-    "openclaw-workboard-card-dashboard": WorkboardCardDashboard;
+    "bot-workboard-card-dashboard": WorkboardCardDashboard;
   }
 }

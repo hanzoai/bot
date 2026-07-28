@@ -1,12 +1,12 @@
 ---
-summary: "CLI reference for `openclaw migrate` (import state from another agent system)"
+summary: "CLI reference for `bot migrate` (import state from another agent system)"
 read_when:
-  - You want to migrate from Hermes or another agent system into OpenClaw
+  - You want to migrate from Hermes or another agent system into Bot
   - You are adding a plugin-owned migration provider
 title: "Migrate"
 ---
 
-# `openclaw migrate`
+# `bot migrate`
 
 Import state from another agent system through a plugin-owned migration provider. Bundled providers cover Claude, Codex CLI, and [Hermes](/install/migrating-hermes); plugins can register additional providers.
 
@@ -17,29 +17,29 @@ For user-facing walkthroughs, see [Migrating from Claude](/install/migrating-cla
 ## Commands
 
 ```bash
-openclaw migrate list
-openclaw migrate claude --dry-run
-openclaw migrate codex --dry-run
-openclaw migrate codex --skill gog-vault77-google-workspace
-openclaw migrate codex --plugin google-calendar --dry-run
-openclaw migrate codex --plugin google-calendar --verify-plugin-apps --dry-run
-openclaw migrate hermes --dry-run
-openclaw migrate hermes
-openclaw migrate apply codex --yes --skill gog-vault77-google-workspace
-openclaw migrate apply codex --yes --plugin google-calendar
-openclaw migrate apply codex --yes
-openclaw migrate apply claude --yes
-openclaw migrate apply hermes --yes
-openclaw migrate apply hermes --include-secrets --yes
-openclaw onboard --flow import
-openclaw onboard --import-from claude --import-source ~/.claude
-openclaw onboard --import-from hermes --import-source ~/.hermes
+bot migrate list
+bot migrate claude --dry-run
+bot migrate codex --dry-run
+bot migrate codex --skill gog-vault77-google-workspace
+bot migrate codex --plugin google-calendar --dry-run
+bot migrate codex --plugin google-calendar --verify-plugin-apps --dry-run
+bot migrate hermes --dry-run
+bot migrate hermes
+bot migrate apply codex --yes --skill gog-vault77-google-workspace
+bot migrate apply codex --yes --plugin google-calendar
+bot migrate apply codex --yes
+bot migrate apply claude --yes
+bot migrate apply hermes --yes
+bot migrate apply hermes --include-secrets --yes
+bot onboard --flow import
+bot onboard --import-from claude --import-source ~/.claude
+bot onboard --import-from hermes --import-source ~/.hermes
 ```
 
-Running `openclaw migrate <provider>` with no other flags plans, previews, and (in a TTY) prompts before applying. `openclaw migrate plan <provider>` and `openclaw migrate apply <provider>` split preview and apply into separate subcommands with the same flags.
+Running `bot migrate <provider>` with no other flags plans, previews, and (in a TTY) prompts before applying. `bot migrate plan <provider>` and `bot migrate apply <provider>` split preview and apply into separate subcommands with the same flags.
 
 <ParamField path="<provider>" type="string">
-  Name of a registered migration provider, for example `hermes`. Run `openclaw migrate list` to see installed providers.
+  Name of a registered migration provider, for example `hermes`. Run `bot migrate list` to see installed providers.
 </ParamField>
 <ParamField path="--dry-run" type="boolean">
   Build the plan and exit without changing state.
@@ -69,10 +69,10 @@ Running `openclaw migrate <provider>` with no other flags plans, previews, and (
   Codex only. Forces a fresh source Codex app-server `app/list` traversal before planning native plugin activation. Off by default to keep migration planning fast.
 </ParamField>
 <ParamField path="--backup-output <path>" type="string">
-  Pre-migration backup archive path or directory. Passed through to `openclaw backup create`.
+  Pre-migration backup archive path or directory. Passed through to `bot backup create`.
 </ParamField>
 <ParamField path="--no-backup" type="boolean">
-  Skip the pre-apply backup. Requires `--force` when local OpenClaw state exists.
+  Skip the pre-apply backup. Requires `--force` when local Bot state exists.
 </ParamField>
 <ParamField path="--force" type="boolean">
   Required alongside `--no-backup` when apply would otherwise refuse to skip the backup.
@@ -83,17 +83,17 @@ Running `openclaw migrate <provider>` with no other flags plans, previews, and (
 
 ## Safety model
 
-`openclaw migrate` is preview-first.
+`bot migrate` is preview-first.
 
 <AccordionGroup>
   <Accordion title="Preview before apply">
     The provider returns an itemized plan before anything changes, including conflicts, skipped items, and sensitive items. JSON plans, apply output, and migration reports redact nested secret-looking keys such as API keys, tokens, authorization headers, cookies, and passwords.
 
-    `openclaw migrate apply <provider>` previews the plan and prompts before changing state unless `--yes` is set. In non-interactive mode, apply requires `--yes`.
+    `bot migrate apply <provider>` previews the plan and prompts before changing state unless `--yes` is set. In non-interactive mode, apply requires `--yes`.
 
   </Accordion>
   <Accordion title="Backups">
-    Apply creates and verifies an OpenClaw backup before applying the migration. If no local OpenClaw state exists yet, the backup step is skipped and the migration continues. To skip a backup when state exists, pass both `--no-backup` and `--force`.
+    Apply creates and verifies an Bot backup before applying the migration. If no local Bot state exists yet, the backup step is skipped and the migration continues. To skip a backup when state exists, pass both `--no-backup` and `--force`.
   </Accordion>
   <Accordion title="Conflicts">
     Apply refuses to continue when the plan has conflicts. Review the plan, then rerun with `--overwrite` if replacing existing targets is intentional. Providers may still write item-level backups for overwritten files in the migration report directory.
@@ -116,31 +116,31 @@ For a user-facing walkthrough, see [Migrating from Claude](/install/migrating-cl
 - Claude Code auto-memory Markdown from `~/.claude/projects/*/memory` and a
   user-configured `autoMemoryDirectory`, copied under
   `memory/imports/claude-code/` for indexed recall.
-- Project `CLAUDE.md` and `.claude/CLAUDE.md` into the OpenClaw agent workspace (`AGENTS.md`).
+- Project `CLAUDE.md` and `.claude/CLAUDE.md` into the Bot agent workspace (`AGENTS.md`).
 - User `~/.claude/CLAUDE.md` appended to workspace `USER.md`.
 - MCP server definitions from project `.mcp.json`, Claude Code `~/.claude.json` (including its per-project entries), and Claude Desktop `claude_desktop_config.json`.
 - Claude skill directories that include `SKILL.md` (user `~/.claude/skills` and project `.claude/skills`).
-- Claude command Markdown files (user `~/.claude/commands` and project `.claude/commands`) converted into OpenClaw skills with manual invocation only.
+- Claude command Markdown files (user `~/.claude/commands` and project `.claude/commands`) converted into Bot skills with manual invocation only.
 
 ### Archive and manual-review state
 
-Claude hooks, permissions, environment defaults, project `CLAUDE.local.md`, `.claude/rules`, user and project `agents/` directories, and project history (`projects`, `cache`, `plans` under `~/.claude`) are preserved in the migration report or reported as manual-review items. OpenClaw does not execute hooks, copy broad allowlists, or import OAuth/Desktop credential state automatically.
+Claude hooks, permissions, environment defaults, project `CLAUDE.local.md`, `.claude/rules`, user and project `agents/` directories, and project history (`projects`, `cache`, `plans` under `~/.claude`) are preserved in the migration report or reported as manual-review items. Bot does not execute hooks, copy broad allowlists, or import OAuth/Desktop credential state automatically.
 
 ## Codex provider
 
 The bundled Codex provider detects Codex CLI state at `~/.codex` by default, or at `CODEX_HOME` when that environment variable is set. Use `--from <path>` to inventory a specific Codex home.
 
-Use this provider when moving to the OpenClaw Codex harness and you want to promote useful personal Codex CLI assets deliberately. Local Codex app-server launches use a per-agent `CODEX_HOME`, so they do not read your personal `~/.codex` by default. The normal process `HOME` is still inherited, so Codex can see shared `$HOME/.agents/*` skills/plugin marketplace entries and subprocesses can find user-home config and tokens.
+Use this provider when moving to the Bot Codex harness and you want to promote useful personal Codex CLI assets deliberately. Local Codex app-server launches use a per-agent `CODEX_HOME`, so they do not read your personal `~/.codex` by default. The normal process `HOME` is still inherited, so Codex can see shared `$HOME/.agents/*` skills/plugin marketplace entries and subprocesses can find user-home config and tokens.
 
-Running `openclaw migrate codex` in an interactive terminal previews the full plan, then opens checkbox selectors before the final apply confirmation. Skill copy items are prompted first. Use `Toggle all on` or `Toggle all off` for bulk selection. Press Space to toggle rows, or Enter to activate the highlighted row and continue. Planned skills start checked, conflict skills start unchecked, and `Skip for now` skips skill copies for this run while still continuing to plugin selection. When source-installed curated Codex plugins are migratable and `--plugin` was not supplied, migration then prompts for native Codex plugin activation by plugin name. Plugin items start checked unless the target OpenClaw Codex plugin config already has that plugin. Existing target plugins start unchecked and show a conflict hint such as `conflict: plugin exists`; choose `Toggle all off` to migrate no native Codex plugins in that run, or `Skip for now` to stop before applying.
+Running `bot migrate codex` in an interactive terminal previews the full plan, then opens checkbox selectors before the final apply confirmation. Skill copy items are prompted first. Use `Toggle all on` or `Toggle all off` for bulk selection. Press Space to toggle rows, or Enter to activate the highlighted row and continue. Planned skills start checked, conflict skills start unchecked, and `Skip for now` skips skill copies for this run while still continuing to plugin selection. When source-installed curated Codex plugins are migratable and `--plugin` was not supplied, migration then prompts for native Codex plugin activation by plugin name. Plugin items start checked unless the target Bot Codex plugin config already has that plugin. Existing target plugins start unchecked and show a conflict hint such as `conflict: plugin exists`; choose `Toggle all off` to migrate no native Codex plugins in that run, or `Skip for now` to stop before applying.
 
 For scripted or exact runs, select one or more skills or plugins explicitly:
 
 ```bash
-openclaw migrate codex --dry-run --skill gog-vault77-google-workspace
-openclaw migrate apply codex --yes --skill gog-vault77-google-workspace
-openclaw migrate codex --dry-run --plugin google-calendar
-openclaw migrate apply codex --yes --plugin google-calendar
+bot migrate codex --dry-run --skill gog-vault77-google-workspace
+bot migrate apply codex --yes --skill gog-vault77-google-workspace
+bot migrate codex --dry-run --plugin google-calendar
+bot migrate apply codex --yes --plugin google-calendar
 ```
 
 ### What Codex imports
@@ -149,7 +149,7 @@ openclaw migrate apply codex --yes --plugin google-calendar
   `$CODEX_HOME/memories`, copied under `memory/imports/codex/` for indexed
   recall. Raw rollout memory is not imported.
 - Codex CLI skill directories under `$CODEX_HOME/skills`, excluding Codex's `.system` cache.
-- Personal AgentSkills under `$HOME/.agents/skills`, copied into the current OpenClaw agent workspace for per-agent ownership.
+- Personal AgentSkills under `$HOME/.agents/skills`, copied into the current Bot agent workspace for per-agent ownership.
 - Source-installed `openai-curated` Codex plugins discovered through Codex app-server `plugin/list`. Planning reads `plugin/read` for each enabled installed plugin.
 
 App-backed plugin migration has extra gates:
@@ -158,7 +158,7 @@ App-backed plugin migration has extra gates:
 - By default, migration does not call source `app/list`, so app-backed plugins that pass the account gate are planned without source app-accessibility verification, and account-lookup transport failures skip with `codex_account_unavailable`.
 - Pass `--verify-plugin-apps` to force a fresh source `app/list` snapshot and require every owned app to be present, enabled, and accessible before planning native activation. In that mode, account-lookup transport failures fall through to source app-inventory verification. The snapshot is kept in memory for the current process only; it is never written to migration output or target config.
 
-Disabled plugins, unreadable plugin details, subscription-gated source accounts, and (when `--verify-plugin-apps` is set) missing, disabled, or inaccessible apps become manual skipped items with typed reasons instead of target config entries. Apply calls app-server `plugin/install` for each selected eligible plugin, even if the target app-server already reports that plugin as installed and enabled. Migrated Codex plugins are usable only in sessions that select the native Codex harness; they are not exposed to OpenClaw provider runs, ACP conversation bindings, or other harnesses.
+Disabled plugins, unreadable plugin details, subscription-gated source accounts, and (when `--verify-plugin-apps` is set) missing, disabled, or inaccessible apps become manual skipped items with typed reasons instead of target config entries. Apply calls app-server `plugin/install` for each selected eligible plugin, even if the target app-server already reports that plugin as installed and enabled. Migrated Codex plugins are usable only in sessions that select the native Codex harness; they are not exposed to Bot provider runs, ACP conversation bindings, or other harnesses.
 
 ### Manual-review Codex state
 
@@ -185,16 +185,16 @@ The bundled Hermes provider follows `$HERMES_HOME` and the active profile, then 
 
 - Default model configuration from `config.yaml`.
 - Configured model providers and custom OpenAI-compatible endpoints from `model`, `providers`, and `custom_providers`.
-- MCP server definitions from `mcp_servers` or `mcp.servers`. Exact OpenClaw mappings cover default Streamable HTTP routing, OAuth scope, boolean TLS verification, separate client certificate/key paths, and Hermes native/resource/prompt tool policy. Unsupported Hermes-only runtime or credential fields are reported for manual review.
-- `SOUL.md` and `AGENTS.md` into the OpenClaw agent workspace.
+- MCP server definitions from `mcp_servers` or `mcp.servers`. Exact Bot mappings cover default Streamable HTTP routing, OAuth scope, boolean TLS verification, separate client certificate/key paths, and Hermes native/resource/prompt tool policy. Unsupported Hermes-only runtime or credential fields are reported for manual review.
+- `SOUL.md` and `AGENTS.md` into the Bot agent workspace.
 - `memories/MEMORY.md` and `memories/USER.md` appended to workspace memory files.
   Memory-only surfaces (the onboarding memory page and the Control UI Memory
   import page) instead copy these files under `memory/imports/hermes/` for
   indexed recall without touching existing workspace memory.
-- Memory config defaults for OpenClaw file memory, plus archive or manual-review items for external memory providers such as Honcho.
+- Memory config defaults for Bot file memory, plus archive or manual-review items for external memory providers such as Honcho.
 - Skills that include a `SKILL.md` file anywhere under `skills/`; nested skills are flattened into the workspace skill directory.
 - Per-skill config values from `skills.config`.
-- Current Hermes OpenAI Codex OAuth credentials and OpenCode OpenAI OAuth credentials when interactive credential migration is accepted, or when `--include-secrets` is set. Do not keep Hermes and OpenClaw using the same imported refresh grant.
+- Current Hermes OpenAI Codex OAuth credentials and OpenCode OpenAI OAuth credentials when interactive credential migration is accepted, or when `--include-secrets` is set. Do not keep Hermes and Bot using the same imported refresh grant.
 - Supported API keys and tokens from Hermes `.env` and OpenCode `auth.json` when interactive credential migration is accepted, or when `--include-secrets` is set.
 
 ### Supported `.env` keys
@@ -203,17 +203,17 @@ The bundled Hermes provider follows `$HERMES_HOME` and the active profile, then 
 
 ### Archive-only state
 
-Hermes state that OpenClaw cannot safely interpret is copied into the migration report for manual review, but it is not loaded into live OpenClaw config or credentials. This includes `plugins/`, `sessions/`, `logs/`, `cron/`, `mcp-tokens/`, `plans/`, `workspace/`, `skins/`, `kanban/`, pairing/platform state, gateway routing/process state, and the detected Hermes SQLite databases.
+Hermes state that Bot cannot safely interpret is copied into the migration report for manual review, but it is not loaded into live Bot config or credentials. This includes `plugins/`, `sessions/`, `logs/`, `cron/`, `mcp-tokens/`, `plans/`, `workspace/`, `skins/`, `kanban/`, pairing/platform state, gateway routing/process state, and the detected Hermes SQLite databases.
 
 ### After applying
 
 ```bash
-openclaw doctor
+bot doctor
 ```
 
 ## Plugin contract
 
-Migration sources are plugins. A plugin declares its provider ids in `openclaw.plugin.json`:
+Migration sources are plugins. A plugin declares its provider ids in `bot.plugin.json`:
 
 ```json
 {
@@ -223,22 +223,22 @@ Migration sources are plugins. A plugin declares its provider ids in `openclaw.p
 }
 ```
 
-At runtime the plugin calls `api.registerMigrationProvider(...)`. The provider implements `detect`, `plan`, and `apply`. Core owns CLI orchestration, backup policy, prompts, JSON output, and conflict preflight. Core passes the reviewed plan into `apply(ctx, plan)`, and providers may rebuild the plan only when that argument is absent for compatibility. Migration items may set `applyPhase: "after-promotion"` for external activation effects that onboarding must defer until staged local data is durably published. Those providers must declare `deferredApply: { retrySafe: true }` and make each deferred effect safe to replay after an interrupted process; onboarding rejects undeclared deferred effects. An idempotent no-op should return a non-mutating item with `deferredCompletion: true` so recovery can record it as complete. Standalone `openclaw migrate` still applies the complete plan through its normal backup-backed flow.
+At runtime the plugin calls `api.registerMigrationProvider(...)`. The provider implements `detect`, `plan`, and `apply`. Core owns CLI orchestration, backup policy, prompts, JSON output, and conflict preflight. Core passes the reviewed plan into `apply(ctx, plan)`, and providers may rebuild the plan only when that argument is absent for compatibility. Migration items may set `applyPhase: "after-promotion"` for external activation effects that onboarding must defer until staged local data is durably published. Those providers must declare `deferredApply: { retrySafe: true }` and make each deferred effect safe to replay after an interrupted process; onboarding rejects undeclared deferred effects. An idempotent no-op should return a non-mutating item with `deferredCompletion: true` so recovery can record it as complete. Standalone `bot migrate` still applies the complete plan through its normal backup-backed flow.
 
-Provider plugins can use `openclaw/plugin-sdk/migration` for item construction and summary counts, plus `openclaw/plugin-sdk/migration-runtime` for conflict-aware file copies, archive-only report copies, cached config-runtime wrappers, and migration reports.
+Provider plugins can use `bot/plugin-sdk/migration` for item construction and summary counts, plus `bot/plugin-sdk/migration-runtime` for conflict-aware file copies, archive-only report copies, cached config-runtime wrappers, and migration reports.
 
 ## Onboarding integration
 
-Onboarding can offer migration when a provider detects a known source. Both `openclaw onboard --flow import` and `openclaw setup --wizard --import-from hermes` use the same plugin migration provider and still show a preview before applying. Unlike standalone migration, the fresh-target onboarding path stages local artifacts and imported credentials, verifies or repairs imported inference inside staging, then promotes workspace and agent state before committing configuration. A mode-`0600` promotion journal lets the next run finish or roll back an interrupted publish, including any deferred external activation, without replaying imported local data.
+Onboarding can offer migration when a provider detects a known source. Both `bot onboard --flow import` and `bot setup --wizard --import-from hermes` use the same plugin migration provider and still show a preview before applying. Unlike standalone migration, the fresh-target onboarding path stages local artifacts and imported credentials, verifies or repairs imported inference inside staging, then promotes workspace and agent state before committing configuration. A mode-`0600` promotion journal lets the next run finish or roll back an interrupted publish, including any deferred external activation, without replaying imported local data.
 
 <Note>
-Onboarding imports require a fresh OpenClaw setup. Reset config, credentials, sessions, and the workspace first if you already have local state. Backup-plus-overwrite or merge imports are feature-gated for existing setups.
+Onboarding imports require a fresh Bot setup. Reset config, credentials, sessions, and the workspace first if you already have local state. Backup-plus-overwrite or merge imports are feature-gated for existing setups.
 </Note>
 
 ## Related
 
 - [Migrating from Hermes](/install/migrating-hermes): user-facing walkthrough.
 - [Migrating from Claude](/install/migrating-claude): user-facing walkthrough.
-- [Migrating](/install/migrating): move OpenClaw to a new machine.
+- [Migrating](/install/migrating): move Bot to a new machine.
 - [Doctor](/gateway/doctor): health check after applying a migration.
 - [Plugins](/tools/plugin): plugin install and registration.

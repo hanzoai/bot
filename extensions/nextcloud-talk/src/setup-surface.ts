@@ -1,6 +1,6 @@
 // Nextcloud Talk plugin module implements setup surface behavior.
-import { DEFAULT_ACCOUNT_ID } from "openclaw/plugin-sdk/routing";
-import { hasConfiguredSecretInput } from "openclaw/plugin-sdk/secret-input";
+import { DEFAULT_ACCOUNT_ID } from "bot/plugin-sdk/routing";
+import { hasConfiguredSecretInput } from "bot/plugin-sdk/secret-input";
 import {
   baseUrlTextInput,
   createStandardChannelSetupStatus,
@@ -9,8 +9,8 @@ import {
   setSetupChannelEnabled,
   createSetupTranslator,
   type ChannelSetupWizard,
-} from "openclaw/plugin-sdk/setup";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/setup";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { resolveNextcloudTalkAccount } from "./accounts.js";
 import {
   nextcloudTalkDmPolicy,

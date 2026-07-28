@@ -11,7 +11,7 @@ import { resolveExecWorkdir } from "./bash-tools.exec-workdir.js";
 import type { BashSandboxConfig } from "./bash-tools.shared.js";
 
 async function withTempDir(run: (dir: string) => Promise<void>) {
-  const dir = await mkdtemp(path.join(os.tmpdir(), "openclaw-exec-workdir-"));
+  const dir = await mkdtemp(path.join(os.tmpdir(), "bot-exec-workdir-"));
   try {
     await run(dir);
   } finally {

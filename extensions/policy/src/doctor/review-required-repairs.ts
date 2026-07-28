@@ -4,7 +4,7 @@ import type {
   HealthRepairContext,
   HealthRepairEffect,
   HealthRepairResult,
-} from "openclaw/plugin-sdk/health";
+} from "bot/plugin-sdk/health";
 import { CHECK_IDS, type POLICY_CHECK_IDS } from "./check-ids.js";
 import { POLICY_FIX_METADATA_BY_CHECK_ID } from "./fix-metadata.js";
 
@@ -79,8 +79,8 @@ function previewGatewayLoopbackBind(
   finding: HealthFinding,
 ): readonly { readonly change: string; readonly effect: HealthRepairEffect }[] {
   if (
-    finding.ocPath !== "oc://openclaw.config/gateway/bind" &&
-    finding.ocPath !== "oc://openclaw.config/gateway/customBindHost"
+    finding.ocPath !== "oc://bot.config/gateway/bind" &&
+    finding.ocPath !== "oc://bot.config/gateway/customBindHost"
   ) {
     return [];
   }
@@ -104,7 +104,7 @@ function previewGatewayNodeDenyCommand(
   if (
     command === undefined ||
     command === "" ||
-    finding.ocPath !== "oc://openclaw.config/gateway/nodes/commands/deny"
+    finding.ocPath !== "oc://bot.config/gateway/nodes/commands/deny"
   ) {
     return [];
   }

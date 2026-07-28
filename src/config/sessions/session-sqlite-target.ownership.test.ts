@@ -1,15 +1,15 @@
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "bot/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
-import { unregisterOpenClawAgentDatabase } from "../../state/openclaw-agent-db-registry.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import { unregisterBotAgentDatabase } from "../../state/bot-agent-db-registry.js";
+import { openBotAgentDatabase } from "../../state/bot-agent-db.js";
 import { loadSessionEntry, replaceSessionEntry } from "./session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target.js";
 
 describe("explicit SQLite session target ownership", () => {
   it("keeps scoped rows for multiple agents in one exact SQLite locator", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, BOT_STATE_DIR: path.join(home, ".bot") };
       const storePath = path.join(home, "shared.sqlite");
       const mainScope = {
         agentId: "main",
@@ -37,11 +37,11 @@ describe("explicit SQLite session target ownership", () => {
 
   it("honors durable ownership after the registry row is removed", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".bot");
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const databasePath = path.join(home, "shared.sqlite");
-      openOpenClawAgentDatabase({ agentId: "ops", env, path: databasePath });
-      unregisterOpenClawAgentDatabase({ agentId: "ops", env, path: databasePath });
+      openBotAgentDatabase({ agentId: "ops", env, path: databasePath });
+      unregisterBotAgentDatabase({ agentId: "ops", env, path: databasePath });
 
       expect(resolveSqliteTargetFromSessionStorePath(databasePath, { env })).toMatchObject({
         agentId: "ops",

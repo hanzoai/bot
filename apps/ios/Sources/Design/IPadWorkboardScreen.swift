@@ -1,4 +1,4 @@
-import OpenClawKit
+import BotKit
 import SwiftUI
 
 struct IPadWorkboardScreen: View {
@@ -20,13 +20,13 @@ struct IPadWorkboardScreen: View {
     @State private var busyCardID: String?
     @State private var dispatchSummaryText: String?
     @State private var presentedSheet: IPadWorkboardSheet?
-    let headerSidebarAction: OpenClawSidebarHeaderAction?
+    let headerSidebarAction: BotSidebarHeaderAction?
     let usesNativeNavigationChrome: Bool
     let openChat: () -> Void
     let openSettings: () -> Void
 
     init(
-        headerSidebarAction: OpenClawSidebarHeaderAction? = nil,
+        headerSidebarAction: BotSidebarHeaderAction? = nil,
         usesNativeNavigationChrome: Bool = false,
         openChat: @escaping () -> Void,
         openSettings: @escaping () -> Void = {})
@@ -85,32 +85,32 @@ struct IPadWorkboardScreen: View {
                 icon: "tray.full",
                 title: "Cards",
                 value: "\(self.cards.count)",
-                color: OpenClawBrand.accent),
+                color: BotBrand.accent),
             ProMetric(
                 icon: "figure.run",
                 title: "Running",
                 value: "\(self.cards.count(where: { $0.status == "running" }))",
-                color: OpenClawBrand.ok),
+                color: BotBrand.ok),
             ProMetric(
                 icon: "exclamationmark.triangle",
                 title: "Blocked",
                 value: "\(self.cards.count(where: { $0.status == "blocked" }))",
-                color: OpenClawBrand.warn),
+                color: BotBrand.warn),
         ]
     }
 
     private var controlsCard: some View {
-        ProCard(radius: OpenClawProMetric.cardRadius) {
+        ProCard(radius: BotProMetric.cardRadius) {
             VStack(alignment: .leading, spacing: 12) {
                 self.boardScopeMenu
                 HStack(spacing: 8) {
                     Image(systemName: "magnifyingglass")
-                        .font(OpenClawType.captionSemiBold)
+                        .font(BotType.captionSemiBold)
                         .foregroundStyle(.secondary)
                     TextField("Search cards", text: self.$query)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                        .font(OpenClawType.subhead)
+                        .font(BotType.subhead)
                     if !self.query.isEmpty {
                         Button {
                             self.query = ""
@@ -126,20 +126,20 @@ struct IPadWorkboardScreen: View {
                 } else {
                     Picker(selection: self.$selectedStatus) {
                         Text("Active")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(BotType.captionSemiBold)
                             .tag("active")
                         ForEach(self.statuses, id: \.self) { status in
                             Text(IPadWorkboardDefaults.label(for: status))
-                                .font(OpenClawType.captionSemiBold)
+                                .font(BotType.captionSemiBold)
                                 .tag(status)
                         }
                     } label: {
                         Text("Scope")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(BotType.captionSemiBold)
                     }
                     .pickerStyle(.segmented)
                     .controlSize(.small)
-                    .tint(OpenClawBrand.accent)
+                    .tint(BotBrand.accent)
                 }
 
                 HStack(spacing: 8) {
@@ -149,7 +149,7 @@ struct IPadWorkboardScreen: View {
                         Task { await self.dispatchCards() }
                     } label: {
                         Label("Dispatch", systemImage: "bolt.fill")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(BotType.captionSemiBold)
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
@@ -159,7 +159,7 @@ struct IPadWorkboardScreen: View {
                         Task { await self.loadCards(force: true) }
                     } label: {
                         Label("Refresh", systemImage: "arrow.clockwise")
-                            .font(OpenClawType.captionSemiBold)
+                            .font(BotType.captionSemiBold)
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)
@@ -173,28 +173,28 @@ struct IPadWorkboardScreen: View {
 
                 if let dispatchSummaryText {
                     Text(dispatchSummaryText)
-                        .font(OpenClawType.caption2)
-                        .foregroundStyle(OpenClawBrand.accent)
+                        .font(BotType.caption2)
+                        .foregroundStyle(BotBrand.accent)
                 }
                 if let errorText {
                     Text(errorText)
-                        .font(OpenClawType.caption2)
-                        .foregroundStyle(OpenClawBrand.warn)
+                        .font(BotType.caption2)
+                        .foregroundStyle(BotBrand.warn)
                 }
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     private var compactQueueControls: some View {
         let count = self.filteredCards.count
         let countText = String(
             AttributedString(localized: "^[\(count) card](inflect: true)").characters)
-        return ProCard(radius: OpenClawProMetric.cardRadius) {
+        return ProCard(radius: BotProMetric.cardRadius) {
             VStack(alignment: .leading, spacing: 9) {
                 HStack(alignment: .firstTextBaseline, spacing: 10) {
                     Text(verbatim: countText)
-                        .font(OpenClawType.headline)
+                        .font(BotType.headline)
                     Spacer(minLength: 8)
                     self.compactRefreshButton
                 }
@@ -210,7 +210,7 @@ struct IPadWorkboardScreen: View {
                             Task { await self.dispatchCards() }
                         } label: {
                             Label("Dispatch", systemImage: "bolt.fill")
-                                .font(OpenClawType.captionSemiBold)
+                                .font(BotType.captionSemiBold)
                                 .frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.bordered)
@@ -219,24 +219,24 @@ struct IPadWorkboardScreen: View {
                     }
                 } else {
                     Text(Self.compactWriteUnavailableMessage(canRead: self.canRead))
-                        .font(OpenClawType.caption2)
+                        .font(BotType.caption2)
                         .foregroundStyle(.secondary)
                         .lineLimit(2)
                 }
 
                 if let dispatchSummaryText {
                     Text(dispatchSummaryText)
-                        .font(OpenClawType.caption2)
-                        .foregroundStyle(OpenClawBrand.accent)
+                        .font(BotType.caption2)
+                        .foregroundStyle(BotBrand.accent)
                 }
                 if let errorText {
                     Text(errorText)
-                        .font(OpenClawType.caption2)
-                        .foregroundStyle(OpenClawBrand.warn)
+                        .font(BotType.caption2)
+                        .foregroundStyle(BotBrand.warn)
                 }
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     private var compactRefreshButton: some View {
@@ -244,7 +244,7 @@ struct IPadWorkboardScreen: View {
             Task { await self.loadCards(force: true) }
         } label: {
             Image(systemName: "arrow.clockwise")
-                .font(OpenClawType.captionSemiBold)
+                .font(BotType.captionSemiBold)
                 .frame(width: 32, height: 32)
         }
         .buttonStyle(.plain)
@@ -258,7 +258,7 @@ struct IPadWorkboardScreen: View {
             self.beginCreateCard()
         } label: {
             Label("New Card", systemImage: "plus")
-                .font(OpenClawType.captionSemiBold)
+                .font(BotType.captionSemiBold)
                 .frame(maxWidth: expands ? .infinity : nil)
         }
         .buttonStyle(.borderedProminent)
@@ -273,34 +273,34 @@ struct IPadWorkboardScreen: View {
                 self.selectedBoardID = ""
             } label: {
                 Text("All boards")
-                    .font(OpenClawType.subhead)
+                    .font(BotType.subhead)
             }
             ForEach(self.boardScopeOptions, id: \.self) { boardID in
                 Button {
                     self.selectedBoardID = boardID
                 } label: {
                     Text(Self.boardScopeLabel(for: boardID))
-                        .font(OpenClawType.subhead)
+                        .font(BotType.subhead)
                 }
             }
         } label: {
             HStack(spacing: 8) {
                 Image(systemName: "rectangle.stack")
-                    .font(OpenClawType.captionSemiBold)
+                    .font(BotType.captionSemiBold)
                 Text(self.boardScopeLabel)
-                    .font(OpenClawType.captionSemiBold)
+                    .font(BotType.captionSemiBold)
                     .lineLimit(1)
                 Spacer(minLength: 4)
                 Image(systemName: "chevron.up.chevron.down")
-                    .font(OpenClawType.caption2Bold)
+                    .font(BotType.caption2Bold)
             }
             .padding(.horizontal, 10)
             .frame(height: 32)
             .background(
                 Color.primary.opacity(0.06),
-                in: RoundedRectangle(cornerRadius: OpenClawRadius.xs, style: .continuous))
+                in: RoundedRectangle(cornerRadius: BotRadius.xs, style: .continuous))
             .overlay {
-                RoundedRectangle(cornerRadius: OpenClawRadius.xs, style: .continuous)
+                RoundedRectangle(cornerRadius: BotRadius.xs, style: .continuous)
                     .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
             }
         }
@@ -335,26 +335,26 @@ struct IPadWorkboardScreen: View {
             self.selectedStatus = status
         } label: {
             Text(IPadWorkboardDefaults.label(for: status))
-                .font(OpenClawType.caption2SemiBold)
+                .font(BotType.caption2SemiBold)
                 .lineLimit(1)
                 .padding(.horizontal, 10)
                 .frame(height: 30)
                 .background(
                     self.selectedStatus == status
-                        ? OpenClawBrand.accent.opacity(0.12)
+                        ? BotBrand.accent.opacity(0.12)
                         : Color.primary.opacity(0.06),
                     in: Capsule())
                 .overlay {
                     Capsule()
                         .strokeBorder(
                             self.selectedStatus == status
-                                ? OpenClawBrand.accent.opacity(0.42)
+                                ? BotBrand.accent.opacity(0.42)
                                 : Color.primary.opacity(0.08),
                             lineWidth: 1)
                 }
         }
         .buttonStyle(.plain)
-        .foregroundStyle(self.selectedStatus == status ? OpenClawBrand.accent : .primary)
+        .foregroundStyle(self.selectedStatus == status ? BotBrand.accent : .primary)
         .accessibilityLabel(
             String(
                 format: String(localized: "Show %@ cards"),
@@ -364,30 +364,30 @@ struct IPadWorkboardScreen: View {
     private var boardScopeMenu: some View {
         HStack(spacing: 8) {
             Text("Board")
-                .font(OpenClawType.captionSemiBold)
+                .font(BotType.captionSemiBold)
                 .foregroundStyle(.secondary)
             Menu {
                 Button {
                     self.selectedBoardID = ""
                 } label: {
                     Text("All boards")
-                        .font(OpenClawType.subhead)
+                        .font(BotType.subhead)
                 }
                 ForEach(self.boardScopeOptions, id: \.self) { boardID in
                     Button {
                         self.selectedBoardID = boardID
                     } label: {
                         Text(Self.boardScopeLabel(for: boardID))
-                            .font(OpenClawType.subhead)
+                            .font(BotType.subhead)
                     }
                 }
             } label: {
                 HStack(spacing: 6) {
                     Text(self.boardScopeLabel)
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                         .lineLimit(1)
                     Image(systemName: "chevron.up.chevron.down")
-                        .font(OpenClawType.caption2Bold)
+                        .font(BotType.caption2Bold)
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
@@ -401,29 +401,29 @@ struct IPadWorkboardScreen: View {
     private var statusMenu: some View {
         HStack(spacing: 8) {
             Text("Status")
-                .font(OpenClawType.captionSemiBold)
+                .font(BotType.captionSemiBold)
                 .foregroundStyle(.secondary)
             Menu {
                 Button {
                     self.selectedStatus = "active"
                 } label: {
                     Text("Active")
-                        .font(OpenClawType.subhead)
+                        .font(BotType.subhead)
                 }
                 ForEach(self.statuses, id: \.self) { status in
                     Button {
                         self.selectedStatus = status
                     } label: {
                         Text(IPadWorkboardDefaults.label(for: status))
-                            .font(OpenClawType.subhead)
+                            .font(BotType.subhead)
                     }
                 }
             } label: {
                 HStack(spacing: 6) {
                     Text(IPadWorkboardDefaults.label(for: self.selectedStatus))
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                     Image(systemName: "chevron.up.chevron.down")
-                        .font(OpenClawType.caption2Bold)
+                        .font(BotType.caption2Bold)
                 }
                 .frame(maxWidth: .infinity, alignment: .trailing)
             }
@@ -461,14 +461,14 @@ struct IPadWorkboardScreen: View {
                         .frame(width: 282)
                 }
             }
-            .padding(.horizontal, OpenClawProMetric.pagePadding)
+            .padding(.horizontal, BotProMetric.pagePadding)
             .padding(.bottom, 12)
         }
         .scrollIndicators(.visible)
     }
 
     private var compactCardsPanel: some View {
-        ProCard(padding: 0, radius: OpenClawProMetric.cardRadius) {
+        ProCard(padding: 0, radius: BotProMetric.cardRadius) {
             VStack(spacing: 0) {
                 ProPanelHeader(
                     title: "Queue",
@@ -511,7 +511,7 @@ struct IPadWorkboardScreen: View {
                 }
             }
         }
-        .padding(.horizontal, OpenClawProMetric.pagePadding)
+        .padding(.horizontal, BotProMetric.pagePadding)
     }
 
     private var createCardSheet: some View {
@@ -519,21 +519,21 @@ struct IPadWorkboardScreen: View {
             Section {
                 TextField("Title", text: self.$draftTitle)
                     .textInputAutocapitalization(.sentences)
-                    .font(OpenClawType.subhead)
+                    .font(BotType.subhead)
                     .submitLabel(.next)
                 TextField("Notes", text: self.$draftNotes, axis: .vertical)
                     .lineLimit(3...6)
                     .textInputAutocapitalization(.sentences)
-                    .font(OpenClawType.subhead)
+                    .font(BotType.subhead)
             } header: {
                 Text("Card")
-                    .font(OpenClawType.captionSemiBold)
+                    .font(BotType.captionSemiBold)
             }
             if let errorText {
                 Section {
                     Text(errorText)
-                        .font(OpenClawType.caption)
-                        .foregroundStyle(OpenClawBrand.warn)
+                        .font(BotType.caption)
+                        .foregroundStyle(BotBrand.warn)
                 }
             }
         }
@@ -545,7 +545,7 @@ struct IPadWorkboardScreen: View {
                     self.presentedSheet = nil
                 } label: {
                     Text("Cancel")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                 }
             }
             ToolbarItem(placement: .confirmationAction) {
@@ -559,7 +559,7 @@ struct IPadWorkboardScreen: View {
                     Text(self.isCreatingCard
                         ? LocalizedStringKey("Creating...")
                         : LocalizedStringKey("Create"))
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                 }
                 .disabled(self.isCreatingCard)
                 .accessibilityHint(
@@ -968,7 +968,7 @@ struct IPadWorkboardKanbanColumn: View {
     let archive: (IPadWorkboardCard) -> Void
 
     var body: some View {
-        ProCard(padding: 0, radius: OpenClawProMetric.cardRadius) {
+        ProCard(padding: 0, radius: BotProMetric.cardRadius) {
             VStack(spacing: 0) {
                 ProPanelHeader(
                     title: .localized(IPadWorkboardDefaults.label(for: self.status)),
@@ -1034,10 +1034,10 @@ private struct IPadWorkboardKanbanCard: View {
                         ProIconBadge(systemName: self.icon, color: self.color)
                         VStack(alignment: .leading, spacing: 4) {
                             Text(self.card.title)
-                                .font(OpenClawType.subheadSemiBold)
+                                .font(BotType.subheadSemiBold)
                                 .lineLimit(2)
                             Text(self.detail)
-                                .font(OpenClawType.caption)
+                                .font(BotType.caption)
                                 .foregroundStyle(.secondary)
                                 .lineLimit(3)
                         }
@@ -1045,7 +1045,7 @@ private struct IPadWorkboardKanbanCard: View {
 
                     if !self.card.labels.isEmpty {
                         Text(self.card.labels.prefix(3).joined(separator: ", "))
-                            .font(OpenClawType.caption2Medium)
+                            .font(BotType.caption2Medium)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
@@ -1072,14 +1072,14 @@ private struct IPadWorkboardKanbanCard: View {
                             Text(verbatim: String(
                                 format: String(localized: "Move to %@"),
                                 IPadWorkboardDefaults.label(for: status)))
-                                .font(OpenClawType.subheadSemiBold)
+                                .font(BotType.subheadSemiBold)
                         }
                     }
                     Button(action: self.archive) {
                         Text(self.card.metadata?.archivedAt == nil
                             ? LocalizedStringKey("Archive")
                             : LocalizedStringKey("Unarchive"))
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(BotType.subheadSemiBold)
                     }
                 } label: {
                     Image(systemName: self.isBusy ? "hourglass" : "ellipsis")
@@ -1094,7 +1094,7 @@ private struct IPadWorkboardKanbanCard: View {
                 ProValuePill(value: IPadWorkboardDefaults.label(for: self.card.status), color: self.color)
             }
         }
-        .padding(OpenClawSpacing.space3)
+        .padding(BotSpacing.space3)
         .contentShape(Rectangle())
     }
 
@@ -1110,11 +1110,11 @@ private struct IPadWorkboardKanbanCard: View {
 
     private var color: Color {
         switch self.card.status {
-        case "running": OpenClawBrand.ok
-        case "review": OpenClawBrand.accentForeground
-        case "blocked": OpenClawBrand.warn
+        case "running": BotBrand.ok
+        case "review": BotBrand.accentForeground
+        case "blocked": BotBrand.warn
         case "done": .secondary
-        default: OpenClawBrand.accentHotForeground
+        default: BotBrand.accentHotForeground
         }
     }
 
@@ -1147,10 +1147,10 @@ struct IPadWorkboardQueueRow: View {
                     ProIconBadge(systemName: self.icon, color: self.color)
                     VStack(alignment: .leading, spacing: 5) {
                         Text(self.card.title)
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(BotType.subheadSemiBold)
                             .lineLimit(2)
                         Text(self.detail)
-                            .font(OpenClawType.caption)
+                            .font(BotType.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
                     }
@@ -1171,7 +1171,7 @@ struct IPadWorkboardQueueRow: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            .foregroundStyle(OpenClawBrand.accent)
+            .foregroundStyle(BotBrand.accent)
             .disabled(self.isBusy)
             .accessibilityLabel("Card Actions")
         }
@@ -1183,15 +1183,15 @@ struct IPadWorkboardQueueRow: View {
         .swipeActions(edge: .leading, allowsFullSwipe: true) {
             Button(action: self.inspect) {
                 Text("Inspect")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
             }
-            .tint(OpenClawBrand.accent)
+            .tint(BotBrand.accent)
             if self.card.sessionKey?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
                 Button(action: self.openSession) {
                     Text("Open")
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                 }
-                .tint(OpenClawBrand.ok)
+                .tint(BotBrand.ok)
             }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
@@ -1200,15 +1200,15 @@ struct IPadWorkboardQueueRow: View {
                     self.move(nextStatus)
                 } label: {
                     Text(IPadWorkboardDefaults.label(for: nextStatus))
-                        .font(OpenClawType.subheadSemiBold)
+                        .font(BotType.subheadSemiBold)
                 }
-                .tint(OpenClawBrand.accentHot)
+                .tint(BotBrand.accentHot)
             }
             Button(action: self.archive) {
                 Text(self.card.metadata?.archivedAt == nil
                     ? LocalizedStringKey("Archive")
                     : LocalizedStringKey("Unarchive"))
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
             }
             .tint(.secondary)
         }
@@ -1219,12 +1219,12 @@ struct IPadWorkboardQueueRow: View {
         if self.card.sessionKey?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty == false {
             Button(action: self.openSession) {
                 Text("Open Session")
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
             }
         }
         Button(action: self.inspect) {
             Text("Inspect")
-                .font(OpenClawType.subheadSemiBold)
+                .font(BotType.subheadSemiBold)
         }
         ForEach(self.statuses, id: \.self) { status in
             Button {
@@ -1233,14 +1233,14 @@ struct IPadWorkboardQueueRow: View {
                 Text(verbatim: String(
                     format: String(localized: "Move to %@"),
                     IPadWorkboardDefaults.label(for: status)))
-                    .font(OpenClawType.subheadSemiBold)
+                    .font(BotType.subheadSemiBold)
             }
         }
         Button(action: self.archive) {
             Text(self.card.metadata?.archivedAt == nil
                 ? LocalizedStringKey("Archive")
                 : LocalizedStringKey("Unarchive"))
-                .font(OpenClawType.subheadSemiBold)
+                .font(BotType.subheadSemiBold)
         }
     }
 
@@ -1265,11 +1265,11 @@ struct IPadWorkboardQueueRow: View {
 
     private var color: Color {
         switch self.card.status {
-        case "running": OpenClawBrand.ok
-        case "review": OpenClawBrand.accentForeground
-        case "blocked": OpenClawBrand.warn
+        case "running": BotBrand.ok
+        case "review": BotBrand.accentForeground
+        case "blocked": BotBrand.warn
         case "done": .secondary
-        default: OpenClawBrand.accentHotForeground
+        default: BotBrand.accentHotForeground
         }
     }
 
@@ -1304,11 +1304,11 @@ private struct IPadWorkboardCardDetailSheet: View {
                     self.detailRow("Status", value: IPadWorkboardDefaults.label(for: self.card.status))
                     if let notes = self.card.notes?.trimmingCharacters(in: .whitespacesAndNewlines), !notes.isEmpty {
                         Text(notes)
-                            .font(OpenClawType.subhead)
+                            .font(BotType.subhead)
                     }
                 } header: {
                     Text("Card")
-                        .font(OpenClawType.captionSemiBold)
+                        .font(BotType.captionSemiBold)
                 }
 
                 Section {
@@ -1317,7 +1317,7 @@ private struct IPadWorkboardCardDetailSheet: View {
                             self.openSession()
                         } label: {
                             Text("Open Session")
-                                .font(OpenClawType.subheadSemiBold)
+                                .font(BotType.subheadSemiBold)
                         }
                     }
                     Menu {
@@ -1326,12 +1326,12 @@ private struct IPadWorkboardCardDetailSheet: View {
                                 self.move(status)
                             } label: {
                                 Text(IPadWorkboardDefaults.label(for: status))
-                                    .font(OpenClawType.subhead)
+                                    .font(BotType.subhead)
                             }
                         }
                     } label: {
                         Text("Move")
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(BotType.subheadSemiBold)
                     }
                     .disabled(!self.canWrite || self.isBusy)
                     Button {
@@ -1340,12 +1340,12 @@ private struct IPadWorkboardCardDetailSheet: View {
                         Text(self.card.metadata?.archivedAt == nil
                             ? LocalizedStringKey("Archive")
                             : LocalizedStringKey("Unarchive"))
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(BotType.subheadSemiBold)
                     }
                     .disabled(!self.canWrite || self.isBusy)
                 } header: {
                     Text("Actions")
-                        .font(OpenClawType.captionSemiBold)
+                        .font(BotType.captionSemiBold)
                 }
             }
             .navigationTitle("Card")
@@ -1356,7 +1356,7 @@ private struct IPadWorkboardCardDetailSheet: View {
                         self.dismiss()
                     } label: {
                         Text("Done")
-                            .font(OpenClawType.subheadSemiBold)
+                            .font(BotType.subheadSemiBold)
                     }
                 }
             }
@@ -1366,11 +1366,11 @@ private struct IPadWorkboardCardDetailSheet: View {
     private func detailRow(_ title: String, value: String) -> some View {
         LabeledContent {
             Text(value)
-                .font(OpenClawType.subhead)
+                .font(BotType.subhead)
                 .foregroundStyle(.secondary)
         } label: {
             Text(title)
-                .font(OpenClawType.subheadSemiBold)
+                .font(BotType.subheadSemiBold)
         }
     }
 }

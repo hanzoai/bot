@@ -5,8 +5,8 @@ import {
   asDateTimestampMs,
   parseStrictInteger,
   resolveExpiresAtMsFromDurationMs,
-} from "openclaw/plugin-sdk/number-runtime";
-import { resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
+} from "bot/plugin-sdk/number-runtime";
+import { resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
 import { normalizeDirectChatIdentifier } from "./chat-context.js";
 import { runIMessageCliJsonCommand } from "./cli-output.js";
 import { createIMessageRpcClient } from "./client.js";
@@ -187,7 +187,7 @@ function resolveMessageId(result: Record<string, unknown>): string {
 }
 
 async function withTempFile<T>(input: TempFileInput, fn: (path: string) => Promise<T>): Promise<T> {
-  const dir = await mkdtemp(join(resolvePreferredOpenClawTmpDir(), "openclaw-imessage-"));
+  const dir = await mkdtemp(join(resolvePreferredBotTmpDir(), "bot-imessage-"));
   const safeExt = extname(input.filename).slice(0, 16) || ".bin";
   const filePath = join(dir, `upload${safeExt}`);
   try {
@@ -327,7 +327,7 @@ export const imessageActionsRuntime = {
     // — this runtime intentionally does not accept a raw filesystem path,
     // because that would let an attacker-controlled path bypass the
     // resolver and let imsg send any host-readable file. Requires an imsg
-    // build that accepts `send-rich --file` (openclaw/imsg#114); callers
+    // build that accepts `send-rich --file` (bot/imsg#114); callers
     // must feature-detect via the cached private-api status first.
     attachment?: { kind: "buffer"; buffer: Uint8Array; filename: string };
     options: IMessageBridgeActionOptions;

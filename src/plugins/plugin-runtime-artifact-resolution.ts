@@ -1,7 +1,7 @@
 /** Resolves the exact root and entry selected by the plugin runtime loader. */
 import fs from "node:fs";
 import path from "node:path";
-import type { OpenClawPackageManifest } from "./manifest.js";
+import type { BotPackageManifest } from "./manifest.js";
 import type { PluginOrigin } from "./plugin-origin.types.js";
 
 type ResolvedPluginRuntimeArtifact = { source: string; rootDir: string };
@@ -114,7 +114,7 @@ function resolvePreferredBuiltRuntimeArtifact(params: {
   rootDir: string;
   origin: PluginOrigin;
   preferBuiltPluginArtifacts: boolean;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: BotPackageManifest;
 }): { source: string; rootDir: string } {
   const rootDir = safeRealpathOrResolve(params.rootDir);
   const source = safeRealpathOrResolve(params.source);
@@ -174,7 +174,7 @@ export function resolvePluginRuntimeArtifact(params: {
   rootDir: string;
   origin: PluginOrigin;
   preferBuiltPluginArtifacts: boolean;
-  packageManifest?: OpenClawPackageManifest;
+  packageManifest?: BotPackageManifest;
 }): { source: string; rootDir: string } {
   const rootDir = resolveCanonicalDistRuntimeSource(safeRealpathOrResolve(params.rootDir));
   const source = resolveCanonicalDistRuntimeSource(safeRealpathOrResolve(params.source));

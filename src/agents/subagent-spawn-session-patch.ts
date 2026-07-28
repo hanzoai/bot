@@ -1,8 +1,8 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { buildSessionCreationStamp } from "../config/sessions/session-entry-provenance.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import { resolveIncognitoOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
+import type { BotConfig } from "../config/types.bot.js";
+import { resolveIncognitoBotAgentSqlitePath } from "../state/bot-agent-db.js";
 import {
   inheritedToolAllowPatch,
   inheritedToolDenyPatch,
@@ -101,7 +101,7 @@ export function loadSubagentConfig() {
 }
 
 export async function createInitialSubagentSession(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   targetAgentId: string;
   childSessionKey: string;
   incognito: boolean;
@@ -141,7 +141,7 @@ export async function createInitialSubagentSession(params: {
           agentId: params.targetAgentId,
           canonicalKey: params.childSessionKey,
           storeKeys: [params.childSessionKey],
-          storePath: resolveIncognitoOpenClawAgentSqlitePath({ agentId: params.targetAgentId }),
+          storePath: resolveIncognitoBotAgentSqlitePath({ agentId: params.targetAgentId }),
         }
       : resolveGatewaySessionStoreTarget({
           cfg: params.cfg,
@@ -168,7 +168,7 @@ export async function createInitialSubagentSession(params: {
 }
 
 export async function persistInitialChildSessionRuntimeModel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   childSessionKey: string;
   resolvedModel?: string;
 }): Promise<string | undefined> {

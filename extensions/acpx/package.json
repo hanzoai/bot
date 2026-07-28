@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/acpx",
+  "name": "@hanzo/bot-acpx",
   "version": "2026.7.2",
-  "description": "OpenClaw ACP runtime backend with plugin-owned session and transport management.",
+  "description": "Bot ACP runtime backend with plugin-owned session and transport management.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
@@ -15,14 +15,14 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*"
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
     "install": {
-      "npmSpec": "@openclaw/acpx",
+      "npmSpec": "@hanzo/bot-acpx",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.25",
       "requiredPlatformPackages": [
@@ -46,7 +46,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "staticAssets": [
         {
           "source": "./src/runtime-internals/mcp-proxy.mjs",

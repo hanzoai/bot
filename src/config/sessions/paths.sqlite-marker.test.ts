@@ -10,8 +10,8 @@ describe("SQLite sessionFile markers", () => {
   const fixture = useTempSessionsFixture("sqlite-session-file-marker-");
 
   it("preserves SQLite markers for transcript target resolution", () => {
-    const marker = "sqlite:main:sess-1:/tmp/openclaw/agents/main/agent/openclaw-agent.sqlite";
-    const sessionsDir = "/tmp/openclaw/agents/main/sessions";
+    const marker = "sqlite:main:sess-1:/tmp/bot/agents/main/agent/bot-agent.sqlite";
+    const sessionsDir = "/tmp/bot/agents/main/sessions";
 
     const resolved = resolveSessionFilePath("sess-1", { sessionFile: marker }, { sessionsDir });
 
@@ -20,11 +20,11 @@ describe("SQLite sessionFile markers", () => {
 
   it("matches SQLite markers against the full transcript target", () => {
     const marker =
-      "sqlite:main:sess-1:/tmp/openclaw/agents/main/agent/../agent/openclaw-agent.sqlite";
+      "sqlite:main:sess-1:/tmp/bot/agents/main/agent/../agent/bot-agent.sqlite";
     const target = {
       agentId: "main",
       sessionId: "sess-1",
-      storePath: "/tmp/openclaw/agents/main/agent/openclaw-agent.sqlite",
+      storePath: "/tmp/bot/agents/main/agent/bot-agent.sqlite",
     };
 
     expect(sqliteSessionFileMarkerMatchesTarget(marker, target)).toBe(true);
@@ -37,7 +37,7 @@ describe("SQLite sessionFile markers", () => {
     expect(
       sqliteSessionFileMarkerMatchesTarget(marker, {
         ...target,
-        storePath: "/tmp/openclaw/agents/other/agent/openclaw-agent.sqlite",
+        storePath: "/tmp/bot/agents/other/agent/bot-agent.sqlite",
       }),
     ).toBe(false);
   });

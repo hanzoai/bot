@@ -6,7 +6,7 @@ import { formatCliCommand } from "../cli/command-format.js";
 import { configIncludeOwnsAgentRoster } from "../config/agent-roster-provenance.js";
 import { migratePersistedImplicitMainRoster } from "../config/legacy.roster.js";
 import { CONFIG_PATH } from "../config/paths.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { callGateway } from "../gateway/call.js";
 import type { RuntimeEnv } from "../runtime.js";
 import {
@@ -39,7 +39,7 @@ function hasLegacyInternalHookHandlers(raw: unknown): boolean {
 }
 
 function collectInvalidHookTransformsDirWarnings(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   configPath: string,
 ): string[] {
   const transformsDir = cfg.hooks?.transformsDir?.trim();
@@ -62,7 +62,7 @@ function collectInvalidHookTransformsDirWarnings(
   ];
 }
 
-function collectUnsupportedInternalHookEntryWarnings(cfg: OpenClawConfig): string[] {
+function collectUnsupportedInternalHookEntryWarnings(cfg: BotConfig): string[] {
   const entries = cfg.hooks?.internal?.entries;
   if (!entries) {
     return [];
@@ -87,7 +87,7 @@ function collectUnsupportedInternalHookEntryWarnings(cfg: OpenClawConfig): strin
   );
 }
 
-function collectConfiguredChannelIds(cfg: OpenClawConfig): string[] {
+function collectConfiguredChannelIds(cfg: BotConfig): string[] {
   const channels =
     cfg.channels && typeof cfg.channels === "object" && !Array.isArray(cfg.channels)
       ? cfg.channels
@@ -163,7 +163,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
     fixHints: [],
   };
   let shouldRepairCronCodexModelRefsAfterConfigWrite = false;
-  const doctorFixCommand = formatCliCommand("openclaw doctor --fix");
+  const doctorFixCommand = formatCliCommand("bot doctor --fix");
   const applyConfigMutation = (
     mutation: DoctorConfigMutationResult & { warnings?: string[] },
     options: { fixHint: string; sanitize?: boolean; emitWarnings?: boolean },
@@ -201,7 +201,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
   const includeOwnsRoster = configIncludeOwnsAgentRoster(snapshot);
   if (snapshot.exists && rosterMigrationNeeded && !includeOwnsRoster) {
     // Runtime roster normalization is read-only; doctor --fix owns persistence.
-    const migrated = migratePersistedImplicitMainRoster(state.candidate).config as OpenClawConfig;
+    const migrated = migratePersistedImplicitMainRoster(state.candidate).config as BotConfig;
     const migratedRoster = readAgentRosterProperty(migrated);
     const migratedEntries = migratedRoster?.kind === "entries" ? migratedRoster.value : undefined;
     const { list: _legacyList, ...candidateAgents } = state.candidate.agents ?? {};
@@ -210,7 +210,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
         ...state.candidate,
         agents: {
           ...candidateAgents,
-          entries: migratedEntries as NonNullable<OpenClawConfig["agents"]>["entries"],
+          entries: migratedEntries as NonNullable<BotConfig["agents"]>["entries"],
         },
       },
       changes: ["Persisted agents.entries with exactly one explicit default agent."],
@@ -283,7 +283,7 @@ export async function loadAndMaybeMigrateDoctorConfig(params: {
       [
         "- hooks.internal.handlers: legacy inline hook modules are no longer part of the public config surface.",
         "- Migrate each entry to a managed or workspace hook directory with HOOK.md + handler.js, then enable it through hooks.internal.entries.<hookKey> as needed.",
-        "- openclaw doctor --fix does not rewrite this shape automatically.",
+        "- bot doctor --fix does not rewrite this shape automatically.",
       ].join("\n"),
       "Legacy config keys detected",
     );

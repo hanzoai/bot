@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { render } from "lit";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { CostDailyEntry, UsageAggregates, UsageSessionEntry, UsageTotals } from "./types.ts";
@@ -126,7 +126,7 @@ describe("renderUsageInsights", () => {
     );
 
     const buttons = [...container.querySelectorAll<HTMLButtonElement>("button.usage-summary-hint")];
-    const tooltips = [...container.querySelectorAll("openclaw-tooltip")];
+    const tooltips = [...container.querySelectorAll("bot-tooltip")];
     expect(buttons).toHaveLength(9);
     expect(tooltips).toHaveLength(9);
     expect(
@@ -374,7 +374,7 @@ describe("renderDailyChartCompact", () => {
     ).toEqual(["$0.000010", "$0.000005", "$0.00"]);
     expect(container.querySelector<HTMLElement>(".daily-bar")?.style.height).toBe("200px");
     expect(container.querySelector(".daily-bar-total")?.textContent?.trim()).toBe("$0.000010");
-    const tooltip = container.querySelector<HTMLElement & { content: string }>("openclaw-tooltip");
+    const tooltip = container.querySelector<HTMLElement & { content: string }>("bot-tooltip");
     expect(tooltip?.content).toContain("$0.000010");
     expect(tooltip?.content).toContain("Output $0.000006");
     expect(tooltip?.content).toContain("Input $0.000004");

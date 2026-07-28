@@ -1,12 +1,12 @@
-# OpenClaw Qwen Cloud Provider
+# Bot Qwen Cloud Provider
 
-Official OpenClaw provider plugin for Qwen Cloud.
+Official Bot provider plugin for Qwen Cloud.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/qwen-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-qwen-provider
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/qwen> for setup and configuration.
+See <https://docs.bot.ai/providers/qwen> for setup and configuration.

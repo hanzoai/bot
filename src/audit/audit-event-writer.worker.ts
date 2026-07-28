@@ -1,6 +1,6 @@
 /** Worker-thread entrypoint for serialized audit writes and retention maintenance. */
 import { parentPort, workerData } from "node:worker_threads";
-import { closeOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabase } from "../state/bot-state-db.js";
 import { pruneExpiredAuditEvents, recordAuditEvent } from "./audit-event-store.js";
 import type { AuditEventInput } from "./audit-event-types.js";
 
@@ -16,7 +16,7 @@ if (!parentPort || !stateDir) {
   throw new Error("audit event writer requires a parent port and state directory");
 }
 const port = parentPort;
-const database = { env: { OPENCLAW_STATE_DIR: stateDir } };
+const database = { env: { BOT_STATE_DIR: stateDir } };
 
 function reportMaintenance(): void {
   try {
@@ -43,7 +43,7 @@ port.on("message", (message: AuditWriterRequest) => {
   clearInterval(maintenanceTimer);
   reportMaintenance();
   try {
-    closeOpenClawStateDatabase();
+    closeBotStateDatabase();
   } catch (error) {
     port.postMessage({ type: "maintenance-error", error: String(error) });
   }

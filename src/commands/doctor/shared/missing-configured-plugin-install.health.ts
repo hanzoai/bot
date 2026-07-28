@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import type { PluginInstallRecord } from "../../../config/types.plugins.js";
 import type { HealthFinding, HealthRepairEffect } from "../../../flows/health-checks.js";
 import {
@@ -95,7 +95,7 @@ function missingRecordedPluginIssueKind(params: {
 
 /** Detect configured plugin installs that Doctor can repair without mutating package state. */
 export async function detectConfiguredPluginInstallHealthIssues(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   baselineRecords?: Record<string, PluginInstallRecord>;
 }): Promise<ConfiguredPluginInstallHealthIssue[]> {
@@ -351,7 +351,7 @@ export function configuredPluginInstallIssueToHealthFinding(
         severity: "warning",
         message: `Configured plugin ${issue.pluginId} is not installed.`,
         target,
-        fixHint: `Run \`openclaw doctor --fix\` to install ${issue.installSpec}.`,
+        fixHint: `Run \`bot doctor --fix\` to install ${issue.installSpec}.`,
       };
     case "missing-installed-payload":
       return {
@@ -360,7 +360,7 @@ export function configuredPluginInstallIssueToHealthFinding(
         message: `Configured plugin ${issue.pluginId} has an install record but its package payload is missing.`,
         target,
         ...(issue.installPath ? { path: issue.installPath } : {}),
-        fixHint: "Run `openclaw doctor --fix` to reinstall the configured plugin package.",
+        fixHint: "Run `bot doctor --fix` to reinstall the configured plugin package.",
       };
     case "repairable-installed-plugin":
       return {
@@ -369,16 +369,16 @@ export function configuredPluginInstallIssueToHealthFinding(
         message: `Configured plugin ${issue.pluginId} has a repairable package install problem.`,
         target,
         ...(issue.installPath ? { path: issue.installPath } : {}),
-        fixHint: "Run `openclaw doctor --fix` to repair the configured plugin package.",
+        fixHint: "Run `bot doctor --fix` to repair the configured plugin package.",
       };
     case "stale-version-bound-runtime":
       return {
         checkId: CONFIGURED_PLUGIN_INSTALLS_CHECK_ID,
         severity: "warning",
-        message: `Configured runtime plugin ${issue.pluginId} is older than this OpenClaw version.`,
+        message: `Configured runtime plugin ${issue.pluginId} is older than this Bot version.`,
         target,
         ...(issue.installPath ? { path: issue.installPath } : {}),
-        fixHint: "Run `openclaw doctor --fix` to refresh the configured runtime plugin.",
+        fixHint: "Run `bot doctor --fix` to refresh the configured runtime plugin.",
       };
     case "stale-channel-config-descriptor":
       return {
@@ -387,7 +387,7 @@ export function configuredPluginInstallIssueToHealthFinding(
         message: `Configured plugin ${issue.pluginId} has stale channel config metadata.`,
         target,
         ...(issue.installPath ? { path: issue.installPath } : {}),
-        fixHint: "Run `openclaw doctor --fix` to repair the configured plugin install metadata.",
+        fixHint: "Run `bot doctor --fix` to repair the configured plugin install metadata.",
       };
     case "deferred-package-manager-repair":
       return {
@@ -396,7 +396,7 @@ export function configuredPluginInstallIssueToHealthFinding(
         message: `Configured plugin ${issue.pluginId} package repair is deferred until the package update finishes.`,
         target,
         ...(issue.installPath ? { path: issue.installPath } : {}),
-        fixHint: "Rerun `openclaw doctor --fix` after the package update completes.",
+        fixHint: "Rerun `bot doctor --fix` after the package update completes.",
       };
   }
   return assertNeverConfiguredPluginInstallIssue(issue);

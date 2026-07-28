@@ -3,8 +3,8 @@
 // Control UI diff panel can render without shelling out client-side.
 import fs from "node:fs/promises";
 import nodePath from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   validateSessionsDiffParams,
   type SessionDiffFile,

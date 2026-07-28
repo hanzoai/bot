@@ -10,38 +10,38 @@ describe("readEnvInt", () => {
     vi.unstubAllEnvs();
   });
 
-  it("reads deprecated PI env integer aliases behind OPENCLAW env names", () => {
+  it("reads deprecated PI env integer aliases behind BOT env names", () => {
     vi.stubEnv("PI_BASH_YIELD_MS", "250");
 
-    expect(readEnvInt("OPENCLAW_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBe(250);
+    expect(readEnvInt("BOT_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBe(250);
 
-    vi.stubEnv("OPENCLAW_BASH_YIELD_MS", "500");
+    vi.stubEnv("BOT_BASH_YIELD_MS", "500");
 
-    expect(readEnvInt("OPENCLAW_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBe(500);
+    expect(readEnvInt("BOT_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBe(500);
   });
 
   it("ignores partial environment integers", () => {
-    vi.stubEnv("OPENCLAW_BASH_YIELD_MS", "250ms");
+    vi.stubEnv("BOT_BASH_YIELD_MS", "250ms");
     vi.stubEnv("PI_BASH_YIELD_MS", "500");
 
-    expect(readEnvInt("OPENCLAW_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBeUndefined();
+    expect(readEnvInt("BOT_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBeUndefined();
   });
 
   it("reads only strict signed decimal environment integers", () => {
-    vi.stubEnv("OPENCLAW_BASH_YIELD_MS", "+250");
-    expect(readEnvInt("OPENCLAW_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBe(250);
+    vi.stubEnv("BOT_BASH_YIELD_MS", "+250");
+    expect(readEnvInt("BOT_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBe(250);
 
-    vi.stubEnv("OPENCLAW_BASH_YIELD_MS", "0x10");
-    expect(readEnvInt("OPENCLAW_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBeUndefined();
+    vi.stubEnv("BOT_BASH_YIELD_MS", "0x10");
+    expect(readEnvInt("BOT_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBeUndefined();
 
-    vi.stubEnv("OPENCLAW_BASH_YIELD_MS", "1e2");
-    expect(readEnvInt("OPENCLAW_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBeUndefined();
+    vi.stubEnv("BOT_BASH_YIELD_MS", "1e2");
+    expect(readEnvInt("BOT_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBeUndefined();
   });
 
   it("ignores unsafe environment integers", () => {
-    vi.stubEnv("OPENCLAW_BASH_YIELD_MS", "9007199254740993");
+    vi.stubEnv("BOT_BASH_YIELD_MS", "9007199254740993");
 
-    expect(readEnvInt("OPENCLAW_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBeUndefined();
+    expect(readEnvInt("BOT_BASH_YIELD_MS", "PI_BASH_YIELD_MS")).toBeUndefined();
   });
 });
 

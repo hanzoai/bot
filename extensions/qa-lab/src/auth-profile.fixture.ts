@@ -150,7 +150,7 @@ export function resolveCodexAuthProfile(
     return {
       status: "blocked",
       remediation:
-        'Codex app-server auth requires an openai OAuth profile. Run "openclaw doctor --fix" to repair Codex auth routing before retrying.',
+        'Codex app-server auth requires an openai OAuth profile. Run "bot doctor --fix" to repair Codex auth routing before retrying.',
     };
   }
 

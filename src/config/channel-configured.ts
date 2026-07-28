@@ -5,11 +5,11 @@ import {
   hasMeaningfulChannelConfigShallow,
   resolveChannelConfigRecord,
 } from "./channel-configured-shared.js";
-import type { OpenClawConfig } from "./types.openclaw.js";
+import type { BotConfig } from "./types.bot.js";
 
 /** Resolves whether a channel has enough config, env, or plugin state to be considered setup. */
 export function isChannelConfigured(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   channelId: string,
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {

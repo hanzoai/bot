@@ -9,7 +9,7 @@ import path from "node:path";
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationMs,
-} from "@openclaw/normalization-core/number-coercion";
+} from "@hanzo/bot-normalization-core/number-coercion";
 import { resolveOsHomeRelativePath } from "../infra/home-dir.js";
 import { loadJsonFile } from "../infra/json-file.js";
 import { createSubsystemLogger } from "../logging/subsystem.js";
@@ -174,8 +174,8 @@ function parseClaudeCliOauthCredential(claudeOauth: unknown): ClaudeCliCredentia
 
 function resolveCodexHomePath(codexHome?: string) {
   const configured = codexHome ?? process.env.CODEX_HOME;
-  // External CLI state belongs to the OS user, not OpenClaw's relocatable
-  // home. Otherwise an isolated OPENCLAW_HOME hides an already logged-in CLI.
+  // External CLI state belongs to the OS user, not Bot's relocatable
+  // home. Otherwise an isolated BOT_HOME hides an already logged-in CLI.
   const home = resolveOsHomeRelativePath(configured || "~/.codex");
   try {
     return fs.realpathSync.native(home);
@@ -765,7 +765,7 @@ export function readGeminiCliCredentialsCached(options?: {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.cliCredentialsTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.cliCredentialsTestApi")] = {
     readCodexAuth: readCodexCliCredentials,
     resetCaches: resetCliCredentialCachesForTest,
   };

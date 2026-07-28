@@ -9,7 +9,7 @@ const scriptPath = "scripts/dev/ios-pull-gateway-log.sh";
 const tempDirs: string[] = [];
 
 function makeTempDir(): string {
-  const root = mkdtempSync(path.join(tmpdir(), "openclaw-ios-log-pull-"));
+  const root = mkdtempSync(path.join(tmpdir(), "bot-ios-log-pull-"));
   tempDirs.push(root);
   return root;
 }
@@ -28,7 +28,7 @@ function runWithFakeXcrun(
   );
   chmodSync(xcrunPath, 0o755);
 
-  return spawnSync("bash", [scriptPath, "device-udid", "ai.openclaw.ios.dev", destPath], {
+  return spawnSync("bash", [scriptPath, "device-udid", "ai.bot.ios.dev", destPath], {
     cwd: process.cwd(),
     encoding: "utf8",
     env: {
@@ -47,7 +47,7 @@ afterEach(() => {
 describe("scripts/dev/ios-pull-gateway-log.sh", () => {
   it("fails when the copied gateway log is empty", () => {
     const root = makeTempDir();
-    const destPath = path.join(root, "openclaw-gateway.log");
+    const destPath = path.join(root, "bot-gateway.log");
     const result = runWithFakeXcrun(
       root,
       'while [[ "$#" -gt 0 ]]; do if [[ "$1" == "--destination" ]]; then shift; : > "$1"; fi; shift || break; done',
@@ -61,7 +61,7 @@ describe("scripts/dev/ios-pull-gateway-log.sh", () => {
 
   it("prints the pulled gateway log tail when the copied file has content", () => {
     const root = makeTempDir();
-    const destPath = path.join(root, "openclaw-gateway.log");
+    const destPath = path.join(root, "bot-gateway.log");
     const result = runWithFakeXcrun(
       root,
       'while [[ "$#" -gt 0 ]]; do if [[ "$1" == "--destination" ]]; then shift; printf "gateway ready\\n" > "$1"; fi; shift || break; done',

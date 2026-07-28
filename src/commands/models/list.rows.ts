@@ -1,8 +1,8 @@
-/** Row builders used by `openclaw models list` source orchestration. */
+/** Row builders used by `bot models list` source orchestration. */
 import {
   normalizeProviderId,
   normalizeProviderIdForAuth,
-} from "@openclaw/model-catalog-core/provider-id";
+} from "@hanzo/bot-model-catalog-core/provider-id";
 import { DEFAULT_CONTEXT_TOKENS } from "../../agents/defaults.js";
 import {
   projectModelCatalogEntryForRoute,
@@ -16,7 +16,7 @@ import {
 } from "../../agents/model-suppression.js";
 import { openAIModelCatalogRoutePolicy } from "../../agents/openai-model-routes.js";
 import type { ModelDefinitionConfig, ModelProviderConfig } from "../../config/types.models.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { ModelRegistry } from "../../llm/model-registry.js";
 import type { Model } from "../../llm/types.js";
 import type { PluginMetadataSnapshot } from "../../plugins/plugin-metadata-snapshot.types.js";
@@ -46,7 +46,7 @@ type RowFilter = {
 
 /** Context shared by every model-list row source builder. */
 export type RowBuilderContext = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId?: string;
   agentDir: string;
   authIndex: ModelListAuthIndex;
@@ -161,7 +161,7 @@ function hasSameCatalogRoute(left: ListRowModel, right: ListRowModel): boolean {
 function projectListRowModel(params: {
   model: ListRowModel;
   evaluation: ModelListAuthEvaluation;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   routeIndex?: ModelCatalogLogicalRouteIndex;
 }): ListRowModel {
   const projection =
@@ -408,7 +408,7 @@ function shouldListConfiguredProviderModel(params: {
 }
 
 function findConfiguredProviderModel(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider: string;
   modelId: string;
 }): ListRowModel | undefined {
@@ -424,7 +424,7 @@ function findConfiguredProviderModel(params: {
   });
 }
 
-function toFallbackConfiguredListModel(entry: ConfiguredEntry, cfg: OpenClawConfig): ListRowModel {
+function toFallbackConfiguredListModel(entry: ConfiguredEntry, cfg: BotConfig): ListRowModel {
   return (
     findConfiguredProviderModel({
       cfg,

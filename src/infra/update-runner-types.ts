@@ -1,5 +1,5 @@
 import type { CommandOptions } from "../process/exec.js";
-import type { OpenClawSchemaVersions } from "../state/openclaw-schema-versions.js";
+import type { BotSchemaVersions } from "../state/bot-schema-versions.js";
 import type { PackageUpdateStepAdvisory } from "./package-update-steps.js";
 import type { UpdateChannel } from "./update-channels.js";
 import type { GlobalInstallManager } from "./update-global.js";
@@ -122,7 +122,7 @@ export type UpdateRunnerOptions = {
   allowGatewayServiceRepair?: boolean;
   allowGatewayActivation?: boolean;
   beforeGitMutation?: (target: {
-    schemaVersions?: OpenClawSchemaVersions;
+    schemaVersions?: BotSchemaVersions;
     metadataUnreadable?: string;
   }) => Promise<{
     allowGatewayServiceRepair?: boolean;

@@ -4,19 +4,19 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { readProviderJsonObjectResponse } from "openclaw/plugin-sdk/provider-http";
-import { runPluginCommandWithTimeout } from "openclaw/plugin-sdk/run-command";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-import { CONFIG_DIR, extractArchive, resolveBrewExecutable } from "openclaw/plugin-sdk/setup-tools";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { readProviderJsonObjectResponse } from "bot/plugin-sdk/provider-http";
+import { runPluginCommandWithTimeout } from "bot/plugin-sdk/run-command";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
+import { CONFIG_DIR, extractArchive, resolveBrewExecutable } from "bot/plugin-sdk/setup-tools";
+import { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
 import {
   isRecord,
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { withTempDownloadPath } from "openclaw/plugin-sdk/temp-path";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import { withTempDownloadPath } from "bot/plugin-sdk/temp-path";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 
 export type ReleaseAsset = {
   name?: string;
@@ -339,7 +339,7 @@ export async function installSignalCliFromRelease(
     auditContext: "signal-cli-release-info",
     init: {
       headers: {
-        "User-Agent": "openclaw",
+        "User-Agent": "bot",
         Accept: "application/vnd.github+json",
       },
     },
@@ -382,7 +382,7 @@ export async function installSignalCliFromRelease(
   // Keep the large release archive in an owned workspace so every callback exit
   // cleans it without touching the installed tree under CONFIG_DIR.
   return await withTempDownloadPath(
-    { prefix: "openclaw-signal", fileName: asset.name },
+    { prefix: "bot-signal", fileName: asset.name },
     async (archivePath) => {
       runtime.log(`Downloading signal-cli ${releaseInfo.version} (${asset.name})…`);
       await downloadToFile(asset.browser_download_url, archivePath);

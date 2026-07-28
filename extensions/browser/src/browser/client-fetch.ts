@@ -4,17 +4,17 @@
  * Sends requests to either an absolute HTTP browser-control URL or the local
  * in-process dispatcher, adding loopback auth and operator-facing diagnostics.
  */
-import { parseBrowserHttpUrl } from "openclaw/plugin-sdk/browser-config";
+import { parseBrowserHttpUrl } from "bot/plugin-sdk/browser-config";
 import {
   extractErrorCode,
   formatErrorMessage,
   toErrorObject,
-} from "openclaw/plugin-sdk/error-runtime";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { fetchWithSsrFGuard } from "openclaw/plugin-sdk/ssrf-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/error-runtime";
+import { resolveTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
+import { fetchWithSsrFGuard } from "bot/plugin-sdk/ssrf-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import { formatCliCommand } from "../cli/command-format.js";
 import { getRuntimeConfig } from "../config/config.js";
 import { isLoopbackHost } from "../gateway/net.js";
@@ -83,7 +83,7 @@ function withLoopbackBrowserAuthImpl(
   deps: LoopbackBrowserAuthDeps,
 ): RequestInit & { timeoutMs?: number } {
   const headers = new Headers(init?.headers ?? {});
-  if (headers.has("authorization") || headers.has("x-openclaw-password")) {
+  if (headers.has("authorization") || headers.has("x-bot-password")) {
     return { ...init, headers };
   }
   if (!isLoopbackHttpUrl(url)) {
@@ -98,7 +98,7 @@ function withLoopbackBrowserAuthImpl(
       return { ...init, headers };
     }
     if (auth.password) {
-      headers.set("x-openclaw-password", auth.password);
+      headers.set("x-bot-password", auth.password);
       return { ...init, headers };
     }
   } catch {
@@ -113,7 +113,7 @@ function withLoopbackBrowserAuthImpl(
     if (bridgeAuth?.token) {
       headers.set("Authorization", `Bearer ${bridgeAuth.token}`);
     } else if (bridgeAuth?.password) {
-      headers.set("x-openclaw-password", bridgeAuth.password);
+      headers.set("x-bot-password", bridgeAuth.password);
     }
   } catch {
     // ignore
@@ -182,7 +182,7 @@ function resolveDispatcherBrowserControlOwnership(url: string): BrowserControlOw
     if (!profile) {
       return "unknown";
     }
-    return profile.driver === "openclaw" && profile.cdpIsLoopback && !profile.attachOnly
+    return profile.driver === "bot" && profile.cdpIsLoopback && !profile.attachOnly
       ? "local-managed"
       : "external-browser";
   } catch {
@@ -196,13 +196,13 @@ function resolveBrowserFetchOperatorHint(
 ): string {
   if (opts?.ownership === "external-browser") {
     return (
-      "The browser profile is external to OpenClaw; make sure its browser/CDP endpoint " +
-      "is running and reachable. Restarting the OpenClaw gateway will not launch it."
+      "The browser profile is external to Bot; make sure its browser/CDP endpoint " +
+      "is running and reachable. Restarting the Bot gateway will not launch it."
     );
   }
   const isLocal = !isAbsoluteHttp(url);
   return isLocal
-    ? `Restart the OpenClaw gateway (OpenClaw.app menubar, or \`${formatCliCommand("openclaw gateway")}\`).`
+    ? `Restart the Bot gateway (Bot.app menubar, or \`${formatCliCommand("bot gateway")}\`).`
     : "If this is a sandboxed session, ensure the sandbox browser is running.";
 }
 
@@ -320,7 +320,7 @@ function enhanceBrowserFetchError(url: string, err: unknown, timeoutMs: number):
   const kind = classifyBrowserFetchFailure(err);
   if (kind === "timeout") {
     return new Error(
-      `Can't reach the OpenClaw browser control service (timed out after ${timeoutMs}ms). ${operatorHint} ${BROWSER_TOOL_TRANSIENT_MODEL_HINT}`,
+      `Can't reach the Bot browser control service (timed out after ${timeoutMs}ms). ${operatorHint} ${BROWSER_TOOL_TRANSIENT_MODEL_HINT}`,
       err instanceof Error ? { cause: err } : undefined,
     );
   }
@@ -332,13 +332,13 @@ function enhanceBrowserFetchError(url: string, err: unknown, timeoutMs: number):
   }
   if (kind === "transient-network") {
     return new Error(
-      `Can't reach the OpenClaw browser control service. ${operatorHint} (${msg}) ${BROWSER_TOOL_TRANSIENT_MODEL_HINT}`,
+      `Can't reach the Bot browser control service. ${operatorHint} (${msg}) ${BROWSER_TOOL_TRANSIENT_MODEL_HINT}`,
       err instanceof Error ? { cause: err } : undefined,
     );
   }
   return new Error(
     appendBrowserToolModelHint(
-      `Can't reach the OpenClaw browser control service. ${operatorHint} (${msg})`,
+      `Can't reach the Bot browser control service. ${operatorHint} (${msg})`,
       BROWSER_TOOL_PERSISTENT_MODEL_HINT,
     ),
     err instanceof Error ? { cause: err } : undefined,

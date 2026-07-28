@@ -1,5 +1,5 @@
 #!/usr/bin/env -S pnpm tsx
-// Release Beta Smoke script supports OpenClaw repository automation.
+// Release Beta Smoke script supports Bot repository automation.
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -43,7 +43,7 @@ Options:
   --model <provider/model>     Parallels agent-turn model. Default: openai/gpt-5.4
   --provider-mode <mode>       Telegram workflow provider mode. Default: mock-openai
   --ref <ref>                  GitHub workflow dispatch ref. Default: main
-  --repo <owner/repo>          GitHub repo. Default: openclaw/openclaw
+  --repo <owner/repo>          GitHub repo. Default: hanzoai/bot
   --skip-parallels             Only run Telegram workflow
   --skip-telegram              Only run Parallels beta validation
   -h, --help                   Show help
@@ -57,7 +57,7 @@ export function parseArgs(argv: string[]): Options {
     model: "openai/gpt-5.4",
     providerMode: "mock-openai",
     ref: "main",
-    repo: "openclaw/openclaw",
+    repo: "hanzoai/bot",
     skipParallels: false,
     skipTelegram: false,
   };
@@ -115,19 +115,19 @@ function requireValue(argv: string[], index: number, flag: string): string {
 
 const CAPTURE_MAX_BUFFER_BYTES = 32 * 1024 * 1024;
 const DEFAULT_COMMAND_TIMEOUT_MS = readPositiveInt(
-  process.env.OPENCLAW_RELEASE_BETA_SMOKE_COMMAND_MS,
+  process.env.BOT_RELEASE_BETA_SMOKE_COMMAND_MS,
   10 * 60_000,
-  "OPENCLAW_RELEASE_BETA_SMOKE_COMMAND_MS",
+  "BOT_RELEASE_BETA_SMOKE_COMMAND_MS",
 );
 const TELEGRAM_POLL_INTERVAL_MS = readPositiveInt(
-  process.env.OPENCLAW_RELEASE_BETA_SMOKE_POLL_INTERVAL_MS,
+  process.env.BOT_RELEASE_BETA_SMOKE_POLL_INTERVAL_MS,
   30_000,
-  "OPENCLAW_RELEASE_BETA_SMOKE_POLL_INTERVAL_MS",
+  "BOT_RELEASE_BETA_SMOKE_POLL_INTERVAL_MS",
 );
 const TELEGRAM_POLL_TIMEOUT_MS = readPositiveInt(
-  process.env.OPENCLAW_RELEASE_BETA_SMOKE_POLL_TIMEOUT_MS,
+  process.env.BOT_RELEASE_BETA_SMOKE_POLL_TIMEOUT_MS,
   4 * 60 * 60_000,
-  "OPENCLAW_RELEASE_BETA_SMOKE_POLL_TIMEOUT_MS",
+  "BOT_RELEASE_BETA_SMOKE_POLL_TIMEOUT_MS",
 );
 
 export function readPositiveInt(
@@ -177,27 +177,27 @@ function shellQuote(value: string): string {
 const TELEGRAM_BETA_WORKFLOW_FILE = "npm-telegram-beta-e2e.yml";
 
 function resolveBetaVersion(beta: string): string {
-  const value = beta.trim().replace(/^openclaw@/, "");
+  const value = beta.trim().replace(/^bot@/, "");
   if (/^\d{4}\.\d+\.\d+-beta\.\d+$/u.test(value)) {
     return value;
   }
   if (value === "beta") {
-    return run("npm", ["view", "openclaw@beta", "version"], { capture: true }).trim();
+    return run("npm", ["view", "bot@beta", "version"], { capture: true }).trim();
   }
   const betaMatch = /^(?:beta)?(\d+)$/u.exec(value);
   if (!betaMatch) {
-    return run("npm", ["view", `openclaw@${value}`, "version"], { capture: true }).trim();
+    return run("npm", ["view", `bot@${value}`, "version"], { capture: true }).trim();
   }
   const suffix = `-beta.${betaMatch[1]}`;
   const versions = JSON.parse(
-    run("npm", ["view", "openclaw", "versions", "--json"], { capture: true }),
+    run("npm", ["view", "bot", "versions", "--json"], { capture: true }),
   ) as string[];
   const match = versions
     .filter((version) => version.endsWith(suffix))
     .toSorted((a, b) => a.localeCompare(b, undefined, { numeric: true }))
     .at(-1);
   if (!match) {
-    throw new Error(`no openclaw registry version found for ${beta}`);
+    throw new Error(`no bot registry version found for ${beta}`);
   }
   return match;
 }
@@ -240,12 +240,12 @@ function ghJson(repo: string, pathSuffix: string): unknown {
       [
         "set -euo pipefail",
         'token="$(gh auth token)"',
-        'curl -fsS -H "Authorization: Bearer ${token}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "${OPENCLAW_GITHUB_REST_URL}"',
+        'curl -fsS -H "Authorization: Bearer ${token}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" "${BOT_GITHUB_REST_URL}"',
       ].join("\n"),
     ],
     {
       encoding: "utf8",
-      env: { ...process.env, OPENCLAW_GITHUB_REST_URL: url },
+      env: { ...process.env, BOT_GITHUB_REST_URL: url },
       killSignal: "SIGKILL",
       maxBuffer: CAPTURE_MAX_BUFFER_BYTES,
       stdio: ["ignore", "pipe", "pipe"],
@@ -415,7 +415,7 @@ function appendTelegramProofToRelease(repo: string, version: string, runId: stri
   const telegramLine = `- npm Telegram beta E2E: https://github.com/${repo}/actions/runs/${runId}`;
   const notesFile = path.join(
     "/tmp",
-    `openclaw-${version.replace(/[^a-zA-Z0-9.-]/g, "-")}-release-notes-${process.pid}.md`,
+    `bot-${version.replace(/[^a-zA-Z0-9.-]/g, "-")}-release-notes-${process.pid}.md`,
   );
   const nextBody = mergeTelegramProofIntoReleaseBody(body, telegramLine);
   if (nextBody === body) {
@@ -431,7 +431,7 @@ function appendTelegramProofToRelease(repo: string, version: string, runId: stri
 async function main(): Promise<void> {
   const options = parseArgs(process.argv.slice(2));
   const version = resolveBetaVersion(options.beta);
-  const packageSpec = `openclaw@${version}`;
+  const packageSpec = `bot@${version}`;
   console.log(`Resolved beta target: ${packageSpec}`);
 
   let telegramRunId: string | undefined;

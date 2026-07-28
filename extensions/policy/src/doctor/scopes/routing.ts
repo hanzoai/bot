@@ -1,4 +1,4 @@
-import type { HealthCheck } from "openclaw/plugin-sdk/health";
+import type { HealthCheck } from "bot/plugin-sdk/health";
 import { CHECK_IDS } from "../check-ids.js";
 import type { PolicyDoctorCheckDeps } from "../types.js";
 

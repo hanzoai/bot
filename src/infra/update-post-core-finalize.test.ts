@@ -1,5 +1,5 @@
 import fs from "node:fs/promises";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import {
   foldPostCoreFinalizeIntoResult,
@@ -11,7 +11,7 @@ function gitOkResult(overrides: Partial<UpdateRunResult> = {}): UpdateRunResult 
   return {
     status: "ok",
     mode: "git",
-    root: "/srv/openclaw",
+    root: "/srv/bot",
     before: { sha: "aaa", version: "2026.5.3" },
     after: { sha: "bbb", version: "2026.6.1" },
     steps: [],
@@ -20,7 +20,7 @@ function gitOkResult(overrides: Partial<UpdateRunResult> = {}): UpdateRunResult 
   };
 }
 
-const ENTRYPOINT = "/srv/openclaw/dist/index.mjs";
+const ENTRYPOINT = "/srv/bot/dist/index.mjs";
 const resolveEntrypointOk = async () => ENTRYPOINT;
 type PostCoreFinalizeSpawner = NonNullable<
   Parameters<typeof runPostCoreFinalizeAfterGatewayUpdate>[0]["spawnFinalize"]
@@ -101,9 +101,9 @@ describe("runPostCoreFinalizeAfterGatewayUpdate", () => {
     ]);
     expect(call.argv).not.toContain("--channel");
     // Configured channel is carried as the effective convergence channel via env.
-    expect(call.env.OPENCLAW_UPDATE_EFFECTIVE_CHANNEL).toBe("stable");
+    expect(call.env.BOT_UPDATE_EFFECTIVE_CHANNEL).toBe("stable");
     // Host-compat resolution is pinned to the just-installed core version.
-    expect(call.env.OPENCLAW_COMPATIBILITY_HOST_VERSION).toBe("2026.6.1");
+    expect(call.env.BOT_COMPATIBILITY_HOST_VERSION).toBe("2026.6.1");
     // Outer whole-process timeout is decoupled from the per-step --timeout (120s):
     // a generous floor so a valid multi-step finalize is not killed prematurely.
     expect(call.timeoutMs).toBe(30 * 60_000);
@@ -117,9 +117,9 @@ describe("runPostCoreFinalizeAfterGatewayUpdate", () => {
       spawnFinalize,
       env: {
         PATH: "/usr/bin",
-        OPENCLAW_SERVICE_MARKER: "openclaw",
-        OPENCLAW_SERVICE_KIND: "gateway",
-        OPENCLAW_GATEWAY_SERVICE_PID: "4242",
+        BOT_SERVICE_MARKER: "bot",
+        BOT_SERVICE_KIND: "gateway",
+        BOT_GATEWAY_SERVICE_PID: "4242",
       },
     });
     const { env } = expectDefined(
@@ -127,9 +127,9 @@ describe("runPostCoreFinalizeAfterGatewayUpdate", () => {
       "spawnFinalize.mock.calls[0] test invariant",
     )[0];
     expect(env.PATH).toBe("/usr/bin");
-    expect(env.OPENCLAW_SERVICE_MARKER).toBeUndefined();
-    expect(env.OPENCLAW_SERVICE_KIND).toBeUndefined();
-    expect(env.OPENCLAW_GATEWAY_SERVICE_PID).toBeUndefined();
+    expect(env.BOT_SERVICE_MARKER).toBeUndefined();
+    expect(env.BOT_SERVICE_KIND).toBeUndefined();
+    expect(env.BOT_GATEWAY_SERVICE_PID).toBeUndefined();
   });
 
   it("carries the external service-repair policy into the finalizer", async () => {
@@ -143,7 +143,7 @@ describe("runPostCoreFinalizeAfterGatewayUpdate", () => {
 
     expect(
       expectDefined(spawnFinalize.mock.calls[0], "spawnFinalize.mock.calls[0] test invariant")[0]
-        .env.OPENCLAW_SERVICE_REPAIR_POLICY,
+        .env.BOT_SERVICE_REPAIR_POLICY,
     ).toBe("external");
   });
 
@@ -160,8 +160,8 @@ describe("runPostCoreFinalizeAfterGatewayUpdate", () => {
     )[0];
     // No configured channel → effective channel defaults to the git/dev channel
     // the core update ran on, carried via env (convergence-only, not persisted),
-    // never as `--channel` (which `update finalize` would persist to openclaw.json).
-    expect(call.env.OPENCLAW_UPDATE_EFFECTIVE_CHANNEL).toBe("dev");
+    // never as `--channel` (which `update finalize` would persist to bot.json).
+    expect(call.env.BOT_UPDATE_EFFECTIVE_CHANNEL).toBe("dev");
     expect(call.argv).not.toContain("--channel");
     expect(call.argv).not.toContain("--timeout");
     // No per-step timeout requested → outer backstop is the floor.
@@ -183,7 +183,7 @@ describe("runPostCoreFinalizeAfterGatewayUpdate", () => {
     };
     let sourceConfigPath: string | undefined;
     const spawnFinalize = vi.fn<PostCoreFinalizeSpawner>(async ({ env }) => {
-      sourceConfigPath = env.OPENCLAW_UPDATE_POST_CORE_SOURCE_CONFIG_PATH;
+      sourceConfigPath = env.BOT_UPDATE_POST_CORE_SOURCE_CONFIG_PATH;
       expect(sourceConfigPath).toEqual(expect.any(String));
       await expect(fs.readFile(sourceConfigPath!, "utf-8")).resolves.toBe(
         `${JSON.stringify(preUpdateConfig)}\n`,

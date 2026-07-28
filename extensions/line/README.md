@@ -1,11 +1,11 @@
-# OpenClaw LINE
+# Bot LINE
 
-Official OpenClaw channel plugin for LINE Bot API chats.
+Official Bot channel plugin for LINE Bot API chats.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/line
+bot plugins install @hanzo/bot-line
 ```
 
-Configure LINE channel credentials in OpenClaw, then connect the bot to the chats where agents should receive and send messages.
+Configure LINE channel credentials in Bot, then connect the bot to the chats where agents should receive and send messages.

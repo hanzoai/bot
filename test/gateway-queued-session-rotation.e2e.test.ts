@@ -3,13 +3,13 @@ import { createServer, type IncomingMessage, type ServerResponse } from "node:ht
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../src/config/types.openclaw.js";
+import type { BotConfig } from "../src/config/types.bot.js";
 import { createDeferred } from "../src/test-utils/deferred.js";
 import { GatewayChatClient } from "../src/tui/gateway-chat.js";
 import {
-  createOpenClawTestInstance,
-  type OpenClawTestInstance,
-} from "./helpers/openclaw-test-instance.js";
+  createBotTestInstance,
+  type BotTestInstance,
+} from "./helpers/bot-test-instance.js";
 
 type MockModelRequest = {
   body: Record<string, unknown>;
@@ -25,7 +25,7 @@ type MockModelServer = {
 const TEST_TIMEOUT_MS = 150_000;
 const WAIT_OPTS = { timeout: 30_000, interval: 20 } as const;
 
-const instances: OpenClawTestInstance[] = [];
+const instances: BotTestInstance[] = [];
 const cleanupDirs: string[] = [];
 const modelServers: MockModelServer[] = [];
 
@@ -148,7 +148,7 @@ async function startMockModelServer(): Promise<MockModelServer> {
 
 async function writeTurnTracerPlugin(pluginDir: string, tracePath: string): Promise<void> {
   await writeFile(
-    path.join(pluginDir, "openclaw.plugin.json"),
+    path.join(pluginDir, "bot.plugin.json"),
     JSON.stringify({
       id: "queued-rotation-tracer",
       name: "Queued Rotation Tracer",
@@ -190,7 +190,7 @@ describe("Gateway queued session rotation", () => {
   it(
     "runs a replacement turn after /new cancels an active turn",
     async () => {
-      const fixtureDir = await mkdtemp(path.join(tmpdir(), "openclaw-queued-rotation-"));
+      const fixtureDir = await mkdtemp(path.join(tmpdir(), "bot-queued-rotation-"));
       cleanupDirs.push(fixtureDir);
       const pluginDir = path.join(fixtureDir, "plugin");
       const tracePath = path.join(fixtureDir, "turns.ndjson");
@@ -212,7 +212,7 @@ describe("Gateway queued session rotation", () => {
           defaults: {
             workspace: path.join(fixtureDir, "workspace"),
             model: { primary: modelRef },
-            models: { [modelRef]: { agentRuntime: { id: "openclaw" } } },
+            models: { [modelRef]: { agentRuntime: { id: "bot" } } },
             skills: [],
             skipBootstrap: true,
           },
@@ -243,12 +243,12 @@ describe("Gateway queued session rotation", () => {
           },
         },
         messages: { queue: { mode: "followup" } },
-      } satisfies OpenClawConfig;
-      const instance = await createOpenClawTestInstance({
+      } satisfies BotConfig;
+      const instance = await createBotTestInstance({
         name: "queued-session-rotation",
         gatewayToken: "secret-token",
         config,
-        env: { OPENCLAW_SKIP_PROVIDERS: undefined },
+        env: { BOT_SKIP_PROVIDERS: undefined },
       });
       instances.push(instance);
       await instance.startGateway();
@@ -264,7 +264,7 @@ describe("Gateway queued session rotation", () => {
       try {
         const first = await client.sendChat({
           sessionKey,
-          message: "OPENCLAW_E2E_HELD_TURN",
+          message: "BOT_E2E_HELD_TURN",
           runId: "queued-rotation-held",
         });
         expect(first.status).toBe("started");
@@ -275,7 +275,7 @@ describe("Gateway queued session rotation", () => {
 
         const replacement = await client.sendChat({
           sessionKey,
-          message: "/new OPENCLAW_E2E_AFTER_RESET",
+          message: "/new BOT_E2E_AFTER_RESET",
           runId: "queued-rotation-reset",
         });
         expect(replacement.status).toBe("started");
@@ -286,8 +286,8 @@ describe("Gateway queued session rotation", () => {
           expect(modelServer.requests).toHaveLength(2);
           expect(await readTraceCount(tracePath)).toBe(2);
         }, WAIT_OPTS);
-        expect(JSON.stringify(modelServer.requests[0]?.body)).toContain("OPENCLAW_E2E_HELD_TURN");
-        expect(JSON.stringify(modelServer.requests[1]?.body)).toContain("OPENCLAW_E2E_AFTER_RESET");
+        expect(JSON.stringify(modelServer.requests[0]?.body)).toContain("BOT_E2E_HELD_TURN");
+        expect(JSON.stringify(modelServer.requests[1]?.body)).toContain("BOT_E2E_AFTER_RESET");
       } finally {
         await client.abortChat({ sessionKey }).catch(() => undefined);
         client.stop();

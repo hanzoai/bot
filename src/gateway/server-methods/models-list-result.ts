@@ -1,6 +1,6 @@
 // Model list result building resolves visible model catalogs for an agent and
 // strips runtime-only provider params before sending the browse API payload.
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import {
   resolveAgentDir,
   resolveAgentEffectiveModelPrimary,
@@ -47,7 +47,7 @@ import { publishedModelCatalogOwnerMatchesAgent } from "../../agents/prepared-mo
 import { resolveProviderIdForAuth } from "../../agents/provider-auth-aliases.js";
 import { resolveDefaultAgentWorkspaceDir } from "../../agents/workspace.js";
 import { getRuntimeConfigSourceSnapshot } from "../../config/config.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { loadPluginRegistrySnapshotWithMetadata } from "../../plugins/plugin-registry.js";
 import { resolveManifestProviderAuthChoices } from "../../plugins/provider-auth-choices.js";
 import { normalizeAgentId } from "../../routing/session-key.js";
@@ -98,7 +98,7 @@ function buildPublicModelProjection(entry: ModelCatalogEntry): ModelsListEntry {
 }
 
 function resolveModelChoiceAgentRuntime(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   entry: ModelCatalogEntry;
 }): GatewayAgentRuntime | undefined {
@@ -120,7 +120,7 @@ function resolveModelChoiceAgentRuntime(params: {
 }
 
 function listEnabledSyntheticAuthProviderRefs(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   workspaceDir: string;
 }): readonly string[] {
   const result = loadPluginRegistrySnapshotWithMetadata({
@@ -137,7 +137,7 @@ function listEnabledSyntheticAuthProviderRefs(params: {
 }
 
 function createModelsListAuthResolver(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   includeOpenAIExternalProfiles: boolean;
   workspaceDir: string;
@@ -166,7 +166,7 @@ function resolveLegacyEntryAvailability(params: {
   authResolver: ModelAuthAvailabilityResolver;
   entry: ModelCatalogEntry;
   primaryAvailability: ModelsListAvailability;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
 }): ModelsListAvailability {
   if (params.primaryAvailability === true) {
@@ -195,7 +195,7 @@ function resolveLegacyEntryAvailability(params: {
 }
 
 function createModelsListEntryEvaluator(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   authResolver: ModelAuthAvailabilityResolver;
   preferredProfileId?: string;
@@ -275,7 +275,7 @@ function resolveProviderConfigInventoryEntries(params: {
 
 /** Builds one per-agent, snapshot-scoped route projection for Gateway thinking metadata. */
 export function createGatewayAgentModelCatalogProjector(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   snapshot: ModelCatalogSnapshot;
   preferredProfileId?: string;
@@ -378,7 +378,7 @@ export function createGatewayAgentModelCatalogProjector(params: {
 
 async function buildPublicModelsListEntries(params: {
   catalog: ModelCatalogEntry[];
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   evaluateEntry(entry: ModelCatalogEntry): Promise<ModelsListEntryEvaluation>;
   includeInput?: boolean;
@@ -421,7 +421,7 @@ async function buildPublicModelsListEntries(params: {
 }
 
 function apiKeyProviderCapabilities(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   workspaceDir: string;
 }): ApiKeyProviderCapabilities {
   const capabilities = new Map<string, boolean>();
@@ -453,7 +453,7 @@ type BuildModelsListResultParams = {
   params: Record<string, unknown>;
   preloadedCatalog?: {
     agentId: string;
-    config: OpenClawConfig;
+    config: BotConfig;
     snapshot: ModelCatalogSnapshot;
   };
   catalogProjector?: ReturnType<typeof createGatewayAgentModelCatalogProjector>;

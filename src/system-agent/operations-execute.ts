@@ -1,5 +1,5 @@
 // Public operation dispatcher. Parsing and mutation helpers live in focused modules.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { createAgent } from "../agents/agent-create.js";
 import { buildAgentMainSessionKey, normalizeAgentId } from "../routing/session-key.js";
 import type { RuntimeEnv } from "../runtime.js";
@@ -34,7 +34,7 @@ import type { SystemAgentOperation, SystemAgentOperationResult } from "./operati
 
 const loadOverviewModule = async () => await import("./overview.js");
 
-/** Execute a parsed OpenClaw operation after applying approval gates and audit logging. */
+/** Execute a parsed Bot operation after applying approval gates and audit logging. */
 export async function executeSystemAgentOperation(
   operation: SystemAgentOperation,
   runtime: RuntimeEnv,
@@ -240,32 +240,32 @@ export async function executeSystemAgentOperation(
       return { applied: false };
     }
     case "channel-setup":
-      // Channel setup is a multi-step wizard; only interactive OpenClaw (TUI
+      // Channel setup is a multi-step wizard; only interactive Bot (TUI
       // chat bridge or the gateway chat) can host it. One-shot mode points at
       // the guided paths.
       runtime.log(
         [
           `Connecting ${operation.channel} needs an interactive session.`,
-          "Run `openclaw setup` and say `connect " + operation.channel + "`,",
-          "or run `openclaw channels add` for the terminal wizard.",
+          "Run `bot setup` and say `connect " + operation.channel + "`,",
+          "or run `bot channels add` for the terminal wizard.",
         ].join("\n"),
       );
       return { applied: false };
     case "model-setup":
       runtime.log(
         [
-          "Changing model providers must happen outside the inference session that powers OpenClaw.",
-          "Exit OpenClaw and run `openclaw onboard`; it stages credentials, live-tests the candidate route, and saves only a passing setup.",
+          "Changing model providers must happen outside the inference session that powers Bot.",
+          "Exit Bot and run `bot onboard`; it stages credentials, live-tests the candidate route, and saves only a passing setup.",
         ].join("\n"),
       );
       return { applied: false };
     case "open-setup": {
       const command =
         operation.target === "guided"
-          ? "openclaw onboard"
+          ? "bot onboard"
           : operation.target === "classic"
-            ? "openclaw onboard --classic"
-            : `openclaw channels add${operation.channel ? ` --channel ${operation.channel}` : ""}`;
+            ? "bot onboard --classic"
+            : `bot channels add${operation.channel ? ` --channel ${operation.channel}` : ""}`;
       runtime.log(
         `One-shot mode cannot open an interactive wizard. Run \`${command}\` in a terminal.`,
       );
@@ -309,8 +309,8 @@ export async function executeSystemAgentOperation(
     case "plugin-uninstall": {
       if (await isPluginBackingDefaultInferenceRoute(operation.pluginId)) {
         const message = [
-          `Uninstalling ${operation.pluginId} could remove the provider behind OpenClaw's own active inference route.`,
-          `Exit OpenClaw and run \`openclaw plugins uninstall ${operation.pluginId}\` from a terminal.`,
+          `Uninstalling ${operation.pluginId} could remove the provider behind Bot's own active inference route.`,
+          `Exit Bot and run \`bot plugins uninstall ${operation.pluginId}\` from a terminal.`,
         ].join("\n");
         runtime.log(message);
         return { applied: false, message };
@@ -334,7 +334,7 @@ export async function executeSystemAgentOperation(
             // moment so the destructive removal never hits the active route.
             if (await isPluginBackingDefaultInferenceRoute(operation.pluginId)) {
               throw new Error(
-                `Uninstall aborted: ${operation.pluginId} now backs the active inference route. Exit OpenClaw and run \`openclaw plugins uninstall ${operation.pluginId}\` from a terminal.`,
+                `Uninstall aborted: ${operation.pluginId} now backs the active inference route. Exit Bot and run \`bot plugins uninstall ${operation.pluginId}\` from a terminal.`,
               );
             }
             await runPluginUninstall(operation.pluginId, createNoExitRuntime(ctx.runtime));
@@ -358,7 +358,7 @@ export async function executeSystemAgentOperation(
       }
       if (operation.model?.trim()) {
         throw new Error(
-          "OpenClaw cannot save an explicit per-agent model until that new route can be live-tested. Retry without `model`; the new agent inherits the verified default, then use `set_default_model` with agentId to live-test and save its own model.",
+          "Bot cannot save an explicit per-agent model until that new route can be live-tested. Retry without `model`; the new agent inherits the verified default, then use `set_default_model` with agentId to live-test and save its own model.",
         );
       }
       return await applyPersistentOperation({
@@ -396,7 +396,7 @@ export async function executeSystemAgentOperation(
     }
     case "doctor-fix":
       runtime.log(
-        "Doctor repairs can change the inference route that powers this session. Exit OpenClaw and run `openclaw doctor --fix` in a terminal.",
+        "Doctor repairs can change the inference route that powers this session. Exit Bot and run `bot doctor --fix` in a terminal.",
       );
       return { applied: false };
     case "status": {
@@ -474,8 +474,8 @@ export async function executeSystemAgentOperation(
       if (result?.exitReason === "return-to-system-agent") {
         runtime.log(
           result.systemAgentMessage
-            ? `[openclaw] returned from agent with request: ${result.systemAgentMessage}`
-            : "[openclaw] returned from agent",
+            ? `[bot] returned from agent with request: ${result.systemAgentMessage}`
+            : "[bot] returned from agent",
         );
         return { applied: false, returnToShell: true, nextInput: result.systemAgentMessage };
       }

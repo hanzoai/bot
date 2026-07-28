@@ -141,7 +141,7 @@ describe("models cli", () => {
     });
 
     const originalArgv = process.argv;
-    process.argv = ["node", "openclaw", "models", "--status-json"];
+    process.argv = ["node", "bot", "models", "--status-json"];
     try {
       await program.parseAsync(["models", "--status-json"], { from: "user" });
     } finally {

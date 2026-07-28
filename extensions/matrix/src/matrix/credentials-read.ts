@@ -1,7 +1,7 @@
 // Matrix plugin module implements credentials read behavior.
-import { normalizeAccountId } from "openclaw/plugin-sdk/account-id";
-import type { PluginStateSyncKeyedStore } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { createPluginStateSyncKeyedStore } from "openclaw/plugin-sdk/runtime-doctor";
+import { normalizeAccountId } from "bot/plugin-sdk/account-id";
+import type { PluginStateSyncKeyedStore } from "bot/plugin-sdk/plugin-state-runtime";
+import { createPluginStateSyncKeyedStore } from "bot/plugin-sdk/runtime-doctor";
 import { getOptionalMatrixRuntime } from "../runtime.js";
 
 export { resolveMatrixCredentialsDir, resolveMatrixCredentialsPath } from "../storage-paths.js";
@@ -89,9 +89,9 @@ export function openMatrixCredentialsStore(
 ): PluginStateSyncKeyedStore<MatrixCredentialStateRecord> {
   const runtime = getOptionalMatrixRuntime();
   const resolvedEnv =
-    env.OPENCLAW_STATE_DIR?.trim() || !runtime
+    env.BOT_STATE_DIR?.trim() || !runtime
       ? env
-      : { ...env, OPENCLAW_STATE_DIR: runtime.state.resolveStateDir(env) };
+      : { ...env, BOT_STATE_DIR: runtime.state.resolveStateDir(env) };
   return createPluginStateSyncKeyedStore<MatrixCredentialStateRecord>("matrix", {
     namespace: MATRIX_CREDENTIALS_NAMESPACE,
     maxEntries: MATRIX_CREDENTIALS_MAX_ENTRIES,

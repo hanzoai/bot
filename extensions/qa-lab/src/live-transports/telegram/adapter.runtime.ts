@@ -1,6 +1,6 @@
 // Qa Lab plugin module implements Telegram live transport adapter behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { QaRunnerCliRegistration } from "openclaw/plugin-sdk/qa-runner-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { QaRunnerCliRegistration } from "bot/plugin-sdk/qa-runner-runtime";
 import {
   assertQaGatewayCredentialLeaseQuarantine,
   shouldRetainQaGatewayCredentialLease,
@@ -168,7 +168,7 @@ export async function createTelegramQaTransportAdapter(
       logicalConversationId = input.conversation.id;
       logicalConversationKind = input.conversation.kind;
       const text = sutIdentity.username
-        ? input.text.replaceAll("@openclaw", `@${sutIdentity.username}`)
+        ? input.text.replaceAll("@bot", `@${sutIdentity.username}`)
         : input.text;
       const nativeReplyToId = input.replyToId ? nativeMessageIds.get(input.replyToId) : undefined;
       const sent = await callTelegramApi<{ message_id: number }>(
@@ -205,7 +205,7 @@ export async function createTelegramQaTransportAdapter(
       busMessageIds.clear();
     },
     createGatewayConfig: () =>
-      buildTelegramQaConfig({} as OpenClawConfig, {
+      buildTelegramQaConfig({} as BotConfig, {
         groupId: runtimeEnv.groupId,
         sutToken: runtimeEnv.sutToken,
         driverBotId: driverIdentity.id,

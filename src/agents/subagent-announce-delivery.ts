@@ -3,14 +3,14 @@
  *
  * Routes completion payloads through gateway/channel/session paths and records delivery evidence.
  */
-import { clampTimerTimeoutMs } from "@openclaw/normalization-core/number-coercion";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { clampTimerTimeoutMs } from "@hanzo/bot-normalization-core/number-coercion";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   normalizeStringEntries,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-normalization";
 import { completionRequiresMessageToolDelivery } from "../auto-reply/reply/completion-delivery-policy.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { isFastTestRuntimeEnv } from "../infra/env.js";
 import { isOutboundDeliveryError } from "../infra/outbound/deliver-types.js";
 import { sourceDeliveryTargetsMatch } from "../infra/outbound/source-delivery-plan.js";
@@ -326,7 +326,7 @@ async function resolveActiveWakeWithRetries(
   return outcome;
 }
 
-export function resolveSubagentAnnounceTimeoutMs(cfg: OpenClawConfig): number {
+export function resolveSubagentAnnounceTimeoutMs(cfg: BotConfig): number {
   const configured = cfg.agents?.defaults?.subagents?.announceTimeoutMs;
   return clampTimerTimeoutMs(configured) ?? DEFAULT_SUBAGENT_ANNOUNCE_TIMEOUT_MS;
 }
@@ -781,7 +781,7 @@ function resolveGeneratedMediaFailureNotice(params: {
 }
 
 async function deliverGeneratedMediaCompletionDirect(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   requesterSessionKey: string;
   directIdempotencyKey: string;
   deliveryTarget: {
@@ -911,7 +911,7 @@ function hasFailedSubagentNoOutputCompletion(events: readonly AgentInternalEvent
 }
 
 async function deliverTextCompletionDirect(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   requesterSessionKey: string;
   directIdempotencyKey: string;
   deliveryTarget: {
@@ -1910,7 +1910,7 @@ const testing = {
 };
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
   (globalThis as Record<PropertyKey, unknown>)[
-    Symbol.for("openclaw.subagentAnnounceDeliveryTestApi")
+    Symbol.for("bot.subagentAnnounceDeliveryTestApi")
   ] = testing;
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

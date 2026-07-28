@@ -1,5 +1,5 @@
 import { readPackageVersion } from "./package-json.js";
-// Runs OpenClaw package update checks, package steps, and restart handoff.
+// Runs Bot package update checks, package steps, and restart handoff.
 import { detectGlobalInstallManagerForRoot } from "./update-global.js";
 import { buildUpdateCommandRunner, DEFAULT_TIMEOUT_MS } from "./update-runner-command.js";
 import { resolveUpdateDoctorExecutionPolicy } from "./update-runner-doctor.js";
@@ -52,7 +52,7 @@ export async function runGatewayUpdate(opts: UpdateRunnerOptions = {}): Promise<
       status: "error",
       mode: "unknown",
       root: gitRoot,
-      reason: "not-openclaw-root",
+      reason: "not-bot-root",
       steps: [],
       durationMs: Date.now() - startedAt,
     };
@@ -71,7 +71,7 @@ export async function runGatewayUpdate(opts: UpdateRunnerOptions = {}): Promise<
     return {
       status: "error",
       mode: "unknown",
-      reason: "not-openclaw-root",
+      reason: "not-bot-root",
       steps: [],
       durationMs: Date.now() - startedAt,
     };

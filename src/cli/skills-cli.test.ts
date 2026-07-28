@@ -5,7 +5,7 @@ import { createEmptyInstallChecks } from "./requirements-test-fixtures.js";
 import { formatSkillInfo, formatSkillsCheck, formatSkillsList } from "./skills-cli.format.js";
 
 // Unit tests: don't pay the runtime cost of loading/parsing the real skills loader.
-vi.mock("openclaw/plugin-sdk/agent-sessions", () => ({
+vi.mock("bot/plugin-sdk/agent-sessions", () => ({
   loadSkillsFromDir: () => ({ skills: [] }),
   formatSkillsForPrompt: () => "",
 }));
@@ -56,7 +56,7 @@ describe("skills-cli", () => {
       const report = createMockReport([]);
       const output = formatSkillsList(report, {});
       expect(output).toContain("No skills found");
-      expect(output).toContain("openclaw skills search");
+      expect(output).toContain("bot skills search");
     });
 
     it("formats skills list with eligible skill", () => {
@@ -153,7 +153,7 @@ describe("skills-cli", () => {
       const report = createMockReport([]);
       const output = formatSkillInfo(report, "unknown-skill", {});
       expect(output).toContain("not found");
-      expect(output).toContain("openclaw skills install");
+      expect(output).toContain("bot skills install");
     });
 
     it("shows detailed info for a skill", () => {
@@ -286,7 +286,7 @@ describe("skills-cli", () => {
       expect(output).toContain("ready-2");
       expect(output).toContain("not-ready");
       expect(output).toContain("go"); // missing binary
-      expect(output).toContain("openclaw skills update");
+      expect(output).toContain("bot skills update");
     });
 
     it("normalizes text-presentation emoji selectors in check output", () => {

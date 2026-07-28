@@ -1,10 +1,10 @@
 // Covers model fallback ordering, error classification, and auth cooldown behavior.
 import crypto from "node:crypto";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { TranscriptNotContinuableError } from "../../packages/agent-core/src/errors.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import {
   onTrustedInternalDiagnosticEvent,
   resetDiagnosticEventsForTest,
@@ -269,7 +269,7 @@ async function runModelFallbackCase(name: string, run: () => Promise<void>): Pro
   }
 }
 
-function makeFallbacksOnlyCfg(): OpenClawConfig {
+function makeFallbacksOnlyCfg(): BotConfig {
   return {
     agents: {
       defaults: {
@@ -278,10 +278,10 @@ function makeFallbacksOnlyCfg(): OpenClawConfig {
         },
       },
     },
-  } as OpenClawConfig;
+  } as BotConfig;
 }
 
-function makeProviderFallbackCfg(provider: string): OpenClawConfig {
+function makeProviderFallbackCfg(provider: string): BotConfig {
   return makeCfg({
     agents: {
       defaults: {
@@ -296,7 +296,7 @@ function makeProviderFallbackCfg(provider: string): OpenClawConfig {
 
 function makeProviderOrderFallbackCfg(
   entries: Array<[provider: string, model: string]>,
-): OpenClawConfig {
+): BotConfig {
   return {
     agents: {
       defaults: {
@@ -316,7 +316,7 @@ function makeProviderOrderFallbackCfg(
         ]),
       ),
     },
-  } as unknown as OpenClawConfig;
+  } as unknown as BotConfig;
 }
 
 async function withTempAuthStore<T>(
@@ -329,12 +329,12 @@ async function withTempAuthStore<T>(
 }
 
 async function makeAuthTempDir(): Promise<string> {
-  authTempRoot ||= path.join("/tmp", "openclaw-auth-suite-mock");
+  authTempRoot ||= path.join("/tmp", "bot-auth-suite-mock");
   return path.join(authTempRoot, `case-${++authTempCounter}`);
 }
 
 async function runWithStoredAuth(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   store: AuthProfileStore;
   provider: string;
   run: (provider: string, model: string) => Promise<string>;
@@ -520,7 +520,7 @@ async function expectSkippedUnavailableProvider(params: {
 }
 
 // Issue-backed Anthropic/OpenAI-compatible insufficient_quota payload under HTTP 400:
-// https://github.com/openclaw/openclaw/issues/23440
+// https://github.com/hanzoai/bot/issues/23440
 const INSUFFICIENT_QUOTA_PAYLOAD =
   '{"type":"error","error":{"type":"insufficient_quota","message":"Your account has insufficient quota balance to run this request."}}';
 
@@ -539,7 +539,7 @@ function captureModelFailoverDiagnostics(): {
   return { events, stop };
 }
 
-function makeDiagnosticFallbackConfig(fallbacks: string[]): OpenClawConfig {
+function makeDiagnosticFallbackConfig(fallbacks: string[]): BotConfig {
   return makeCfg({
     agents: { defaults: { model: { primary: "openai/gpt-5.5", fallbacks } } },
   });
@@ -803,8 +803,8 @@ describe("runWithModelFallback", () => {
   });
 
   it("uses the opt-in auth skip cache on the second turn for the same session", async () => {
-    const previous = process.env.OPENCLAW_FALLBACK_SKIP_TTL_MS;
-    process.env.OPENCLAW_FALLBACK_SKIP_TTL_MS = "60000";
+    const previous = process.env.BOT_FALLBACK_SKIP_TTL_MS;
+    process.env.BOT_FALLBACK_SKIP_TTL_MS = "60000";
     try {
       const cfg = makeCfg({
         agents: {
@@ -864,9 +864,9 @@ describe("runWithModelFallback", () => {
       );
     } finally {
       if (previous === undefined) {
-        delete process.env.OPENCLAW_FALLBACK_SKIP_TTL_MS;
+        delete process.env.BOT_FALLBACK_SKIP_TTL_MS;
       } else {
-        process.env.OPENCLAW_FALLBACK_SKIP_TTL_MS = previous;
+        process.env.BOT_FALLBACK_SKIP_TTL_MS = previous;
       }
     }
   });
@@ -879,13 +879,13 @@ describe("runWithModelFallback", () => {
       cfg: makeCfg(),
       provider: "openai",
       model: "gpt-4.1-mini",
-      agentDir: "/tmp/openclaw-no-auth-profiles",
+      agentDir: "/tmp/bot-no-auth-profiles",
       run,
     });
 
     expect(result.result).toBe("ok");
     expect(authSourceCheckMock.hasAnyAuthProfileStoreSource).toHaveBeenCalledWith(
-      "/tmp/openclaw-no-auth-profiles",
+      "/tmp/bot-no-auth-profiles",
     );
     expect(authRuntimeMock.runtime.ensureAuthProfileStore).not.toHaveBeenCalled();
     expect(run).toHaveBeenCalledWith("openai", "gpt-4.1-mini", {
@@ -1009,7 +1009,7 @@ describe("runWithModelFallback", () => {
       },
     ] satisfies Array<{
       name: string;
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       provider: string;
       model: string;
       requestedRouteResolution?: "raw" | "resolved";
@@ -1128,7 +1128,7 @@ describe("runWithModelFallback", () => {
       },
     });
     const missingToolResultError = new Error(
-      "OpenClaw recorded a native Codex tool.call without a matching tool.result before the turn completed.",
+      "Bot recorded a native Codex tool.call without a matching tool.result before the turn completed.",
     );
     const run = vi.fn().mockRejectedValue(missingToolResultError);
 
@@ -1199,20 +1199,20 @@ describe("runWithModelFallback", () => {
     );
   });
 
-  it("does not prepare agent harness plugins for forced OpenClaw candidates", async () => {
+  it("does not prepare agent harness plugins for forced Bot candidates", async () => {
     const cfg = makeCfg({
       models: {
         providers: {
           openai: {
             baseUrl: "https://api.openai.com/v1",
-            agentRuntime: { id: "openclaw" },
+            agentRuntime: { id: "bot" },
             models: [],
           },
         },
       },
     });
     const prepareAgentHarnessRuntime = vi.fn(() => {
-      throw new Error("OpenClaw candidates should not prepare plugin harnesses");
+      throw new Error("Bot candidates should not prepare plugin harnesses");
     });
     const run = vi.fn().mockResolvedValueOnce("ok");
 
@@ -1229,20 +1229,20 @@ describe("runWithModelFallback", () => {
     expect(run).toHaveBeenCalledTimes(1);
   });
 
-  it("does not prepare agent harness plugins for forced OpenClaw runtime candidates", async () => {
+  it("does not prepare agent harness plugins for forced Bot runtime candidates", async () => {
     const cfg = makeCfg({
       models: {
         providers: {
           openai: {
             baseUrl: "https://api.openai.com/v1",
-            agentRuntime: { id: "openclaw" },
+            agentRuntime: { id: "bot" },
             models: [],
           },
         },
       },
     });
     const prepareAgentHarnessRuntime = vi.fn(() => {
-      throw new Error("OpenClaw candidates should not prepare plugin harnesses");
+      throw new Error("Bot candidates should not prepare plugin harnesses");
     });
     const run = vi.fn().mockResolvedValueOnce("ok");
 
@@ -1843,7 +1843,7 @@ describe("runWithModelFallback", () => {
     const lockError = new SessionWriteLockTimeoutError({
       timeoutMs: 10_000,
       owner: "pid=37121",
-      lockPath: "/tmp/openclaw/session.jsonl.lock",
+      lockPath: "/tmp/bot/session.jsonl.lock",
     });
     const run = vi.fn().mockRejectedValue(lockError);
 
@@ -1928,7 +1928,7 @@ describe("runWithModelFallback", () => {
     const lockError = new SessionWriteLockTimeoutError({
       timeoutMs: 10_000,
       owner: "pid=37121",
-      lockPath: "/tmp/openclaw/session.jsonl.lock",
+      lockPath: "/tmp/bot/session.jsonl.lock",
     });
     const providerError = {
       status: 429,
@@ -2549,7 +2549,7 @@ describe("runWithModelFallback", () => {
         provider: "anthropic",
         model: "claude-haiku-3-5",
         resolveAgentHarnessRuntimeOverride: (provider) =>
-          provider === "openai" ? "openclaw" : undefined,
+          provider === "openai" ? "bot" : undefined,
         run,
       }),
     ).rejects.toBe(switchError);
@@ -2570,7 +2570,7 @@ describe("runWithModelFallback", () => {
         provider: "openai",
         model: "gpt-4.1-mini",
         fallbacksOverride: [],
-        resolveAgentHarnessRuntimeOverride: () => "openclaw",
+        resolveAgentHarnessRuntimeOverride: () => "bot",
         run,
       }),
     ).rejects.toBe(switchError);
@@ -2969,7 +2969,7 @@ describe("runWithModelFallback", () => {
   });
 
   it("warns when falling back due to model_not_found", async () => {
-    const warnLogs = createWarnLogCapture("openclaw-model-fallback-test");
+    const warnLogs = createWarnLogCapture("bot-model-fallback-test");
     try {
       const cfg = makeCfg();
       const run = vi
@@ -2996,7 +2996,7 @@ describe("runWithModelFallback", () => {
   });
 
   it("sanitizes model identifiers in model_not_found warnings", async () => {
-    const warnLogs = createWarnLogCapture("openclaw-model-fallback-test");
+    const warnLogs = createWarnLogCapture("bot-model-fallback-test");
     try {
       const cfg = makeCfg();
       const run = vi
@@ -3740,7 +3740,7 @@ describe("runWithModelFallback", () => {
         },
       ] satisfies Array<{
         name: string;
-        cfg: OpenClawConfig;
+        cfg: BotConfig;
         provider: string;
         model: string;
         calls: Array<[string, string]>;
@@ -4552,7 +4552,7 @@ describe("runWithImageModelFallback", () => {
       },
     ] satisfies Array<{
       name: string;
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       modelOverride: string;
       expected: Array<[string, string]>;
     }>;

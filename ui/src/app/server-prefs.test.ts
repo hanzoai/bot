@@ -101,7 +101,7 @@ describe("applyServerUiPrefs", () => {
 
     pushServerUiPrefs(client, { themeMode: "dark" });
     await vi.waitFor(() =>
-      expect(localStorage.getItem(`openclaw.control.serverPrefs.pending.v1:${scope}`)).toBeNull(),
+      expect(localStorage.getItem(`bot.control.serverPrefs.pending.v1:${scope}`)).toBeNull(),
     );
 
     expect(applyServerUiPrefs(oldSnapshot, { scope, onApplied })).toBe(false);
@@ -120,7 +120,7 @@ describe("applyServerUiPrefs", () => {
     >[0];
     pushServerUiPrefs(client, { themeMode: "dark" });
     await vi.waitFor(() =>
-      expect(localStorage.getItem(`openclaw.control.serverPrefs.pending.v1:${scope}`)).toBeNull(),
+      expect(localStorage.getItem(`bot.control.serverPrefs.pending.v1:${scope}`)).toBeNull(),
     );
 
     // A new post-bump snapshot object represents a genuine foreign restore and is LWW-correct.
@@ -137,7 +137,7 @@ describe("applyServerUiPrefs", () => {
     expect(applyServerUiPrefs(snapshot, { scope, onApplied })).toBe(true);
     patchSettings({ themeMode: "light" });
     localStorage.setItem(
-      `openclaw.control.serverPrefs.v1:${scope}`,
+      `bot.control.serverPrefs.v1:${scope}`,
       JSON.stringify({ themeMode: "light" }),
     );
     expect(applyServerUiPrefs(snapshot, { scope, onApplied })).toBe(false);
@@ -293,8 +293,8 @@ describe("pushServerUiPrefs", () => {
     });
     return { promise, reject, resolve };
   };
-  const pendingKey = (scope: string) => `openclaw.control.serverPrefs.pending.v1:${scope}`;
-  const lastSeenKey = (scope: string) => `openclaw.control.serverPrefs.v1:${scope}`;
+  const pendingKey = (scope: string) => `bot.control.serverPrefs.pending.v1:${scope}`;
+  const lastSeenKey = (scope: string) => `bot.control.serverPrefs.v1:${scope}`;
   const readPending = (scope: string) =>
     JSON.parse(localStorage.getItem(pendingKey(scope)) ?? "{}") as Record<string, unknown>;
   const createClient = (request: RequestMock, gatewayUrl = "ws://gw", connected = true) =>

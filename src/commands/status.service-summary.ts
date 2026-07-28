@@ -1,7 +1,7 @@
 // Reads service manager state for status reports.
 // Converts gateway/node launchd/systemd state into a compact summary shape.
 
-import { OPENCLAW_WRAPPER_ENV_KEY } from "../daemon/program-args.js";
+import { BOT_WRAPPER_ENV_KEY } from "../daemon/program-args.js";
 import {
   summarizeGatewayServiceLayout,
   type GatewayServiceLayoutSummary,
@@ -14,7 +14,7 @@ type ServiceStatusSummary = {
   label: string;
   installed: boolean | null;
   loaded: boolean;
-  managedByOpenClaw: boolean;
+  managedByBot: boolean;
   externallyManaged: boolean;
   loadedText: string;
   runtime: GatewayServiceRuntime | undefined;
@@ -25,7 +25,7 @@ type ServiceStatusSummary = {
 function normalizeServiceWrapperPath(
   command: GatewayServiceCommandConfig | null,
 ): string | undefined {
-  const wrapperPath = command?.environment?.[OPENCLAW_WRAPPER_ENV_KEY]?.trim();
+  const wrapperPath = command?.environment?.[BOT_WRAPPER_ENV_KEY]?.trim();
   return wrapperPath || undefined;
 }
 
@@ -39,10 +39,10 @@ export async function readServiceStatusSummary(
     const state = await readGatewayServiceState(service, { env: process.env, timeoutMs });
     const layout = await summarizeGatewayServiceLayout(state.command);
     const wrapperPath = normalizeServiceWrapperPath(state.command);
-    const managedByOpenClaw = state.installed;
+    const managedByBot = state.installed;
     // A running unmanaged process still counts as installed for status display.
-    const externallyManaged = !managedByOpenClaw && state.running;
-    const installed = managedByOpenClaw || externallyManaged;
+    const externallyManaged = !managedByBot && state.running;
+    const installed = managedByBot || externallyManaged;
     const loadedText = externallyManaged
       ? "running (externally managed)"
       : state.loaded
@@ -52,7 +52,7 @@ export async function readServiceStatusSummary(
       label: service.label,
       installed,
       loaded: state.loaded,
-      managedByOpenClaw,
+      managedByBot,
       externallyManaged,
       loadedText,
       runtime: state.runtime,
@@ -65,7 +65,7 @@ export async function readServiceStatusSummary(
       label: fallbackLabel,
       installed: null,
       loaded: false,
-      managedByOpenClaw: false,
+      managedByBot: false,
       externallyManaged: false,
       loadedText: "unknown",
       runtime: undefined,

@@ -3,8 +3,8 @@
  *
  * Builds safe status snapshots and resolves enabled/configured account state.
  */
-import { normalizeStringEntries } from "@openclaw/normalization-core/string-normalization";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeStringEntries } from "@hanzo/bot-normalization-core/string-normalization";
+import type { BotConfig } from "../config/types.bot.js";
 import { isRecord } from "../utils.js";
 import {
   projectSafeChannelAccountSnapshotFields,
@@ -19,7 +19,7 @@ import type { ChannelPlugin } from "./plugins/types.plugin.js";
 export function buildChannelAccountSnapshot(params: {
   plugin: ChannelPlugin;
   account: unknown;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   enabled: boolean;
   configured: boolean;
@@ -39,7 +39,7 @@ export function buildChannelAccountSnapshot(params: {
  */
 export function formatChannelAllowFrom(params: {
   plugin: ChannelPlugin;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
   allowFrom: Array<string | number>;
 }): string[] {
@@ -59,7 +59,7 @@ export function formatChannelAllowFrom(params: {
 export function resolveChannelAccountEnabled(params: {
   plugin: ChannelPlugin;
   account: unknown;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): boolean {
   if (params.plugin.config.isEnabled) {
     return params.plugin.config.isEnabled(params.account, params.cfg);
@@ -74,7 +74,7 @@ export function resolveChannelAccountEnabled(params: {
 export async function resolveChannelAccountConfigured(params: {
   plugin: ChannelPlugin;
   account: unknown;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   readAccountConfiguredField?: boolean;
 }): Promise<boolean> {
   if (params.plugin.config.isConfigured) {

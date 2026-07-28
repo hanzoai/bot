@@ -2,16 +2,16 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/plugin-entry";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+import type { BotConfig } from "bot/plugin-sdk/plugin-entry";
+import { normalizeAgentId } from "bot/plugin-sdk/routing";
 import {
   archiveLegacyStateSource,
-  detectOpenClawStateDatabaseSchemaMigrations,
+  detectBotStateDatabaseSchemaMigrations,
   type PluginDoctorStateMigration,
   type PluginStateKeyedStore,
-  repairOpenClawStateDatabaseSchema,
-  type OpenClawStateDatabaseSchemaMigration,
-} from "openclaw/plugin-sdk/runtime-doctor";
+  repairBotStateDatabaseSchema,
+  type BotStateDatabaseSchemaMigration,
+} from "bot/plugin-sdk/runtime-doctor";
 import {
   buildVoiceCallLegacyJsonlEventKey,
   CALL_RECORD_CHUNK_MAX_ENTRIES,
@@ -71,7 +71,7 @@ function resolveUserPath(input: string, env: NodeJS.ProcessEnv): string {
 
 /** Read the configured voice-call store path from either package id. */
 function getVoiceCallConfigStore(config: PluginDoctorStateMigrationParams["config"]): string {
-  for (const pluginId of ["voice-call", "@openclaw/voice-call"]) {
+  for (const pluginId of ["voice-call", "@hanzo/bot-voice-call"]) {
     const rawConfig = config.plugins?.entries?.[pluginId]?.config;
     if (!rawConfig || typeof rawConfig !== "object" || Array.isArray(rawConfig)) {
       continue;
@@ -95,9 +95,9 @@ function asRecord(value: unknown): Record<string, unknown> | undefined {
 }
 
 /** Return Voice Call agents whose templated core session stores need migration. */
-export function resolveSessionStoreAgentIds(params: { cfg: OpenClawConfig }): string[] {
+export function resolveSessionStoreAgentIds(params: { cfg: BotConfig }): string[] {
   const agentIds = new Set<string>();
-  for (const pluginId of ["voice-call", "@openclaw/voice-call"]) {
+  for (const pluginId of ["voice-call", "@hanzo/bot-voice-call"]) {
     const entry = params.cfg.plugins?.entries?.[pluginId];
     if (!entry) {
       continue;
@@ -135,18 +135,18 @@ function resolveVoiceCallStateDatabaseEnv(
 ): NodeJS.ProcessEnv {
   return {
     ...params.env,
-    OPENCLAW_STATE_DIR: resolveVoiceCallStorePath(params),
+    BOT_STATE_DIR: resolveVoiceCallStorePath(params),
   };
 }
 
-function describeVoiceCallSchemaMigration(migration: OpenClawStateDatabaseSchemaMigration): string {
+function describeVoiceCallSchemaMigration(migration: BotStateDatabaseSchemaMigration): string {
   switch (migration.kind) {
     case "agent-databases-composite-primary-key":
       return "agent database registry primary key -> agent_id,path";
     case "audit-events-v2":
       return "audit event ledger -> versioned message lifecycle schema";
     case "operator-approvals-system-agent":
-      return "operator approvals -> OpenClaw system changes";
+      return "operator approvals -> Bot system changes";
     case "session-watch-cursor-provenance-v4":
       return "session watch cursors -> provenance column";
     case "strict-tables-v3":
@@ -306,7 +306,7 @@ export const stateMigrations: PluginDoctorStateMigration[] = [
       const storePath = resolveVoiceCallStorePath(params);
       const filePath = resolveVoiceCallLegacyCallLogPath(storePath);
       const { entries } = await readLegacyCallRecords(filePath);
-      const schemaMigrations = detectOpenClawStateDatabaseSchemaMigrations({
+      const schemaMigrations = detectBotStateDatabaseSchemaMigrations({
         env: resolveVoiceCallStateDatabaseEnv(params),
       });
       if (entries.length === 0 && schemaMigrations.length === 0) {
@@ -334,11 +334,11 @@ export const stateMigrations: PluginDoctorStateMigration[] = [
       const { entries, warnings: readWarnings } = await readLegacyCallRecords(filePath);
       warnings.push(...readWarnings);
       const stateDatabaseEnv = resolveVoiceCallStateDatabaseEnv(params);
-      const schemaMigrations = detectOpenClawStateDatabaseSchemaMigrations({
+      const schemaMigrations = detectBotStateDatabaseSchemaMigrations({
         env: stateDatabaseEnv,
       });
       if (schemaMigrations.length > 0) {
-        const repaired = repairOpenClawStateDatabaseSchema({ env: stateDatabaseEnv });
+        const repaired = repairBotStateDatabaseSchema({ env: stateDatabaseEnv });
         warnings.push(...repaired.warnings);
         if (repaired.warnings.length > 0) {
           return { changes, warnings };

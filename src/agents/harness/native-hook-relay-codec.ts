@@ -68,7 +68,7 @@ const nativeHookRelayProviderAdapters: Record<
               ? { behavior: "allow" }
               : {
                   behavior: "deny",
-                  message: message?.trim() || "Denied by OpenClaw",
+                  message: message?.trim() || "Denied by Bot",
                 },
         },
       })}\n`,
@@ -209,7 +209,7 @@ function readCodexToolResponse(rawPayload: JsonValue): unknown {
 
 export function readNativeHookRelayApprovalMode(rawPayload: JsonValue): "report" | undefined {
   const payload = isJsonObject(rawPayload) ? rawPayload : {};
-  return payload.openclaw_approval_mode === "report" ? "report" : undefined;
+  return payload.bot_approval_mode === "report" ? "report" : undefined;
 }
 
 export function normalizeNativeHookToolName(toolName: string | undefined): string {

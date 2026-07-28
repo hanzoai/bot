@@ -6,14 +6,14 @@ import type {
   EmbeddingProviderAdapter,
   EmbeddingProviderCreateOptions,
   EmbeddingProviderCreateResult,
-} from "openclaw/plugin-sdk/embedding-providers";
+} from "bot/plugin-sdk/embedding-providers";
 import {
   createLocalEmbeddingProvider,
   type EmbeddingInput as MemoryEmbeddingInput,
   type MemoryEmbeddingProvider,
   type MemoryEmbeddingProviderCreateOptions,
   type MemoryEmbeddingProviderCreateResult,
-} from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
+} from "bot/plugin-sdk/memory-core-host-engine-embeddings";
 import { formatLlamaCppSetupError, resolveNodeLlamaCppImportUrl } from "./node-llama.runtime.js";
 
 type LlamaCppLocalOptions = {
@@ -27,7 +27,7 @@ type LlamaCppEmbeddingProviderRuntimeOptions = {
 };
 
 const LLAMA_CPP_EMBEDDING_PROVIDER_ID = "local";
-const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("openclaw.localEmbeddingRuntimeFacts");
+const LOCAL_EMBEDDING_RUNTIME_FACTS = Symbol.for("bot.localEmbeddingRuntimeFacts");
 const DEFAULT_LLAMA_CPP_EMBEDDING_MODEL =
   "hf:ggml-org/embeddinggemma-300m-qat-q8_0-GGUF/embeddinggemma-300m-qat-Q8_0.gguf";
 const DEFAULT_LLAMA_CPP_EMBEDDING_MODEL_CACHE_FILE_NAME =

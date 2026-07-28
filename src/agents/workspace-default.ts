@@ -5,7 +5,7 @@
  */
 import os from "node:os";
 import path from "node:path";
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import { resolveRequiredHomeDir } from "../infra/home-dir.js";
 
 /** Resolve the default agent workspace directory from env/profile/home state. */
@@ -13,16 +13,16 @@ export function resolveDefaultAgentWorkspaceDir(
   env: NodeJS.ProcessEnv = process.env,
   homedir: () => string = os.homedir,
 ): string {
-  const workspaceDir = env.OPENCLAW_WORKSPACE_DIR?.trim();
+  const workspaceDir = env.BOT_WORKSPACE_DIR?.trim();
   if (workspaceDir) {
     return path.resolve(workspaceDir);
   }
   const home = resolveRequiredHomeDir(env, homedir);
-  const profile = env.OPENCLAW_PROFILE?.trim();
+  const profile = env.BOT_PROFILE?.trim();
   if (profile && normalizeOptionalLowercaseString(profile) !== "default") {
-    return path.join(home, ".openclaw", `workspace-${profile}`);
+    return path.join(home, ".bot", `workspace-${profile}`);
   }
-  return path.join(home, ".openclaw", "workspace");
+  return path.join(home, ".bot", "workspace");
 }
 
 /** Default agent workspace directory for the current process environment. */

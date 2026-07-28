@@ -2,12 +2,12 @@
 import {
   defineFinalizableLivePreviewAdapter,
   deliverWithFinalizableLivePreviewAdapter,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-outbound";
 import {
   buildTtsSupplementMediaPayload,
   getReplyPayloadTtsSupplement,
   isReasoningReplyPayload,
-} from "openclaw/plugin-sdk/reply-payload";
+} from "bot/plugin-sdk/reply-payload";
 import { updateMattermostPost, type MattermostClient } from "./client.js";
 import { createMattermostDraftStream } from "./draft-stream.js";
 import { canFinalizeMattermostPreviewInPlace } from "./monitor-context.js";

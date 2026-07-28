@@ -1,4 +1,4 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { describe, expect, it } from "vitest";
 import { isTelegramMiniAppOwner } from "./owner.js";
 
@@ -14,7 +14,7 @@ describe("isTelegramMiniAppOwner", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     await expect(
       isTelegramMiniAppOwner({ cfg, accountId: "default", userId: "100" }),
@@ -31,7 +31,7 @@ describe("isTelegramMiniAppOwner", () => {
     const cfg = {
       commands: { ownerAllowFrom: ["*", "telegram:owner"] },
       channels: { telegram: { allowFrom: ["*"] } },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
 
     await expect(
       isTelegramMiniAppOwner({ cfg, accountId: "default", userId: "100" }),

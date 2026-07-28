@@ -1,7 +1,7 @@
 // Discord tests cover native command.command arg plugin behavior.
-import type { ChatCommandDefinition } from "openclaw/plugin-sdk/command-auth-native";
-import * as commandRegistryModule from "openclaw/plugin-sdk/command-auth-native";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { ChatCommandDefinition } from "bot/plugin-sdk/command-auth-native";
+import * as commandRegistryModule from "bot/plugin-sdk/command-auth-native";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { DispatchDiscordCommandInteraction } from "./native-command-dispatch.js";
 import { createDiscordCommandArgFallbackButton } from "./native-command-ui.js";
@@ -33,13 +33,13 @@ function createCommandDefinition(): ChatCommandDefinition {
 }
 
 function createContext(
-  discordConfig: NonNullable<OpenClawConfig["channels"]>["discord"],
+  discordConfig: NonNullable<BotConfig["channels"]>["discord"],
 ): CommandArgContext {
   const cfg = {
     channels: {
       discord: discordConfig,
     },
-  } as OpenClawConfig;
+  } as BotConfig;
   return {
     cfg,
     discordConfig,

@@ -1,12 +1,12 @@
 // Google tests cover google plugin behavior.
-import { completeSimple, type Model } from "openclaw/plugin-sdk/llm";
-import { resolveFfmpegBin } from "openclaw/plugin-sdk/media-runtime";
+import { completeSimple, type Model } from "bot/plugin-sdk/llm";
+import { resolveFfmpegBin } from "bot/plugin-sdk/media-runtime";
 import {
   registerProviderPlugin,
   requireRegisteredProvider,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import { normalizeTranscriptForMatch } from "openclaw/plugin-sdk/provider-test-contracts";
-import { isLiveTestEnabled } from "openclaw/plugin-sdk/test-live";
+} from "bot/plugin-sdk/plugin-test-runtime";
+import { normalizeTranscriptForMatch } from "bot/plugin-sdk/provider-test-contracts";
+import { isLiveTestEnabled } from "bot/plugin-sdk/test-live";
 import { describe, expect, it } from "vitest";
 import plugin from "./index.js";
 import { buildGoogleLiveCatalogProvider } from "./provider-catalog.js";
@@ -95,7 +95,7 @@ describeLive("google plugin live", () => {
           messages: [
             {
               role: "user",
-              content: "Reply with exactly: OpenClaw live catalog OK",
+              content: "Reply with exactly: Bot live catalog OK",
               timestamp: Date.now(),
             },
           ],
@@ -116,7 +116,7 @@ describeLive("google plugin live", () => {
     const provider = requireRegisteredProvider(speechProviders, "google");
 
     const audioFile = await provider.synthesize({
-      text: "OpenClaw Google text to speech integration test OK.",
+      text: "Bot Google text to speech integration test OK.",
       cfg: { plugins: { enabled: true } } as never,
       providerConfig: { apiKey: GOOGLE_API_KEY },
       target: "audio-file",
@@ -137,7 +137,7 @@ describeLive("google plugin live", () => {
     const provider = requireRegisteredProvider(speechProviders, "google");
 
     const audioFile = await provider.synthesize({
-      text: "OpenClaw Google voice note integration test OK.",
+      text: "Bot Google voice note integration test OK.",
       cfg: { plugins: { enabled: true } } as never,
       providerConfig: { apiKey: GOOGLE_API_KEY },
       target: "voice-note",
@@ -188,7 +188,7 @@ describeLive("google plugin live", () => {
     let lastError: unknown;
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
-        result = await tool?.execute({ query: "OpenClaw GitHub", count: 1 });
+        result = await tool?.execute({ query: "Bot GitHub", count: 1 });
         lastError = undefined;
         break;
       } catch (error) {
@@ -224,7 +224,7 @@ describeLive("google plugin live", () => {
         searchConfig: { provider: "gemini", cacheTtlMinutes: 0, timeoutSeconds: 90 },
       } as never);
 
-      const result = await tool?.execute({ query: "OpenClaw GitHub", count: 1 });
+      const result = await tool?.execute({ query: "Bot GitHub", count: 1 });
 
       expect(process.env.GEMINI_API_KEY).toBeUndefined();
       expect(process.env.GOOGLE_API_KEY).toBeUndefined();

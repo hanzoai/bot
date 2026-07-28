@@ -1,7 +1,7 @@
 // Covers direct-message policy audit findings for channels.
 import { describe, expect, it } from "vitest";
 import type { ChannelPlugin } from "../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { collectChannelSecurityFindings } from "./audit-channel.js";
 
 type ChannelSecurityFinding = Awaited<ReturnType<typeof collectChannelSecurityFindings>>[number];
@@ -19,7 +19,7 @@ function requireFinding(
 
 describe("security audit channel dm policy", () => {
   it("warns when multiple DM senders share the main session", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       session: { dmScope: "main" },
       channels: { whatsapp: { enabled: true } },
     };
@@ -69,7 +69,7 @@ describe("security audit channel dm policy", () => {
   });
 
   it("flags public DMs and shared main-session scope together", async () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       session: { dmScope: "main" },
       channels: { telegram: { enabled: true } },
     };

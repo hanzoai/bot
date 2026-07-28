@@ -4,9 +4,9 @@ import type {
   AcpRuntimeCapabilities,
   AcpRuntimeHandle,
   AcpRuntimeStatus,
-} from "@openclaw/acp-core/runtime/types";
-import { asNullableRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-acp-core/runtime/types";
+import { asNullableRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   AcpRuntimeError,
   formatAcpErrorChain,

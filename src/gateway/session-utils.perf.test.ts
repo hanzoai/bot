@@ -1,7 +1,7 @@
 // Session utility performance tests protect resolver cache scaling for large
 // session lists with repeated provider/model tuples.
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeAll, describe, test, expect, vi } from "vitest";
 import {
   readAcpSessionMetaBatch,
@@ -9,12 +9,12 @@ import {
   writeAcpSessionMetaForMigration,
 } from "../acp/runtime/session-meta.js";
 import * as thinking from "../auto-reply/thinking.js";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import { resetConfigRuntimeState, setRuntimeConfigSnapshot } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
 import { createEmptyPluginRegistry } from "../plugins/registry-empty.js";
 import { resetPluginRuntimeStateForTest, setActivePluginRegistry } from "../plugins/runtime.js";
-import { openOpenClawStateDatabase } from "../state/openclaw-state-db.js";
+import { openBotStateDatabase } from "../state/bot-state-db.js";
 import { withStateDirEnv } from "../test-helpers/state-dir-env.js";
 import * as usageFormat from "../utils/usage-format.js";
 import { listSessionsFromStore } from "./session-utils.js";
@@ -32,12 +32,12 @@ import { listSessionsFromStore } from "./session-utils.js";
  */
 describe("listSessionsFromStore resolver cache", () => {
   beforeAll(async () => {
-    await withStateDirEnv("openclaw-perf-warm-", async ({ stateDir }) => {
+    await withStateDirEnv("bot-perf-warm-", async ({ stateDir }) => {
       resetPluginRuntimeStateForTest();
       setActivePluginRegistry(createEmptyPluginRegistry());
       const cfg = {
         agents: { defaults: { model: { primary: "google-vertex/gemini-3-flash-preview" } } },
-      } as OpenClawConfig;
+      } as BotConfig;
       resetConfigRuntimeState();
       setRuntimeConfigSnapshot(cfg);
       listSessionsFromStore({
@@ -75,14 +75,14 @@ describe("listSessionsFromStore resolver cache", () => {
   });
 
   test("collapses non-lightweight per-row resolver work to O(unique provider/model tuples)", async () => {
-    await withStateDirEnv("openclaw-perf-", async ({ stateDir }) => {
+    await withStateDirEnv("bot-perf-", async ({ stateDir }) => {
       resetPluginRuntimeStateForTest();
       setActivePluginRegistry(createEmptyPluginRegistry());
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           defaults: { model: { primary: "google-vertex/gemini-3-flash-preview" } },
         },
-      } as OpenClawConfig;
+      } as BotConfig;
       resetConfigRuntimeState();
       setRuntimeConfigSnapshot(cfg);
 
@@ -142,12 +142,12 @@ describe("listSessionsFromStore resolver cache", () => {
   });
 
   test("batches ACP metadata reads once per list without changing row results", async () => {
-    await withStateDirEnv("openclaw-perf-acp-", async ({ stateDir }) => {
+    await withStateDirEnv("bot-perf-acp-", async ({ stateDir }) => {
       resetPluginRuntimeStateForTest();
       setActivePluginRegistry(createEmptyPluginRegistry());
       const cfg = {
         agents: { defaults: { model: { primary: "openai/gpt-5" } } },
-      } as OpenClawConfig;
+      } as BotConfig;
       resetConfigRuntimeState();
       setRuntimeConfigSnapshot(cfg);
 
@@ -236,7 +236,7 @@ describe("listSessionsFromStore resolver cache", () => {
       expect(largeBatch.get(aboveSqliteVariableLimit[0]!.entry)).toBeUndefined();
       expect(largeBatch.get(aboveSqliteVariableLimit.at(-1)!.entry)).toBeUndefined();
 
-      const database = openOpenClawStateDatabase();
+      const database = openBotStateDatabase();
       const originalPrepare = database.db.prepare.bind(database.db);
       let acpSelects = 0;
       const prepareSpy = vi.spyOn(database.db, "prepare").mockImplementation((sql: string) => {

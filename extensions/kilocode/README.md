@@ -1,12 +1,12 @@
-# OpenClaw Kilo Gateway Provider
+# Bot Kilo Gateway Provider
 
-Official OpenClaw provider plugin for Kilo Gateway.
+Official Bot provider plugin for Kilo Gateway.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/kilocode-provider
-openclaw gateway restart
+bot plugins install @hanzo/bot-kilocode-provider
+bot gateway restart
 ```
 
-See <https://docs.openclaw.ai/providers/kilocode> for setup and configuration.
+See <https://docs.bot.ai/providers/kilocode> for setup and configuration.

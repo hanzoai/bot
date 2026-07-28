@@ -1,4 +1,4 @@
-import { resolveAgentModelPrimaryValue } from "openclaw/plugin-sdk/provider-onboard";
+import { resolveAgentModelPrimaryValue } from "bot/plugin-sdk/provider-onboard";
 import { describe, expect, it } from "vitest";
 import {
   applyTokenHubConfig,
@@ -6,7 +6,7 @@ import {
   TOKENHUB_DEFAULT_MODEL_REF,
   TOKENPLAN_DEFAULT_MODEL_REF,
 } from "./onboard.js";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+import manifest from "./bot.plugin.json" with { type: "json" };
 
 describe("Tencent onboarding", () => {
   it("applies the TokenHub manifest catalog, default, and aliases", () => {

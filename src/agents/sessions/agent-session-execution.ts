@@ -1,4 +1,4 @@
-import { isContextOverflow } from "@openclaw/ai/internal/runtime";
+import { isContextOverflow } from "@hanzo/bot-ai/internal/runtime";
 import type { AssistantMessage } from "../../llm/types.js";
 import { classifyRateLimitWindow } from "../../llm/utils/rate-limit-window.js";
 import { isRetryableAssistantError } from "../../llm/utils/retry.js";

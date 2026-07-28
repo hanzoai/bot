@@ -2,17 +2,17 @@
 import { describe, expect, it } from "vitest";
 import { computeBaseConfigSchemaResponse } from "./schema-base.js";
 import { CLOUD_WORKER_FIELD_HELP, CLOUD_WORKER_FIELD_LABELS } from "./zod-schema.cloud-workers.js";
-import { OpenClawSchema } from "./zod-schema.js";
+import { BotSchema } from "./zod-schema.js";
 
 function parseCloudWorkers(value: unknown) {
-  const result = OpenClawSchema.safeParse({ cloudWorkers: value });
+  const result = BotSchema.safeParse({ cloudWorkers: value });
   if (!result.success) {
     throw new Error(JSON.stringify(result.error.issues, null, 2));
   }
   return result.data.cloudWorkers;
 }
 
-describe("OpenClawSchema cloudWorkers config", () => {
+describe("BotSchema cloudWorkers config", () => {
   it("derives cloud worker labels and help from the field schemas", () => {
     const response = computeBaseConfigSchemaResponse({ generatedAt: "cloud-worker-metadata" });
     const properties = (
@@ -54,7 +54,7 @@ describe("OpenClawSchema cloudWorkers config", () => {
   });
 
   it("is absent by default and accepts an empty opt-in block", () => {
-    expect(OpenClawSchema.parse({}).cloudWorkers).toBeUndefined();
+    expect(BotSchema.parse({}).cloudWorkers).toBeUndefined();
     expect(parseCloudWorkers({})).toStrictEqual({});
   });
 
@@ -67,7 +67,7 @@ describe("OpenClawSchema cloudWorkers config", () => {
             settings: {
               host: "worker.example.test",
               port: 22,
-              user: "openclaw",
+              user: "bot",
               keyRef: {
                 source: "file",
                 provider: "default",
@@ -85,7 +85,7 @@ describe("OpenClawSchema cloudWorkers config", () => {
           settings: {
             host: "worker.example.test",
             port: 22,
-            user: "openclaw",
+            user: "bot",
             keyRef: {
               source: "file",
               provider: "default",
@@ -141,6 +141,6 @@ describe("OpenClawSchema cloudWorkers config", () => {
     },
     { profiles: { development: { provider: "qa-lab", unsupported: true } } },
   ])("rejects invalid core profile fields %#", (cloudWorkers) => {
-    expect(OpenClawSchema.safeParse({ cloudWorkers }).success).toBe(false);
+    expect(BotSchema.safeParse({ cloudWorkers }).success).toBe(false);
   });
 });

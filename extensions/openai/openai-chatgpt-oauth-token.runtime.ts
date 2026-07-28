@@ -1,9 +1,9 @@
 import {
   resolveOAuthTokenExpiresAt,
   resolveOAuthTokenLifetimeMs,
-} from "openclaw/plugin-sdk/provider-oauth-runtime";
-import { readResponseWithLimit } from "openclaw/plugin-sdk/response-limit-runtime";
-import { fetchWithSsrFGuard, type SsrFPolicy } from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/provider-oauth-runtime";
+import { readResponseWithLimit } from "bot/plugin-sdk/response-limit-runtime";
+import { fetchWithSsrFGuard, type SsrFPolicy } from "bot/plugin-sdk/ssrf-runtime";
 import { throwIfOAuthLoginAborted } from "./openai-chatgpt-oauth-abort.runtime.js";
 
 const CLIENT_ID = "app_EMoamEEZ73f0CkXaXp7hrann";

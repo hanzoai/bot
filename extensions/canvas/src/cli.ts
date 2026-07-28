@@ -4,23 +4,23 @@
 import { randomUUID } from "node:crypto";
 import fs from "node:fs/promises";
 import type { Command } from "commander";
-import { runCommandWithRuntime, theme } from "openclaw/plugin-sdk/cli-runtime";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
+import { runCommandWithRuntime, theme } from "bot/plugin-sdk/cli-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
 import {
   callGatewayFromCli,
   resolveNodeFromNodeList,
   type NodeMatchCandidate,
-} from "openclaw/plugin-sdk/gateway-runtime";
+} from "bot/plugin-sdk/gateway-runtime";
 import {
   parseStrictFiniteNumber,
   parseStrictPositiveInteger,
-} from "openclaw/plugin-sdk/number-runtime";
-import { defaultRuntime } from "openclaw/plugin-sdk/runtime";
+} from "bot/plugin-sdk/number-runtime";
+import { defaultRuntime } from "bot/plugin-sdk/runtime";
 import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
-import { shortenHomePath } from "openclaw/plugin-sdk/text-utility-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
+import { shortenHomePath } from "bot/plugin-sdk/text-utility-runtime";
 import { buildA2UITextJsonl, validateSupportedA2UIJsonl } from "./a2ui-jsonl.js";
 import { canvasSnapshotTempPath, parseCanvasSnapshotPayload } from "./cli-helpers.js";
 
@@ -191,7 +191,7 @@ function unauthorizedHintForMessage(message: string): string | null {
   return null;
 }
 
-/** Creates the default Canvas CLI dependency bundle backed by the OpenClaw gateway CLI. */
+/** Creates the default Canvas CLI dependency bundle backed by the Bot gateway CLI. */
 export function createDefaultCanvasCliDependencies(): CanvasCliDependencies {
   const nodesCallOpts = (cmd: Command, defaults?: { timeoutMs?: number }) =>
     cmd

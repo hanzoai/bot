@@ -8,10 +8,10 @@ import {
   basenameFromAnyPath,
   extnameFromAnyPath,
   nameFromAnyPath,
-} from "@openclaw/media-core/file-name";
-import { detectMime, extensionForMime, normalizeMimeType } from "@openclaw/media-core/mime";
-import { hasHttpUrlPrefix } from "@openclaw/net-policy/url-protocol";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+} from "@hanzo/bot-media-core/file-name";
+import { detectMime, extensionForMime, normalizeMimeType } from "@hanzo/bot-media-core/mime";
+import { hasHttpUrlPrefix } from "@hanzo/bot-net-policy/url-protocol";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { fileStore } from "../infra/file-store.js";
 import { sanitizeUntrustedFileName } from "../infra/fs-safe-advanced.js";
 import { isPathInside } from "../infra/fs-safe.js";
@@ -45,7 +45,7 @@ function setMediaStoreNetworkDepsForTest(deps?: {
 }
 
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.mediaStoreTestApi")] = {
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.mediaStoreTestApi")] = {
     setMediaStoreNetworkDepsForTest,
   };
 }

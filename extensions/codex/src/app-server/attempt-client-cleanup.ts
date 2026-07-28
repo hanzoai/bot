@@ -1,7 +1,7 @@
 /**
  * Best-effort cleanup helpers for Codex app-server startup attempts and turns.
  */
-import { embeddedAgentLog } from "openclaw/plugin-sdk/agent-harness-runtime";
+import { embeddedAgentLog } from "bot/plugin-sdk/agent-harness-runtime";
 import type { CodexAppServerClient } from "./client.js";
 import {
   clearSharedCodexAppServerClientIfCurrent,
@@ -14,7 +14,7 @@ export const CODEX_APP_SERVER_INTERRUPT_TIMEOUT_MS = 5_000;
 /** Timeout for best-effort thread unsubscribe during cleanup. */
 export const CODEX_APP_SERVER_UNSUBSCRIBE_TIMEOUT_MS = 5_000;
 
-/** Raised when a thread subscription may be live on a client OpenClaw no longer controls. */
+/** Raised when a thread subscription may be live on a client Bot no longer controls. */
 export class CodexAppServerUnsafeSubscriptionError extends Error {
   constructor(message: string, options?: ErrorOptions) {
     super(message, options);

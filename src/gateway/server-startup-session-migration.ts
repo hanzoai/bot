@@ -9,11 +9,11 @@ import {
   runSessionStartupMigration,
   type SessionStartupMigrationLogger,
 } from "../config/sessions/startup-migration.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 
 type SessionSqliteStartupImportRunner = (params: {
   allAgents: true;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   mode: "import";
 }) => Promise<DoctorSessionSqliteReport>;
@@ -42,7 +42,7 @@ type SessionMigrationDeps = Parameters<typeof runSessionStartupMigration>[0]["de
  * for hot legacy session issues because runtime no longer falls back to JSONL.
  */
 export async function runStartupSessionMigration(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   log: SessionStartupMigrationLogger;
   deps?: SessionMigrationDeps;
@@ -53,7 +53,7 @@ export async function runStartupSessionMigration(params: {
 }
 
 async function reconcileStartupSessionTranscriptIndexes(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   log: SessionStartupMigrationLogger;
   deps?: SessionMigrationDeps;
@@ -78,7 +78,7 @@ async function reconcileStartupSessionTranscriptIndexes(params: {
 }
 
 async function runStartupSessionSqliteImport(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
   log: SessionStartupMigrationLogger;
   deps?: SessionMigrationDeps;
@@ -100,7 +100,7 @@ async function runStartupSessionSqliteImport(params: {
       throw new Error(
         [
           `session SQLite migration failed during startup because an agent SQLite database could not be opened: ${String(error)}`,
-          'Run "openclaw doctor --session-sqlite recover --session-sqlite-all-agents" to move the corrupt database aside and preserve it for support.',
+          'Run "bot doctor --session-sqlite recover --session-sqlite-all-agents" to move the corrupt database aside and preserve it for support.',
         ].join("\n"),
         { cause: error },
       );
@@ -115,7 +115,7 @@ async function runStartupSessionSqliteImport(params: {
       [
         `session SQLite migration failed during startup with ${blockingIssues.length} blocking issue(s).`,
         ...formatStartupIssueLines(blockingIssues).map((line) => `- ${line}`),
-        'Run "openclaw doctor --session-sqlite inspect --session-sqlite-all-agents" for details.',
+        'Run "bot doctor --session-sqlite inspect --session-sqlite-all-agents" for details.',
         ...(recovery.length > 0 ? recovery : []),
       ].join("\n"),
     );
@@ -136,7 +136,7 @@ async function runStartupSessionSqliteImport(params: {
 
 async function restoreFailedStartupSessionSqliteRun(
   params: {
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     env?: NodeJS.ProcessEnv;
     log: SessionStartupMigrationLogger;
     deps?: SessionMigrationDeps;

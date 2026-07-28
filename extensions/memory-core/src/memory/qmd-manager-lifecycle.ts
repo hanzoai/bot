@@ -61,7 +61,7 @@ export abstract class QmdManagerLifecycle extends QmdManagerSync {
       this.watchPressureWarning,
       count,
       "paths",
-      "Large QMD collections can make OpenClaw run out of file watchers or open files.",
+      "Large QMD collections can make Bot run out of file watchers or open files.",
       "Remove large collections, or set memory.search.sync.watch to false and refresh memory manually.",
       (message) => qmdManagerLog.warn(message),
     );

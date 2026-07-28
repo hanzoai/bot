@@ -2,7 +2,7 @@
 import { vi, type Mock } from "vitest";
 import { clearAgentHarnesses } from "../../agents/harness/registry.js";
 import type { ChannelMessagingAdapter } from "../../channels/plugins/types.core.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import type {
   AcpRuntime,
   AcpRuntimeEnsureInput,
@@ -53,7 +53,7 @@ export const automaticGroupReplyConfig = {
       visibleReplies: "automatic",
     },
   },
-} as const satisfies OpenClawConfig;
+} as const satisfies BotConfig;
 
 export const messageToolGroupReplyConfig = {
   messages: {
@@ -61,13 +61,13 @@ export const messageToolGroupReplyConfig = {
       visibleReplies: "message_tool",
     },
   },
-} as const satisfies OpenClawConfig;
+} as const satisfies BotConfig;
 
 export const automaticDirectReplyConfig = {
   messages: {
     visibleReplies: "automatic",
   },
-} as const satisfies OpenClawConfig;
+} as const satisfies BotConfig;
 
 export let dispatchReplyFromConfig: typeof import("./dispatch-from-config.js").dispatchReplyFromConfig;
 
@@ -150,7 +150,7 @@ export function createAcpRuntime(events: AcpRuntimeEvent[]): MockAcpRuntime {
 
 function createMockAcpSessionManager() {
   return {
-    resolveSession: (params: { cfg: OpenClawConfig; sessionKey: string }) => {
+    resolveSession: (params: { cfg: BotConfig; sessionKey: string }) => {
       const entry = acpMocks.readAcpSessionEntry({
         cfg: params.cfg,
         sessionKey: params.sessionKey,
@@ -194,7 +194,7 @@ function createMockAcpSessionManager() {
     }),
     runTurn: vi.fn(
       async (params: {
-        cfg: OpenClawConfig;
+        cfg: BotConfig;
         sessionKey: string;
         text?: string;
         attachments?: unknown[];
@@ -409,7 +409,7 @@ export const describe0BeforeEach0 = () => {
         payload,
         hint,
       }: {
-        cfg: OpenClawConfig;
+        cfg: BotConfig;
         payload: ReplyPayload;
         hint?: { kind?: string; approvalKind?: string; nativeRouteActive?: boolean };
       }) =>

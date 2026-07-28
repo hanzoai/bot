@@ -1,10 +1,10 @@
 // Managed proxy TLS helpers resolve and load CA trust only for HTTPS forward
-// proxies that OpenClaw owns or inherited from a parent process.
+// proxies that Bot owns or inherited from a parent process.
 import { readFileSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import type { ProxyConfig } from "../../../config/zod-schema.proxy.js";
 
-/** TLS trust material passed to proxy clients for OpenClaw-managed HTTPS proxies. */
+/** TLS trust material passed to proxy clients for Bot-managed HTTPS proxies. */
 export type ManagedProxyTlsOptions = Readonly<{
   ca?: string;
 }>;

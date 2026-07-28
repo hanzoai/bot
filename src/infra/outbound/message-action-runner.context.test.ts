@@ -6,7 +6,7 @@ import type {
   ChannelMessageActionContext,
   ChannelPlugin,
 } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import { setActivePluginRegistry } from "../../plugins/runtime.js";
 import {
   createChannelTestPluginBase,
@@ -269,7 +269,7 @@ describe("runMessageAction context isolation", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       actionParams: {
         channel: "slackdm",
         target: "user:U123",
@@ -379,7 +379,7 @@ describe("runMessageAction context isolation", () => {
             token: "forum-test",
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       action: "send" as const,
       actionParams: {
         message: "hi",
@@ -500,7 +500,7 @@ describe("runMessageAction context isolation", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       actionParams: {
         channel: "workspace",
         target: "channel:C99999999",
@@ -521,7 +521,7 @@ describe("runMessageAction context isolation", () => {
             },
           },
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       actionParams: {
         channel: "workspace",
         target: "channel:C99999999",
@@ -559,7 +559,7 @@ describe("runMessageAction context isolation", () => {
             },
           ],
         },
-      } as OpenClawConfig,
+      } as BotConfig,
       agentId: "sandbox",
       actionParams: {
         channel: "workspace",

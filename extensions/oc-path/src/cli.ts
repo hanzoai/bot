@@ -1,5 +1,5 @@
 /**
- * `openclaw path` — shell access to the OcPath substrate verbs.
+ * `bot path` — shell access to the OcPath substrate verbs.
  *
  * Subcommands: `resolve` / `set` / `find` / `validate` / `emit`.
  * TTY-aware output: human when interactive, JSON when piped; `--json`
@@ -558,7 +558,7 @@ export function registerPathCli(program: Command): void {
   const path = program
     .command("path")
     .description("Inspect and edit workspace files via the oc:// addressing scheme")
-    .addHelpText("after", "\nDocs: https://docs.openclaw.ai/cli/path\n");
+    .addHelpText("after", "\nDocs: https://docs.bot.ai/cli/path\n");
 
   withCommonOpts(
     path
@@ -610,8 +610,8 @@ export function registerPathCli(program: Command): void {
     await pathEmitCommand(fileArg, opts, defaultRuntime);
   });
 
-  // Bare `openclaw path` prints help and exits 0 (matches the core
-  // applyParentDefaultHelpAction contract — see openclaw#73077).
+  // Bare `bot path` prints help and exits 0 (matches the core
+  // applyParentDefaultHelpAction contract — see bot#73077).
   path.action(() => {
     path.outputHelp();
     process.exitCode = 0;

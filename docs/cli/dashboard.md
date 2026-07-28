@@ -1,20 +1,20 @@
 ---
-summary: "CLI reference for `openclaw dashboard` (open the Control UI)"
+summary: "CLI reference for `bot dashboard` (open the Control UI)"
 read_when:
   - You want to open the Control UI with your current token
   - You want to print the URL without launching a browser
 title: "Dashboard"
 ---
 
-# `openclaw dashboard`
+# `bot dashboard`
 
 Open the Control UI using your current auth.
 
 ```bash
-openclaw dashboard
-openclaw dashboard --no-open
-openclaw dashboard --json
-openclaw dashboard --yes
+bot dashboard
+bot dashboard --no-open
+bot dashboard --json
+bot dashboard --yes
 ```
 
 - `--no-open`: print the URL but do not launch a browser.
@@ -26,7 +26,7 @@ openclaw dashboard --yes
 Use `--json` for desktop integrations and scripts that need the resolved Control UI URL:
 
 ```bash
-openclaw dashboard --json
+bot dashboard --json
 ```
 
 The response includes `url`, `httpUrl`, `wsUrl`, `port`, and `tokenIncluded`. If the Gateway is not ready, the command returns `{"ok":false,"reason":"..."}` and exits non-zero. SecretRef-managed tokens are never included in `url`.
@@ -39,7 +39,7 @@ Notes:
 - Before delivering an authenticated loopback URL for a specific-interface bind, the command probes the configured interface and verifies that it and `127.0.0.1` are owned by the same Gateway process. Ambiguous listener ownership fails closed with status guidance.
 - For SecretRef-managed tokens (resolved or unresolved), the printed/copied/opened URL never includes the token, so external secrets do not leak into terminal output, clipboard history, or browser-launch arguments.
 - If `gateway.auth.token` is SecretRef-managed but unresolved, the command prints a non-tokenized URL and remediation guidance instead of an invalid token placeholder.
-- If clipboard/browser delivery fails for a token-authenticated URL, the command logs a safe manual-auth hint naming `OPENCLAW_GATEWAY_TOKEN`, `gateway.auth.token`, and the URL fragment key `token`, without printing the token value.
+- If clipboard/browser delivery fails for a token-authenticated URL, the command logs a safe manual-auth hint naming `BOT_GATEWAY_TOKEN`, `gateway.auth.token`, and the URL fragment key `token`, without printing the token value.
 
 ## Related
 

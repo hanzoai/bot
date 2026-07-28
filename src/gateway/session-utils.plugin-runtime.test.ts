@@ -2,7 +2,7 @@
  * Tests session utility interactions with plugin runtime state.
  */
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/config.js";
+import type { BotConfig } from "../config/config.js";
 import type { SessionEntry } from "../config/sessions.js";
 
 const normalizeProviderModelIdWithPluginMock = vi.fn();
@@ -37,7 +37,7 @@ describe("gateway session list plugin runtime normalization", () => {
       agents: {
         defaults: { model: { primary: "custom-provider/custom-legacy-model" } },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
     const store = Object.fromEntries(
       Array.from({ length: 3 }, (_value, index) => [
         `session-${index}`,
@@ -74,7 +74,7 @@ describe("gateway session list plugin runtime normalization", () => {
       agents: {
         defaults: { model: { primary: "custom-provider/custom-legacy-model" } },
       },
-    } as OpenClawConfig;
+    } as BotConfig;
 
     const row = sessionUtils.buildGatewaySessionRow({
       cfg,

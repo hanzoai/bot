@@ -2,8 +2,8 @@
  * Doctor contract hooks for Codex plugin config migrations and session-route
  * ownership warnings.
  */
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import type { DoctorSessionRouteStateOwner } from "openclaw/plugin-sdk/runtime-doctor";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import type { DoctorSessionRouteStateOwner } from "bot/plugin-sdk/runtime-doctor";
 
 type LegacyConfigRule = {
   path: string[];
@@ -44,19 +44,19 @@ export const legacyConfigRules: LegacyConfigRule[] = [
   {
     path: ["plugins", "entries", "codex", "config"],
     message:
-      'plugins.entries.codex.config.codexDynamicToolsProfile is retired; Codex app-server always keeps Codex-native workspace tools native. Run "openclaw doctor --fix".',
+      'plugins.entries.codex.config.codexDynamicToolsProfile is retired; Codex app-server always keeps Codex-native workspace tools native. Run "bot doctor --fix".',
     match: hasRetiredDynamicToolsProfile,
   },
   {
     path: ["plugins", "entries", "codex", "config", "codexPlugins"],
     message:
-      'plugins.entries.codex.config.codexPlugins.allow_destructive_actions="on-request" was renamed to "auto". Run "openclaw doctor --fix".',
+      'plugins.entries.codex.config.codexPlugins.allow_destructive_actions="on-request" was renamed to "auto". Run "bot doctor --fix".',
     match: hasLegacyPluginDestructivePolicy,
   },
   {
     path: ["plugins", "entries", "codex", "config", "appServer"],
     message:
-      'plugins.entries.codex.config.appServer.approvalPolicy="on-failure" was retired by Codex 0.143; use "on-request". Run "openclaw doctor --fix".',
+      'plugins.entries.codex.config.appServer.approvalPolicy="on-failure" was retired by Codex 0.143; use "on-request". Run "bot doctor --fix".',
     match: hasRetiredOnFailureApprovalPolicy,
   },
 ];
@@ -64,8 +64,8 @@ export const legacyConfigRules: LegacyConfigRule[] = [
 /**
  * Removes retired Codex plugin config keys while preserving unrelated config.
  */
-export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): {
-  config: OpenClawConfig;
+export function normalizeCompatibilityConfig({ cfg }: { cfg: BotConfig }): {
+  config: BotConfig;
   changes: string[];
 } {
   const rawEntry = asRecord(cfg.plugins?.entries?.codex);
@@ -85,7 +85,7 @@ export function normalizeCompatibilityConfig({ cfg }: { cfg: OpenClawConfig }): 
     return { config: cfg, changes: [] };
   }
 
-  const nextConfig = structuredClone(cfg) as OpenClawConfig & {
+  const nextConfig = structuredClone(cfg) as BotConfig & {
     plugins?: Record<string, unknown>;
   };
   const nextPlugins = asRecord(nextConfig.plugins);

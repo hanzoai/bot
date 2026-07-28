@@ -9,11 +9,11 @@ import {
   waitForDiagnosticEventsDrained,
 } from "../../infra/diagnostic-events.js";
 import { executeSqliteQuerySync, getNodeSqliteKysely } from "../../infra/kysely-sync.js";
-import type { DB as OpenClawStateDatabase } from "../../state/openclaw-state-db.generated.js";
+import type { DB as BotStateDatabase } from "../../state/bot-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../../state/bot-state-db.js";
 import { loadSkills } from "../loading/session.js";
 import {
   buildWorkspaceSkillSnapshot,
@@ -126,8 +126,8 @@ async function runSkillCuratorSweep(options: {
 }
 
 function readSkillUsageFiles(): string[] {
-  const database = openOpenClawStateDatabase({ env: process.env });
-  const kysely = getNodeSqliteKysely<Pick<OpenClawStateDatabase, "skill_usage">>(database.db);
+  const database = openBotStateDatabase({ env: process.env });
+  const kysely = getNodeSqliteKysely<Pick<BotStateDatabase, "skill_usage">>(database.db);
   return executeSqliteQuerySync(
     database.db,
     kysely.selectFrom("skill_usage").select("skill_file").orderBy("skill_file", "asc"),
@@ -161,7 +161,7 @@ function addAppliedSkill(params: {
     scanState: "clean",
   });
   store.records.set(id, {
-    schema: "openclaw.skill-workshop.proposal.v1",
+    schema: "bot.skill-workshop.proposal.v1",
     id,
     kind,
     status: "applied",
@@ -203,15 +203,15 @@ function writeSkill(agentDir: string, key: string, name: string): void {
 }
 
 beforeEach(() => {
-  rootDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-curator-")));
+  rootDir = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "bot-curator-")));
   stateDir = path.join(rootDir, "state-root");
   fs.mkdirSync(stateDir, { recursive: true });
-  originalStateDir = process.env.OPENCLAW_STATE_DIR;
-  process.env.OPENCLAW_STATE_DIR = stateDir;
+  originalStateDir = process.env.BOT_STATE_DIR;
+  process.env.BOT_STATE_DIR = stateDir;
   store.entries.length = 0;
   store.records.clear();
   store.readManifest.mockReset().mockImplementation(async () => ({
-    schema: "openclaw.skill-workshop.proposals-manifest.v1",
+    schema: "bot.skill-workshop.proposals-manifest.v1",
     updatedAt: new Date(0).toISOString(),
     proposals: store.entries,
   }));
@@ -221,12 +221,12 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   resetDiagnosticEventsForTest();
   if (originalStateDir === undefined) {
-    delete process.env.OPENCLAW_STATE_DIR;
+    delete process.env.BOT_STATE_DIR;
   } else {
-    process.env.OPENCLAW_STATE_DIR = originalStateDir;
+    process.env.BOT_STATE_DIR = originalStateDir;
   }
   fs.rmSync(rootDir, { recursive: true, force: true });
 });
@@ -597,7 +597,7 @@ describe("skill curator lifecycle", () => {
       ).toContain("skill curator has not completed a sweep");
 
       resolveManifest?.({
-        schema: "openclaw.skill-workshop.proposals-manifest.v1",
+        schema: "bot.skill-workshop.proposals-manifest.v1",
         updatedAt: new Date(nowMs).toISOString(),
         proposals: [],
       });

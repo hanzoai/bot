@@ -4,9 +4,9 @@ import {
   createChannelIngressMonitor,
   DEFAULT_INGRESS_ADOPTION_STALL_MS,
   type ChannelIngressQueue,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { collectErrorGraphCandidates, extractErrorCode } from "openclaw/plugin-sdk/error-runtime";
-import type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import { collectErrorGraphCandidates, extractErrorCode } from "bot/plugin-sdk/error-runtime";
+import type { RuntimeEnv } from "bot/plugin-sdk/runtime";
 import { getZalouserRuntime } from "./runtime.js";
 import type { ZaloInboundMessage } from "./types.js";
 import { normalizeZaloInboundMessage } from "./zalo-js.js";

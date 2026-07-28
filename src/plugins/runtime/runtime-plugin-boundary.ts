@@ -1,7 +1,7 @@
 // Runtime plugin boundary helpers enforce package and source boundaries for runtime loading.
 import fs from "node:fs";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { getRuntimeConfig } from "../../config/config.js";
 import { loadPluginManifestRegistry } from "../manifest-registry.js";
 import {

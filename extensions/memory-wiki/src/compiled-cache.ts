@@ -2,14 +2,14 @@
 import { createHash, randomUUID } from "node:crypto";
 import path from "node:path";
 import { gunzipSync, gzipSync } from "node:zlib";
-import type { PluginBlobStore } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginBlobStore } from "bot/plugin-sdk/plugin-state-runtime";
 import type { WikiFreshnessLevel } from "./claim-health.js";
 import type { ResolvedMemoryWikiConfig } from "./config.js";
 import type { WikiPageKind, WikiPageSummary, WikiRelationship } from "./markdown.js";
 
 export const LEGACY_MEMORY_WIKI_COMPILED_CACHE_PATHS = [
-  ".openclaw-wiki/cache/agent-digest.json",
-  ".openclaw-wiki/cache/claims.jsonl",
+  ".bot-wiki/cache/agent-digest.json",
+  ".bot-wiki/cache/claims.jsonl",
 ] as const;
 
 const COMPILED_CACHE_NAMESPACE = "compiled-cache";

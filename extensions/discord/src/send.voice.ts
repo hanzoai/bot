@@ -1,17 +1,17 @@
 // Discord plugin module implements send.voice behavior.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { recordChannelActivity } from "bot/plugin-sdk/channel-activity-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   extensionForMime,
   maxBytesForKind,
   unlinkIfExists,
-} from "openclaw/plugin-sdk/media-runtime";
-import { requireRuntimeConfig } from "openclaw/plugin-sdk/plugin-config-runtime";
-import type { RetryConfig } from "openclaw/plugin-sdk/retry-runtime";
-import { tempWorkspace, resolvePreferredOpenClawTmpDir } from "openclaw/plugin-sdk/temp-path";
-import { loadWebMediaRaw } from "openclaw/plugin-sdk/web-media";
+} from "bot/plugin-sdk/media-runtime";
+import { requireRuntimeConfig } from "bot/plugin-sdk/plugin-config-runtime";
+import type { RetryConfig } from "bot/plugin-sdk/retry-runtime";
+import { tempWorkspace, resolvePreferredBotTmpDir } from "bot/plugin-sdk/temp-path";
+import { loadWebMediaRaw } from "bot/plugin-sdk/web-media";
 import { resolveDiscordAccount } from "./accounts.js";
 import type { RequestClient } from "./internal/discord.js";
 import { parseAndResolveChannelRecipient } from "./recipient-resolution.js";
@@ -26,7 +26,7 @@ import {
 } from "./voice-message.js";
 
 type VoiceMessageOpts = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   token?: string;
   accountId?: string;
   verbose?: boolean;
@@ -59,7 +59,7 @@ async function materializeVoiceMessageInput(
   const extFromMime = media.contentType ? extensionForMime(media.contentType) : "";
   const ext = extFromName || extFromMime || ".bin";
   const workspace = await tempWorkspace({
-    rootDir: resolvePreferredOpenClawTmpDir(),
+    rootDir: resolvePreferredBotTmpDir(),
     prefix: "voice-src-",
   });
   const filePath = await workspace.write(`input${ext}`, media.buffer);

@@ -1,7 +1,7 @@
 // Approval auth helpers resolve actor and channel identity for approval requests.
 import { normalizeOptionalString } from "../../packages/normalization-core/src/string-coerce.js";
 import { resolveApprovalApprovers } from "./approval-approvers.js";
-import type { OpenClawConfig } from "./config-runtime.js";
+import type { BotConfig } from "./config-runtime.js";
 
 type ApprovalKind = "exec" | "plugin";
 type ApproverInput = string | number;
@@ -12,7 +12,7 @@ type ApprovalApproverInputs = {
   defaultTo?: string | null;
 };
 type ApprovalContext = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId?: string | null;
 };
 type ApprovalActorContext = ApprovalContext & {
@@ -30,7 +30,7 @@ type ApprovalAuthorizationResult = {
   reason?: string;
 };
 const IMPLICIT_SAME_CHAT_APPROVAL_AUTHORIZATION = Symbol(
-  "openclaw.implicitSameChatApprovalAuthorization",
+  "bot.implicitSameChatApprovalAuthorization",
 );
 
 /**
@@ -78,7 +78,7 @@ export function createResolvedApproverActionAuthAdapter(params: {
   /** Human-readable channel label used in denial messages. */
   channelLabel: string;
   /** Resolves normalized approver ids from config and optional account scope. */
-  resolveApprovers: (params: { cfg: OpenClawConfig; accountId?: string | null }) => string[];
+  resolveApprovers: (params: { cfg: BotConfig; accountId?: string | null }) => string[];
   /** Optional sender normalizer; defaults to trimmed string normalization. */
   normalizeSenderId?: (value: string) => string | undefined;
 }) {
@@ -92,7 +92,7 @@ export function createResolvedApproverActionAuthAdapter(params: {
       approvalKind,
     }: {
       /** Full config used to resolve account-scoped approvers. */
-      cfg: OpenClawConfig;
+      cfg: BotConfig;
       /** Optional channel account id for account-scoped approver config. */
       accountId?: string | null;
       /** Actor attempting the approval action. */
@@ -163,7 +163,7 @@ export function createChannelApprovalAuth(params: {
     isAuthorizedSender,
     approvalAuth: {
       authorizeActorAction(input: {
-        cfg: OpenClawConfig;
+        cfg: BotConfig;
         accountId?: string | null;
         senderId?: string | null;
         action: "approve";

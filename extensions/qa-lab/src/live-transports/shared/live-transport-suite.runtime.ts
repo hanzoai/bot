@@ -1,4 +1,4 @@
-import type { LiveTransportQaCommandOptions } from "openclaw/plugin-sdk/qa-runtime";
+import type { LiveTransportQaCommandOptions } from "bot/plugin-sdk/qa-runtime";
 import { runQaSuiteCommand } from "../../cli.runtime.js";
 import type { QaProviderMode } from "../../providers/index.js";
 import { normalizeQaProviderMode } from "../../run-config.js";

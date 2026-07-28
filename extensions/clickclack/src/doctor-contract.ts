@@ -1,6 +1,6 @@
-import type { ChannelDoctorConfigMutation } from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { asObjectRecord } from "openclaw/plugin-sdk/runtime-doctor";
+import type { ChannelDoctorConfigMutation } from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { asObjectRecord } from "bot/plugin-sdk/runtime-doctor";
 
 function stripTimeoutSeconds(value: unknown): { value: unknown; changed: boolean } {
   const record = asObjectRecord(value);
@@ -24,7 +24,7 @@ function stripTimeoutSeconds(value: unknown): { value: unknown; changed: boolean
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): ChannelDoctorConfigMutation {
   const rawEntry = asObjectRecord(
     (cfg.channels as Record<string, unknown> | undefined)?.clickclack,
@@ -42,7 +42,7 @@ export function normalizeCompatibilityConfig({
       channels: {
         ...cfg.channels,
         clickclack: stripped.value,
-      } as OpenClawConfig["channels"],
+      } as BotConfig["channels"],
     },
     changes: ["Removed retired ClickClack timeout tuning knobs."],
   };

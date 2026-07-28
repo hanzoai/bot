@@ -1,7 +1,7 @@
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
 import { executeSqliteQuerySync } from "../../infra/kysely-sync.js";
-import { openOpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
-import type { OpenClawConfig } from "../types.openclaw.js";
+import { openBotAgentDatabase } from "../../state/bot-agent-db.js";
+import type { BotConfig } from "../types.bot.js";
 import type { ConversationIdentity, ConversationKind } from "./conversation-identity.js";
 import { resolveStorePath } from "./paths.js";
 import { upsertConversationIdentity } from "./session-accessor.sqlite-conversation.js";
@@ -40,7 +40,7 @@ export type ConversationRegistryScope = {
 
 export function resolveConversationRegistryScope(params: {
   agentId: string;
-  config: OpenClawConfig;
+  config: BotConfig;
 }): ConversationRegistryScope {
   const configuredStore = params.config.session?.store;
   return {
@@ -125,7 +125,7 @@ function selectConversationRows(
     ...(scope.env ? { env: scope.env } : {}),
     ...(scope.storePath ? { storePath: scope.storePath } : {}),
   });
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openBotAgentDatabase(toDatabaseOptions(resolved));
   const db = getSessionKysely(database.db);
   let query = db
     .selectFrom("conversations as c")
@@ -212,7 +212,7 @@ export function registerConversationAddresses(
     ...(scope.env ? { env: scope.env } : {}),
     ...(scope.storePath ? { storePath: scope.storePath } : {}),
   });
-  const database = openOpenClawAgentDatabase(toDatabaseOptions(resolved));
+  const database = openBotAgentDatabase(toDatabaseOptions(resolved));
   for (const identity of identities) {
     upsertConversationIdentity(database, identity, discoveredAt);
   }

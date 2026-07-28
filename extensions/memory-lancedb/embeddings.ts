@@ -1,15 +1,15 @@
 import { Buffer } from "node:buffer";
-import type { AgentToolResult } from "openclaw/plugin-sdk/agent-core";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { toErrorObject } from "openclaw/plugin-sdk/error-runtime";
-import { resolveGlobalSingleton } from "openclaw/plugin-sdk/global-singleton";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { canonicalizeBase64 } from "openclaw/plugin-sdk/media-runtime";
-import type { MemoryEmbeddingProvider } from "openclaw/plugin-sdk/memory-core-host-engine-embeddings";
-import { resolveTimerTimeoutMs } from "openclaw/plugin-sdk/number-runtime";
-import { ensureGlobalUndiciEnvProxyDispatcher } from "openclaw/plugin-sdk/runtime-env";
-import { asOptionalRecord as asRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
-import type { OpenClawPluginApi } from "./api.js";
+import type { AgentToolResult } from "bot/plugin-sdk/agent-core";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { toErrorObject } from "bot/plugin-sdk/error-runtime";
+import { resolveGlobalSingleton } from "bot/plugin-sdk/global-singleton";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { canonicalizeBase64 } from "bot/plugin-sdk/media-runtime";
+import type { MemoryEmbeddingProvider } from "bot/plugin-sdk/memory-core-host-engine-embeddings";
+import { resolveTimerTimeoutMs } from "bot/plugin-sdk/number-runtime";
+import { ensureGlobalUndiciEnvProxyDispatcher } from "bot/plugin-sdk/runtime-env";
+import { asOptionalRecord as asRecord } from "bot/plugin-sdk/string-coerce-runtime";
+import type { BotPluginApi } from "./api.js";
 import type { MemoryConfig } from "./config.js";
 
 type OpenAiEmbeddingClient = {
@@ -20,10 +20,10 @@ type OpenAiEmbeddingClient = {
 };
 const loadOpenAiModule = createLazyRuntimeModule(() => import("openai"));
 const loadMemoryEmbeddingProviderModule = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/memory-core-host-engine-embeddings"),
+  () => import("bot/plugin-sdk/memory-core-host-engine-embeddings"),
 );
 const loadMemoryHostCoreModule = createLazyRuntimeModule(
-  () => import("openclaw/plugin-sdk/memory-host-core"),
+  () => import("bot/plugin-sdk/memory-host-core"),
 );
 
 export type Embeddings = {
@@ -37,7 +37,7 @@ type ProviderAdapterLifecycleState = {
 };
 
 const PROVIDER_ADAPTER_LIFECYCLE = resolveGlobalSingleton<ProviderAdapterLifecycleState>(
-  Symbol.for("openclaw.memoryLanceDbEmbeddingProviderLifecycle.v1"),
+  Symbol.for("bot.memoryLanceDbEmbeddingProviderLifecycle.v1"),
   // Plugin reload replaces the service instance. Retain failed closes process-wide so
   // the next instance cannot create a provider before its predecessor retires.
   () => ({ retainedProviders: new Set(), tail: Promise.resolve() }),
@@ -202,7 +202,7 @@ class ProviderAdapterEmbeddings implements Embeddings {
   private idleWaiters = new Set<() => void>();
 
   constructor(
-    private api: OpenClawPluginApi,
+    private api: BotPluginApi,
     private embedding: MemoryConfig["embedding"],
   ) {}
 
@@ -255,7 +255,7 @@ class ProviderAdapterEmbeddings implements Embeddings {
   }
 
   private async createProviderAfterRetirement(): Promise<MemoryEmbeddingProvider> {
-    const cfg = (this.api.runtime.config?.current?.() ?? this.api.config) as OpenClawConfig;
+    const cfg = (this.api.runtime.config?.current?.() ?? this.api.config) as BotConfig;
     const providerId = this.embedding.provider;
     const { getMemoryEmbeddingProvider } = await loadMemoryEmbeddingProviderModule();
     const adapter = getMemoryEmbeddingProvider(providerId, cfg);
@@ -417,7 +417,7 @@ export const testing = {
   truncateEmbeddingVector,
 } as const;
 
-export function createEmbeddings(api: OpenClawPluginApi, cfg: MemoryConfig): Embeddings {
+export function createEmbeddings(api: BotPluginApi, cfg: MemoryConfig): Embeddings {
   const { provider, model, dimensions, apiKey, baseUrl } = cfg.embedding;
   if (provider === "openai" && apiKey) {
     return new OpenAiCompatibleEmbeddings(apiKey, model, baseUrl, dimensions);

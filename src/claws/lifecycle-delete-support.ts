@@ -15,14 +15,14 @@ import {
 import { pruneAgentConfig } from "../commands/agents.config.js";
 import { moveToTrash } from "../commands/onboard-helpers.js";
 import { resolveSessionTranscriptsDirForAgent } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { root as fsSafeRoot, FsSafeError } from "../infra/fs-safe.js";
 import type { RuntimeEnv } from "../runtime.js";
 import {
-  openOpenClawStateDatabase,
-  runOpenClawStateWriteTransaction,
-  type OpenClawStateDatabaseOptions,
-} from "../state/openclaw-state-db.js";
+  openBotStateDatabase,
+  runBotStateWriteTransaction,
+  type BotStateDatabaseOptions,
+} from "../state/bot-state-db.js";
 import type { PersistedClawInstall } from "./provenance.js";
 import type { PersistedClawWorkspaceFile } from "./workspace.js";
 
@@ -71,9 +71,9 @@ function rowToWorkspaceFile(row: WorkspaceFileRow): PersistedClawWorkspaceFile {
 }
 
 export function readAllClawWorkspaceFiles(
-  options: OpenClawStateDatabaseOptions,
+  options: BotStateDatabaseOptions,
 ): PersistedClawWorkspaceFile[] {
-  const database = openOpenClawStateDatabase(options);
+  const database = openBotStateDatabase(options);
   if (!clawStateTableExists(database.db, "claw_workspace_files")) {
     return [];
   }
@@ -96,7 +96,7 @@ export function synthesizeOrphanInstall(params: {
 }): PersistedClawInstall {
   const updatedAtMs = params.updatedAtMs ?? 0;
   return {
-    schemaVersion: "openclaw.clawInstallRecord.v1" as PersistedClawInstall["schemaVersion"],
+    schemaVersion: "bot.clawInstallRecord.v1" as PersistedClawInstall["schemaVersion"],
     claw: {
       kind: "development",
       name: params.clawName ?? `orphan:${params.agentId}`,
@@ -119,7 +119,7 @@ export function synthesizeOrphanInstall(params: {
   };
 }
 
-export function deletionEffects(config: OpenClawConfig, agentId: string, fallbackWorkspace = "") {
+export function deletionEffects(config: BotConfig, agentId: string, fallbackWorkspace = "") {
   const agent = listAgentEntries(config).find((candidate) => candidate.id === agentId);
   const pruned = pruneAgentConfig(config, agentId);
   const workspace = agent?.workspace ?? fallbackWorkspace;
@@ -149,9 +149,9 @@ type AttachedCronJob = {
 /** Inventories cron jobs that would retain a reference to a removed agent. */
 export function readAttachedCronJobs(
   agentId: string,
-  options: OpenClawStateDatabaseOptions,
+  options: BotStateDatabaseOptions,
 ): AttachedCronJob[] {
-  const database = openOpenClawStateDatabase(options);
+  const database = openBotStateDatabase(options);
   if (!clawStateTableExists(database.db, "cron_jobs")) {
     return [];
   }
@@ -235,7 +235,7 @@ export async function workspaceContainsUntrackedEntries(
 /** Applies canonical post-config filesystem cleanup and reports every failed effect. */
 export async function cleanupClawAgentFilesystem(params: {
   agentId: string;
-  nextConfig: OpenClawConfig;
+  nextConfig: BotConfig;
   targets: ClawCleanupTargets;
   runtime: RuntimeEnv;
   trashPath?: ClawTrashPath;
@@ -346,7 +346,7 @@ export async function removeClawWorkspaceFile(
     if (!(await workspace.exists(record.path))) {
       return { path: record.path, action: "missing" };
     }
-    const stagedPath = `${record.path}.openclaw-claw-remove-${randomUUID()}`;
+    const stagedPath = `${record.path}.bot-claw-remove-${randomUUID()}`;
     await workspace.move(record.path, stagedPath, { overwrite: false });
     const content = await workspace.readBytes(stagedPath, { maxBytes: 1024 * 1024 });
     const digest = `sha256:${createHash("sha256").update(content).digest("hex")}`;
@@ -369,9 +369,9 @@ export function releaseClawRemoveRows(
   agentId: string,
   files: RemovedWorkspaceFile[],
   complete: boolean,
-  options: OpenClawStateDatabaseOptions,
+  options: BotStateDatabaseOptions,
 ): void {
-  runOpenClawStateWriteTransaction(({ db }) => {
+  runBotStateWriteTransaction(({ db }) => {
     if (clawStateTableExists(db, "claw_workspace_files")) {
       for (const file of files.filter((candidate) => candidate.action !== "error")) {
         db /* sqlite-allow-raw: remove one owned Claw workspace-file row. */

@@ -6,7 +6,7 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { updateAuthProfileStoreWithLock } from "../agents/auth-profiles/store.js";
 import type { MigrationPlan } from "../plugins/types.js";
-import { listOpenClawRegisteredAgentDatabases } from "../state/openclaw-agent-db-registry.js";
+import { listBotRegisteredAgentDatabases } from "../state/bot-agent-db-registry.js";
 import type { SetupMigrationPromotionContinuation } from "./setup.migration-promotion.js";
 import {
   createSetupMigrationStage,
@@ -16,7 +16,7 @@ import {
 const tempRoots = new Set<string>();
 
 async function makeTempRoot(): Promise<string> {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-migration-stage-"));
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "bot-migration-stage-"));
   tempRoots.add(root);
   return root;
 }
@@ -53,13 +53,13 @@ function continuation(): Omit<
 }
 
 afterEach(async () => {
-  const [{ closeOpenClawAgentDatabasesForTest }, { closeOpenClawStateDatabaseForTest }] =
+  const [{ closeBotAgentDatabasesForTest }, { closeBotStateDatabaseForTest }] =
     await Promise.all([
-      import("../state/openclaw-agent-db.js"),
-      import("../state/openclaw-state-db.js"),
+      import("../state/bot-agent-db.js"),
+      import("../state/bot-state-db.js"),
     ]);
-  closeOpenClawAgentDatabasesForTest();
-  closeOpenClawStateDatabaseForTest();
+  closeBotAgentDatabasesForTest();
+  closeBotStateDatabaseForTest();
   for (const root of tempRoots) {
     await fs.rm(root, { recursive: true, force: true });
   }
@@ -164,21 +164,21 @@ describe("setup migration stage", () => {
 
     expect(updated?.profiles["openai:imported"]).toBeDefined();
     expect(
-      listOpenClawRegisteredAgentDatabases({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stagedStateDir },
+      listBotRegisteredAgentDatabases({
+        env: { ...process.env, BOT_STATE_DIR: stagedStateDir },
       }),
     ).toEqual([
       expect.objectContaining({
         agentId: "main",
-        path: path.join(stagedAgentDir, "openclaw-agent.sqlite"),
+        path: path.join(stagedAgentDir, "bot-agent.sqlite"),
       }),
     ]);
     expect(
-      listOpenClawRegisteredAgentDatabases({
-        env: { ...process.env, OPENCLAW_STATE_DIR: liveStateDir },
+      listBotRegisteredAgentDatabases({
+        env: { ...process.env, BOT_STATE_DIR: liveStateDir },
       }),
     ).toEqual([]);
-    await expect(fs.access(path.join(liveStateDir, "state", "openclaw.sqlite"))).rejects.toThrow();
+    await expect(fs.access(path.join(liveStateDir, "state", "bot.sqlite"))).rejects.toThrow();
   });
 
   it("promotes the final agent registry path after verification closes the handle", async () => {
@@ -194,9 +194,9 @@ describe("setup migration stage", () => {
       reportDir,
       targetConfig,
     });
-    const { disposeOpenClawAgentDatabaseByPath } = await import("../state/openclaw-agent-db.js");
-    disposeOpenClawAgentDatabaseByPath(path.join(stage.staged.agentDir, "openclaw-agent.sqlite"), {
-      env: { ...process.env, OPENCLAW_STATE_DIR: stage.staged.stateDir },
+    const { disposeBotAgentDatabaseByPath } = await import("../state/bot-agent-db.js");
+    disposeBotAgentDatabaseByPath(path.join(stage.staged.agentDir, "bot-agent.sqlite"), {
+      env: { ...process.env, BOT_STATE_DIR: stage.staged.stateDir },
     });
 
     const promoted = await stage.promote({
@@ -207,13 +207,13 @@ describe("setup migration stage", () => {
     });
 
     expect(
-      listOpenClawRegisteredAgentDatabases({
-        env: { ...process.env, OPENCLAW_STATE_DIR: stateDir },
+      listBotRegisteredAgentDatabases({
+        env: { ...process.env, BOT_STATE_DIR: stateDir },
       }),
     ).toEqual([
       expect.objectContaining({
         agentId: "main",
-        path: path.join(stage.final.agentDir, "openclaw-agent.sqlite"),
+        path: path.join(stage.final.agentDir, "bot-agent.sqlite"),
       }),
     ]);
     await promoted.resume.complete();

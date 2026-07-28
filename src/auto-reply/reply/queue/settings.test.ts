@@ -1,11 +1,11 @@
 // Tests queue setting normalization and directive parsing.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import { resolveQueueSettings } from "./settings.js";
 
 describe("resolveQueueSettings", () => {
   it("defaults inbound channels to steering settings", () => {
-    expect(resolveQueueSettings({ cfg: {} as OpenClawConfig })).toEqual({
+    expect(resolveQueueSettings({ cfg: {} as BotConfig })).toEqual({
       mode: "steer",
       debounceMs: 500,
       cap: 20,
@@ -22,7 +22,7 @@ describe("resolveQueueSettings", () => {
               mode: "collect",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
       }),
     ).toEqual({
       mode: "collect",
@@ -44,7 +44,7 @@ describe("resolveQueueSettings", () => {
               },
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
         channel: "discord",
       }),
     ).toEqual({
@@ -64,7 +64,7 @@ describe("resolveQueueSettings", () => {
               mode: "steer",
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
       }),
     ).toEqual({
       mode: "steer",
@@ -83,7 +83,7 @@ describe("resolveQueueSettings", () => {
               mode: "steer-backlog" as never,
             },
           },
-        } as OpenClawConfig,
+        } as BotConfig,
       }),
     ).toEqual({
       mode: "steer",
@@ -96,13 +96,13 @@ describe("resolveQueueSettings", () => {
   it("maps retired persisted session queue modes to compatible modes", () => {
     expect(
       resolveQueueSettings({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         sessionEntry: { sessionId: "test-session", updatedAt: 0, queueMode: "queue" as never },
       }).mode,
     ).toBe("steer");
     expect(
       resolveQueueSettings({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         sessionEntry: {
           sessionId: "test-session",
           updatedAt: 0,
@@ -112,7 +112,7 @@ describe("resolveQueueSettings", () => {
     ).toBe("followup");
     expect(
       resolveQueueSettings({
-        cfg: {} as OpenClawConfig,
+        cfg: {} as BotConfig,
         sessionEntry: {
           sessionId: "test-session",
           updatedAt: 0,

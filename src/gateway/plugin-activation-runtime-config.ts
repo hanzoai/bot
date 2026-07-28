@@ -2,7 +2,7 @@
 // Carries activation enablement into runtime config without copying stale state.
 import type { AmbientEnvTriggerPolicy } from "../channels/config-presence.js";
 import { applyPluginAutoEnable } from "../config/plugin-auto-enable.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { PluginDiscoveryResult } from "../plugins/discovery.js";
 import type { PluginManifestRegistry } from "../plugins/manifest-registry.js";
 import { isRecord } from "../utils.js";
@@ -15,9 +15,9 @@ function hasOwnValue(record: Record<string, unknown>, key: string): boolean {
 }
 
 function mergeChannelActivationSections(params: {
-  runtimeConfig: OpenClawConfig;
-  activationConfig: OpenClawConfig;
-}): OpenClawConfig {
+  runtimeConfig: BotConfig;
+  activationConfig: BotConfig;
+}): BotConfig {
   const activationChannels = params.activationConfig.channels;
   if (!isRecord(activationChannels)) {
     return params.runtimeConfig;
@@ -46,14 +46,14 @@ function mergeChannelActivationSections(params: {
   }
   return {
     ...params.runtimeConfig,
-    channels: nextChannels as OpenClawConfig["channels"],
+    channels: nextChannels as BotConfig["channels"],
   };
 }
 
 function mergePluginActivationSections(params: {
-  runtimeConfig: OpenClawConfig;
-  activationConfig: OpenClawConfig;
-}): OpenClawConfig {
+  runtimeConfig: BotConfig;
+  activationConfig: BotConfig;
+}): BotConfig {
   const activationPlugins = params.activationConfig.plugins;
   if (!isRecord(activationPlugins)) {
     return params.runtimeConfig;
@@ -99,15 +99,15 @@ function mergePluginActivationSections(params: {
   }
   return {
     ...params.runtimeConfig,
-    plugins: nextPlugins as OpenClawConfig["plugins"],
+    plugins: nextPlugins as BotConfig["plugins"],
   };
 }
 
 /** Merges plugin/channel activation enablement into the runtime config shape. */
 export function mergeActivationSectionsIntoRuntimeConfig(params: {
-  runtimeConfig: OpenClawConfig;
-  activationConfig: OpenClawConfig;
-}): OpenClawConfig {
+  runtimeConfig: BotConfig;
+  activationConfig: BotConfig;
+}): BotConfig {
   return mergePluginActivationSections({
     ...params,
     runtimeConfig: mergeChannelActivationSections(params),
@@ -121,13 +121,13 @@ export function mergeActivationSectionsIntoRuntimeConfig(params: {
 // that recomputes the startup plan — notably the `/status plugins` should-run drift check —
 // from drifting away from real gateway boot. Behavior-preserving extraction only.
 export function resolveGatewayStartupPluginActivationConfig(params: {
-  runtimeConfig: OpenClawConfig;
-  activationSourceConfig: OpenClawConfig;
+  runtimeConfig: BotConfig;
+  activationSourceConfig: BotConfig;
   env: NodeJS.ProcessEnv;
   manifestRegistry?: PluginManifestRegistry;
   discovery?: PluginDiscoveryResult;
   ambientEnvTriggers?: AmbientEnvTriggerPolicy;
-}): OpenClawConfig {
+}): BotConfig {
   return mergeActivationSectionsIntoRuntimeConfig({
     runtimeConfig: params.runtimeConfig,
     activationConfig: applyPluginAutoEnable({
@@ -142,13 +142,13 @@ export function resolveGatewayStartupPluginActivationConfig(params: {
 
 /** Re-derives source-owned plugin activation and carries it into one reload candidate. */
 export function resolveGatewayReloadPluginActivationCandidate(params: {
-  runtimeConfig: OpenClawConfig;
-  sourceConfig: OpenClawConfig;
+  runtimeConfig: BotConfig;
+  sourceConfig: BotConfig;
   env: NodeJS.ProcessEnv;
   manifestRegistry?: PluginManifestRegistry;
   discovery?: PluginDiscoveryResult;
   ambientEnvTriggers?: AmbientEnvTriggerPolicy;
-}): { runtimeConfig: OpenClawConfig; compareConfig: OpenClawConfig } {
+}): { runtimeConfig: BotConfig; compareConfig: BotConfig } {
   const activationConfig = applyPluginAutoEnable({
     config: params.sourceConfig,
     env: params.env,

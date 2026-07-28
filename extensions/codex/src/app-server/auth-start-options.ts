@@ -8,7 +8,7 @@ export function resolveCodexAppServerHomeDir(agentDir: string): string {
   return path.join(path.resolve(agentDir), CODEX_APP_SERVER_HOME_DIRNAME);
 }
 
-/** Forces OpenClaw-owned Codex auth to remain process-local. */
+/** Forces Bot-owned Codex auth to remain process-local. */
 export function withEphemeralCodexAuthStore(params: {
   startOptions: CodexAppServerStartOptions;
   preparedAuth?: unknown;

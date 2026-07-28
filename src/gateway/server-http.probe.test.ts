@@ -66,7 +66,7 @@ describe("gateway OpenAI-compatible disabled HTTP routes", () => {
           "/v1",
           "/v1/",
           "/v1/models",
-          "/v1/models/openclaw",
+          "/v1/models/bot",
           "/v1/chat/completions",
           "/v1/responses",
           "/v1/embeddings",
@@ -99,13 +99,13 @@ describe("gateway OpenAI-compatible disabled HTTP routes", () => {
         const { res, getBody } = await sendGatewayRequest(server, {
           path: "/v1/models",
           method: "GET",
-          headers: { "x-openclaw-scopes": "operator.read" },
+          headers: { "x-bot-scopes": "operator.read" },
         });
 
         expect(res.statusCode).toBe(200);
         expect(JSON.parse(getBody())).toMatchObject({
           object: "list",
-          data: expect.arrayContaining([expect.objectContaining({ id: "openclaw/default" })]),
+          data: expect.arrayContaining([expect.objectContaining({ id: "bot/default" })]),
         });
       },
     });
@@ -178,7 +178,7 @@ describe("gateway probe endpoints", () => {
           });
 
           const blockedBoard = await sendGatewayRequest(server, {
-            path: "/__openclaw__/board/agent%3Amain%3Amain/status/index.html?bt=garbage",
+            path: "/__bot__/board/agent%3Amain%3Amain/status/index.html?bt=garbage",
           });
           expect(blockedBoard.res.statusCode).toBe(503);
           expect(JSON.parse(blockedBoard.getBody())).toMatchObject({

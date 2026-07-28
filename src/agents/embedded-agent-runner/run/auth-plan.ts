@@ -46,14 +46,14 @@ export async function prepareEmbeddedRunAuthPlan(params: {
   const runParams = params.runParams;
   const usesOpenAIAuthRouting = params.provider === OPENAI_PROVIDER_ID;
   const initialHarness = params.getAgentHarness();
-  const initialPluginHarnessOwnsTransport = initialHarness.id !== "openclaw";
-  const openClawNativeCodexResponsesNeedsAuthBootstrap =
+  const initialPluginHarnessOwnsTransport = initialHarness.id !== "bot";
+  const botNativeCodexResponsesNeedsAuthBootstrap =
     !initialPluginHarnessOwnsTransport &&
     usesOpenAIAuthRouting &&
     params.getEffectiveModel().api === "openai-chatgpt-responses";
   let externalCliAuthScope = initialPluginHarnessOwnsTransport
     ? { ignoreAutoPreferredProfile: false }
-    : openClawNativeCodexResponsesNeedsAuthBootstrap
+    : botNativeCodexResponsesNeedsAuthBootstrap
       ? {
           providerIds: [OPENAI_PROVIDER_ID],
           ignoreAutoPreferredProfile: false,

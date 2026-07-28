@@ -20,7 +20,7 @@ declare const chrome: {
   };
 };
 
-const runE2E = process.env.OPENCLAW_BROWSER_COPILOT_E2E === "1";
+const runE2E = process.env.BOT_BROWSER_COPILOT_E2E === "1";
 const cleanups: Array<() => Promise<void>> = [];
 const tempDirs = useAutoCleanupTempDirTracker(afterEach);
 let nextPopupCommandId = 0;
@@ -108,7 +108,7 @@ describe.runIf(runE2E)("Chrome page sharing with a real Gateway extension relay"
     });
     const relay = await startExtensionRelayServer({
       port: 0,
-      token: "openclaw-autoqa-page-share-relay-placeholder",
+      token: "bot-autoqa-page-share-relay-placeholder",
       onPageShare: async (payload) => {
         receivedShares.push({ url: payload.url, content: payload.content });
         await delivery;
@@ -142,7 +142,7 @@ describe.runIf(runE2E)("Chrome page sharing with a real Gateway extension relay"
 
     const unpackedExtension = await copyCopilotSidepanelExtension(tempDirs);
     const context = await chromium.launchPersistentContext(
-      tempDirs.make("openclaw-page-share-disconnect-profile-"),
+      tempDirs.make("bot-page-share-disconnect-profile-"),
       {
         channel: "chromium",
         headless: true,
@@ -227,7 +227,7 @@ describe.runIf(runE2E)("Chrome page sharing with a real Gateway extension relay"
         target.url === `chrome-extension://${extensionId}/popup.html`,
     );
     if (!popupTarget) {
-      throw new Error("Chromium did not open the actual OpenClaw toolbar popup");
+      throw new Error("Chromium did not open the actual Bot toolbar popup");
     }
     const attached = (await browserCdp.send("Target.attachToTarget", {
       targetId: popupTarget.targetId,
@@ -293,7 +293,7 @@ describe.runIf(runE2E)("Chrome page sharing with a real Gateway extension relay"
           ),
         { timeout: 1_500, interval: 25 },
       )
-      .toBe("Browser relay disconnected before OpenClaw acknowledged the page share.");
+      .toBe("Browser relay disconnected before Bot acknowledged the page share.");
     expect(
       await evaluateToolbarPopup<boolean>(
         browserCdp,

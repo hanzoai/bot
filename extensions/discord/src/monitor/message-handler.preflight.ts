@@ -1,6 +1,6 @@
 // Discord plugin module implements message handler.preflight behavior.
-import { formatAllowlistMatchMeta } from "openclaw/plugin-sdk/allow-from";
-import { recordChannelActivity } from "openclaw/plugin-sdk/channel-activity-runtime";
+import { formatAllowlistMatchMeta } from "bot/plugin-sdk/allow-from";
+import { recordChannelActivity } from "bot/plugin-sdk/channel-activity-runtime";
 import {
   buildMentionRegexes,
   classifyChannelInboundEvent,
@@ -10,17 +10,17 @@ import {
   resolveUnmentionedGroupInboundPolicy,
   toHistoryMediaEntries,
   toInboundMediaFacts,
-} from "openclaw/plugin-sdk/channel-inbound";
-import { isRecentOutboundMessageIdentity } from "openclaw/plugin-sdk/channel-outbound";
-import { hasControlCommand } from "openclaw/plugin-sdk/command-detection";
-import { isAbortRequestText } from "openclaw/plugin-sdk/command-primitives-runtime";
-import { shouldHandleTextCommands } from "openclaw/plugin-sdk/command-surface";
-import { isDangerousNameMatchingEnabled } from "openclaw/plugin-sdk/dangerous-name-runtime";
-import { logDebug } from "openclaw/plugin-sdk/logging-core";
-import { mimeTypeFromFilePath } from "openclaw/plugin-sdk/media-mime";
-import { createChannelHistoryWindow } from "openclaw/plugin-sdk/reply-history";
-import { getChildLogger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { enqueueSystemEvent } from "openclaw/plugin-sdk/system-event-runtime";
+} from "bot/plugin-sdk/channel-inbound";
+import { isRecentOutboundMessageIdentity } from "bot/plugin-sdk/channel-outbound";
+import { hasControlCommand } from "bot/plugin-sdk/command-detection";
+import { isAbortRequestText } from "bot/plugin-sdk/command-primitives-runtime";
+import { shouldHandleTextCommands } from "bot/plugin-sdk/command-surface";
+import { isDangerousNameMatchingEnabled } from "bot/plugin-sdk/dangerous-name-runtime";
+import { logDebug } from "bot/plugin-sdk/logging-core";
+import { mimeTypeFromFilePath } from "bot/plugin-sdk/media-mime";
+import { createChannelHistoryWindow } from "bot/plugin-sdk/reply-history";
+import { getChildLogger, logVerbose } from "bot/plugin-sdk/runtime-env";
+import { enqueueSystemEvent } from "bot/plugin-sdk/system-event-runtime";
 import { resolveDefaultDiscordAccountId } from "../accounts.js";
 import { ChannelType, MessageType, type User } from "../internal/discord.js";
 import {

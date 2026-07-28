@@ -1,6 +1,6 @@
 // Configure wizard tests keep workspace-owned effects on the configured default agent.
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { RuntimeEnv } from "../runtime.js";
 
 const mocks = vi.hoisted(() => ({
@@ -19,8 +19,8 @@ vi.mock("../config/config.js", () => ({
   readConfigFileSnapshotForWrite: async () => ({
     snapshot: mocks.state.snapshot,
     writeOptions: {
-      expectedConfigPath: "/tmp/openclaw.json",
-      ownedConfigPathForWrite: "/tmp/openclaw.json",
+      expectedConfigPath: "/tmp/bot.json",
+      ownedConfigPathForWrite: "/tmp/bot.json",
     },
   }),
   resolveGatewayPort: () => 18789,
@@ -60,7 +60,7 @@ vi.mock("./configure.shared.js", () => ({
 
 vi.mock("./onboard-helpers.js", () => ({
   DEFAULT_WORKSPACE: "/tmp/default-workspace",
-  applyWizardMetadata: (config: OpenClawConfig) => config,
+  applyWizardMetadata: (config: BotConfig) => config,
   ensureWorkspaceAndSessions: mocks.ensureWorkspaceAndSessions,
   guardCancel: (value: unknown) => value,
   probeGatewayReachable: vi.fn(),
@@ -94,7 +94,7 @@ describe("runConfigureWizard default-agent ownership", () => {
           },
         },
       },
-    } satisfies OpenClawConfig;
+    } satisfies BotConfig;
     mocks.state.snapshot = {
       exists: true,
       valid: true,
@@ -105,11 +105,11 @@ describe("runConfigureWizard default-agent ownership", () => {
     };
     mocks.text.mockResolvedValue("/tmp/new-ops-workspace");
     mocks.setupPluginConfig.mockImplementation(
-      async ({ config }: { config: OpenClawConfig }) => config,
+      async ({ config }: { config: BotConfig }) => config,
     );
-    mocks.setupSkills.mockImplementation(async (config: OpenClawConfig) => config);
+    mocks.setupSkills.mockImplementation(async (config: BotConfig) => config);
     mocks.commitConfig.mockImplementation(
-      async ({ nextConfig }: { nextConfig: OpenClawConfig }) => ({ config: nextConfig }),
+      async ({ nextConfig }: { nextConfig: BotConfig }) => ({ config: nextConfig }),
     );
   });
 

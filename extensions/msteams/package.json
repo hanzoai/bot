@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/msteams",
+  "name": "@hanzo/bot-msteams",
   "version": "2026.7.2",
-  "description": "OpenClaw Microsoft Teams channel plugin for bot conversations.",
+  "description": "Bot Microsoft Teams channel plugin for bot conversations.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
@@ -17,20 +17,20 @@
   },
   "devDependencies": {
     "@microsoft/teams.common": "2.0.14",
-    "@openclaw/plugin-sdk": "workspace:*",
+    "@hanzo/bot-plugin-sdk": "workspace:*",
     "jose": "6.2.3",
     "jwks-rsa": "4.1.0",
-    "openclaw": "workspace:*"
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -61,10 +61,12 @@
         "groupAllowFromFallbackToAllowFrom": true,
         "warnOnEmptyGroupSenderAllowlist": true
       },
-      "setup": { "fields": [] }
+      "setup": {
+        "fields": []
+      }
     },
     "install": {
-      "npmSpec": "@openclaw/msteams",
+      "npmSpec": "@hanzo/bot-msteams",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.10"
     },
@@ -72,7 +74,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2",
+      "botVersion": "2026.7.2",
       "runtimeFormat": "cjs"
     },
     "release": {

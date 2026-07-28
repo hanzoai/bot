@@ -2,7 +2,7 @@
  * Resolves hook-selected model state and pre-model attachments for a run.
  */
 import type { SessionEntry } from "../../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../../config/types.openclaw.js";
+import type { BotConfig } from "../../../config/types.bot.js";
 import type { ProviderRuntimeModel } from "../../../plugins/provider-runtime-model.types.js";
 import type {
   PluginHookBeforeModelResolveAttachment,
@@ -18,7 +18,7 @@ import {
 import {
   isDefaultAgentRuntimeId,
   normalizeOptionalAgentRuntimeId,
-  OPENCLAW_AGENT_RUNTIME_ID,
+  BOT_AGENT_RUNTIME_ID,
 } from "../../agent-runtime-id.js";
 import {
   evaluateContextWindowGuard,
@@ -171,7 +171,7 @@ export function resolveNativeModelOwnedHarnessId(params: {
   if (
     !requestedHarnessId ||
     isDefaultAgentRuntimeId(requestedHarnessId) ||
-    requestedHarnessId === OPENCLAW_AGENT_RUNTIME_ID ||
+    requestedHarnessId === BOT_AGENT_RUNTIME_ID ||
     requestedHarnessId !== selectedHarnessId
   ) {
     return undefined;
@@ -205,7 +205,7 @@ export function createNativeModelOwnedRuntimeModel(params: {
  * limit as the guard.
  */
 function resolveEffectiveRuntimeModel(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   contextConfigProvider?: string;
   modelId: string;
@@ -265,9 +265,9 @@ function resolveEffectiveRuntimeModel(params: {
   };
 }
 
-/** Resolves only OpenClaw-owned context policy; native model owners keep that policy private. */
+/** Resolves only Bot-owned context policy; native model owners keep that policy private. */
 export function resolveEmbeddedRuntimeModelPolicy(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   contextConfigProvider?: string;
   modelId: string;

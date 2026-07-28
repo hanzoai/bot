@@ -7,7 +7,7 @@ const coerceSecretRefMock = vi.hoisted(() => vi.fn());
 const resolveConfiguredSecretInputWithFallbackMock = vi.hoisted(() => vi.fn());
 const resolveRequiredConfiguredSecretRefInputStringMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/provider-auth", () => ({
+vi.mock("bot/plugin-sdk/provider-auth", () => ({
   coerceSecretRef: coerceSecretRefMock,
   ensureAuthProfileStore: ensureAuthProfileStoreMock,
   listProfilesForProvider: listProfilesForProviderMock,
@@ -15,7 +15,7 @@ vi.mock("openclaw/plugin-sdk/provider-auth", () => ({
     typeof value === "string" && value.trim() ? value.trim() : undefined,
 }));
 
-vi.mock("openclaw/plugin-sdk/secret-input-runtime", () => ({
+vi.mock("bot/plugin-sdk/secret-input-runtime", () => ({
   resolveConfiguredSecretInputWithFallback: resolveConfiguredSecretInputWithFallbackMock,
   resolveRequiredConfiguredSecretRefInputString: resolveRequiredConfiguredSecretRefInputStringMock,
 }));
@@ -23,8 +23,8 @@ vi.mock("openclaw/plugin-sdk/secret-input-runtime", () => ({
 import { resolveFirstGithubToken } from "./auth.js";
 
 afterAll(() => {
-  vi.doUnmock("openclaw/plugin-sdk/provider-auth");
-  vi.doUnmock("openclaw/plugin-sdk/secret-input-runtime");
+  vi.doUnmock("bot/plugin-sdk/provider-auth");
+  vi.doUnmock("bot/plugin-sdk/secret-input-runtime");
   vi.resetModules();
 });
 

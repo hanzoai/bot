@@ -1,9 +1,9 @@
 // Line plugin module implements download behavior.
 import { setTimeout as delay } from "node:timers/promises";
-import { MediaFetchError } from "openclaw/plugin-sdk/media-runtime";
-import { saveMediaStream } from "openclaw/plugin-sdk/media-store";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
-import { fetchWithRuntimeDispatcherOrMockedGlobal } from "openclaw/plugin-sdk/runtime-fetch";
+import { MediaFetchError } from "bot/plugin-sdk/media-runtime";
+import { saveMediaStream } from "bot/plugin-sdk/media-store";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
+import { fetchWithRuntimeDispatcherOrMockedGlobal } from "bot/plugin-sdk/runtime-fetch";
 
 interface DownloadResult {
   path: string;

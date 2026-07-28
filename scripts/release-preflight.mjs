@@ -7,7 +7,7 @@ import { parseReleaseVersion } from "./lib/release-version.mjs";
 
 const parsedArgs = parseArgs(process.argv.slice(2));
 const fix = parsedArgs.fix;
-const macosInfoPlistPath = "apps/macos/Sources/OpenClaw/Resources/Info.plist";
+const macosInfoPlistPath = "apps/macos/Sources/Bot/Resources/Info.plist";
 const nodeCommand = (...args) => ({ args, bin: "node" });
 const pnpmCommand = (...args) => ({ args, bin: "pnpm" });
 const releaseTasks = [
@@ -331,7 +331,7 @@ function printSkipped(skipped) {
 
 function parseArgs(argv) {
   let check = false;
-  let jobs = parseJobs(process.env.OPENCLAW_RELEASE_PREFLIGHT_JOBS ?? "4");
+  let jobs = parseJobs(process.env.BOT_RELEASE_PREFLIGHT_JOBS ?? "4");
   let wantsFix = false;
   let macosVersionsOnly = false;
   const scopes = new Set();

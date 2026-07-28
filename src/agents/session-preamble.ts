@@ -1,4 +1,4 @@
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { sanitizeProgressStatusText } from "../channels/progress-draft-status-text.js";
 import { stripMarkdown } from "../shared/text/strip-markdown.js";
 

@@ -71,11 +71,11 @@ describe("noteDevicePairingHealth", () => {
       initial: Awaited<ReturnType<typeof requestDevicePairing>>;
     }) => Promise<void>,
   ): Promise<void> {
-    await withTempDir("openclaw-doctor-device-pairing-", async (stateDir) => {
+    await withTempDir("bot-doctor-device-pairing-", async (stateDir) => {
       await withEnvAsync(
         {
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_FAST: "1",
+          BOT_STATE_DIR: stateDir,
+          BOT_TEST_FAST: "1",
         },
         async () => {
           const identity = loadOrCreateDeviceIdentity();
@@ -134,7 +134,7 @@ describe("noteDevicePairingHealth", () => {
       expect(requireNoteTitle()).toBe("Device pairing");
       expect(message).toContain("Pending scope upgrade");
       expect(message).toContain("operator.admin");
-      expect(message).toContain("openclaw devices approve");
+      expect(message).toContain("bot devices approve");
       expect(callGatewayMock).not.toHaveBeenCalled();
 
       const findings = await collectDevicePairingHealthFindings({
@@ -148,7 +148,7 @@ describe("noteDevicePairingHealth", () => {
           target: identity.deviceId + ":" + pending.request.requestId,
           requirement: "scope-upgrade",
           message: expect.stringContaining("Pending scope upgrade"),
-          fixHint: expect.stringContaining("openclaw devices approve"),
+          fixHint: expect.stringContaining("bot devices approve"),
         }),
       ]);
       expect(callGatewayMock).not.toHaveBeenCalled();
@@ -156,11 +156,11 @@ describe("noteDevicePairingHealth", () => {
   });
 
   it("warns when a legacy pairing store file has not been imported into SQLite", async () => {
-    await withTempDir("openclaw-doctor-device-pairing-", async (stateDir) => {
+    await withTempDir("bot-doctor-device-pairing-", async (stateDir) => {
       await withEnvAsync(
         {
-          OPENCLAW_STATE_DIR: stateDir,
-          OPENCLAW_TEST_FAST: "1",
+          BOT_STATE_DIR: stateDir,
+          BOT_TEST_FAST: "1",
         },
         async () => {
           const pairedPath = path.join(stateDir, "devices", "paired.json");
@@ -222,7 +222,7 @@ describe("noteDevicePairingHealth", () => {
       expect(noteMock).toHaveBeenCalledTimes(1);
       const message = requireNoteMessage();
       expect(message).toContain("stale device-token pattern");
-      expect(message).toContain("openclaw devices rotate");
+      expect(message).toContain("bot devices rotate");
     });
   });
 
@@ -354,9 +354,9 @@ describe("noteDevicePairingHealth", () => {
     });
 
     const message = requireNoteMessage();
-    expect(message).toContain("openclaw devices remove 'device; echo pwn'");
+    expect(message).toContain("bot devices remove 'device; echo pwn'");
     expect(message).toContain(
-      "openclaw devices rotate --device 'device; echo pwn' --role 'operator; touch /tmp/pwn'",
+      "bot devices rotate --device 'device; echo pwn' --role 'operator; touch /tmp/pwn'",
     );
   });
 

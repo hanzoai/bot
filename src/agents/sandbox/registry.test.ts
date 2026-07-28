@@ -6,7 +6,7 @@ import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 
 const {
   TEST_STATE_DIR,
-  PREVIOUS_OPENCLAW_STATE_DIR,
+  PREVIOUS_BOT_STATE_DIR,
   SANDBOX_REGISTRY_PATH,
   SANDBOX_BROWSER_REGISTRY_PATH,
   SANDBOX_CONTAINERS_DIR,
@@ -15,13 +15,13 @@ const {
   const nodePath = require("node:path");
   const { mkdtempSync } = require("node:fs");
   const { tmpdir } = require("node:os");
-  const baseDir = mkdtempSync(nodePath.join(tmpdir(), "openclaw-sandbox-registry-"));
-  const previousStateDir = process.env.OPENCLAW_STATE_DIR;
-  Reflect.set(process.env, "OPENCLAW_STATE_DIR", baseDir);
+  const baseDir = mkdtempSync(nodePath.join(tmpdir(), "bot-sandbox-registry-"));
+  const previousStateDir = process.env.BOT_STATE_DIR;
+  Reflect.set(process.env, "BOT_STATE_DIR", baseDir);
 
   return {
     TEST_STATE_DIR: baseDir,
-    PREVIOUS_OPENCLAW_STATE_DIR: previousStateDir,
+    PREVIOUS_BOT_STATE_DIR: previousStateDir,
     SANDBOX_REGISTRY_PATH: nodePath.join(baseDir, "containers.json"),
     SANDBOX_BROWSER_REGISTRY_PATH: nodePath.join(baseDir, "browsers.json"),
     SANDBOX_CONTAINERS_DIR: nodePath.join(baseDir, "containers"),
@@ -37,7 +37,7 @@ vi.mock("./constants.js", () => ({
   SANDBOX_BROWSERS_DIR,
 }));
 
-import { closeOpenClawStateDatabaseForTest } from "../../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../../state/bot-state-db.js";
 import { deleteTestEnvValue, setTestEnvValue } from "../../test-utils/env.js";
 import { hashTextSha256 } from "./hash.js";
 import {
@@ -64,7 +64,7 @@ async function seedMalformedBrowserRegistry(payload: string) {
 }
 
 afterEach(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   await fs.rm(path.join(TEST_STATE_DIR, "state"), { recursive: true, force: true });
   await fs.rm(SANDBOX_CONTAINERS_DIR, { recursive: true, force: true });
   await fs.rm(SANDBOX_BROWSERS_DIR, { recursive: true, force: true });
@@ -75,12 +75,12 @@ afterEach(async () => {
 });
 
 afterAll(async () => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
   await fs.rm(TEST_STATE_DIR, { recursive: true, force: true });
-  if (PREVIOUS_OPENCLAW_STATE_DIR === undefined) {
-    deleteTestEnvValue("OPENCLAW_STATE_DIR");
+  if (PREVIOUS_BOT_STATE_DIR === undefined) {
+    deleteTestEnvValue("BOT_STATE_DIR");
   } else {
-    setTestEnvValue("OPENCLAW_STATE_DIR", PREVIOUS_OPENCLAW_STATE_DIR);
+    setTestEnvValue("BOT_STATE_DIR", PREVIOUS_BOT_STATE_DIR);
   }
 });
 
@@ -92,7 +92,7 @@ function browserEntry(
     sessionKey: "agent:main",
     createdAtMs: 1,
     lastUsedAtMs: 1,
-    image: "openclaw-browser:test",
+    image: "bot-browser:test",
     cdpPort: 9222,
     ...overrides,
   };
@@ -104,7 +104,7 @@ function containerEntry(overrides: Partial<SandboxRegistryEntry> = {}): SandboxR
     sessionKey: "agent:main",
     createdAtMs: 1,
     lastUsedAtMs: 1,
-    image: "openclaw-sandbox:test",
+    image: "bot-sandbox:test",
     ...overrides,
   };
 }
@@ -181,7 +181,7 @@ describe("registry race safety", () => {
     await expect(readRegistry()).resolves.toEqual({ entries: [] });
     await expect(readRegistryEntry("legacy-container")).resolves.toBeNull();
     await expect(fs.access(SANDBOX_REGISTRY_PATH)).resolves.toBeUndefined();
-    await expectPathMissing(path.join(TEST_STATE_DIR, "state", "openclaw.sqlite"));
+    await expectPathMissing(path.join(TEST_STATE_DIR, "state", "bot.sqlite"));
   });
 
   it("normalizes legacy registry entries after explicit migration", async () => {
@@ -191,7 +191,7 @@ describe("registry race safety", () => {
         sessionKey: "agent:main",
         createdAtMs: 1,
         lastUsedAtMs: 1,
-        image: "openclaw-sandbox:test",
+        image: "bot-sandbox:test",
       },
     ]);
 

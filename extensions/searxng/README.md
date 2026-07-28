@@ -1,13 +1,13 @@
-# SearXNG OpenClaw plugin
+# SearXNG Bot plugin
 
-Official OpenClaw plugin for SearXNG.
+Official Bot plugin for SearXNG.
 
 ## Install
 
 ```sh
-openclaw plugins install @openclaw/searxng-plugin
+bot plugins install @hanzo/bot-searxng-plugin
 ```
 
 ## Docs
 
-See `docs/tools/searxng-search.md` in the OpenClaw repository, or the published docs at `https://docs.openclaw.ai/tools/searxng-search`.
+See `docs/tools/searxng-search.md` in the Bot repository, or the published docs at `https://docs.bot.ai/tools/searxng-search`.

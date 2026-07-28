@@ -1,5 +1,5 @@
 /** Registry-owned message-tool metadata prepared once per channel registry generation. */
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import type { PreparedMessageToolCatalog } from "../channels/plugins/message-action-discovery.js";
 import { CHAT_CHANNEL_ORDER } from "../channels/registry.js";
 import type { PluginRegistry } from "./registry-types.js";

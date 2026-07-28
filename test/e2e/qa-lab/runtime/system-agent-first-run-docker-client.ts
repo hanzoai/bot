@@ -1,4 +1,4 @@
-// OpenClaw first-run Docker harness.
+// Bot first-run Docker harness.
 // Imports packaged dist modules so the Docker lane verifies the npm tarball,
 // while this small test driver stays mounted from the checkout.
 import { spawn } from "node:child_process";
@@ -6,7 +6,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { shouldStartOnboardingForFreshInstall } from "../../../../dist/cli/run-main.js";
 import { clearConfigCache } from "../../../../dist/config/config.js";
-import type { OpenClawConfig } from "../../../../dist/config/types.openclaw.js";
+import type { BotConfig } from "../../../../dist/config/types.bot.js";
 import { createSqliteAuditRecordStore } from "../../../../dist/infra/sqlite-audit-record-store.js";
 import type { RuntimeEnv } from "../../../../dist/runtime.js";
 import {
@@ -81,7 +81,7 @@ const FAKE_PLANNER_REPLY = "Fake Claude planner selected an inference-backed typ
 const PACKAGED_CLI_TIMEOUT_MS = 60_000;
 const INFERENCE_PROBE_PROMPT = "Reply with the single word OK";
 const DISCORD_CREDENTIAL_ENV = ["DISCORD", "BOT", "TOKEN"].join("_");
-const DISCORD_CREDENTIAL_FIXTURE = ["openclaw", "discord", "fixture"].join("-");
+const DISCORD_CREDENTIAL_FIXTURE = ["bot", "discord", "fixture"].join("-");
 
 type PackagedCommandResult = {
   code: number | null;
@@ -99,7 +99,7 @@ function countInferencePrompts(lines: string[]): number {
   return lines.filter((line) => line.includes(INFERENCE_PROBE_PROMPT)).length;
 }
 
-function resolveDefaultModel(config: OpenClawConfig): string | undefined {
+function resolveDefaultModel(config: BotConfig): string | undefined {
   const model = config.agents?.defaults?.model;
   return typeof model === "string" ? model : model?.primary;
 }
@@ -154,7 +154,7 @@ async function installFakeClaudeCli(
 }
 
 async function runPackagedCli(args: string[]): Promise<PackagedCommandResult> {
-  const child = spawn("openclaw", args, {
+  const child = spawn("bot", args, {
     env: process.env,
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -184,7 +184,7 @@ async function runPackagedCli(args: string[]): Promise<PackagedCommandResult> {
   }
   if (timedOut) {
     throw new Error(
-      `Packaged CLI timed out after ${PACKAGED_CLI_TIMEOUT_MS}ms: openclaw ${args.join(" ")}\n${stdout}\n${stderr}`,
+      `Packaged CLI timed out after ${PACKAGED_CLI_TIMEOUT_MS}ms: bot ${args.join(" ")}\n${stdout}\n${stderr}`,
     );
   }
   return { code, stdout, stderr };
@@ -211,16 +211,16 @@ async function runPackagedOneShot(
 
 async function main() {
   const spec = await readFirstRunSpec();
-  const tempState = await createE2eStateDir("openclaw-system-agent-first-run-");
+  const tempState = await createE2eStateDir("bot-system-agent-first-run-");
   tempState.registerExitCleanup();
   const stateDir = tempState.stateDir;
-  const configPath = process.env.OPENCLAW_CONFIG_PATH ?? path.join(stateDir, "openclaw.json");
+  const configPath = process.env.BOT_CONFIG_PATH ?? path.join(stateDir, "bot.json");
   // Keep mutable logs/config outside the hashed package tree. Every file below
   // this root is part of the durable CLI owner checked before persistent setup.
   const fakeBinDir = path.join(stateDir, "fake-claude-package", "bin");
   const promptLogPath = path.join(stateDir, "fake-claude-prompts.jsonl");
-  setEnvValue("OPENCLAW_STATE_DIR", stateDir);
-  setEnvValue("OPENCLAW_CONFIG_PATH", configPath);
+  setEnvValue("BOT_STATE_DIR", stateDir);
+  setEnvValue("BOT_CONFIG_PATH", configPath);
   setEnvValue("PATH", `${fakeBinDir}:${process.env.PATH ?? ""}`);
   Reflect.deleteProperty(process.env, "OPENAI_API_KEY");
   Reflect.deleteProperty(process.env, "ANTHROPIC_API_KEY");
@@ -229,15 +229,15 @@ async function main() {
 
   clearConfigCache();
   assert(
-    await shouldStartOnboardingForFreshInstall(["node", "openclaw"]),
-    "fresh bare OpenClaw invocation did not route to onboarding",
+    await shouldStartOnboardingForFreshInstall(["node", "bot"]),
+    "fresh bare Bot invocation did not route to onboarding",
   );
 
   const blocked = await runPackagedCli(["setup", "--message", "overview"]);
-  assert(blocked.code === 1, "OpenClaw did not fail closed without inference");
+  assert(blocked.code === 1, "Bot did not fail closed without inference");
   assert(
-    `${blocked.stdout}\n${blocked.stderr}`.includes("openclaw onboard"),
-    "blocked OpenClaw did not direct the user to inference onboarding",
+    `${blocked.stdout}\n${blocked.stderr}`.includes("bot onboard"),
+    "blocked Bot did not direct the user to inference onboarding",
   );
 
   const plannerCommand = `setup workspace ${spec.dockerDefaultWorkspace}`;
@@ -254,7 +254,7 @@ async function main() {
     activation.modelRef === "claude-cli/claude-opus-5",
     `activation selected the wrong model: ${activation.modelRef}`,
   );
-  const inferenceConfig = JSON.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig;
+  const inferenceConfig = JSON.parse(await fs.readFile(configPath, "utf8")) as BotConfig;
   assert(
     resolveDefaultModel(inferenceConfig) === activation.modelRef,
     "activation did not persist the verified inference route",
@@ -262,7 +262,7 @@ async function main() {
   assert(
     inferenceConfig.agents?.defaults?.workspace === undefined &&
       inferenceConfig.gateway === undefined,
-    "inference activation configured the rest before OpenClaw started",
+    "inference activation configured the rest before Bot started",
   );
   const activationPrompts = await fs.readFile(promptLogPath, "utf8");
   assert(
@@ -279,7 +279,7 @@ async function main() {
   ]);
   assert(
     modern.code === 0 && `${modern.stdout}\n${modern.stderr}`.includes(activation.modelRef),
-    "modern compatibility entrypoint did not expose OpenClaw after activation",
+    "modern compatibility entrypoint did not expose Bot after activation",
   );
 
   // An unrelated ambient channel credential must not alter the requested setup.
@@ -302,14 +302,14 @@ async function main() {
     const output = `${result.stdout}\n${result.stderr}`;
     assert(
       result.code === 0 && output.includes(command.expectOutput),
-      `OpenClaw first-run command ${command.id} did not apply: ${output}`,
+      `Bot first-run command ${command.id} did not apply: ${output}`,
     );
     if (command.planner) {
       assert(
-        output.includes(`[openclaw] planner: ${spec.model}`) &&
+        output.includes(`[bot] planner: ${spec.model}`) &&
           output.includes(FAKE_PLANNER_REPLY) &&
-          output.includes(`[openclaw] interpreted: ${plannerCommand}`),
-        `OpenClaw first-run command ${command.id} did not use the verified planner: ${output}`,
+          output.includes(`[bot] interpreted: ${plannerCommand}`),
+        `Bot first-run command ${command.id} did not use the verified planner: ${output}`,
       );
     }
     const probesAfter = countInferencePrompts(await readFakeClaudePromptLines(promptLogPath));
@@ -317,7 +317,7 @@ async function main() {
     const minimumProbes = command.approve ? 2 : 1;
     assert(
       probeDelta >= minimumProbes,
-      `OpenClaw command ${command.id} ran ${probeDelta} inference probes; expected at least ${minimumProbes} for preflight${command.approve ? " plus its persistent boundary" : ""}`,
+      `Bot command ${command.id} ran ${probeDelta} inference probes; expected at least ${minimumProbes} for preflight${command.approve ? " plus its persistent boundary" : ""}`,
     );
   }
 
@@ -339,20 +339,20 @@ async function main() {
     `unexpected fake Claude prompt count: ${probeLines.length}`,
   );
 
-  const config = JSON.parse(await fs.readFile(configPath, "utf8")) as OpenClawConfig;
+  const config = JSON.parse(await fs.readFile(configPath, "utf8")) as BotConfig;
   assert(
     config.agents?.defaults?.workspace === spec.dockerDefaultWorkspace,
     "first-run setup did not write default workspace",
   );
   assert(resolveDefaultModel(config) === spec.model, "first-run setup did not write default model");
   const reef = config.agents?.entries?.[spec.agentId];
-  assert(reef, "OpenClaw did not create reef agent");
-  assert(reef.workspace === spec.dockerAgentWorkspace, "OpenClaw did not write reef workspace");
+  assert(reef, "Bot did not create reef agent");
+  assert(reef.workspace === spec.dockerAgentWorkspace, "Bot did not write reef workspace");
   assert(
     reef.model === undefined,
-    "OpenClaw wrote a per-agent model instead of inheriting the verified default",
+    "Bot wrote a per-agent model instead of inheriting the verified default",
   );
-  assert(config.channels?.discord?.enabled === true, "OpenClaw did not enable Discord");
+  assert(config.channels?.discord?.enabled === true, "Bot did not enable Discord");
   const discordToken = config.channels?.discord?.token;
   assert(
     discordToken &&
@@ -361,16 +361,16 @@ async function main() {
       discordToken.source === "env" &&
       "id" in discordToken &&
       discordToken.id === DISCORD_CREDENTIAL_ENV,
-    "OpenClaw did not write Discord token SecretRef",
+    "Bot did not write Discord token SecretRef",
   );
   assert(
     !JSON.stringify(config.channels.discord).includes(DISCORD_CREDENTIAL_FIXTURE),
-    "OpenClaw persisted the raw Discord token",
+    "Bot persisted the raw Discord token",
   );
   assert(config.channels?.telegram === undefined, "ambient Telegram credentials altered config");
   assert(
     !JSON.stringify(config).includes(spec.telegramToken),
-    "OpenClaw persisted an unrelated ambient credential",
+    "Bot persisted an unrelated ambient credential",
   );
 
   const audit = createSqliteAuditRecordStore<SystemAgentAuditEntry>({
@@ -384,7 +384,7 @@ async function main() {
     );
   }
 
-  console.log("OpenClaw first-run Docker E2E passed");
+  console.log("Bot first-run Docker E2E passed");
 }
 
 main().catch((err: unknown) => {

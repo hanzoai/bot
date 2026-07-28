@@ -1,5 +1,5 @@
 // 导入运行时配置缓存清除函数，确保配置更新后 getRuntimeConfig() 能读取到最新值
-import { clearRuntimeConfigSnapshot } from "openclaw/plugin-sdk/runtime-config-snapshot";
+import { clearRuntimeConfigSnapshot } from "bot/plugin-sdk/runtime-config-snapshot";
 // Qqbot plugin module implements register group allways behavior.
 import type { ApproveRuntimeGetter } from "../../adapter/commands.port.js";
 import type { SlashCommandRegistry } from "../slash-commands.js";
@@ -73,9 +73,9 @@ export function registerGroupAllwaysCommand(registry: SlashCommandRegistry): voi
           ``,
           `\`\`\`shell`,
           `# 设为 AI 自主判断何时发言（defaultRequireMention=false）`,
-          `openclaw config set channels.qqbot.defaultRequireMention false`,
+          `bot config set channels.qqbot.defaultRequireMention false`,
           `# 或设为仅被 @ 时回复（defaultRequireMention=true）`,
-          `openclaw config set channels.qqbot.defaultRequireMention true`,
+          `bot config set channels.qqbot.defaultRequireMention true`,
           `\`\`\``,
         ].join("\n");
       }

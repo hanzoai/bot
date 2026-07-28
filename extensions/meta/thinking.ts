@@ -1,5 +1,5 @@
 // Meta plugin module implements thinking behavior.
-import type { ProviderThinkingProfile } from "openclaw/plugin-sdk/plugin-entry";
+import type { ProviderThinkingProfile } from "bot/plugin-sdk/plugin-entry";
 
 const META_REASONING_MODEL_ID = "muse-spark-1.1";
 

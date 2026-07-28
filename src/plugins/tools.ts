@@ -1,9 +1,9 @@
 /** Builds agent tools registered by plugins, preserving plugin scope around callbacks and descriptors. */
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   normalizeUniqueStringEntries,
   uniqueStrings,
-} from "@openclaw/normalization-core/string-normalization";
+} from "@hanzo/bot-normalization-core/string-normalization";
 import { compileGlobPatterns, matchesAnyGlobPattern } from "../agents/glob-pattern.js";
 import { DEFAULT_PLUGIN_TOOLS_ALLOWLIST_ENTRY, normalizeToolName } from "../agents/tool-policy.js";
 import type { AnyAgentTool } from "../agents/tools/common.js";
@@ -44,7 +44,7 @@ import {
   writeCachedPluginToolDescriptors,
 } from "./tool-descriptor-cache.js";
 import { isPluginToolAllowed } from "./tool-grant-allowlist.js";
-import type { OpenClawPluginToolContext } from "./types.js";
+import type { BotPluginToolContext } from "./types.js";
 
 /** MCP bridge metadata attached to plugin tools surfaced through agent tool lists. */
 export type PluginToolMcpMeta = {
@@ -200,7 +200,7 @@ function wrapPluginToolFactoryResult(
   return isAgentTool(result) ? wrapPluginToolCallbacks(entry, result) : result;
 }
 
-function resolvePluginToolFactory(entry: PluginToolRegistration, ctx: OpenClawPluginToolContext) {
+function resolvePluginToolFactory(entry: PluginToolRegistration, ctx: BotPluginToolContext) {
   return runWithPluginToolScope(entry, () =>
     wrapPluginToolFactoryResult(entry, entry.factory(ctx)),
   );
@@ -210,7 +210,7 @@ function blocksHostRestrictedConversationReadTool(params: {
   pluginId: string;
   toolNames: readonly string[];
   bundledOwner: boolean;
-  ctx: OpenClawPluginToolContext;
+  ctx: BotPluginToolContext;
 }): boolean {
   if (
     normalizeConversationReadInvocationOrigin(params.ctx.conversationReadOrigin) ===
@@ -227,7 +227,7 @@ function blocksHostRestrictedConversationReadTool(params: {
 function blocksHostRestrictedConversationReadRegistration(params: {
   entry: PluginToolRegistration;
   manifestPlugin: PluginManifestRecord | undefined;
-  ctx: OpenClawPluginToolContext;
+  ctx: BotPluginToolContext;
 }): boolean {
   return (
     registrationIncludesHostRestrictedConversationReadTool(params.entry) &&
@@ -245,7 +245,7 @@ function blocksHostRestrictedConversationReadRegistration(params: {
 
 function resolveCurrentManifestPlugin(params: {
   pluginId: string;
-  ctx: OpenClawPluginToolContext;
+  ctx: BotPluginToolContext;
   loadContext: ReturnType<typeof resolvePluginRuntimeLoadContext>;
 }): PluginManifestRecord | undefined {
   let config = params.ctx.runtimeConfig ?? params.ctx.config ?? params.loadContext.config;
@@ -454,7 +454,7 @@ function createPluginToolFactoryTiming(params: {
 
 function resolvePluginToolFactoryEntry(params: {
   entry: PluginToolRegistration;
-  ctx: OpenClawPluginToolContext;
+  ctx: BotPluginToolContext;
   declaredNames: string[];
   factoryTimingStartedAt: number;
   logError: (message: string) => void;
@@ -727,7 +727,7 @@ function readPluginCacheSource(plugin: PluginManifestRecord): string {
 
 function buildPluginDescriptorCacheKey(params: {
   plugin: PluginManifestRecord;
-  ctx: OpenClawPluginToolContext;
+  ctx: BotPluginToolContext;
   currentRuntimeConfig?: PluginLoadOptions["config"] | null;
   configCacheKeyMemo?: PluginToolDescriptorConfigCacheKeyMemo;
   clientCaps?: ReadonlySet<string>;
@@ -757,7 +757,7 @@ function cachedDescriptorsCoverToolNames(params: {
 function createCachedDescriptorPluginTool(params: {
   descriptor: CachedPluginToolDescriptor;
   plugin: PluginManifestRecord;
-  ctx: OpenClawPluginToolContext;
+  ctx: BotPluginToolContext;
   loadContext: ReturnType<typeof resolvePluginRuntimeLoadContext>;
   runtimeOptions: PluginLoadOptions["runtimeOptions"];
 }): AnyAgentTool {
@@ -879,7 +879,7 @@ function resolveCachedPluginTools(params: {
   existing: Set<string>;
   existingNormalized: Set<string>;
   pluginToolOwnersByName: Map<string, string>;
-  ctx: OpenClawPluginToolContext;
+  ctx: BotPluginToolContext;
   loadContext: ReturnType<typeof resolvePluginRuntimeLoadContext>;
   runtimeOptions: PluginLoadOptions["runtimeOptions"];
   currentRuntimeConfig?: PluginLoadOptions["config"] | null;
@@ -1211,7 +1211,7 @@ function registryHasScopedPluginTools(
 }
 
 function resolvePluginToolLoadState(params: {
-  context: OpenClawPluginToolContext;
+  context: BotPluginToolContext;
   toolAllowlist?: string[];
   toolDenylist?: string[];
   allowGatewaySubagentBinding?: boolean;
@@ -1267,7 +1267,7 @@ function resolvePluginToolLoadState(params: {
 }
 
 export function ensureStandalonePluginToolRegistryLoaded(params: {
-  context: OpenClawPluginToolContext;
+  context: BotPluginToolContext;
   toolAllowlist?: string[];
   toolDenylist?: string[];
   allowGatewaySubagentBinding?: boolean;
@@ -1293,7 +1293,7 @@ export function ensureStandalonePluginToolRegistryLoaded(params: {
 }
 
 export function resolvePluginTools(params: {
-  context: OpenClawPluginToolContext;
+  context: BotPluginToolContext;
   existingToolNames?: Set<string>;
   clientCaps?: string[];
   toolAllowlist?: string[];

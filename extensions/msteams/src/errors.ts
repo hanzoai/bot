@@ -1,7 +1,7 @@
 // Msteams plugin module implements errors behavior.
-import { asFiniteNumberInRange, parseStrictFiniteNumber } from "openclaw/plugin-sdk/number-runtime";
-import { parseRetryAfterHeaderSeconds } from "openclaw/plugin-sdk/retry-runtime";
-import { isRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { asFiniteNumberInRange, parseStrictFiniteNumber } from "bot/plugin-sdk/number-runtime";
+import { parseRetryAfterHeaderSeconds } from "bot/plugin-sdk/retry-runtime";
+import { isRecord } from "bot/plugin-sdk/string-coerce-runtime";
 
 const MAX_SAFE_RETRY_AFTER_SECONDS = Number.MAX_SAFE_INTEGER / 1000;
 

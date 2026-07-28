@@ -2,7 +2,7 @@
  * Regression coverage for deterministic unknown-value stringification.
  * Verifies sorted keys, repeated references, cycles, binary data, and errors.
  */
-import { sanitizeSurrogates } from "@openclaw/ai/internal/shared";
+import { sanitizeSurrogates } from "@hanzo/bot-ai/internal/shared";
 import { describe, expect, it } from "vitest";
 import { stableStringify } from "./stable-stringify.js";
 

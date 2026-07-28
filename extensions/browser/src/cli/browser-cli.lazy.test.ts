@@ -89,20 +89,20 @@ describe("registerBrowserCli lazy browser subcommands", () => {
     ["local storage", ["browser", "storage", "local", "get"]],
     ["session storage", ["browser", "storage", "session", "get", "key"]],
   ])("declares default JSON output for %s", (_name, args) => {
-    expect(isBrowserMachineOutput({ argv: ["node", "openclaw", ...args] })).toBe(true);
+    expect(isBrowserMachineOutput({ argv: ["node", "bot", ...args] })).toBe(true);
   });
 
   it("keeps human browser commands out of machine-output mode", () => {
-    expect(isBrowserMachineOutput({ argv: ["node", "openclaw", "browser", "status"] })).toBe(false);
+    expect(isBrowserMachineOutput({ argv: ["node", "bot", "browser", "status"] })).toBe(false);
     expect(
-      isBrowserMachineOutput({ argv: ["node", "openclaw", "browser", "cookies", "set"] }),
+      isBrowserMachineOutput({ argv: ["node", "bot", "browser", "cookies", "set"] }),
     ).toBe(false);
   });
 
   it("accepts supported root options after browser", () => {
     expect(
       isBrowserMachineOutput({
-        argv: ["node", "openclaw", "browser", "--log-level", "debug", "evaluate"],
+        argv: ["node", "bot", "browser", "--log-level", "debug", "evaluate"],
       }),
     ).toBe(true);
   });
@@ -129,9 +129,9 @@ describe("registerBrowserCli lazy browser subcommands", () => {
 
   it("registers browser placeholders without loading handlers for help", () => {
     const program = new Command();
-    program.name("openclaw");
+    program.name("bot");
 
-    registerBrowserCli(program, ["node", "openclaw", "browser", "--help"]);
+    registerBrowserCli(program, ["node", "bot", "browser", "--help"]);
 
     const browser = program.commands.find((command) => command.name() === "browser");
     expect(browser?.commands.map((command) => command.name())).toContain("status");
@@ -148,9 +148,9 @@ describe("registerBrowserCli lazy browser subcommands", () => {
 
   it("registers only the requested browser group before dispatch", async () => {
     const program = new Command();
-    program.name("openclaw");
+    program.name("bot");
 
-    registerBrowserCli(program, ["node", "openclaw", "browser", "status"]);
+    registerBrowserCli(program, ["node", "bot", "browser", "status"]);
 
     const browser = program.commands.find((command) => command.name() === "browser");
     expect(browser?.commands.map((command) => command.name())).toEqual(["status"]);
@@ -164,9 +164,9 @@ describe("registerBrowserCli lazy browser subcommands", () => {
 
   it("loads browser doctor from the manage group so --deep is available", async () => {
     const program = new Command();
-    program.name("openclaw");
+    program.name("bot");
 
-    registerBrowserCli(program, ["node", "openclaw", "browser", "doctor", "--deep"]);
+    registerBrowserCli(program, ["node", "bot", "browser", "doctor", "--deep"]);
 
     await program.parseAsync(["browser", "doctor", "--deep"], { from: "user" });
 
@@ -179,9 +179,9 @@ describe("registerBrowserCli lazy browser subcommands", () => {
 
   it("preserves parent --json while reparsing lazy manage commands", async () => {
     const program = new Command();
-    program.name("openclaw");
+    program.name("bot");
 
-    registerBrowserCli(program, ["node", "openclaw", "browser", "--json", "open", "about:blank"]);
+    registerBrowserCli(program, ["node", "bot", "browser", "--json", "open", "about:blank"]);
 
     await program.parseAsync(["browser", "--json", "open", "about:blank"], { from: "user" });
 
@@ -193,8 +193,8 @@ describe("registerBrowserCli lazy browser subcommands", () => {
     expect(openCommand.parent?.opts().json).toBe(true);
 
     const tabsProgram = new Command();
-    tabsProgram.name("openclaw");
-    registerBrowserCli(tabsProgram, ["node", "openclaw", "browser", "--json", "tabs"]);
+    tabsProgram.name("bot");
+    registerBrowserCli(tabsProgram, ["node", "bot", "browser", "--json", "tabs"]);
 
     await tabsProgram.parseAsync(["browser", "--json", "tabs"], { from: "user" });
 
@@ -207,10 +207,10 @@ describe("registerBrowserCli lazy browser subcommands", () => {
   });
 
   it("accepts the shipped trailing browser profile order after lazy loading", async () => {
-    const program = new Command().name("openclaw").enablePositionalOptions();
+    const program = new Command().name("bot").enablePositionalOptions();
     registerBrowserCli(program, [
       "node",
-      "openclaw",
+      "bot",
       "browser",
       "tabs",
       "--browser-profile",
@@ -230,11 +230,11 @@ describe("registerBrowserCli lazy browser subcommands", () => {
 
   it("skips browser option values when selecting the lazy command group", async () => {
     const program = new Command();
-    program.name("openclaw");
+    program.name("bot");
 
     registerBrowserCli(program, [
       "node",
-      "openclaw",
+      "bot",
       "browser",
       "--browser-profile",
       "status",
@@ -255,11 +255,11 @@ describe("registerBrowserCli lazy browser subcommands", () => {
 
   it("resolves browser parent options for nested commands", async () => {
     const program = new Command();
-    program.name("openclaw");
+    program.name("bot");
 
     registerBrowserCli(program, [
       "node",
-      "openclaw",
+      "bot",
       "browser",
       "--browser-profile",
       "work",
@@ -280,11 +280,11 @@ describe("registerBrowserCli lazy browser subcommands", () => {
   });
 
   it("can eagerly register all browser groups for compatibility", async () => {
-    vi.stubEnv("OPENCLAW_DISABLE_LAZY_SUBCOMMANDS", "1");
+    vi.stubEnv("BOT_DISABLE_LAZY_SUBCOMMANDS", "1");
     const program = new Command();
-    program.name("openclaw");
+    program.name("bot");
 
-    registerBrowserCli(program, ["node", "openclaw", "browser", "--help"]);
+    registerBrowserCli(program, ["node", "bot", "browser", "--help"]);
 
     await vi.waitFor(() =>
       expect(manageMocks.registerBrowserManageCommands).toHaveBeenCalledTimes(1),

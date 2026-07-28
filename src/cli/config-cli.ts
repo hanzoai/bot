@@ -8,7 +8,7 @@ import { attachConfigIssueDiagnostics } from "../config/issue-location.js";
 import { CONFIG_PATH, resolveConfigPath } from "../config/paths.js";
 import { redactConfigObject } from "../config/redact-snapshot.js";
 import { readBestEffortRuntimeConfigSchema } from "../config/runtime-schema.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { danger, info, success, warn } from "../globals.js";
 import {
   ExitError,
@@ -60,22 +60,22 @@ export { parseConfigSetPath } from "./config-cli-path.js";
 const CONFIG_SET_DESCRIPTION = [
   "Set config values by path (value mode, ref/provider builder mode, or batch JSON mode).",
   "Examples:",
-  formatCliCommand("openclaw config set gateway.port 19001 --strict-json"),
+  formatCliCommand("bot config set gateway.port 19001 --strict-json"),
   formatCliCommand(
-    "openclaw config set channels.discord.token --ref-provider default --ref-source env --ref-id DISCORD_BOT_TOKEN",
+    "bot config set channels.discord.token --ref-provider default --ref-source env --ref-id DISCORD_BOT_TOKEN",
   ),
   formatCliCommand(
-    "openclaw config set secrets.providers.vault --provider-source file --provider-path /etc/openclaw/secrets.json --provider-mode json",
+    "bot config set secrets.providers.vault --provider-source file --provider-path /etc/bot/secrets.json --provider-mode json",
   ),
-  formatCliCommand("openclaw config set --batch-file ./config-set.batch.json --dry-run"),
+  formatCliCommand("bot config set --batch-file ./config-set.batch.json --dry-run"),
 ].join("\n");
 
 const CONFIG_PATCH_DESCRIPTION = [
   "Patch config from a JSON5 object in one validated write.",
   "Objects merge recursively, arrays/scalars replace, and null deletes a path.",
   "Examples:",
-  formatCliCommand("openclaw config patch --file ./openclaw.patch.json5 --dry-run"),
-  formatCliCommand("openclaw config patch --stdin"),
+  formatCliCommand("bot config patch --file ./bot.patch.json5 --dry-run"),
+  formatCliCommand("bot config patch --stdin"),
 ].join("\n");
 
 export async function runConfigSet(opts: {
@@ -160,7 +160,7 @@ export async function runConfigGet(opts: { path: string; json?: boolean; runtime
       }
       runtime.error(
         danger(
-          `Config path not found: ${opts.path}. Run ${formatCliCommand("openclaw config validate")} to inspect config shape.`,
+          `Config path not found: ${opts.path}. Run ${formatCliCommand("bot config validate")} to inspect config shape.`,
         ),
       );
       runtime.exit(1);
@@ -206,7 +206,7 @@ export async function runConfigUnset(opts: {
     // Mutate resolved config so runtime defaults never leak into the authored file.
     const next = structuredClone(snapshot.resolved) as Record<string, unknown>;
     const currentConfig = normalizeConfigMutationModelRefs(
-      structuredClone(snapshot.resolved) as OpenClawConfig,
+      structuredClone(snapshot.resolved) as BotConfig,
     );
     const unsetResult = unsetAtPath(next, parsedPath);
     if (!unsetResult.removed) {
@@ -248,7 +248,7 @@ export async function runConfigUnset(opts: {
       });
       return;
     }
-    const nextConfig = normalizeConfigMutationModelRefs(structuredClone(next) as OpenClawConfig);
+    const nextConfig = normalizeConfigMutationModelRefs(structuredClone(next) as BotConfig);
     const modelRefCheck = await checkTouchedTextModelRefs({
       config: nextConfig,
       previousConfig: currentConfig,
@@ -299,7 +299,7 @@ async function runConfigSchema(opts: { runtime?: RuntimeEnv } = {}) {
 
 async function runConfigValidate(opts: { json?: boolean; runtime?: RuntimeEnv } = {}) {
   const runtime = opts.runtime ?? defaultRuntime;
-  let outputPath = CONFIG_PATH ?? "openclaw.json";
+  let outputPath = CONFIG_PATH ?? "bot.json";
   try {
     const snapshot = await readConfigFileSnapshot();
     outputPath = snapshot.path;
@@ -310,7 +310,7 @@ async function runConfigValidate(opts: { json?: boolean; runtime?: RuntimeEnv } 
       } else {
         runtime.error(danger(`Config file not found: ${shortPath}`));
         runtime.error(
-          `Create one with ${formatCliCommand("openclaw onboard")} or run ${formatCliCommand("openclaw doctor --fix")}.`,
+          `Create one with ${formatCliCommand("bot onboard")} or run ${formatCliCommand("bot doctor --fix")}.`,
         );
       }
       runtime.exit(1);
@@ -329,7 +329,7 @@ async function runConfigValidate(opts: { json?: boolean; runtime?: RuntimeEnv } 
           formatPathForDisplay: true,
           includeReceivedValueHint: true,
         });
-        runtime.error(danger(`OpenClaw config is invalid: ${shortPath}`));
+        runtime.error(danger(`Bot config is invalid: ${shortPath}`));
         for (const line of formatConfigIssueLines(displayIssues, danger("×"), {
           normalizeRoot: true,
         })) {
@@ -339,7 +339,7 @@ async function runConfigValidate(opts: { json?: boolean; runtime?: RuntimeEnv } 
         runtime.error(
           formatInvalidConfigRepairHint(snapshot, "to repair, or fix the keys above manually."),
         );
-        runtime.error(`Inspect with ${formatCliCommand("openclaw config validate")}.`);
+        runtime.error(`Inspect with ${formatCliCommand("bot config validate")}.`);
       }
       runtime.exit(1);
       return;
@@ -379,7 +379,7 @@ export function registerConfigCli(program: Command) {
     .addHelpText(
       "after",
       () =>
-        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/config", "docs.openclaw.ai/cli/config")}\n`,
+        `\n${theme.muted("Docs:")} ${formatDocsLink("/cli/config", "docs.bot.ai/cli/config")}\n`,
     )
     .option(
       "--section <section>",
@@ -410,7 +410,7 @@ export function registerConfigCli(program: Command) {
     .option("--json", "Legacy alias for --strict-json", false)
     .option(
       "--dry-run",
-      "Validate changes without writing openclaw.json (checks run in builder/json/batch modes; exec SecretRefs are skipped unless --allow-exec is set)",
+      "Validate changes without writing bot.json (checks run in builder/json/batch modes; exec SecretRefs are skipped unless --allow-exec is set)",
       false,
     )
     .option(
@@ -489,7 +489,7 @@ export function registerConfigCli(program: Command) {
     .option("--stdin", "Read a JSON5 config patch object from stdin", false)
     .option(
       "--dry-run",
-      "Validate changes without writing openclaw.json (checks schema and SecretRef resolvability; exec SecretRefs are skipped unless --allow-exec is set)",
+      "Validate changes without writing bot.json (checks schema and SecretRef resolvability; exec SecretRefs are skipped unless --allow-exec is set)",
       false,
     )
     .option(
@@ -522,7 +522,7 @@ export function registerConfigCli(program: Command) {
   cmd.command("file").description("Print the active config file path").action(runConfigFile);
   cmd
     .command("schema")
-    .description("Print the JSON schema for openclaw.json")
+    .description("Print the JSON schema for bot.json")
     .action(runConfigSchema);
   cmd
     .command("validate")

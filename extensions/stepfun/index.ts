@@ -1,12 +1,12 @@
-// Stepfun plugin entrypoint registers its OpenClaw integration.
+// Stepfun plugin entrypoint registers its Bot integration.
 import {
   definePluginEntry,
-  type OpenClawConfig,
+  type BotConfig,
   type ProviderCatalogContext,
-} from "openclaw/plugin-sdk/plugin-entry";
-import { createProviderApiKeyAuthMethod } from "openclaw/plugin-sdk/provider-auth-api-key";
-import { buildOpenAICompatibleLiveModelProviderConfig } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
-import { normalizeLowercaseStringOrEmpty } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/plugin-entry";
+import { createProviderApiKeyAuthMethod } from "bot/plugin-sdk/provider-auth-api-key";
+import { buildOpenAICompatibleLiveModelProviderConfig } from "bot/plugin-sdk/provider-catalog-live-runtime";
+import { normalizeLowercaseStringOrEmpty } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   applyStepFunPlanConfig,
   applyStepFunPlanConfigCn,
@@ -137,7 +137,7 @@ function createStepFunApiKeyMethod(params: {
   choiceId: string;
   choiceLabel: string;
   choiceHint: string;
-  applyConfig: (cfg: OpenClawConfig) => OpenClawConfig;
+  applyConfig: (cfg: BotConfig) => BotConfig;
 }) {
   return createProviderApiKeyAuthMethod({
     providerId: params.providerId,

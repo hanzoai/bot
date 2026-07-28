@@ -1,5 +1,5 @@
 // Tracks active reply runs so stop, queue, and status commands can coordinate.
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   createAgentRunRestartAbortError,
   isAgentRunRestartAbortReason,
@@ -257,7 +257,7 @@ type ReplyRunState = {
   evictOperationByOperation?: WeakMap<ReplyOperation, () => void>;
 };
 
-const REPLY_RUN_STATE_KEY = Symbol.for("openclaw.replyRunRegistry");
+const REPLY_RUN_STATE_KEY = Symbol.for("bot.replyRunRegistry");
 
 const replyRunState = resolveGlobalSingleton<ReplyRunState>(REPLY_RUN_STATE_KEY, () => ({
   activeRunsByKey: new Map<string, ReplyOperation>(),
@@ -1510,7 +1510,7 @@ const replyRunRegistryTestApi = {
 };
 
 if (process.env.VITEST === "true" || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.replyRunRegistryTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.replyRunRegistryTestApi")] =
     replyRunRegistryTestApi;
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

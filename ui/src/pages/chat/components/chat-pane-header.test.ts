@@ -24,7 +24,7 @@ const containers: HTMLElement[] = [];
 
 afterEach(() => {
   containers.splice(0).forEach((container) => container.remove());
-  Reflect.deleteProperty(window, "__OPENCLAW_NATIVE_WEB_CHROME__");
+  Reflect.deleteProperty(window, "__BOT_NATIVE_WEB_CHROME__");
 });
 
 function nativeGateways(snapshot: NativeGatewaysSnapshot): NativeGatewaysCapability {
@@ -77,8 +77,8 @@ function mount(patch: Partial<ChatPaneHeaderProps> = {}) {
     catalog: false,
     editing: false,
     renameValue: "Session title",
-    workspaceRoot: "/repo/openclaw",
-    workspaceLabel: "openclaw",
+    workspaceRoot: "/repo/bot",
+    workspaceLabel: "bot",
     branch: "feature/header",
     branches: [],
     branchSwitchDisabledReason: null,
@@ -107,7 +107,7 @@ function mount(patch: Partial<ChatPaneHeaderProps> = {}) {
 
 describe("chat pane header", () => {
   it("hides the gateway picker without capability and with one gateway", () => {
-    Object.assign(window, { __OPENCLAW_NATIVE_WEB_CHROME__: true });
+    Object.assign(window, { __BOT_NATIVE_WEB_CHROME__: true });
     expect(mount().container.querySelector(".chat-pane__gateway-menu")).toBeNull();
     const one = nativeGateways({ gateways: [gatewaySnapshot.gateways[0]!], currentId: "primary" });
     expect(
@@ -116,7 +116,7 @@ describe("chat pane header", () => {
   });
 
   it("renders gateway rows, primary tag, and current checkmark", () => {
-    Object.assign(window, { __OPENCLAW_NATIVE_WEB_CHROME__: true });
+    Object.assign(window, { __BOT_NATIVE_WEB_CHROME__: true });
     const { container } = mount({ nativeGateways: nativeGateways(gatewaySnapshot) });
     const rows = container.querySelectorAll(".chat-pane__gateway-item");
     expect(rows).toHaveLength(2);
@@ -126,7 +126,7 @@ describe("chat pane header", () => {
   });
 
   it("selects normally and opens a new window on alt-click", () => {
-    Object.assign(window, { __OPENCLAW_NATIVE_WEB_CHROME__: true });
+    Object.assign(window, { __BOT_NATIVE_WEB_CHROME__: true });
     const select = vi.fn();
     const openWindow = vi.fn();
     const capability = { ...nativeGateways(gatewaySnapshot), select, openWindow };
@@ -143,7 +143,7 @@ describe("chat pane header", () => {
   });
 
   it("opens a new window when alt-clicking the current gateway", () => {
-    Object.assign(window, { __OPENCLAW_NATIVE_WEB_CHROME__: true });
+    Object.assign(window, { __BOT_NATIVE_WEB_CHROME__: true });
     const select = vi.fn();
     const openWindow = vi.fn();
     const capability = { ...nativeGateways(gatewaySnapshot), select, openWindow };
@@ -156,7 +156,7 @@ describe("chat pane header", () => {
   });
 
   it("re-renders gateway rows from a changed snapshot property", () => {
-    Object.assign(window, { __OPENCLAW_NATIVE_WEB_CHROME__: true });
+    Object.assign(window, { __BOT_NATIVE_WEB_CHROME__: true });
     let current = gatewaySnapshot;
     const capability = {
       ...nativeGateways(gatewaySnapshot),
@@ -180,7 +180,7 @@ describe("chat pane header", () => {
       ],
     };
     current = next;
-    window.dispatchEvent(new CustomEvent("openclaw:native-gateways-changed", { detail: next }));
+    window.dispatchEvent(new CustomEvent("bot:native-gateways-changed", { detail: next }));
 
     const props = { ...mounted.props, gatewaysSnapshot: capability.snapshot };
     render(html`${renderChatPaneHeader(props)}`, mounted.container);
@@ -190,7 +190,7 @@ describe("chat pane header", () => {
   });
 
   it("disables set-primary when the viewed gateway cannot be promoted", () => {
-    Object.assign(window, { __OPENCLAW_NATIVE_WEB_CHROME__: true });
+    Object.assign(window, { __BOT_NATIVE_WEB_CHROME__: true });
     const snapshot = {
       ...gatewaySnapshot,
       gateways: gatewaySnapshot.gateways.map((gateway) =>
@@ -242,7 +242,7 @@ describe("chat pane header", () => {
     const title = container.querySelector<HTMLButtonElement>(".chat-pane__session-title-button");
     const chip = container.querySelector<HTMLButtonElement>(".chat-pane__workspace-chip");
     expect(title?.textContent?.trim()).toBe("Session title");
-    expect(chip?.textContent?.trim()).toContain("openclaw");
+    expect(chip?.textContent?.trim()).toContain("bot");
     title?.click();
     expect(props.onBeginRename).toHaveBeenCalledOnce();
   });
@@ -264,13 +264,13 @@ describe("chat pane header", () => {
       showOwnerChip: true,
       session: row({ createdActor: { type: "human", id: "profile-ada", label: "Ada" } }),
     });
-    expect(shown.container.querySelector("openclaw-session-owner-chip")).not.toBeNull();
+    expect(shown.container.querySelector("bot-session-owner-chip")).not.toBeNull();
 
     const dormant = mount({
       showOwnerChip: false,
       session: row({ createdActor: { type: "human", id: "profile-ada", label: "Ada" } }),
     });
-    expect(dormant.container.querySelector("openclaw-session-owner-chip")).toBeNull();
+    expect(dormant.container.querySelector("bot-session-owner-chip")).toBeNull();
   });
 
   it("renders a resolved owner avatar with the header attribution semantics", async () => {
@@ -285,7 +285,7 @@ describe("chat pane header", () => {
     });
 
     await vi.waitFor(() => {
-      expect(mounted.container.querySelector("openclaw-session-owner-chip img")).not.toBeNull();
+      expect(mounted.container.querySelector("bot-session-owner-chip img")).not.toBeNull();
     });
     const chip = mounted.container.querySelector(".session-owner-chip--header");
     expect(chip?.getAttribute("aria-label")).toBe("Created by Ada");
@@ -417,39 +417,39 @@ describe("chat pane workspace resolution", () => {
       resolveChatPaneWorkspace({
         session: row({
           spawnedCwd: "/tmp/worktrees/title-bar",
-          worktree: { id: "wt-1", branch: "title-bar", repoRoot: "/src/openclaw" },
+          worktree: { id: "wt-1", branch: "title-bar", repoRoot: "/src/bot" },
         }),
       }),
-    ).toEqual({ root: "/tmp/worktrees/title-bar", label: "openclaw" });
+    ).toEqual({ root: "/tmp/worktrees/title-bar", label: "bot" });
   });
 
   it("does not substitute the agent workspace for a missing worktree checkout", () => {
     expect(
       resolveChatPaneWorkspace({
         session: row({
-          worktree: { id: "wt-missing", branch: "feature", repoRoot: "/src/openclaw" },
+          worktree: { id: "wt-missing", branch: "feature", repoRoot: "/src/bot" },
         }),
         agentWorkspace: "/src/default-agent-workspace",
         worktreePath: null,
       }),
-    ).toEqual({ root: null, label: "openclaw" });
+    ).toEqual({ root: null, label: "bot" });
   });
 
   it("matches the gateway root order: spawned workspace before spawned cwd", () => {
     expect(
       resolveChatPaneWorkspace({
         session: row({
-          spawnedWorkspaceDir: "/src/openclaw",
-          spawnedCwd: "/src/openclaw/packages/nested",
+          spawnedWorkspaceDir: "/src/bot",
+          spawnedCwd: "/src/bot/packages/nested",
         }),
       }),
-    ).toEqual({ root: "/src/openclaw", label: "openclaw" });
+    ).toEqual({ root: "/src/bot", label: "bot" });
     // execCwd is exec-node routing state; it never overrides local facts.
     expect(
       resolveChatPaneWorkspace({
-        session: row({ execCwd: "/remote/stale", spawnedCwd: "/src/openclaw" }),
+        session: row({ execCwd: "/remote/stale", spawnedCwd: "/src/bot" }),
       }),
-    ).toEqual({ root: "/src/openclaw", label: "openclaw" });
+    ).toEqual({ root: "/src/bot", label: "bot" });
   });
 
   it("prefers exec cwd and falls back to the agent workspace", () => {
@@ -468,9 +468,9 @@ describe("chat pane workspace resolution", () => {
         worktreePath: "/local/worktree",
       }),
     ).toEqual({ root: null, label: null });
-    expect(resolveChatPaneWorkspace({ session: row(), agentWorkspace: "/src/openclaw" })).toEqual({
-      root: "/src/openclaw",
-      label: "openclaw",
+    expect(resolveChatPaneWorkspace({ session: row(), agentWorkspace: "/src/bot" })).toEqual({
+      root: "/src/bot",
+      label: "bot",
     });
   });
 
@@ -494,7 +494,7 @@ describe("chat pane workspace resolution", () => {
     expect(
       canRevealSessionWorkspace({
         session: row(),
-        workspaceRoot: "/src/openclaw",
+        workspaceRoot: "/src/bot",
         methodAdvertised: false,
         hasAdminAccess: true,
       }),
@@ -502,7 +502,7 @@ describe("chat pane workspace resolution", () => {
     expect(
       canRevealSessionWorkspace({
         session: row(),
-        workspaceRoot: "/src/openclaw",
+        workspaceRoot: "/src/bot",
         methodAdvertised: true,
         hasAdminAccess: false,
       }),

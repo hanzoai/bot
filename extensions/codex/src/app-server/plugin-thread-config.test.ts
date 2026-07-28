@@ -1093,7 +1093,7 @@ describe("Codex plugin thread config", () => {
     ]);
   });
 
-  it("re-enables an OpenClaw-allowed app even when app/list reports it disabled", async () => {
+  it("re-enables an Bot-allowed app even when app/list reports it disabled", async () => {
     const appCache = new CodexAppInventoryCache();
     await appCache.refreshNow({
       key: "runtime",
@@ -1267,7 +1267,7 @@ describe("Codex plugin thread config", () => {
     ]);
   });
 
-  it("does not expose apps for plugins that OpenClaw policy leaves disabled", async () => {
+  it("does not expose apps for plugins that Bot policy leaves disabled", async () => {
     const appCache = new CodexAppInventoryCache();
     await appCache.refreshNow({
       key: "runtime",
@@ -1759,7 +1759,7 @@ describe("Codex plugin thread config", () => {
     expect(third).not.toBe(second);
   });
 
-  it("uses app-level destructive policy for plugins without OpenClaw tool-name knowledge", async () => {
+  it("uses app-level destructive policy for plugins without Bot tool-name knowledge", async () => {
     const appCache = new CodexAppInventoryCache();
     await appCache.refreshNow({
       key: "runtime",

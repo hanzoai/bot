@@ -42,7 +42,7 @@ flow:
             senderId: "@driver:matrix.test"
             senderName: QA Driver
             text:
-              expr: "`@openclaw Reply exactly: ${config.marker}`"
+              expr: "`@bot Reply exactly: ${config.marker}`"
           saveAs: inbound
         - waitForOutbound:
             conversation:

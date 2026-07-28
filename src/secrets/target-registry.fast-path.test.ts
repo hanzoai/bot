@@ -16,7 +16,7 @@ const { loadBundledPluginPublicArtifactModuleSyncMock } = vi.hoisted(() => ({
             {
               id: "channels.googlechat.serviceAccount",
               targetType: "channels.googlechat.serviceAccount",
-              configFile: "openclaw.json",
+              configFile: "bot.json",
               pathPattern: "channels.googlechat.serviceAccount",
               secretShape: "secret_input",
               expectedResolvedValue: "string",
@@ -33,7 +33,7 @@ const { loadBundledPluginPublicArtifactModuleSyncMock } = vi.hoisted(() => ({
             {
               id: "channels.telegram.botToken",
               targetType: "channels.telegram.botToken",
-              configFile: "openclaw.json",
+              configFile: "bot.json",
               pathPattern: "channels.telegram.botToken",
               refPathPattern: "channels.telegram.botTokenRef",
               secretShape: "sibling_ref",

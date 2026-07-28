@@ -1,5 +1,5 @@
 // Discord plugin module implements error body behavior.
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 
 const DISCORD_RESPONSE_BODY_SUMMARY_MAX_CHARS = 240;
 

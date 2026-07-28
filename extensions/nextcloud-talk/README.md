@@ -1,11 +1,11 @@
-# OpenClaw Nextcloud Talk
+# Bot Nextcloud Talk
 
-Official OpenClaw channel plugin for Nextcloud Talk conversations.
+Official Bot channel plugin for Nextcloud Talk conversations.
 
-Install from OpenClaw:
+Install from Bot:
 
 ```bash
-openclaw plugins install @openclaw/nextcloud-talk
+bot plugins install @hanzo/bot-nextcloud-talk
 ```
 
-Configure the Nextcloud server and Talk credentials in OpenClaw, then enable the conversations where agents should receive and send messages.
+Configure the Nextcloud server and Talk credentials in Bot, then enable the conversations where agents should receive and send messages.

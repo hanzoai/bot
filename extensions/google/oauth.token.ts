@@ -2,11 +2,11 @@
 import {
   asDateTimestampMs,
   resolveExpiresAtMsFromDurationSeconds,
-} from "openclaw/plugin-sdk/number-runtime";
+} from "bot/plugin-sdk/number-runtime";
 import {
   readProviderJsonResponse,
   readResponseTextLimited,
-} from "openclaw/plugin-sdk/provider-http";
+} from "bot/plugin-sdk/provider-http";
 import { resolveOAuthClientConfig } from "./oauth.credentials.js";
 import { fetchWithTimeout } from "./oauth.http.js";
 import { resolveGoogleOAuthIdentity, resolveGooglePersonalOAuthIdentity } from "./oauth.project.js";

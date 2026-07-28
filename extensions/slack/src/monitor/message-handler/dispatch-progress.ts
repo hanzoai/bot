@@ -1,4 +1,4 @@
-import type { AgentPlanStep } from "openclaw/plugin-sdk/channel-outbound";
+import type { AgentPlanStep } from "bot/plugin-sdk/channel-outbound";
 import {
   createChannelProgressDraftCompositor,
   createChannelProgressReceiptTracker,
@@ -12,8 +12,8 @@ import {
   resolveChannelStreamingSuppressDefaultToolProgressMessages,
   type ChannelProgressDraftCompositorSnapshot,
   type ChannelProgressDraftLine,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { danger, logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/channel-outbound";
+import { danger, logVerbose } from "bot/plugin-sdk/runtime-env";
 import { createSlackDraftStream } from "../../draft-stream.js";
 import { formatSlackError } from "../../errors.js";
 import { SLACK_TEXT_LIMIT } from "../../limits.js";

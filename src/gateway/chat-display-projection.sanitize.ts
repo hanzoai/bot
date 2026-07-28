@@ -1,6 +1,6 @@
-import { estimateBase64DecodedBytes } from "@openclaw/media-core/base64";
-import { asFiniteNumber } from "@openclaw/normalization-core/number-coercion";
-import { asOptionalRecord as readRecord } from "@openclaw/normalization-core/record-coerce";
+import { estimateBase64DecodedBytes } from "@hanzo/bot-media-core/base64";
+import { asFiniteNumber } from "@hanzo/bot-normalization-core/number-coercion";
+import { asOptionalRecord as readRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import {
   parseAssistantTextSignature,
   resolveAssistantMessagePhase,
@@ -92,8 +92,8 @@ export function sanitizeChatHistoryContentBlock(
     delete entry.thinkingSignature;
     changed = true;
   }
-  if ("openclawReasoningReplay" in entry) {
-    delete entry.openclawReasoningReplay;
+  if ("botReasoningReplay" in entry) {
+    delete entry.botReasoningReplay;
     changed = true;
   }
   const type = typeof entry.type === "string" ? entry.type : "";
@@ -260,7 +260,7 @@ function projectWorkspaceConflictDetails(
       (entryPath): entryPath is string => typeof entryPath === "string" && entryPath.length > 0,
     ) ||
     typeof details.stagedResultRef !== "string" ||
-    !/^refs\/openclaw\/worker-results\/[A-Za-z0-9-]+$/u.test(details.stagedResultRef) ||
+    !/^refs\/bot\/worker-results\/[A-Za-z0-9-]+$/u.test(details.stagedResultRef) ||
     (details.totalCount !== undefined &&
       (!Number.isSafeInteger(details.totalCount) ||
         (details.totalCount as number) < details.paths.length))

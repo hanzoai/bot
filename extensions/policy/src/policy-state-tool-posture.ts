@@ -2,7 +2,7 @@ import {
   isRecord,
   asBoolean as readBoolean,
   normalizeOptionalString as readString,
-} from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/string-coerce-runtime";
 import { ocPathSegment } from "./policy-state-helpers.js";
 import type { PolicyToolPostureEvidence } from "./policy-state-types.js";
 
@@ -21,8 +21,8 @@ export function scanPolicyToolPosture(
     inheritedTools: {},
     sandbox: defaultSandbox,
     inheritedSandbox: {},
-    sourceBase: "oc://openclaw.config/tools",
-    inheritedSourceBase: "oc://openclaw.config/tools",
+    sourceBase: "oc://bot.config/tools",
+    inheritedSourceBase: "oc://bot.config/tools",
   });
 
   const list = Array.isArray(agents.list) ? agents.list : [];
@@ -40,8 +40,8 @@ export function scanPolicyToolPosture(
       inheritedTools: globalTools,
       sandbox: isRecord(agent.sandbox) ? agent.sandbox : {},
       inheritedSandbox: defaultSandbox,
-      sourceBase: `oc://openclaw.config/agents/list/#${index}/tools`,
-      inheritedSourceBase: "oc://openclaw.config/tools",
+      sourceBase: `oc://bot.config/agents/list/#${index}/tools`,
+      inheritedSourceBase: "oc://bot.config/tools",
     });
   });
 

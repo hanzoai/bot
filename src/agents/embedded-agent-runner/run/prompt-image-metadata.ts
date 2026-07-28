@@ -52,7 +52,7 @@ export function countMissingLayoutInlineSlots(
 export function readPersistedImageBlockFactIndexes(
   message: AgentMessage,
 ): ImageFactIndex[] | undefined {
-  const meta = (message as unknown as Record<string, unknown>)["__openclaw"];
+  const meta = (message as unknown as Record<string, unknown>)["__bot"];
   const value =
     meta && typeof meta === "object" && !Array.isArray(meta)
       ? (meta as Record<string, unknown>).mediaImageBlockFactIndexes
@@ -66,7 +66,7 @@ export function readPersistedImageBlockFactIndexes(
 }
 
 export function readPersistedMediaImageLayout(message: AgentMessage): MediaImageLayout | undefined {
-  const meta = (message as unknown as Record<string, unknown>)["__openclaw"];
+  const meta = (message as unknown as Record<string, unknown>)["__bot"];
   if (!meta || typeof meta !== "object" || Array.isArray(meta)) {
     return undefined;
   }

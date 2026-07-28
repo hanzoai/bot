@@ -25,7 +25,7 @@ import {
 } from "../commands/channel-setup/trusted-catalog.js";
 import type { ChannelChoice } from "../commands/onboard-types.js";
 import { isChannelConfigured } from "../config/channel-configured.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { formatErrorMessage } from "../infra/errors.js";
 import { resolveBundledPluginSources } from "../plugins/bundled-sources.js";
 import { enableExplicitlySelectedPluginInConfig } from "../plugins/enable.js";
@@ -69,7 +69,7 @@ export function createChannelOnboardingPostWriteHookCollector() {
 
 export async function runCollectedChannelOnboardingPostWriteHooks(params: {
   hooks: ChannelOnboardingPostWriteHook[];
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   runtime: RuntimeEnv;
   beforePersistentEffect?: () => Promise<void>;
 }): Promise<void> {
@@ -90,7 +90,7 @@ export function createChannelOnboardingPostWriteHook(params: {
   accountId?: string;
   adapter?: Pick<ChannelSetupWizardAdapter, "afterConfigWritten">;
   channel: ChannelChoice;
-  previousCfg: OpenClawConfig;
+  previousCfg: BotConfig;
 }): ChannelOnboardingPostWriteHook | undefined {
   if (!params.accountId || !params.adapter?.afterConfigWritten) {
     return undefined;
@@ -111,11 +111,11 @@ export function createChannelOnboardingPostWriteHook(params: {
 // Channel-specific prompts moved into setup flow adapters.
 
 export async function setupChannels(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   runtime: RuntimeEnv,
   prompter: WizardPrompter,
   options?: SetupChannelsOptions,
-): Promise<OpenClawConfig> {
+): Promise<BotConfig> {
   let next = cfg;
   const deferStatusUntilSelection = options?.deferStatusUntilSelection === true;
   const forceAllowFromChannels = new Set(options?.forceAllowFromChannels ?? []);
@@ -379,7 +379,7 @@ export async function setupChannels(
         t("wizard.channels.disabledDuringSetup", {
           channel,
           hint: disabledHint,
-          command: formatCliCommand("openclaw channels add"),
+          command: formatCliCommand("bot channels add"),
         }),
         t("wizard.channels.setupTitle"),
       );
@@ -392,7 +392,7 @@ export async function setupChannels(
         t("wizard.channels.pluginEnableFailed", {
           channel,
           reason: result.reason ?? "plugin disabled",
-          command: formatCliCommand("openclaw plugins list"),
+          command: formatCliCommand("bot plugins list"),
         }),
         t("wizard.channels.setupTitle"),
       );
@@ -409,8 +409,8 @@ export async function setupChannels(
         await prompter.note(
           t("wizard.channels.pluginMissingRecoverable", {
             channel,
-            listCommand: formatCliCommand("openclaw plugins list"),
-            enableCommand: formatCliCommand("openclaw plugins enable " + channel),
+            listCommand: formatCliCommand("bot plugins list"),
+            enableCommand: formatCliCommand("bot plugins enable " + channel),
           }),
           t("wizard.channels.setupTitle"),
         );
@@ -497,7 +497,7 @@ export async function setupChannels(
       await prompter.note(
         t("wizard.channels.noInteractiveSetup", {
           channel,
-          command: formatCliCommand(`openclaw channels add --channel ${channel} --help`),
+          command: formatCliCommand(`bot channels add --channel ${channel} --help`),
         }),
         t("wizard.channels.setupTitle"),
       );
@@ -663,7 +663,7 @@ export async function setupChannels(
               enabled: true,
             },
           },
-        } as OpenClawConfig;
+        } as BotConfig;
         resumingDisabledChannel = true;
       } else if (deferredDisabledHint === "plugin disabled") {
         const resume =
@@ -683,7 +683,7 @@ export async function setupChannels(
             t("wizard.channels.pluginEnableFailed", {
               channel,
               reason: result.reason ?? "plugin disabled",
-              command: formatCliCommand("openclaw plugins list"),
+              command: formatCliCommand("bot plugins list"),
             }),
             t("wizard.channels.setupTitle"),
           );
@@ -917,7 +917,7 @@ export async function setupChannels(
             value: skipValue,
             label: t("common.skipForNow"),
             hint: t("wizard.channels.skipLaterHint", {
-              command: formatCliCommand("openclaw channels add"),
+              command: formatCliCommand("bot channels add"),
             }),
           },
           ...resolveChannelSetupSelectionContributions({

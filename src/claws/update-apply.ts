@@ -3,8 +3,8 @@ import { listAgentEntries } from "../agents/agent-scope.js";
 import { stableStringify } from "../agents/stable-stringify.js";
 import { transformConfigFileWithRetry } from "../config/config.js";
 import type { AgentConfig } from "../config/types.agents.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
-import type { OpenClawStateDatabaseOptions } from "../state/openclaw-state-db.js";
+import type { BotConfig } from "../config/types.bot.js";
+import type { BotStateDatabaseOptions } from "../state/bot-state-db.js";
 import {
   applyClawCronUpdate,
   ClawCronUpdateError,
@@ -31,7 +31,7 @@ import {
 import {
   CLAW_OUTPUT_STABILITY,
   type ClawManifest,
-  type ClawOpenClawProfile,
+  type ClawBotProfile,
   type ClawPackage,
   type ClawSourceIdentity,
 } from "./types.js";
@@ -42,9 +42,9 @@ import {
   type ClawWorkspaceUpdateExecution,
 } from "./workspace-update.js";
 
-export const CLAW_UPDATE_RESULT_SCHEMA_VERSION = "openclaw.clawUpdateResult.v1" as const;
+export const CLAW_UPDATE_RESULT_SCHEMA_VERSION = "bot.clawUpdateResult.v1" as const;
 
-type ConfigCommit = (transform: (config: OpenClawConfig) => OpenClawConfig) => Promise<void>;
+type ConfigCommit = (transform: (config: BotConfig) => BotConfig) => Promise<void>;
 
 function digest(value: unknown): string {
   return `sha256:${createHash("sha256").update(stableStringify(value)).digest("hex")}`;
@@ -90,11 +90,11 @@ export async function applyClawUpdatePlan(
   params: {
     targetManifest: ClawManifest;
     targetClawMarkdownBody?: Buffer;
-    targetOpenClawProfile?: ClawOpenClawProfile;
+    targetBotProfile?: ClawBotProfile;
     targetSource: ClawSourceIdentity;
   },
-  options: OpenClawStateDatabaseOptions & {
-    config: OpenClawConfig;
+  options: BotStateDatabaseOptions & {
+    config: BotConfig;
     sourceMcpServers: Record<string, Record<string, unknown>>;
     consentPlanIntegrity: string | undefined;
     packagePreflight?: ClawAddPlanContext["packagePreflight"];
@@ -128,7 +128,7 @@ export async function applyClawUpdatePlan(
     agentId: plan.agentId,
     targetManifest: params.targetManifest,
     targetClawMarkdownBody: params.targetClawMarkdownBody,
-    targetOpenClawProfile: params.targetOpenClawProfile,
+    targetBotProfile: params.targetBotProfile,
     targetSource: params.targetSource,
     config: options.config,
     sourceMcpServers: options.sourceMcpServers,
@@ -181,7 +181,7 @@ export async function applyClawUpdatePlan(
   const targetAddPlan = await buildAddPlan({
     manifest: params.targetManifest,
     clawMarkdownBody: params.targetClawMarkdownBody,
-    openClawProfile: params.targetOpenClawProfile,
+    botProfile: params.targetBotProfile,
     source: params.targetSource,
     context: {
       agentId: fresh.agentId,

@@ -4,6 +4,6 @@ export {
   formatDocsLink,
   setSetupChannelEnabled,
   splitSetupEntries,
-} from "openclaw/plugin-sdk/setup";
-export type { ChannelSetupWizard } from "openclaw/plugin-sdk/setup";
+} from "bot/plugin-sdk/setup";
+export type { ChannelSetupWizard } from "bot/plugin-sdk/setup";
 export { listLineAccountIds, normalizeAccountId, resolveLineAccount } from "./accounts.js";

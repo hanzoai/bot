@@ -1,5 +1,5 @@
 // Control UI module implements assistant identity behavior.
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import { isRenderableAvatarImageDataUrl } from "../../../src/shared/avatar-limits.js";
 import { normalizeOptionalString } from "./string-coerce.ts";
 

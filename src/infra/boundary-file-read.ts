@@ -17,19 +17,19 @@ export {
   type RootFileOpenResult,
 } from "@openclaw/fs-safe/advanced";
 
-function preserveOpenClawOverflowError(error: unknown, maxBytes: number): never {
+function preserveBotOverflowError(error: unknown, maxBytes: number): never {
   if (error instanceof FsSafeError && error.code === "too-large") {
     throw new RangeError(`File exceeds ${maxBytes} bytes`, { cause: error });
   }
   throw error;
 }
 
-/** Read a pinned descriptor without changing OpenClaw's user-facing overflow error. */
+/** Read a pinned descriptor without changing Bot's user-facing overflow error. */
 export async function readFileDescriptorBounded(fd: number, maxBytes: number): Promise<Buffer> {
   try {
     return await readFileDescriptorBoundedFsSafe(fd, maxBytes);
   } catch (error) {
-    return preserveOpenClawOverflowError(error, maxBytes);
+    return preserveBotOverflowError(error, maxBytes);
   }
 }
 
@@ -38,6 +38,6 @@ export function readFileDescriptorBoundedSync(fd: number, maxBytes: number): Buf
   try {
     return readFileDescriptorBoundedSyncFsSafe(fd, maxBytes);
   } catch (error) {
-    return preserveOpenClawOverflowError(error, maxBytes);
+    return preserveBotOverflowError(error, maxBytes);
   }
 }

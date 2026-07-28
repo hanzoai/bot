@@ -2,15 +2,15 @@
 import type {
   ChannelDoctorConfigMutation,
   ChannelDoctorLegacyConfigRule,
-} from "openclaw/plugin-sdk/channel-contract";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+} from "bot/plugin-sdk/channel-contract";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   asObjectRecord,
   defineChannelAliasMigration,
   defineKeyMoveMigration,
   hasLegacyAccountStreamingAliases,
   normalizeChannelConfigEntries,
-} from "openclaw/plugin-sdk/runtime-doctor";
+} from "bot/plugin-sdk/runtime-doctor";
 
 // Feishu's legacy boolean `streaming` gated streaming-card replies with an
 // enabled default, so it migrates through the mode path (true → "partial",
@@ -91,7 +91,7 @@ function sanitizeLegacyCoalesceFields(params: {
   };
 }
 
-function sanitizeFeishuCoalesce(cfg: OpenClawConfig, changes: string[]): OpenClawConfig {
+function sanitizeFeishuCoalesce(cfg: BotConfig, changes: string[]): BotConfig {
   return normalizeChannelConfigEntries({
     cfg,
     channelId: "feishu",
@@ -113,7 +113,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
   {
     path: ["channels", "feishu"],
     message:
-      'channels.feishu[.accounts.<id>].tools.base is legacy; use tools.bitable. Run "openclaw doctor --fix".',
+      'channels.feishu[.accounts.<id>].tools.base is legacy; use tools.bitable. Run "bot doctor --fix".',
     match: (value) => {
       const entry = asObjectRecord(value);
       return (
@@ -127,7 +127,7 @@ export const legacyConfigRules: ChannelDoctorLegacyConfigRule[] = [
 export function normalizeCompatibilityConfig({
   cfg,
 }: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): ChannelDoctorConfigMutation {
   const aliases = streamingAliasMigration.normalizeChannelConfig({ cfg });
   return {

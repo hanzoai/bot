@@ -1,4 +1,4 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 // JSON schema default helpers fill object values from TypeBox schema defaults.
 import { Compile } from "typebox/compile";
 import { isBlockedObjectKey } from "../infra/prototype-keys.js";

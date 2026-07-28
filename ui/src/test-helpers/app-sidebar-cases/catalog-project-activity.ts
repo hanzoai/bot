@@ -22,7 +22,7 @@ describe("AppSidebar project session activity", () => {
               {
                 threadId: "active-thread",
                 name: "Active session",
-                cwd: "/work/openclaw",
+                cwd: "/work/bot",
                 status: "active",
                 archived: false,
                 canContinue: false,
@@ -31,7 +31,7 @@ describe("AppSidebar project session activity", () => {
               {
                 threadId: "idle-thread",
                 name: "Idle session",
-                cwd: "/work/openclaw",
+                cwd: "/work/bot",
                 status: "idle",
                 archived: false,
                 canContinue: true,
@@ -45,7 +45,7 @@ describe("AppSidebar project session activity", () => {
     sidebar.sessionData.requestSessionDataUpdate();
     await sidebar.updateComplete;
 
-    const project = sidebar.querySelector('[data-session-catalog-project="/work/openclaw"]');
+    const project = sidebar.querySelector('[data-session-catalog-project="/work/bot"]');
     const active = sidebar.querySelector('[data-session-key*="active-thread"]');
     const idle = sidebar.querySelector('[data-session-key*="idle-thread"]');
     expect(project).not.toBeNull();

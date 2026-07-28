@@ -1,5 +1,5 @@
-import type { TtsProvider } from "openclaw/plugin-sdk/config-contracts";
-import { parseTtsDirectives, summarizeText } from "openclaw/plugin-sdk/speech-core";
+import type { TtsProvider } from "bot/plugin-sdk/config-contracts";
+import { parseTtsDirectives, summarizeText } from "bot/plugin-sdk/speech-core";
 import { getResolvedSpeechProviderConfig, resolveTtsProvider } from "./tts-provider-resolution.js";
 import { resolveModelOverridePolicy, type ResolvedTtsConfig } from "./tts-settings.js";
 import { formatTtsProviderError, sanitizeTtsErrorForLog } from "./tts-synthesis-support.js";
@@ -13,7 +13,7 @@ import {
 export type {
   TtsDirectiveOverrides,
   TtsDirectiveParseResult,
-} from "openclaw/plugin-sdk/speech-core";
+} from "bot/plugin-sdk/speech-core";
 
 export function getTtsProvider(config: ResolvedTtsConfig, prefsPath: string): TtsProvider {
   return resolveTtsProvider(config, prefsPath);

@@ -2,7 +2,7 @@ import {
   normalizeLowercaseStringOrEmpty,
   normalizeOptionalLowercaseString,
   normalizeOptionalString,
-} from "@openclaw/normalization-core/string-coerce";
+} from "@hanzo/bot-normalization-core/string-coerce";
 import { readAcpSessionMeta } from "../acp/runtime/session-meta.js";
 import { resolveModelAgentRuntimeMetadata } from "../agents/agent-runtime-metadata.js";
 import { resolveAgentConfig, resolveDefaultAgentId } from "../agents/agent-scope.js";
@@ -32,7 +32,7 @@ import {
   resolveSupportedThinkingLevel,
 } from "../auto-reply/thinking.js";
 import { resolveAgentMainSessionKey, type SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import {
   createSessionRowModelCacheKey,
@@ -69,7 +69,7 @@ function resolveGatewaySessionThinkingLevel(params: {
 }
 
 export function resolveGatewaySessionThinkingDefault(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider: string;
   model: string;
   agentId?: string;
@@ -98,7 +98,7 @@ export function resolveGatewaySessionThinkingDefault(params: {
 }
 
 function resolveSessionRowThinkingMetadata(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   provider: string;
   model: string;
@@ -156,7 +156,7 @@ function resolveSessionRowThinkingMetadata(params: {
 }
 
 type GatewaySessionThinkingProjectionParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider: string;
   model: string;
   agentId: string;
@@ -239,7 +239,7 @@ export function resolveGatewaySessionThinkingProjectionInternal(
 
 /** Resolve the canonical runtime, selected level, and picker metadata for a session. */
 export function resolveGatewaySessionThinkingProjection(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   provider: string;
   model: string;
   agentId: string;
@@ -251,7 +251,7 @@ export function resolveGatewaySessionThinkingProjection(params: {
 }
 
 export function getSessionDefaults(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   modelCatalog?: ModelCatalogEntry[],
   options?: { allowPluginNormalization?: boolean },
 ): GatewaySessionsDefaults {
@@ -379,7 +379,7 @@ export async function resolveGatewayModelSupportsImages(params: {
 }
 
 export function resolveSessionDisplayModelIdentityRefCached(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   provider?: string;
   model?: string;
@@ -403,7 +403,7 @@ export function resolveSessionDisplayModelIdentityRefCached(params: {
 }
 
 export function resolveSessionDisplayModelIdentityRef(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   provider?: string;
   model?: string;

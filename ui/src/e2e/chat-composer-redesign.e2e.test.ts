@@ -12,7 +12,7 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
 
 let server: ControlUiE2eServer;
@@ -558,7 +558,7 @@ describeControlUiE2e("Control UI chat composer redesign", () => {
       methodResponses: {
         "chat.startup": {
           agentsList: {
-            agents: [{ id: "main", name: "OpenClaw" }],
+            agents: [{ id: "main", name: "Bot" }],
             defaultId: "main",
             mainKey: "main",
             scope: "agent",
@@ -722,7 +722,7 @@ describeControlUiE2e("Control UI chat composer redesign", () => {
         .poll(() => composer.locator('[data-chat-model-option="openai/work-model"]').count())
         .toBe(1);
 
-      await page.locator("openclaw-chat-pane").evaluate((pane) => {
+      await page.locator("bot-chat-pane").evaluate((pane) => {
         (pane as HTMLElement & { sessionKey: string }).sessionKey = "agent:other:main";
       });
 
@@ -793,7 +793,7 @@ describeControlUiE2e("Control UI chat composer redesign", () => {
     try {
       await page.goto(controlUiSessionUrl(server.baseUrl, "agent:main:main"));
       await gateway.waitForRequest("chat.startup");
-      await page.locator("openclaw-chat-pane").evaluate((pane) => {
+      await page.locator("bot-chat-pane").evaluate((pane) => {
         (pane as HTMLElement & { sessionKey: string }).sessionKey = "agent:work:main";
       });
       await expect
@@ -805,7 +805,7 @@ describeControlUiE2e("Control UI chat composer redesign", () => {
         })
         .toBe(true);
       await page.waitForFunction(() => {
-        const pane = document.querySelector("openclaw-chat-pane") as
+        const pane = document.querySelector("bot-chat-pane") as
           | (HTMLElement & {
               state?: {
                 sessionKey?: string;
@@ -842,7 +842,7 @@ describeControlUiE2e("Control UI chat composer redesign", () => {
         thinkingLevel: null,
       });
       await page.waitForFunction(() => {
-        const pane = document.querySelector("openclaw-chat-pane") as
+        const pane = document.querySelector("bot-chat-pane") as
           | (HTMLElement & {
               state?: { agentsList?: { defaultId?: string; agents?: Array<{ id?: string }> } };
             })

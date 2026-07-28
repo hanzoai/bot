@@ -8,12 +8,12 @@ import { withEnv, withEnvAsync } from "../test-utils/env.js";
 
 const BUNDLED_PLUGINS_DIR = fileURLToPath(new URL("../../extensions/", import.meta.url));
 const PLUGIN_MANIFEST_ENV_KEYS = [
-  "OPENCLAW_BUNDLED_PLUGINS_DIR",
-  "OPENCLAW_DISABLE_BUNDLED_PLUGINS",
-  "OPENCLAW_SKIP_PROVIDERS",
-  "OPENCLAW_SKIP_CHANNELS",
-  "OPENCLAW_SKIP_CRON",
-  "OPENCLAW_TEST_MINIMAL_GATEWAY",
+  "BOT_BUNDLED_PLUGINS_DIR",
+  "BOT_DISABLE_BUNDLED_PLUGINS",
+  "BOT_SKIP_PROVIDERS",
+  "BOT_SKIP_CHANNELS",
+  "BOT_SKIP_CRON",
+  "BOT_TEST_MINIMAL_GATEWAY",
 ] as const;
 
 function cleanPluginManifestEnv(): Record<
@@ -21,12 +21,12 @@ function cleanPluginManifestEnv(): Record<
   string | undefined
 > {
   return {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: BUNDLED_PLUGINS_DIR,
-    OPENCLAW_DISABLE_BUNDLED_PLUGINS: undefined,
-    OPENCLAW_SKIP_PROVIDERS: undefined,
-    OPENCLAW_SKIP_CHANNELS: undefined,
-    OPENCLAW_SKIP_CRON: undefined,
-    OPENCLAW_TEST_MINIMAL_GATEWAY: undefined,
+    BOT_BUNDLED_PLUGINS_DIR: BUNDLED_PLUGINS_DIR,
+    BOT_DISABLE_BUNDLED_PLUGINS: undefined,
+    BOT_SKIP_PROVIDERS: undefined,
+    BOT_SKIP_CHANNELS: undefined,
+    BOT_SKIP_CRON: undefined,
+    BOT_TEST_MINIMAL_GATEWAY: undefined,
   };
 }
 
@@ -74,7 +74,7 @@ describe("model auth markers", () => {
   });
 
   it("recognizes the Codex app-server marker without bundled plugin discovery", async () => {
-    await withEnvAsync({ OPENCLAW_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
+    await withEnvAsync({ BOT_DISABLE_BUNDLED_PLUGINS: "1" }, async () => {
       await loadMarkerModules();
       expect(isNonSecretApiKeyMarker(CODEX_APP_SERVER_AUTH_MARKER)).toBe(true);
     });
@@ -84,7 +84,7 @@ describe("model auth markers", () => {
   it("reads bundled plugin-owned non-secret markers from manifests", () => {
     withEnv(cleanPluginManifestEnv(), () => {
       expect(isNonSecretApiKeyMarker("codex-app-server")).toBe(true);
-      expect(isNonSecretApiKeyMarker(["openclaw", "claude-cli-api-key-helper"].join(":"))).toBe(
+      expect(isNonSecretApiKeyMarker(["bot", "claude-cli-api-key-helper"].join(":"))).toBe(
         true,
       );
       expect(isNonSecretApiKeyMarker("gcp-vertex-credentials")).toBe(true);

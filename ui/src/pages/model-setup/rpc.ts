@@ -10,7 +10,7 @@ export function detectModelSetup(
   signal?: AbortSignal,
 ): Promise<SystemAgentSetupDetectResult> {
   return client.request<SystemAgentSetupDetectResult>(
-    "openclaw.setup.detect",
+    "bot.setup.detect",
     {},
     { timeoutMs: MODEL_SETUP_DETECT_TIMEOUT_MS, ...(signal ? { signal } : {}) },
   );
@@ -21,7 +21,7 @@ export function verifyModelSetup(
   signal?: AbortSignal,
 ): Promise<SystemAgentSetupVerifyResult> {
   return client.request<SystemAgentSetupVerifyResult>(
-    "openclaw.setup.verify",
+    "bot.setup.verify",
     {},
     { timeoutMs: MODEL_SETUP_VERIFY_TIMEOUT_MS, ...(signal ? { signal } : {}) },
   );

@@ -40,7 +40,7 @@ function isTestOnlyPath(changedPath) {
 // Paths outside this set — repo scripts, workflows, qa scenarios, docs mixes —
 // cannot change dist or bundled plugin asset bytes.
 const BUILD_INPUT_RE =
-  /^(?:src|extensions|packages)\/|^(?:openclaw\.mjs|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$|^tsconfig[^/]*\.json$|^scripts\/(?:build-[^/]+|write-plugin-sdk-entry-dts\.ts|copy-export-html-templates\.ts)$|^scripts\/lib\/(?:copy-assets\.ts|plugin-sdk-entries\.mjs)$/u;
+  /^(?:src|extensions|packages)\/|^(?:bot\.mjs|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$|^tsconfig[^/]*\.json$|^scripts\/(?:build-[^/]+|write-plugin-sdk-entry-dts\.ts|copy-export-html-templates\.ts)$|^scripts\/lib\/(?:copy-assets\.ts|plugin-sdk-entries\.mjs)$/u;
 
 /**
  * True when a changed path can influence built dist/packaging bytes: a
@@ -62,7 +62,7 @@ export function hasBuildArtifactAffectingChange(changedPaths) {
 // orchestration (this planner, the CI workflow, composite actions) is also
 // QA-impacting: changes to the gate must not be able to skip the gated lane.
 const QA_SMOKE_SURFACE_RE =
-  /^(?:extensions\/(?:matrix|qa-lab|telegram)|packages|qa|ui)\/|^scripts\/(?:build-all\.mjs|package-openclaw-for-docker\.mjs)$|^scripts\/lib\/ci-changed-node-test-plan\.mjs$|^\.github\/(?:workflows\/ci\.yml$|actions\/)|^(?:openclaw\.mjs|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|tsdown\.config\.ts)$/u;
+  /^(?:extensions\/(?:matrix|qa-lab|telegram)|packages|qa|ui)\/|^scripts\/(?:build-all\.mjs|package-bot-for-docker\.mjs)$|^scripts\/lib\/ci-changed-node-test-plan\.mjs$|^\.github\/(?:workflows\/ci\.yml$|actions\/)|^(?:bot\.mjs|package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml|tsdown\.config\.ts)$/u;
 // The smoke profile runs the packaged CLI end to end, so its runtime blast
 // radius is exactly the CLI entry's import graph (dynamic imports included).
 const QA_SMOKE_RUNTIME_ENTRY = "src/index.ts";

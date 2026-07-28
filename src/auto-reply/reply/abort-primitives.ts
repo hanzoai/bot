@@ -1,5 +1,5 @@
 // Normalizes abort command primitives before runtime cancellation.
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeCommandBody } from "../commands-registry-normalize.js";
 import type { CommandNormalizeOptions } from "../commands-registry.types.js";
 
@@ -32,8 +32,8 @@ const ABORT_TRIGGERS = new Set([
   "hoer auf",
   "stopp",
   "pare",
-  "stop openclaw",
-  "openclaw stop",
+  "stop bot",
+  "bot stop",
   "stop action",
   "stop current action",
   "stop run",

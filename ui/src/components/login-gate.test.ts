@@ -10,7 +10,7 @@ type LoginGateElement = HTMLElement & {
 };
 
 async function mountFailure(lastError: string, lastErrorCode: string | null) {
-  const element = document.createElement("openclaw-login-gate") as LoginGateElement;
+  const element = document.createElement("bot-login-gate") as LoginGateElement;
   element.props = {
     basePath: "",
     connected: false,

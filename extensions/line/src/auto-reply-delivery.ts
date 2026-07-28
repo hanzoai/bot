@@ -1,11 +1,11 @@
 // Line plugin module implements auto reply delivery behavior.
 import { HTTPFetchError, type messagingApi } from "@line/bot-sdk";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { expectDefined } from "openclaw/plugin-sdk/expect-runtime";
-import { resolveSendableOutboundReplyParts } from "openclaw/plugin-sdk/reply-payload";
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-runtime";
-import { sanitizeAssistantVisibleText } from "openclaw/plugin-sdk/text-chunking";
-import { truncateUtf16Safe } from "openclaw/plugin-sdk/text-utility-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { expectDefined } from "bot/plugin-sdk/expect-runtime";
+import { resolveSendableOutboundReplyParts } from "bot/plugin-sdk/reply-payload";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-runtime";
+import { sanitizeAssistantVisibleText } from "bot/plugin-sdk/text-chunking";
+import { truncateUtf16Safe } from "bot/plugin-sdk/text-utility-runtime";
 import type { FlexContainer } from "./flex-templates.js";
 import type { ProcessedLineMessage } from "./markdown-to-line.js";
 import { hasLineSpecificMediaOptions } from "./outbound-media.js";
@@ -22,7 +22,7 @@ type LineAutoReplyDeps = {
   pushMessagesLine: (
     to: string,
     messages: messagingApi.Message[],
-    opts: { cfg: OpenClawConfig; accountId?: string },
+    opts: { cfg: BotConfig; accountId?: string },
   ) => Promise<unknown>;
   createFlexMessage: (altText: string, contents: FlexContainer) => messagingApi.FlexMessage;
   buildMediaMessage: (
@@ -39,7 +39,7 @@ type LineAutoReplyDeps = {
   replyMessageLine: (
     replyToken: string,
     messages: messagingApi.Message[],
-    opts: { cfg: OpenClawConfig; accountId?: string },
+    opts: { cfg: BotConfig; accountId?: string },
   ) => Promise<unknown>;
   onReplyError?: (err: unknown) => void;
 };
@@ -79,7 +79,7 @@ export async function deliverLineAutoReply(params: {
   replyToken?: string | null;
   replyTokenUsed: boolean;
   accountId?: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   textLimit: number;
   deps: LineAutoReplyDeps;
 }): Promise<LineAutoReplyDeliveryResult> {

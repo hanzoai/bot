@@ -1,10 +1,10 @@
 /**
  * Resolves fast-mode state from agent config and runtime defaults.
  */
-import type { FastMode } from "@openclaw/normalization-core/string-coerce";
+import type { FastMode } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeFastMode } from "../auto-reply/thinking.shared.js";
 import type { SessionEntry } from "../config/sessions.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   type FastModeSource,
   resolveFastModeModelAutoOnSeconds,
@@ -34,7 +34,7 @@ type FastModeState = {
 };
 
 function resolveConfiguredFastModeRaw(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   model: string;
 }): unknown {
@@ -44,7 +44,7 @@ function resolveConfiguredFastModeRaw(params: {
 
 /** Resolve the effective fast-mode setting and its source. */
 export function resolveFastModeState(params: {
-  cfg: OpenClawConfig | undefined;
+  cfg: BotConfig | undefined;
   provider: string;
   model: string;
   agentId?: string;

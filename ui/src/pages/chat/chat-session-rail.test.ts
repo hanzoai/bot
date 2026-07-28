@@ -193,7 +193,7 @@ describe("ChatSessionCompanionThreads", () => {
 describe("ChatSessionRailElement", () => {
   beforeEach(() => {
     vi.stubGlobal("localStorage", createStorageMock());
-    localStorage.setItem("openclaw.chat.observerHud.display", "card");
+    localStorage.setItem("bot.chat.observerHud.display", "card");
     vi.spyOn(Date, "now").mockReturnValue(600_000);
   });
 
@@ -204,7 +204,7 @@ describe("ChatSessionRailElement", () => {
   });
 
   async function mount(overrides: Partial<ChatSessionRailElement> = {}) {
-    const element = document.createElement("openclaw-chat-session-rail") as ChatSessionRailElement;
+    const element = document.createElement("bot-chat-session-rail") as ChatSessionRailElement;
     element.sessionKey = "agent:main:run";
     element.digest = digest();
     element.running = true;

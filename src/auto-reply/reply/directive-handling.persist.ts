@@ -15,7 +15,7 @@ import {
   sessionSnapshotChangesApplied,
 } from "../../config/sessions/session-snapshot-merge.js";
 import type { SessionEntry } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { triggerSessionPatchHook } from "../../gateway/session-patch-hooks.js";
 import { enqueueSystemEvent } from "../../infra/system-events.js";
 import { applySessionModelSelectionToEntry } from "../../model-picker/apply-session-model-selection.js";
@@ -51,7 +51,7 @@ type PersistedThinkingLevelRemap = {
 export async function persistInlineDirectives(params: {
   directives: InlineDirectives;
   effectiveModelDirective?: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentDir?: string;
   sessionEntry?: SessionEntry;
   sessionStore?: Record<string, SessionEntry>;
@@ -67,7 +67,7 @@ export async function persistInlineDirectives(params: {
   model: string;
   initialModelLabel: string;
   formatModelSwitchEvent: (label: string, alias?: string) => string;
-  agentCfg: NonNullable<OpenClawConfig["agents"]>["defaults"] | undefined;
+  agentCfg: NonNullable<BotConfig["agents"]>["defaults"] | undefined;
   messageProvider?: string;
   surface?: string;
   gatewayClientScopes?: string[];

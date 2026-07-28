@@ -461,14 +461,14 @@ type AgentRuntimePromptPlan = {
 type AgentRuntimePreparedMetadataSnapshot = object;
 
 /** Prepared metadata loader used by tool planning without eager manifest reads. */
-type PreparedOpenClawToolPlanning = {
+type PreparedBotToolPlanning = {
   metadataSnapshot?: AgentRuntimePreparedMetadataSnapshot;
   loadMetadataSnapshot?: () => AgentRuntimePreparedMetadataSnapshot;
 };
 
 /** Tool normalization and diagnostics hooks for one runtime attempt. */
 type AgentRuntimeToolPlan = {
-  preparedPlanning?: PreparedOpenClawToolPlanning;
+  preparedPlanning?: PreparedBotToolPlanning;
   normalize<TSchemaType extends TSchema = TSchema, TResult = unknown>(
     tools: AgentTool<TSchemaType, TResult>[],
     params?: {

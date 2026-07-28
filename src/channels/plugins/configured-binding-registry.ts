@@ -3,7 +3,7 @@
  *
  * Primes, counts, and resolves compiled binding records from config and conversation facts.
  */
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { ConversationRef } from "../../infra/outbound/session-binding-service.js";
 import type {
   ConfiguredBindingRecordResolution,
@@ -22,7 +22,7 @@ import {
 import { resolveConfiguredBindingRecordBySessionKeyFromRegistry } from "./configured-binding-session-lookup.js";
 
 function resolveMaterializedConfiguredBinding(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   conversation: ConversationRef;
 }) {
   const conversation = toConfiguredBindingConversationRef(params.conversation);
@@ -56,7 +56,7 @@ function resolveMaterializedConfiguredBinding(params: {
 /**
  * Warms and counts the compiled configured binding registry for a config snapshot.
  */
-export function primeConfiguredBindingRegistry(params: { cfg: OpenClawConfig }): {
+export function primeConfiguredBindingRegistry(params: { cfg: BotConfig }): {
   bindingCount: number;
   channelCount: number;
 } {
@@ -67,7 +67,7 @@ export function primeConfiguredBindingRegistry(params: { cfg: OpenClawConfig }):
  * Resolves a configured binding record from explicit channel/account/conversation ids.
  */
 export function resolveConfiguredBindingRecord(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   channel: string;
   accountId: string;
   conversationId: string;
@@ -92,7 +92,7 @@ export function resolveConfiguredBindingRecord(params: {
  * Resolves a configured binding record from a normalized conversation reference.
  */
 function resolveConfiguredBindingRecordForConversation(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   conversation: ConversationRef;
 }): ConfiguredBindingRecordResolution | null {
   const resolved = resolveMaterializedConfiguredBinding(params);
@@ -106,7 +106,7 @@ function resolveConfiguredBindingRecordForConversation(params: {
  * Resolves the full configured binding match, including compiled rule and match diagnostics.
  */
 export function resolveConfiguredBinding(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   conversation: ConversationRef;
 }): ConfiguredBindingResolution | null {
   const resolved = resolveMaterializedConfiguredBinding(params);
@@ -125,7 +125,7 @@ export function resolveConfiguredBinding(params: {
  * Resolves a configured binding record by the stateful target session key.
  */
 export function resolveConfiguredBindingRecordBySessionKey(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
 }): ConfiguredBindingRecordResolution | null {
   return resolveConfiguredBindingRecordBySessionKeyFromRegistry({

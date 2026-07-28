@@ -1,6 +1,6 @@
 /** Builds compact prompt notes for inbound media attachments. */
 import path from "node:path";
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { normalizeMediaFacts, type MediaFact } from "../media/media-facts.js";
 import { getMediaDir } from "../media/store.js";
 import type { RuntimeMsgContext as MsgContext } from "./templating.js";

@@ -9,23 +9,23 @@ import {
   type AgentHarnessToolSurfaceRuntime as CoreAgentHarnessToolSurfaceRuntime,
 } from "../agents/harness/tool-surface-bridge.js";
 
-type OpenClawCodingToolsOptions = NonNullable<
-  Parameters<typeof import("./agent-harness.js").createOpenClawCodingTools>[0]
+type BotCodingToolsOptions = NonNullable<
+  Parameters<typeof import("./agent-harness.js").createBotCodingTools>[0]
 >;
 
 export type AgentHarnessToolSurfaceRuntime = Omit<
   CoreAgentHarnessToolSurfaceRuntime,
   "toolSearchCatalogExecutor" | "toolSearchCatalogRef"
 > & {
-  toolSearchCatalogExecutor: OpenClawCodingToolsOptions["toolSearchCatalogExecutor"];
-  toolSearchCatalogRef: OpenClawCodingToolsOptions["toolSearchCatalogRef"];
+  toolSearchCatalogExecutor: BotCodingToolsOptions["toolSearchCatalogExecutor"];
+  toolSearchCatalogRef: BotCodingToolsOptions["toolSearchCatalogRef"];
 };
 
 export type AgentHarnessToolSurfaceRuntimeParams = Omit<
   Parameters<typeof createCoreAgentHarnessToolSurfaceRuntime>[0],
   "executeTool"
 > & {
-  executeTool: NonNullable<OpenClawCodingToolsOptions["toolSearchCatalogExecutor"]>;
+  executeTool: NonNullable<BotCodingToolsOptions["toolSearchCatalogExecutor"]>;
 };
 
 export function createAgentHarnessToolSurfaceRuntime(

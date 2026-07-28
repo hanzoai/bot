@@ -82,7 +82,7 @@ describe("pending cloud recovery state", () => {
 
   it("rejects a persisted recovery record that claims to be incognito", () => {
     sessionStorage.setItem(
-      "openclaw.new-session.cloud-recovery.v1:ws://gateway.example:principal-a",
+      "bot.new-session.cloud-recovery.v1:ws://gateway.example:principal-a",
       JSON.stringify({
         sessionKey: "agent:cloud:dashboard:persisted-incognito",
         messageId: "message-private",

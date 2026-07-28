@@ -138,7 +138,7 @@ export class BoardWidgetSandboxHost {
     if (!this.ready) {
       return;
     }
-    if (event.data?.type === "openclaw:widget-bridge-port-offer") {
+    if (event.data?.type === "bot:widget-bridge-port-offer") {
       const port = event.ports[0];
       if (!port || this.bridgePort) {
         port?.close();
@@ -152,7 +152,7 @@ export class BoardWidgetSandboxHost {
       this.postHostInit();
       return;
     }
-    if (event.data?.type === "openclaw:widget-bridge-ready") {
+    if (event.data?.type === "bot:widget-bridge-ready") {
       this.postHostInit();
     }
     // Requests on the forgeable window channel never carry authority. The
@@ -163,7 +163,7 @@ export class BoardWidgetSandboxHost {
     if (
       data &&
       typeof data === "object" &&
-      Reflect.get(data, "type") === "openclaw:widget-host-init-ack" &&
+      Reflect.get(data, "type") === "bot:widget-host-init-ack" &&
       typeof Reflect.get(data, "ticket") === "string"
     ) {
       const ticket = Reflect.get(data, "ticket") as string;
@@ -315,7 +315,7 @@ export class BoardWidgetSandboxHost {
       return;
     }
     this.offeredTicket = ticket;
-    this.bridgePort.postMessage({ type: "openclaw:widget-host-init", ticket }, []);
+    this.bridgePort.postMessage({ type: "bot:widget-host-init", ticket }, []);
   }
 
   private async loadDocument(): Promise<void> {
@@ -376,7 +376,7 @@ export class BoardWidgetSandboxHost {
 
   private postResponse(id: string, ok: boolean, result?: unknown, error?: string): void {
     this.bridgePort?.postMessage({
-      type: "openclaw:widget-bridge-response",
+      type: "bot:widget-bridge-response",
       id,
       ok,
       ...(ok ? { result } : { error: error ?? "widget host request failed" }),

@@ -1,6 +1,6 @@
 // Tests system command version probing for presence checks.
 import os from "node:os";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { withEnvAsync } from "../test-utils/env.js";
 import { VERSION as runtimeVersion } from "../version.js";
@@ -10,7 +10,7 @@ vi.unmock("../version.js");
 const spawnSyncMock = vi.hoisted(() => vi.fn());
 
 vi.mock("node:child_process", async () => {
-  const { mockNodeChildProcessSpawnSync } = await import("openclaw/plugin-sdk/test-node-mocks");
+  const { mockNodeChildProcessSpawnSync } = await import("bot/plugin-sdk/test-node-mocks");
   return mockNodeChildProcessSpawnSync(spawnSyncMock, () =>
     vi.importActual<typeof import("node:child_process")>("node:child_process"),
   );
@@ -22,8 +22,8 @@ async function withPresenceModule<T>(
 ): Promise<T> {
   return withEnvAsync(
     {
-      OPENCLAW_VERSION: undefined,
-      OPENCLAW_SERVICE_VERSION: undefined,
+      BOT_VERSION: undefined,
+      BOT_SERVICE_VERSION: undefined,
       npm_package_version: undefined,
       ...env,
     },
@@ -66,32 +66,32 @@ describe("system-presence version fallback", () => {
     });
   }
 
-  it("uses runtime VERSION when OPENCLAW_VERSION is not set", async () => {
+  it("uses runtime VERSION when BOT_VERSION is not set", async () => {
     await expectSelfVersion(
       {
-        OPENCLAW_SERVICE_VERSION: "2.4.6-service",
+        BOT_SERVICE_VERSION: "2.4.6-service",
         npm_package_version: "1.0.0-package",
       },
       runtimeVersion,
     );
   });
 
-  it("prefers OPENCLAW_VERSION over runtime VERSION", async () => {
+  it("prefers BOT_VERSION over runtime VERSION", async () => {
     await expectSelfVersion(
       {
-        OPENCLAW_VERSION: "9.9.9-cli",
-        OPENCLAW_SERVICE_VERSION: "2.4.6-service",
+        BOT_VERSION: "9.9.9-cli",
+        BOT_SERVICE_VERSION: "2.4.6-service",
         npm_package_version: "1.0.0-package",
       },
       "9.9.9-cli",
     );
   });
 
-  it("still prefers runtime VERSION over OPENCLAW_SERVICE_VERSION when OPENCLAW_VERSION is blank", async () => {
+  it("still prefers runtime VERSION over BOT_SERVICE_VERSION when BOT_VERSION is blank", async () => {
     await expectSelfVersion(
       {
-        OPENCLAW_VERSION: " ",
-        OPENCLAW_SERVICE_VERSION: "2.4.6-service",
+        BOT_VERSION: " ",
+        BOT_SERVICE_VERSION: "2.4.6-service",
         npm_package_version: "1.0.0-package",
       },
       runtimeVersion,
@@ -101,19 +101,19 @@ describe("system-presence version fallback", () => {
   it("still prefers runtime VERSION over npm_package_version when service markers are blank", async () => {
     await expectSelfVersion(
       {
-        OPENCLAW_VERSION: " ",
-        OPENCLAW_SERVICE_VERSION: "\t",
+        BOT_VERSION: " ",
+        BOT_SERVICE_VERSION: "\t",
         npm_package_version: "1.0.0-package",
       },
       runtimeVersion,
     );
   });
 
-  it("uses runtime VERSION when OPENCLAW_VERSION and OPENCLAW_SERVICE_VERSION are blank", async () => {
+  it("uses runtime VERSION when BOT_VERSION and BOT_SERVICE_VERSION are blank", async () => {
     await expectSelfVersion(
       {
-        OPENCLAW_VERSION: " ",
-        OPENCLAW_SERVICE_VERSION: "\t",
+        BOT_VERSION: " ",
+        BOT_SERVICE_VERSION: "\t",
         npm_package_version: "1.0.0-package",
       },
       runtimeVersion,

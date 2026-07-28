@@ -8,9 +8,9 @@ export type ExternalizedBundledPluginBridge = {
   pluginId?: string;
   /** Preferred external source when migrating the bundled plugin out. Defaults to npm. */
   preferredSource?: ExternalizedBundledPluginPreferredSource;
-  /** npm spec OpenClaw can install when migrating the bundled plugin out. */
+  /** npm spec Bot can install when migrating the bundled plugin out. */
   npmSpec?: string;
-  /** ClawHub spec OpenClaw can install when migrating the bundled plugin out. */
+  /** ClawHub spec Bot can install when migrating the bundled plugin out. */
   clawhubSpec?: string;
   /** Optional ClawHub base URL for non-default registries. */
   clawhubUrl?: string;

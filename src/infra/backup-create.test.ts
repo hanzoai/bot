@@ -3,28 +3,28 @@ import fsSync, { rmSync } from "node:fs";
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import * as tar from "tar";
 import { describe, expect, it, vi } from "vitest";
 import { saveAuthProfileStore } from "../agents/auth-profiles/store.js";
 import { backupVerifyCommand } from "../commands/backup-verify.js";
 import { CONFIG_AUDIT_MAX_ENTRIES, CONFIG_AUDIT_SCOPE } from "../config/io.audit.js";
 import type { RuntimeEnv } from "../runtime.js";
-import { closeOpenClawAgentDatabasesForTest } from "../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../state/bot-agent-db.js";
 import {
-  closeOpenClawStateDatabase,
-  closeOpenClawStateDatabaseByPath,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
-import { resolveOpenClawStateSqlitePath } from "../state/openclaw-state-db.paths.js";
+  closeBotStateDatabase,
+  closeBotStateDatabaseByPath,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
+import { resolveBotStateSqlitePath } from "../state/bot-state-db.paths.js";
 import {
-  sanitizeOpenClawGlobalStateSnapshot,
-  sanitizeOpenClawStateLeaseRows,
-} from "../state/openclaw-state-snapshot-sanitizer.js";
+  sanitizeBotGlobalStateSnapshot,
+  sanitizeBotStateLeaseRows,
+} from "../state/bot-state-snapshot-sanitizer.js";
 import {
-  type OpenClawTestState,
-  withOpenClawTestState,
-} from "../test-utils/openclaw-test-state.js";
+  type BotTestState,
+  withBotTestState,
+} from "../test-utils/bot-test-state.js";
 import {
   createBackupArchive,
   formatBackupCreateSummary,
@@ -40,8 +40,8 @@ import { detectLegacyAuditLogs, migrateLegacyAuditLogs } from "./state-migration
 function makeResult(overrides: Partial<BackupCreateResult> = {}): BackupCreateResult {
   return {
     createdAt: "2026-01-01T00:00:00.000Z",
-    archiveRoot: "openclaw-backup-2026-01-01",
-    archivePath: "/tmp/openclaw-backup.tar.gz",
+    archiveRoot: "bot-backup-2026-01-01",
+    archivePath: "/tmp/bot-backup.tar.gz",
     dryRun: false,
     includeWorkspace: true,
     onlyConfig: false,
@@ -160,16 +160,16 @@ function createOwnedSqliteDatabase(params: {
 }
 
 function resolveCanonicalTestSqlitePath(
-  state: OpenClawTestState,
+  state: BotTestState,
   kind: "agent" | "global",
 ): string {
   return kind === "global"
-    ? resolveOpenClawStateSqlitePath(state.env)
-    : state.statePath("agents", "main", "agent", "openclaw-agent.sqlite");
+    ? resolveBotStateSqlitePath(state.env)
+    : state.statePath("agents", "main", "agent", "bot-agent.sqlite");
 }
 
 describe("formatBackupCreateSummary", () => {
-  const backupArchiveLine = "Backup archive: /tmp/openclaw-backup.tar.gz";
+  const backupArchiveLine = "Backup archive: /tmp/bot-backup.tar.gz";
 
   it.each([
     {
@@ -181,26 +181,26 @@ describe("formatBackupCreateSummary", () => {
             kind: "state",
             sourcePath: "/state",
             archivePath: "archive/state",
-            displayPath: "~/.openclaw",
+            displayPath: "~/.bot",
           },
         ],
         skipped: [
           {
             kind: "workspace",
             sourcePath: "/workspace",
-            displayPath: "~/Projects/openclaw",
+            displayPath: "~/Projects/bot",
             reason: "covered",
-            coveredBy: "~/.openclaw",
+            coveredBy: "~/.bot",
           },
         ],
       }),
       expected: [
         backupArchiveLine,
         "Included 1 path:",
-        "- state: ~/.openclaw",
+        "- state: ~/.bot",
         "Skipped 1 path:",
-        "- workspace: ~/Projects/openclaw (covered by ~/.openclaw)",
-        "Created /tmp/openclaw-backup.tar.gz",
+        "- workspace: ~/Projects/bot (covered by ~/.bot)",
+        "Created /tmp/bot-backup.tar.gz",
         "Archive verification: passed",
       ],
     },
@@ -213,21 +213,21 @@ describe("formatBackupCreateSummary", () => {
             kind: "config",
             sourcePath: "/config",
             archivePath: "archive/config",
-            displayPath: "~/.openclaw/config.json",
+            displayPath: "~/.bot/config.json",
           },
           {
             kind: "credentials",
             sourcePath: "/oauth",
             archivePath: "archive/oauth",
-            displayPath: "~/.openclaw/oauth",
+            displayPath: "~/.bot/oauth",
           },
         ],
       }),
       expected: [
         backupArchiveLine,
         "Included 2 paths:",
-        "- config: ~/.openclaw/config.json",
-        "- credentials: ~/.openclaw/oauth",
+        "- config: ~/.bot/config.json",
+        "- credentials: ~/.bot/oauth",
         "Dry run only; archive was not written.",
       ],
     },
@@ -244,28 +244,28 @@ describe("formatBackupCreateSummary", () => {
               kind: "state",
               sourcePath: "/state",
               archivePath: "archive/state",
-              displayPath: "~/.openclaw",
+              displayPath: "~/.bot",
             },
           ],
           skippedVolatileCount: 3,
         }),
       ),
     ).toEqual([
-      "Backup archive: /tmp/openclaw-backup.tar.gz",
+      "Backup archive: /tmp/bot-backup.tar.gz",
       "Included 1 path:",
-      "- state: ~/.openclaw",
-      "Created /tmp/openclaw-backup.tar.gz",
+      "- state: ~/.bot",
+      "Created /tmp/bot-backup.tar.gz",
       "Skipped 3 volatile files (live sessions, cron logs, queues, sockets, pid/tmp).",
     ]);
   });
 });
 
-describe("sanitizeOpenClawGlobalStateSnapshot", () => {
+describe("sanitizeBotGlobalStateSnapshot", () => {
   it("tolerates legacy databases without current transient tables", () => {
     const sqlite = requireNodeSqlite();
     const database = new sqlite.DatabaseSync(":memory:");
     try {
-      expect(() => sanitizeOpenClawGlobalStateSnapshot(database)).not.toThrow();
+      expect(() => sanitizeBotGlobalStateSnapshot(database)).not.toThrow();
     } finally {
       database.close();
     }
@@ -284,7 +284,7 @@ describe("sanitizeOpenClawGlobalStateSnapshot", () => {
         INSERT INTO plugin_blob_entries VALUES ('keep', 1);
       `);
 
-      sanitizeOpenClawStateLeaseRows(database);
+      sanitizeBotStateLeaseRows(database);
 
       expect(database.prepare("SELECT COUNT(*) AS count FROM state_leases").get()).toEqual({
         count: 0,
@@ -310,7 +310,7 @@ describe("sanitizeOpenClawGlobalStateSnapshot", () => {
         INSERT INTO diagnostic_events VALUES ('system-agent.audit');
       `);
 
-      sanitizeOpenClawGlobalStateSnapshot(database);
+      sanitizeBotGlobalStateSnapshot(database);
 
       expect(database.prepare("SELECT scope FROM diagnostic_events").all()).toEqual([
         { scope: "migration.legacy-audit-raw" },
@@ -527,10 +527,10 @@ describe("writeTarArchiveWithRetry", () => {
 
 describe("createBackupVolatileStatCache", () => {
   it("lets tar filter a volatile file that disappears before lstat", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-volatile-stat-cache-",
+        prefix: "bot-backup-volatile-stat-cache-",
         scenario: "minimal",
       },
       async (state) => {
@@ -573,10 +573,10 @@ describe("createBackupVolatileStatCache", () => {
 
 describe("createBackupArchive", () => {
   it("falls back when injected nowMs is outside Date range", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-invalid-now-",
+        prefix: "bot-backup-invalid-now-",
         scenario: "minimal",
       },
       async (state) => {
@@ -593,7 +593,7 @@ describe("createBackupArchive", () => {
           });
 
           expect(result.createdAt).toBe("2026-05-30T12:00:00.000Z");
-          expect(path.basename(result.archivePath)).toContain("openclaw-backup.tar.gz");
+          expect(path.basename(result.archivePath)).toContain("bot-backup.tar.gz");
           expect(path.basename(result.archivePath)).not.toContain("NaN");
         } finally {
           dateNowSpy.mockRestore();
@@ -603,10 +603,10 @@ describe("createBackupArchive", () => {
   });
 
   it("falls back to epoch when injected nowMs and Date.now are outside Date range", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-invalid-fallback-now-",
+        prefix: "bot-backup-invalid-fallback-now-",
         scenario: "minimal",
       },
       async (state) => {
@@ -623,7 +623,7 @@ describe("createBackupArchive", () => {
           });
 
           expect(result.createdAt).toBe("1970-01-01T00:00:00.000Z");
-          expect(path.basename(result.archivePath)).toContain("openclaw-backup.tar.gz");
+          expect(path.basename(result.archivePath)).toContain("bot-backup.tar.gz");
           expect(path.basename(result.archivePath)).not.toContain("NaN");
         } finally {
           dateNowSpy.mockRestore();
@@ -633,10 +633,10 @@ describe("createBackupArchive", () => {
   });
 
   it("skips current live volatile state files while preserving workspace locks", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "split",
-        prefix: "openclaw-backup-volatile-",
+        prefix: "bot-backup-volatile-",
         scenario: "minimal",
       },
       async (state) => {
@@ -699,10 +699,10 @@ describe("createBackupArchive", () => {
   });
 
   it("replaces legacy audit raw archives with sanitized restorable snapshots", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-audit-raw-",
+        prefix: "bot-backup-audit-raw-",
         scenario: "minimal",
       },
       async (state) => {
@@ -718,11 +718,11 @@ describe("createBackupArchive", () => {
             ts: "2026-07-01T00:00:00.000Z",
             source: "config-io",
             event: "config.write",
-            argv: ["openclaw", "config", "set", "token", marker],
+            argv: ["bot", "config", "set", "token", marker],
             execArgv: [],
           })}\n`,
         );
-        const { db } = openOpenClawStateDatabase({ env: state.env });
+        const { db } = openBotStateDatabase({ env: state.env });
         db.prepare(
           `
             INSERT INTO diagnostic_events (
@@ -743,7 +743,7 @@ describe("createBackupArchive", () => {
             "sanitized raw archive entry",
           );
           const databaseEntry = expectDefined(
-            entries.find((entry) => entry.endsWith("/state/state/openclaw.sqlite")),
+            entries.find((entry) => entry.endsWith("/state/state/bot.sqlite")),
             "global state database entry",
           );
           expect(entries.some((entry) => entry.endsWith(".doctor-scrub-restore"))).toBe(false);
@@ -752,7 +752,7 @@ describe("createBackupArchive", () => {
           const archivedRaw = await fs.readFile(path.join(extractDir, rawEntry), "utf8");
           expect(archivedRaw).not.toContain(marker);
           expect(JSON.parse(archivedRaw.trim())).toMatchObject({
-            argv: ["openclaw", "config", "set", "token", "***"],
+            argv: ["bot", "config", "set", "token", "***"],
           });
           const sqlite = requireNodeSqlite();
           const archivedDb = new sqlite.DatabaseSync(path.join(extractDir, databaseEntry), {
@@ -770,17 +770,17 @@ describe("createBackupArchive", () => {
             archivedDb.close();
           }
         } finally {
-          closeOpenClawStateDatabase();
+          closeBotStateDatabase();
         }
       },
     );
   });
 
   it("omits completed blank audit append pads when dropping their checkpoints", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-completed-audit-pad-",
+        prefix: "bot-backup-completed-audit-pad-",
         scenario: "minimal",
       },
       async (state) => {
@@ -797,7 +797,7 @@ describe("createBackupArchive", () => {
             ts: "2026-07-01T00:00:00.000Z",
             source: "config-io",
             event: "config.write",
-            argv: ["openclaw", "config", "set", "safe", "value"],
+            argv: ["bot", "config", "set", "safe", "value"],
             execArgv: [],
           })}\n`,
         );
@@ -814,7 +814,7 @@ describe("createBackupArchive", () => {
             doctorOnlyStateMigrations: true,
           }).hasLegacy,
         ).toBe(false);
-        const { db } = openOpenClawStateDatabase({ env: state.env });
+        const { db } = openBotStateDatabase({ env: state.env });
         expect(
           db
             .prepare(
@@ -832,7 +832,7 @@ describe("createBackupArchive", () => {
           const entries = await listArchiveEntries(result.archivePath);
           expect(entries.some((entry) => entry.endsWith(`/state/${rawRelativePath}`))).toBe(false);
           const databaseEntry = expectDefined(
-            entries.find((entry) => entry.endsWith("/state/state/openclaw.sqlite")),
+            entries.find((entry) => entry.endsWith("/state/state/bot.sqlite")),
             "global state database entry",
           );
           await tar.x({ file: result.archivePath, gzip: true, cwd: extractDir });
@@ -852,17 +852,17 @@ describe("createBackupArchive", () => {
             archivedDb.close();
           }
         } finally {
-          closeOpenClawStateDatabase();
+          closeBotStateDatabase();
         }
       },
     );
   });
 
   it("preserves audit ordinals for identical later appends across backup restore", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-audit-ordinal-",
+        prefix: "bot-backup-audit-ordinal-",
         scenario: "minimal",
       },
       async (state) => {
@@ -874,7 +874,7 @@ describe("createBackupArchive", () => {
           ts: "2026-07-01T00:00:00.000Z",
           source: "config-io",
           event: "config.write",
-          argv: ["openclaw", "config", "set", "safe", "same"],
+          argv: ["bot", "config", "set", "safe", "same"],
           execArgv: [],
         };
         await fs.mkdir(outputDir, { recursive: true });
@@ -897,11 +897,11 @@ describe("createBackupArchive", () => {
         });
         const entries = await listArchiveEntries(result.archivePath);
         const databaseEntry = expectDefined(
-          entries.find((entry) => entry.endsWith("/state/state/openclaw.sqlite")),
+          entries.find((entry) => entry.endsWith("/state/state/bot.sqlite")),
           "global state database entry",
         );
         await tar.x({ file: result.archivePath, gzip: true, cwd: extractDir });
-        closeOpenClawStateDatabase();
+        closeBotStateDatabase();
 
         const restoredDatabasePath = path.join(extractDir, databaseEntry);
         const restoredStateDir = path.dirname(path.dirname(restoredDatabasePath));
@@ -918,23 +918,23 @@ describe("createBackupArchive", () => {
           const restoredEntries = createSqliteAuditRecordStore({
             scope: CONFIG_AUDIT_SCOPE,
             maxEntries: CONFIG_AUDIT_MAX_ENTRIES,
-            env: { ...process.env, OPENCLAW_STATE_DIR: restoredStateDir },
+            env: { ...process.env, BOT_STATE_DIR: restoredStateDir },
           }).entries();
           expect(restoredEntries).toHaveLength(2);
           expect(new Set(restoredEntries.map((entry) => entry.key)).size).toBe(2);
           expect(restoredEntries.map((entry) => entry.value)).toEqual([record, record]);
         } finally {
-          closeOpenClawStateDatabaseByPath(restoredDatabasePath);
+          closeBotStateDatabaseByPath(restoredDatabasePath);
         }
       },
     );
   });
 
   it("scrubs transient SQLite queue and plugin blob rows from archive snapshots", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-sqlite-queue-",
+        prefix: "bot-backup-sqlite-queue-",
         scenario: "minimal",
       },
       async (state) => {
@@ -942,7 +942,7 @@ describe("createBackupArchive", () => {
         const extractDir = state.path("extract");
         await fs.mkdir(outputDir, { recursive: true });
         await fs.mkdir(extractDir, { recursive: true });
-        const { db } = openOpenClawStateDatabase({ env: state.env });
+        const { db } = openBotStateDatabase({ env: state.env });
         db.prepare(
           `
             INSERT INTO delivery_queue_entries (
@@ -994,10 +994,10 @@ describe("createBackupArchive", () => {
           });
           const entries = await listArchiveEntries(result.archivePath);
           const archivedDbEntry = entries.find((entry) =>
-            entry.endsWith("/state/state/openclaw.sqlite"),
+            entry.endsWith("/state/state/bot.sqlite"),
           );
           expect(archivedDbEntry).toBeDefined();
-          expect(entries.some((entry) => entry.endsWith("/state/state/openclaw.sqlite-wal"))).toBe(
+          expect(entries.some((entry) => entry.endsWith("/state/state/bot.sqlite-wal"))).toBe(
             false,
           );
 
@@ -1044,25 +1044,25 @@ describe("createBackupArchive", () => {
             count: 1,
           });
         } finally {
-          closeOpenClawStateDatabase();
+          closeBotStateDatabase();
         }
       },
     );
   });
 
   it("rejects stale secondary indexes before creating a backup archive", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-unsafe-index-",
+        prefix: "bot-backup-unsafe-index-",
         scenario: "minimal",
       },
       async (state) => {
         const outputDir = state.path("backups");
         await fs.mkdir(outputDir, { recursive: true });
-        openOpenClawStateDatabase({ env: state.env });
-        closeOpenClawStateDatabase();
-        createUnsafeIndexDrift(resolveOpenClawStateSqlitePath(state.env));
+        openBotStateDatabase({ env: state.env });
+        closeBotStateDatabase();
+        createUnsafeIndexDrift(resolveBotStateSqlitePath(state.env));
 
         await expect(
           createBackupArchive({
@@ -1079,20 +1079,20 @@ describe("createBackupArchive", () => {
   });
 
   it("rejects foreign-key violations before creating a backup archive", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-foreign-key-",
+        prefix: "bot-backup-foreign-key-",
         scenario: "minimal",
       },
       async (state) => {
         const outputDir = state.path("backups");
         await fs.mkdir(outputDir, { recursive: true });
-        openOpenClawStateDatabase({ env: state.env });
-        closeOpenClawStateDatabase();
+        openBotStateDatabase({ env: state.env });
+        closeBotStateDatabase();
 
         const sqlite = requireNodeSqlite();
-        const database = new sqlite.DatabaseSync(resolveOpenClawStateSqlitePath(state.env));
+        const database = new sqlite.DatabaseSync(resolveBotStateSqlitePath(state.env));
         try {
           database.exec("PRAGMA foreign_keys = OFF;");
           database
@@ -1121,10 +1121,10 @@ describe("createBackupArchive", () => {
   });
 
   it("snapshots per-agent SQLite auth stores without deleted secret pages", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-agent-sqlite-",
+        prefix: "bot-backup-agent-sqlite-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1146,10 +1146,10 @@ describe("createBackupArchive", () => {
           state.agentDir(),
           { syncExternalCli: false },
         );
-        closeOpenClawAgentDatabasesForTest();
+        closeBotAgentDatabasesForTest();
         const sqlite = requireNodeSqlite();
-        const liveDbPath = path.join(state.agentDir(), "openclaw-agent.sqlite");
-        const deletedSecretMarker = "OPENCLAW_DELETED_SECRET_PAGE_MARKER";
+        const liveDbPath = path.join(state.agentDir(), "bot-agent.sqlite");
+        const deletedSecretMarker = "BOT_DELETED_SECRET_PAGE_MARKER";
         const deletedSecret = `${deletedSecretMarker}-${"x".repeat(16_384)}`;
         const liveDb = new sqlite.DatabaseSync(liveDbPath);
         try {
@@ -1184,12 +1184,12 @@ describe("createBackupArchive", () => {
         });
         const entries = await listArchiveEntries(result.archivePath);
         const archivedDbEntry = entries.find((entry) =>
-          entry.endsWith("/state/agents/main/agent/openclaw-agent.sqlite"),
+          entry.endsWith("/state/agents/main/agent/bot-agent.sqlite"),
         );
         expect(archivedDbEntry).toBeDefined();
         expect(
           entries.some((entry) =>
-            entry.endsWith("/state/agents/main/agent/openclaw-agent.sqlite-wal"),
+            entry.endsWith("/state/agents/main/agent/bot-agent.sqlite-wal"),
           ),
         ).toBe(false);
 
@@ -1230,16 +1230,16 @@ describe("createBackupArchive", () => {
   });
 
   it("snapshots and verifies a canonical agent database when the agent id is node_modules", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-agent-node-modules-",
+        prefix: "bot-backup-agent-node-modules-",
         scenario: "minimal",
       },
       async (state) => {
         const outputDir = state.path("backups");
         const extractDir = state.path("extract");
-        const dbPath = state.statePath("agents", "node_modules", "agent", "openclaw-agent.sqlite");
+        const dbPath = state.statePath("agents", "node_modules", "agent", "bot-agent.sqlite");
         await fs.mkdir(path.dirname(dbPath), { recursive: true });
         await fs.mkdir(outputDir, { recursive: true });
         await fs.mkdir(extractDir, { recursive: true });
@@ -1271,12 +1271,12 @@ describe("createBackupArchive", () => {
           });
           const entries = await listArchiveEntries(result.archivePath);
           const archivedDbEntry = entries.find((entry) =>
-            entry.endsWith("/state/agents/node_modules/agent/openclaw-agent.sqlite"),
+            entry.endsWith("/state/agents/node_modules/agent/bot-agent.sqlite"),
           );
           expect(archivedDbEntry).toBeDefined();
           expect(
             entries.some((entry) =>
-              entry.endsWith("/state/agents/node_modules/agent/openclaw-agent.sqlite-wal"),
+              entry.endsWith("/state/agents/node_modules/agent/bot-agent.sqlite-wal"),
             ),
           ).toBe(false);
 
@@ -1313,10 +1313,10 @@ describe("createBackupArchive", () => {
       kind: "agent" as const,
     },
   ])("rejects a zero-byte canonical $name database", async ({ kind }) => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-zero-byte-canonical-",
+        prefix: "bot-backup-zero-byte-canonical-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1349,10 +1349,10 @@ describe("createBackupArchive", () => {
       kind: "agent" as const,
     },
   ])("rejects a schema-empty canonical $name database", async ({ kind }) => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-schema-empty-canonical-",
+        prefix: "bot-backup-schema-empty-canonical-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1417,10 +1417,10 @@ describe("createBackupArchive", () => {
       expected: /belongs to agent Main; requested agent main/iu,
     },
   ])("rejects a canonical $name", async ({ kind, role, agentId, expected }) => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-wrong-owner-",
+        prefix: "bot-backup-wrong-owner-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1443,15 +1443,15 @@ describe("createBackupArchive", () => {
   });
 
   it("rejects a canonical agent database under a noncanonical agent path", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-noncanonical-agent-path-",
+        prefix: "bot-backup-noncanonical-agent-path-",
         scenario: "minimal",
       },
       async (state) => {
         const outputDir = state.path("backups");
-        const dbPath = state.statePath("agents", "Main", "agent", "openclaw-agent.sqlite");
+        const dbPath = state.statePath("agents", "Main", "agent", "bot-agent.sqlite");
         await fs.mkdir(path.dirname(dbPath), { recursive: true });
         await fs.mkdir(outputDir, { recursive: true });
         createOwnedSqliteDatabase({
@@ -1473,16 +1473,16 @@ describe("createBackupArchive", () => {
   });
 
   it("validates hard-linked canonical agent paths against each path owner", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-hardlinked-agent-owners-",
+        prefix: "bot-backup-hardlinked-agent-owners-",
         scenario: "minimal",
       },
       async (state) => {
         const outputDir = state.path("backups");
-        const mainDbPath = state.statePath("agents", "main", "agent", "openclaw-agent.sqlite");
-        const workerDbPath = state.statePath("agents", "worker", "agent", "openclaw-agent.sqlite");
+        const mainDbPath = state.statePath("agents", "main", "agent", "bot-agent.sqlite");
+        const workerDbPath = state.statePath("agents", "worker", "agent", "bot-agent.sqlite");
         await fs.mkdir(path.dirname(mainDbPath), { recursive: true });
         await fs.mkdir(path.dirname(workerDbPath), { recursive: true });
         await fs.mkdir(outputDir, { recursive: true });
@@ -1506,10 +1506,10 @@ describe("createBackupArchive", () => {
   });
 
   it("does not treat a canonical agent path as an alias of the global database", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-hardlinked-global-agent-owners-",
+        prefix: "bot-backup-hardlinked-global-agent-owners-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1540,10 +1540,10 @@ describe("createBackupArchive", () => {
   it.runIf(process.platform !== "win32")(
     "fails closed when a canonical SQLite symlink retargets after discovery",
     async () => {
-      await withOpenClawTestState(
+      await withBotTestState(
         {
           layout: "state-only",
-          prefix: "openclaw-backup-canonical-symlink-retarget-",
+          prefix: "bot-backup-canonical-symlink-retarget-",
           scenario: "minimal",
         },
         async (state) => {
@@ -1594,10 +1594,10 @@ describe("createBackupArchive", () => {
   );
 
   it("backs up older owned canonical databases and a generic schema-empty plugin database", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-owned-older-schema-",
+        prefix: "bot-backup-owned-older-schema-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1628,9 +1628,9 @@ describe("createBackupArchive", () => {
           nowMs: Date.UTC(2026, 6, 24, 9, 3, 0),
         });
         const entries = await listArchiveEntries(result.archivePath);
-        expect(entries.some((entry) => entry.endsWith("/state/state/openclaw.sqlite"))).toBe(true);
+        expect(entries.some((entry) => entry.endsWith("/state/state/bot.sqlite"))).toBe(true);
         expect(
-          entries.some((entry) => entry.endsWith("/state/agents/main/agent/openclaw-agent.sqlite")),
+          entries.some((entry) => entry.endsWith("/state/agents/main/agent/bot-agent.sqlite")),
         ).toBe(true);
         expect(
           entries.some((entry) => entry.endsWith("/state/plugins/dedicated/empty.sqlite")),
@@ -1660,10 +1660,10 @@ describe("createBackupArchive", () => {
   });
 
   it("snapshots nested live SQLite databases with transaction continuity", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-nested-sqlite-",
+        prefix: "bot-backup-nested-sqlite-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1767,10 +1767,10 @@ describe("createBackupArchive", () => {
   });
 
   it("fails closed when a plugin SQLite schema cannot be compacted safely", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-plugin-capability-",
+        prefix: "bot-backup-plugin-capability-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1800,10 +1800,10 @@ describe("createBackupArchive", () => {
   });
 
   it("scrubs deleted plugin SQLite bytes from archive snapshots", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-plugin-deleted-bytes-",
+        prefix: "bot-backup-plugin-deleted-bytes-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1851,10 +1851,10 @@ describe("createBackupArchive", () => {
   });
 
   it("fails instead of raw-copying malformed nested SQLite databases", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-malformed-sqlite-",
+        prefix: "bot-backup-malformed-sqlite-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1878,10 +1878,10 @@ describe("createBackupArchive", () => {
   it.each(["late.sqlite", "late.sqlite-wal"])(
     "fails when SQLite-looking state appears after snapshot discovery: %s",
     async (lateName) => {
-      await withOpenClawTestState(
+      await withBotTestState(
         {
           layout: "state-only",
-          prefix: "openclaw-backup-late-sqlite-",
+          prefix: "bot-backup-late-sqlite-",
           scenario: "minimal",
         },
         async (state) => {
@@ -1912,7 +1912,7 @@ describe("createBackupArchive", () => {
             const targetPath = path.resolve(String(target));
             if (
               targetPath.startsWith(path.resolve(outputDir)) &&
-              targetPath.includes(".openclaw-backup-publish-")
+              targetPath.includes(".bot-backup-publish-")
             ) {
               stagedArchiveCleanupAttempts += 1;
               if (stagedArchiveCleanupAttempts === 1) {
@@ -1943,10 +1943,10 @@ describe("createBackupArchive", () => {
   );
 
   it("omits pre-existing orphan SQLite sidecars without failing backup", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-orphan-sqlite-sidecars-",
+        prefix: "bot-backup-orphan-sqlite-sidecars-",
         scenario: "minimal",
       },
       async (state) => {
@@ -1977,10 +1977,10 @@ describe("createBackupArchive", () => {
   });
 
   it("omits transient memory reindex databases and sidecars", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-memory-reindex-lock-",
+        prefix: "bot-backup-memory-reindex-lock-",
         scenario: "minimal",
       },
       async (state) => {
@@ -2030,10 +2030,10 @@ describe("createBackupArchive", () => {
       return;
     }
 
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-symlinked-sqlite-",
+        prefix: "bot-backup-symlinked-sqlite-",
         scenario: "minimal",
       },
       async (state) => {
@@ -2067,17 +2067,17 @@ describe("createBackupArchive", () => {
       return;
     }
 
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-global-sqlite-symlink-",
+        prefix: "bot-backup-global-sqlite-symlink-",
         scenario: "minimal",
       },
       async (state) => {
         const outputDir = state.path("backups");
         const extractDir = state.path("extract");
         const backingDbPath = state.statePath("state", "backing-global.sqlite");
-        const linkedDbPath = state.statePath("state", "openclaw.sqlite");
+        const linkedDbPath = state.statePath("state", "bot.sqlite");
         const hardlinkedDbPath = state.statePath("state", "hardlinked-global.sqlite");
         await state.writeConfig({
           agents: {
@@ -2150,7 +2150,7 @@ describe("createBackupArchive", () => {
           const entries = await listArchiveEntryDetails(result.archivePath);
           const archivedDbEntries = entries.filter(
             (entry) =>
-              entry.path.endsWith("/state/state/openclaw.sqlite") ||
+              entry.path.endsWith("/state/state/bot.sqlite") ||
               entry.path.endsWith("/state/state/backing-global.sqlite") ||
               entry.path.endsWith("/state/state/hardlinked-global.sqlite"),
           );
@@ -2204,10 +2204,10 @@ describe("createBackupArchive", () => {
       return;
     }
 
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-agent-sqlite-alias-",
+        prefix: "bot-backup-agent-sqlite-alias-",
         scenario: "minimal",
       },
       async (state) => {
@@ -2215,7 +2215,7 @@ describe("createBackupArchive", () => {
         const extractDir = state.path("extract");
         const agentDir = state.statePath("agents", "main", "agent");
         const backingDbPath = path.join(agentDir, "backing-agent.sqlite");
-        const linkedDbPath = path.join(agentDir, "openclaw-agent.sqlite");
+        const linkedDbPath = path.join(agentDir, "bot-agent.sqlite");
         const hardlinkedDbPath = state.statePath("plugins", "dedicated", "agent-alias.sqlite");
         await fs.mkdir(agentDir, { recursive: true });
         await fs.mkdir(path.dirname(hardlinkedDbPath), { recursive: true });
@@ -2262,7 +2262,7 @@ describe("createBackupArchive", () => {
           const entries = await listArchiveEntryDetails(result.archivePath);
           const archivedDbEntries = entries.filter(
             (entry) =>
-              entry.path.endsWith("/state/agents/main/agent/openclaw-agent.sqlite") ||
+              entry.path.endsWith("/state/agents/main/agent/bot-agent.sqlite") ||
               entry.path.endsWith("/state/agents/main/agent/backing-agent.sqlite") ||
               entry.path.endsWith("/state/plugins/dedicated/agent-alias.sqlite"),
           );
@@ -2304,15 +2304,15 @@ describe("createBackupArchive", () => {
   });
 
   it("fails when the canonical global SQLite path is not a file", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-global-sqlite-directory-",
+        prefix: "bot-backup-global-sqlite-directory-",
         scenario: "minimal",
       },
       async (state) => {
         const outputDir = state.path("backups");
-        const globalDbPath = state.statePath("state", "openclaw.sqlite");
+        const globalDbPath = state.statePath("state", "bot.sqlite");
         await fs.mkdir(globalDbPath, { recursive: true });
         await fs.mkdir(outputDir, { recursive: true });
 
@@ -2329,10 +2329,10 @@ describe("createBackupArchive", () => {
   });
 
   it("omits reinstallable runtime trees and plugin dependencies while keeping plugin files", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-plugin-deps-",
+        prefix: "bot-backup-plugin-deps-",
         scenario: "minimal",
       },
       async (state) => {
@@ -2355,7 +2355,7 @@ describe("createBackupArchive", () => {
           );
         }
         await fs.writeFile(
-          path.join(stateDir, "extensions", "demo", "openclaw.plugin.json"),
+          path.join(stateDir, "extensions", "demo", "bot.plugin.json"),
           '{"id":"demo"}\n',
           "utf8",
         );
@@ -2399,7 +2399,7 @@ describe("createBackupArchive", () => {
         const entries = await listArchiveEntries(result.archivePath);
 
         const entrySuffixes = entries.map((entry) => entry.replace(/^.*\/state\//, "/state/"));
-        expect(entrySuffixes).toContain("/state/extensions/demo/openclaw.plugin.json");
+        expect(entrySuffixes).toContain("/state/extensions/demo/bot.plugin.json");
         expect(entrySuffixes).toContain("/state/extensions/demo/src/index.js");
         expect(entrySuffixes).toContain("/state/node_modules/root-dep/index.js");
         expect(entrySuffixes).toContain("/state/node_modules/root-dep/fixture.sqlite");
@@ -2425,24 +2425,24 @@ describe("createBackupArchive", () => {
   });
 
   it("preserves configured state paths nested under managed runtime roots", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-managed-root-workspace-",
+        prefix: "bot-backup-managed-root-workspace-",
         scenario: "minimal",
-        env: { OPENCLAW_OAUTH_DIR: undefined },
+        env: { BOT_OAUTH_DIR: undefined },
       },
       async (state) => {
         const stateDir = state.stateDir;
         const workspaceDir = path.join(stateDir, "dev", "workspace");
-        const runtimeDir = path.join(stateDir, "dev", "openclaw");
-        const configPath = path.join(stateDir, "git", "config", "openclaw.json");
+        const runtimeDir = path.join(stateDir, "dev", "bot");
+        const configPath = path.join(stateDir, "git", "config", "bot.json");
         const oauthDir = path.join(stateDir, "tools", "oauth");
         const toolRuntimeDir = path.join(stateDir, "tools", "runtime");
         const workspaceDbPath = path.join(workspaceDir, "workspace.sqlite");
         const outputDir = state.path("backups");
-        state.envVars.OPENCLAW_CONFIG_PATH = configPath;
-        state.envVars.OPENCLAW_OAUTH_DIR = oauthDir;
+        state.envVars.BOT_CONFIG_PATH = configPath;
+        state.envVars.BOT_OAUTH_DIR = oauthDir;
         state.applyEnv();
         await fs.mkdir(workspaceDir, { recursive: true });
         await fs.mkdir(runtimeDir, { recursive: true });
@@ -2486,13 +2486,13 @@ describe("createBackupArchive", () => {
         expect(
           entries.some((entry) => entry.endsWith("/state/dev/workspace/workspace.sqlite")),
         ).toBe(true);
-        expect(entries.some((entry) => entry.endsWith("/state/git/config/openclaw.json"))).toBe(
+        expect(entries.some((entry) => entry.endsWith("/state/git/config/bot.json"))).toBe(
           true,
         );
         expect(entries.some((entry) => entry.endsWith("/state/tools/oauth/credentials.json"))).toBe(
           true,
         );
-        expect(entries.some((entry) => entry.includes("/state/dev/openclaw/"))).toBe(false);
+        expect(entries.some((entry) => entry.includes("/state/dev/bot/"))).toBe(false);
         expect(entries.some((entry) => entry.includes("/state/tools/runtime/"))).toBe(false);
 
         const runtime: RuntimeEnv = { log: vi.fn(), error: vi.fn(), exit: vi.fn() };
@@ -2504,16 +2504,16 @@ describe("createBackupArchive", () => {
   });
 
   it("dereferences hardlinks instead of emitting restore-hostile Link entries", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-hardlink-",
+        prefix: "bot-backup-hardlink-",
         scenario: "minimal",
       },
       async (state) => {
         const stateDir = state.stateDir;
         const outputDir = state.path("backups");
-        const sourcePath = path.join(stateDir, "workspace-adx", "openclaw-src", "node_modules");
+        const sourcePath = path.join(stateDir, "workspace-adx", "bot-src", "node_modules");
         const targetPath = path.join(sourcePath, "esbuild", "bin", "esbuild");
         const hardlinkPath = path.join(sourcePath, "@esbuild", "darwin-arm64", "bin", "esbuild");
         await fs.mkdir(path.dirname(targetPath), { recursive: true });
@@ -2543,10 +2543,10 @@ describe("createBackupArchive", () => {
   });
 
   it("does not duplicate the root manifest when the system tempdir lives inside the state dir", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-tmp-overlap-",
+        prefix: "bot-backup-tmp-overlap-",
         scenario: "minimal",
       },
       async (state) => {
@@ -2580,10 +2580,10 @@ describe("createBackupArchive", () => {
   });
 
   it("does not duplicate the root manifest when the system tempdir is the state dir itself", async () => {
-    await withOpenClawTestState(
+    await withBotTestState(
       {
         layout: "state-only",
-        prefix: "openclaw-backup-tmp-equals-state-",
+        prefix: "bot-backup-tmp-equals-state-",
         scenario: "minimal",
       },
       async (state) => {
@@ -2611,7 +2611,7 @@ describe("createBackupArchive", () => {
             entry.endsWith("/state/plugins/dedicated/empty.sqlite"),
           );
           expect(emptyDbEntries).toHaveLength(1);
-          expect(entries.some((entry) => entry.includes("/openclaw-state-db-"))).toBe(false);
+          expect(entries.some((entry) => entry.includes("/bot-state-db-"))).toBe(false);
 
           await tar.x({ file: result.archivePath, gzip: true, cwd: extractDir });
           const sqlite = requireNodeSqlite();
@@ -2644,10 +2644,10 @@ describe("createBackupArchive", () => {
 
   describe.runIf(process.platform !== "win32")("archive permissions", () => {
     it("publishes via hard link with owner-only 0o600 permissions", async () => {
-      await withOpenClawTestState(
+      await withBotTestState(
         {
           layout: "state-only",
-          prefix: "openclaw-backup-mode-",
+          prefix: "bot-backup-mode-",
           scenario: "minimal",
         },
         async (state) => {
@@ -2671,10 +2671,10 @@ describe("createBackupArchive", () => {
         .spyOn(fs, "link")
         .mockRejectedValue(Object.assign(new Error("hard links unsupported"), { code: "EPERM" }));
       try {
-        await withOpenClawTestState(
+        await withBotTestState(
           {
             layout: "state-only",
-            prefix: "openclaw-backup-no-hardlinks-",
+            prefix: "bot-backup-no-hardlinks-",
             scenario: "minimal",
           },
           async (state) => {

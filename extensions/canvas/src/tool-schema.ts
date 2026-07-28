@@ -6,7 +6,7 @@ import {
   optionalNonNegativeIntegerSchema,
   optionalPositiveIntegerSchema,
   stringEnum,
-} from "openclaw/plugin-sdk/channel-actions";
+} from "bot/plugin-sdk/channel-actions";
 import { Type } from "typebox";
 
 /** Agent tool actions supported by the Canvas plugin. */

@@ -297,7 +297,7 @@ describe("QA Lab runner browser interactions", () => {
     selectValue(root, "#run-profile", "smoke-ci");
     selectValue(root, "#execution-channel", "telegram");
     selectValue(root, "#evidence-mode", "slim");
-    selectValue(root, "#runtime-pair", "openclaw,codex");
+    selectValue(root, "#runtime-pair", "bot,codex");
     selectValue(root, "#runtime-pair-lane", "core");
     root.querySelector<HTMLButtonElement>("[data-action='run-suite']")?.click();
 
@@ -309,7 +309,7 @@ describe("QA Lab runner browser interactions", () => {
         channel: "telegram",
         channelDriver: "crabline",
         evidenceMode: "slim",
-        runtimePair: ["openclaw", "codex"],
+        runtimePair: ["bot", "codex"],
         runtimePairLane: "core",
         scenarioIds: null,
       }),

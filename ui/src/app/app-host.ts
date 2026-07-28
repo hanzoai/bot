@@ -1,5 +1,5 @@
 import { ContextProvider } from "@lit/context";
-import type { UiCommandParams } from "@openclaw/gateway-protocol";
+import type { UiCommandParams } from "@hanzo/bot-gateway-protocol";
 import { html, nothing } from "lit";
 import { property, query, state } from "lit/decorators.js";
 import {
@@ -14,7 +14,7 @@ import "../components/github-link-hovercard-registration.ts";
 import "../components/login-gate.ts";
 import "../components/macos-titlebar-controls.ts";
 import "../components/onboarding-memory-import.ts";
-import "../components/openclaw-mascot.ts";
+import "../components/bot-mascot.ts";
 import "../components/resizable-divider.ts";
 import "../components/sidebar-update-card.ts";
 import "../components/tooltip.ts";
@@ -71,7 +71,7 @@ import {
   resolveUiKnownSelectedGlobalAgentId,
 } from "../lib/sessions/session-key.ts";
 import { isTerminalAvailable } from "../lib/terminal-availability.ts";
-import { OpenClawLightDomElement } from "../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../lit/bot-element.ts";
 import { SubscriptionsController } from "../lit/subscriptions-controller.ts";
 import { findSettingsSearchBlocks } from "../pages/config/settings-search.ts";
 import { newSessionSearch, type NewSessionTarget } from "../pages/new-session/location.ts";
@@ -220,7 +220,7 @@ function resolveTerminalThemeMode(): "dark" | "light" {
 function renderConnectingSplash() {
   return html`
     <main class="connect-splash" role="status" aria-live="polite" aria-label=${t("common.loading")}>
-      <openclaw-mascot mood="thinking" .size=${120}></openclaw-mascot>
+      <bot-mascot mood="thinking" .size=${120}></bot-mascot>
     </main>
   `;
 }
@@ -231,7 +231,7 @@ function renderApprovalDocument(runtime: ApplicationRuntime) {
     return nothing;
   }
   return html`
-    <openclaw-approval-page .approvalId=${documentMode.approvalId ?? ""}>
+    <bot-approval-page .approvalId=${documentMode.approvalId ?? ""}>
       <main class="approval-page approval-page--booting" role="status" aria-live="polite">
         <img
           class="connect-splash__logo"
@@ -240,7 +240,7 @@ function renderApprovalDocument(runtime: ApplicationRuntime) {
         />
         <span>${t("common.loading")}</span>
       </main>
-    </openclaw-approval-page>
+    </bot-approval-page>
   `;
 }
 
@@ -254,7 +254,7 @@ function isBrowserPanelAvailable(snapshot: ApplicationContext["gateway"]["snapsh
   );
 }
 
-class OpenClawApp extends OpenClawLightDomElement {
+class BotApp extends BotLightDomElement {
   // Pinned while a connect submitted from the visible login gate is in
   // flight, so a failed manual attempt cannot flash the shell in between.
   @state() private loginGatePinned = false;
@@ -319,7 +319,7 @@ class OpenClawApp extends OpenClawLightDomElement {
     // their lazy source getters bind on both the initial mount and reconnect.
     this.requestUpdate();
     void this.runtime.start().catch((error: unknown) => {
-      console.error("[openclaw] application start failed", error);
+      console.error("[bot] application start failed", error);
     });
   }
 
@@ -381,7 +381,7 @@ class OpenClawApp extends OpenClawLightDomElement {
     const gatewayConnected = gatewaySnapshot.phase === "connected";
     const gatewayUrlConfirmation = this.pendingGatewayUrl
       ? html`
-          <openclaw-gateway-url-confirmation
+          <bot-gateway-url-confirmation
             .props=${{
               pendingGatewayUrl: this.pendingGatewayUrl,
               onConfirm: () => {
@@ -393,7 +393,7 @@ class OpenClawApp extends OpenClawLightDomElement {
                 this.pendingGatewayUrl = null;
               },
             }}
-          ></openclaw-gateway-url-confirmation>
+          ></bot-gateway-url-confirmation>
         `
       : nothing;
     // Embedded mobile terminals own the whole document. Keep the generic login
@@ -405,12 +405,12 @@ class OpenClawApp extends OpenClawLightDomElement {
       );
       // Embedded clients query this host immediately; keep it stable while the chunk loads.
       return html`
-        <openclaw-terminal-panel
+        <bot-terminal-panel
           .client=${gatewayConnected ? gatewaySnapshot.client : null}
           .available=${terminalAvailable}
           .themeMode=${resolveTerminalThemeMode()}
           fullscreen
-        ></openclaw-terminal-panel>
+        ></bot-terminal-panel>
         ${!isOptionalElementDefined(TERMINAL_PANEL_ELEMENT) && terminalAvailable
           ? renderConnectingSplash()
           : nothing}
@@ -434,17 +434,17 @@ class OpenClawApp extends OpenClawLightDomElement {
       gatewaySnapshot.client !== null;
     if (initialConnectPending) {
       return html`
-        <openclaw-tooltip-provider>
+        <bot-tooltip-provider>
           ${renderConnectingSplash()} ${gatewayUrlConfirmation}
-        </openclaw-tooltip-provider>
+        </bot-tooltip-provider>
       `;
     }
     const showLoginGate =
       !gatewayConnected && (this.loginGatePinned || gatewaySnapshot.phase !== "reconnecting");
     if (showLoginGate) {
       return html`
-        <openclaw-tooltip-provider>
-          <openclaw-login-gate
+        <bot-tooltip-provider>
+          <bot-login-gate
             .props=${{
               basePath: context.basePath,
               connected: gatewayConnected,
@@ -481,33 +481,33 @@ class OpenClawApp extends OpenClawLightDomElement {
                 });
               },
             }}
-          ></openclaw-login-gate>
+          ></bot-login-gate>
           ${gatewayUrlConfirmation}
-        </openclaw-tooltip-provider>
+        </bot-tooltip-provider>
       `;
     }
     if (runtime.documentMode?.kind === "approval") {
       return html`
-        <openclaw-tooltip-provider>
+        <bot-tooltip-provider>
           ${gatewayUrlConfirmation} ${renderApprovalDocument(runtime)}
-        </openclaw-tooltip-provider>
+        </bot-tooltip-provider>
       `;
     }
     return html`
-      <openclaw-tooltip-provider>
-        <openclaw-github-link-hovercard-provider .client=${gatewaySnapshot.client}>
+      <bot-tooltip-provider>
+        <bot-github-link-hovercard-provider .client=${gatewaySnapshot.client}>
           ${gatewayUrlConfirmation}
-          <openclaw-app-shell
+          <bot-app-shell
             .runtime=${runtime}
             .onboarding=${this.onboarding}
-          ></openclaw-app-shell>
-        </openclaw-github-link-hovercard-provider>
-      </openclaw-tooltip-provider>
+          ></bot-app-shell>
+        </bot-github-link-hovercard-provider>
+      </bot-tooltip-provider>
     `;
   }
 }
 
-class OpenClawShell extends OpenClawLightDomElement {
+class BotShell extends BotLightDomElement {
   @property({ attribute: false }) runtime?: ApplicationRuntime;
   @property({ attribute: false }) onboarding = false;
 
@@ -520,8 +520,8 @@ class OpenClawShell extends OpenClawLightDomElement {
   private readonly terminalPanelElement = TERMINAL_PANEL_ELEMENT;
   private readonly browserPanelElement = BROWSER_PANEL_ELEMENT;
   private readonly execApprovalElement = EXEC_APPROVAL_ELEMENT;
-  @query("openclaw-command-palette") private commandPalette?: CommandPaletteElement;
-  @query("openclaw-exec-approval")
+  @query("bot-command-palette") private commandPalette?: CommandPaletteElement;
+  @query("bot-exec-approval")
   private approvalOverlay?: HTMLElement & { show(): void };
   private commandPaletteTarget?: CommandPaletteTargetDetail;
   private navDrawerTrigger: HTMLElement | null = null;
@@ -727,10 +727,10 @@ class OpenClawShell extends OpenClawLightDomElement {
     // Shipped Mac app builds without web chrome still drive these events; the
     // app's ⌘N menu item reuses native-new-session, while its ⌘K menu item
     // uses native-toggle-search because the legacy open-search is open-only.
-    window.addEventListener("openclaw:native-toggle-sidebar", this.handleNativeToggleSidebar);
-    window.addEventListener("openclaw:native-open-search", this.handleNativeOpenSearch);
-    window.addEventListener("openclaw:native-toggle-search", this.handleNativeToggleSearch);
-    window.addEventListener("openclaw:native-new-session", this.handleNativeNewSession);
+    window.addEventListener("bot:native-toggle-sidebar", this.handleNativeToggleSidebar);
+    window.addEventListener("bot:native-open-search", this.handleNativeOpenSearch);
+    window.addEventListener("bot:native-toggle-search", this.handleNativeToggleSearch);
+    window.addEventListener("bot:native-new-session", this.handleNativeNewSession);
     window.addEventListener(TERMINAL_PANEL_TOGGLE_EVENT, this.handleDeferredTerminalToggle);
     window.addEventListener(BROWSER_PANEL_TOGGLE_EVENT, this.handleDeferredBrowserToggle);
     // Write-through of synced display prefs to config ui.prefs. Server-applied
@@ -763,10 +763,10 @@ class OpenClawShell extends OpenClawLightDomElement {
     window.removeEventListener("dragover", this.handleUnhandledFileDrag);
     window.removeEventListener("drop", this.handleUnhandledFileDrag);
     window.removeEventListener(NATIVE_HISTORY_STATE_EVENT, this.handleNativeHistoryState);
-    window.removeEventListener("openclaw:native-toggle-sidebar", this.handleNativeToggleSidebar);
-    window.removeEventListener("openclaw:native-open-search", this.handleNativeOpenSearch);
-    window.removeEventListener("openclaw:native-toggle-search", this.handleNativeToggleSearch);
-    window.removeEventListener("openclaw:native-new-session", this.handleNativeNewSession);
+    window.removeEventListener("bot:native-toggle-sidebar", this.handleNativeToggleSidebar);
+    window.removeEventListener("bot:native-open-search", this.handleNativeOpenSearch);
+    window.removeEventListener("bot:native-toggle-search", this.handleNativeToggleSearch);
+    window.removeEventListener("bot:native-new-session", this.handleNativeNewSession);
     window.removeEventListener(TERMINAL_PANEL_TOGGLE_EVENT, this.handleDeferredTerminalToggle);
     window.removeEventListener(BROWSER_PANEL_TOGGLE_EVENT, this.handleDeferredBrowserToggle);
     this.outboxStoreImport.dispose();
@@ -861,7 +861,7 @@ class OpenClawShell extends OpenClawLightDomElement {
     }
     if (event.event === "config.changed") {
       // Another writer (agent-approved config_set, other device, CLI) changed
-      // openclaw.json; refresh the snapshot so ui.prefs reconcile live. A
+      // bot.json; refresh the snapshot so ui.prefs reconcile live. A
       // dirty local settings draft wins — the autosave/conflict flow owns it.
       const runtimeConfig = this.context?.runtimeConfig;
       if (runtimeConfig && !runtimeConfig.state.configFormDirty) {
@@ -1190,7 +1190,7 @@ class OpenClawShell extends OpenClawLightDomElement {
 
   private dismissSidebarTransientMenus(): boolean {
     return (
-      this.querySelector<AppSidebarElement>("openclaw-app-sidebar")?.dismissTransientMenus() ??
+      this.querySelector<AppSidebarElement>("bot-app-sidebar")?.dismissTransientMenus() ??
       false
     );
   }
@@ -1407,7 +1407,7 @@ class OpenClawShell extends OpenClawLightDomElement {
     if (isSessionRouteId(routeId) && this.activeSessionKey) {
       primaryContext = this.chatTitleContext(context, outboxScopeHost) || primaryContext;
     } else if (routeId === "custodian") {
-      primaryContext = t("nav.askOpenClaw");
+      primaryContext = t("nav.askBot");
     }
     const title = formatDocumentTitle({
       context: primaryContext,
@@ -1772,11 +1772,11 @@ class OpenClawShell extends OpenClawLightDomElement {
     // and the upgraded panels catch the first toggle instead of dropping the event.
     return html`
       ${isOptionalElementDefined(this.commandPaletteElement)
-        ? html`<openclaw-command-palette
+        ? html`<bot-command-palette
             .onNavigate=${(routeId: RouteId) => this.navigate(routeId)}
             .onSelectSession=${(sessionKey: string) => this.selectChatSession(sessionKey)}
             .onSlashCommand=${this.handleCommandPaletteSlashCommand}
-          ></openclaw-command-palette>`
+          ></bot-command-palette>`
         : nothing}
       <div
         class="shell ${chatLikeRoute ? "shell--chat" : ""} ${navCollapsed
@@ -1799,7 +1799,7 @@ class OpenClawShell extends OpenClawLightDomElement {
         ></button>
         ${isNativeWebChromeHost() && !onboarding
           ? html`
-              <openclaw-macos-titlebar-controls
+              <bot-macos-titlebar-controls
                 .navCollapsed=${this.nativeNavCollapsed()}
                 .historyOnly=${settingsTakeover}
                 .canGoBack=${this.nativeHistoryState.canGoBack}
@@ -1807,21 +1807,21 @@ class OpenClawShell extends OpenClawLightDomElement {
                 .onToggleSidebar=${() => this.toggleNavigationSurface()}
                 .onOpenPalette=${this.openPalette}
                 .onOpenNewSession=${this.handleNativeNewSession}
-              ></openclaw-macos-titlebar-controls>
+              ></bot-macos-titlebar-controls>
             `
           : nothing}
-        <openclaw-app-topbar
+        <bot-app-topbar
           .basePath=${context.basePath}
           .searchDisabled=${false}
           .navDrawerOpen=${navDrawerOpen}
           .onboarding=${onboarding}
           .onOpenPalette=${this.openPalette}
           .onToggleDrawer=${(trigger: HTMLElement) => this.toggleNavigationSurface(trigger)}
-        ></openclaw-app-topbar>
+        ></bot-app-topbar>
         ${!onboarding && !settingsTakeover && !mobileNavLayout
           ? html`
               <div class="shell-chrome-controls">
-                <openclaw-tooltip
+                <bot-tooltip
                   .content=${`${t(navCollapsed ? "nav.expand" : "nav.collapse")} (⌘B)`}
                 >
                   <button
@@ -1833,9 +1833,9 @@ class OpenClawShell extends OpenClawLightDomElement {
                   >
                     ${navCollapsed ? icons.panelLeftOpen : icons.panelLeftClose}
                   </button>
-                </openclaw-tooltip>
+                </bot-tooltip>
                 ${navCollapsed
-                  ? html`<openclaw-tooltip
+                  ? html`<bot-tooltip
                       .content=${gatewaySnapshot.phase === "connected"
                         ? t("chat.runControls.newSession")
                         : t("chat.runControls.newSessionDisconnected")}
@@ -1849,9 +1849,9 @@ class OpenClawShell extends OpenClawLightDomElement {
                       >
                         ${icons.plus}
                       </button>
-                    </openclaw-tooltip>`
+                    </bot-tooltip>`
                   : nothing}
-                <openclaw-tooltip
+                <bot-tooltip
                   .content=${`${t("chat.openCommandPalette")} (${PALETTE_SHORTCUT})`}
                 >
                   <button
@@ -1862,7 +1862,7 @@ class OpenClawShell extends OpenClawLightDomElement {
                   >
                     ${icons.search}
                   </button>
-                </openclaw-tooltip>
+                </bot-tooltip>
               </div>
             `
           : nothing}
@@ -1894,7 +1894,7 @@ class OpenClawShell extends OpenClawLightDomElement {
                 },
                 preloadTimers: this.settingsPreloadTimers,
               })
-            : html`<openclaw-app-sidebar
+            : html`<bot-app-sidebar
                 .basePath=${context.basePath}
                 .activeRouteId=${activeRoute}
                 .activePluginTabId=${activePluginTabId}
@@ -1939,7 +1939,7 @@ class OpenClawShell extends OpenClawLightDomElement {
                   this.navigate(routeId, options)}
                 .onPreloadRoute=${(routeId: string) =>
                   isRouteId(routeId) ? context.preload(routeId) : Promise.resolve()}
-              ></openclaw-app-sidebar>`}
+              ></bot-app-sidebar>`}
         </div>
         ${!navCollapsed && !onboarding && !settingsTakeover
           ? html`
@@ -1964,14 +1964,14 @@ class OpenClawShell extends OpenClawLightDomElement {
           .tabIndex=${-1}
         >
           ${gatewaySnapshot.hello?.deviceAuthMigration?.pending === true
-            ? customElements.get("openclaw-device-auth-migration-banner")
-              ? html`<openclaw-device-auth-migration-banner
+            ? customElements.get("bot-device-auth-migration-banner")
+              ? html`<bot-device-auth-migration-banner
                   .props=${{
                     state: overlaySnapshot.deviceAuthMigration,
                     onSecure: () => void context.overlays.secureThisBrowser(),
                   }}
-                ></openclaw-device-auth-migration-banner>`
-              : html`<openclaw-update-banner
+                ></bot-device-auth-migration-banner>`
+              : html`<bot-update-banner
                   .props=${{
                     statusBanner: {
                       tone: overlaySnapshot.deviceAuthMigration.error ? "danger" : "warn",
@@ -1980,8 +1980,8 @@ class OpenClawShell extends OpenClawLightDomElement {
                         t("login.deviceAuthMigration.banner"),
                     },
                   }}
-                ></openclaw-update-banner>`
-            : html`<openclaw-update-banner
+                ></bot-update-banner>`
+            : html`<bot-update-banner
                 .props=${{
                   statusBanner: overlaySnapshot.controlUiRefreshRequired
                     ? {
@@ -1993,12 +1993,12 @@ class OpenClawShell extends OpenClawLightDomElement {
                     ? { label: t("common.refresh"), onClick: this.refreshControlUi }
                     : undefined,
                 }}
-              ></openclaw-update-banner>`}
-          <openclaw-update-banner
+              ></bot-update-banner>`}
+          <bot-update-banner
             .props=${{
               statusBanner: overlaySnapshot.updateStatusBanner,
             }}
-          ></openclaw-update-banner>
+          ></bot-update-banner>
           ${renderFloatingUpdateCard({
             navigationSurfaceHidden,
             onboarding,
@@ -2006,19 +2006,19 @@ class OpenClawShell extends OpenClawLightDomElement {
             updateRunning: overlaySnapshot.updateRunning,
             onUpdate: () => void context.overlays.runUpdate(),
           })}
-          <openclaw-router-outlet
+          <bot-router-outlet
             .router=${runtime.router}
             .retryContext=${context}
             .onNotFound=${() => this.replaceChatWithCurrentSession()}
-          ></openclaw-router-outlet>
+          ></bot-router-outlet>
         </main>
-        <openclaw-terminal-panel
+        <bot-terminal-panel
           .client=${gatewayConnected ? gatewaySnapshot.client : null}
           .available=${terminalAvailable}
           .suppressed=${settingsTakeover}
           .themeMode=${resolveTerminalThemeMode()}
-        ></openclaw-terminal-panel>
-        <openclaw-browser-panel
+        ></bot-terminal-panel>
+        <bot-browser-panel
           .client=${gatewayConnected ? gatewaySnapshot.client : null}
           .available=${browserPanelAvailable}
           .suppressed=${settingsTakeover}
@@ -2028,9 +2028,9 @@ class OpenClawShell extends OpenClawLightDomElement {
             settings: { token: context.gateway.connection.token },
             password: context.gateway.connection.password,
           })}
-        ></openclaw-browser-panel>
+        ></bot-browser-panel>
         ${isOptionalElementDefined(this.execApprovalElement)
-          ? html`<openclaw-exec-approval
+          ? html`<bot-exec-approval
               .props=${{
                 queue: overlaySnapshot.approvalQueue,
                 busy: overlaySnapshot.approvalBusy,
@@ -2042,7 +2042,7 @@ class OpenClawShell extends OpenClawLightDomElement {
                   decision: Parameters<typeof context.overlays.decideApproval>[0],
                 ) => context.overlays.decideApproval(decision, approvalId),
               }}
-            ></openclaw-exec-approval>`
+            ></bot-exec-approval>`
           : nothing}
         ${renderDevicePairSetup({
           open: overlaySnapshot.devicePairSetupOpen,
@@ -2065,20 +2065,20 @@ class OpenClawShell extends OpenClawLightDomElement {
           },
         })}
         ${onboarding && activeRoute !== "custodian"
-          ? html`<openclaw-onboarding-memory-import
+          ? html`<bot-onboarding-memory-import
               .active=${true}
               .context=${context}
-            ></openclaw-onboarding-memory-import>`
+            ></bot-onboarding-memory-import>`
           : nothing}
-        <openclaw-toast-host></openclaw-toast-host>
+        <bot-toast-host></bot-toast-host>
       </div>
     `;
   }
 }
-if (!customElements.get("openclaw-app")) {
-  customElements.define("openclaw-app", OpenClawApp);
+if (!customElements.get("bot-app")) {
+  customElements.define("bot-app", BotApp);
 }
-if (!customElements.get("openclaw-app-shell")) {
-  customElements.define("openclaw-app-shell", OpenClawShell);
+if (!customElements.get("bot-app-shell")) {
+  customElements.define("bot-app-shell", BotShell);
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

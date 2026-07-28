@@ -1,8 +1,8 @@
 // Memory Core tests cover manager.mistral provider plugin behavior.
 import type {
-  OpenClawConfig,
+  BotConfig,
   ResolvedMemorySearchConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+} from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import { describe, expect, it, vi } from "vitest";
 import {
   applyMemoryFallbackProviderState,
@@ -154,7 +154,7 @@ describe("memory manager mistral provider wiring", () => {
 
   it("uses default ollama model when activating ollama fallback", () => {
     const request = resolveMemoryFallbackProviderRequest({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       settings: createSettings({ provider: "openai", fallback: "ollama" }),
       currentProviderId: "openai",
     });
@@ -197,7 +197,7 @@ describe("memory manager mistral provider wiring", () => {
 
   it("uses default lmstudio model when activating lmstudio fallback", () => {
     const request = resolveMemoryFallbackProviderRequest({
-      cfg: {} as OpenClawConfig,
+      cfg: {} as BotConfig,
       settings: createSettings({ provider: "openai", fallback: "lmstudio" }),
       currentProviderId: "openai",
     });

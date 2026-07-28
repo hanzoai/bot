@@ -1,17 +1,17 @@
 // Qqbot plugin module implements runtime behavior.
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import type { OpenKeyedStoreOptions } from "openclaw/plugin-sdk/plugin-state-runtime";
+import type { PluginRuntime } from "bot/plugin-sdk/core";
+import type { OpenKeyedStoreOptions } from "bot/plugin-sdk/plugin-state-runtime";
 import {
   createPluginStateKeyedStoreForTests,
   createPluginStateSyncKeyedStoreForTests,
   resetPluginStateStoreForTests,
-} from "openclaw/plugin-sdk/plugin-state-test-runtime";
+} from "bot/plugin-sdk/plugin-state-test-runtime";
 import { setQQBotRuntime } from "../bridge/runtime.js";
 
 function stateEnv(stateDir: string, env?: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
   return {
     ...(env ?? process.env),
-    OPENCLAW_STATE_DIR: stateDir,
+    BOT_STATE_DIR: stateDir,
   };
 }
 

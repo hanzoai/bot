@@ -3,19 +3,19 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import { writePluginWithSkill } from "../test-support/skill-plugin-fixtures.test-support.js";
 import { resolveEmbeddedRunSkillEntries } from "./embedded-run-entries.js";
 
 const tempDirs: string[] = [];
-const originalBundledDir = process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+const originalBundledDir = process.env.BOT_BUNDLED_PLUGINS_DIR;
 
 function restoreBundledPluginsDir() {
   if (originalBundledDir === undefined) {
-    delete process.env.OPENCLAW_BUNDLED_PLUGINS_DIR;
+    delete process.env.BOT_BUNDLED_PLUGINS_DIR;
     return;
   }
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = originalBundledDir;
+  process.env.BOT_BUNDLED_PLUGINS_DIR = originalBundledDir;
 }
 
 async function createTempDir(prefix: string) {
@@ -25,8 +25,8 @@ async function createTempDir(prefix: string) {
 }
 
 async function setupBundledDiffsPlugin() {
-  const bundledPluginsDir = await createTempDir("openclaw-bundled-");
-  const workspaceDir = await createTempDir("openclaw-workspace-");
+  const bundledPluginsDir = await createTempDir("bot-bundled-");
+  const workspaceDir = await createTempDir("bot-workspace-");
   const pluginRoot = path.join(bundledPluginsDir, "diffs");
 
   await writePluginWithSkill({
@@ -39,9 +39,9 @@ async function setupBundledDiffsPlugin() {
   return { bundledPluginsDir, workspaceDir };
 }
 
-async function resolveBundledDiffsSkillEntries(config?: OpenClawConfig) {
+async function resolveBundledDiffsSkillEntries(config?: BotConfig) {
   const { bundledPluginsDir, workspaceDir } = await setupBundledDiffsPlugin();
-  process.env.OPENCLAW_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
+  process.env.BOT_BUNDLED_PLUGINS_DIR = bundledPluginsDir;
 
   return resolveEmbeddedRunSkillEntries({ workspaceDir, ...(config ? { config } : {}) });
 }
@@ -53,7 +53,7 @@ afterEach(async () => {
 
 describe("resolveEmbeddedRunSkillEntries (integration)", () => {
   it("loads bundled diffs skill when explicitly enabled in config", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       plugins: {
         entries: {
           diffs: { enabled: true },

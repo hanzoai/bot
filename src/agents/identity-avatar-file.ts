@@ -1,8 +1,8 @@
 // Internal local-avatar resolution and pinned file reads.
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
+import type { BotConfig } from "../config/types.bot.js";
 import { openRootFileSync } from "../infra/boundary-file-read.js";
 import { readFileDescriptorBoundedSync } from "../infra/boundary-file-read.js";
 import { isRenderableAvatarImageDataUrl } from "../shared/avatar-limits.js";
@@ -125,7 +125,7 @@ function openResolvedLocalAgentAvatarFile(
  * A successful caller owns `file.fd` and must close it exactly once.
  */
 export function openLocalAgentAvatarFile(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   source: string;
 }):
@@ -160,7 +160,7 @@ export function readOpenedLocalAgentAvatarDataUrl(
 
 /** Resolve one configured avatar source for agent-list projections. */
 export function resolveAgentAvatarUrlFromSource(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string,
   source: string | null | undefined,
 ): string | undefined {

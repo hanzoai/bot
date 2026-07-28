@@ -3,7 +3,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.js";
+import type { BotConfig } from "../config/types.js";
 import { withTempDir } from "../test-helpers/temp-dir.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { CLI_OUTPUT_MAX_BUFFER } from "./defaults.constants.js";
@@ -99,11 +99,11 @@ async function runAudioEntry(params: {
   args: string[];
 }): Promise<Awaited<ReturnType<typeof runCliEntry>>> {
   let result: Awaited<ReturnType<typeof runCliEntry>> = null;
-  await withAudioFixture(`openclaw-cli-${params.command}`, async ({ ctx, media, cache }) => {
+  await withAudioFixture(`bot-cli-${params.command}`, async ({ ctx, media, cache }) => {
     result = await runCliEntry({
       capability: "audio",
       entry: { type: "cli", command: params.command, args: params.args },
-      cfg: { tools: { media: { audio: {} } } } as OpenClawConfig,
+      cfg: { tools: { media: { audio: {} } } } as BotConfig,
       ctx,
       attachment: requireFirstAttachment(media),
       cache,
@@ -130,7 +130,7 @@ describe("media-understanding CLI audio entry", () => {
     let mediaPath = "";
 
     await withAudioFixture(
-      "openclaw-cli-audio",
+      "bot-cli-audio",
       async ({ ctx, mediaPath: fixturePath, media, cache }) => {
         mediaPath = await fs.realpath(fixturePath);
 
@@ -161,7 +161,7 @@ describe("media-understanding CLI audio entry", () => {
                 },
               },
             },
-          } as OpenClawConfig,
+          } as BotConfig,
           ctx,
           attachment: requireFirstAttachment(media),
           cache,
@@ -191,7 +191,7 @@ describe("media-understanding CLI audio entry", () => {
   ])(
     "projects facts-first and deprecated template variables for $name",
     async ({ count, leadingEmpty }) => {
-      await withTempDir({ prefix: "openclaw-cli-media-template-" }, async (base) => {
+      await withTempDir({ prefix: "bot-cli-media-template-" }, async (base) => {
         const media = await Promise.all(
           Array.from({ length: count }, async (_, index) => {
             const mediaPath = path.join(base, `audio-${index}.wav`);
@@ -237,7 +237,7 @@ describe("media-understanding CLI audio entry", () => {
                   "{{MediaPaths}}",
                 ],
               },
-              cfg: { tools: { media: { audio: {} } } } as OpenClawConfig,
+              cfg: { tools: { media: { audio: {} } } } as BotConfig,
               ctx,
               attachment,
               cache,
@@ -386,7 +386,7 @@ describe("media-understanding CLI audio entry", () => {
       stderr: "",
     });
 
-    await withAudioFixture("openclaw-cli-audio-empty-sherpa", async ({ ctx, media, cache }) => {
+    await withAudioFixture("bot-cli-audio-empty-sherpa", async ({ ctx, media, cache }) => {
       const result = await runCliEntry({
         capability: "audio",
         entry: {
@@ -394,7 +394,7 @@ describe("media-understanding CLI audio entry", () => {
           command: "sherpa-onnx-offline",
           args: ["{{MediaPath}}"],
         },
-        cfg: { tools: { media: { audio: {} } } } as OpenClawConfig,
+        cfg: { tools: { media: { audio: {} } } } as BotConfig,
         ctx,
         attachment: requireFirstAttachment(media),
         cache,
@@ -411,7 +411,7 @@ describe("media-understanding CLI audio entry", () => {
       stderr: "",
     });
 
-    await withAudioFixture("openclaw-cli-audio-sherpa-json", async ({ ctx, media, cache }) => {
+    await withAudioFixture("bot-cli-audio-sherpa-json", async ({ ctx, media, cache }) => {
       const result = await runCliEntry({
         capability: "audio",
         entry: {
@@ -419,7 +419,7 @@ describe("media-understanding CLI audio entry", () => {
           command: "sherpa-onnx-offline",
           args: ["{{MediaPath}}"],
         },
-        cfg: { tools: { media: { audio: {} } } } as OpenClawConfig,
+        cfg: { tools: { media: { audio: {} } } } as BotConfig,
         ctx,
         attachment: requireFirstAttachment(media),
         cache,

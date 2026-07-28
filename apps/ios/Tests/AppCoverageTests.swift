@@ -1,7 +1,7 @@
-import OpenClawKit
+import BotKit
 import SwiftUI
 import Testing
-@testable import OpenClaw
+@testable import Bot
 
 struct AppCoverageTests {
     @Test @MainActor func `node app model updates backgrounded state`() {
@@ -28,7 +28,7 @@ struct AppCoverageTests {
         #expect(appModel.voiceWake._test_isSuppressedForBackground())
         let blocked = await appModel._test_handleInvoke(BridgeInvokeRequest(
             id: "initial-scene-blocked",
-            command: OpenClawTalkCommand.pttStart.rawValue))
+            command: BotTalkCommand.pttStart.rawValue))
         #expect(!blocked.ok)
 
         appModel.setScenePhase(.active)
@@ -37,11 +37,11 @@ struct AppCoverageTests {
         #expect(!appModel.voiceWake._test_isSuppressedForBackground())
         let admitted = await appModel._test_handleInvoke(BridgeInvokeRequest(
             id: "initial-scene-active",
-            command: OpenClawTalkCommand.pttStart.rawValue))
+            command: BotTalkCommand.pttStart.rawValue))
         #expect(admitted.ok)
         _ = await appModel._test_handleInvoke(BridgeInvokeRequest(
             id: "initial-scene-cleanup",
-            command: OpenClawTalkCommand.pttCancel.rawValue))
+            command: BotTalkCommand.pttCancel.rawValue))
     }
 
     @Test @MainActor func `voice wake start reports unsupported on simulator`() async {

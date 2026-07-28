@@ -1,16 +1,16 @@
 import { readProviderJsonResponse } from "../agents/provider-http-errors.js";
 import { runCommandWithTimeout } from "../process/exec.js";
 import {
-  parseOpenClawSchemaVersions,
-  type OpenClawSchemaVersions,
-} from "../state/openclaw-schema-versions.js";
+  parseBotSchemaVersions,
+  type BotSchemaVersions,
+} from "../state/bot-schema-versions.js";
 import { buildTimeoutAbortSignal } from "../utils/fetch-timeout.js";
 
 type NpmPackageTargetStatus = {
   target: string;
   version: string | null;
   nodeEngine: string | null;
-  schemaVersions?: OpenClawSchemaVersions;
+  schemaVersions?: BotSchemaVersions;
   error?: string;
 };
 
@@ -35,7 +35,7 @@ function toOptionalTrimmedString(value: unknown): string | null {
 function parseNpmPackageTargetMetadata(raw: string): {
   version: string | null;
   nodeEngine: string | null;
-  schemaVersions?: OpenClawSchemaVersions;
+  schemaVersions?: BotSchemaVersions;
 } {
   let parsed: unknown;
   try {
@@ -53,11 +53,11 @@ function parseNpmPackageTargetMetadata(raw: string): {
   const nodeEngine =
     toOptionalTrimmedString(rec["engines.node"]) ??
     (engines ? toOptionalTrimmedString((engines as Record<string, unknown>).node) : null);
-  const openclaw = rec.openclaw && typeof rec.openclaw === "object" ? rec.openclaw : null;
+  const bot = rec.bot && typeof rec.bot === "object" ? rec.bot : null;
   const schemaVersions =
-    parseOpenClawSchemaVersions(rec["openclaw.schemaVersions"]) ??
-    (openclaw
-      ? parseOpenClawSchemaVersions((openclaw as Record<string, unknown>).schemaVersions)
+    parseBotSchemaVersions(rec["bot.schemaVersions"]) ??
+    (bot
+      ? parseBotSchemaVersions((bot as Record<string, unknown>).schemaVersions)
       : undefined);
   return {
     version: toOptionalTrimmedString(rec.version),
@@ -73,11 +73,11 @@ function formatNpmViewError(res: { stdout: string; stderr: string }): string {
 
 function packageTargetSpec(params: { target: string; spec?: string }): string {
   const spec = params.spec?.trim();
-  return spec || `openclaw@${params.target.trim() || "latest"}`;
+  return spec || `bot@${params.target.trim() || "latest"}`;
 }
 
 const PUBLIC_NPM_REGISTRY_URL = "https://registry.npmjs.org/";
-const PUBLIC_NPM_PACKAGE_NAME = "openclaw";
+const PUBLIC_NPM_PACKAGE_NAME = "bot";
 
 function npmRegistryTargetUrl(params: {
   registryUrl: string;
@@ -123,9 +123,9 @@ async function fetchNpmPackageTargetStatusFromRegistry(params: {
     const json = await readProviderJsonResponse<{
       version?: unknown;
       engines?: { node?: unknown };
-      openclaw?: { schemaVersions?: unknown };
+      bot?: { schemaVersions?: unknown };
     }>(res, "npm package target status");
-    const schemaVersions = parseOpenClawSchemaVersions(json.openclaw?.schemaVersions);
+    const schemaVersions = parseBotSchemaVersions(json.bot?.schemaVersions);
     return {
       target: params.target,
       version: toOptionalTrimmedString(json.version),
@@ -172,7 +172,7 @@ export async function fetchNpmPackageTargetStatus(params: {
         packageTargetSpec({ target, spec: params.spec }),
         "version",
         "engines.node",
-        "openclaw.schemaVersions",
+        "bot.schemaVersions",
         "--json",
         "--global",
       ],

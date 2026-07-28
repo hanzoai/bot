@@ -1,5 +1,5 @@
 ---
-summary: "Setup guide for developers working on the OpenClaw macOS app"
+summary: "Setup guide for developers working on the Bot macOS app"
 read_when:
   - Setting up the macOS development environment
 title: "macOS dev setup"
@@ -7,7 +7,7 @@ title: "macOS dev setup"
 
 # macOS developer setup
 
-Build and run the OpenClaw macOS application from source.
+Build and run the Bot macOS application from source.
 
 ## Prerequisites
 
@@ -28,11 +28,11 @@ pnpm install
 ./scripts/package-mac-app.sh
 ```
 
-Outputs `dist/OpenClaw.app`. Without an Apple Developer ID certificate, the
+Outputs `dist/Bot.app`. Without an Apple Developer ID certificate, the
 script falls back to ad-hoc signing.
 
 For dev run modes, signing flags, and Team ID troubleshooting, see
-[apps/macos/README.md](https://github.com/openclaw/openclaw/blob/main/apps/macos/README.md).
+[apps/macos/README.md](https://github.com/hanzoai/bot/blob/main/apps/macos/README.md).
 Fast dev loop from repo root: `scripts/restart-mac.sh` (add `--no-sign` for
 ad-hoc signing; TCC permissions do not stick with `--no-sign`).
 
@@ -50,10 +50,10 @@ matching user-space CLI and runtime before starting the Gateway wizard.
 For manual development recovery, install the matching CLI yourself:
 
 ```bash
-npm install -g openclaw@<version>
+npm install -g bot@<version>
 ```
 
-`pnpm add -g openclaw@<version>` and `bun add -g openclaw@<version>` also
+`pnpm add -g bot@<version>` and `bun add -g bot@<version>` also
 work. Node remains the recommended runtime for the Gateway itself.
 
 ## Troubleshooting
@@ -78,11 +78,11 @@ If the app crashes when you try to allow **Speech Recognition** or
 1. Reset TCC permissions for the debug bundle id:
 
    ```bash
-   tccutil reset All ai.openclaw.mac.debug
+   tccutil reset All ai.bot.mac.debug
    ```
 
 2. If that fails, temporarily change `BUNDLE_ID` in
-   [`scripts/package-mac-app.sh`](https://github.com/openclaw/openclaw/blob/main/scripts/package-mac-app.sh)
+   [`scripts/package-mac-app.sh`](https://github.com/hanzoai/bot/blob/main/scripts/package-mac-app.sh)
    to force a clean slate from macOS.
 
 ### Gateway "Starting..." indefinitely
@@ -90,8 +90,8 @@ If the app crashes when you try to allow **Speech Recognition** or
 Check whether a zombie process holds the port:
 
 ```bash
-openclaw gateway status
-openclaw gateway stop
+bot gateway status
+bot gateway stop
 
 # If you're not using a LaunchAgent (dev mode / manual runs), find the listener:
 lsof -nP -iTCP:18789 -sTCP:LISTEN

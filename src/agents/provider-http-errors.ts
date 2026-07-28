@@ -2,9 +2,9 @@
  * Shared provider HTTP error normalization helpers.
  *
  * Transport adapters use this module to turn provider-specific response bodies,
- * request ids, and binary payload guardrails into stable OpenClaw error shapes.
+ * request ids, and binary payload guardrails into stable Bot error shapes.
  */
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 export { asFiniteNumber } from "../../packages/normalization-core/src/number-coercion.js";
 import { normalizeOptionalString as trimToUndefined } from "../../packages/normalization-core/src/string-coerce.js";
 import {

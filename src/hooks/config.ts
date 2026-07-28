@@ -1,5 +1,5 @@
 // Hook config helpers read, normalize, and update hook configuration.
-import type { OpenClawConfig, HookConfig } from "../config/config.js";
+import type { BotConfig, HookConfig } from "../config/config.js";
 import {
   evaluateRuntimeEligibility,
   hasBinary,
@@ -18,7 +18,7 @@ export { hasBinary };
 
 /** Evaluate a config path with hook-specific defaults for legacy runtime requirements. */
 export function isHookConfigPathTruthy(
-  config: OpenClawConfig | undefined,
+  config: BotConfig | undefined,
   pathStr: string,
 ): boolean {
   return isConfigPathTruthyWithDefaults(config, pathStr, DEFAULT_CONFIG_VALUES);
@@ -32,7 +32,7 @@ export function isHookEnvSatisfied(envName: string, hookConfig?: HookConfig): bo
 
 function evaluateHookRuntimeEligibility(params: {
   entry: HookEntry;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   hookConfig?: HookConfig;
   eligibility?: HookEligibilityContext;
 }): boolean {
@@ -59,7 +59,7 @@ function evaluateHookRuntimeEligibility(params: {
 /** Return true when a hook passes enable policy and runtime requirements. */
 export function shouldIncludeHook(params: {
   entry: HookEntry;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   eligibility?: HookEligibilityContext;
 }): boolean {
   const { entry, config, eligibility } = params;

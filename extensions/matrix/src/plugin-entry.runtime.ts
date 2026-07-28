@@ -1,7 +1,7 @@
 // Matrix plugin module implements plugin entry behavior.
-import type { GatewayRequestHandlerOptions } from "openclaw/plugin-sdk/gateway-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { GatewayRequestHandlerOptions } from "bot/plugin-sdk/gateway-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { formatMatrixErrorMessage } from "./matrix/errors.js";
 
 const loadMatrixVerificationRuntime = createLazyRuntimeModule(

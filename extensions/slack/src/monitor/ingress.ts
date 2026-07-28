@@ -4,14 +4,14 @@ import {
   createChannelIngressMonitor,
   type ChannelIngressQueue,
   type ChannelIngressMonitorLifecycle,
-} from "openclaw/plugin-sdk/channel-outbound";
+} from "bot/plugin-sdk/channel-outbound";
 import {
   collectErrorGraphCandidates,
   extractErrorCode,
   formatErrorMessage,
-} from "openclaw/plugin-sdk/error-runtime";
-import type { PluginJsonValue } from "openclaw/plugin-sdk/plugin-entry";
-import { asOptionalRecord } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/error-runtime";
+import type { PluginJsonValue } from "bot/plugin-sdk/plugin-entry";
+import { asOptionalRecord } from "bot/plugin-sdk/string-coerce-runtime";
 import { getSlackRuntime } from "../runtime.js";
 import { isNonRecoverableSlackAuthError } from "./reconnect-policy.js";
 
@@ -24,7 +24,7 @@ const SLACK_INGRESS_FAILED_TTL_MS = 30 * 24 * 60 * 60 * 1_000;
 const SLACK_INGRESS_FAILED_MAX_ENTRIES = 20_000;
 const SLACK_BOLT_AUTHORIZATION_ERROR = "slack_bolt_authorization_error";
 
-const SLACK_INGRESS_LIFECYCLE_CONTEXT_KEY = "openclawIngressLifecycle";
+const SLACK_INGRESS_LIFECYCLE_CONTEXT_KEY = "botIngressLifecycle";
 
 export type SlackIngressTurnLifecycle = Omit<
   ChannelIngressMonitorLifecycle,

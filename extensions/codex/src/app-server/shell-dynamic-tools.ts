@@ -1,9 +1,9 @@
 import type { CodexPluginConfig } from "./config.js";
 import { normalizeCodexDynamicToolName } from "./dynamic-tool-profile.js";
 
-type OpenClawCodingToolsFactory =
-  (typeof import("openclaw/plugin-sdk/agent-harness"))["createOpenClawCodingTools"];
-type OpenClawDynamicTool = ReturnType<OpenClawCodingToolsFactory>[number];
+type BotCodingToolsFactory =
+  (typeof import("bot/plugin-sdk/agent-harness"))["createBotCodingTools"];
+type BotDynamicTool = ReturnType<BotCodingToolsFactory>[number];
 
 export const CODEX_NODE_EXEC_DYNAMIC_TOOL_NAME = "node_exec";
 export const CODEX_NODE_PROCESS_DYNAMIC_TOOL_NAME = "node_process";
@@ -21,16 +21,16 @@ export function isCodexDynamicToolExcluded(
 }
 
 export function createNodeExecDynamicTool(
-  execTool: OpenClawDynamicTool,
+  execTool: BotDynamicTool,
   configuredNode: string | undefined,
-): OpenClawDynamicTool {
+): BotDynamicTool {
   const pinnedNode = configuredNode?.trim();
   return {
     ...execTool,
     name: CODEX_NODE_EXEC_DYNAMIC_TOOL_NAME,
     description: pinnedNode
-      ? "Run a shell command on the OpenClaw configured remote node for this session. This tool always uses OpenClaw host=node internally and follows the existing node exec approval and allowlist policy. Use node_process for follow-up on backgrounded node_exec sessions. Use Codex's native shell for local app-server work."
-      : "Run a shell command on an OpenClaw remote node. Select the node by name or id when multiple nodes are available. This tool always uses OpenClaw host=node internally and follows the existing node exec approval and allowlist policy. Use node_process for follow-up on backgrounded node_exec sessions. Use Codex's native shell for local app-server work.",
+      ? "Run a shell command on the Bot configured remote node for this session. This tool always uses Bot host=node internally and follows the existing node exec approval and allowlist policy. Use node_process for follow-up on backgrounded node_exec sessions. Use Codex's native shell for local app-server work."
+      : "Run a shell command on an Bot remote node. Select the node by name or id when multiple nodes are available. This tool always uses Bot host=node internally and follows the existing node exec approval and allowlist policy. Use node_process for follow-up on backgrounded node_exec sessions. Use Codex's native shell for local app-server work.",
     parameters: hideNodeExecDynamicToolParameters(execTool.parameters, {
       hideNode: Boolean(pinnedNode),
     }),
@@ -59,13 +59,13 @@ export function createNodeExecDynamicTool(
 }
 
 export function createNodeProcessDynamicTool(
-  processTool: OpenClawDynamicTool,
-): OpenClawDynamicTool {
+  processTool: BotDynamicTool,
+): BotDynamicTool {
   return {
     ...processTool,
     name: CODEX_NODE_PROCESS_DYNAMIC_TOOL_NAME,
     description:
-      "Manage node_exec sessions that were started on OpenClaw remote nodes: list, poll, log, write, send-keys, submit, paste, kill, clear, or remove. Use only for node_exec follow-up; use Codex's native shell session handling for local app-server work.",
+      "Manage node_exec sessions that were started on Bot remote nodes: list, poll, log, write, send-keys, submit, paste, kill, clear, or remove. Use only for node_exec follow-up; use Codex's native shell session handling for local app-server work.",
   };
 }
 
@@ -84,7 +84,7 @@ function pinNodeExecDynamicToolArgs(args: unknown, configuredNode: string | unde
 }
 
 function hideNodeExecDynamicToolParameters(
-  parameters: OpenClawDynamicTool["parameters"],
+  parameters: BotDynamicTool["parameters"],
   options: { hideNode: boolean },
 ) {
   if (!parameters || typeof parameters !== "object" || Array.isArray(parameters)) {

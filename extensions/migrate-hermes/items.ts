@@ -1,11 +1,11 @@
 // Migrate Hermes plugin module implements items behavior.
-import type { MigrationItem } from "openclaw/plugin-sdk/migration";
+import type { MigrationItem } from "bot/plugin-sdk/migration";
 import {
   createMigrationItem,
   markMigrationItemConflict,
   markMigrationItemError,
   markMigrationItemSkipped,
-} from "openclaw/plugin-sdk/migration";
+} from "bot/plugin-sdk/migration";
 import { isRecord, readString } from "./helpers.js";
 
 export const HERMES_REASON_ALREADY_CONFIGURED = "already configured";

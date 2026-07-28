@@ -3,7 +3,7 @@ import fs from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { closeOpenClawAgentDatabasesForTest } from "../../state/openclaw-agent-db.js";
+import { closeBotAgentDatabasesForTest } from "../../state/bot-agent-db.js";
 import { clearAuthProfileMigrationDiagnostics } from "../auth-profiles/legacy-source-diagnostic.js";
 import { loadPersistedAuthProfileStore } from "../auth-profiles/persisted.js";
 import {
@@ -25,7 +25,7 @@ describe("SQLite auth storage", () => {
     clearAuthProfileMigrationDiagnostics();
     clearRuntimeAuthProfileStoreSnapshots();
     vi.unstubAllEnvs();
-    closeOpenClawAgentDatabasesForTest();
+    closeBotAgentDatabasesForTest();
     for (const dir of tempDirs.splice(0)) {
       fs.rmSync(dir, { recursive: true, force: true });
     }

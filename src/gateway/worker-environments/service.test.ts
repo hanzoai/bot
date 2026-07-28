@@ -1,19 +1,19 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../../config/types.js";
+import type { BotConfig } from "../../config/types.js";
 import {
   WorkerProviderError,
   type WorkerProvider,
   type WorkerSshEndpoint,
 } from "../../plugins/types.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-  type OpenClawStateDatabase,
-} from "../../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+  type BotStateDatabase,
+} from "../../state/bot-state-db.js";
 import type { WorkerInstallationArtifact } from "./bundle.js";
 import type { WorkerConnectionIdentity } from "./connection-identity.js";
 import { hashWorkerCredential } from "./credential.js";
@@ -35,7 +35,7 @@ type WorkerEnvironmentServiceError = Error & { code: string };
 const SSH_ENDPOINT: WorkerSshEndpoint = {
   host: "worker.example.test",
   port: 22,
-  user: "openclaw",
+  user: "bot",
   hostKey: HOST_KEY,
   keyRef: { source: "file", provider: "worker-keys", id: "/development-key" },
 };
@@ -43,7 +43,7 @@ const BUNDLE_HASH = "a".repeat(64);
 const BUNDLE_ARTIFACT: WorkerInstallationArtifact = {
   install: "bundle",
   bundleHash: BUNDLE_HASH,
-  openclawVersion: "2026.7.2",
+  botVersion: "2026.7.2",
   protocolFeatures: [],
   tarballSha256: "b".repeat(64),
   tarballPath: "/gateway/cache/worker-bundle.tgz",
@@ -51,14 +51,14 @@ const BUNDLE_ARTIFACT: WorkerInstallationArtifact = {
 const NPM_ARTIFACT: WorkerInstallationArtifact = {
   install: "npm",
   bundleHash: BUNDLE_HASH,
-  openclawVersion: "2026.7.2",
+  botVersion: "2026.7.2",
   packageIntegrity: `sha512-${Buffer.alloc(64).toString("base64")}`,
   protocolFeatures: [],
-  packageSpec: "openclaw@2026.7.2",
+  packageSpec: "bot@2026.7.2",
 };
 const BOOTSTRAP_RECEIPT = {
   bundleHash: BUNDLE_HASH,
-  openclawVersion: "2026.7.2",
+  botVersion: "2026.7.2",
   protocolFeatures: [],
 };
 const CREDENTIAL = ["worker", "credential", "fixture"].join("-");
@@ -75,18 +75,18 @@ type WorkerLifecycleLease = Parameters<WorkerProvider["inspect"]>[0];
 
 describe("worker environment service", () => {
   let root: string;
-  let database: OpenClawStateDatabase;
+  let database: BotStateDatabase;
   let store: WorkerEnvironmentStore;
   let service: WorkerEnvironmentService | undefined;
-  let config: OpenClawConfig;
+  let config: BotConfig;
   let nowMs: number;
   let providersEnabled: boolean;
   let prepareInstallation: WorkerEnvironmentServiceOptions["prepareInstallation"];
   let bootstrapWorker: WorkerEnvironmentServiceOptions["bootstrapWorker"];
 
   beforeEach(async () => {
-    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "openclaw-worker-service-"));
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    root = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "bot-worker-service-"));
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     nowMs = 1_000;
     providersEnabled = true;
     store = createWorkerEnvironmentStore({ database, now: () => nowMs });
@@ -105,7 +105,7 @@ describe("worker environment service", () => {
     );
     bootstrapWorker = vi.fn(async ({ installation }) => ({
       bundleHash: installation.bundleHash,
-      openclawVersion: installation.openclawVersion,
+      botVersion: installation.botVersion,
       protocolFeatures: [...installation.protocolFeatures],
     }));
   });
@@ -113,7 +113,7 @@ describe("worker environment service", () => {
   afterEach(async () => {
     await service?.stop();
     vi.useRealTimers();
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     await fs.rm(root, { recursive: true, force: true });
   });
 
@@ -1106,8 +1106,8 @@ describe("worker environment service", () => {
         WHERE environment_id = 'legacy-b';
     `);
 
-    closeOpenClawStateDatabaseForTest();
-    database = openOpenClawStateDatabase({ env: { OPENCLAW_STATE_DIR: root } });
+    closeBotStateDatabaseForTest();
+    database = openBotStateDatabase({ env: { BOT_STATE_DIR: root } });
     store = createWorkerEnvironmentStore({ database, now: () => nowMs });
     const liveEvents = createLiveEvents();
     const workerService = createService(createProvider(), { liveEvents });
@@ -1420,7 +1420,7 @@ describe("worker environment service", () => {
       await resolveIdentity(SSH_ENDPOINT.keyRef);
       return {
         bundleHash: installation.bundleHash,
-        openclawVersion: installation.openclawVersion,
+        botVersion: installation.botVersion,
         protocolFeatures: [...installation.protocolFeatures],
       };
     });

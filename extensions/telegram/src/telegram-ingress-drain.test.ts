@@ -2,15 +2,15 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createChannelIngressQueueForTests } from "openclaw/plugin-sdk/plugin-state-test-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createChannelIngressQueueForTests } from "bot/plugin-sdk/plugin-state-test-runtime";
 import { describe, expect, it } from "vitest";
 import { createTelegramIngressMonitor } from "./telegram-ingress-drain.js";
 import { telegramSpooledUpdateLaneKey } from "./telegram-ingress-spool.js";
 import type { TelegramSpooledUpdatePayload } from "./telegram-ingress-spool.payload.js";
 
 async function withTempState<T>(fn: (stateDir: string) => Promise<T>): Promise<T> {
-  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-telegram-ingress-drain-"));
+  const stateDir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-telegram-ingress-drain-"));
   try {
     return await fn(stateDir);
   } finally {
@@ -25,7 +25,7 @@ const cfg = {
       dmPolicy: "allowlist",
     },
   },
-} as OpenClawConfig;
+} as BotConfig;
 
 function updatePayload(updateId: number): TelegramSpooledUpdatePayload {
   return {

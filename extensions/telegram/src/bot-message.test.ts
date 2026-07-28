@@ -1,5 +1,5 @@
 // Telegram tests cover bot message plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { TelegramBotDeps } from "./bot-deps.js";
 import type { TelegramMessageProcessingResult } from "./bot-processing-outcome.js";
@@ -18,7 +18,7 @@ function requireInvocationOrder(mock: { invocationCallOrder: number[] }, context
   return expectDefined(mock.invocationCallOrder[0], context);
 }
 
-vi.mock("openclaw/plugin-sdk/runtime-env", () => ({
+vi.mock("bot/plugin-sdk/runtime-env", () => ({
   createSubsystemLogger: () => ({
     child: () => ({
       info: telegramInboundInfo,
@@ -147,7 +147,7 @@ describe("telegram bot message processor", () => {
         ChatType: "direct",
         RawBody: "hello there",
       },
-      primaryCtx: { me: { username: "openclaw_bot" } },
+      primaryCtx: { me: { username: "bot_bot" } },
       route: { sessionKey: "agent:main:main" },
       sendTyping: vi.fn().mockResolvedValue(undefined),
       ...context,
@@ -171,7 +171,7 @@ describe("telegram bot message processor", () => {
       requireInvocationOrder(dispatchTelegramMessage.mock, "message dispatch invocation"),
     );
     expect(telegramInboundInfo).toHaveBeenCalledWith(
-      "Inbound message telegram:123 -> @openclaw_bot (direct, 11 chars)",
+      "Inbound message telegram:123 -> @bot_bot (direct, 11 chars)",
     );
   });
 
@@ -300,7 +300,7 @@ describe("telegram bot message processor", () => {
     ).resolves.toEqual({ kind: "completed" });
 
     expect(telegramInboundInfo).toHaveBeenCalledWith(
-      "Inbound message telegram:group:-100 -> @openclaw_bot (group, image/jpeg, 13 chars)",
+      "Inbound message telegram:group:-100 -> @bot_bot (group, image/jpeg, 13 chars)",
     );
   });
 

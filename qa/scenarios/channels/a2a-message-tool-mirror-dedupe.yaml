@@ -34,7 +34,7 @@ scenario:
     - src/agents/tools/sessions-send-tool.ts
     - src/agents/tools/sessions-send-tool.a2a.ts
     - src/agents/run-wait.ts
-    - src/shared/transcript-only-openclaw-assistant.ts
+    - src/shared/transcript-only-bot-assistant.ts
   execution:
     kind: flow
     channel: qa-channel
@@ -84,7 +84,7 @@ flow:
               senderId: alice
               senderName: Alice
               text:
-                expr: "`@openclaw ${config.promptSnippet}. sessionKey=\"${targetSessionKey}\". Use sessions_send once with timeoutSeconds=0. The target must reply visibly with exact marker: \\`${config.expectedMarker}\\``"
+                expr: "`@bot ${config.promptSnippet}. sessionKey=\"${targetSessionKey}\". Use sessions_send once with timeoutSeconds=0. The target must reply visibly with exact marker: \\`${config.expectedMarker}\\``"
         - call: waitForCondition
           saveAs: sourceSessionsSendRequest
           args:

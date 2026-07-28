@@ -16,7 +16,7 @@ describe("secrets runtime snapshot inline auth-store refs", () => {
     const snapshot = await prepareSecretsRuntimeSnapshot({
       config: asConfig({ models: {}, secrets: {} }),
       env: { MY_TOKEN: "resolved-token-value" },
-      agentDirs: ["/tmp/openclaw-agent-main"],
+      agentDirs: ["/tmp/bot-agent-main"],
       loadablePluginOrigins: EMPTY_LOADABLE_PLUGIN_ORIGINS,
       loadAuthStore: () =>
         loadAuthStoreWithProfiles({
@@ -41,7 +41,7 @@ describe("secrets runtime snapshot inline auth-store refs", () => {
     const snapshot = await prepareSecretsRuntimeSnapshot({
       config: asConfig({ models: {}, secrets: {} }),
       env: { MY_KEY: "resolved-key-value" },
-      agentDirs: ["/tmp/openclaw-agent-main"],
+      agentDirs: ["/tmp/bot-agent-main"],
       loadablePluginOrigins: EMPTY_LOADABLE_PLUGIN_ORIGINS,
       loadAuthStore: () =>
         loadAuthStoreWithProfiles({
@@ -69,7 +69,7 @@ describe("secrets runtime snapshot inline auth-store refs", () => {
         PRIMARY_KEY: "primary-key-value",
         SHADOW_KEY: "shadow-key-value",
       },
-      agentDirs: ["/tmp/openclaw-agent-main"],
+      agentDirs: ["/tmp/bot-agent-main"],
       loadablePluginOrigins: EMPTY_LOADABLE_PLUGIN_ORIGINS,
       loadAuthStore: () =>
         loadAuthStoreWithProfiles({
@@ -104,7 +104,7 @@ describe("secrets runtime snapshot inline auth-store refs", () => {
         },
       }),
       env: {},
-      agentDirs: ["/tmp/openclaw-agent-main"],
+      agentDirs: ["/tmp/bot-agent-main"],
       allowUnavailableSecretOwners: true,
       loadablePluginOrigins: EMPTY_LOADABLE_PLUGIN_ORIGINS,
       loadAuthStore: () =>
@@ -129,11 +129,11 @@ describe("secrets runtime snapshot inline auth-store refs", () => {
       expect.arrayContaining([
         expect.objectContaining({
           code: "SECRETS_REF_IGNORED_INACTIVE_SURFACE",
-          path: `/tmp/openclaw-agent-main.auth-profiles.${profileId}.key`,
+          path: `/tmp/bot-agent-main.auth-profiles.${profileId}.key`,
         }),
         expect.objectContaining({
           code: "SECRETS_REF_IGNORED_INACTIVE_SURFACE",
-          path: `/tmp/openclaw-agent-main.auth-profiles.${tokenProfileId}.token`,
+          path: `/tmp/bot-agent-main.auth-profiles.${tokenProfileId}.token`,
         }),
       ]),
     );
@@ -145,7 +145,7 @@ describe("secrets runtime snapshot inline auth-store refs", () => {
   });
 
   it("isolates a failed profile ref while materializing an eligible sibling profile", async () => {
-    const agentDir = "/tmp/openclaw-agent-profile-isolation";
+    const agentDir = "/tmp/bot-agent-profile-isolation";
     const coldProfileId = "openai:cold";
     const healthyProfileId = "anthropic:healthy";
     const snapshot = await prepareSecretsRuntimeSnapshot({

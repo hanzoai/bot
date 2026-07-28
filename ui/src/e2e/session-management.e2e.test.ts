@@ -17,10 +17,10 @@ import {
 
 const chromiumExecutablePath = resolvePlaywrightChromiumExecutablePath(chromium.executablePath());
 const chromiumAvailable = canRunPlaywrightChromium(chromiumExecutablePath);
-const allowMissingChromium = process.env.OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
+const allowMissingChromium = process.env.BOT_UI_E2E_ALLOW_MISSING_CHROMIUM === "1";
 const describeControlUiE2e = chromiumAvailable || !allowMissingChromium ? describe : describe.skip;
-const collapsedSessionSectionsStorageKey = "openclaw:sidebar:sessions:collapsed-sections";
-const captureUiProofEnabled = process.env.OPENCLAW_CAPTURE_UI_PROOF === "1";
+const collapsedSessionSectionsStorageKey = "bot:sidebar:sessions:collapsed-sections";
+const captureUiProofEnabled = process.env.BOT_CAPTURE_UI_PROOF === "1";
 const uiProofArtifactDir = path.join(
   process.cwd(),
   ".artifacts",
@@ -149,7 +149,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
   beforeAll(async () => {
     if (!chromiumAvailable) {
       throw new Error(
-        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set OPENCLAW_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
+        `Playwright Chromium is not installed or cannot start at ${chromiumExecutablePath}. Run \`pnpm --dir ui exec playwright install --with-deps chromium\`, or set BOT_UI_E2E_ALLOW_MISSING_CHROMIUM=1 only when intentionally skipping this lane.`,
       );
     }
     server = await startControlUiE2eServer();
@@ -583,7 +583,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
 
     try {
       await page.goto(`${server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       const row = sidebar.locator(
         '.sidebar-recent-session[data-session-key="agent:main:research"]',
       );
@@ -719,7 +719,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
       await row.waitFor({ state: "visible", timeout: 10_000 });
 
       await row.click({ button: "right" });
-      const menuHost = page.locator("openclaw-session-menu");
+      const menuHost = page.locator("bot-session-menu");
       await menuHost
         .getByRole("menuitem", { name: "Archive thread" })
         .waitFor({ state: "visible" });
@@ -767,7 +767,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
 
     try {
       await page.goto(`${server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       const rowFor = (key: string) =>
         sidebar.locator(`.sidebar-recent-session[data-session-key="${key}"]`);
       await rowFor(batchKeys[0]).waitFor({ state: "visible", timeout: 10_000 });
@@ -780,7 +780,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
         await rowFor(key).click({ modifiers: ["Meta"] });
       }
       await rowFor(batchKeys[0]).click({ button: "right" });
-      const batchMenu = page.locator("openclaw-session-menu");
+      const batchMenu = page.locator("bot-session-menu");
       const archiveItem = batchMenu.getByRole("menuitem", { name: `Archive ${batchKeys.length}` });
       await archiveItem.waitFor({ state: "visible", timeout: 10_000 });
       await captureUiProof(page, "sidebar-multi-select-archive-menu.png");
@@ -847,7 +847,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
 
     try {
       await page.goto(`${server.baseUrl}chat`);
-      const sidebar = page.locator("openclaw-app-sidebar");
+      const sidebar = page.locator("bot-app-sidebar");
       const rowFor = (key: string) =>
         sidebar.locator(`.sidebar-recent-session[data-session-key="${key}"]`);
       await rowFor(selected.key).waitFor({ state: "visible", timeout: 10_000 });
@@ -859,7 +859,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
         await rowFor(row.key).click({ modifiers: ["Meta"] });
       }
       await rowFor(batchRows[0]!.key).click({ button: "right" });
-      const batchMenu = page.locator("openclaw-session-menu");
+      const batchMenu = page.locator("bot-session-menu");
       await activateMenuItem(
         batchMenu.getByRole("menuitem", { name: `Archive ${batchRows.length}` }),
       );
@@ -881,7 +881,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
       await selectedRow.hover();
       await selectedRow.getByRole("button", { name: "Open thread menu" }).click();
       await activateMenuItem(
-        page.locator("openclaw-session-menu").getByRole("menuitem", {
+        page.locator("bot-session-menu").getByRole("menuitem", {
           name: "Archive thread",
         }),
       );
@@ -1015,7 +1015,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
 
       await row.getByRole("button", { name: "Open thread menu" }).click();
       await activateMenuItem(
-        page.locator("openclaw-session-menu").getByRole("menuitem", { name: "Delete…" }),
+        page.locator("bot-session-menu").getByRole("menuitem", { name: "Delete…" }),
       );
 
       const request = await gateway.waitForRequest("sessions.delete");
@@ -1399,7 +1399,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
       // Wait for its focus contract so navigation keys cannot outrun the menu.
       await expect
         .poll(() =>
-          page.locator("openclaw-session-menu > wa-dropdown > wa-dropdown-item:focus").count(),
+          page.locator("bot-session-menu > wa-dropdown > wa-dropdown-item:focus").count(),
         )
         .toBe(1);
       await page.keyboard.press("Home");
@@ -1708,7 +1708,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
           withWork
             ? {
                 execNode: nodeHash,
-                worktree: { branch: "openclaw/wt-1", repoRoot: "/Users/dev/Projects/clawdbot" },
+                worktree: { branch: "bot/wt-1", repoRoot: "/Users/dev/Projects/clawdbot" },
               }
             : {},
         ),
@@ -1801,7 +1801,7 @@ describeControlUiE2e("Control UI session management mocked Gateway E2E", () => {
     const rows = [
       ...Array.from({ length: 8 }, (_, index) =>
         sessionRow(`agent:main:work-${index}`, `Work session ${index}`, baseTime - index * 60_000, {
-          worktree: { branch: `openclaw/wt-${index}`, repoRoot: "/Users/dev/Projects/clawdbot" },
+          worktree: { branch: `bot/wt-${index}`, repoRoot: "/Users/dev/Projects/clawdbot" },
         }),
       ),
       ...Array.from({ length: 30 }, (_, index) =>

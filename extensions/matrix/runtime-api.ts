@@ -36,22 +36,22 @@ export {
   ssrfPolicyFromDangerouslyAllowPrivateNetwork,
   type LookupFn,
   type SsrFPolicy,
-} from "openclaw/plugin-sdk/ssrf-runtime";
+} from "bot/plugin-sdk/ssrf-runtime";
 export {
   setMatrixThreadBindingIdleTimeoutBySessionKey,
   setMatrixThreadBindingMaxAgeBySessionKey,
 } from "./src/matrix/thread-bindings-shared.js";
 export { setMatrixRuntime } from "./src/runtime.js";
-export { writeJsonFileAtomically } from "openclaw/plugin-sdk/json-store";
+export { writeJsonFileAtomically } from "bot/plugin-sdk/json-store";
 export type {
   ChannelDirectoryEntry,
   ChannelMessageActionContext,
-} from "openclaw/plugin-sdk/channel-contract";
-export type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-export { formatZonedTimestamp } from "openclaw/plugin-sdk/time-runtime";
-export type { PluginRuntime, RuntimeLogger } from "openclaw/plugin-sdk/plugin-runtime";
-export type { RuntimeEnv } from "openclaw/plugin-sdk/runtime-env";
-export type { WizardPrompter } from "openclaw/plugin-sdk/setup";
+} from "bot/plugin-sdk/channel-contract";
+export type { BotConfig } from "bot/plugin-sdk/config-contracts";
+export { formatZonedTimestamp } from "bot/plugin-sdk/time-runtime";
+export type { PluginRuntime, RuntimeLogger } from "bot/plugin-sdk/plugin-runtime";
+export type { RuntimeEnv } from "bot/plugin-sdk/runtime-env";
+export type { WizardPrompter } from "bot/plugin-sdk/setup";
 
 export function chunkTextForOutbound(text: string, limit: number): string[] {
   const chunks: string[] = [];

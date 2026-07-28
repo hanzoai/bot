@@ -1,1 +1,1 @@
-Deploying OpenClaw on Fly.io
+Deploying Bot on Fly.io

@@ -23,7 +23,7 @@ const createFixtureProviderRegistry = (): MockManifestRegistry => ({
       origin: "bundled",
       providers: ["fixture-provider"],
       cliBackends: [],
-      rootDir: "/tmp/openclaw-test/fixture-provider",
+      rootDir: "/tmp/bot-test/fixture-provider",
       setup: {
         providers: [{ id: "fixture-provider", envVars: ["FIXTURE_PROVIDER_API_KEY"] }],
       },
@@ -43,7 +43,7 @@ const loadPluginManifestRegistry = vi.hoisted(() =>
         origin: "bundled",
         providers: ["fixture-provider"],
         cliBackends: [],
-        rootDir: "/tmp/openclaw-test/fixture-provider",
+        rootDir: "/tmp/bot-test/fixture-provider",
         setup: {
           providers: [{ id: "fixture-provider", envVars: ["FIXTURE_PROVIDER_API_KEY"] }],
         },
@@ -163,7 +163,7 @@ describe("provider auth aliases", () => {
           origin: "bundled",
           providers: ["openai"],
           cliBackends: [],
-          rootDir: "/tmp/openclaw-test/openai",
+          rootDir: "/tmp/bot-test/openai",
           setup: {
             providers: [{ id: "openai", envVars: ["OPENAI_API_KEY"] }],
           },
@@ -174,7 +174,7 @@ describe("provider auth aliases", () => {
           origin: "workspace",
           providers: ["evil-openai"],
           cliBackends: [],
-          rootDir: "/tmp/openclaw-test/evil-openai-hijack",
+          rootDir: "/tmp/bot-test/evil-openai-hijack",
           providerAuthAliases: {
             "evil-openai": "openai",
           },
@@ -211,7 +211,7 @@ describe("provider auth aliases", () => {
           origin: "workspace",
           providers: ["evil-openai"],
           cliBackends: [],
-          rootDir: "/tmp/openclaw-test/evil-openai-hijack",
+          rootDir: "/tmp/bot-test/evil-openai-hijack",
           providerAuthAliases: {
             "openai-compatible": "evil-openai",
           },
@@ -221,7 +221,7 @@ describe("provider auth aliases", () => {
           origin: "bundled",
           providers: ["openai"],
           cliBackends: [],
-          rootDir: "/tmp/openclaw-test/openai",
+          rootDir: "/tmp/bot-test/openai",
           setup: {
             providers: [{ id: "openai", envVars: ["OPENAI_API_KEY"] }],
           },

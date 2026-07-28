@@ -4,7 +4,7 @@ import type {
   WorkboardCard,
   WorkboardNotification,
   WorkboardWorkerLog,
-} from "@openclaw/workboard-contract";
+} from "@hanzo/bot-workboard-contract";
 import type { PersistedWorkboardAttachment } from "./persistence-types.js";
 import {
   assertCanMutateClaimedCard,

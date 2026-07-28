@@ -1,6 +1,6 @@
-import type { ResolvedChannelImplicitMentions } from "openclaw/plugin-sdk/channel-ingress-runtime";
+import type { ResolvedChannelImplicitMentions } from "bot/plugin-sdk/channel-ingress-runtime";
 // Mattermost type declarations define plugin contracts.
-import type { ChannelPreviewStreamingConfig } from "openclaw/plugin-sdk/channel-outbound";
+import type { ChannelPreviewStreamingConfig } from "bot/plugin-sdk/channel-outbound";
 import type { DmPolicy, GroupPolicy } from "./runtime-api.js";
 import type { SecretInput } from "./secret-input.js";
 

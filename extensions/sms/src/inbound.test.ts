@@ -1,5 +1,5 @@
 // Sms tests cover inbound plugin behavior.
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { describe, expect, it, vi } from "vitest";
 import { dispatchSmsInboundEvent, type SmsChannelRuntime } from "./inbound.js";
 import type { sendSmsViaTwilio as sendSmsViaTwilioType } from "./twilio.js";

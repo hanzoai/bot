@@ -1,14 +1,14 @@
 ---
-summary: "Let OpenClaw propose reusable skills from corrections and substantial completed work"
+summary: "Let Bot propose reusable skills from corrections and substantial completed work"
 read_when:
-  - You want OpenClaw to learn reusable procedures from completed conversations
+  - You want Bot to learn reusable procedures from completed conversations
   - You are deciding whether to enable autonomous skill proposals
   - You need to understand self-learning safety, cost, eligibility, or troubleshooting
 title: "Self-learning"
 sidebarTitle: "Self-learning"
 ---
 
-Self-learning lets OpenClaw turn useful evidence from conversations into pending
+Self-learning lets Bot turn useful evidence from conversations into pending
 [Skill Workshop](/tools/skill-workshop) proposals. It does not train model
 weights, edit active skills, or silently change agent behavior. Every learned
 procedure stays pending until an operator reviews and applies it.
@@ -26,10 +26,10 @@ page or Gateway reload.
 Use the CLI:
 
 ```bash
-openclaw config set skills.workshop.autonomous.enabled true --strict-json
+bot config set skills.workshop.autonomous.enabled true --strict-json
 ```
 
-Or edit `~/.openclaw/openclaw.json`:
+Or edit `~/.hanzoai/bot.json`:
 
 ```json5
 {
@@ -46,7 +46,7 @@ Or edit `~/.openclaw/openclaw.json`:
 Disable it again with:
 
 ```bash
-openclaw config set skills.workshop.autonomous.enabled false --strict-json
+bot config set skills.workshop.autonomous.enabled false --strict-json
 ```
 
 User-requested skill creation, `/learn`, and manual Skill Workshop operations
@@ -72,10 +72,10 @@ Each scan:
 The Workshop reports cumulative session count, date coverage, and ideas found.
 Select **Scan earlier work** for the next older window. When the cursor reaches
 the beginning of eligible history, the action changes to **Scan new work**.
-OpenClaw persists only cursor and coverage metadata in the shared state database;
+Bot persists only cursor and coverage metadata in the shared state database;
 it does not create a second transcript archive.
 
-Sessions are scanned only when OpenClaw can prove their ownership and exclude
+Sessions are scanned only when Bot can prove their ownership and exclude
 external-hook content. After an upgrade, the current pre-upgrade transcript can
 be classified locally, but rotated pre-upgrade transcripts without per-run
 provenance are skipped. New transcripts retain this provenance across rotation.
@@ -84,11 +84,11 @@ Manual scans still incur model-provider cost and send eligible conversation
 content to the configured provider. Use them only when that review matches the
 workspace's privacy and data-handling requirements.
 
-## What OpenClaw can learn
+## What Bot can learn
 
 Self-learning has two conservative paths:
 
-1. **Direct instructions and corrections.** OpenClaw detects durable language
+1. **Direct instructions and corrections.** Bot detects durable language
    such as “from now on,” “next time,” and corrections to a failed approach.
    With self-learning enabled, it can turn those signals into pending proposals
    without waiting for another prompt. This deterministic path can group related
@@ -96,7 +96,7 @@ Self-learning has two conservative paths:
    or revise its own related pending proposal. It also runs after failed turns
    because it captures the user's instructions rather than judging completion.
 2. **Experience review.** After a successful, substantial foreground turn,
-   OpenClaw can review the completed work for a reusable recovery technique or
+   Bot can review the completed work for a reusable recovery technique or
    a stable procedure that would remove at least two future model or tool round
    trips.
 
@@ -121,7 +121,7 @@ Experience review is deliberately delayed and bounded:
   excluded.
 - The foreground run must have resolved a provider and model and must actually
   have had access to `skill_workshop`.
-- OpenClaw waits 30 seconds after completion. A later foreground completion in
+- Bot waits 30 seconds after completion. A later foreground completion in
   the same session restarts that quiet period.
 - If any agent or reply run is still active, review waits another 30 seconds.
 - Only one experience review runs at a time.
@@ -137,7 +137,7 @@ still be offered as a suggestion when autonomy is disabled.
 
 The background reviewer receives only the current turn, starting at its most
 recent user message. The rendered trajectory is capped at 60,000 characters;
-when necessary, OpenClaw keeps the first message and the newest evidence and
+when necessary, Bot keeps the first message and the newest evidence and
 marks the omitted middle.
 
 The reviewer reuses the resolved provider and model. It reuses the foreground
@@ -147,7 +147,7 @@ That run can make more than one provider request when it inspects or drafts a
 proposal. Provider pricing and data-handling terms apply just as they do to the
 foreground turn.
 
-Before starting, OpenClaw reloads current runtime configuration and rechecks the
+Before starting, Bot reloads current runtime configuration and rechecks the
 effective sandbox and tool policy for the original conversation. If the run is
 sandboxed, policy no longer permits `skill_workshop`, or required runtime facts
 are missing, review fails closed and creates nothing.
@@ -186,17 +186,17 @@ Self-learning produces the same pending proposals as manual Workshop use.
 Inspect them before applying:
 
 ```bash
-openclaw skills workshop list
-openclaw skills workshop inspect <proposal-id>
-openclaw skills workshop apply <proposal-id>
+bot skills workshop list
+bot skills workshop inspect <proposal-id>
+bot skills workshop apply <proposal-id>
 ```
 
 Revise, reject, or quarantine proposals that are useful but not ready:
 
 ```bash
-openclaw skills workshop revise <proposal-id> --proposal ./PROPOSAL.md
-openclaw skills workshop reject <proposal-id> --reason "Too specific"
-openclaw skills workshop quarantine <proposal-id> --reason "Needs security review"
+bot skills workshop revise <proposal-id> --proposal ./PROPOSAL.md
+bot skills workshop reject <proposal-id> --reason "Too specific"
+bot skills workshop quarantine <proposal-id> --reason "Needs security review"
 ```
 
 Applying is the only operation that writes an active `SKILL.md`. See
@@ -237,7 +237,7 @@ result when the evidence does not clear the reusable-procedure bar.
 
 ### Doctor reports that the Workshop tool is hidden
 
-When self-learning is enabled, `openclaw doctor` checks whether the default
+When self-learning is enabled, `bot doctor` checks whether the default
 agent's effective tool policy permits `skill_workshop`. Follow the reported
 `tools.allow` or `tools.alsoAllow` change, or disable self-learning.
 
@@ -246,7 +246,7 @@ agent's effective tool policy permits `skill_workshop`. Follow the reported
 Disable self-learning and continue using `/learn` or explicit Workshop requests:
 
 ```bash
-openclaw config set skills.workshop.autonomous.enabled false --strict-json
+bot config set skills.workshop.autonomous.enabled false --strict-json
 ```
 
 Pending proposals remain reviewable after the feature is disabled. Disabling

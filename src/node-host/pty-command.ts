@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { OpenClawPluginNodeHostCommandIo } from "../plugins/types.js";
+import type { BotPluginNodeHostCommandIo } from "../plugins/types.js";
 import { spawnTerminalPty } from "../process/terminal-pty.js";
 
 export type NodePtyCommandResult = { exitCode: number; signal?: number };
@@ -103,7 +103,7 @@ export async function runNodePtyCommand(
     cols: number;
     rows: number;
   },
-  io: OpenClawPluginNodeHostCommandIo,
+  io: BotPluginNodeHostCommandIo,
   spawn: typeof spawnTerminalPty = spawnTerminalPty,
 ): Promise<NodePtyCommandResult> {
   if (io.signal.aborted) {
@@ -115,7 +115,7 @@ export async function runNodePtyCommand(
     ),
   );
   env.TERM ??= "xterm-256color";
-  env.OPENCLAW_TERMINAL = "1";
+  env.BOT_TERMINAL = "1";
   if (params.pathEnv) {
     env.PATH = params.pathEnv;
   }

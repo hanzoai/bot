@@ -1,7 +1,7 @@
 // Durable outbound notice ownership for restart-sentinel recovery.
 import { sendDurableMessageBatch } from "../channels/message/runtime.js";
 import type { CliDeps } from "../cli/deps.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   findPlatformMessageRejectedError,
   isProvenDeliveryNotSentError,
@@ -69,7 +69,7 @@ async function waitForRecoveryDrain(): Promise<void> {
 }
 
 async function drainFailedRestartSentinelNotice(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   queueId: string;
   sessionKey: string;
   summary: string;
@@ -136,7 +136,7 @@ async function drainFailedRestartSentinelNotice(params: {
 export async function deliverRestartSentinelNotice(
   params: RestartSentinelNoticeRoute & {
     deps: CliDeps;
-    cfg: OpenClawConfig;
+    cfg: BotConfig;
     sessionKey: string;
     summary: string;
     message: string;

@@ -1,6 +1,6 @@
 import { resolveDefaultAgentId } from "../../agents/agent-scope.js";
 import { getReplyPayloadMetadata, type ReplyPayload } from "../../auto-reply/reply-payload.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import { projectChatDisplayMessage } from "../chat-display-projection.js";
 import type { GatewayRequestContext } from "./types.js";
 
@@ -28,7 +28,7 @@ function nextChatSeq(context: { agentRunSeq: Map<string, number> }, runId: strin
 }
 
 function resolveGlobalAwareNodeChatDeliveryKeys(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   sessionKey: string;
   agentId?: string;
 }): string[] {
@@ -53,7 +53,7 @@ export function sendGlobalAwareNodeChatPayload(params: {
   payload: unknown;
 }): void {
   const deliveryKeys = resolveGlobalAwareNodeChatDeliveryKeys({
-    cfg: params.context.getRuntimeConfig?.() ?? ({} as OpenClawConfig),
+    cfg: params.context.getRuntimeConfig?.() ?? ({} as BotConfig),
     sessionKey: params.sessionKey,
     agentId: params.agentId,
   });
@@ -81,7 +81,7 @@ export function broadcastChatFinal(params: {
   };
   params.context.broadcast("chat", payload, {
     sessionKeys: resolveGlobalAwareNodeChatDeliveryKeys({
-      cfg: params.context.getRuntimeConfig?.() ?? ({} as OpenClawConfig),
+      cfg: params.context.getRuntimeConfig?.() ?? ({} as BotConfig),
       sessionKey: params.sessionKey,
       agentId: payloadAgentId,
     }),
@@ -122,7 +122,7 @@ export function broadcastSideResult(params: {
   };
   params.context.broadcast("chat.side_result", payload, {
     sessionKeys: resolveGlobalAwareNodeChatDeliveryKeys({
-      cfg: params.context.getRuntimeConfig?.() ?? ({} as OpenClawConfig),
+      cfg: params.context.getRuntimeConfig?.() ?? ({} as BotConfig),
       sessionKey: params.payload.sessionKey,
       agentId: payloadAgentId,
     }),
@@ -155,7 +155,7 @@ export function broadcastChatError(params: {
   };
   params.context.broadcast("chat", payload, {
     sessionKeys: resolveGlobalAwareNodeChatDeliveryKeys({
-      cfg: params.context.getRuntimeConfig?.() ?? ({} as OpenClawConfig),
+      cfg: params.context.getRuntimeConfig?.() ?? ({} as BotConfig),
       sessionKey: params.sessionKey,
       agentId: payloadAgentId,
     }),

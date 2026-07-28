@@ -1,11 +1,11 @@
 // Discord tests cover message handler.process plugin behavior.
-import type { ReplyPayload } from "openclaw/plugin-sdk/reply-dispatch-runtime";
-import { setReplyPayloadMetadata } from "openclaw/plugin-sdk/reply-payload-testing";
-import { logVerbose, sleepWithAbort } from "openclaw/plugin-sdk/runtime-env";
+import type { ReplyPayload } from "bot/plugin-sdk/reply-dispatch-runtime";
+import { setReplyPayloadMetadata } from "bot/plugin-sdk/reply-payload-testing";
+import { logVerbose, sleepWithAbort } from "bot/plugin-sdk/runtime-env";
 import { afterEach, beforeAll, beforeEach, vi } from "vitest";
 import type { DiscordMessagePreflightContext } from "./message-handler.preflight.js";
 
-vi.mock("openclaw/plugin-sdk/runtime-env", { spy: true });
+vi.mock("bot/plugin-sdk/runtime-env", { spy: true });
 
 export const logVerboseForTest = logVerbose;
 export const sleepWithAbortForTest = sleepWithAbort;
@@ -66,7 +66,7 @@ export const createDiscordDraftStream = deliveryMocks.createDiscordDraftStream;
 export function createNonTerminalToolWarningPayload(): ReplyPayload {
   return setReplyPayloadMetadata(
     {
-      text: "⚠️ 🛠️ `run openclaw definitely-not-a-real-subcommand (agent)` failed",
+      text: "⚠️ 🛠️ `run bot definitely-not-a-real-subcommand (agent)` failed",
       isError: true,
     },
     { nonTerminalToolErrorWarning: true },
@@ -227,7 +227,7 @@ const configSessionsMocks = vi.hoisted(() => ({
   >(async () => undefined),
   readSessionUpdatedAt: vi.fn<(params?: unknown) => number | undefined>(() => undefined),
   resolveStorePath: vi.fn<(path?: unknown, opts?: unknown) => string>(
-    () => "/tmp/openclaw-discord-process-test-sessions.json",
+    () => "/tmp/bot-discord-process-test-sessions.json",
   ),
 }));
 export const getSessionEntry = configSessionsMocks.getSessionEntry;
@@ -262,7 +262,7 @@ let processDiscordMessage: typeof import("./message-handler.process.js").process
 export let formatDiscordReplySkip: typeof import("./message-handler.process.js").formatDiscordReplySkip;
 export let notifyDiscordInboundEventOutboundSuccess: typeof import("../inbound-event-delivery.js").notifyDiscordInboundEventOutboundSuccess;
 
-vi.mock("openclaw/plugin-sdk/reply-runtime", () => ({
+vi.mock("bot/plugin-sdk/reply-runtime", () => ({
   dispatchReplyWithBufferedBlockDispatcher: async (params: {
     dispatcherOptions: {
       beforeDeliver?: (
@@ -380,13 +380,13 @@ vi.mock("openclaw/plugin-sdk/reply-runtime", () => ({
   },
 }));
 
-vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("openclaw/plugin-sdk/channel-inbound")>();
-  const replyRuntime = await import("openclaw/plugin-sdk/reply-runtime");
+vi.mock("bot/plugin-sdk/channel-inbound", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("bot/plugin-sdk/channel-inbound")>();
+  const replyRuntime = await import("bot/plugin-sdk/reply-runtime");
   return {
     ...actual,
     dispatchChannelInboundTurn: async (
-      plan: import("openclaw/plugin-sdk/channel-inbound").ChannelInboundTurnPlan<"provider_message_sending">,
+      plan: import("bot/plugin-sdk/channel-inbound").ChannelInboundTurnPlan<"provider_message_sending">,
     ) => {
       const { cfg, route, delivery, sessionInitRetry, ...prepared } = plan;
       const runDispatch = async () => {
@@ -429,7 +429,7 @@ vi.mock("openclaw/plugin-sdk/channel-inbound", async (importOriginal) => {
   };
 });
 
-vi.mock("openclaw/plugin-sdk/conversation-runtime", () => ({
+vi.mock("bot/plugin-sdk/conversation-runtime", () => ({
   recordInboundSession: (...args: unknown[]) => recordInboundSession(...args),
   resolvePinnedMainDmOwnerFromAllowlist: (params: {
     dmScope?: string | null;
@@ -458,14 +458,14 @@ vi.mock("openclaw/plugin-sdk/conversation-runtime", () => ({
     bindingId.split(":").at(-1) ?? bindingId,
 }));
 
-vi.mock("openclaw/plugin-sdk/session-store-runtime", () => ({
+vi.mock("bot/plugin-sdk/session-store-runtime", () => ({
   getSessionEntry: (params?: unknown) => configSessionsMocks.getSessionEntry(params),
   readSessionUpdatedAt: (params?: unknown) => configSessionsMocks.readSessionUpdatedAt(params),
   resolveStorePath: (path?: unknown, opts?: unknown) =>
     configSessionsMocks.resolveStorePath(path, opts),
 }));
 
-vi.mock("openclaw/plugin-sdk/session-transcript-runtime", () => ({
+vi.mock("bot/plugin-sdk/session-transcript-runtime", () => ({
   readLatestAssistantTextByIdentity: (params?: unknown) =>
     configSessionsMocks.readLatestAssistantTextByIdentity(params),
 }));
@@ -572,7 +572,7 @@ export function registerDiscordProcessTestLifecycle() {
     readSessionUpdatedAt.mockReturnValue(undefined);
     getSessionEntry.mockReturnValue(undefined);
     readLatestAssistantTextByIdentity.mockResolvedValue(undefined);
-    resolveStorePath.mockReturnValue("/tmp/openclaw-discord-process-test-sessions.json");
+    resolveStorePath.mockReturnValue("/tmp/bot-discord-process-test-sessions.json");
     threadBindingTesting.resetThreadBindingsForTests();
   });
 

@@ -1,6 +1,6 @@
 // Mattermost tests cover accounts plugin behavior.
 import { describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../runtime-api.js";
+import type { BotConfig } from "../../runtime-api.js";
 import {
   listMattermostAccountIds,
   resolveDefaultMattermostAccountId,
@@ -10,7 +10,7 @@ import {
 
 describe("resolveDefaultMattermostAccountId", () => {
   it("prefers channels.mattermost.defaultAccount when it matches a configured account", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         mattermost: {
           defaultAccount: "alerts",
@@ -26,7 +26,7 @@ describe("resolveDefaultMattermostAccountId", () => {
   });
 
   it("normalizes channels.mattermost.defaultAccount before lookup", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         mattermost: {
           defaultAccount: "Ops Team",
@@ -41,7 +41,7 @@ describe("resolveDefaultMattermostAccountId", () => {
   });
 
   it("falls back when channels.mattermost.defaultAccount is missing", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         mattermost: {
           defaultAccount: "missing",
@@ -57,7 +57,7 @@ describe("resolveDefaultMattermostAccountId", () => {
   });
 
   it("keeps the implicit default account when named accounts are added to top-level credentials", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         mattermost: {
           botToken: "tok-default",
@@ -78,7 +78,7 @@ describe("resolveDefaultMattermostAccountId", () => {
   });
 
   it("inherits top-level access policy for named accounts before doctor migration", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         mattermost: {
           dmPolicy: "open",
@@ -106,7 +106,7 @@ describe("resolveDefaultMattermostAccountId", () => {
 
 describe("resolveMattermostReplyToMode", () => {
   it("uses configured defaultAccount when accountId is omitted", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         mattermost: {
           defaultAccount: "alerts",
@@ -127,7 +127,7 @@ describe("resolveMattermostReplyToMode", () => {
   });
 
   it("uses the configured mode for channel and group messages", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         mattermost: {
           replyToMode: "all",
@@ -141,7 +141,7 @@ describe("resolveMattermostReplyToMode", () => {
   });
 
   it("keeps direct messages off by default even when replyToMode is enabled", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         mattermost: {
           replyToMode: "all",
@@ -154,7 +154,7 @@ describe("resolveMattermostReplyToMode", () => {
   });
 
   it("uses per-chat-type overrides before the channel and group default", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       channels: {
         mattermost: {
           replyToMode: "all",

@@ -1,5 +1,5 @@
-/** Implementation of `openclaw models list`. */
-import { normalizeLowercaseStringOrEmpty } from "@openclaw/normalization-core/string-coerce";
+/** Implementation of `bot models list`. */
+import { normalizeLowercaseStringOrEmpty } from "@hanzo/bot-normalization-core/string-coerce";
 import { parseModelRef } from "../../agents/model-selection.js";
 import { requestExitAfterOneShotOutput } from "../../cli/one-shot-exit.js";
 import type { ModelRegistry } from "../../llm/model-registry.js";

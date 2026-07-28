@@ -12,7 +12,7 @@ import type { FastMode } from "../../auto-reply/thinking.shared.js";
 import type { InboundEventKind } from "../../channels/inbound-event/kind.js";
 import type { CliSessionBinding, SessionEntry } from "../../config/sessions.js";
 import type { SessionSystemPromptReport } from "../../config/sessions/types.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import type { ContextEngine } from "../../context-engine/types.js";
 import type { ImageContent } from "../../llm/types.js";
 import type { MediaFact } from "../../media/media-facts.js";
@@ -64,7 +64,7 @@ export type RunCliAgentParams = {
   cwd?: string;
   /** Start a fresh CLI process so per-turn MCP authority is reloaded from this run. */
   disableCliLiveSession?: boolean;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   prompt: string;
   transcriptPrompt?: string;
   /** Undecorated current-turn prompt used to merge inline and offloaded images. */
@@ -74,7 +74,7 @@ export type RunCliAgentParams = {
    * background answers and must not reuse or mutate normal agent sessions.
    */
   executionMode?: CliBackendExecutionMode;
-  /** Persist the successful CLI assistant reply into the OpenClaw session transcript. */
+  /** Persist the successful CLI assistant reply into the Bot session transcript. */
   persistAssistantTranscript?: boolean;
   /** Session store path used when assistant transcript persistence is enabled. */
   storePath?: string;
@@ -194,10 +194,10 @@ export type RunCliAgentParams = {
   toolsAllow?: string[];
   /** Trusted server-stamped authority for an explicitly capped scheduled run. */
   scheduledToolPolicy?: ScheduledToolPolicyContext;
-  /** Exact native plus canonical OpenClaw surface for a selectable CLI backend. */
+  /** Exact native plus canonical Bot surface for a selectable CLI backend. */
   cliToolAvailability?: {
     native: string[];
-    openClaw: string[];
+    bot: string[];
   };
   disableTools?: boolean;
   abortSignal?: AbortSignal;
@@ -278,7 +278,7 @@ export type PreparedCliRunContext = {
   /** Resume is safe only while the exact managed Claude stdio child still exists. */
   requiredClaudeLiveSessionGeneration?: string;
   hadSessionFile: boolean;
-  contextEngineConfig: OpenClawConfig;
+  contextEngineConfig: BotConfig;
   contextEngine?: ContextEngine;
   contextEngineTurnPrompt?: string;
   contextEngineDeferredTurnMaintenance?: Promise<void>;
@@ -289,7 +289,7 @@ export type PreparedCliRunContext = {
   systemPromptReport: SessionSystemPromptReport;
   claudeSkillsPluginArgs?: string[] | undefined;
   bootstrapPromptWarningLines: string[];
-  openClawHistoryPrompt?: string;
+  botHistoryPrompt?: string;
   heartbeatPrompt?: string;
   authEpoch?: string;
   /** Strict owner fingerprint captured for live inference verification only. */

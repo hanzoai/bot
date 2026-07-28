@@ -304,7 +304,7 @@ describe("subscribeEmbeddedAgentSession", () => {
 
     const transcriptOnlyMessage = {
       role: "assistant",
-      provider: "openclaw",
+      provider: "bot",
       model: "delivery-mirror",
       content: [{ type: "text", text: "Already delivered." }],
     };

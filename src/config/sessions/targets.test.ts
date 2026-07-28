@@ -1,14 +1,14 @@
 // Session target tests cover persisted channel targets for sessions.
 import fs from "node:fs/promises";
 import path from "node:path";
-import { withTempHome } from "openclaw/plugin-sdk/test-env";
+import { withTempHome } from "bot/plugin-sdk/test-env";
 import { describe, expect, it } from "vitest";
 import {
-  registerOpenClawAgentDatabase,
-  unregisterOpenClawAgentDatabase,
-} from "../../state/openclaw-agent-db-registry.js";
-import { resolveOpenClawStateSqlitePath } from "../../state/openclaw-state-db.paths.js";
-import type { OpenClawConfig } from "../config.js";
+  registerBotAgentDatabase,
+  unregisterBotAgentDatabase,
+} from "../../state/bot-agent-db-registry.js";
+import { resolveBotStateSqlitePath } from "../../state/bot-state-db.paths.js";
+import type { BotConfig } from "../config.js";
 import { resolveStorePath } from "./paths.js";
 import { listSessionEntriesReadOnly, replaceSessionEntry } from "./session-accessor.js";
 import { resolveSqliteTargetFromSessionStorePath } from "./session-sqlite-target.js";
@@ -21,7 +21,7 @@ import {
   resolveSessionStoreTargets,
 } from "./targets.js";
 
-const EXPLICIT_MAIN_CONFIG: OpenClawConfig = {
+const EXPLICIT_MAIN_CONFIG: BotConfig = {
   agents: { list: [{ id: "main", default: true }] },
 };
 
@@ -47,7 +47,7 @@ async function createAgentSessionStores(
   return storePaths;
 }
 
-function createCustomRootCfg(customRoot: string, defaultAgentId = "ops"): OpenClawConfig {
+function createCustomRootCfg(customRoot: string, defaultAgentId = "ops"): BotConfig {
   return {
     session: {
       store: path.join(customRoot, "agents", "{agentId}", "sessions", "sessions.json"),
@@ -90,9 +90,9 @@ function expectTargetsToContainStores(
 describe("resolveSessionStoreTargets", () => {
   it("resolves all configured agent stores", async () => {
     await withTempHome(async () => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         session: {
-          store: "~/.openclaw/agents/{agentId}/sessions/sessions.json",
+          store: "~/.bot/agents/{agentId}/sessions/sessions.json",
         },
         agents: {
           list: [{ id: "main", default: true }, { id: "work" }],
@@ -116,9 +116,9 @@ describe("resolveSessionStoreTargets", () => {
 
   it("includes configured ACP harness stores for all-agent session views", async () => {
     await withTempHome(async () => {
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         session: {
-          store: "~/.openclaw/agents/{agentId}/sessions/sessions.json",
+          store: "~/.bot/agents/{agentId}/sessions/sessions.json",
         },
         agents: {
           list: [
@@ -160,7 +160,7 @@ describe("resolveSessionStoreTargets", () => {
   });
 
   it("keeps shared store paths distinct by SQLite owner for --all-agents", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       session: {
         store: "/tmp/shared-sessions.json",
       },
@@ -177,10 +177,10 @@ describe("resolveSessionStoreTargets", () => {
 
   it("keeps a colliding fixed-store target on the configured default", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, BOT_STATE_DIR: path.join(home, ".bot") };
       const storePath = path.join(home, "ops.json");
       const diagnostics: string[] = [];
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -195,7 +195,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("lands colliding fixed-store writes in distinct owner databases", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, BOT_STATE_DIR: path.join(home, ".bot") };
       const storePath = path.join(home, "ops.json");
 
       await replaceSessionEntry(
@@ -253,7 +253,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("keeps a promoted default on its registered suffixed database", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, BOT_STATE_DIR: path.join(home, ".bot") };
       const storePath = path.join(home, "shared.json");
       await replaceSessionEntry(
         {
@@ -311,7 +311,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("does not let durable metadata override ambiguous suffix registration", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, BOT_STATE_DIR: path.join(home, ".bot") };
       const storePath = path.join(home, "shared.json");
       await replaceSessionEntry(
         {
@@ -328,7 +328,7 @@ describe("resolveSessionStoreTargets", () => {
         defaultAgentId: "main",
         env,
       }).path;
-      registerOpenClawAgentDatabase({ agentId: "ops", env, path: occupiedPath });
+      registerBotAgentDatabase({ agentId: "ops", env, path: occupiedPath });
 
       expect(
         resolveSqliteTargetFromSessionStorePath(storePath, {
@@ -344,8 +344,8 @@ describe("resolveSessionStoreTargets", () => {
     "deduplicates aliased SQLite locators by physical identity",
     async () => {
       await withTempHome(async (home) => {
-        const stateDir = path.join(home, ".openclaw");
-        const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+        const stateDir = path.join(home, ".bot");
+        const env = { ...process.env, BOT_STATE_DIR: stateDir };
         const realDir = path.join(home, "real-stores");
         const aliasDir = path.join(home, "alias-stores");
         await fs.mkdir(realDir, { recursive: true });
@@ -372,7 +372,7 @@ describe("resolveSessionStoreTargets", () => {
 
   it("retains a shared-store claimant when the physical owner left the roster", async () => {
     await withTempHome(async (home) => {
-      const env = { ...process.env, OPENCLAW_STATE_DIR: path.join(home, ".openclaw") };
+      const env = { ...process.env, BOT_STATE_DIR: path.join(home, ".bot") };
       const storePath = path.join(home, "shared.sqlite");
       await replaceSessionEntry(
         {
@@ -394,7 +394,7 @@ describe("resolveSessionStoreTargets", () => {
         },
         { sessionId: "ops-session", updatedAt: 2 },
       );
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         session: { store: storePath },
         agents: { entries: { ops: { default: true } } },
       };
@@ -410,15 +410,15 @@ describe("resolveSessionStoreTargets", () => {
 
   it("honors a registered owner over the configured default for a fixed-store collision", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".bot");
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const storePath = path.join(home, "ops.json");
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
       const unsuffixedPath = resolveSqliteTargetFromSessionStorePath(storePath).path;
-      registerOpenClawAgentDatabase({ agentId: "ops", env, path: unsuffixedPath });
+      registerBotAgentDatabase({ agentId: "ops", env, path: unsuffixedPath });
       await replaceSessionEntry(
         {
           agentId: "ops",
@@ -444,8 +444,8 @@ describe("resolveSessionStoreTargets", () => {
 
   it("honors durable database ownership after its registry row is removed", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".bot");
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const storePath = path.join(home, "ops.json");
       await replaceSessionEntry(
         {
@@ -462,7 +462,7 @@ describe("resolveSessionStoreTargets", () => {
         defaultAgentId: "ops",
         env,
       }).path;
-      unregisterOpenClawAgentDatabase({ agentId: "ops", env, path: unsuffixedPath });
+      unregisterBotAgentDatabase({ agentId: "ops", env, path: unsuffixedPath });
 
       expect(
         resolveSqliteTargetFromSessionStorePath(storePath, {
@@ -480,7 +480,7 @@ describe("resolveSessionStoreTargets", () => {
       ).toBe(path.join(home, "ops.main.sqlite"));
 
       const diagnostics: string[] = [];
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -496,13 +496,13 @@ describe("resolveSessionStoreTargets", () => {
 
   it("does not let a scoped losing owner claim an unregistered fixed-store database", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".bot");
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const storePath = path.join(home, "ops.json");
       const databasePath = resolveSqliteTargetFromSessionStorePath(storePath, {
         agentId: "main",
       }).path;
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -510,7 +510,7 @@ describe("resolveSessionStoreTargets", () => {
         { agentId: "main", env, storePath, sessionKey: "main" },
         { sessionId: "main-session", updatedAt: 1 },
       );
-      unregisterOpenClawAgentDatabase({ agentId: "main", env, path: databasePath });
+      unregisterBotAgentDatabase({ agentId: "main", env, path: databasePath });
 
       expect(resolveExistingAgentSessionStoreTargetsSync(cfg, "ops", { env })).toEqual([]);
       expect(resolveExistingAgentSessionStoreTargetsSync(cfg, "main", { env })).toEqual([
@@ -521,13 +521,13 @@ describe("resolveSessionStoreTargets", () => {
 
   it("keeps ambiguous registry ownership off the unsuffixed target", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".bot");
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const storePath = path.join(home, "ops.json");
       const databasePath = resolveSqliteTargetFromSessionStorePath(storePath).path;
-      registerOpenClawAgentDatabase({ agentId: "ops", env, path: databasePath });
-      registerOpenClawAgentDatabase({ agentId: "main", env, path: databasePath });
-      const cfg: OpenClawConfig = {
+      registerBotAgentDatabase({ agentId: "ops", env, path: databasePath });
+      registerBotAgentDatabase({ agentId: "main", env, path: databasePath });
+      const cfg: BotConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -545,12 +545,12 @@ describe("resolveSessionStoreTargets", () => {
 
   it("prefers a canonical database-path owner over a conflicting registry row", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".bot");
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const storePath = path.join(stateDir, "agents", "main", "sessions", "sessions.json");
       const databasePath = resolveSqliteTargetFromSessionStorePath(storePath).path;
-      registerOpenClawAgentDatabase({ agentId: "ops", env, path: databasePath });
-      const cfg: OpenClawConfig = {
+      registerBotAgentDatabase({ agentId: "ops", env, path: databasePath });
+      const cfg: BotConfig = {
         session: { store: storePath },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -563,12 +563,12 @@ describe("resolveSessionStoreTargets", () => {
 
   it("fails closed when the ownership registry cannot be read", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
-      const registryPath = resolveOpenClawStateSqlitePath(env);
+      const stateDir = path.join(home, ".bot");
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
+      const registryPath = resolveBotStateSqlitePath(env);
       await fs.mkdir(path.dirname(registryPath), { recursive: true });
       await fs.writeFile(registryPath, "not a sqlite database", "utf-8");
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         session: { store: path.join(home, "ops.json") },
         agents: { entries: { main: { default: true }, ops: {} } },
       };
@@ -579,9 +579,9 @@ describe("resolveSessionStoreTargets", () => {
 
   it("uses the path-owned agent id for explicit agent store paths", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".bot");
       const storePaths = await createAgentSessionStores(stateDir, ["codex-proof"]);
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
 
       expect(
         resolveSessionStoreTargets(
@@ -612,7 +612,7 @@ describe("resolveSessionStoreTargets", () => {
   });
 
   it("accepts case-insensitive legacy main paths but rejects aliases", () => {
-    const cfg: OpenClawConfig = { agents: { list: [{ id: "ops", default: true }] } };
+    const cfg: BotConfig = { agents: { list: [{ id: "ops", default: true }] } };
     const mainPath = path.resolve("/tmp/agents/Main/sessions/sessions.json");
 
     expect(resolveSessionStoreTargets(cfg, { store: mainPath })).toEqual([
@@ -627,7 +627,7 @@ describe("resolveSessionStoreTargets", () => {
   });
 
   it("rejects unknown agent ids", () => {
-    const cfg: OpenClawConfig = {
+    const cfg: BotConfig = {
       agents: {
         list: [{ id: "main", default: true }, { id: "work" }],
       },
@@ -686,7 +686,7 @@ describe("resolveExistingAgentSessionStoreTargetsSync", () => {
       const storePath = path.join(home, "shared", "sessions.json");
       await fs.mkdir(path.dirname(storePath), { recursive: true });
       await fs.writeFile(storePath, "{}\n", "utf8");
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "main", default: true }] },
         session: { store: storePath },
       };
@@ -716,7 +716,7 @@ describe("resolveExistingAgentSessionStoreTargetsSync", () => {
         }),
         "utf8",
       );
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "main", default: true }] },
         session: { store: storePath },
       };
@@ -730,7 +730,7 @@ describe("resolveExistingAgentSessionStoreTargetsSync", () => {
   it("includes existing deterministic template targets outside discoverable agent roots", async () => {
     await withTempHome(async (home) => {
       const storeTemplate = path.join(home, "external-stores", "sessions-{agentId}.json");
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: { list: [{ id: "main", default: true }] },
         session: { store: storeTemplate },
       };
@@ -801,10 +801,10 @@ describe("resolveExistingAgentSessionStoreTargetsSync", () => {
 describe("resolveAllAgentSessionStoreTargetsSync", () => {
   it("includes discovered on-disk agent stores alongside configured targets", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".bot");
       const storePaths = await createAgentSessionStores(stateDir, ["ops", "retired"]);
 
-      const cfg: OpenClawConfig = {
+      const cfg: BotConfig = {
         agents: {
           list: [{ id: "ops", default: true }],
         },
@@ -819,7 +819,7 @@ describe("resolveAllAgentSessionStoreTargetsSync", () => {
 
   it("includes legacy JSON stores before an agent SQLite database exists", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".bot");
       const sessionsDir = path.join(stateDir, "agents", "legacy", "sessions");
       const storePath = path.join(sessionsDir, "sessions.json");
       await fs.mkdir(sessionsDir, { recursive: true });
@@ -831,7 +831,7 @@ describe("resolveAllAgentSessionStoreTargetsSync", () => {
 
       const targets = resolveAllAgentSessionStoreTargetsSync(
         { agents: { list: [{ id: "legacy", default: true }] } },
-        { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } },
+        { env: { ...process.env, BOT_STATE_DIR: stateDir } },
       );
 
       expect(targets).toContainEqual({ agentId: "legacy", storePath });
@@ -881,9 +881,9 @@ describe("resolveAllAgentSessionStoreTargetsSync", () => {
 
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: envStateDir,
+        BOT_STATE_DIR: envStateDir,
       };
-      const cfg: OpenClawConfig = EXPLICIT_MAIN_CONFIG;
+      const cfg: BotConfig = EXPLICIT_MAIN_CONFIG;
       const mainStorePath = await resolveRealStorePath(mainSessionsDir);
       const retiredStorePath = await resolveRealStorePath(retiredSessionsDir);
 
@@ -911,7 +911,7 @@ describe("resolveAllAgentSessionStoreTargetsSync", () => {
       const cfg = createCustomRootCfg(customRoot, "main");
       const env = {
         ...process.env,
-        OPENCLAW_STATE_DIR: envStateDir,
+        BOT_STATE_DIR: envStateDir,
       };
 
       const targets = resolveAllAgentSessionStoreTargetsSync(cfg, { env });
@@ -935,7 +935,7 @@ describe("resolveAllAgentSessionStoreTargetsSync", () => {
       await fs.mkdir(opsSessionsDir, { recursive: true });
       await fs.mkdir(opsAgentDbDir, { recursive: true });
       await fs.writeFile(leakedFile, JSON.stringify({ leak: { secret: "x" } }), "utf8");
-      await fs.symlink(leakedFile, path.join(opsAgentDbDir, "openclaw-agent.sqlite"));
+      await fs.symlink(leakedFile, path.join(opsAgentDbDir, "bot-agent.sqlite"));
 
       const targets = resolveAllAgentSessionStoreTargetsSync(createCustomRootCfg(customRoot), {
         env: process.env,
@@ -951,7 +951,7 @@ describe("resolveAllAgentSessionStoreTargetsSync", () => {
 
   it("skips discovered directories that only normalize into the default main agent", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".bot");
       const mainSessionsDir = path.join(stateDir, "agents", "main", "sessions");
       const junkSessionsDir = path.join(stateDir, "agents", "###", "sessions");
       const collisionSessionsDir = path.join(stateDir, "agents", "main!", "sessions");
@@ -989,7 +989,7 @@ describe("resolveAllAgentSessionStoreTargetsSync", () => {
         { sessionId: "sid-whitespace", updatedAt: Date.now() },
       );
 
-      const cfg: OpenClawConfig = EXPLICIT_MAIN_CONFIG;
+      const cfg: BotConfig = EXPLICIT_MAIN_CONFIG;
       const mainStorePath = await resolveRealStorePath(mainSessionsDir);
       const targets = resolveAllAgentSessionStoreTargetsSync(cfg, { env: process.env });
 
@@ -1019,8 +1019,8 @@ describe("resolveAllAgentSessionStoreTargetsSync", () => {
 describe("resolveAllAgentSessionStoreCandidateTargetsSync", () => {
   it("includes configured targets before either state file exists", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const stateDir = path.join(home, ".bot");
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
       const storePath = resolveStorePath(undefined, { agentId: "main", env });
 
       expect(
@@ -1034,10 +1034,10 @@ describe("resolveAllAgentSessionStoreCandidateTargetsSync", () => {
 
   it("includes retired agent directories after both state files are removed", async () => {
     await withTempHome(async (home) => {
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".bot");
       const retiredAgentDir = path.join(stateDir, "agents", "retired");
       await fs.mkdir(retiredAgentDir, { recursive: true });
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
 
       expect(
         resolveAllAgentSessionStoreCandidateTargetsSync(EXPLICIT_MAIN_CONFIG, { env }),
@@ -1053,13 +1053,13 @@ describe("resolveAllAgentSessionStoreCandidateTargetsSync", () => {
       if (process.platform === "win32") {
         return;
       }
-      const stateDir = path.join(home, ".openclaw");
+      const stateDir = path.join(home, ".bot");
       const agentDir = path.join(stateDir, "agents", "retired");
       const outsideSessionsDir = path.join(home, "outside-sessions");
       await fs.mkdir(agentDir, { recursive: true });
       await fs.mkdir(outsideSessionsDir, { recursive: true });
       await fs.symlink(outsideSessionsDir, path.join(agentDir, "sessions"));
-      const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+      const env = { ...process.env, BOT_STATE_DIR: stateDir };
 
       expect(
         resolveAllAgentSessionStoreCandidateTargetsSync(EXPLICIT_MAIN_CONFIG, { env }),

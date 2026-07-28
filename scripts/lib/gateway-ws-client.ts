@@ -1,4 +1,4 @@
-// Gateway Ws Client script supports OpenClaw repository automation.
+// Gateway Ws Client script supports Bot repository automation.
 import { Buffer } from "node:buffer";
 import { randomUUID } from "node:crypto";
 import WebSocket from "ws";

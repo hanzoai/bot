@@ -3,12 +3,12 @@ import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { runFfmpeg } from "openclaw/plugin-sdk/media-runtime";
+import { runFfmpeg } from "bot/plugin-sdk/media-runtime";
 import {
   createAuthCaptureJsonFetch,
   createRequestCaptureJsonFetch,
   installPinnedHostnameTestHooks,
-} from "openclaw/plugin-sdk/test-media-understanding";
+} from "bot/plugin-sdk/test-media-understanding";
 import { describe, expect, it } from "vitest";
 import { senseaudioMediaUnderstandingProvider } from "./media-understanding-provider.js";
 
@@ -108,7 +108,7 @@ describe("transcribeSenseAudioAudio", () => {
   });
 
   it("can transcribe generated speech in live mode", async () => {
-    if (process.env.OPENCLAW_LIVE_TEST !== "1" || !process.env.SENSEAUDIO_API_KEY) {
+    if (process.env.BOT_LIVE_TEST !== "1" || !process.env.SENSEAUDIO_API_KEY) {
       return;
     }
     const say = spawnSync("sh", ["-lc", "command -v say"], { encoding: "utf8" });
@@ -116,7 +116,7 @@ describe("transcribeSenseAudioAudio", () => {
       return;
     }
 
-    const tempDir = mkdtempSync(path.join(os.tmpdir(), "openclaw-senseaudio-live-"));
+    const tempDir = mkdtempSync(path.join(os.tmpdir(), "bot-senseaudio-live-"));
     try {
       const aiffPath = path.join(tempDir, "speech.aiff");
       const mp3Path = path.join(tempDir, "speech.mp3");

@@ -112,7 +112,7 @@ function request(
   init: { method?: string; headers?: Record<string, string>; ticket?: string } = {},
 ) {
   const query = init.ticket ? `?bt=${encodeURIComponent(init.ticket)}` : "";
-  return fetch(`${baseUrl}/__openclaw__/board/agent%3Amain%3Amain/${name}/index.html${query}`, {
+  return fetch(`${baseUrl}/__bot__/board/agent%3Amain%3Amain/${name}/index.html${query}`, {
     method: init.method,
     headers: init.headers,
   });
@@ -264,7 +264,7 @@ describe("board widget HTTP", () => {
       nowMs,
     }).ticket;
     const response = await fetch(
-      `${baseUrl}/__openclaw__/board/session%2Fwith%2Fslash/slash-key/index.html?bt=${encodeURIComponent(ticket)}`,
+      `${baseUrl}/__bot__/board/session%2Fwith%2Fslash/slash-key/index.html?bt=${encodeURIComponent(ticket)}`,
     );
     expect(response.status).toBe(200);
     await expect(response.text()).resolves.toBe("slash");

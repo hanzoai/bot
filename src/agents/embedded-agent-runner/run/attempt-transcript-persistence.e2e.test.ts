@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { readSessionTranscriptRawDelta } from "openclaw/plugin-sdk/session-transcript-runtime";
+import { readSessionTranscriptRawDelta } from "bot/plugin-sdk/session-transcript-runtime";
 import { afterEach, describe, expect, it } from "vitest";
 import {
   appendTranscriptMessage,
@@ -14,7 +14,7 @@ import { flushSessionManagerTranscript } from "./attempt-transcript-helpers.js";
 const tempPaths: string[] = [];
 
 async function makeTempDir(): Promise<string> {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-attempt-transcript-"));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), "bot-attempt-transcript-"));
   tempPaths.push(dir);
   return dir;
 }

@@ -1,8 +1,8 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import type { Result } from "@openclaw/normalization-core/result";
-import { uniqueValues } from "@openclaw/normalization-core/string-normalization";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import type { Result } from "@hanzo/bot-normalization-core/result";
+import { uniqueValues } from "@hanzo/bot-normalization-core/string-normalization";
 import { parse, tokenizer } from "acorn";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { createLazyPromiseLoader } from "../shared/lazy-runtime.js";
 import { clampNumber } from "../utils.js";
 import { resolveAgentConfig } from "./agent-scope-config.js";
@@ -131,7 +131,7 @@ function normalizeCodeModeRawConfig(value: unknown): Record<string, unknown> | u
   return isRecord(codeMode) ? codeMode : undefined;
 }
 
-function readCodeModeRawConfig(config?: OpenClawConfig, agentId?: string): Record<string, unknown> {
+function readCodeModeRawConfig(config?: BotConfig, agentId?: string): Record<string, unknown> {
   const tools = isRecord(config?.tools) ? config.tools : undefined;
   const globalRaw = normalizeCodeModeRawConfig(tools?.codeMode) ?? {};
   const agentRaw =
@@ -160,7 +160,7 @@ function readLanguages(value: unknown): CodeModeLanguage[] {
 }
 
 /** Resolves Code Mode runtime limits and language support from config. */
-export function resolveCodeModeConfig(config?: OpenClawConfig, agentId?: string): CodeModeConfig {
+export function resolveCodeModeConfig(config?: BotConfig, agentId?: string): CodeModeConfig {
   const raw = readCodeModeRawConfig(config, agentId);
   const maxSearchLimit = clampNumber(
     readPositiveInteger(raw.maxSearchLimit, DEFAULT_MAX_SEARCH_LIMIT),

@@ -89,10 +89,10 @@ function writePublishablePluginPackage(repoDir: string): string {
   const packageDir = join(repoDir, "extensions", "diffs");
   mkdirSync(packageDir, { recursive: true });
   writeJsonFile(join(packageDir, "package.json"), {
-    name: "@openclaw/diffs",
+    name: "@hanzo/bot-diffs",
     version: "2026.5.3",
     type: "module",
-    openclaw: {
+    bot: {
       extensions: ["./index.ts"],
       setupEntry: "./setup-entry.ts",
       compat: {
@@ -103,7 +103,7 @@ function writePublishablePluginPackage(repoDir: string): string {
       },
     },
   });
-  writeJsonFile(join(packageDir, "openclaw.plugin.json"), { id: "diffs" });
+  writeJsonFile(join(packageDir, "bot.plugin.json"), { id: "diffs" });
   writeFileText(join(packageDir, "README.md"), "# Diffs\n");
   writeFileText(join(packageDir, "SKILL.md"), "# Diffs Skill\n");
   writeFileText(join(packageDir, "skills", "diffs", "SKILL.md"), "# Diffs Skill\n");
@@ -148,9 +148,9 @@ describe("plugin npm package manifest staging", () => {
   it("keeps msteams runtime dependencies registry-installed", () => {
     const packageJson = JSON.parse(
       readFileSync(join(process.cwd(), "extensions", "msteams", "package.json"), "utf8"),
-    ) as { openclaw?: { release?: { bundleRuntimeDependencies?: boolean } } };
+    ) as { bot?: { release?: { bundleRuntimeDependencies?: boolean } } };
 
-    expect(packageJson.openclaw?.release?.bundleRuntimeDependencies).toBe(false);
+    expect(packageJson.bot?.release?.bundleRuntimeDependencies).toBe(false);
   });
 
   it("wraps Windows npm.cmd staging through cmd.exe without shell mode", () => {
@@ -185,11 +185,11 @@ describe("plugin npm package manifest staging", () => {
         existsSync: () => false,
         platform: "win32",
       }),
-    ).toThrow("OpenClaw refuses to shell out to bare npm on Windows");
+    ).toThrow("Bot refuses to shell out to bare npm on Windows");
   });
 
   it("overlays generated channel configs while packing and restores source manifest", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-manifest-");
+    const repoDir = makeTempRepoRoot(tempDirs, "bot-plugin-npm-package-manifest-");
     const packageDir = join(repoDir, "extensions", "twitch");
     mkdirSync(packageDir, { recursive: true });
     const sourceManifest = {
@@ -201,7 +201,7 @@ describe("plugin npm package manifest staging", () => {
         properties: {},
       },
     };
-    writeJsonFile(join(packageDir, "openclaw.plugin.json"), sourceManifest);
+    writeJsonFile(join(packageDir, "bot.plugin.json"), sourceManifest);
     writeGeneratedChannelMetadata(repoDir);
 
     const resolved = resolveAugmentedPluginNpmManifest({
@@ -232,18 +232,18 @@ describe("plugin npm package manifest staging", () => {
       },
     });
 
-    const originalText = readFileSync(join(packageDir, "openclaw.plugin.json"), "utf8");
+    const originalText = readFileSync(join(packageDir, "bot.plugin.json"), "utf8");
     withAugmentedPluginNpmManifestForPackage({ repoRoot: repoDir, packageDir }, () => {
       const stagedManifest = JSON.parse(
-        readFileSync(join(packageDir, "openclaw.plugin.json"), "utf8"),
+        readFileSync(join(packageDir, "bot.plugin.json"), "utf8"),
       );
       expect(stagedManifest.channelConfigs.twitch.description).toBe("Twitch chat integration");
     });
-    expect(readFileSync(join(packageDir, "openclaw.plugin.json"), "utf8")).toBe(originalText);
+    expect(readFileSync(join(packageDir, "bot.plugin.json"), "utf8")).toBe(originalText);
   });
 
   it("overlays package-local runtime metadata while packing and restores source package json", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-runtime-");
+    const repoDir = makeTempRepoRoot(tempDirs, "bot-plugin-npm-package-runtime-");
     const packageDir = writePublishablePluginPackage(repoDir);
     writeFileText(join(packageDir, "dist", "index.js"), "export {};\n");
     writeFileText(join(packageDir, "dist", "setup-entry.js"), "export {};\n");
@@ -255,20 +255,20 @@ describe("plugin npm package manifest staging", () => {
     });
     expect(resolved.changed).toBe(true);
     expect(resolved.packageJson).toEqual({
-      name: "@openclaw/diffs",
+      name: "@hanzo/bot-diffs",
       version: "2026.5.3",
       type: "module",
       bundledDependencies: [],
-      files: ["dist/**", "openclaw.plugin.json", "README.md", "SKILL.md", "skills/**"],
+      files: ["dist/**", "bot.plugin.json", "README.md", "SKILL.md", "skills/**"],
       peerDependencies: {
-        openclaw: ">=2026.4.30",
+        bot: ">=2026.4.30",
       },
       peerDependenciesMeta: {
-        openclaw: {
+        bot: {
           optional: true,
         },
       },
-      openclaw: {
+      bot: {
         extensions: ["./index.ts"],
         setupEntry: "./dist/setup-entry.js",
         compat: {
@@ -289,39 +289,39 @@ describe("plugin npm package manifest staging", () => {
         const stagedPackageJson = JSON.parse(
           readFileSync(join(packageDir, "package.json"), "utf8"),
         );
-        expect(stagedPackageJson.openclaw.extensions).toEqual(["./index.ts"]);
-        expect(stagedPackageJson.openclaw.runtimeExtensions).toEqual(["./dist/index.js"]);
-        expect(stagedPackageJson.openclaw.setupEntry).toBe("./dist/setup-entry.js");
-        expect(stagedPackageJson.openclaw.runtimeSetupEntry).toBe("./dist/setup-entry.js");
+        expect(stagedPackageJson.bot.extensions).toEqual(["./index.ts"]);
+        expect(stagedPackageJson.bot.runtimeExtensions).toEqual(["./dist/index.js"]);
+        expect(stagedPackageJson.bot.setupEntry).toBe("./dist/setup-entry.js");
+        expect(stagedPackageJson.bot.runtimeSetupEntry).toBe("./dist/setup-entry.js");
         expect(stagedPackageJson.bundledDependencies).toEqual([]);
         expect(stagedPackageJson.bundleDependencies).toBeUndefined();
         expect(stagedPackageJson.files).toContain("dist/**");
         expect(stagedPackageJson.files).not.toContain("package-lock.json");
         expect(stagedPackageJson.files).toContain("skills/**");
-        expect(stagedPackageJson.peerDependencies.openclaw).toBe(">=2026.4.30");
-        expect(stagedPackageJson.peerDependenciesMeta.openclaw.optional).toBe(true);
+        expect(stagedPackageJson.peerDependencies.bot).toBe(">=2026.4.30");
+        expect(stagedPackageJson.peerDependenciesMeta.bot.optional).toBe(true);
       },
     );
     expect(readFileSync(join(packageDir, "package.json"), "utf8")).toBe(originalText);
   });
 
   it("installs and cleans package-local bundled dependencies while packing", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-bundled-deps-");
+    const repoDir = makeTempRepoRoot(tempDirs, "bot-plugin-npm-package-bundled-deps-");
     const packageDir = writePublishablePluginPackage(repoDir);
     writeFileText(join(packageDir, "dist", "index.js"), "export {};\n");
     writeFileText(join(packageDir, "dist", "setup-entry.js"), "export {};\n");
     writeLocalDependencyPackage(packageDir);
     writeJsonFile(join(packageDir, "package.json"), {
-      name: "@openclaw/diffs",
+      name: "@hanzo/bot-diffs",
       version: "2026.5.3",
       type: "module",
       dependencies: {
         "local-runtime-dep": "file:./deps/local-runtime-dep",
       },
       devDependencies: {
-        "@openclaw/plugin-sdk": "workspace:*",
+        "@hanzo/bot-plugin-sdk": "workspace:*",
       },
-      openclaw: {
+      bot: {
         extensions: ["./index.ts"],
         setupEntry: "./setup-entry.ts",
         compat: {
@@ -361,7 +361,7 @@ describe("plugin npm package manifest staging", () => {
   });
 
   it("force-installs missing optional bundled dependencies for portable packs", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-portable-optional-");
+    const repoDir = makeTempRepoRoot(tempDirs, "bot-plugin-npm-package-portable-optional-");
     const packageDir = writePublishablePluginPackage(repoDir);
     writeFileText(join(packageDir, "dist", "index.js"), "export {};\n");
     writeFileText(join(packageDir, "dist", "setup-entry.js"), "export {};\n");
@@ -370,13 +370,13 @@ describe("plugin npm package manifest staging", () => {
       optionalDependencySpec: "file:../../deps/optional-platform-dep",
     });
     writeJsonFile(join(packageDir, "package.json"), {
-      name: "@openclaw/diffs",
+      name: "@hanzo/bot-diffs",
       version: "2026.5.3",
       type: "module",
       dependencies: {
         "local-runtime-dep": "file:./deps/local-runtime-dep",
       },
-      openclaw: {
+      bot: {
         extensions: ["./index.ts"],
         setupEntry: "./setup-entry.ts",
         compat: {
@@ -430,19 +430,19 @@ withAugmentedPluginNpmManifestForPackage(
   });
 
   it("honors plugin package opt-out for bundled runtime dependencies", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-bundle-opt-out-");
+    const repoDir = makeTempRepoRoot(tempDirs, "bot-plugin-npm-package-bundle-opt-out-");
     const packageDir = writePublishablePluginPackage(repoDir);
     writeFileText(join(packageDir, "dist", "index.js"), "export {};\n");
     writeFileText(join(packageDir, "dist", "setup-entry.js"), "export {};\n");
     writeLocalDependencyPackage(packageDir);
     writeJsonFile(join(packageDir, "package.json"), {
-      name: "@openclaw/diffs",
+      name: "@hanzo/bot-diffs",
       version: "2026.5.3",
       type: "module",
       dependencies: {
         "local-runtime-dep": "file:./deps/local-runtime-dep",
       },
-      openclaw: {
+      bot: {
         extensions: ["./index.ts"],
         setupEntry: "./setup-entry.ts",
         compat: {
@@ -478,7 +478,7 @@ withAugmentedPluginNpmManifestForPackage(
   });
 
   it("refuses to pack publishable plugins before package-local runtime files exist", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-runtime-missing-");
+    const repoDir = makeTempRepoRoot(tempDirs, "bot-plugin-npm-package-runtime-missing-");
     const packageDir = writePublishablePluginPackage(repoDir);
 
     expect(() =>
@@ -492,16 +492,16 @@ withAugmentedPluginNpmManifestForPackage(
   });
 
   it("refuses package file rules that omit advertised package-local runtime files", () => {
-    const repoDir = makeTempRepoRoot(tempDirs, "openclaw-plugin-npm-package-runtime-excluded-");
+    const repoDir = makeTempRepoRoot(tempDirs, "bot-plugin-npm-package-runtime-excluded-");
     const packageDir = writePublishablePluginPackage(repoDir);
     writeFileText(join(packageDir, "dist", "index.js"), "export {};\n");
     writeFileText(join(packageDir, "dist", "setup-entry.js"), "export {};\n");
     writeJsonFile(join(packageDir, "package.json"), {
-      name: "@openclaw/diffs",
+      name: "@hanzo/bot-diffs",
       version: "2026.5.3",
       type: "module",
       files: ["dist/**", "!dist/setup-entry.js"],
-      openclaw: {
+      bot: {
         extensions: ["./index.ts"],
         setupEntry: "./setup-entry.ts",
         compat: {

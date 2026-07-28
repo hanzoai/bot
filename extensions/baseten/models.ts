@@ -4,12 +4,12 @@
 import {
   buildManifestModelDefinition,
   readManifestProviderDefaultModelRef,
-} from "openclaw/plugin-sdk/provider-catalog-shared";
+} from "bot/plugin-sdk/provider-catalog-shared";
 import type {
   ModelCompatConfig,
   ModelDefinitionConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import manifest from "./openclaw.plugin.json" with { type: "json" };
+} from "bot/plugin-sdk/provider-model-shared";
+import manifest from "./bot.plugin.json" with { type: "json" };
 
 const BASETEN_MANIFEST_CATALOG = manifest.modelCatalog.providers.baseten;
 const DEFAULT_CONTEXT_WINDOW = 128_000;
@@ -217,7 +217,7 @@ function projectLiveModel(
   };
 }
 
-/** Projects Baseten's authenticated `/models` response into OpenClaw model rows. */
+/** Projects Baseten's authenticated `/models` response into Bot model rows. */
 export function projectBasetenLiveModels(rows: readonly unknown[]): ModelDefinitionConfig[] {
   const fallbacks = new Map(buildStaticBasetenModels().map((model) => [model.id, model]));
   const seen = new Set<string>();

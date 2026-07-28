@@ -1,4 +1,4 @@
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import { listAgentIds } from "../agents/agent-scope.js";
 import {
   isConfiguredSessionStoreAgentId,
@@ -13,14 +13,14 @@ import {
   listSessionEntriesReadOnly as listAccessorSessionEntriesReadOnly,
 } from "../config/sessions/session-accessor.js";
 import type { SessionEntryListScope } from "../config/sessions/session-accessor.types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import {
   DEFAULT_AGENT_ID,
   isIncognitoSessionKey,
   normalizeAgentId,
   parseAgentSessionKey,
 } from "../routing/session-key.js";
-import { resolveIncognitoOpenClawAgentSqlitePath } from "../state/openclaw-agent-db.js";
+import { resolveIncognitoBotAgentSqlitePath } from "../state/bot-agent-db.js";
 import {
   resolveSessionStoreAgentId,
   resolveSessionStoreKey,
@@ -59,7 +59,7 @@ function findFreshestStoreMatch(
 }
 
 function buildGatewaySessionStoreScanTargets(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   key: string;
   canonicalKey: string;
   agentId: string;
@@ -82,7 +82,7 @@ function buildGatewaySessionStoreScanTargets(params: {
 }
 
 function resolveGatewaySessionStoreCandidates(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string,
   cache?: GatewaySessionStoreDiscoveryCache,
 ): { existing: SessionStoreTarget[]; fallback: SessionStoreTarget } {
@@ -173,7 +173,7 @@ function loadGatewaySessionLookupStoreUncached(
 }
 
 function resolveGatewaySessionStoreLookup(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   key: string;
   canonicalKey: string;
   agentId: string;
@@ -255,7 +255,7 @@ function isAgentScopedSentinelSessionKey(canonicalKey: string): boolean {
 }
 
 function resolveExplicitDeletedLegacyMainStoreTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   key: string;
   clone?: boolean;
   projection?: SessionEntryListScope["projection"];
@@ -336,7 +336,7 @@ function resolveExplicitDeletedLegacyMainStoreTarget(params: {
 }
 
 export function resolveGatewaySessionStoreTargetWithStore(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   key: string;
   agentId?: string;
   clone?: boolean;
@@ -372,7 +372,7 @@ export function resolveGatewaySessionStoreTargetWithStore(params: {
       ? normalizeAgentId(requestedAgentId)
       : resolveSessionStoreAgentId(params.cfg, canonicalKey);
   if (isIncognitoSessionKey(canonicalKey)) {
-    const storePath = resolveIncognitoOpenClawAgentSqlitePath({ agentId });
+    const storePath = resolveIncognitoBotAgentSqlitePath({ agentId });
     // Session resolution may receive arbitrary stale keys; only creation/write
     // owners may materialize the process-lifetime incognito database.
     const store = loadGatewaySessionLookupStore(storePath, params.clone, agentId, {
@@ -418,7 +418,7 @@ export function resolveGatewaySessionStoreTargetWithStore(params: {
 }
 
 export function resolveGatewaySessionStoreTarget(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   key: string;
   agentId?: string;
   clone?: boolean;

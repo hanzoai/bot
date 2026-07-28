@@ -1,6 +1,6 @@
-import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@openclaw/ai/internal/shared";
-import { expectDefined } from "@openclaw/normalization-core";
-import type { Model } from "openclaw/plugin-sdk/llm";
+import { SYSTEM_PROMPT_CACHE_BOUNDARY } from "@hanzo/bot-ai/internal/shared";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import type { Model } from "bot/plugin-sdk/llm";
 import { describe, expect, it } from "vitest";
 import { buildOpenAICompletionsParams } from "./openai-transport-stream.js";
 import {
@@ -159,18 +159,18 @@ describe("openai transport stream", () => {
       } as never,
       { sessionId: "session-123" } as never,
       {
-        openclaw_session_id: "session-123",
-        openclaw_turn_id: "turn-123",
-        openclaw_turn_attempt: "1",
-        openclaw_transport: "stream",
+        bot_session_id: "session-123",
+        bot_turn_id: "turn-123",
+        bot_turn_attempt: "1",
+        bot_transport: "stream",
       },
     ) as { metadata?: Record<string, string> };
 
     expectRecordFields(params.metadata, {
-      openclaw_session_id: "session-123",
-      openclaw_turn_id: "turn-123",
-      openclaw_turn_attempt: "1",
-      openclaw_transport: "stream",
+      bot_session_id: "session-123",
+      bot_turn_id: "turn-123",
+      bot_turn_attempt: "1",
+      bot_transport: "stream",
     });
   });
 

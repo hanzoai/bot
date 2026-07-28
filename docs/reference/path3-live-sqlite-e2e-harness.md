@@ -34,20 +34,20 @@ node scripts/path3-live-sqlite-e2e.mjs \
 The command connects to an already running Gateway. It does not start, stop,
 import, or re-run the migration unless an explicit migration mode is added
 later. A CI or isolated-local variant can use
-`test/helpers/openclaw-test-instance.ts`, but the live proof path should inspect
+`test/helpers/bot-test-instance.ts`, but the live proof path should inspect
 the actual operator Gateway and its real per-agent SQLite database.
 
 ## Isolated built-CLI proof
 
 The built-CLI proof runner seeds an isolated legacy session store, starts the
 rebuilt Gateway, and proves that startup imports hot legacy sessions into
-SQLite before runtime reads begin. It must not run `openclaw doctor --fix`
+SQLite before runtime reads begin. It must not run `bot doctor --fix`
 before the first Gateway start, because that would prove the manual migration
 path instead of the upgrade path users receive on first boot after the flip.
 
 After startup import, the isolated proof may run
-`openclaw doctor --session-sqlite inspect` and
-`openclaw doctor --session-sqlite validate` as diagnostic evidence. Those
+`bot doctor --session-sqlite inspect` and
+`bot doctor --session-sqlite validate` as diagnostic evidence. Those
 doctor commands are not the migration driver for the startup-upgrade proof.
 Separate doctor-import scenarios should seed legacy transcript files plus
 trajectory sidecars and verify doctor archives those artifacts while SQLite
@@ -71,7 +71,7 @@ Gateway is not usable:
 - `lsof -p <gateway-pid>` must show SQLite DB/WAL/SHM handles and no hot
   `.jsonl` or `sessions.json` handles.
 
-`openclaw doctor --session-sqlite validate` is informational only in live mode.
+`bot doctor --session-sqlite validate` is informational only in live mode.
 After post-flip traffic it may report expected drift against legacy files. The
 harness should use doctor output for classification and migration inventory,
 not as the runtime pass/fail oracle.

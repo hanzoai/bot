@@ -4,11 +4,11 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import {
-  closeOpenClawStateDatabaseForTest,
-  openOpenClawStateDatabase,
-} from "../state/openclaw-state-db.js";
+  closeBotStateDatabaseForTest,
+  openBotStateDatabase,
+} from "../state/bot-state-db.js";
 import {
   executeSqliteQuerySync,
   executeSqliteQueryTakeFirstSync,
@@ -23,23 +23,23 @@ import {
 import type { GatewayRestartHandoff } from "./restart-handoff.js";
 
 const tempDirs: string[] = [];
-type GatewayRestartHandoffDatabase = Pick<OpenClawStateKyselyDatabase, "gateway_restart_handoff">;
+type GatewayRestartHandoffDatabase = Pick<BotStateKyselyDatabase, "gateway_restart_handoff">;
 
 function createHandoffEnv(): NodeJS.ProcessEnv {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-restart-handoff-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-restart-handoff-"));
   tempDirs.push(dir);
   return {
     ...process.env,
-    OPENCLAW_STATE_DIR: dir,
+    BOT_STATE_DIR: dir,
   };
 }
 
 function legacyHandoffPath(env: NodeJS.ProcessEnv): string {
-  return path.join(env.OPENCLAW_STATE_DIR ?? "", "gateway-supervisor-restart-handoff.json");
+  return path.join(env.BOT_STATE_DIR ?? "", "gateway-supervisor-restart-handoff.json");
 }
 
 function readHandoffRow(env: NodeJS.ProcessEnv) {
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openBotStateDatabase({ env });
   const stateDb = getNodeSqliteKysely<GatewayRestartHandoffDatabase>(db);
   return executeSqliteQueryTakeFirstSync(
     db,
@@ -82,7 +82,7 @@ function insertHandoffRow(
     restartTraceLastAt?: number | null;
   },
 ) {
-  const { db } = openOpenClawStateDatabase({ env });
+  const { db } = openBotStateDatabase({ env });
   const stateDb = getNodeSqliteKysely<GatewayRestartHandoffDatabase>(db);
   const now = Date.now();
   executeSqliteQuerySync(
@@ -126,13 +126,13 @@ function spawnHandoffConsumer(params: {
   const moduleUrl = new URL("./restart-handoff.ts", import.meta.url).href;
   const script = `
     import fs from "node:fs";
-    while (!fs.existsSync(process.env.OPENCLAW_HANDOFF_TEST_START_FILE)) {
+    while (!fs.existsSync(process.env.BOT_HANDOFF_TEST_START_FILE)) {
       await new Promise((resolve) => setTimeout(resolve, 5));
     }
-    const mod = await import(process.env.OPENCLAW_HANDOFF_TEST_MODULE_URL);
+    const mod = await import(process.env.BOT_HANDOFF_TEST_MODULE_URL);
     const result = mod.consumeGatewayRestartHandoffSync({
-      expectedPid: Number(process.env.OPENCLAW_HANDOFF_TEST_EXPECTED_PID),
-      now: Number(process.env.OPENCLAW_HANDOFF_TEST_NOW),
+      expectedPid: Number(process.env.BOT_HANDOFF_TEST_EXPECTED_PID),
+      now: Number(process.env.BOT_HANDOFF_TEST_NOW),
       env: process.env,
     });
     process.stdout.write(JSON.stringify(result));
@@ -146,10 +146,10 @@ function spawnHandoffConsumer(params: {
         cwd: process.cwd(),
         env: {
           ...params.env,
-          OPENCLAW_HANDOFF_TEST_EXPECTED_PID: String(params.expectedPid),
-          OPENCLAW_HANDOFF_TEST_MODULE_URL: moduleUrl,
-          OPENCLAW_HANDOFF_TEST_NOW: String(params.now),
-          OPENCLAW_HANDOFF_TEST_START_FILE: params.startFile,
+          BOT_HANDOFF_TEST_EXPECTED_PID: String(params.expectedPid),
+          BOT_HANDOFF_TEST_MODULE_URL: moduleUrl,
+          BOT_HANDOFF_TEST_NOW: String(params.now),
+          BOT_HANDOFF_TEST_START_FILE: params.startFile,
         },
         stdio: ["ignore", "pipe", "pipe"],
       },
@@ -201,7 +201,7 @@ function spawnHandoffConsumer(params: {
 
 describe("gateway restart handoff", () => {
   afterEach(() => {
-    closeOpenClawStateDatabaseForTest();
+    closeBotStateDatabaseForTest();
     for (const dir of tempDirs.splice(0)) {
       fs.rmSync(dir, { force: true, recursive: true });
     }
@@ -303,7 +303,7 @@ describe("gateway restart handoff", () => {
       startedAt: 10_000,
       lastAt: 10_250,
     });
-    const { db } = openOpenClawStateDatabase({ env });
+    const { db } = openBotStateDatabase({ env });
     expect(
       db
         .prepare(
@@ -549,8 +549,8 @@ describe("gateway restart handoff", () => {
       supervisorMode: "external",
       createdAt: 1_000,
     });
-    closeOpenClawStateDatabaseForTest();
-    const startFile = path.join(env.OPENCLAW_STATE_DIR ?? "", "start-consumers");
+    closeBotStateDatabaseForTest();
+    const startFile = path.join(env.BOT_STATE_DIR ?? "", "start-consumers");
 
     const first = spawnHandoffConsumer({
       env,
@@ -585,7 +585,7 @@ describe("gateway restart handoff", () => {
       createdAt: 1_000,
       ttlMs: 1_000,
     });
-    const { db } = openOpenClawStateDatabase({ env });
+    const { db } = openBotStateDatabase({ env });
     const originalExec = db.exec.bind(db);
     let transactionBegan = false;
     const execSpy = vi.spyOn(db, "exec").mockImplementation((sql) => {

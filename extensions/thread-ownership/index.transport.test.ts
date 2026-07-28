@@ -1,9 +1,9 @@
 // Real-transport proof: ownership 200 path is status-only and must cancel unread bodies.
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { OpenClawPluginApi } from "./api.js";
+import type { BotPluginApi } from "./api.js";
 import register from "./index.js";
 
 async function listen(server: ReturnType<typeof createServer>): Promise<string> {
@@ -79,7 +79,7 @@ describe("thread-ownership transport body cleanup", () => {
 
     const forwarderUrl = await listen(server);
     process.env.SLACK_FORWARDER_URL = forwarderUrl;
-    register.register(api as unknown as OpenClawPluginApi);
+    register.register(api as unknown as BotPluginApi);
     const send = expectDefined(hooks.message_sending, "message_sending hook");
 
     try {
@@ -109,7 +109,7 @@ describe("thread-ownership transport body cleanup", () => {
 
     const forwarderUrl = await listen(server);
     process.env.SLACK_FORWARDER_URL = forwarderUrl;
-    register.register(api as unknown as OpenClawPluginApi);
+    register.register(api as unknown as BotPluginApi);
     const send = expectDefined(hooks.message_sending, "message_sending hook");
 
     try {

@@ -1,5 +1,5 @@
-// Microsoft Foundry plugin entrypoint registers its OpenClaw integration.
-import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
+// Microsoft Foundry plugin entrypoint registers its Bot integration.
+import { definePluginEntry } from "bot/plugin-sdk/plugin-entry";
 import { buildMicrosoftFoundryImageGenerationProvider } from "./image-generation-provider.js";
 import { buildMicrosoftFoundryProvider } from "./provider.js";
 

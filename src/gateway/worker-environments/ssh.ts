@@ -108,7 +108,7 @@ export async function prepareWorkerSsh(params: {
     pinnedHostKey: params.pinnedHostKey,
   });
   const temporaryDir = await fs.mkdtemp(
-    path.join(os.tmpdir(), params.temporaryDirectoryPrefix ?? "openclaw-worker-ssh-"),
+    path.join(os.tmpdir(), params.temporaryDirectoryPrefix ?? "bot-worker-ssh-"),
   );
   try {
     const identity = await params.resolveIdentity(params.ssh.keyRef);

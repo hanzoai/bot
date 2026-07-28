@@ -1,12 +1,12 @@
-import type { StatusReactionController } from "openclaw/plugin-sdk/channel-feedback";
-import type { ChannelInboundTurnPlan } from "openclaw/plugin-sdk/channel-inbound";
+import type { StatusReactionController } from "bot/plugin-sdk/channel-feedback";
+import type { ChannelInboundTurnPlan } from "bot/plugin-sdk/channel-inbound";
 // Discord plugin module owns progress-window state and agent-event rendering.
 import {
   buildChannelProgressDraftLine,
   buildChannelProgressDraftLineForEntry,
   isChannelProgressDraftWorkToolName,
-} from "openclaw/plugin-sdk/channel-outbound";
-import { getSessionEntry, resolveStorePath } from "openclaw/plugin-sdk/session-store-runtime";
+} from "bot/plugin-sdk/channel-outbound";
+import { getSessionEntry, resolveStorePath } from "bot/plugin-sdk/session-store-runtime";
 import type { createDiscordDraftPreviewController } from "./message-handler.draft-preview.js";
 import type { DiscordMessagePreflightContext } from "./message-handler.preflight.js";
 

@@ -1,5 +1,5 @@
-// Slack plugin entrypoint registers its OpenClaw integration.
-import { defineBundledChannelEntry } from "openclaw/plugin-sdk/channel-entry-contract";
+// Slack plugin entrypoint registers its Bot integration.
+import { defineBundledChannelEntry } from "bot/plugin-sdk/channel-entry-contract";
 import { registerSlackPluginHttpRoutes } from "./http-routes-api.js";
 
 export default defineBundledChannelEntry({

@@ -1,5 +1,5 @@
 ---
-summary: "Adds Vercel AI Gateway model provider support to OpenClaw."
+summary: "Adds Vercel AI Gateway model provider support to Bot."
 read_when:
   - You are installing, configuring, or auditing the vercel-ai-gateway plugin
 title: "Vercel AI Gateway plugin"
@@ -7,12 +7,12 @@ title: "Vercel AI Gateway plugin"
 
 # Vercel AI Gateway plugin
 
-Adds Vercel AI Gateway model provider support to OpenClaw.
+Adds Vercel AI Gateway model provider support to Bot.
 
 ## Distribution
 
-- Package: `@openclaw/vercel-ai-gateway-provider`
-- Install route: npm; ClawHub: `clawhub:@openclaw/vercel-ai-gateway-provider`
+- Package: `@hanzo/bot-vercel-ai-gateway-provider`
+- Install route: npm; ClawHub: `clawhub:@hanzo/bot-vercel-ai-gateway-provider`
 
 ## Surface
 

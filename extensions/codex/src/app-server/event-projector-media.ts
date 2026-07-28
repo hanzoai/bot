@@ -1,10 +1,10 @@
 import {
   embeddedAgentLog,
   type EmbeddedRunAttemptParams,
-} from "openclaw/plugin-sdk/agent-harness-runtime";
-import { generatedImageAssetFromBase64 } from "openclaw/plugin-sdk/image-generation";
-import { resolveGeneratedMediaMaxBytes } from "openclaw/plugin-sdk/media-generation-runtime";
-import { saveMediaBuffer } from "openclaw/plugin-sdk/media-store";
+} from "bot/plugin-sdk/agent-harness-runtime";
+import { generatedImageAssetFromBase64 } from "bot/plugin-sdk/image-generation";
+import { resolveGeneratedMediaMaxBytes } from "bot/plugin-sdk/media-generation-runtime";
+import { saveMediaBuffer } from "bot/plugin-sdk/media-store";
 import { readItemString, readString } from "./event-projector-values.js";
 import type { CodexThreadItem, JsonObject } from "./protocol.js";
 

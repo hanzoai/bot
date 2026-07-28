@@ -1,4 +1,4 @@
-import { normalizeStringifiedEntries } from "@openclaw/normalization-core/string-coerce";
+import { normalizeStringifiedEntries } from "@hanzo/bot-normalization-core/string-coerce";
 // Normalization Core tests cover string coerce behavior.
 import { describe, expect, it } from "vitest";
 

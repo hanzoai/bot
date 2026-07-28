@@ -1,6 +1,6 @@
 /* @vitest-environment jsdom */
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { html, render } from "lit";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GatewayBrowserClient } from "../../api/gateway.ts";
@@ -835,7 +835,7 @@ describe("cloud workspace conflict notice", () => {
       "src/path-5.ts",
       "src/path-6.ts",
     ],
-    stagedResultRef: "refs/openclaw/worker-results/claim-123",
+    stagedResultRef: "refs/bot/worker-results/claim-123",
     totalCount: 9,
   };
 
@@ -864,8 +864,8 @@ describe("cloud workspace conflict notice", () => {
       (element) => element.textContent,
     );
     expect(commands).toEqual([
-      "git show 'refs/openclaw/worker-results/claim-123:src/[path]-1.ts'",
-      "git checkout 'refs/openclaw/worker-results/claim-123' -- ':(top,literal)src/[path]-1.ts'",
+      "git show 'refs/bot/worker-results/claim-123:src/[path]-1.ts'",
+      "git checkout 'refs/bot/worker-results/claim-123' -- ':(top,literal)src/[path]-1.ts'",
     ]);
     expect(
       notice.querySelector<HTMLButtonElement>('[aria-label="Copy cloud inspect command"]'),
@@ -898,7 +898,7 @@ describe("cloud workspace conflict notice", () => {
         customType: "cloud-workspace-conflict",
         details: {
           paths: [entryPath],
-          stagedResultRef: "refs/openclaw/worker-results/claim-unsafe",
+          stagedResultRef: "refs/bot/worker-results/claim-unsafe",
         },
       });
       expect(normalizedConflict).toBeDefined();
@@ -917,7 +917,7 @@ describe("cloud workspace conflict notice", () => {
       customType: "cloud-workspace-conflict",
       details: {
         paths: ["src/unsafe\nname.ts", "src/safe.ts"],
-        stagedResultRef: "refs/openclaw/worker-results/claim-mixed",
+        stagedResultRef: "refs/bot/worker-results/claim-mixed",
       },
     });
     const container = renderChatView({ workspaceConflict: normalizedConflict });
@@ -925,8 +925,8 @@ describe("cloud workspace conflict notice", () => {
       (element) => element.textContent,
     );
     expect(commands).toEqual([
-      "git show 'refs/openclaw/worker-results/claim-mixed:src/safe.ts'",
-      "git checkout 'refs/openclaw/worker-results/claim-mixed' -- ':(top,literal)src/safe.ts'",
+      "git show 'refs/bot/worker-results/claim-mixed:src/safe.ts'",
+      "git checkout 'refs/bot/worker-results/claim-mixed' -- ':(top,literal)src/safe.ts'",
     ]);
   });
 });
@@ -1138,7 +1138,7 @@ describe("chat code-block copy", () => {
     { name: "keeps legacy raw data-code payloads copyable", payload: "legacy text" },
     {
       name: "does not decode unmarked raw data-code payloads that start with the block-art prefix",
-      payload: 'openclaw:block-art-code:"literal"',
+      payload: 'bot:block-art-code:"literal"',
     },
   ])("$name", async ({ payload }) => {
     const writeText = vi.fn().mockResolvedValue(undefined);
@@ -2724,7 +2724,7 @@ describe("chat voice controls", () => {
   it.each([
     ["connecting", "Connecting voice input..."],
     ["listening", "Listening..."],
-    ["thinking", "Asking OpenClaw..."],
+    ["thinking", "Asking Bot..."],
   ] as const)("renders %s voice activity without visible status copy", (status, label) => {
     const inputLevel = new RealtimeTalkLevelSignal();
     inputLevel.set(0.64);
@@ -2822,7 +2822,7 @@ describe("chat voice controls", () => {
     );
     const tooltip = talkButton.parentElement as (HTMLElement & { content?: string }) | null;
     expect(talkButton.getAttribute("title")).toBeNull();
-    expect(tooltip?.localName).toBe("openclaw-tooltip");
+    expect(tooltip?.localName).toBe("bot-tooltip");
     expect(tooltip?.content).toBe(startTalkLabel);
     expect(talkButton.textContent?.trim()).toBe(startTalkLabel);
     requireElement(
@@ -3798,7 +3798,7 @@ describe("chat attachment picker", () => {
     chat.dispatchEvent(createDragEvent("dragleave"));
     expect(chat.hasAttribute("data-attachment-drop-active")).toBe(false);
 
-    chat.dispatchEvent(createDragEvent("dragenter", ["application/x-openclaw-session"]));
+    chat.dispatchEvent(createDragEvent("dragenter", ["application/x-bot-session"]));
     expect(chat.hasAttribute("data-attachment-drop-active")).toBe(false);
   });
 
@@ -4307,7 +4307,7 @@ describe("chat welcome", () => {
 
     const clawd = container.querySelector(".agent-chat__welcome-clawd");
     expect(clawd).not.toBeNull();
-    expect(clawd?.querySelector("openclaw-mascot")?.getAttribute("mood")).toBe("idle");
+    expect(clawd?.querySelector("bot-mascot")?.getAttribute("mood")).toBe("idle");
     expect(container.querySelector(".agent-chat__badge")).toBeNull();
   });
 
@@ -4316,7 +4316,7 @@ describe("chat welcome", () => {
     const welcome = requireElement(container, ".agent-chat__welcome", "welcome screen");
     const mascot = requireElement(
       container,
-      ".agent-chat__welcome-clawd openclaw-mascot",
+      ".agent-chat__welcome-clawd bot-mascot",
       "welcome mascot",
     ) as HTMLElement & { tease: boolean; catchOnce: () => void };
     const catchOnce = vi.spyOn(mascot, "catchOnce");
@@ -4538,7 +4538,7 @@ describe("chat model controls", () => {
     },
     {
       name: "uses a neutral model label for non-Codex locked sessions",
-      runtimeId: "openclaw",
+      runtimeId: "bot",
       expected: "Thread model",
       omitSession: false,
     },
@@ -4565,7 +4565,7 @@ describe("chat model controls", () => {
     expect(container.querySelector(".chat-controls__inline-select-label")?.textContent).toContain(
       expected,
     );
-    if (runtimeId === "openclaw") {
+    if (runtimeId === "bot") {
       expect(container.textContent).not.toContain("Codex-controlled model");
     }
   });
@@ -5604,7 +5604,7 @@ describe("right-click Reply", () => {
     expect(document.querySelector(".chat-delete-confirm")).not.toBeNull();
     document.querySelector<HTMLButtonElement>(".chat-delete-confirm__yes")!.click();
 
-    expect(storedValues.get("openclaw:deleted:context-hide-test")).toBe(
+    expect(storedValues.get("bot:deleted:context-hide-test")).toBe(
       JSON.stringify(["group:assistant:persisted"]),
     );
     expect(onRequestUpdate).toHaveBeenCalledOnce();
@@ -5619,7 +5619,7 @@ describe("right-click Reply", () => {
     const confirmationTrigger = document.createElement("button");
     confirmationOwner.appendChild(confirmationTrigger);
     section.appendChild(confirmationOwner);
-    window.localStorage.removeItem("openclaw:skip-rewind-confirm");
+    window.localStorage.removeItem("bot:skip-rewind-confirm");
     chatMessage.openChatRewindConfirmation(confirmationTrigger, vi.fn());
     const { bubble } = appendChatBubble(container, { text: "open message actions" });
 
@@ -5658,7 +5658,7 @@ describe("right-click Reply", () => {
     expect(
       document
         .querySelector<HTMLElement>('[aria-label="Rewind to here"]')
-        ?.closest("openclaw-tooltip")?.content,
+        ?.closest("bot-tooltip")?.content,
     ).toBe("Rewind is unavailable while the agent is working");
   });
 

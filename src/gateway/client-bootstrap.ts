@@ -1,6 +1,6 @@
 // Gateway client bootstrap resolver.
 // Collects URL, auth, and handshake settings before constructing a GatewayClient.
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveGatewayConnectionAuth } from "./connection-auth.js";
 import { buildGatewayConnectionDetailsWithResolvers } from "./connection-details.js";
 import type { ExplicitGatewayAuth } from "./credentials.js";
@@ -12,7 +12,7 @@ function resolveGatewayUrlOverrideSource(urlSource: string): "cli" | "env" | und
   if (urlSource === "cli --url") {
     return "cli";
   }
-  if (urlSource === "env OPENCLAW_GATEWAY_URL") {
+  if (urlSource === "env BOT_GATEWAY_URL") {
     return "env";
   }
   return undefined;
@@ -22,7 +22,7 @@ function resolveGatewayUrlOverrideSource(urlSource: string): "cli" | "env" | und
  * Resolves the URL, auth material, and handshake tuning needed to start a GatewayClient.
  */
 export async function resolveGatewayClientBootstrap(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   gatewayUrl?: string;
   explicitAuth?: ExplicitGatewayAuth;
   env?: NodeJS.ProcessEnv;

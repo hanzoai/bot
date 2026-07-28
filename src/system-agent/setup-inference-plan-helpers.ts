@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import { listAgentEntries, resolveDefaultAgentId } from "../agents/agent-scope.js";
 import { loadAuthProfileStoreForRuntime } from "../agents/auth-profiles/store.js";
 import { resolveCliBackendConfig } from "../agents/cli-backends.js";
@@ -13,7 +13,7 @@ import {
 import { resolveProviderIdForAuth } from "../agents/provider-auth-aliases.js";
 import { buildAgentRuntimeAuthPlan } from "../agents/runtime-plan/auth.js";
 import { GEMINI_CLI_DEFAULT_MODEL_REF } from "../commands/onboard-inference.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import type { ProviderAuthResult } from "../plugins/types.js";
 import { normalizeAgentId } from "../routing/session-key.js";
 import {
@@ -28,8 +28,8 @@ export type SetupInferenceTestPlan = {
   provider: string;
   model: string;
   modelRef: string;
-  config: OpenClawConfig;
-  /** Execution identity used by the real OpenClaw turn. */
+  config: BotConfig;
+  /** Execution identity used by the real Bot turn. */
   agentId?: string;
   /** Default-agent owner whose model/runtime config is being selected. */
   routeAgentId?: string;
@@ -41,14 +41,14 @@ export type SetupInferenceTestPlan = {
   persistModelRef?: string;
   manualAuth?: {
     profiles: ProviderAuthResult["profiles"];
-    runtimeConfigBase: OpenClawConfig;
-    sourceConfigBase: OpenClawConfig;
+    runtimeConfigBase: BotConfig;
+    sourceConfigBase: BotConfig;
     configPatch: unknown;
     pluginId?: string;
   };
 };
 
-export function configureCodexCliPreparedAuth(cfg: OpenClawConfig): OpenClawConfig {
+export function configureCodexCliPreparedAuth(cfg: BotConfig): BotConfig {
   const entry = cfg.plugins?.entries?.codex;
   const pluginConfig = entry?.config ?? {};
   const appServer =
@@ -213,7 +213,7 @@ export function parseRef(modelRef: string): { provider: string; model: string } 
     : { provider: modelRef.slice(0, slash), model: modelRef.slice(slash + 1) };
 }
 
-export function projectSetupTargetModelMetadata(config: OpenClawConfig, modelRef: string): unknown {
+export function projectSetupTargetModelMetadata(config: BotConfig, modelRef: string): unknown {
   const target = parseRef(modelRef);
   const canonicalKey = modelKey(target.provider, target.model);
   const keys = new Set(
@@ -256,7 +256,7 @@ export function resolveSetupAgentRuntimeId(
     kind === "provider-auth" ||
     parseProviderAutoSetupChoiceId(kind) !== undefined
   ) {
-    return "openclaw";
+    return "bot";
   }
   return undefined;
 }
@@ -283,15 +283,15 @@ export function mapFailoverReasonToSetupStatus(
 }
 
 export function prepareManualAuthForActivation(params: {
-  baseConfig: OpenClawConfig;
-  preparedConfig: OpenClawConfig;
+  baseConfig: BotConfig;
+  preparedConfig: BotConfig;
   profiles: ProviderAuthResult["profiles"];
   selectedProfileId: string;
   modelRef: string;
   providerId: string;
   pluginId?: string;
 }): {
-  config: OpenClawConfig;
+  config: BotConfig;
   profiles: ProviderAuthResult["profiles"];
   selectedProfileId: string;
 } {
@@ -317,8 +317,8 @@ export function prepareManualAuthForActivation(params: {
 }
 
 function copySelectedModelMetadata(params: {
-  target: OpenClawConfig;
-  prepared: OpenClawConfig;
+  target: BotConfig;
+  prepared: BotConfig;
   modelRef: string;
 }): void {
   const preparedDefaultModels = params.prepared.agents?.defaults?.models;
@@ -365,7 +365,7 @@ function copySelectedModelMetadata(params: {
 }
 
 function findSelectedProviderConfigKey(
-  config: OpenClawConfig,
+  config: BotConfig,
   providerId: string,
 ): string | undefined {
   const providers = config.models?.providers;
@@ -383,18 +383,18 @@ function findSelectedProviderConfigKey(
 
 /**
  * Provider auth hooks are untrusted setup input. Carry only the selected
- * inference route's config into the probe; OpenClaw owns every other setup
+ * inference route's config into the probe; Bot owns every other setup
  * surface after intelligence exists.
  */
 export function projectManualInferenceConfig(params: {
-  baseConfig: OpenClawConfig;
-  preparedConfig: OpenClawConfig;
+  baseConfig: BotConfig;
+  preparedConfig: BotConfig;
   selectedProfile?: ProviderAuthResult["profiles"][number];
   selectedProfileId?: string;
   modelRef: string;
   providerId: string;
   pluginId?: string;
-}): OpenClawConfig {
+}): BotConfig {
   const config = structuredClone(params.baseConfig);
   if (params.selectedProfile && params.selectedProfileId) {
     const metadata = params.preparedConfig.auth?.profiles?.[params.selectedProfile.profileId] ?? {
@@ -446,7 +446,7 @@ export function projectManualInferenceConfig(params: {
 }
 
 export function canonicalizeSetupModelRef(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   raw: string;
   defaultProvider: string;
 }): string {

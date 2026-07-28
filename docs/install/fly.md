@@ -1,12 +1,12 @@
 ---
-summary: "Step-by-step Fly.io deployment for OpenClaw with persistent storage and HTTPS"
+summary: "Step-by-step Fly.io deployment for Bot with persistent storage and HTTPS"
 title: Fly.io
 read_when:
-  - Deploying OpenClaw on Fly.io
+  - Deploying Bot on Fly.io
   - Setting up Fly volumes, secrets, and first-run config
 ---
 
-**Goal:** OpenClaw Gateway running on a [Fly.io](https://fly.io) machine with persistent storage, automatic HTTPS, and Discord/channel access.
+**Goal:** Bot Gateway running on a [Fly.io](https://fly.io) machine with persistent storage, automatic HTTPS, and Discord/channel access.
 
 ## What you need
 
@@ -25,14 +25,14 @@ read_when:
 <Steps>
   <Step title="Create the Fly app">
     ```bash
-    git clone https://github.com/openclaw/openclaw.git
-    cd openclaw
+    git clone https://github.com/hanzoai/bot.git
+    cd bot
 
     # pick your own name
-    fly apps create my-openclaw
+    fly apps create my-bot
 
     # 1GB is usually enough
-    fly volumes create openclaw_data --size 1 --region iad
+    fly volumes create bot_data --size 1 --region iad
     ```
 
     Choose a region close to you. Common options: `lhr` (London), `iad` (Virginia), `sjc` (San Jose).
@@ -43,7 +43,7 @@ read_when:
     Edit `fly.toml` to match your app name and requirements. The repo's tracked `fly.toml` is the public template shown below; `deploy/fly.private.toml` is the hardened, no-public-IP variant (see [Private deployment](#private-deployment-hardened)).
 
     ```toml
-    app = "my-openclaw"  # your app name
+    app = "my-bot"  # your app name
     primary_region = "iad"
 
     [build]
@@ -51,8 +51,8 @@ read_when:
 
     [env]
       NODE_ENV = "production"
-      OPENCLAW_PREFER_PNPM = "1"
-      OPENCLAW_STATE_DIR = "/data"
+      BOT_PREFER_PNPM = "1"
+      BOT_STATE_DIR = "/data"
       NODE_OPTIONS = "--max-old-space-size=1536"
 
     [processes]
@@ -71,11 +71,11 @@ read_when:
       memory = "2048mb"
 
     [mounts]
-      source = "openclaw_data"
+      source = "bot_data"
       destination = "/data"
     ```
 
-    The OpenClaw Docker image entrypoint is `tini`, running `node openclaw.mjs gateway` by default. Fly `[processes]` replaces the Docker `CMD` (here it runs `node dist/index.js gateway ...` directly, the same compiled entrypoint) without touching `ENTRYPOINT`, so the process still runs under `tini`.
+    The Bot Docker image entrypoint is `tini`, running `node bot.mjs gateway` by default. Fly `[processes]` replaces the Docker `CMD` (here it runs `node dist/index.js gateway ...` directly, the same compiled entrypoint) without touching `ENTRYPOINT`, so the process still runs under `tini`.
 
     **Key settings:**
 
@@ -83,16 +83,16 @@ read_when:
     | ------------------------------ | --------------------------------------------------------------------------- |
     | `--bind lan`                   | Binds to `0.0.0.0` so Fly's proxy can reach the gateway                     |
     | `--allow-unconfigured`         | Starts without a config file (you create one after)                        |
-    | `internal_port = 3000`         | Must match `--port 3000` (or `OPENCLAW_GATEWAY_PORT`) for Fly health checks |
+    | `internal_port = 3000`         | Must match `--port 3000` (or `BOT_GATEWAY_PORT`) for Fly health checks |
     | `memory = "2048mb"`            | 512MB is too small; 2GB recommended                                         |
-    | `OPENCLAW_STATE_DIR = "/data"` | Persists state on the volume                                                |
+    | `BOT_STATE_DIR = "/data"` | Persists state on the volume                                                |
 
   </Step>
 
   <Step title="Set secrets">
     ```bash
     # required: gateway auth token for non-loopback binding
-    fly secrets set OPENCLAW_GATEWAY_TOKEN=$(openssl rand -hex 32)
+    fly secrets set BOT_GATEWAY_TOKEN=$(openssl rand -hex 32)
 
     # model provider API keys
     fly secrets set ANTHROPIC_API_KEY=example-anthropic-key-not-real
@@ -105,9 +105,9 @@ read_when:
     fly secrets set DISCORD_BOT_TOKEN=example-discord-bot-token
     ```
 
-    Non-loopback binds (`--bind lan`) require a valid gateway auth path. This example uses `OPENCLAW_GATEWAY_TOKEN`, but `gateway.auth.password` or a correctly configured non-loopback trusted-proxy deployment also satisfy the requirement. See [Secrets management](/gateway/secrets) for the SecretRef contract.
+    Non-loopback binds (`--bind lan`) require a valid gateway auth path. This example uses `BOT_GATEWAY_TOKEN`, but `gateway.auth.password` or a correctly configured non-loopback trusted-proxy deployment also satisfy the requirement. See [Secrets management](/gateway/secrets) for the SecretRef contract.
 
-    Treat these tokens like passwords. Prefer env vars/`fly secrets` over the config file for API keys and tokens so secrets stay out of `openclaw.json`.
+    Treat these tokens like passwords. Prefer env vars/`fly secrets` over the config file for API keys and tokens so secrets stay out of `bot.json`.
 
   </Step>
 
@@ -136,7 +136,7 @@ read_when:
 
     ```bash
     mkdir -p /data
-    cat > /data/openclaw.json << 'EOF'
+    cat > /data/bot.json << 'EOF'
     {
       "agents": {
         "defaults": {
@@ -182,7 +182,7 @@ read_when:
         "bind": "auto",
         "controlUi": {
           "allowedOrigins": [
-            "https://my-openclaw.fly.dev",
+            "https://my-bot.fly.dev",
             "http://localhost:3000",
             "http://127.0.0.1:3000"
           ]
@@ -193,9 +193,9 @@ read_when:
     EOF
     ```
 
-    With `OPENCLAW_STATE_DIR=/data`, the config path is `/data/openclaw.json`.
+    With `BOT_STATE_DIR=/data`, the config path is `/data/bot.json`.
 
-    Replace `https://my-openclaw.fly.dev` with your real Fly app origin. Gateway startup seeds local Control UI origins from the runtime `--bind` and `--port` values so first boot can proceed before config exists, but browser access through Fly still needs the exact HTTPS origin listed in `gateway.controlUi.allowedOrigins`.
+    Replace `https://my-bot.fly.dev` with your real Fly app origin. Gateway startup seeds local Control UI origins from the runtime `--bind` and `--port` values so first boot can proceed before config exists, but browser access through Fly still needs the exact HTTPS origin listed in `gateway.controlUi.allowedOrigins`.
 
     The Discord token can come from either:
 
@@ -218,9 +218,9 @@ read_when:
     fly open
     ```
 
-    Or visit `https://my-openclaw.fly.dev/`.
+    Or visit `https://my-bot.fly.dev/`.
 
-    Authenticate with the configured shared secret: the gateway token from `OPENCLAW_GATEWAY_TOKEN`, or your password if you switched to password auth.
+    Authenticate with the configured shared secret: the gateway token from `BOT_GATEWAY_TOKEN`, or your password if you switched to password auth.
 
     ### Logs
 
@@ -250,7 +250,7 @@ The gateway is binding to `127.0.0.1` instead of `0.0.0.0`.
 
 Fly cannot reach the gateway on the configured port.
 
-**Fix:** ensure `internal_port` matches the gateway port (`--port 3000` or `OPENCLAW_GATEWAY_PORT=3000`).
+**Fix:** ensure `internal_port` matches the gateway port (`--port 3000` or `BOT_GATEWAY_PORT=3000`).
 
 ### OOM / memory issues
 
@@ -275,27 +275,27 @@ fly machine update <machine-id> --vm-memory 2048 -y
 
 Gateway refuses to start with "already running" errors after a container restart.
 
-The runtime lock files live at `<tmpdir>/openclaw-<uid>/gateway.<hash>.lock`
+The runtime lock files live at `<tmpdir>/bot-<uid>/gateway.<hash>.lock`
 and `gateway.state.<hash>.lock` (Linux:
-`/tmp/openclaw-<uid>/gateway.*.lock`), not on the persistent `/data` volume, so
+`/tmp/bot-<uid>/gateway.*.lock`), not on the persistent `/data` volume, so
 a full container restart normally clears them along with the rest of the
 container filesystem. If a lock survives (for example a `fly machine restart`
 that preserves the container filesystem) and blocks startup, remove it
 manually:
 
 ```bash
-fly ssh console --command "rm -f /tmp/openclaw-*/gateway.*.lock"
+fly ssh console --command "rm -f /tmp/bot-*/gateway.*.lock"
 fly machine restart <machine-id>
 ```
 
 ### Config not being read
 
-`--allow-unconfigured` only bypasses the startup guard. It does not create or repair `/data/openclaw.json`, so make sure your real config exists and includes `"gateway": { "mode": "local" }` for a normal local gateway start.
+`--allow-unconfigured` only bypasses the startup guard. It does not create or repair `/data/bot.json`, so make sure your real config exists and includes `"gateway": { "mode": "local" }` for a normal local gateway start.
 
 Verify the config exists:
 
 ```bash
-fly ssh console --command "cat /data/openclaw.json"
+fly ssh console --command "cat /data/bot.json"
 ```
 
 ### Writing config via SSH
@@ -304,24 +304,24 @@ fly ssh console --command "cat /data/openclaw.json"
 
 ```bash
 # echo + tee (pipe from local to remote)
-echo '{"your":"config"}' | fly ssh console -C "tee /data/openclaw.json"
+echo '{"your":"config"}' | fly ssh console -C "tee /data/bot.json"
 
 # or sftp
 fly sftp shell
-> put /local/path/config.json /data/openclaw.json
+> put /local/path/config.json /data/bot.json
 ```
 
 `fly sftp` may fail if the file already exists; delete first:
 
 ```bash
-fly ssh console --command "rm /data/openclaw.json"
+fly ssh console --command "rm /data/bot.json"
 ```
 
 ### State not persisting
 
 If you lose auth profiles, channel/provider state, or sessions after a restart, the state dir is writing to the container filesystem instead of the volume.
 
-**Fix:** ensure `OPENCLAW_STATE_DIR=/data` is set in `fly.toml` and redeploy.
+**Fix:** ensure `BOT_STATE_DIR=/data` is set in `fly.toml` and redeploy.
 
 ## Updating
 
@@ -332,7 +332,7 @@ fly status
 fly logs
 ```
 
-`git pull` + `fly deploy` is the supervised path here: it rebuilds the image from the Dockerfile, so the CLI/gateway version, the base OS image, and any Dockerfile changes all update together. `openclaw update` inside the running container is not the same operation, since the image ships as a Docker-built `dist/` tree with no `.git` checkout and no npm-managed global install for it to detect; see [Updating](/install/updating) for that flow on VM-style installs.
+`git pull` + `fly deploy` is the supervised path here: it rebuilds the image from the Dockerfile, so the CLI/gateway version, the base OS image, and any Dockerfile changes all update together. `bot update` inside the running container is not the same operation, since the image ships as a Docker-built `dist/` tree with no `.git` checkout and no npm-managed global install for it to detect; see [Updating](/install/updating) for that flow on VM-style installs.
 
 ### Updating the machine command
 
@@ -371,17 +371,17 @@ Or convert an existing deployment:
 
 ```bash
 # list current IPs
-fly ips list -a my-openclaw
+fly ips list -a my-bot
 
 # release public IPs
-fly ips release <public-ipv4> -a my-openclaw
-fly ips release <public-ipv6> -a my-openclaw
+fly ips release <public-ipv4> -a my-bot
+fly ips release <public-ipv6> -a my-bot
 
 # switch to the private config so future deploys do not re-allocate public IPs
 fly deploy -c deploy/fly.private.toml
 
 # allocate private-only IPv6
-fly ips allocate-v6 --private -a my-openclaw
+fly ips allocate-v6 --private -a my-bot
 ```
 
 After this, `fly ips list` should show only a `private` type IP:
@@ -396,7 +396,7 @@ v6       fdaa:x:x:x:x::x      private          global
 **Option 1: local proxy (simplest)**
 
 ```bash
-fly proxy 3000:3000 -a my-openclaw
+fly proxy 3000:3000 -a my-bot
 # open http://localhost:3000 in a browser
 ```
 
@@ -411,7 +411,7 @@ fly wireguard create
 **Option 3: SSH only**
 
 ```bash
-fly ssh console -a my-openclaw
+fly ssh console -a my-bot
 ```
 
 ### Webhooks with private deployment
@@ -469,7 +469,7 @@ With the recommended config (`shared-cpu-2x`, 2GB RAM), expect roughly $10-15/mo
 
 - Set up messaging channels: [Channels](/channels)
 - Configure the Gateway: [Gateway configuration](/gateway/configuration)
-- Keep OpenClaw up to date: [Updating](/install/updating)
+- Keep Bot up to date: [Updating](/install/updating)
 
 ## Related
 

@@ -1,6 +1,6 @@
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 const MATRIX_DEFAULT_ECHO_TRANSCRIPT_FORMAT = '📝 "{transcript}"';
 
 const loadMatrixPreflightAudioRuntime = createLazyRuntimeModule(
@@ -17,7 +17,7 @@ function formatMatrixAudioTranscriptEcho(transcript: string, format: string): st
   return format.replace("{transcript}", () => transcript);
 }
 
-function suppressMatrixPreflightAudioEcho(cfg: OpenClawConfig): OpenClawConfig {
+function suppressMatrixPreflightAudioEcho(cfg: BotConfig): BotConfig {
   const audio = cfg.tools?.media?.audio;
   if (!audio?.echoTranscript) {
     return cfg;
@@ -50,7 +50,7 @@ export function isMatrixAudioContent(params: { msgtype?: string; mimetype?: stri
 export async function resolveMatrixPreflightAudioTranscript(params: {
   mediaPath: string;
   mediaContentType?: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   chatType: "channel" | "direct";
   originatingTo: string;
@@ -89,7 +89,7 @@ export async function resolveMatrixPreflightAudioTranscript(params: {
 
 export async function sendMatrixPreflightAudioTranscriptEcho(params: {
   transcript: string;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   accountId: string;
   originatingTo: string;
   messageThreadId?: string;

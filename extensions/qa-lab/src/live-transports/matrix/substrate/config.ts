@@ -1,6 +1,6 @@
 // Qa Lab Matrix helper module supports config behavior.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { normalizeStringEntries, uniqueStrings } from "openclaw/plugin-sdk/string-coerce-runtime";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { normalizeStringEntries, uniqueStrings } from "bot/plugin-sdk/string-coerce-runtime";
 import type { MatrixQaProvisionedTopology } from "./topology.js";
 
 type MatrixQaReplyToMode = "off" | "first" | "all" | "batched";
@@ -37,10 +37,10 @@ type MatrixQaToolConfigOverrides = {
   deny?: string[];
 };
 type MatrixQaAudioConfigOverrides = NonNullable<
-  NonNullable<NonNullable<OpenClawConfig["tools"]>["media"]>["audio"]
+  NonNullable<NonNullable<BotConfig["tools"]>["media"]>["audio"]
 >;
 type MatrixQaMediaModelsOverrides = NonNullable<
-  NonNullable<NonNullable<OpenClawConfig["tools"]>["media"]>["models"]
+  NonNullable<NonNullable<BotConfig["tools"]>["media"]>["models"]
 >;
 type MatrixQaGroupConfigOverrides = {
   allowBots?: MatrixQaAllowBotsMode;
@@ -142,7 +142,7 @@ type MatrixQaGroupSnapshot = {
 };
 
 type MatrixQaGroupEntry = Omit<MatrixQaGroupSnapshot, "roomId">;
-type MatrixQaChannelConfig = NonNullable<OpenClawConfig["channels"]>["matrix"];
+type MatrixQaChannelConfig = NonNullable<BotConfig["channels"]>["matrix"];
 type MatrixQaChannelAccountConfig = NonNullable<
   NonNullable<MatrixQaChannelConfig>["accounts"]
 >[string];
@@ -537,7 +537,7 @@ function buildMatrixQaConfigSnapshot(params: {
 }
 
 export function buildMatrixQaConfig(
-  baseCfg: OpenClawConfig,
+  baseCfg: BotConfig,
   params: {
     driverAccessToken?: string;
     driverUserId: string;
@@ -551,7 +551,7 @@ export function buildMatrixQaConfig(
     sutUserId: string;
     topology: MatrixQaProvisionedTopology;
   },
-): OpenClawConfig {
+): BotConfig {
   const pluginAllow = uniqueStrings([...(baseCfg.plugins?.allow ?? []), "matrix"]);
   const snapshot = buildMatrixQaConfigSnapshot({
     driverUserId: params.driverUserId,

@@ -1,4 +1,4 @@
 // Feishu API module exposes the plugin public contract.
-export type { OpenClawConfig as ClawdbotConfig } from "openclaw/plugin-sdk/config-contracts";
-export type { RuntimeEnv } from "openclaw/plugin-sdk/runtime";
-export { createChannelPairingController } from "openclaw/plugin-sdk/channel-pairing";
+export type { BotConfig as ClawdbotConfig } from "bot/plugin-sdk/config-contracts";
+export type { RuntimeEnv } from "bot/plugin-sdk/runtime";
+export { createChannelPairingController } from "bot/plugin-sdk/channel-pairing";

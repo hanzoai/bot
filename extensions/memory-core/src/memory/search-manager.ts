@@ -1,20 +1,20 @@
 import { createHash } from "node:crypto";
 // Memory Core plugin module implements search manager behavior.
 import fs from "node:fs/promises";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { createLazyRuntimeModule } from "openclaw/plugin-sdk/lazy-runtime";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { createLazyRuntimeModule } from "bot/plugin-sdk/lazy-runtime";
 import {
   createSubsystemLogger,
   resolveAgentContextLimits,
   resolveAgentWorkspaceDir,
   resolveGlobalSingleton,
   resolveMemorySearchSyncConfig,
-  type OpenClawConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-foundation";
+  type BotConfig,
+} from "bot/plugin-sdk/memory-core-host-engine-foundation";
 import {
   checkQmdBinaryAvailability,
   resolveQmdBinaryUnavailableReason,
-} from "openclaw/plugin-sdk/memory-core-host-engine-qmd";
+} from "bot/plugin-sdk/memory-core-host-engine-qmd";
 import {
   resolveMemoryBackendConfig,
   type MemoryEmbeddingProbeResult,
@@ -23,9 +23,9 @@ import {
   type MemorySource,
   type MemorySyncParams,
   type ResolvedQmdConfig,
-} from "openclaw/plugin-sdk/memory-core-host-engine-storage";
-import type { PluginStateLeaseRunner } from "openclaw/plugin-sdk/plugin-state-runtime";
-import { normalizeAgentId } from "openclaw/plugin-sdk/routing";
+} from "bot/plugin-sdk/memory-core-host-engine-storage";
+import type { PluginStateLeaseRunner } from "bot/plugin-sdk/plugin-state-runtime";
+import { normalizeAgentId } from "bot/plugin-sdk/routing";
 import {
   resolveMemoryCoreLocalServiceHostIdentity,
   type MemoryCoreAcquireLocalService,
@@ -38,7 +38,7 @@ import {
   type MemorySearchDeadlineControlOptions,
 } from "./search-deadline.js";
 
-const MEMORY_SEARCH_MANAGER_CACHE_KEY = Symbol.for("openclaw.memorySearchManagerCache");
+const MEMORY_SEARCH_MANAGER_CACHE_KEY = Symbol.for("bot.memorySearchManagerCache");
 type Maybe<T> = T | null;
 type QmdManagerRuntimeConfig = {
   workspaceDir: string;
@@ -262,7 +262,7 @@ type MemorySearchManagerResult = {
 
 type MemorySearchManagerPurpose = "default" | "status" | "cli";
 type MemorySearchManagerParams = {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   purpose?: MemorySearchManagerPurpose;
   acquireLocalService?: MemoryCoreAcquireLocalService;
@@ -740,7 +740,7 @@ async function closeAllMemorySearchManagersWithinLifecycle(): Promise<void> {
 }
 
 export async function closeMemorySearchManager(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
 }): Promise<void> {
   const scopeKey = buildQmdManagerScopeKey(normalizeAgentId(params.agentId));
@@ -752,7 +752,7 @@ export async function closeMemorySearchManager(params: {
 }
 
 async function closeMemorySearchManagerWithinLifecycle(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
 }): Promise<void> {
   const normalizedAgentId = normalizeAgentId(params.agentId);
@@ -1090,7 +1090,7 @@ function buildQmdManagerIdentityKey(
 }
 
 function resolveQmdManagerRuntimeConfig(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   agentId: string,
 ): QmdManagerRuntimeConfig {
   return {

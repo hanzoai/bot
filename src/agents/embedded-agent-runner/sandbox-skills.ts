@@ -9,7 +9,7 @@ import type { SkillEligibilityContext, SkillSnapshot, SkillUsagePath } from "../
 import type { SkillEntry } from "../../skills/types.js";
 import type { SandboxContext } from "../sandbox/types.js";
 
-const MATERIALIZED_SKILLS_WORKSPACE_CONTAINER_PARTS = [".openclaw", "sandbox-skills"] as const;
+const MATERIALIZED_SKILLS_WORKSPACE_CONTAINER_PARTS = [".bot", "sandbox-skills"] as const;
 type SandboxSkillRuntimeContext = Pick<SandboxContext, "enabled"> &
   Partial<
     Pick<

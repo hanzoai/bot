@@ -341,7 +341,7 @@ describe("memory index schema", () => {
   });
 
   it("keeps source and path FTS identities stable across VACUUM", () => {
-    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "openclaw-memory-vacuum-"));
+    const rootDir = fs.mkdtempSync(path.join(os.tmpdir(), "bot-memory-vacuum-"));
     const db = new DatabaseSync(path.join(rootDir, "memory.sqlite"));
     try {
       ensureMemoryIndexSchema({ db, cacheEnabled: false, ftsEnabled: true });

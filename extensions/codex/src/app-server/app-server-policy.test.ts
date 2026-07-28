@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest";
 import {
   resolveCodexAppServerForModelProvider,
-  resolveCodexAppServerForOpenClawToolPolicy,
+  resolveCodexAppServerForBotToolPolicy,
 } from "./app-server-policy.js";
 import { readCodexPluginConfig, resolveCodexAppServerRuntimeOptions } from "./config.js";
 
@@ -10,7 +10,7 @@ describe("Codex app-server policy", () => {
   it("keeps implicit Codex yolo approval policy when untrusted approvals are disallowed", () => {
     const appServer = resolveCodexAppServerRuntimeOptions({ env: {}, requirementsToml: null });
 
-    const resolved = resolveCodexAppServerForOpenClawToolPolicy({
+    const resolved = resolveCodexAppServerForBotToolPolicy({
       appServer,
       pluginConfig: readCodexPluginConfig({}),
       env: {},
@@ -21,10 +21,10 @@ describe("Codex app-server policy", () => {
     expect(resolved.approvalPolicy).toBe("never");
   });
 
-  it("promotes implicit yolo approval policy when OpenClaw tool policy requires review", () => {
+  it("promotes implicit yolo approval policy when Bot tool policy requires review", () => {
     const appServer = resolveCodexAppServerRuntimeOptions({ env: {}, requirementsToml: null });
 
-    const resolved = resolveCodexAppServerForOpenClawToolPolicy({
+    const resolved = resolveCodexAppServerForBotToolPolicy({
       appServer,
       pluginConfig: readCodexPluginConfig({}),
       env: {},
@@ -43,21 +43,21 @@ describe("Codex app-server policy", () => {
         'allowed_approval_policies = ["never"]\nallowed_sandbox_modes = ["workspace-write"]\n',
     });
 
-    const explicitConfig = resolveCodexAppServerForOpenClawToolPolicy({
+    const explicitConfig = resolveCodexAppServerForBotToolPolicy({
       appServer,
       pluginConfig: readCodexPluginConfig({ appServer: { mode: "yolo" } }),
       env: {},
       shouldPromote: true,
       canUseUntrustedApprovalPolicy: true,
     });
-    const explicitEnv = resolveCodexAppServerForOpenClawToolPolicy({
+    const explicitEnv = resolveCodexAppServerForBotToolPolicy({
       appServer,
       pluginConfig: readCodexPluginConfig({}),
-      env: { OPENCLAW_CODEX_APP_SERVER_APPROVAL_POLICY: "never" },
+      env: { BOT_CODEX_APP_SERVER_APPROVAL_POLICY: "never" },
       shouldPromote: true,
       canUseUntrustedApprovalPolicy: true,
     });
-    const explicitRequirements = resolveCodexAppServerForOpenClawToolPolicy({
+    const explicitRequirements = resolveCodexAppServerForBotToolPolicy({
       appServer: requirementsAppServer,
       pluginConfig: readCodexPluginConfig({}),
       env: {},

@@ -3,15 +3,15 @@
  * Records failures under the store lock, applies WHAM usage probes for OpenAI
  * OAuth profiles, and exposes display helpers for unavailable profiles.
  */
-import { normalizeProviderId } from "@openclaw/model-catalog-core/provider-id";
+import { normalizeProviderId } from "@hanzo/bot-model-catalog-core/provider-id";
 import {
   asDateTimestampMs,
   isFutureDateTimestampMs,
   positiveSecondsToSafeMilliseconds,
   resolveExpiresAtMsFromDurationMs,
   resolveExpiresAtMsFromEpochSeconds,
-} from "@openclaw/normalization-core/number-coercion";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+} from "@hanzo/bot-normalization-core/number-coercion";
+import type { BotConfig } from "../../config/types.bot.js";
 import { createSubsystemLogger } from "../../logging/subsystem.js";
 import { readProviderJsonResponse } from "../provider-http-errors.js";
 import { resolveProviderRequestHeaders } from "../provider-request-config.js";
@@ -60,7 +60,7 @@ const testing = {
   },
 };
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.authProfileUsageTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.authProfileUsageTestApi")] =
     testing;
 }
 
@@ -265,13 +265,13 @@ async function probeWhamForCooldown(
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), WHAM_TIMEOUT_MS);
   try {
-    const version = process.env.OPENCLAW_VERSION?.trim();
+    const version = process.env.BOT_VERSION?.trim();
     const defaultHeaders: Record<string, string> = {
       Authorization: `Bearer ${profile.access}`,
       Accept: "application/json",
-      originator: "openclaw",
+      originator: "bot",
       ...(version ? { version } : {}),
-      "User-Agent": `openclaw/${version || "dev"}`,
+      "User-Agent": `bot/${version || "dev"}`,
     };
     if (profile.accountId) {
       defaultHeaders["ChatGPT-Account-Id"] = profile.accountId;
@@ -919,7 +919,7 @@ export async function markAuthProfileFailure(params: {
   store: AuthProfileStore;
   profileId: string;
   reason: AuthProfileFailureReason;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   agentDir?: string;
   runId?: string;
   modelId?: string;

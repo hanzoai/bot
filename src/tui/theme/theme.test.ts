@@ -1,8 +1,8 @@
 // TUI theme tests cover theme defaults and environment-driven variants.
 
-import { expectDefined } from "@openclaw/normalization-core";
+import { expectDefined } from "@hanzo/bot-normalization-core";
 import chalk from "chalk";
-import { importFreshModule } from "openclaw/plugin-sdk/test-fixtures";
+import { importFreshModule } from "bot/plugin-sdk/test-fixtures";
 import { afterAll, afterEach, describe, expect, it } from "vitest";
 
 const originalChalkLevel = chalk.level;
@@ -26,7 +26,7 @@ afterEach(() => {
 });
 
 type ThemeEnvOverrides = {
-  OPENCLAW_THEME?: string | undefined;
+  BOT_THEME?: string | undefined;
   COLORFGBG?: string | undefined;
 };
 
@@ -73,11 +73,11 @@ function readActivePalette(mod: ThemeModule) {
 }
 
 async function importThemeWithEnv(env: ThemeEnvOverrides) {
-  if (Object.hasOwn(env, "OPENCLAW_THEME")) {
-    if (env.OPENCLAW_THEME === undefined) {
-      delete process.env.OPENCLAW_THEME;
+  if (Object.hasOwn(env, "BOT_THEME")) {
+    if (env.BOT_THEME === undefined) {
+      delete process.env.BOT_THEME;
     } else {
-      process.env.OPENCLAW_THEME = env.OPENCLAW_THEME;
+      process.env.BOT_THEME = env.BOT_THEME;
     }
   }
   if (Object.hasOwn(env, "COLORFGBG")) {
@@ -149,30 +149,30 @@ describe("theme", () => {
 describe("light background detection", () => {
   it("uses dark palette by default", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: undefined,
     });
     expect(mod.lightMode).toBe(false);
   });
 
-  it("selects light palette when OPENCLAW_THEME=light", async () => {
-    const mod = await importThemeWithEnv({ OPENCLAW_THEME: "light" });
+  it("selects light palette when BOT_THEME=light", async () => {
+    const mod = await importThemeWithEnv({ BOT_THEME: "light" });
     expect(mod.lightMode).toBe(true);
   });
 
-  it("selects dark palette when OPENCLAW_THEME=dark", async () => {
-    const mod = await importThemeWithEnv({ OPENCLAW_THEME: "dark" });
+  it("selects dark palette when BOT_THEME=dark", async () => {
+    const mod = await importThemeWithEnv({ BOT_THEME: "dark" });
     expect(mod.lightMode).toBe(false);
   });
 
-  it("treats OPENCLAW_THEME case-insensitively", async () => {
-    const mod = await importThemeWithEnv({ OPENCLAW_THEME: "LiGhT" });
+  it("treats BOT_THEME case-insensitively", async () => {
+    const mod = await importThemeWithEnv({ BOT_THEME: "LiGhT" });
     expect(mod.lightMode).toBe(true);
   });
 
   it("detects light background from COLORFGBG", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "0;15",
     });
     expect(mod.lightMode).toBe(true);
@@ -180,7 +180,7 @@ describe("light background detection", () => {
 
   it("treats COLORFGBG bg=7 (silver) as light", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "0;7",
     });
     expect(mod.lightMode).toBe(true);
@@ -188,7 +188,7 @@ describe("light background detection", () => {
 
   it("treats COLORFGBG bg=8 (bright black / dark gray) as dark", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "15;8",
     });
     expect(mod.lightMode).toBe(false);
@@ -196,7 +196,7 @@ describe("light background detection", () => {
 
   it("treats COLORFGBG bg < 7 as dark", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "15;0",
     });
     expect(mod.lightMode).toBe(false);
@@ -204,7 +204,7 @@ describe("light background detection", () => {
 
   it("treats 256-color COLORFGBG bg=232 (near-black greyscale) as dark", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "15;232",
     });
     expect(mod.lightMode).toBe(false);
@@ -212,7 +212,7 @@ describe("light background detection", () => {
 
   it("treats 256-color COLORFGBG bg=255 (near-white greyscale) as light", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "0;255",
     });
     expect(mod.lightMode).toBe(true);
@@ -220,7 +220,7 @@ describe("light background detection", () => {
 
   it("treats 256-color COLORFGBG bg=231 (white cube entry) as light", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "0;231",
     });
     expect(mod.lightMode).toBe(true);
@@ -228,7 +228,7 @@ describe("light background detection", () => {
 
   it("treats 256-color COLORFGBG bg=16 (black cube entry) as dark", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "15;16",
     });
     expect(mod.lightMode).toBe(false);
@@ -236,7 +236,7 @@ describe("light background detection", () => {
 
   it("treats bright 256-color green backgrounds as light when dark text contrasts better", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "15;34",
     });
     expect(mod.lightMode).toBe(true);
@@ -244,7 +244,7 @@ describe("light background detection", () => {
 
   it("treats bright 256-color cyan backgrounds as light when dark text contrasts better", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "15;39",
     });
     expect(mod.lightMode).toBe(true);
@@ -252,7 +252,7 @@ describe("light background detection", () => {
 
   it("falls back to dark mode for invalid COLORFGBG values", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "garbage",
     });
     expect(mod.lightMode).toBe(false);
@@ -260,23 +260,23 @@ describe("light background detection", () => {
 
   it("ignores pathological COLORFGBG values", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: undefined,
+      BOT_THEME: undefined,
       COLORFGBG: "0;".repeat(40),
     });
     expect(mod.lightMode).toBe(false);
   });
 
-  it("OPENCLAW_THEME overrides COLORFGBG", async () => {
+  it("BOT_THEME overrides COLORFGBG", async () => {
     const mod = await importThemeWithEnv({
-      OPENCLAW_THEME: "dark",
+      BOT_THEME: "dark",
       COLORFGBG: "0;15",
     });
     expect(mod.lightMode).toBe(false);
   });
 
   it("keeps assistantText as identity in both modes", async () => {
-    const lightMod = await importThemeWithEnv({ OPENCLAW_THEME: "light" });
-    const darkMod = await importThemeWithEnv({ OPENCLAW_THEME: "dark" });
+    const lightMod = await importThemeWithEnv({ BOT_THEME: "light" });
+    const darkMod = await importThemeWithEnv({ BOT_THEME: "dark" });
     expect(lightMod.theme.assistantText("hello")).toBe("hello");
     expect(darkMod.theme.assistantText("hello")).toBe("hello");
   });
@@ -284,7 +284,7 @@ describe("light background detection", () => {
 
 describe("light palette accessibility", () => {
   it("keeps light theme text colors at WCAG AA contrast or better", async () => {
-    const mod = await importThemeWithEnv({ OPENCLAW_THEME: "light" });
+    const mod = await importThemeWithEnv({ BOT_THEME: "light" });
     const backgrounds = {
       page: "#FFFFFF",
       user: mod.lightPalette.userBg,

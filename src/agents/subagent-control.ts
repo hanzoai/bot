@@ -9,7 +9,7 @@ import { resolveSubagentLabel, sortSubagentRuns } from "../auto-reply/reply/suba
 import { resolveStorePath } from "../config/sessions/paths.js";
 import { loadSessionEntry, patchSessionEntry } from "../config/sessions/session-accessor.js";
 import type { SessionEntry } from "../config/sessions/types.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { callGateway } from "../gateway/call.js";
 import { logVerbose } from "../globals.js";
 import { formatErrorMessage } from "../infra/errors.js";
@@ -120,7 +120,7 @@ export type ResolvedSubagentController = {
 };
 /** Resolves which subagent runs the caller is allowed to control. */
 export function resolveSubagentController(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentSessionKey?: string;
 }): ResolvedSubagentController {
   const { mainKey, alias } = resolveMainSessionAlias(params.cfg);
@@ -267,7 +267,7 @@ function markSubagentRunTerminatedBestEffort(
 }
 
 async function killSubagentRun(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   entry: SubagentRunRecord;
   cache: Map<string, Record<string, SessionEntry>>;
 }): Promise<{
@@ -365,7 +365,7 @@ async function killSubagentRun(params: {
 }
 
 async function cascadeKillChildren(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   parentChildSessionKey: string;
   cache: Map<string, Record<string, SessionEntry>>;
   seenChildSessionKeys?: Set<string>;
@@ -427,7 +427,7 @@ async function cascadeKillChildren(params: {
 
 /** Kills every currently controlled child run and its descendants. */
 export async function killAllControlledSubagentRuns(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   controller: ResolvedSubagentController;
   runs: SubagentRunRecord[];
 }) {
@@ -476,7 +476,7 @@ export async function killAllControlledSubagentRuns(params: {
 
 /** Kills one controlled subagent run and any active descendants. */
 export async function killControlledSubagentRun(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   controller: ResolvedSubagentController;
   entry: SubagentRunRecord;
 }) {
@@ -552,7 +552,7 @@ export async function killControlledSubagentRun(params: {
 }
 
 /** Admin kill path for a subagent session key, bypassing caller ownership checks. */
-export async function killSubagentRunAdmin(params: { cfg: OpenClawConfig; sessionKey: string }) {
+export async function killSubagentRunAdmin(params: { cfg: BotConfig; sessionKey: string }) {
   const targetSessionKey = params.sessionKey.trim();
   if (!targetSessionKey) {
     return { found: false as const, killed: false };
@@ -616,7 +616,7 @@ export async function killSubagentRunAdmin(params: { cfg: OpenClawConfig; sessio
 
 /** Restarts a controlled subagent run with a new steering message. */
 export async function steerControlledSubagentRun(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   controller: ResolvedSubagentController;
   entry: SubagentRunRecord;
   message: string;
@@ -831,7 +831,7 @@ export async function steerControlledSubagentRun(params: {
 
 /** Sends a follow-up message to a controlled subagent and waits for a reply. */
 export async function sendControlledSubagentMessage(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   controller: ResolvedSubagentController;
   entry: SubagentRunRecord;
   message: string;
@@ -949,7 +949,7 @@ const testing = {
   },
 };
 if (process.env.VITEST || process.env.NODE_ENV === "test") {
-  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("openclaw.subagentControlTestApi")] =
+  (globalThis as Record<PropertyKey, unknown>)[Symbol.for("bot.subagentControlTestApi")] =
     testing;
 }
 /* oxlint-disable max-lines -- TODO: split this grandfathered oversized file. */

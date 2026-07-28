@@ -1,6 +1,6 @@
-import { resolveDefaultAgentId } from "openclaw/plugin-sdk/agent-runtime";
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import { resolveAgentIdFromSessionKey } from "openclaw/plugin-sdk/routing";
+import { resolveDefaultAgentId } from "bot/plugin-sdk/agent-runtime";
+import type { PluginRuntime } from "bot/plugin-sdk/core";
+import { resolveAgentIdFromSessionKey } from "bot/plugin-sdk/routing";
 import {
   ClickClackHttpError,
   isClickClackChannelNameConflict,
@@ -177,7 +177,7 @@ export async function openClickClackDiscussionBinding(
     return undefined;
   }
   if (!entry.sessionId?.trim()) {
-    throw new Error("OpenClaw session does not yet have a concrete session id");
+    throw new Error("Bot session does not yet have a concrete session id");
   }
   const client = params.clientFactory(account);
   const workspaces = await client.workspaces();
@@ -449,7 +449,7 @@ export async function openClickClackDiscussionBinding(
           `failed to archive superseded discussion channel ${channel.id}: ${String(archiveError)}`,
         );
       }
-      throw new Error("OpenClaw session changed while opening its ClickClack discussion");
+      throw new Error("Bot session changed while opening its ClickClack discussion");
     }
     try {
       store.set(sessionKey, nextBinding);

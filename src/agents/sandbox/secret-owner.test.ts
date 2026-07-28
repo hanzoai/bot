@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import type { OpenClawConfig } from "../../config/config.js";
+import type { BotConfig } from "../../config/config.js";
 import { setActiveDegradedSecretOwners } from "../../secrets/runtime-degraded-state.js";
 import { resolveSandboxContext } from "./context.js";
 
@@ -9,7 +9,7 @@ afterEach(() => {
 
 describe("sandbox SSH secret owner", () => {
   it("rejects an unmaterialized inherited ref without active degraded-owner state", async () => {
-    const config: OpenClawConfig = {
+    const config: BotConfig = {
       agents: {
         entries: { main: { default: true } },
         defaults: {

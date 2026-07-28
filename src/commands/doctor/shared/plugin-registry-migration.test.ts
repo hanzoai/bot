@@ -13,7 +13,7 @@ import {
   cleanupTrackedTempDirs,
   makeTrackedTempDir,
 } from "../../../plugins/test-helpers/fs-fixtures.js";
-import { runOpenClawStateWriteTransaction } from "../../../state/openclaw-state-db.js";
+import { runBotStateWriteTransaction } from "../../../state/bot-state-db.js";
 import { migratePluginRegistryForInstall } from "./plugin-registry-migration.js";
 const tempDirs: string[] = [];
 
@@ -22,13 +22,13 @@ afterEach(() => {
 });
 
 function makeTempDir() {
-  return makeTrackedTempDir("openclaw-plugin-registry-migration", tempDirs);
+  return makeTrackedTempDir("bot-plugin-registry-migration", tempDirs);
 }
 
 function hermeticEnv(overrides: NodeJS.ProcessEnv = {}): NodeJS.ProcessEnv {
   return {
-    OPENCLAW_BUNDLED_PLUGINS_DIR: undefined,
-    OPENCLAW_VERSION: "2026.4.25",
+    BOT_BUNDLED_PLUGINS_DIR: undefined,
+    BOT_VERSION: "2026.4.25",
     VITEST: "true",
     ...overrides,
   };
@@ -46,7 +46,7 @@ function createCandidate(
     "utf8",
   );
   fs.writeFileSync(
-    path.join(rootDir, "openclaw.plugin.json"),
+    path.join(rootDir, "bot.plugin.json"),
     JSON.stringify({
       id,
       name: id,
@@ -118,7 +118,7 @@ function requirePlugin(index: InstalledPluginIndex | null | undefined, pluginId:
 }
 
 function insertStalePersistedIndexRow(stateDir: string) {
-  runOpenClawStateWriteTransaction(
+  runBotStateWriteTransaction(
     ({ db }) => {
       db.prepare(
         `
@@ -134,7 +134,7 @@ function insertStalePersistedIndexRow(stateDir: string) {
         `,
       ).run();
     },
-    { env: { ...process.env, OPENCLAW_STATE_DIR: stateDir } },
+    { env: { ...process.env, BOT_STATE_DIR: stateDir } },
   );
 }
 

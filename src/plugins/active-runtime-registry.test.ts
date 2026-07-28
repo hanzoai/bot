@@ -105,7 +105,7 @@ describe("getLoadedRuntimePluginRegistry", () => {
     const deferredRegistry = createEmptyPluginRegistry();
     deferredRegistry.plugins.push({
       id: "deferred",
-      format: "openclaw",
+      format: "bot",
       imported: false,
       status: "loaded",
     } as never);

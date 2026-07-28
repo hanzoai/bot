@@ -1,4 +1,4 @@
-import type { Message } from "@openclaw/llm-core";
+import type { Message } from "@hanzo/bot-llm-core";
 import { describe, expect, it } from "vitest";
 import { serializeConversation } from "./utils.js";
 

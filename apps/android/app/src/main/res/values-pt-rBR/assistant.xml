@@ -1,7 +1,7 @@
 <resources>
-    <string-array name="ask_openclaw_query_patterns">
-        <item>"perguntar ao OpenClaw %1$s"</item>
-        <item>"dizer ao OpenClaw para %1$s"</item>
-        <item>"abrir o OpenClaw e perguntar %1$s"</item>
+    <string-array name="ask_bot_query_patterns">
+        <item>"perguntar ao Bot %1$s"</item>
+        <item>"dizer ao Bot para %1$s"</item>
+        <item>"abrir o Bot e perguntar %1$s"</item>
     </string-array>
 </resources>

@@ -1,10 +1,10 @@
 // Openai provider module implements model/runtime integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   isProviderAuthProfileConfigured,
   resolveProviderAuthProfileApiKey,
-} from "openclaw/plugin-sdk/provider-auth";
-import { resolveProviderRequestHeaders } from "openclaw/plugin-sdk/provider-http";
+} from "bot/plugin-sdk/provider-auth";
+import { resolveProviderRequestHeaders } from "bot/plugin-sdk/provider-http";
 import {
   createRealtimeTranscriptionWebSocketSession,
   type RealtimeTranscriptionProviderConfig,
@@ -12,8 +12,8 @@ import {
   type RealtimeTranscriptionSession,
   type RealtimeTranscriptionSessionCreateRequest,
   type RealtimeTranscriptionWebSocketTransport,
-} from "openclaw/plugin-sdk/realtime-transcription";
-import { normalizeResolvedSecretInputString } from "openclaw/plugin-sdk/secret-input";
+} from "bot/plugin-sdk/realtime-transcription";
+import { normalizeResolvedSecretInputString } from "bot/plugin-sdk/secret-input";
 import {
   asFiniteNumber,
   createOpenAIRealtimeTranscriptionClientSecret,
@@ -33,7 +33,7 @@ type OpenAIRealtimeTranscriptionProviderConfig = {
 
 type OpenAIRealtimeTranscriptionSessionConfig = RealtimeTranscriptionSessionCreateRequest & {
   apiKey?: string;
-  cfg?: OpenClawConfig;
+  cfg?: BotConfig;
   language?: string;
   model: string;
   prompt?: string;
@@ -178,7 +178,7 @@ function createOpenAIRealtimeTranscriptionSession(
   const previousItemIds = new Map<string, string | null | undefined>();
   const settledItemIds = new Set<string>();
   const completedTranscripts = new Map<string, string | undefined>();
-  const unkeyedTranscript = "__openclaw_unkeyed_transcript__";
+  const unkeyedTranscript = "__bot_unkeyed_transcript__";
 
   const resetTranscriptionState = () => {
     pendingTranscripts.clear();

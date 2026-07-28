@@ -2,21 +2,21 @@
  * Credential storage facade for API keys and OAuth tokens.
  * Canonical persistence is the per-agent SQLite auth-profile store.
  *
- * The backend contract keeps the upstream session SDK shape while OpenClaw
+ * The backend contract keeps the upstream session SDK shape while Bot
  * projects provider-default profiles into it.
  */
 
 import fs from "node:fs";
 import { dirname } from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { findEnvKeys, getEnvApiKey } from "@openclaw/ai/internal/runtime";
+import { findEnvKeys, getEnvApiKey } from "@hanzo/bot-ai/internal/runtime";
 import { withFileLock } from "../../infra/file-lock.js";
 import type {
   OAuthCredentials,
   OAuthLoginCallbacks,
   OAuthProviderId,
 } from "../../llm/utils/oauth/types.js";
-import type { OpenClawAgentDatabase } from "../../state/openclaw-agent-db.js";
+import type { BotAgentDatabase } from "../../state/bot-agent-db.js";
 import { AUTH_STORE_VERSION, OAUTH_REFRESH_LOCK_OPTIONS } from "../auth-profiles/constants.js";
 import {
   assertAuthProfileMigrationReady,
@@ -88,7 +88,7 @@ class AuthStorageLegacyPathMigrationRequiredError extends Error {
 
   constructor() {
     super(
-      "Deprecated AuthStorage path contains unmigrated credentials; run openclaw doctor --fix for standard agent auth.json or migrate plugin storage to AuthStorage.forAgent(agentDir).",
+      "Deprecated AuthStorage path contains unmigrated credentials; run bot doctor --fix for standard agent auth.json or migrate plugin storage to AuthStorage.forAgent(agentDir).",
     );
     this.name = "AuthStorageLegacyPathMigrationRequiredError";
   }
@@ -263,7 +263,7 @@ function collectStateOnlyAuthProfileIds(store: AuthProfileStore): string[] {
 
 function loadSqliteAuthStorageStore(
   agentDir: string,
-  database?: OpenClawAgentDatabase,
+  database?: BotAgentDatabase,
 ): AuthProfileStore {
   const inspection = inspectPersistedAuthProfileStoreRaw(agentDir, database);
   if (inspection.status === "missing") {

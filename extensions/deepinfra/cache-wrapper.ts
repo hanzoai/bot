@@ -2,7 +2,7 @@
 import {
   applyAnthropicEphemeralCacheControlMarkers,
   streamWithPayloadPatch,
-} from "openclaw/plugin-sdk/provider-stream";
+} from "bot/plugin-sdk/provider-stream";
 
 // StreamFn isn't re-exported via the plugin SDK; derive it from a helper that
 // accepts it so we stay on the SDK boundary.

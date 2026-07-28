@@ -1,22 +1,22 @@
 // Lmstudio setup module handles plugin onboarding behavior.
-import { parseStrictPositiveInteger } from "openclaw/plugin-sdk/number-runtime";
-import type { ProviderAppGuidedSetupContext } from "openclaw/plugin-sdk/plugin-entry";
+import { parseStrictPositiveInteger } from "bot/plugin-sdk/number-runtime";
+import type { ProviderAppGuidedSetupContext } from "bot/plugin-sdk/plugin-entry";
 import {
   removeProviderAuthProfilesWithLock,
   buildApiKeyCredential,
   ensureApiKeyFromEnvOrPrompt,
   hasConfiguredSecretInput,
   normalizeOptionalSecretInput,
-  type OpenClawConfig,
+  type BotConfig,
   type SecretInput,
   type SecretInputMode,
-} from "openclaw/plugin-sdk/provider-auth";
+} from "bot/plugin-sdk/provider-auth";
 import {
   selectPreferredLocalModelId,
   type ModelDefinitionConfig,
   type ModelProviderConfig,
-} from "openclaw/plugin-sdk/provider-model-shared";
-import { withAgentModelAliases } from "openclaw/plugin-sdk/provider-onboard";
+} from "bot/plugin-sdk/provider-model-shared";
+import { withAgentModelAliases } from "bot/plugin-sdk/provider-onboard";
 import {
   applyProviderDefaultModel,
   configureOpenAICompatibleSelfHostedProviderNonInteractive,
@@ -25,9 +25,9 @@ import {
   type ProviderCatalogContext,
   type ProviderPrepareDynamicModelContext,
   type ProviderRuntimeModel,
-} from "openclaw/plugin-sdk/provider-setup";
-import { WizardCancelledError, type WizardPrompter } from "openclaw/plugin-sdk/setup";
-import { normalizeStringEntries } from "openclaw/plugin-sdk/string-coerce-runtime";
+} from "bot/plugin-sdk/provider-setup";
+import { WizardCancelledError, type WizardPrompter } from "bot/plugin-sdk/setup";
+import { normalizeStringEntries } from "bot/plugin-sdk/string-coerce-runtime";
 import {
   LMSTUDIO_DEFAULT_API_KEY_ENV_VAR,
   LMSTUDIO_DEFAULT_INFERENCE_BASE_URL,
@@ -81,18 +81,18 @@ function isTruthyEnvValue(value: string | undefined): boolean {
 }
 
 function resolveLmstudioSetupDefaultBaseUrl(env: NodeJS.ProcessEnv = process.env): string {
-  return isTruthyEnvValue(env.OPENCLAW_DOCKER_SETUP)
+  return isTruthyEnvValue(env.BOT_DOCKER_SETUP)
     ? LMSTUDIO_DOCKER_HOST_BASE_URL
     : LMSTUDIO_DEFAULT_BASE_URL;
 }
 
 function resolveLmstudioSetupDefaultInferenceBaseUrl(env: NodeJS.ProcessEnv = process.env): string {
-  return isTruthyEnvValue(env.OPENCLAW_DOCKER_SETUP)
+  return isTruthyEnvValue(env.BOT_DOCKER_SETUP)
     ? LMSTUDIO_DOCKER_HOST_INFERENCE_BASE_URL
     : LMSTUDIO_DEFAULT_INFERENCE_BASE_URL;
 }
 
-function stripLmstudioStoredAuthConfig(cfg: OpenClawConfig): OpenClawConfig {
+function stripLmstudioStoredAuthConfig(cfg: BotConfig): BotConfig {
   const { profiles: _profiles, order: _order, ...restAuth } = cfg.auth ?? {};
   const nextProfiles = Object.fromEntries(
     Object.entries(cfg.auth?.profiles ?? {}).filter(
@@ -330,7 +330,7 @@ function isLmstudioDiscoveryConfigResolutionError(error: unknown): boolean {
 
 /** Preserves existing allowlist metadata and appends discovered LM Studio model refs. */
 function mergeDiscoveredLmstudioAllowlistEntries(params: {
-  existing?: NonNullable<NonNullable<OpenClawConfig["agents"]>["defaults"]>["models"];
+  existing?: NonNullable<NonNullable<BotConfig["agents"]>["defaults"]>["models"];
   discoveredModels: ModelDefinitionConfig[];
 }) {
   return withAgentModelAliases(
@@ -488,7 +488,7 @@ export async function prepareAppGuidedLmstudioSetup(
 
 /** Interactive LM Studio setup with connectivity and model-availability checks. */
 export async function promptAndConfigureLmstudioInteractive(params: {
-  config: OpenClawConfig;
+  config: BotConfig;
   agentDir?: string;
   prompter?: WizardPrompter;
   secretInputMode?: SecretInputMode;
@@ -673,7 +673,7 @@ export async function promptAndConfigureLmstudioInteractive(params: {
 /** Non-interactive setup path backed by the shared self-hosted helper. */
 export async function configureLmstudioNonInteractive(
   ctx: ProviderAuthMethodNonInteractiveContext,
-): Promise<OpenClawConfig | null> {
+): Promise<BotConfig | null> {
   const customBaseUrl = normalizeOptionalSecretInput(ctx.opts.customBaseUrl);
   const baseUrl = resolveLmstudioInferenceBase(
     customBaseUrl || resolveLmstudioSetupDefaultInferenceBaseUrl(),

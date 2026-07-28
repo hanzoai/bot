@@ -10,7 +10,7 @@ type PluginConfigValidation = { ok: true; value?: unknown } | { ok: false; error
  * function, or both. `uiHints` and `jsonSchema` are optional extras for docs,
  * forms, and config UIs.
  */
-export type OpenClawPluginConfigSchema = {
+export type BotPluginConfigSchema = {
   safeParse?: (value: unknown) => {
     success: boolean;
     data?: unknown;

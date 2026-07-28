@@ -3,8 +3,8 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
-import { collectConfiguredModelRefs } from "@openclaw/model-catalog-core/configured-model-refs";
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
+import { collectConfiguredModelRefs } from "@hanzo/bot-model-catalog-core/configured-model-refs";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
 import { note } from "../../packages/terminal-core/src/note.js";
 import { resolveAgentDir, resolveDefaultAgentDir, listAgentIds } from "../agents/agent-scope.js";
 import { AUTH_STORE_VERSION } from "../agents/auth-profiles/constants.js";
@@ -42,10 +42,10 @@ import { splitTrailingAuthProfile } from "../agents/model-ref-profile.js";
 import { formatCliCommand } from "../cli/command-format.js";
 import { resolveStateDir } from "../config/paths.js";
 import type { AuthProfileConfig } from "../config/types.auth.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { coerceSecretRef } from "../config/types.secrets.js";
 import { loadJsonFile } from "../infra/json-file.js";
-import type { OpenClawAgentDatabase } from "../state/openclaw-agent-db.js";
+import type { BotAgentDatabase } from "../state/bot-agent-db.js";
 import { shortenHomePath } from "../utils.js";
 import {
   resolveLegacyAuthProfilesPath as resolveAuthStorePath,
@@ -142,7 +142,7 @@ function extractProviderFromModelRef(modelRef: string): string | undefined {
 }
 
 function collectLegacyConfigAuthProfileProviderHints(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
 ): ReadonlyMap<string, string> {
   const hints = new Map<string, string>();
   const conflicted = new Set<string>();
@@ -311,13 +311,13 @@ function listExistingAgentDirsFromState(env: NodeJS.ProcessEnv): string[] {
 }
 
 function listAuthProfileRepairCandidates(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv,
 ): AuthProfileRepairCandidate[] {
   const candidates = new Map<string, AuthProfileRepairCandidate>();
   addCandidate(candidates, resolveDefaultAgentDir(cfg, env));
   const envAgentDir =
-    readNonEmptyString(env.OPENCLAW_AGENT_DIR) ?? readNonEmptyString(env.PI_CODING_AGENT_DIR);
+    readNonEmptyString(env.BOT_AGENT_DIR) ?? readNonEmptyString(env.PI_CODING_AGENT_DIR);
   if (envAgentDir) {
     addCandidate(candidates, envAgentDir);
   }
@@ -331,7 +331,7 @@ function listAuthProfileRepairCandidates(
 }
 
 function listAuthProfileSqliteMigrationCandidates(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv,
 ): AuthProfileSqliteMigrationCandidate[] {
   const candidates: AuthProfileSqliteMigrationCandidate[] = [];
@@ -422,7 +422,7 @@ function inferLegacyConfigAuthProfileMode(
   return undefined;
 }
 
-function coerceLegacyConfigAuthProfileStore(cfg: OpenClawConfig): AuthProfileStore | null {
+function coerceLegacyConfigAuthProfileStore(cfg: BotConfig): AuthProfileStore | null {
   const cfgRecord: Record<string, unknown> = cfg;
   const auth = isRecord(cfgRecord.auth) ? cfgRecord.auth : null;
   const profiles = auth && isRecord(auth.profiles) ? auth.profiles : null;
@@ -495,14 +495,14 @@ function coerceLegacyConfigAuthProfileStore(cfg: OpenClawConfig): AuthProfileSto
 
 function isDefaultAgentCandidate(
   candidate: AuthProfileSqliteMigrationCandidate,
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   env: NodeJS.ProcessEnv,
 ): boolean {
   return path.resolve(candidate.agentDir ?? "") === path.resolve(resolveDefaultAgentDir(cfg, env));
 }
 
 function stripImportedConfigAuthProfileCredentials(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   store: AuthProfileStore,
 ): boolean {
   const profiles = ensureConfigAuthProfiles(cfg);
@@ -867,7 +867,7 @@ function coerceLegacyOAuthFile(raw: unknown): {
 function loadAuthProfileMigrationTargetStore(
   agentDir: string | undefined,
   loadStore: typeof loadPersistedAuthProfileStore = loadPersistedAuthProfileStore,
-  database?: OpenClawAgentDatabase,
+  database?: BotAgentDatabase,
 ): AuthProfileStore {
   const inspection = inspectPersistedAuthProfileStoreRaw(agentDir, database);
   const store = loadStore(agentDir, database ? { database } : undefined);
@@ -1006,7 +1006,7 @@ function migrateLockedLegacyOAuthFile(params: {
  * OAuth profiles that still depend on unresolved sidecar secrets remain as a migration input.
  */
 export async function maybeMigrateAuthProfileJsonStoresToSqlite(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: Pick<DoctorPrompter, "confirmAutoFix">;
   now?: () => number;
   env?: NodeJS.ProcessEnv;
@@ -1076,7 +1076,7 @@ export async function maybeMigrateAuthProfileJsonStoresToSqlite(params: {
           `- ${shortenHomePath(candidate.authPath)} / ${shortenHomePath(candidate.statePath)}`,
       ),
       ...(hasLegacyOAuth ? [`- ${shortenHomePath(oauthPath)} (shared-main owner)`] : []),
-      `- ${formatCliCommand("openclaw doctor --fix")} imports legacy auth profile JSON into SQLite, verifies it, records a receipt, and archives the original bytes.`,
+      `- ${formatCliCommand("bot doctor --fix")} imports legacy auth profile JSON into SQLite, verifies it, records a receipt, and archives the original bytes.`,
     ].join("\n"),
     "Auth profile SQLite migration",
   );
@@ -1157,7 +1157,7 @@ export async function maybeMigrateAuthProfileJsonStoresToSqlite(params: {
         // Sidecar-backed OAuth entries cannot move into SQLite until their secret material exists.
         pruneRawAuthProfileIds(rawStore, unresolvedSidecarProfileIds);
         result.warnings.push(
-          `Left ${unresolvedSidecarProfileIds.size} legacy OAuth sidecar profile${unresolvedSidecarProfileIds.size === 1 ? "" : "s"} in ${shortenHomePath(candidate.authPath)}; rerun ${formatCliCommand("openclaw doctor --fix")} after sidecar migration or re-authenticate those profiles.`,
+          `Left ${unresolvedSidecarProfileIds.size} legacy OAuth sidecar profile${unresolvedSidecarProfileIds.size === 1 ? "" : "s"} in ${shortenHomePath(candidate.authPath)}; rerun ${formatCliCommand("bot doctor --fix")} after sidecar migration or re-authenticate those profiles.`,
         );
       }
       const awsSdkMarkerStore =
@@ -1426,7 +1426,7 @@ export async function maybeMigrateAuthProfileJsonStoresToSqlite(params: {
   ].some((pathname) => fs.existsSync(pathname));
   if (hasLegacyOAuth && sharedMainCredentialSourceRemains) {
     result.warnings.push(
-      `Deferred shared legacy OAuth migration until higher-priority shared-main credential sources are resolved by ${formatCliCommand("openclaw doctor --fix")}.`,
+      `Deferred shared legacy OAuth migration until higher-priority shared-main credential sources are resolved by ${formatCliCommand("bot doctor --fix")}.`,
     );
   } else if (hasLegacyOAuth) {
     try {
@@ -1521,7 +1521,7 @@ function resolveAwsSdkAuthProfileMarkerStore(
     : null;
 }
 
-function ensureConfigAuthProfiles(config: OpenClawConfig): Record<string, AuthProfileConfig> {
+function ensureConfigAuthProfiles(config: BotConfig): Record<string, AuthProfileConfig> {
   const root = config as Record<string, unknown>;
   const auth = isRecord(root.auth) ? root.auth : {};
   if (root.auth !== auth) {
@@ -1549,7 +1549,7 @@ function removeAwsSdkProfileMarkers(raw: Record<string, unknown>, profileIds: st
  * credentials, and the runtime no longer treats them as stored secrets.
  */
 export async function maybeRepairLegacyFlatAuthProfileStores(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: DoctorPrompter;
   now?: () => number;
   env?: NodeJS.ProcessEnv;
@@ -1581,17 +1581,17 @@ export async function maybeRepairLegacyFlatAuthProfileStores(params: {
     ),
     ...awsSdkMarkerStores.map(
       (entry) =>
-        `- ${shortenHomePath(entry.authPath)} contains aws-sdk profile markers that belong in openclaw.json auth.profiles.`,
+        `- ${shortenHomePath(entry.authPath)} contains aws-sdk profile markers that belong in bot.json auth.profiles.`,
     ),
   ];
   if (legacyStores.length > 0) {
     noteLines.push(
-      `- The gateway expects the canonical version/profiles store; ${formatCliCommand("openclaw doctor --fix")} rewrites this legacy shape with a backup.`,
+      `- The gateway expects the canonical version/profiles store; ${formatCliCommand("bot doctor --fix")} rewrites this legacy shape with a backup.`,
     );
   }
   if (awsSdkMarkerStores.length > 0) {
     noteLines.push(
-      `- AWS SDK profile markers are routing metadata, not stored credentials; ${formatCliCommand("openclaw doctor --fix")} moves them to config with a backup.`,
+      `- AWS SDK profile markers are routing metadata, not stored credentials; ${formatCliCommand("bot doctor --fix")} moves them to config with a backup.`,
     );
   }
   note(noteLines.join("\n"), "Auth profiles");
@@ -1721,7 +1721,7 @@ function backupCanonicalApiKeyAlias(authPath: string, now: () => number): string
  * moving the alias into the canonical key slot.
  */
 export async function maybeRepairCanonicalApiKeyFieldAlias(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   prompter: DoctorPrompter;
   now?: () => number;
   env?: NodeJS.ProcessEnv;
@@ -1746,7 +1746,7 @@ export async function maybeRepairCanonicalApiKeyFieldAlias(params: {
       `- ${shortenHomePath(entry.authPath)} has ${entry.profileIds.length} profile(s) using the non-canonical "api_key" field; the canonical field is "key".`,
   );
   noteLines.push(
-    `- Runtime auth parsing only reads canonical "key" and "keyRef" fields, so these profiles are silently skipped; ${formatCliCommand("openclaw doctor --fix")} rewrites "api_key" to "key" with a backup.`,
+    `- Runtime auth parsing only reads canonical "key" and "keyRef" fields, so these profiles are silently skipped; ${formatCliCommand("bot doctor --fix")} rewrites "api_key" to "key" with a backup.`,
   );
   note(noteLines.join("\n"), "Auth profiles");
 
@@ -2036,10 +2036,10 @@ function canonicalizeOpenAILastGood(
  * contain the same legacy profile.
  */
 export function maybeRepairOpenAICodexAuthConfig(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   options?: { profileIdMap?: ReadonlyMap<string, string> },
 ): {
-  config: OpenClawConfig;
+  config: BotConfig;
   changes: string[];
   warnings: string[];
 } {
@@ -2114,7 +2114,7 @@ function resolveOpenAICodexAuthStoreRepair(
 
 /** Collects deterministic legacy-to-canonical OpenAI profile ids across all agent stores. */
 export function collectOpenAICodexAuthProfileStoreIdMap(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env?: NodeJS.ProcessEnv;
 }): Map<string, string> {
   const env = params.env ?? process.env;
@@ -2153,7 +2153,7 @@ function backupOpenAIProviderUnification(authPath: string, now: () => number): s
  * Rewrites legacy OpenAI Codex auth profiles in JSON stores to the canonical OpenAI provider id.
  */
 export async function maybeRepairOpenAICodexAuthProfileStores(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   now?: () => number;
   env?: NodeJS.ProcessEnv;
 }): Promise<LegacyFlatAuthProfileRepairResult> {

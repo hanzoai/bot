@@ -1,10 +1,10 @@
 // Builds channel setup metadata from plugin light surfaces.
 import type { ChannelPlugin } from "../channels/plugins/types.plugin.js";
 import { isChannelConfigured } from "../config/channel-configured.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { unwrapDefaultModuleExport } from "./module-export.js";
 import type { PluginRuntime } from "./runtime/types.js";
-import type { OpenClawPluginApi } from "./types.js";
+import type { BotPluginApi } from "./types.js";
 
 function mergeChannelPluginSection<T>(
   baseValue: T | undefined,
@@ -127,7 +127,7 @@ export function loadBundledRuntimeChannelPlugin(params: {
 export function resolveSetupChannelRegistration(moduleExport: unknown): {
   plugin?: ChannelPlugin;
   setChannelRuntime?: (runtime: PluginRuntime) => void;
-  registerSetupRuntime?: (api: OpenClawPluginApi) => void;
+  registerSetupRuntime?: (api: BotPluginApi) => void;
   usesBundledSetupContract?: boolean;
   loadError?: unknown;
 } {
@@ -173,7 +173,7 @@ export function resolveSetupChannelRegistration(moduleExport: unknown): {
           ...(typeof setupEntryRecord.registerSetupRuntime === "function"
             ? {
                 registerSetupRuntime: setupEntryRecord.registerSetupRuntime as (
-                  api: OpenClawPluginApi,
+                  api: BotPluginApi,
                 ) => void,
               }
             : {}),
@@ -204,7 +204,7 @@ export function shouldLoadChannelPluginInSetupRuntime(params: {
   manifestChannels: string[];
   setupSource?: string;
   startupDeferConfiguredChannelFullLoadUntilAfterListen?: boolean;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   preferSetupRuntimeForChannelPlugins?: boolean;
 }): boolean {
@@ -225,7 +225,7 @@ export function shouldLoadChannelPluginInSetupRuntime(params: {
 export function shouldDeferConfiguredChannelFullRuntimeMerge(params: {
   manifestChannels: string[];
   startupDeferConfiguredChannelFullLoadUntilAfterListen?: boolean;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   env: NodeJS.ProcessEnv;
   preferSetupRuntimeForChannelPlugins?: boolean;
 }): boolean {

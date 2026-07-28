@@ -1,11 +1,11 @@
-import { isRecord } from "@openclaw/normalization-core/record-coerce";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { isRecord } from "@hanzo/bot-normalization-core/record-coerce";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 // Maps commitment records to the canonical shared SQLite table.
 import type { Insertable, Selectable, Updateable } from "kysely";
-import type { DB as OpenClawStateKyselyDatabase } from "../state/openclaw-state-db.generated.js";
+import type { DB as BotStateKyselyDatabase } from "../state/bot-state-db.generated.js";
 import type { CommitmentRecord } from "./types.js";
 
-export type CommitmentsDatabase = Pick<OpenClawStateKyselyDatabase, "commitments">;
+export type CommitmentsDatabase = Pick<BotStateKyselyDatabase, "commitments">;
 export type CommitmentRow = Selectable<CommitmentsDatabase["commitments"]>;
 type CommitmentRowInsert = Insertable<CommitmentsDatabase["commitments"]>;
 type CommitmentRowUpdate = Updateable<CommitmentsDatabase["commitments"]>;

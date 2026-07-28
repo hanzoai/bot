@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import {
   clearMemoryPluginState,
   registerMemoryCorpusSupplement,
-} from "openclaw/plugin-sdk/memory-host-core";
-import { readMemoryHostEvents } from "openclaw/plugin-sdk/memory-host-events";
+} from "bot/plugin-sdk/memory-host-core";
+import { readMemoryHostEvents } from "bot/plugin-sdk/memory-host-events";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   getMemoryCloseMockCalls,
@@ -28,7 +28,7 @@ import {
   testing as memoryToolsTesting,
 } from "./tools.js";
 import {
-  asOpenClawConfig,
+  asBotConfig,
   createAutoCitationsMemorySearchTool,
   createDefaultMemoryToolConfig,
   createMemoryGetToolOrThrow,
@@ -95,7 +95,7 @@ describe("memory search citations", () => {
 
   it("appends source information when citations are enabled", async () => {
     setMemoryBackend("builtin");
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       memory: { citations: "on" },
       agents: { list: [{ id: "main", default: true }] },
     });
@@ -109,7 +109,7 @@ describe("memory search citations", () => {
 
   it("leaves snippet untouched when citations are off", async () => {
     setMemoryBackend("builtin");
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       memory: { citations: "off" },
       agents: { list: [{ id: "main", default: true }] },
     });
@@ -133,7 +133,7 @@ describe("memory search citations", () => {
         source: "memory" as const,
       },
     ]);
-    const cfg = asOpenClawConfig({
+    const cfg = asBotConfig({
       memory: { citations: "on", backend: "qmd", qmd: { limits: { maxInjectedChars: 4 } } },
       agents: { list: [{ id: "main", default: true }] },
     });
@@ -183,7 +183,7 @@ describe("memory tools", () => {
   it("uses default memory manager mode for shared memory_search", async () => {
     setMemoryBackend("qmd");
     const tool = createMemorySearchToolOrThrow({
-      config: asOpenClawConfig({
+      config: asBotConfig({
         memory: { backend: "qmd", qmd: { command: "qmd" } },
         agents: { list: [{ id: "main", default: true }] },
       }),
@@ -203,7 +203,7 @@ describe("memory tools", () => {
   it("uses one-shot CLI memory manager mode for explicit local CLI memory_search", async () => {
     setMemoryBackend("qmd");
     const tool = createMemorySearchToolOrThrow({
-      config: asOpenClawConfig({
+      config: asBotConfig({
         memory: { backend: "qmd", qmd: { command: "qmd" } },
         agents: { list: [{ id: "main", default: true }] },
       }),
@@ -325,7 +325,7 @@ describe("memory tools", () => {
       ]);
 
       const tool = createMemorySearchToolOrThrow({
-        config: asOpenClawConfig({
+        config: asBotConfig({
           agents: { list: [{ id: "main", default: true }] },
           plugins: {
             entries: {
@@ -424,7 +424,7 @@ describe("memory tools", () => {
         search,
         get: async () => null,
       });
-      const config = asOpenClawConfig({
+      const config = asBotConfig({
         agents: { list: [{ id: "marketing-agent", default: true }] },
       });
       const tool = createMemorySearchTool({
@@ -767,7 +767,7 @@ describe("memory tools", () => {
         search: async () => [],
         get,
       });
-      const config = asOpenClawConfig({
+      const config = asBotConfig({
         agents: { list: [{ id: "marketing-agent", default: true }] },
       });
       const tool = createMemoryGetTool({

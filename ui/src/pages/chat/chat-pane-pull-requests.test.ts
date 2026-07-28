@@ -49,7 +49,7 @@ describe("chat pane pull request refresh", () => {
         {
           number: 2,
           title: "Current session PR",
-          url: "https://github.com/openclaw/openclaw/pull/2",
+          url: "https://github.com/hanzoai/bot/pull/2",
           state: "open",
         },
       ],
@@ -61,7 +61,7 @@ describe("chat pane pull request refresh", () => {
         {
           number: 1,
           title: "Previous session PR",
-          url: "https://github.com/openclaw/openclaw/pull/1",
+          url: "https://github.com/hanzoai/bot/pull/1",
           state: "open",
         },
       ],
@@ -79,20 +79,20 @@ describe("chat pane pull request refresh", () => {
       pullRequests: [
         {
           number: 111772,
-          owner: "openclaw",
-          repo: "openclaw",
+          owner: "bot",
+          repo: "bot",
           branch: "claude/pr-detection",
           title: "Detect pull requests",
-          url: "https://github.com/openclaw/openclaw/pull/111772",
+          url: "https://github.com/hanzoai/bot/pull/111772",
           state: "draft",
         },
         {
           number: 111751,
-          owner: "openclaw",
-          repo: "openclaw",
+          owner: "bot",
+          repo: "bot",
           branch: "claude/pr-detection",
           title: "Earlier pull request",
-          url: "https://github.com/openclaw/openclaw/pull/111751",
+          url: "https://github.com/hanzoai/bot/pull/111751",
           state: "closed",
         },
       ],
@@ -130,18 +130,18 @@ describe("chat pane pull request refresh", () => {
   it("retains the current PR when a live summary is truncated", async () => {
     const current = {
       number: 999,
-      owner: "openclaw",
-      repo: "openclaw",
+      owner: "bot",
+      repo: "bot",
       branch: "claude/pr-detection",
       title: "Current pull request",
-      url: "https://github.com/openclaw/openclaw/pull/999",
+      url: "https://github.com/hanzoai/bot/pull/999",
       state: "draft" as const,
     };
     const older = Array.from({ length: 20 }, (_value, index) => ({
       ...current,
       number: index + 1,
       title: `Earlier pull request ${index + 1}`,
-      url: `https://github.com/openclaw/openclaw/pull/${index + 1}`,
+      url: `https://github.com/hanzoai/bot/pull/${index + 1}`,
       state: "closed" as const,
     }));
     const request = vi.fn().mockResolvedValue({
@@ -183,11 +183,11 @@ describe("chat pane pull request refresh", () => {
     pane.sessionPullRequests = [
       {
         number: 111532,
-        owner: "openclaw",
-        repo: "openclaw",
+        owner: "bot",
+        repo: "bot",
         branch: "claude/pr-detection",
         title: "Detect pull requests",
-        url: "https://github.com/openclaw/openclaw/pull/111532",
+        url: "https://github.com/hanzoai/bot/pull/111532",
         state: "open",
       },
     ];
@@ -228,11 +228,11 @@ describe("chat pane pull request refresh", () => {
       pullRequests: [
         {
           number: 111532,
-          owner: "openclaw",
-          repo: "openclaw",
+          owner: "bot",
+          repo: "bot",
           branch: "claude/pr-detection",
           title: "Detect pull requests",
-          url: "https://github.com/openclaw/openclaw/pull/111532",
+          url: "https://github.com/hanzoai/bot/pull/111532",
           state: "merged",
         },
       ],

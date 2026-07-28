@@ -3,8 +3,8 @@
  * Keep this module synchronous; request paths call it while rendering usage summaries.
  */
 import path from "node:path";
-import { expectDefined } from "@openclaw/normalization-core";
-import { normalizeOptionalString } from "@openclaw/normalization-core/string-coerce";
+import { expectDefined } from "@hanzo/bot-normalization-core";
+import { normalizeOptionalString } from "@hanzo/bot-normalization-core/string-coerce";
 import {
   listAgentEntries,
   resolveAgentDir,
@@ -14,7 +14,7 @@ import { modelKey, normalizeModelRef, normalizeProviderId } from "../agents/mode
 import type { NormalizedUsage } from "../agents/usage.js";
 import { resolveStateDir } from "../config/paths.js";
 import type { ModelProviderConfig } from "../config/types.models.js";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { tryReadJsonSync } from "../infra/json-files.js";
 import {
   modelCatalogPricingFingerprint,
@@ -315,7 +315,7 @@ function loadModelsJsonCostIndex(options?: {
   }
 }
 
-function resolveCostAgentDir(config?: OpenClawConfig, agentDir?: string): string | undefined {
+function resolveCostAgentDir(config?: BotConfig, agentDir?: string): string | undefined {
   if (agentDir) {
     return agentDir;
   }
@@ -330,7 +330,7 @@ function resolveCostAgentDir(config?: OpenClawConfig, agentDir?: string): string
 function findConfiguredProviderCost(params: {
   provider?: string;
   model?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   allowPluginNormalization?: boolean;
 }): ModelCostConfig | undefined {
   const key = toResolvedModelKey(params);
@@ -525,7 +525,7 @@ function serializeCostIndex(
  * Consumers cache this value to know when resolved cost entries need recomputation.
  */
 export function resolveModelCostConfigFingerprint(
-  config?: OpenClawConfig,
+  config?: BotConfig,
   agentDir?: string,
 ): string {
   const resolvedAgentDir = resolveCostAgentDir(config, agentDir);
@@ -554,7 +554,7 @@ export function resolveModelCostConfigFingerprint(
 export function resolveModelCostConfig(params: {
   provider?: string;
   model?: string;
-  config?: OpenClawConfig;
+  config?: BotConfig;
   agentDir?: string;
   allowPluginNormalization?: boolean;
 }): ModelCostConfig | undefined {

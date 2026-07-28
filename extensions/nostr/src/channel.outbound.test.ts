@@ -1,7 +1,7 @@
 // Nostr tests cover channel.outbound plugin behavior.
-import { verifyChannelMessageAdapterCapabilityProofs } from "openclaw/plugin-sdk/channel-outbound";
-import { createStartAccountContext } from "openclaw/plugin-sdk/channel-test-helpers";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+import { verifyChannelMessageAdapterCapabilityProofs } from "bot/plugin-sdk/channel-outbound";
+import { createStartAccountContext } from "bot/plugin-sdk/channel-test-helpers";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PluginRuntime } from "../runtime-api.js";
 import { nostrPlugin } from "./channel.js";
@@ -93,7 +93,7 @@ describe("nostr outbound cfg threading", () => {
 
     const cfg = createCfg();
     await nostrOutboundAdapter.sendText({
-      cfg: cfg as OpenClawConfig,
+      cfg: cfg as BotConfig,
       to: "NPUB123",
       text: "|a|b|",
       accountId: "default",
@@ -109,7 +109,7 @@ describe("nostr outbound cfg threading", () => {
     expect(sendDm).toHaveBeenCalledWith("normalized-npub123", "Table: docs (https://example.com)");
     await expect(
       nostrOutboundAdapter.sendText({
-        cfg: cfg as OpenClawConfig,
+        cfg: cfg as BotConfig,
         to: "NPUB123",
         text: "***",
         accountId: "default",
@@ -133,7 +133,7 @@ describe("nostr outbound cfg threading", () => {
     };
 
     await nostrOutboundAdapter.sendText({
-      cfg: cfg as OpenClawConfig,
+      cfg: cfg as BotConfig,
       to: "NPUB123",
       text: "hello",
     });
@@ -155,7 +155,7 @@ describe("nostr outbound cfg threading", () => {
     sendDm.mockResolvedValueOnce(eventId);
 
     const result = await nostrOutboundAdapter.sendText({
-      cfg: createCfg() as OpenClawConfig,
+      cfg: createCfg() as BotConfig,
       to: "NPUB123",
       text: "hello",
       accountId: "default",
@@ -186,7 +186,7 @@ describe("nostr outbound cfg threading", () => {
       proofs: {
         text: async () => {
           const result = await sendText({
-            cfg: createCfg() as OpenClawConfig,
+            cfg: createCfg() as BotConfig,
             to: "NPUB123",
             text: "hello",
             accountId: "default",

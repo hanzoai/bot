@@ -1,5 +1,5 @@
 // Qa Lab plugin module plans the bounded CI smoke profile parts.
-import { OPENCLAW_CRABLINE_DEFAULT_CHANNEL } from "@openclaw/crabline";
+import { BOT_CRABLINE_DEFAULT_CHANNEL } from "@openclaw/crabline";
 import { defaultQaModelForMode, normalizeQaProviderMode } from "./model-selection.js";
 import { readQaScenarioPack } from "./scenario-catalog.js";
 import { scenarioMatchesQaProviderLane } from "./scenario-lane.js";
@@ -9,7 +9,7 @@ const QA_SMOKE_PROFILE = "smoke-ci";
 // Four parts keep each smoke job near the fixed setup cost (~1min) instead of
 // serializing ~4min of scenarios into one job that owns the PR wall clock.
 const QA_SMOKE_CI_PARTS = ["profile-1", "profile-2", "profile-3", "profile-4"] as const;
-const QA_SMOKE_CI_CHANNELS = ["matrix", OPENCLAW_CRABLINE_DEFAULT_CHANNEL] as const;
+const QA_SMOKE_CI_CHANNELS = ["matrix", BOT_CRABLINE_DEFAULT_CHANNEL] as const;
 const QA_SMOKE_CI_SCENARIO_IDS = new Set([
   "control-ui-chat-flow-playwright",
   "system-agent-ring-zero-setup",
@@ -74,7 +74,7 @@ export function createQaSmokeCiPart(partId: string): QaSmokeCiPart {
         providerMode,
         primaryModel,
         channelDriver: profile.channelDriver,
-        channel: scenario.execution.channel ?? OPENCLAW_CRABLINE_DEFAULT_CHANNEL,
+        channel: scenario.execution.channel ?? BOT_CRABLINE_DEFAULT_CHANNEL,
       }),
   );
   if (scenarios.length === 0) {
@@ -84,7 +84,7 @@ export function createQaSmokeCiPart(partId: string): QaSmokeCiPart {
   const supportedChannels = new Set<string>(QA_SMOKE_CI_CHANNELS);
   const unsupportedChannels = new Set(
     scenarios
-      .map((scenario) => scenario.execution.channel ?? OPENCLAW_CRABLINE_DEFAULT_CHANNEL)
+      .map((scenario) => scenario.execution.channel ?? BOT_CRABLINE_DEFAULT_CHANNEL)
       .filter((channel) => !supportedChannels.has(channel)),
   );
   if (unsupportedChannels.size > 0) {
@@ -97,8 +97,8 @@ export function createQaSmokeCiPart(partId: string): QaSmokeCiPart {
   const defaultChannelScenarios = scenarios
     .filter(
       (scenario) =>
-        (scenario.execution.channel ?? OPENCLAW_CRABLINE_DEFAULT_CHANNEL) ===
-        OPENCLAW_CRABLINE_DEFAULT_CHANNEL,
+        (scenario.execution.channel ?? BOT_CRABLINE_DEFAULT_CHANNEL) ===
+        BOT_CRABLINE_DEFAULT_CHANNEL,
     )
     .toSorted(
       (left, right) =>
@@ -131,7 +131,7 @@ export function createQaSmokeCiPart(partId: string): QaSmokeCiPart {
   }
   const runs: QaSmokeCiRun[] = [
     {
-      channel: OPENCLAW_CRABLINE_DEFAULT_CHANNEL,
+      channel: BOT_CRABLINE_DEFAULT_CHANNEL,
       slug: "primary",
       scenario_ids: selectedPartition.scenarios.map((scenario) => scenario.id).toSorted(),
     },

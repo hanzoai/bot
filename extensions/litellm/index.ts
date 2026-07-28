@@ -1,15 +1,15 @@
-// Litellm plugin entrypoint registers its OpenClaw integration.
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
+// Litellm plugin entrypoint registers its Bot integration.
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
 import {
   definePluginEntry,
-  type OpenClawPluginApi,
+  type BotPluginApi,
   type ProviderAuthMethodNonInteractiveContext,
-} from "openclaw/plugin-sdk/plugin-entry";
+} from "bot/plugin-sdk/plugin-entry";
 import {
   createProviderApiKeyAuthMethod,
   normalizeOptionalSecretInput,
-} from "openclaw/plugin-sdk/provider-auth";
-import { buildOpenAICompatibleProviderCatalog } from "openclaw/plugin-sdk/provider-catalog-live-runtime";
+} from "bot/plugin-sdk/provider-auth";
+import { buildOpenAICompatibleProviderCatalog } from "bot/plugin-sdk/provider-catalog-live-runtime";
 import { buildLitellmImageGenerationProvider } from "./image-generation-provider.js";
 import { applyLitellmConfig, LITELLM_DEFAULT_MODEL_REF } from "./onboard.js";
 import { buildLitellmProvider } from "./provider-catalog.js";
@@ -17,9 +17,9 @@ import { buildLitellmProvider } from "./provider-catalog.js";
 const PROVIDER_ID = "litellm";
 
 function applyCustomBaseUrlForNonInteractiveSetup(
-  cfg: OpenClawConfig,
+  cfg: BotConfig,
   customBaseUrl: unknown,
-): OpenClawConfig {
+): BotConfig {
   const baseUrl = normalizeOptionalSecretInput(customBaseUrl)?.replace(/\/+$/, "");
   if (!baseUrl) {
     return cfg;
@@ -45,7 +45,7 @@ export default definePluginEntry({
   id: PROVIDER_ID,
   name: "LiteLLM Provider",
   description: "Bundled LiteLLM provider plugin",
-  register(api: OpenClawPluginApi) {
+  register(api: BotPluginApi) {
     const apiKeyAuth = createProviderApiKeyAuthMethod({
       providerId: PROVIDER_ID,
       methodId: "api-key",

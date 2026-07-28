@@ -10,17 +10,17 @@ import {
   readControlUiDeviceAuthMigrationState,
   releaseControlUiDeviceAuthMigrationClaim,
 } from "../state/control-ui-device-auth-migration.js";
-import { closeOpenClawStateDatabaseForTest } from "../state/openclaw-state-db.js";
+import { closeBotStateDatabaseForTest } from "../state/bot-state-db.js";
 import { migrateLegacyConfigMachineState } from "./state-migrations.config-machine-state.js";
 
 afterEach(() => {
-  closeOpenClawStateDatabaseForTest();
+  closeBotStateDatabaseForTest();
 });
 
 describe("legacy config machine-state migration", () => {
   it("imports machine-owned values and keeps existing database state", () => {
-    const stateDir = mkdtempSync(join(tmpdir(), "openclaw-config-machine-state-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = mkdtempSync(join(tmpdir(), "bot-config-machine-state-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
     writeConfigMachineState("config.lastTouchedAt", "canonical", { env });
 
     const result = migrateLegacyConfigMachineState({
@@ -46,8 +46,8 @@ describe("legacy config machine-state migration", () => {
   });
 
   it("merges legacy hook installs while canonical records win conflicts", () => {
-    const stateDir = mkdtempSync(join(tmpdir(), "openclaw-config-machine-state-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = mkdtempSync(join(tmpdir(), "bot-config-machine-state-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
     writeConfigMachineState(
       "hooks.internal.installs",
       { canonical: { source: "npm" }, shared: { source: "path" } },
@@ -76,8 +76,8 @@ describe("legacy config machine-state migration", () => {
   });
 
   it("conservatively preserves compatibility for an unstamped plugin allowlist", () => {
-    const stateDir = mkdtempSync(join(tmpdir(), "openclaw-config-machine-state-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = mkdtempSync(join(tmpdir(), "bot-config-machine-state-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
 
     migrateLegacyConfigMachineState({ env, config: { plugins: { allow: ["telegram"] } } });
 
@@ -85,8 +85,8 @@ describe("legacy config machine-state migration", () => {
   });
 
   it("preserves compatibility discovery for a pre-cutover plugin allowlist", () => {
-    const stateDir = mkdtempSync(join(tmpdir(), "openclaw-config-machine-state-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = mkdtempSync(join(tmpdir(), "bot-config-machine-state-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
 
     migrateLegacyConfigMachineState({
       env,
@@ -100,8 +100,8 @@ describe("legacy config machine-state migration", () => {
   });
 
   it("does not infer compatibility discovery after the fixed cutover release", () => {
-    const stateDir = mkdtempSync(join(tmpdir(), "openclaw-config-machine-state-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = mkdtempSync(join(tmpdir(), "bot-config-machine-state-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
 
     migrateLegacyConfigMachineState({
       env,
@@ -115,8 +115,8 @@ describe("legacy config machine-state migration", () => {
   });
 
   it("preserves the shipped device-auth bypass as pending migration state", () => {
-    const stateDir = mkdtempSync(join(tmpdir(), "openclaw-config-machine-state-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = mkdtempSync(join(tmpdir(), "bot-config-machine-state-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
 
     migrateLegacyConfigMachineState({
       env,
@@ -132,8 +132,8 @@ describe("legacy config machine-state migration", () => {
   });
 
   it("never reopens a completed migration from stale legacy config", () => {
-    const stateDir = mkdtempSync(join(tmpdir(), "openclaw-config-machine-state-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = mkdtempSync(join(tmpdir(), "bot-config-machine-state-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
     completeControlUiDeviceAuthMigration("browser-1", { env });
 
     migrateLegacyConfigMachineState({
@@ -150,8 +150,8 @@ describe("legacy config machine-state migration", () => {
   });
 
   it("allows one claim and recovers a released or interrupted claim", () => {
-    const stateDir = mkdtempSync(join(tmpdir(), "openclaw-config-machine-state-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = mkdtempSync(join(tmpdir(), "bot-config-machine-state-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
     migrateLegacyConfigMachineState({
       env,
       config: { gateway: { controlUi: { dangerouslyDisableDeviceAuth: true } } },
@@ -169,8 +169,8 @@ describe("legacy config machine-state migration", () => {
   });
 
   it("does not create migration state when the retired bypass was disabled", () => {
-    const stateDir = mkdtempSync(join(tmpdir(), "openclaw-config-machine-state-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = mkdtempSync(join(tmpdir(), "bot-config-machine-state-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
 
     migrateLegacyConfigMachineState({
       env,
@@ -183,8 +183,8 @@ describe("legacy config machine-state migration", () => {
   });
 
   it("does not treat a newly written current config as upgrade input", () => {
-    const stateDir = mkdtempSync(join(tmpdir(), "openclaw-config-machine-state-"));
-    const env = { ...process.env, OPENCLAW_STATE_DIR: stateDir };
+    const stateDir = mkdtempSync(join(tmpdir(), "bot-config-machine-state-"));
+    const env = { ...process.env, BOT_STATE_DIR: stateDir };
 
     migrateLegacyConfigMachineState({
       env,

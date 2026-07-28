@@ -20,7 +20,7 @@ function isTruthyEnvValue(value: string | undefined): boolean {
 
 function shouldSkipLegacyUpdateDoctorConfigWrite(env: NodeJS.ProcessEnv): boolean {
   return (
-    isTruthyEnvValue(env.OPENCLAW_UPDATE_IN_PROGRESS) &&
+    isTruthyEnvValue(env.BOT_UPDATE_IN_PROGRESS) &&
     !isTruthyEnvValue(env[UPDATE_PARENT_SUPPORTS_DOCTOR_CONFIG_WRITE_ENV])
   );
 }
@@ -123,7 +123,7 @@ export async function collectWriteConfigHealthFindings(
     findings.push({
       checkId: "core/doctor/write-config",
       severity: "warning",
-      message: "Doctor config writes are disabled because OpenClaw is running in Nix mode.",
+      message: "Doctor config writes are disabled because Bot is running in Nix mode.",
       ...(configPath ? { path: configPath } : {}),
       requirement: "mutable-config-write-path",
       fixHint:

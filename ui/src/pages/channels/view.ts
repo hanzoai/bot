@@ -16,7 +16,7 @@ import type {
   WhatsAppStatus,
 } from "../../api/types.ts";
 import { icons } from "../../components/icons.ts";
-import "../../components/openclaw-mascot.ts";
+import "../../components/bot-mascot.ts";
 import {
   renderSettingsEmpty,
   renderSettingsPage,
@@ -87,7 +87,7 @@ export function renderChannels(props: ChannelsProps) {
           ? html`
               <div class="channels-empty">
                 <!-- No configured transports is a true empty state, so Clawd rests here. -->
-                <openclaw-mascot mood="sleepy" .size=${80}></openclaw-mascot>
+                <bot-mascot mood="sleepy" .size=${80}></bot-mascot>
                 ${renderSettingsEmpty(t("channels.hub.noneConnected"))}
               </div>
             `

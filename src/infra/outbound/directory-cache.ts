@@ -1,8 +1,8 @@
 // Directory cache stores short-lived channel directory lookups and invalidates
 // them on config-object changes or resolver signature updates.
-import { resolveNonNegativeIntegerOption } from "@openclaw/normalization-core/number-coercion";
+import { resolveNonNegativeIntegerOption } from "@hanzo/bot-normalization-core/number-coercion";
 import type { ChannelDirectoryEntryKind, ChannelId } from "../../channels/plugins/types.public.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 
 type CacheEntry<T> = {
   value: T;
@@ -34,7 +34,7 @@ export function buildDirectoryCacheKey(key: DirectoryCacheKey): string {
  */
 export class DirectoryCache<T> {
   private readonly cache = new Map<string, CacheEntry<T>>();
-  private lastConfigRef: OpenClawConfig | null = null;
+  private lastConfigRef: BotConfig | null = null;
   private readonly ttlMs: number;
   private readonly maxSize: number;
 
@@ -46,7 +46,7 @@ export class DirectoryCache<T> {
   /**
    * Returns a cached value after applying config, TTL, and capacity invalidation.
    */
-  get(key: string, cfg: OpenClawConfig): T | undefined {
+  get(key: string, cfg: BotConfig): T | undefined {
     this.resetIfConfigChanged(cfg);
     this.pruneExpired(Date.now());
     const entry = this.cache.get(key);
@@ -59,7 +59,7 @@ export class DirectoryCache<T> {
   /**
    * Stores a value and refreshes its recency for bounded-size eviction.
    */
-  set(key: string, value: T, cfg: OpenClawConfig): void {
+  set(key: string, value: T, cfg: BotConfig): void {
     this.resetIfConfigChanged(cfg);
     const now = Date.now();
     this.pruneExpired(now);
@@ -85,14 +85,14 @@ export class DirectoryCache<T> {
   /**
    * Drops all cached entries and optionally adopts the current config reference.
    */
-  clear(cfg?: OpenClawConfig): void {
+  clear(cfg?: BotConfig): void {
     this.cache.clear();
     if (cfg) {
       this.lastConfigRef = cfg;
     }
   }
 
-  private resetIfConfigChanged(cfg: OpenClawConfig): void {
+  private resetIfConfigChanged(cfg: BotConfig): void {
     // Directory availability can change with config snapshots; ref changes must not leak stale entries.
     if (this.lastConfigRef && this.lastConfigRef !== cfg) {
       this.cache.clear();

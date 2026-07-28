@@ -22,7 +22,7 @@ afterEach(async () => {
 });
 
 describe("settings sidebar search", () => {
-  it("links Ask OpenClaw to the shared custodian route", () => {
+  it("links Ask Bot to the shared custodian route", () => {
     const onNavigate = vi.fn();
     render(
       renderSettingsSidebar({
@@ -47,7 +47,7 @@ describe("settings sidebar search", () => {
     const link = container.querySelector<HTMLAnchorElement>(
       '.settings-sidebar__item[href="/custodian"]',
     );
-    expect(link?.textContent?.trim()).toBe("Ask OpenClaw");
+    expect(link?.textContent?.trim()).toBe("Ask Bot");
     link?.click();
     expect(onNavigate).toHaveBeenCalledWith("custodian");
   });
@@ -327,7 +327,7 @@ describe("settings sidebar search", () => {
     );
 
     const card = container.querySelector<HTMLElement & { updateComplete: Promise<boolean> }>(
-      "openclaw-sidebar-update-card",
+      "bot-sidebar-update-card",
     );
     await card?.updateComplete;
     expect(card?.nextElementSibling?.classList.contains("settings-sidebar__footer")).toBe(true);
@@ -366,7 +366,7 @@ describe("settings sidebar search", () => {
     const button = container.querySelector<HTMLButtonElement>(".sidebar-footer-bar__status");
     expect(button?.hasAttribute("title")).toBe(false);
     expect(
-      (button?.closest("openclaw-tooltip") as (HTMLElement & { content?: string }) | null)?.content,
+      (button?.closest("bot-tooltip") as (HTMLElement & { content?: string }) | null)?.content,
     ).toBe("connection refused?[redacted-credential]");
     expect(button?.textContent).toContain("3 queued");
     expect(button?.getAttribute("aria-label")).toBe("Offline — Retry now — 3 queued");

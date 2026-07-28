@@ -2,16 +2,16 @@
 import {
   createAckReactionHandle,
   type AckReactionHandle,
-} from "openclaw/plugin-sdk/channel-feedback";
-import type { OpenClawConfig } from "openclaw/plugin-sdk/config-contracts";
-import { logVerbose } from "openclaw/plugin-sdk/runtime-env";
+} from "bot/plugin-sdk/channel-feedback";
+import type { BotConfig } from "bot/plugin-sdk/config-contracts";
+import { logVerbose } from "bot/plugin-sdk/runtime-env";
 import type { AdmittedWebInboundMessage } from "../../inbound/types.js";
 import { sendReactionWhatsApp } from "../../send.js";
 import { formatError } from "../../session.js";
 import { resolveWhatsAppReactionEligibility } from "./reaction-eligibility.js";
 
 export async function maybeSendAckReaction(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   msg: AdmittedWebInboundMessage;
   agentId: string;
   sessionKey: string;

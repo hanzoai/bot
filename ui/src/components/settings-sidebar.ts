@@ -293,11 +293,11 @@ export function renderSettingsSidebar(props: SettingsSidebarProps) {
               `,
             )}
       </nav>
-      <openclaw-sidebar-update-card
+      <bot-sidebar-update-card
         .updateAvailable=${props.updateAvailable}
         .updateRunning=${props.updateRunning}
         .onUpdate=${props.onUpdate}
-      ></openclaw-sidebar-update-card>
+      ></bot-sidebar-update-card>
       <footer class="settings-sidebar__footer">
         ${props.offline
           ? renderOfflineSidebarStatus({

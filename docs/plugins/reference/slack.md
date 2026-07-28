@@ -1,5 +1,5 @@
 ---
-summary: "OpenClaw Slack channel plugin for channels, DMs, commands, and app events."
+summary: "Bot Slack channel plugin for channels, DMs, commands, and app events."
 read_when:
   - You are installing, configuring, or auditing the slack plugin
 title: "Slack plugin"
@@ -7,11 +7,11 @@ title: "Slack plugin"
 
 # Slack plugin
 
-OpenClaw Slack channel plugin for channels, DMs, commands, and app events.
+Bot Slack channel plugin for channels, DMs, commands, and app events.
 
 ## Distribution
 
-- Package: `@openclaw/slack`
+- Package: `@hanzo/bot-slack`
 - Install route: npm; ClawHub
 
 ## Surface

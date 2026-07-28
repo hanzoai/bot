@@ -1,7 +1,7 @@
 // Command list serialization gathers chat, skill, and plugin commands into the
 // gateway protocol result while clamping names, descriptions, aliases, and args.
-import { normalizeOptionalLowercaseString } from "@openclaw/normalization-core/string-coerce";
-import { truncateUtf16Safe } from "@openclaw/normalization-core/utf16-slice";
+import { normalizeOptionalLowercaseString } from "@hanzo/bot-normalization-core/string-coerce";
+import { truncateUtf16Safe } from "@hanzo/bot-normalization-core/utf16-slice";
 import type {
   CommandEntry,
   CommandsListResult,
@@ -25,7 +25,7 @@ import type {
   CommandArgDefinition,
 } from "../../auto-reply/commands-registry.types.js";
 import { getChannelPlugin } from "../../channels/plugins/index.js";
-import type { OpenClawConfig } from "../../config/types.openclaw.js";
+import type { BotConfig } from "../../config/types.bot.js";
 import {
   getPluginCommandEntrySpecs,
   getPluginCommandEntrySpecsFromRegistrations,
@@ -171,7 +171,7 @@ function mapCommand(
 function buildPluginCommandEntries(params: {
   provider?: string;
   nameSurface: CommandNameSurface;
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
 }): CommandEntry[] {
   const gatewayRegistry = getActivePluginGatewayCommandRegistry();
   const pluginSpecs = gatewayRegistry
@@ -206,7 +206,7 @@ function buildPluginCommandEntries(params: {
 
 /** Builds the public commands.list payload for an agent/provider/scope view. */
 export function buildCommandsListResult(params: {
-  cfg: OpenClawConfig;
+  cfg: BotConfig;
   agentId: string;
   provider?: string;
   scope?: "native" | "text" | "both";

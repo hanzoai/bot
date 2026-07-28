@@ -1,12 +1,12 @@
 // Diffs plugin module implements tool behavior.
 import fs from "node:fs/promises";
-import { optionalFiniteNumberSchema, stringEnum } from "openclaw/plugin-sdk/channel-actions";
-import { formatErrorMessage } from "openclaw/plugin-sdk/error-runtime";
-import { readFiniteNumberParam } from "openclaw/plugin-sdk/param-readers";
-import { normalizeOptionalString } from "openclaw/plugin-sdk/string-coerce-runtime";
+import { optionalFiniteNumberSchema, stringEnum } from "bot/plugin-sdk/channel-actions";
+import { formatErrorMessage } from "bot/plugin-sdk/error-runtime";
+import { readFiniteNumberParam } from "bot/plugin-sdk/param-readers";
+import { normalizeOptionalString } from "bot/plugin-sdk/string-coerce-runtime";
 import { Type } from "typebox";
 import type { Static } from "typebox";
-import type { AnyAgentTool, OpenClawPluginApi, OpenClawPluginToolContext } from "../api.js";
+import type { AnyAgentTool, BotPluginApi, BotPluginToolContext } from "../api.js";
 import { PlaywrightDiffScreenshotter, type DiffScreenshotter } from "./browser.js";
 import { resolveDiffImageRenderOptions } from "./config.js";
 import { DiffRenderInputError, renderDiffDocument } from "./render.js";
@@ -116,13 +116,13 @@ const DiffsToolSchema = Type.Object(
 type DiffsToolParams = Static<typeof DiffsToolSchema>;
 
 export function createDiffsTool(params: {
-  api: OpenClawPluginApi;
+  api: BotPluginApi;
   store: DiffArtifactStore;
   defaults: DiffToolDefaults;
   viewerBaseUrl?: string;
   languagePackAvailable?: boolean;
   screenshotter?: DiffScreenshotter;
-  context?: OpenClawPluginToolContext;
+  context?: BotPluginToolContext;
 }): AnyAgentTool {
   return {
     name: "diffs",
@@ -415,7 +415,7 @@ async function renderDiffArtifactFile(params: {
 }
 
 function buildArtifactContext(
-  context: OpenClawPluginToolContext | undefined,
+  context: BotPluginToolContext | undefined,
 ): DiffArtifactContext | undefined {
   if (!context) {
     return undefined;

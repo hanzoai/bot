@@ -1,20 +1,20 @@
-// OpenClaw overview gathers config, agent, tool, docs, source, and gateway status.
+// Bot overview gathers config, agent, tool, docs, source, and gateway status.
 import {
   listAgentEntries,
   resolveAgentEffectiveModelPrimary,
   resolveDefaultAgentId,
 } from "../agents/agent-scope.js";
 import {
-  OPENCLAW_DOCS_URL,
-  OPENCLAW_SOURCE_URL,
-  resolveOpenClawReferencePaths,
+  BOT_DOCS_URL,
+  BOT_SOURCE_URL,
+  resolveBotReferencePaths,
 } from "../agents/docs-path.js";
 import {
   readConfigFileSnapshot,
   resolveConfigPath,
   resolveGatewayPort,
   type ConfigFileSnapshot,
-  type OpenClawConfig,
+  type BotConfig,
 } from "../config/config.js";
 import { resolveAgentModelPrimaryValue } from "../config/model-input.js";
 import { isFastTestRuntimeEnv } from "../infra/env.js";
@@ -63,7 +63,7 @@ export type SystemAgentOverview = {
   };
 };
 
-type OpenClawReferencePaths = Awaited<ReturnType<typeof resolveOpenClawReferencePaths>>;
+type BotReferencePaths = Awaited<ReturnType<typeof resolveBotReferencePaths>>;
 
 type GatewayConnectionDetails = {
   url: string;
@@ -76,12 +76,12 @@ type SystemAgentOverviewDependencies = {
   resolveConfigPath?: typeof resolveConfigPath;
   resolveGatewayPort?: typeof resolveGatewayPort;
   buildGatewayConnectionDetails?: (input: {
-    config: OpenClawConfig;
+    config: BotConfig;
     configPath: string;
   }) => GatewayConnectionDetails;
   probeLocalCommand?: typeof probeLocalCommand;
   probeGatewayUrl?: typeof probeGatewayUrl;
-  resolveOpenClawReferencePaths?: typeof resolveOpenClawReferencePaths;
+  resolveBotReferencePaths?: typeof resolveBotReferencePaths;
 };
 
 function issueMessages(snapshot: ConfigFileSnapshot): string[] {
@@ -91,7 +91,7 @@ function issueMessages(snapshot: ConfigFileSnapshot): string[] {
   });
 }
 
-function buildAgentSummaries(cfg: OpenClawConfig): SystemAgentSummary[] {
+function buildAgentSummaries(cfg: BotConfig): SystemAgentSummary[] {
   const defaultAgentId = resolveDefaultAgentId(cfg);
   const entries = listAgentEntries(cfg);
   if (entries.length === 0) {
@@ -131,7 +131,7 @@ function buildAgentSummaries(cfg: OpenClawConfig): SystemAgentSummary[] {
   return summaries;
 }
 
-function resolveFastTestReferences(env: NodeJS.ProcessEnv): OpenClawReferencePaths | undefined {
+function resolveFastTestReferences(env: NodeJS.ProcessEnv): BotReferencePaths | undefined {
   if (!isFastTestRuntimeEnv(env)) {
     return undefined;
   }
@@ -169,7 +169,7 @@ export async function loadSystemAgentOverview(
   } catch (err) {
     gatewayError = err instanceof Error ? err.message : String(err);
   }
-  const resolveReferences = deps.resolveOpenClawReferencePaths ?? resolveOpenClawReferencePaths;
+  const resolveReferences = deps.resolveBotReferencePaths ?? resolveBotReferencePaths;
   const commandProbe = deps.probeLocalCommand ?? probeLocalCommand;
   const [codex, claude, gemini, gateway, references] = await Promise.all([
     // Probes run in parallel; each individual probe is timeout-bounded in probes.ts.
@@ -212,9 +212,9 @@ export async function loadSystemAgentOverview(
     },
     references: {
       docsPath: references.docsPath ?? undefined,
-      docsUrl: OPENCLAW_DOCS_URL,
+      docsUrl: BOT_DOCS_URL,
       sourcePath: references.sourcePath ?? undefined,
-      sourceUrl: OPENCLAW_SOURCE_URL,
+      sourceUrl: BOT_SOURCE_URL,
     },
   };
 }
@@ -250,7 +250,7 @@ export function formatSystemAgentOverview(overview: SystemAgentOverview): string
       ? ["Config issues:", ...overview.config.issues.map((issue) => `  - ${issue}`)]
       : [];
   return [
-    "OpenClaw online. Little claws, typed tools.",
+    "Bot online. Little claws, typed tools.",
     "",
     `Config: ${configStatus}`,
     `Path: ${overview.config.path}`,
@@ -267,7 +267,7 @@ export function formatSystemAgentOverview(overview: SystemAgentOverview): string
     `AI: ${
       overview.defaultModel
         ? `conversation runs on ${overview.defaultModel}`
-        : "inference unavailable; run openclaw onboard before starting OpenClaw"
+        : "inference unavailable; run bot onboard before starting Bot"
     }`,
     `Docs: ${overview.references.docsPath ?? overview.references.docsUrl}`,
     overview.references.sourcePath
@@ -284,13 +284,13 @@ export function formatSystemAgentOverview(overview: SystemAgentOverview): string
 
 function recommendSystemAgentNextStep(overview: SystemAgentOverview): string {
   if (!overview.config.exists) {
-    return 'run "openclaw onboard" to establish inference';
+    return 'run "bot onboard" to establish inference';
   }
   if (!overview.config.valid) {
     return 'run "validate config" or "doctor" to inspect the config';
   }
   if (!overview.defaultModel) {
-    return 'run "openclaw onboard" to establish inference';
+    return 'run "bot onboard" to establish inference';
   }
   if (!overview.gateway.reachable) {
     return 'run "gateway status" or "restart gateway"';
@@ -317,13 +317,13 @@ function formatStartupAction(overview: SystemAgentOverview): string | undefined 
     return "Config needs attention. Run `doctor` to inspect it.";
   }
   if (!overview.defaultModel) {
-    return "Inference is unavailable. Run `openclaw onboard` and complete a live model check.";
+    return "Inference is unavailable. Run `bot onboard` and complete a live model check.";
   }
   return undefined;
 }
 
 /**
- * Welcome shown right after inference activation. OpenClaw owns the
+ * Welcome shown right after inference activation. Bot owns the
  * remaining workspace, Gateway, channel, and agent setup.
  */
 export function formatSystemAgentOnboardingWelcome(overview: SystemAgentOverview): string {
@@ -345,7 +345,7 @@ export function formatSystemAgentStartupMessage(overview: SystemAgentOverview): 
     ? `${overview.defaultAgentId} (${agent.name})`
     : overview.defaultAgentId;
   return [
-    "Hi, I'm OpenClaw — caretaker of this gateway, config, channels, and agents.",
+    "Hi, I'm Bot — caretaker of this gateway, config, channels, and agents.",
     // Inference status stays independent of the recovery action line: with an
     // invalid config AND no model, both problems must be visible.
     overview.defaultModel ? `Model: ${overview.defaultModel}.` : "Inference is unavailable.",

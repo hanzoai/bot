@@ -496,13 +496,13 @@ class RemoteShellSandboxFsBridge implements SandboxFsBridge {
     const roots = [
       path.posix.join(workspaceContainerRoot, "skills"),
       path.posix.join(workspaceContainerRoot, ".agents", "skills"),
-      path.posix.join(workspaceContainerRoot, ".openclaw", "sandbox-skills", "skills"),
+      path.posix.join(workspaceContainerRoot, ".bot", "sandbox-skills", "skills"),
     ];
     if (path.resolve(this.sandbox.agentWorkspaceDir) !== path.resolve(this.sandbox.workspaceDir)) {
       roots.push(
         path.posix.join(agentContainerRoot, "skills"),
         path.posix.join(agentContainerRoot, ".agents", "skills"),
-        path.posix.join(agentContainerRoot, ".openclaw", "sandbox-skills", "skills"),
+        path.posix.join(agentContainerRoot, ".bot", "sandbox-skills", "skills"),
       );
     }
     return roots;

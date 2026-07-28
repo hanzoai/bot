@@ -17,7 +17,7 @@ import { listSelectableAgents } from "../../lib/agents/display.ts";
 import { sessionNavigationTarget } from "../../lib/sessions/route-navigation.ts";
 import { buildAgentMainSessionKey, normalizeAgentId } from "../../lib/sessions/session-key.ts";
 import { normalizeOptionalString } from "../../lib/string-coerce.ts";
-import { OpenClawLightDomElement } from "../../lit/openclaw-element.ts";
+import { BotLightDomElement } from "../../lit/bot-element.ts";
 import { SubscriptionsController } from "../../lit/subscriptions-controller.ts";
 import "../../styles/chat.css";
 import "../../styles/new-session.css";
@@ -63,7 +63,7 @@ import { renderAgentSelect } from "./target-controls.ts";
 
 const CATALOG_RETRY_DELAYS_MS = [0, 1_000, 3_000] as const;
 
-class NewSessionPage extends OpenClawLightDomElement {
+class NewSessionPage extends BotLightDomElement {
   @property({ attribute: false }) data: NewSessionRouteData | undefined;
 
   @consume({ context: applicationContext, subscribe: true })
@@ -847,8 +847,8 @@ class NewSessionPage extends OpenClawLightDomElement {
       agent: this.selectedAgent(),
       context: this.context,
     });
-    return runtime && runtime !== "openclaw"
-      ? t("newSession.cloudRequiresOpenClawRuntime", { runtime })
+    return runtime && runtime !== "bot"
+      ? t("newSession.cloudRequiresBotRuntime", { runtime })
       : undefined;
   }
 
@@ -1698,8 +1698,8 @@ class NewSessionPage extends OpenClawLightDomElement {
   }
 }
 
-if (!customElements.get("openclaw-new-session-page")) {
-  customElements.define("openclaw-new-session-page", NewSessionPage);
+if (!customElements.get("bot-new-session-page")) {
+  customElements.define("bot-new-session-page", NewSessionPage);
 }
 
 export type { NewSessionPage };

@@ -5,9 +5,9 @@ import {
   createPluginSetupWizardStatus,
   createTestWizardPrompter,
   runSetupWizardPrepare,
-} from "openclaw/plugin-sdk/plugin-test-runtime";
-import * as processRuntime from "openclaw/plugin-sdk/process-runtime";
-import * as setupRuntime from "openclaw/plugin-sdk/setup";
+} from "bot/plugin-sdk/plugin-test-runtime";
+import * as processRuntime from "bot/plugin-sdk/process-runtime";
+import * as setupRuntime from "bot/plugin-sdk/setup";
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveIMessageAccount } from "./accounts.js";
 import * as channelRuntimeModule from "./channel.runtime.js";
@@ -32,8 +32,8 @@ const setupToolsMocks = vi.hoisted(() => ({
 }));
 const installIMessageCliMock = vi.hoisted(() => vi.fn());
 
-vi.mock("openclaw/plugin-sdk/setup-tools", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("openclaw/plugin-sdk/setup-tools")>()),
+vi.mock("bot/plugin-sdk/setup-tools", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("bot/plugin-sdk/setup-tools")>()),
   ...setupToolsMocks,
 }));
 

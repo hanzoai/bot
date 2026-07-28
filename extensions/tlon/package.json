@@ -1,10 +1,10 @@
 {
-  "name": "@openclaw/tlon",
+  "name": "@hanzo/bot-tlon",
   "version": "2026.7.2",
-  "description": "OpenClaw Tlon/Urbit channel plugin for chat workflows.",
+  "description": "Bot Tlon/Urbit channel plugin for chat workflows.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw"
+    "url": "https://github.com/hanzoai/bot"
   },
   "type": "module",
   "dependencies": {
@@ -15,18 +15,18 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@openclaw/plugin-sdk": "workspace:*",
-    "openclaw": "workspace:*"
+    "@hanzo/bot-plugin-sdk": "workspace:*",
+    "@hanzo/bot": "workspace:*"
   },
   "peerDependencies": {
-    "openclaw": ">=2026.7.2"
+    "@hanzo/bot": ">=2026.7.2"
   },
   "peerDependenciesMeta": {
-    "openclaw": {
+    "@hanzo/bot": {
       "optional": true
     }
   },
-  "openclaw": {
+  "bot": {
     "extensions": [
       "./index.ts"
     ],
@@ -45,19 +45,77 @@
       "quickstartAllowFrom": true,
       "setup": {
         "fields": [
-          { "key": "ship", "kind": "string", "cli": { "flags": "--ship <ship>", "description": "Tlon ship" } },
-          { "key": "url", "kind": "string", "cli": { "flags": "--url <url>", "description": "Tlon URL" } },
-          { "key": "code", "kind": "string", "sensitive": true, "cli": { "flags": "--code <code>", "description": "Tlon login code" } },
-          { "key": "dangerouslyAllowPrivateNetwork", "kind": "boolean", "cli": { "flags": "--dangerously-allow-private-network", "description": "Allow private-network Tlon URLs" } },
-          { "key": "groupChannels", "kind": "string-list", "cli": { "flags": "--group-channels <list>", "description": "Tlon group channels" } },
-          { "key": "dmAllowlist", "kind": "string-list", "cli": { "flags": "--dm-allowlist <list>", "description": "Tlon DM allowlist" } },
-          { "key": "autoDiscoverChannels", "kind": "boolean", "cli": { "flags": "--auto-discover-channels", "negatedFlags": "--no-auto-discover-channels", "description": "Auto-discover Tlon group channels" } },
-          { "key": "ownerShip", "kind": "string", "cli": { "flags": "--owner-ship <ship>", "description": "Tlon owner ship" } }
+          {
+            "key": "ship",
+            "kind": "string",
+            "cli": {
+              "flags": "--ship <ship>",
+              "description": "Tlon ship"
+            }
+          },
+          {
+            "key": "url",
+            "kind": "string",
+            "cli": {
+              "flags": "--url <url>",
+              "description": "Tlon URL"
+            }
+          },
+          {
+            "key": "code",
+            "kind": "string",
+            "sensitive": true,
+            "cli": {
+              "flags": "--code <code>",
+              "description": "Tlon login code"
+            }
+          },
+          {
+            "key": "dangerouslyAllowPrivateNetwork",
+            "kind": "boolean",
+            "cli": {
+              "flags": "--dangerously-allow-private-network",
+              "description": "Allow private-network Tlon URLs"
+            }
+          },
+          {
+            "key": "groupChannels",
+            "kind": "string-list",
+            "cli": {
+              "flags": "--group-channels <list>",
+              "description": "Tlon group channels"
+            }
+          },
+          {
+            "key": "dmAllowlist",
+            "kind": "string-list",
+            "cli": {
+              "flags": "--dm-allowlist <list>",
+              "description": "Tlon DM allowlist"
+            }
+          },
+          {
+            "key": "autoDiscoverChannels",
+            "kind": "boolean",
+            "cli": {
+              "flags": "--auto-discover-channels",
+              "negatedFlags": "--no-auto-discover-channels",
+              "description": "Auto-discover Tlon group channels"
+            }
+          },
+          {
+            "key": "ownerShip",
+            "kind": "string",
+            "cli": {
+              "flags": "--owner-ship <ship>",
+              "description": "Tlon owner ship"
+            }
+          }
         ]
       }
     },
     "install": {
-      "npmSpec": "@openclaw/tlon",
+      "npmSpec": "@hanzo/bot-tlon",
       "defaultChoice": "npm",
       "minHostVersion": ">=2026.4.10"
     },
@@ -65,7 +123,7 @@
       "pluginApi": ">=2026.7.2"
     },
     "build": {
-      "openclawVersion": "2026.7.2"
+      "botVersion": "2026.7.2"
     },
     "release": {
       "bundleRuntimeDependencies": false,

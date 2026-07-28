@@ -7,7 +7,7 @@ import type {
   CodexPluginConfig,
 } from "./config-contracts.js";
 
-/** Tool names owned by Codex app-server and normally excluded from OpenClaw dynamic tools. */
+/** Tool names owned by Codex app-server and normally excluded from Bot dynamic tools. */
 const CODEX_APP_SERVER_OWNED_DYNAMIC_TOOL_EXCLUDES = [
   "read",
   "write",
@@ -30,22 +30,22 @@ const DYNAMIC_TOOL_NAME_ALIASES: Record<string, string> = {
 };
 
 type CodexDynamicToolProfileEnv = {
-  OPENCLAW_BUILD_PRIVATE_QA?: string;
-  OPENCLAW_QA_FORCE_RUNTIME?: string;
+  BOT_BUILD_PRIVATE_QA?: string;
+  BOT_QA_FORCE_RUNTIME?: string;
 };
 
-/** Normalizes OpenClaw/Codex tool names before filtering and allowlist checks. */
+/** Normalizes Bot/Codex tool names before filtering and allowlist checks. */
 export function normalizeCodexDynamicToolName(name: string): string {
   const normalized = name.trim().toLowerCase();
   return DYNAMIC_TOOL_NAME_ALIASES[normalized] ?? normalized;
 }
 
-/** True only for the host-scoped OpenClaw run's exact tool contract. */
+/** True only for the host-scoped Bot run's exact tool contract. */
 export function isSystemAgentOnlyCodexDynamicToolAllowlist(
   toolsAllow: readonly string[] | undefined,
 ): boolean {
   return (
-    toolsAllow?.length === 1 && normalizeCodexDynamicToolName(toolsAllow[0] ?? "") === "openclaw"
+    toolsAllow?.length === 1 && normalizeCodexDynamicToolName(toolsAllow[0] ?? "") === "bot"
   );
 }
 
@@ -54,8 +54,8 @@ export function isForcedPrivateQaCodexRuntime(
   env: CodexDynamicToolProfileEnv = process.env,
 ): boolean {
   return (
-    env.OPENCLAW_BUILD_PRIVATE_QA === "1" &&
-    env.OPENCLAW_QA_FORCE_RUNTIME?.trim().toLowerCase() === "codex"
+    env.BOT_BUILD_PRIVATE_QA === "1" &&
+    env.BOT_QA_FORCE_RUNTIME?.trim().toLowerCase() === "codex"
   );
 }
 
@@ -110,25 +110,25 @@ export function resolveCodexDynamicToolsLoadingForRuntime(
   return loading === "searchable" && options.connectionClass === "remote" ? "direct" : loading;
 }
 
-/** Filters OpenClaw tools that Codex owns natively or config explicitly excludes. */
+/** Filters Bot tools that Codex owns natively or config explicitly excludes. */
 export function filterCodexDynamicTools<T extends { name: string }>(
   tools: T[],
   config: Pick<CodexPluginConfig, "codexDynamicToolsExclude">,
   env: CodexDynamicToolProfileEnv = process.env,
 ): T[] {
   return filterCodexDynamicToolsWithOptions(tools, config, env, {
-    preserveOpenClawShell: false,
+    preserveBotShell: false,
   });
 }
 
 /** Keeps exec/process only when Codex cannot advertise an environment-backed native shell. */
-export function filterCodexDynamicToolsWithOpenClawShell<T extends { name: string }>(
+export function filterCodexDynamicToolsWithBotShell<T extends { name: string }>(
   tools: T[],
   config: Pick<CodexPluginConfig, "codexDynamicToolsExclude">,
   env: CodexDynamicToolProfileEnv = process.env,
 ): T[] {
   return filterCodexDynamicToolsWithOptions(tools, config, env, {
-    preserveOpenClawShell: true,
+    preserveBotShell: true,
   });
 }
 
@@ -136,7 +136,7 @@ function filterCodexDynamicToolsWithOptions<T extends { name: string }>(
   tools: T[],
   config: Pick<CodexPluginConfig, "codexDynamicToolsExclude">,
   env: CodexDynamicToolProfileEnv,
-  options: { preserveOpenClawShell: boolean },
+  options: { preserveBotShell: boolean },
 ): T[] {
   const excludes = new Set<string>();
   for (const name of CODEX_NATIVE_GOAL_TOOL_EXCLUDES) {
@@ -148,7 +148,7 @@ function filterCodexDynamicToolsWithOptions<T extends { name: string }>(
     excludes.add("apply_patch");
   } else {
     for (const name of CODEX_APP_SERVER_OWNED_DYNAMIC_TOOL_EXCLUDES) {
-      if (options.preserveOpenClawShell && CODEX_APP_SERVER_OWNED_SHELL_TOOL_EXCLUDES.has(name)) {
+      if (options.preserveBotShell && CODEX_APP_SERVER_OWNED_SHELL_TOOL_EXCLUDES.has(name)) {
         continue;
       }
       excludes.add(name);

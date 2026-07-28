@@ -4,8 +4,8 @@ import path from "node:path";
 import {
   replaceManagedMarkdownBlock,
   withTrailingNewline,
-} from "openclaw/plugin-sdk/memory-host-markdown";
-import { FsSafeError, pathExists, root as fsRoot } from "openclaw/plugin-sdk/security-runtime";
+} from "bot/plugin-sdk/memory-host-markdown";
+import { FsSafeError, pathExists, root as fsRoot } from "bot/plugin-sdk/security-runtime";
 import {
   activateMemoryWikiCompiledCacheOwner,
   invalidateMemoryWikiCompiledCache,
@@ -28,10 +28,10 @@ const WIKI_VAULT_DIRECTORIES = [
   "reports",
   "_attachments",
   "_views",
-  ".openclaw-wiki",
+  ".bot-wiki",
 ] as const;
 
-const WIKI_VAULT_SCAFFOLD = ["AGENTS.md", "WIKI.md", "index.md", ".openclaw-wiki/log.jsonl"];
+const WIKI_VAULT_SCAFFOLD = ["AGENTS.md", "WIKI.md", "index.md", ".bot-wiki/log.jsonl"];
 
 type InitializeMemoryWikiVaultResult = {
   rootDir: string;
@@ -45,8 +45,8 @@ function buildIndexMarkdown(): string {
     replaceManagedMarkdownBlock({
       original: "# Wiki Index\n",
       heading: "## Generated",
-      startMarker: "<!-- openclaw:wiki:index:start -->",
-      endMarker: "<!-- openclaw:wiki:index:end -->",
+      startMarker: "<!-- bot:wiki:index:start -->",
+      endMarker: "<!-- bot:wiki:index:end -->",
       body: "- No compiled pages yet.",
     }),
   );
@@ -68,7 +68,7 @@ function buildWikiOverviewMarkdown(config: ResolvedMemoryWikiConfig): string {
   return withTrailingNewline(`\
 # Memory Wiki
 
-This vault is maintained by the OpenClaw memory-wiki plugin.
+This vault is maintained by the Bot memory-wiki plugin.
 
 - Vault mode: \`${config.vaultMode}\`
 - Render mode: \`${config.vault.renderMode}\`
@@ -78,11 +78,11 @@ This vault is maintained by the OpenClaw memory-wiki plugin.
 - Raw sources remain the evidence layer.
 - To keep unmanaged raw Markdown in \`sources/\`, add \`${WIKI_RAW_SOURCE_MARKER}\` near the top of the page.
 - Wiki pages are the human-readable synthesis layer.
-- Compiled query and prompt snapshots live in OpenClaw plugin state, not vault files.
+- Compiled query and prompt snapshots live in Bot plugin state, not vault files.
 
 ## Notes
-<!-- openclaw:human:start -->
-<!-- openclaw:human:end -->
+<!-- bot:human:start -->
+<!-- bot:human:end -->
 `);
 }
 
@@ -144,7 +144,7 @@ export async function initializeMemoryWikiVault(
     withTrailingNewline("# Inbox\n\nDrop raw ideas, questions, and source links here.\n"),
     createdFiles,
   );
-  await writeFileIfMissing(rootDir, ".openclaw-wiki/log.jsonl", "", createdFiles);
+  await writeFileIfMissing(rootDir, ".bot-wiki/log.jsonl", "", createdFiles);
 
   if (createdDirectories.length > 0 || createdFiles.length > 0) {
     await appendMemoryWikiLog(rootDir, {

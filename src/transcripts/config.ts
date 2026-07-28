@@ -1,5 +1,5 @@
-// Resolves transcript source configuration from OpenClaw config.
-import { normalizeOptionalString as readString } from "@openclaw/normalization-core/string-coerce";
+// Resolves transcript source configuration from Bot config.
+import { normalizeOptionalString as readString } from "@hanzo/bot-normalization-core/string-coerce";
 
 /**
  * Configuration normalization for transcript capture/import.

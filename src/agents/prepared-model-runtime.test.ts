@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   },
   discoverAuthStorage: vi.fn(),
   discoverModels: vi.fn(),
-  ensureOpenClawModelsJson: vi.fn(async (..._args: unknown[]) => ({
+  ensureBotModelsJson: vi.fn(async (..._args: unknown[]) => ({
     agentDir: "/tmp/agent",
     wrote: false,
   })),
@@ -67,7 +67,7 @@ vi.mock("./model-discovery-context.js", () => ({
 }));
 
 vi.mock("./models-config.js", () => ({
-  ensureOpenClawModelsJson: (...args: unknown[]) => mocks.ensureOpenClawModelsJson(...args),
+  ensureBotModelsJson: (...args: unknown[]) => mocks.ensureBotModelsJson(...args),
 }));
 
 vi.mock("./runtime-plugins.js", () => ({
@@ -98,7 +98,7 @@ import {
 describe("prepared model runtime snapshots", () => {
   const getTesting = () =>
     (globalThis as Record<PropertyKey, unknown>)[
-      Symbol.for("openclaw.preparedModelRuntimeTestApi")
+      Symbol.for("bot.preparedModelRuntimeTestApi")
     ] as {
       resetPreparedModelRuntimeSnapshotsForTest: () => void;
       setModelRuntimeBuildTimeoutMsForTest: (timeoutMs: number) => void;
@@ -108,7 +108,7 @@ describe("prepared model runtime snapshots", () => {
     getTesting().resetPreparedModelRuntimeSnapshotsForTest();
     mocks.discoverAuthStorage.mockClear();
     mocks.discoverModels.mockClear();
-    mocks.ensureOpenClawModelsJson.mockClear();
+    mocks.ensureBotModelsJson.mockClear();
     mocks.buildPreparedModelCatalogSnapshot.mockClear();
     mocks.ensureRuntimePluginsLoaded.mockClear();
     mocks.loadStaticCatalog.mockClear();
@@ -124,21 +124,21 @@ describe("prepared model runtime snapshots", () => {
       waitForReplacement: true,
     });
     const leasePending = acquireReadOnlyPreparedModelRuntime({
-      agentId: "openclaw",
+      agentId: "bot",
       config: stagedConfig,
       agentDir: "/tmp/setup-probe-agent",
       inheritedAuthDir: "/tmp/setup-probe-agent",
       workspaceDir: "/tmp/setup-probe-workspace",
     });
     await Promise.resolve();
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(1);
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledTimes(1);
 
     await refreshPreparedModelRuntimeSnapshots({
       agents: { defaults: { model: "openai/gpt-5.5" } },
     });
     const lease = await leasePending;
     expect(lease.snapshot).toMatchObject({
-      agentId: "openclaw",
+      agentId: "bot",
       config: stagedConfig,
       agentDir: "/tmp/setup-probe-agent",
       workspaceDir: "/tmp/setup-probe-workspace",
@@ -161,7 +161,7 @@ describe("prepared model runtime snapshots", () => {
       config: input.config,
     });
     expect(mocks.discoverAuthStorage).toHaveBeenCalledTimes(2);
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureBotModelsJson).not.toHaveBeenCalled();
   });
 
   it("never returns a standalone generation invalidated while it is building", async () => {
@@ -170,7 +170,7 @@ describe("prepared model runtime snapshots", () => {
       config: {},
     };
     let finishFirstBuild!: () => void;
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(
+    mocks.ensureBotModelsJson.mockImplementationOnce(
       async () =>
         await new Promise<{ agentDir: string; wrote: boolean }>((resolve) => {
           finishFirstBuild = () => resolve({ agentDir: input.agentDir, wrote: false });
@@ -178,13 +178,13 @@ describe("prepared model runtime snapshots", () => {
     );
 
     const activation = activateStandalonePreparedModelRuntime(input);
-    await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(mocks.ensureBotModelsJson).toHaveBeenCalledOnce());
     markPreparedModelRuntimeSnapshotsStale("test in-flight standalone publication");
     finishFirstBuild();
 
     const published = await activation;
     expect(published).toBeDefined();
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledTimes(2);
     await expect(prepareModelRuntimeSnapshot(input)).resolves.toBe(published);
   });
 
@@ -212,7 +212,7 @@ describe("prepared model runtime snapshots", () => {
       env,
     });
 
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledWith(
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledWith(
       {},
       "/tmp/prepared-model-runtime-explicit-env",
       expect.objectContaining({ env }),
@@ -420,7 +420,7 @@ describe("prepared model runtime snapshots", () => {
       expect.objectContaining({ readOnly: true }),
     );
     expect(mocks.discoverModels).toHaveBeenCalledOnce();
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureBotModelsJson).not.toHaveBeenCalled();
     expect(mocks.ensureRuntimePluginsLoaded).not.toHaveBeenCalled();
   });
 
@@ -453,7 +453,7 @@ describe("prepared model runtime snapshots", () => {
 
     expect(second).toBe(first);
     expect(Object.isFrozen(first)).toBe(true);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(1);
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledTimes(1);
     expect(mocks.discoverAuthStorage).toHaveBeenCalledTimes(1);
     expect(mocks.discoverModels).toHaveBeenCalledTimes(1);
     expect(mocks.buildPreparedModelCatalogSnapshot).toHaveBeenCalledWith(
@@ -473,7 +473,7 @@ describe("prepared model runtime snapshots", () => {
     const fromEquivalentClone = await prepareModelRuntimeSnapshot({ config: {}, agentDir });
 
     expect(fromEquivalentClone).toBe(first);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(1);
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledTimes(1);
   });
 
   it("reuses read-only owners for equivalent config clones but rejects projections", async () => {
@@ -560,7 +560,7 @@ describe("prepared model runtime snapshots", () => {
     });
 
     expect(snapshot.config).toBe(explicitConfig);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledWith(
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledWith(
       explicitConfig,
       expect.any(String),
       expect.any(Object),
@@ -577,8 +577,8 @@ describe("prepared model runtime snapshots", () => {
     const snapshot = await prepareModelRuntimeSnapshot({ config: secondConfig, agentDir });
 
     expect(snapshot.config).toBe(secondConfig);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenLastCalledWith(
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledTimes(2);
+    expect(mocks.ensureBotModelsJson).toHaveBeenLastCalledWith(
       secondConfig,
       agentDir,
       expect.any(Object),
@@ -603,7 +603,7 @@ describe("prepared model runtime snapshots", () => {
     const firstConfig = {};
     const secondConfig = {};
     let finishFirstBuild!: () => void;
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(
+    mocks.ensureBotModelsJson.mockImplementationOnce(
       async () =>
         await new Promise<{ agentDir: string; wrote: boolean }>((resolve) => {
           finishFirstBuild = () => resolve({ agentDir, wrote: false });
@@ -614,21 +614,21 @@ describe("prepared model runtime snapshots", () => {
       config: firstConfig,
       agentDir,
     });
-    await vi.waitFor(() => expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(mocks.ensureBotModelsJson).toHaveBeenCalledOnce());
     const secondActivation = activateStandalonePreparedModelRuntime({
       config: secondConfig,
       agentDir,
     });
 
     await Promise.resolve();
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledOnce();
     finishFirstBuild();
 
     const [first, second] = await Promise.all([firstActivation, secondActivation]);
     expect(first?.config).toBe(firstConfig);
     expect(second?.config).toBe(secondConfig);
     expect(first).not.toBe(second);
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(2);
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledTimes(2);
   });
 
   it("does not discover a missing owner from a request lookup", async () => {
@@ -638,7 +638,7 @@ describe("prepared model runtime snapshots", () => {
         agentDir: "/tmp/prepared-model-runtime-missing-owner",
       }),
     ).rejects.toThrow("prepared model runtime owner was not published");
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureBotModelsJson).not.toHaveBeenCalled();
   });
 
   it("deduplicates standalone activation while publishing later owners", async () => {
@@ -663,7 +663,7 @@ describe("prepared model runtime snapshots", () => {
     await expect(prepareModelRuntimeSnapshot(input)).resolves.toMatchObject({
       workspaceDir: input.workspaceDir,
     });
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledTimes(3);
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledTimes(3);
   });
 
   it("skips a queued config generation superseded before its build starts", async () => {
@@ -675,7 +675,7 @@ describe("prepared model runtime snapshots", () => {
     const latest = refreshPreparedModelRuntimeSnapshots(latestConfig);
     await Promise.all([first, latest]);
 
-    expect(mocks.ensureOpenClawModelsJson).toHaveBeenCalledOnce();
+    expect(mocks.ensureBotModelsJson).toHaveBeenCalledOnce();
     await expect(
       prepareModelRuntimeSnapshot({
         agentDir: "/tmp/unused-agent",
@@ -693,7 +693,7 @@ describe("prepared model runtime snapshots", () => {
     const latestConfig = { agents: { defaults: { model: "openai/gpt-5.5" } } };
     await refreshPreparedModelRuntimeSnapshots(initialConfig);
     let finishLatestBuild!: () => void;
-    mocks.ensureOpenClawModelsJson.mockImplementationOnce(
+    mocks.ensureBotModelsJson.mockImplementationOnce(
       async () =>
         await new Promise<{ agentDir: string; wrote: boolean }>((resolve) => {
           finishLatestBuild = () => resolve({ agentDir: "/tmp/unused-agent", wrote: false });
@@ -735,6 +735,6 @@ describe("prepared model runtime snapshots", () => {
     markPreparedModelRuntimeSnapshotsStale("plugin publication boundary");
     await queued;
 
-    expect(mocks.ensureOpenClawModelsJson).not.toHaveBeenCalled();
+    expect(mocks.ensureBotModelsJson).not.toHaveBeenCalled();
   });
 });

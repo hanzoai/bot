@@ -1,7 +1,7 @@
 // Qqbot plugin module implements runtime behavior.
-import type { PluginRuntime } from "openclaw/plugin-sdk/core";
-import { createPluginRuntimeStore } from "openclaw/plugin-sdk/runtime-store";
-import { setOpenClawVersion } from "../engine/messaging/sender.js";
+import type { PluginRuntime } from "bot/plugin-sdk/core";
+import { createPluginRuntimeStore } from "bot/plugin-sdk/runtime-store";
+import { setBotVersion } from "../engine/messaging/sender.js";
 
 // Single plugin runtime per process — concurrent multi-tenant qqbot runtimes are not supported.
 const { setRuntime: _setRuntime, getRuntime: getQQBotRuntime } =
@@ -14,7 +14,7 @@ const { setRuntime: _setRuntime, getRuntime: getQQBotRuntime } =
 function setQQBotRuntime(runtime: PluginRuntime): void {
   _setRuntime(runtime);
   // Inject the framework version into the User-Agent string (same as standalone).
-  setOpenClawVersion(runtime.version);
+  setBotVersion(runtime.version);
 }
 
 export { getQQBotRuntime, setQQBotRuntime };

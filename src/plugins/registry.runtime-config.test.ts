@@ -2,7 +2,7 @@
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import type { OpenClawConfig } from "../config/types.openclaw.js";
+import type { BotConfig } from "../config/types.bot.js";
 import { resolveUserPath } from "../utils.js";
 import { createPluginRecord } from "./loader-records.js";
 import { createPluginRegistry } from "./registry.js";
@@ -25,7 +25,7 @@ function createTestRegistry(runtime: PluginRuntime) {
 
 describe("plugin registry runtime config scope", () => {
   it("resolves plugin API paths against the plugin root", () => {
-    const pluginRoot = path.join(os.tmpdir(), "openclaw-plugins", "demo");
+    const pluginRoot = path.join(os.tmpdir(), "bot-plugins", "demo");
     const pluginRegistry = createTestRegistry(createPluginRuntime());
     const record = createPluginRecord({
       id: "path-plugin",
@@ -36,19 +36,19 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as BotConfig });
     const absolute = path.resolve(pluginRoot, "..", "outside.txt");
 
     expect(api.resolvePath("data/cache.json")).toBe(path.join(pluginRoot, "data", "cache.json"));
     expect(api.resolvePath("./data/cache.json")).toBe(path.join(pluginRoot, "data", "cache.json"));
     expect(api.resolvePath(absolute)).toBe(absolute);
-    expect(api.resolvePath("~/openclaw/plugin.txt")).toBe(resolveUserPath("~/openclaw/plugin.txt"));
+    expect(api.resolvePath("~/bot/plugin.txt")).toBe(resolveUserPath("~/bot/plugin.txt"));
   });
 
   it("adds plugin context to lazy runtime resolution failures", () => {
     const runtime = new Proxy({} as PluginRuntime, {
       get() {
-        throw new Error("Unable to resolve plugin runtime module; loader=/tmp/openclaw-loader.js");
+        throw new Error("Unable to resolve plugin runtime module; loader=/tmp/bot-loader.js");
       },
     });
     const pluginRegistry = createTestRegistry(runtime);
@@ -60,7 +60,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as BotConfig });
 
     let thrown: unknown;
     try {
@@ -81,12 +81,12 @@ describe("plugin registry runtime config scope", () => {
     let currentScope = getPluginRuntimeGatewayRequestScope();
     let mutateScope = getPluginRuntimeGatewayRequestScope();
     let replaceScope = getPluginRuntimeGatewayRequestScope();
-    const config = {} as OpenClawConfig;
+    const config = {} as BotConfig;
     const replaceResult = {
-      path: "/tmp/openclaw.json",
+      path: "/tmp/bot.json",
       previousHash: null,
       persistedHash: "persisted-hash",
-      snapshot: { path: "/tmp/openclaw.json" },
+      snapshot: { path: "/tmp/bot.json" },
       nextConfig: config,
       afterWrite: { mode: "auto" },
       followUp: { mode: "auto", requiresRestart: false },
@@ -164,7 +164,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as BotConfig });
 
     await api.runtime.llm.acquireLocalService({
       providerId: "gpu-host",
@@ -197,7 +197,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as BotConfig });
 
     await api.runtime.nodes.list({ connected: true });
     await api.runtime.nodes.invoke({
@@ -235,7 +235,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as BotConfig });
 
     await api.runtime.gateway.request("voicecall.start", { to: "+15550001234" });
 
@@ -281,8 +281,8 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const ownerApi = pluginRegistry.createApi(ownerRecord, { config: {} as OpenClawConfig });
-    const otherApi = pluginRegistry.createApi(otherRecord, { config: {} as OpenClawConfig });
+    const ownerApi = pluginRegistry.createApi(ownerRecord, { config: {} as BotConfig });
+    const otherApi = pluginRegistry.createApi(otherRecord, { config: {} as BotConfig });
     ownerApi.registerAgentHarness({
       id: "codex",
       label: "Codex",
@@ -343,7 +343,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as BotConfig });
     api.registerCliBackend({ id: "claude-cli", config: { command: "claude" } });
     api.registerAgentHarness({
       id: "anthropic-harness",
@@ -408,7 +408,7 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const api = pluginRegistry.createApi(record, { config: {} as OpenClawConfig });
+    const api = pluginRegistry.createApi(record, { config: {} as BotConfig });
     const initialEntry = {
       acpBackendId: "acpx",
       acpSessionBinding: {
@@ -543,9 +543,9 @@ describe("plugin registry runtime config scope", () => {
       enabled: true,
       configSchema: false,
     });
-    const ownerApi = pluginRegistry.createApi(ownerRecord, { config: {} as OpenClawConfig });
-    const otherApi = pluginRegistry.createApi(otherRecord, { config: {} as OpenClawConfig });
-    const voiceApi = pluginRegistry.createApi(voiceRecord, { config: {} as OpenClawConfig });
+    const ownerApi = pluginRegistry.createApi(ownerRecord, { config: {} as BotConfig });
+    const otherApi = pluginRegistry.createApi(otherRecord, { config: {} as BotConfig });
+    const voiceApi = pluginRegistry.createApi(voiceRecord, { config: {} as BotConfig });
     ownerApi.registerAgentHarness({
       id: "codex",
       label: "Codex",
@@ -610,7 +610,7 @@ describe("plugin registry runtime config scope", () => {
     await expect(
       voiceApi.runtime.agent.runEmbeddedAgent({
         ...delegatedRunParams,
-        agentHarnessRuntimeOverride: "openclaw",
+        agentHarnessRuntimeOverride: "bot",
       }),
     ).rejects.toThrow("only with its exact persisted identity and harness");
     await expect(

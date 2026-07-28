@@ -1,6 +1,6 @@
 import type { Attachment, SessionEvent } from "@github/copilot-sdk";
-import type { AgentMessage } from "openclaw/plugin-sdk/agent-harness-runtime";
-import { sanitizeToolResult } from "openclaw/plugin-sdk/agent-harness-runtime";
+import type { AgentMessage } from "bot/plugin-sdk/agent-harness-runtime";
+import { sanitizeToolResult } from "bot/plugin-sdk/agent-harness-runtime";
 import { buildCopilotAssistantUsage, type CopilotUsageSnapshot } from "./usage-bridge.js";
 
 export type AssistantMessage = Extract<AgentMessage, { role: "assistant" }>;
