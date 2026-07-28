@@ -155,7 +155,21 @@ Tags: a `v*` tag publishes `:X.Y.Z` and `:latest`; a push to `main` publishes
 - **`ghcr.io/hanzoai/bot-browser` has no producer.** `universe`
   `crs/bot-browser.yaml` pins it at `v0.1.0`, but no workflow builds it — only
   `scripts/sandbox-browser-setup.sh`, by hand, locally.
-- **`bot-cloud` has no consumer.** Nothing in `universe` references it.
+- **`bot-cloud` HAS a consumer, and it is not in `universe`.** `hanzoai/playground`
+  provisions desktop-mode cloud agents from `ghcr.io/hanzoai/bot-cloud:latest`
+  (`internal/config/cloud.go` `BotCloudImage`, used by
+  `internal/cloud/provisioner.go`). The App CR `hanzo-playground` overrides
+  `..._OPERATIVE_IMAGE` but NOT the bot-cloud image, so production takes the
+  default — a floating `:latest`, which is the real gap here. Looking for the
+  consumer in `universe` and concluding there is none is what made
+  `docker/cloud-entrypoint.sh` read like dead code; it is the entrypoint of every
+  playground desktop agent.
+- **The live `bot` tag shares NO history with `main`.** `v2026.7.22` — the calver
+  `crs/bot-gateway.yaml` pins — and `origin/main` have an EMPTY merge base
+  (34,825 commits one way, 34,660 the other; see the `pre-ancestry-rebuild` and
+  `pre-transplant` tags). So "cut the next calver from main" is not a patch over
+  what runs; it is a jump across a history rewrite, and a diff against the live
+  tag says nothing. Establish what actually changed before shipping one.
 - **`@hanzo/bot` is two versions behind.** npm has `2026.6.5`, `package.json`
   says `2026.6.7`; both were cut while the publisher did not exist.
 - **The macOS checks do not run.** They need a macOS runner on the forge; see the
